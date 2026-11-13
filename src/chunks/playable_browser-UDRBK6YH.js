@@ -51392,13 +51392,13 @@ var placements = /* @__PURE__ */ new WeakMap();
 function hollowPlantPlacements(space, event) {
   const v = space.visual;
   if (!v) return [];
-  let cache8 = placements.get(v);
-  if (!cache8) {
-    cache8 = /* @__PURE__ */ new Map();
-    placements.set(v, cache8);
+  let cache9 = placements.get(v);
+  if (!cache9) {
+    cache9 = /* @__PURE__ */ new Map();
+    placements.set(v, cache9);
   }
   const key3 = event.groupId + "/" + event.position.x + "/" + event.position.y;
-  if (cache8.has(key3)) return cache8.get(key3);
+  if (cache9.has(key3)) return cache9.get(key3);
   const t = space.collision.tileSize, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
   const clear2 = (x, y, width2) => {
     for (const [dx, dy] of [[0, 0], [-width2 * 0.3, 0], [width2 * 0.3, 0], [0, -5], [0, 5]]) {
@@ -51408,8 +51408,8 @@ function hollowPlantPlacements(space, event) {
     return true;
   };
   const out = HOLLOW_PLANT_LAYOUT.map(([id, dx, dy, width2], index) => ({ id, index, x: event.position.x + dx, y: event.position.y + dy, width: width2 })).filter((p) => clear2(p.x, p.y, p.width));
-  cache8.set(key3, Object.freeze(out.map(Object.freeze)));
-  return cache8.get(key3);
+  cache9.set(key3, Object.freeze(out.map(Object.freeze)));
+  return cache9.get(key3);
 }
 function hollowGroundCoverDepthItems(model, event, art) {
   if (!art) return [];
@@ -85418,16 +85418,16 @@ function woodlandForestField(seed2, x, y) {
   return (h(gx, gy) * (1 - u) + h(gx + 1, gy) * u) * (1 - v) + (h(gx, gy + 1) * (1 - u) + h(gx + 1, gy + 1) * u) * v;
 }
 function createWoodlandForestSampler(seed2) {
-  const cache8 = /* @__PURE__ */ new Map();
+  const cache9 = /* @__PURE__ */ new Map();
   let samples = 0;
   const descriptor = (gx, gy) => {
     const key3 = gx + "," + gy;
-    if (cache8.has(key3)) return cache8.get(key3);
+    if (cache9.has(key3)) return cache9.get(key3);
     const n = hash25(seed2 + "/" + WOODLAND_FOREST_VERSION + "/" + key3), x = gx * WOODLAND_FOREST_POLICY.cellTiles + 1 + n % 2, y = gy * WOODLAND_FOREST_POLICY.cellTiles + 1 + (n >>> 7) % 2, field3 = woodlandForestField(seed2, x, y), admitted2 = (n >>> 13) % 100 < 32 + field3 * 62;
     let role = n % 19 === 0 ? "rock" : n % 29 === 0 ? "log" : n % 31 === 0 ? "stump" : n % 9 === 0 ? "shrub" : n % 13 === 0 ? "sapling" : "tree";
     const p = { n, x, y, field: field3, admitted: admitted2, role };
-    if (cache8.size === 256) cache8.delete(cache8.keys().next().value);
-    cache8.set(key3, p);
+    if (cache9.size === 256) cache9.delete(cache9.keys().next().value);
+    cache9.set(key3, p);
     return p;
   };
   function applies(x, y, biome) {
@@ -85447,7 +85447,7 @@ function createWoodlandForestSampler(seed2) {
     return chosen ? { kind: chosen.role === "rock" ? "rock" : "thicket", clusterId: WOODLAND_FOREST_VERSION + "/" + chosen.role + "/" + chosen.n.toString(16), role: chosen.role } : null;
   }
   const intersectsChunk = (cx, cy2) => cx * 32 < WOODLAND_FOREST_POLICY.scope.right && cx * 32 + 32 > WOODLAND_FOREST_POLICY.scope.left && cy2 * 26 < WOODLAND_FOREST_POLICY.scope.bottom && cy2 * 26 + 26 > WOODLAND_FOREST_POLICY.scope.top;
-  return Object.freeze({ applies, sample, descriptor, intersectsChunk, stats: () => ({ samples, cachedDescriptors: cache8.size, cacheLimit: 256, maxCandidates: 9 }) });
+  return Object.freeze({ applies, sample, descriptor, intersectsChunk, stats: () => ({ samples, cachedDescriptors: cache9.size, cacheLimit: 256, maxCandidates: 9 }) });
 }
 
 // src/shared/generation/natural_clusters_v1.js
@@ -85468,11 +85468,11 @@ var unit2 = (h, n) => (h >>> n & 255) / 255;
 var naturalVisualKind = (code2, blockerKind) => blockerKind === "rock" || ["r", "d", "s", "l"].includes(code2) ? "rock" : code2 === "m" ? "tree" : "base";
 function createNaturalClusterSampler(seedDigest) {
   requireContract(typeof seedDigest === "string" && seedDigest.length > 0, "Natural cluster seed required");
-  const cache8 = /* @__PURE__ */ new Map();
+  const cache9 = /* @__PURE__ */ new Map();
   let sampled = 0, created = 0, maxCandidates = 0;
   function descriptor(gx, gy) {
     const key3 = gx + "," + gy;
-    if (cache8.has(key3)) return cache8.get(key3);
+    if (cache9.has(key3)) return cache9.get(key3);
     const n = hash26(seedDigest + "/" + NATURAL_CLUSTER_VERSION + "/" + key3), a = hash26(n + "/shape"), b = hash26(n + "/lobes"), angle3 = unit2(a, 0) * Math.PI;
     const p = {
       id: NATURAL_CLUSTER_VERSION + ":" + n.toString(16).padStart(8, "0") + ":" + key3,
@@ -85491,8 +85491,8 @@ function createNaturalClusterSampler(seedDigest) {
       admission: (n >>> 16) % 100,
       rock: n % 13 === 0
     };
-    if (cache8.size === 256) cache8.delete(cache8.keys().next().value);
-    cache8.set(key3, p);
+    if (cache9.size === 256) cache9.delete(cache9.keys().next().value);
+    cache9.set(key3, p);
     created++;
     return p;
   }
@@ -85519,7 +85519,7 @@ function createNaturalClusterSampler(seedDigest) {
     maxCandidates = Math.max(maxCandidates, count);
     return best ? { clusterId: best.id, kind: ["r", "d", "s", "l"].includes(biome) || best.rock ? "rock" : "thicket", seed: best.n } : null;
   }
-  return Object.freeze({ sample, stats: () => ({ sampled, created, cachedDescriptors: cache8.size, maxCandidates, cacheLimit: 256 }) });
+  return Object.freeze({ sample, stats: () => ({ sampled, created, cachedDescriptors: cache9.size, maxCandidates, cacheLimit: 256 }) });
 }
 function createNaturalProtection(asset, { ruinFootprints = [] } = {}) {
   const protectedChunks = /* @__PURE__ */ new Set(), ruinKeys = new Set(ruinFootprints.map((c) => c.x + "," + c.y));
@@ -85928,12 +85928,12 @@ var fallbackMaterial = {};
 var PAGE = 256;
 function stampCache(material) {
   const key3 = material ?? fallbackMaterial;
-  let cache8 = stampGroups.get(key3);
-  if (!cache8) {
-    cache8 = /* @__PURE__ */ new Map();
-    stampGroups.set(key3, cache8);
+  let cache9 = stampGroups.get(key3);
+  if (!cache9) {
+    cache9 = /* @__PURE__ */ new Map();
+    stampGroups.set(key3, cache9);
   }
-  return cache8;
+  return cache9;
 }
 function fixedContours(at8, x, y, seed2, o) {
   let signature = "";
@@ -85964,11 +85964,11 @@ function drawStyledRoutes(c, space, bounds2, at8, material = null) {
     segments += contours.segments;
     let biomeKey = "";
     for (let y = Math.floor((py - 96) / 32); y <= Math.ceil((py + PAGE + 96) / 32); y++) for (let x = Math.floor((px7 - 96) / 32); x <= Math.ceil((px7 + PAGE + 96) / 32); x++) biomeKey += v.biomes?.[y - oy]?.[x - ox] ?? "?";
-    const cache8 = stampCache(material), key3 = contours.cacheKey + "/" + biomeKey;
-    let stamp6 = cache8.get(key3);
+    const cache9 = stampCache(material), key3 = contours.cacheKey + "/" + biomeKey;
+    let stamp6 = cache9.get(key3);
     if (stamp6) {
-      cache8.delete(key3);
-      cache8.set(key3, stamp6);
+      cache9.delete(key3);
+      cache9.set(key3, stamp6);
     } else {
       const surface3 = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(PAGE, PAGE) : c.canvas?.ownerDocument?.createElement?.("canvas");
       const g = surface3 ? surface3.getContext("2d") : c;
@@ -86005,10 +86005,10 @@ function drawStyledRoutes(c, space, bounds2, at8, material = null) {
       g.restore();
       if (surface3) {
         stamp6 = surface3;
-        cache8.set(key3, stamp6);
-        while (cache8.size > 32) {
-          const first = cache8.keys().next().value, old2 = cache8.get(first);
-          cache8.delete(first);
+        cache9.set(key3, stamp6);
+        while (cache9.size > 32) {
+          const first = cache9.keys().next().value, old2 = cache9.get(first);
+          cache9.delete(first);
           old2.width = old2.height = 1;
         }
       }
@@ -86220,7 +86220,7 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
   if (profiles2.length !== 4 || !material) throw Error("Incomplete painted route kit");
   const routeSamples = createRouteSampleTablesV3();
   let mode = "candidate";
-  const cache8 = /* @__PURE__ */ new Map(), stats3 = { preparedPages: 0, cacheHits: 0, evictions: 0, preparedMs: 0, maxPrepareMs: 0, maxSliceMs: 0, maxPageWallMs: 0, draws: 0, priorSkipped: 0, readyFallbacks: 0, coldFallbacks: 0, aheadPasses: 0 }, scope = worldCoverage ? null : kit2.scope;
+  const cache9 = /* @__PURE__ */ new Map(), stats3 = { preparedPages: 0, cacheHits: 0, evictions: 0, preparedMs: 0, maxPrepareMs: 0, maxSliceMs: 0, maxPageWallMs: 0, draws: 0, priorSkipped: 0, readyFallbacks: 0, coldFallbacks: 0, aheadPasses: 0 }, scope = worldCoverage ? null : kit2.scope;
   const active2 = (s) => mode === "candidate" && prior.mode?.() === "woodland" && !s.site && !s.settlementInterior && Boolean(s.visual?.worldAddress);
   const offset2 = (s) => {
     const o = environmentWorldOffset(s);
@@ -86250,7 +86250,7 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
     const seed2 = environmentSeed(s);
     for (const [x, y] of pagePositions(b, o)) {
       const key3 = pageKey(s, x, y, at8, o, seed2);
-      if (key3 && !cache8.has(key3)) return false;
+      if (key3 && !cache9.has(key3)) return false;
     }
     return true;
   }
@@ -86270,10 +86270,10 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
   function* makePage(space, px7, py, at8, o, seed2, build2 = true) {
     const v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, key3 = pageKey(space, px7, py, at8, o, seed2);
     if (key3 === null) return null;
-    let page = cache8.get(key3);
+    let page = cache9.get(key3);
     if (page) {
-      cache8.delete(key3);
-      cache8.set(key3, page);
+      cache9.delete(key3);
+      cache9.set(key3, page);
       stats3.cacheHits++;
       return page;
     }
@@ -86359,10 +86359,10 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
     }
     g.putImageData(im, 0, 0);
     page = c;
-    cache8.set(key3, page);
-    while (cache8.size > PAINTED_PAGE_LIMIT) {
-      const k = cache8.keys().next().value;
-      cache8.delete(k);
+    cache9.set(key3, page);
+    while (cache9.size > PAINTED_PAGE_LIMIT) {
+      const k = cache9.keys().next().value;
+      cache9.delete(k);
       stats3.evictions++;
     }
     finishSlice();
@@ -86420,7 +86420,7 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
   return Object.freeze({ ...prior, paintedJourney: kit2, paintedEdgeArt: Object.freeze({ profiles: profiles2, material, sourcePixelScale: kit2.sourcePixelScale, biomes: kit2.biomes }), roadOverlay: overlay, prepareRoadOverlay: (...args) => prepare(...args), prepareRouteAhead: prepareAhead, routeFallbackReady: ready, routeMode: () => mode, setRouteMode(value2) {
     if (!["existing", "candidate"].includes(value2)) throw Error("Unknown painted path mode");
     mode = value2;
-  }, resources: () => ({ ...prior.resources(), paintedPaths: { version: worldCoverage ? "painted-paths-stream-v3" : kit2.version, sampleTableBytes: routeSamples.bytes, sampleTablePatterns: routeSamples.patterns, preparationVersion: "painted-path-readiness-v1", mode, scope, downloadBytes: downloads, retainedSourceBytes: material.data.byteLength + profiles2.reduce((n, p) => n + p.data.byteLength + p.lipData.byteLength, 0), rasterPages: cache8.size, rasterPageLimit: PAINTED_PAGE_LIMIT, rasterBytes: cache8.size * PAINTED_PAGE_SIZE * PAINTED_PAGE_SIZE * 4, rasterMemoryExclusion: "immutable published pages can also be retained by the existing bounded scenery descriptors", loadMs, profiles: profiles2.map((p) => ({ id: p.id, width: p.width, height: p.height, opaquePixels: p.opaquePixels, minEdge: p.minEdge, maxEdge: p.maxEdge })), stats: { ...stats3 }, geometryChanged: false, originalSourcesUnmodified: true, grassStrategy: "shared existing ground through painted stencil; original grass-tip fringe and earthy lip" } }) });
+  }, resources: () => ({ ...prior.resources(), paintedPaths: { version: worldCoverage ? "painted-paths-stream-v3" : kit2.version, sampleTableBytes: routeSamples.bytes, sampleTablePatterns: routeSamples.patterns, preparationVersion: "painted-path-readiness-v1", mode, scope, downloadBytes: downloads, retainedSourceBytes: material.data.byteLength + profiles2.reduce((n, p) => n + p.data.byteLength + p.lipData.byteLength, 0), rasterPages: cache9.size, rasterPageLimit: PAINTED_PAGE_LIMIT, rasterBytes: cache9.size * PAINTED_PAGE_SIZE * PAINTED_PAGE_SIZE * 4, rasterMemoryExclusion: "immutable published pages can also be retained by the existing bounded scenery descriptors", loadMs, profiles: profiles2.map((p) => ({ id: p.id, width: p.width, height: p.height, opaquePixels: p.opaquePixels, minEdge: p.minEdge, maxEdge: p.maxEdge })), stats: { ...stats3 }, geometryChanged: false, originalSourcesUnmodified: true, grassStrategy: "shared existing ground through painted stencil; original grass-tip fringe and earthy lip" } }) });
 }
 
 // src/client/forest_stands_pieces_v2.js
@@ -86816,11 +86816,11 @@ function mossPatch(c, sd, col2 = "#5a9a38") {
 var PIECES = { fernbed: { fn: fernbed, box: [-38, -34, 38, 12] }, tallgrass: { fn: tallgrass, box: [-30, -36, 30, 8] }, reeds: { fn: reeds2, box: [-22, -42, 22, 8] }, bramble: { fn: bramble, box: [-44, -54, 44, 14] }, pole: { fn: pole2, box: [-26, -62, 26, 10] }, litter: { fn: litterPatch, box: [-22, -14, 22, 14] }, moss: { fn: mossPatch, box: [-22, -16, 22, 16] } };
 var STAND_PIECE_VARIANTS = 8;
 function createStandPieces(doc) {
-  const cache8 = /* @__PURE__ */ new Map(), RES4 = 2;
+  const cache9 = /* @__PURE__ */ new Map(), RES4 = 2;
   let bytes = 0;
   function sprite6(name, variant, args = []) {
     const key3 = name + "/" + variant + "/" + JSON.stringify(args);
-    let s = cache8.get(key3);
+    let s = cache9.get(key3);
     if (s) return s;
     const piece3 = PIECES[name];
     if (!piece3) return null;
@@ -86834,10 +86834,10 @@ function createStandPieces(doc) {
     piece3.fn(g, Math.imul(variant + 1, 2654435761) >>> 0 | 1, ...args);
     bytes += c.width * c.height * 4;
     s = Object.freeze({ image: c, w: r - l, h: b - t, ax: -l, ay: -t });
-    cache8.set(key3, s);
+    cache9.set(key3, s);
     return s;
   }
-  return Object.freeze({ sprite: sprite6, resources: () => ({ sprites: cache8.size, bytes }) });
+  return Object.freeze({ sprite: sprite6, resources: () => ({ sprites: cache9.size, bytes }) });
 }
 
 // src/client/forest_stands_lanes_v2.js
@@ -97631,7 +97631,7 @@ function projectStirringV1(s, actor) {
 // src/storage/planned_world_assets_v1.js
 var plannedWorldAssetCacheKey = (binding) => binding.assetId + "/" + binding.assetHash + "/" + (binding.townPrototype ?? "terrain-only") + "/" + (binding.cavePrototype ?? "no-cave") + "/" + (binding.fortPrototype ?? "no-fort") + "/" + (binding.ruinPrototype ?? "no-ruin") + "/" + (binding.cryptPrototype ?? "no-crypt") + "/" + (binding.sitePopulationHash ?? "base-roster") + "/" + (binding.interiorGenerationHash ?? "legacy-interiors") + "/" + (binding.ferryHash ?? "no-ferry") + "/" + (binding.settlementLifeHash ?? "no-services") + "/" + (binding.settlementServicesHash ?? "no-specialists") + "/" + (binding.combatHash ?? "legacy-combat") + "/" + (binding.wildernessHash ?? "no-wilderness") + "/" + (binding.bossHostingHash ?? "legacy-boss-hosting") + (binding.startHash ? "/" + binding.startHash : "") + (binding.woodlandForestHash ? "/" + binding.woodlandForestHash : "") + (binding.forestStandsVersion ? "/" + binding.forestStandsVersion : "") + (binding.hydrologyHash ? "/" + binding.hydrologyHash : "") + (binding.accessHash ? "/" + binding.accessHash : "") + (binding.roadsideHash ? "/" + binding.roadsideHash : "") + (binding.reshapeHash ? "/" + binding.reshapeHash : "");
 function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
-  const cache8 = /* @__PURE__ */ new Map(), prepared = /* @__PURE__ */ new Map();
+  const cache9 = /* @__PURE__ */ new Map(), prepared = /* @__PURE__ */ new Map();
   const derive = async (asset, binding) => {
     const generator = createPlannedChunkGenerator(asset, binding, sha256);
     return { asset, generator, caveReservation: await generator.caveReservation(), caveReservations: await generator.caveReservations(), fortReservations: await generator.fortReservations(), ruinReservations: await generator.ruinReservations(), cryptReservations: await generator.cryptReservations() };
@@ -97650,7 +97650,7 @@ function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
     useQuestWorldV1(asset);
     freezePlan(asset);
     const loaded = await derive(asset, binding);
-    cache8.set(plannedWorldAssetCacheKey(binding), Promise.resolve(loaded));
+    cache9.set(plannedWorldAssetCacheKey(binding), Promise.resolve(loaded));
     useSeededReservationsV1([...loaded.caveReservations, ...loaded.fortReservations, ...loaded.ruinReservations, ...loaded.cryptReservations]);
     return asset;
   }
@@ -97717,8 +97717,8 @@ function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
   }
   async function load(binding) {
     const asset = await prepare(binding), key3 = plannedWorldAssetCacheKey(binding);
-    if (!cache8.has(key3)) cache8.set(key3, derive(asset, binding));
-    return cache8.get(key3);
+    if (!cache9.has(key3)) cache9.set(key3, derive(asset, binding));
+    return cache9.get(key3);
   }
   return Object.freeze({ load, prepare, sha256, async generate(request) {
     const { generator } = await load(request.plannedWorld);
@@ -99199,6 +99199,7 @@ var CHAIN_SHATTER = 50;
 var EXPOSE_TICKS = 240;
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
+var BUCKLER_PERFECT_TICKS = 6;
 var PERFECT_GEAR_TICKS = 12;
 var SHARP_TICKS = 180;
 var HIT_CD_TICKS = 60;
@@ -99645,14 +99646,15 @@ function validateClassSkillState(s, combat, actor) {
     requireContract(unit17(k.flurry) && actor.alive, "Invalid Flurry");
   }
   if (k.pips !== void 0) {
-    closedRecord(k.pips, ["n", "idle"], ["el", "crit"]);
+    closedRecord(k.pips, ["n", "idle"], ["el", "crit", "blocks"]);
     safeInteger(k.pips.n, 0, PIPS_CAP);
     safeInteger(k.pips.idle, 1, PIP_IDLE_TICKS);
     if (k.pips.el !== void 0) requireContract(SPELL_ELEMENTS.includes(k.pips.el), "Invalid pip element");
     if (k.pips.crit !== void 0) safeInteger(k.pips.crit, 1, PIP_CRIT_TICKS);
+    if (k.pips.blocks !== void 0) safeInteger(k.pips.blocks, 1, 2);
   }
   if (k.guarding !== void 0) requireContract(k.guarding === true && actor.alive, "Invalid guarding");
-  if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS + PERFECT_GEAR_TICKS);
+  if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS + PERFECT_GEAR_TICKS + BUCKLER_PERFECT_TICKS);
   if (k.sharp !== void 0) safeInteger(k.sharp, 1, SHARP_TICKS);
   if (k.woven !== void 0) safeInteger(k.woven, 1, SHARP_TICKS);
   if (k.hitCd !== void 0) safeInteger(k.hitCd, 1, HIT_CD_TICKS);
@@ -99684,7 +99686,7 @@ function validateClassSkillState(s, combat, actor) {
     requireContract(Object.keys(k.earned).length > 0, "Invalid earned pips");
     for (const e of Object.values(k.earned)) {
       closedRecord(e, ["n", "ticks"]);
-      safeInteger(e.n, 1, 2);
+      safeInteger(e.n, 1, 3);
       safeInteger(e.ticks, 1, PIP_EARNED_TICKS);
     }
   }
@@ -99906,13 +99908,13 @@ var triangleOpen = (c, pods) => {
 };
 function sporeTriangleV2(s, id) {
   const runtime = s.d9World.runtime, frameKey2 = canonicalStringify(runtime.frames ?? []);
-  let cache8 = layouts.get(s);
-  if (cache8?.frameKey !== frameKey2) {
-    cache8 = { frameKey: frameKey2, rows: /* @__PURE__ */ new Map() };
-    layouts.set(s, cache8);
+  let cache9 = layouts.get(s);
+  if (cache9?.frameKey !== frameKey2) {
+    cache9 = { frameKey: frameKey2, rows: /* @__PURE__ */ new Map() };
+    layouts.set(s, cache9);
   }
   const d = runtime.groups.find((g) => g.groupId === id), c = s.spacesByInstanceId[s.overworldInstanceId].collision;
-  const prior = cache8.rows.get(id);
+  const prior = cache9.rows.get(id);
   if (prior?.layout && (prior.pages === c.pages && prior.tiles === c.tiles || triangleOpen(c, prior.layout.pods))) {
     prior.pages = c.pages;
     prior.tiles = c.tiles;
@@ -99951,7 +99953,7 @@ function sporeTriangleV2(s, id) {
     Object.freeze(chosen.center);
     Object.freeze(chosen);
   }
-  cache8.rows.set(id, { revision: runtime.revision, pages: c.pages, tiles: c.tiles, layout: chosen });
+  cache9.rows.set(id, { revision: runtime.revision, pages: c.pages, tiles: c.tiles, layout: chosen });
   return chosen;
 }
 function initialSporePodsV2(s, id) {
@@ -105035,6 +105037,36 @@ function createMasteryAwards(state2) {
   } };
 }
 
+// src/shared/contracts/offhand_touches_v1.js
+var KINDS6 = Object.freeze({ buckler: "buckler", kite: "kite", heater: "kite", tower: "tower", "main-gauche": "main-gauche", stiletto: "stiletto", kris: "kris", "tome-fire": "fire", "tome-frost": "frost", "tome-storm": "storm" });
+var OFFHAND_KINDS = Object.freeze([...new Set(Object.values(KINDS6))]);
+var OFFHAND_TOUCHES = Object.freeze({
+  recharge: 15,
+  towerStun: 20,
+  parryCut: 50,
+  critDmg: 10,
+  ailment: 25,
+  frost: 25,
+  stormHops: 1,
+  bucklerWindow: 6,
+  kiteBlocks: 3,
+  towerCrowd: 3,
+  parryPips: 3,
+  critPipTicks: 20,
+  freezePips: 3,
+  stormChain: 4
+});
+var cache3 = /* @__PURE__ */ new WeakMap();
+function offhandKind(player) {
+  const inv = player?.inventory, id = inv?.equipped?.subweapon, item2 = id && inv.itemsById?.[id];
+  if (!item2) return null;
+  const hit2 = cache3.get(item2);
+  if (hit2 !== void 0) return hit2;
+  const kind = KINDS6[itemLookType(item2)] ?? null;
+  cache3.set(item2, kind);
+  return kind;
+}
+
 // src/simulation/tome_element_rules.js
 var chillSince = (s, source3, old2) => heroRank(Object.values(s.playersById ?? {}).find((p) => p.entityId === source3.entityId), "winters_grasp") ? { since: old2 && old2.phase === "chill" && old2.expiresTick > s.tick && old2.since !== void 0 ? old2.since : s.tick } : {};
 function applyFrostControl(s, source3, target, stats3, chillTicks = 240, boost = 0, longer = 0) {
@@ -105042,7 +105074,7 @@ function applyFrostControl(s, source3, target, stats3, chillTicks = 240, boost =
   const controls = s.subweaponCombat.controls ?? (s.subweaponCombat.controls = {}), id = source3.entityId + "/" + target.entityId, old2 = controls[id];
   if (Object.values(controls).some((e) => e.targetId === target.entityId && e.expiresTick > s.tick && e.phase !== "chill")) return null;
   const stacks = (old2 && old2.expiresTick > s.tick ? old2.stacks : 0) + 1, def = s.content.definitionsById[target.contentDefinitionId] ?? {}, boss = def.isBoss === true, elite = def.isElite === true;
-  const phase2 = stacks === 4 ? boss ? "boss-slow" : "freeze" : "chill", more = gearAffixTotalsV2(Object.values(s.playersById ?? {}).find((p) => p.entityId === source3.entityId)).controlDur, grow2 = (t, cap7) => Math.min(cap7, Math.round(t * (1e4 + more) / 1e4)), duration = phase2 === "chill" ? grow2(chillTicks, 360) : boss ? 90 : grow2(Math.round((elite ? 30 : 60) * (100 + longer) / 100), (elite ? 68 : 135) + 126);
+  const phase2 = stacks === 4 ? boss ? "boss-slow" : "freeze" : "chill", more = ((p) => gearAffixTotalsV2(p).controlDur + (offhandKind(p) === "frost" ? 100 * OFFHAND_TOUCHES.frost : 0))(Object.values(s.playersById ?? {}).find((p) => p.entityId === source3.entityId)), grow2 = (t, cap7) => Math.min(cap7, Math.round(t * (1e4 + more) / 1e4)), duration = phase2 === "chill" ? grow2(chillTicks, 360) : boss ? 90 : grow2(Math.round((elite ? 30 : 60) * (100 + longer) / 100), (elite ? 68 : 135) + 126);
   const effect = { id, sourceId: source3.entityId, targetId: target.entityId, spaceInstanceId: source3.residency.spaceInstanceId, phase: phase2, stacks: phase2 === "chill" ? stacks : 0, appliedTick: s.tick, expiresTick: s.tick + duration, ...boost && phase2 === "chill" ? { boost } : {}, ...phase2 === "chill" ? chillSince(s, source3, old2) : {} };
   controls[id] = effect;
   if (phase2 === "boss-slow") {
@@ -105212,14 +105244,14 @@ function respawnTargetV2(s, actor) {
 // src/shared/contracts/boss_arena_wall_v1.js
 var ARENA_REGEN_EVERY_TICKS = 30;
 var ARENA_REGEN_PERCENT = 5;
-var cache3 = /* @__PURE__ */ new WeakMap();
+var cache4 = /* @__PURE__ */ new WeakMap();
 function arenaForSpaceV1(state2, spaceInstanceId) {
   const world = state2.d9World;
   if (!world?.plannedWorld || !spaceInstanceId || spaceInstanceId === state2.overworldInstanceId) return null;
-  let byspace = cache3.get(world);
+  let byspace = cache4.get(world);
   if (!byspace) {
     byspace = /* @__PURE__ */ new Map();
-    cache3.set(world, byspace);
+    cache4.set(world, byspace);
   }
   if (byspace.has(spaceInstanceId)) return byspace.get(spaceInstanceId);
   const at8 = siteFloorOfV2(state2, { residency: { spaceInstanceId } }), arena = at8 && floorArenaV2(at8.site, at8.floor), row2 = arena ? Object.freeze({ spaceInstanceId, floor: at8.floor, box: arena.box, doors: arena.doors }) : null;
@@ -107462,6 +107494,7 @@ var CLASS_SKILL_TUNING_V1 = Object.freeze({
   // What the offhand in hand adds: a Buckler recharges Bash a quarter faster; a Tower Shield stuns
   // half again as long and shoves harder; a Main-Gauche Flurry readies a parry; a Stiletto's cuts
   // crit more often; a Kris's cuts always Bleed. Tomes cast their own element.
+  // Each kind also has a second touch and a pip touch (offhand_touches_v1.js).
   styles: { buckler: { cooldown: [3, 4] }, tower: { stun: [3, 2], knockback: [5, 4] }, "main-gauche": { parry: true }, stiletto: { critBonus: [25, 100] }, kris: { bleed: true } }
 });
 var U = Object.freeze({ ring: 64, burst: 56, pool: 40, beam: { reach: 200, attack: [1, 1] }, sunfall: { radius: 40, attack: [1, 1] }, wail: { radius: 110, slow: 2, ticks: 180, below: 30 }, hide: 5, eyeBurn: 10, heal: 3 });
@@ -107515,7 +107548,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return !isPodCombatTargetV4(t) && !d.isBoss && !d.isElite && !d.isMiniboss;
   };
   const eliteOrBoss = (t) => !isPodCombatTargetV4(t) && Boolean(definition2(t).isBoss || s.eliteCombat?.elitesByEntityId?.[t.entityId] || s.bossCombat?.bossesByEntityId?.[t.entityId]);
-  const stunTicks = (a, base3) => Math.min(90, Math.round(base3 * (100 + 10 * rank(a, "heavy_hands")) / 100));
+  const stunTicks = (a, base3) => Math.min(90, Math.round(base3 * (100 + 10 * rank(a, "heavy_hands")) * (offhandKind(owner(a)) === "tower" ? 100 + OFFHAND_TOUCHES.towerStun : 100) / 1e4));
   const daze = (a, t, base3) => {
     const r = rank(a, "concussion");
     if (r && t.alive && canStun(a)) {
@@ -107524,9 +107557,19 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
   };
   const BREAKER = ["earth_breaker", "shield_charge", "skyfall_leap"];
+  let stunning = null;
   function stun(a, t, ticks) {
     effects2.status(a, t, "stun", 1, ticks);
-    if (heroOf(a) === "knight") earnFor(a, current ?? "counter_stance", 1);
+    if (heroOf(a) === "knight") {
+      const id = current ?? "counter_stance";
+      earnFor(a, id, 1);
+      if (offhandKind(owner(a)) === "tower") {
+        const key3 = a.entityId + "/" + id + "/" + s.tick;
+        if (stunning?.key !== key3) stunning = { key: key3, ids: /* @__PURE__ */ new Set() };
+        stunning.ids.add(t.entityId);
+        if (stunning.ids.size >= OFFHAND_TOUCHES.towerCrowd) earnFor(a, id, 2);
+      }
+    }
     const r = rank(a, "unstoppable");
     if (r) for (const id of BREAKER) reduceSkillCooldown(c.actors[a.entityId], id, 12 * r);
   }
@@ -107582,6 +107625,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   const mageEarns = (a, n) => {
     if (current && heroOf(a) === "mage") earnFor(a, current, n);
   };
+  const freezePips = (a) => offhandKind(owner(a)) === "frost" ? OFFHAND_TOUCHES.freezePips : 2;
+  const kiteBlock = (a, combat) => {
+    const q = combat.skills?.pips;
+    if (!q) return;
+    const n = (q.blocks ?? 0) + 1;
+    if (n >= OFFHAND_TOUCHES.kiteBlocks) {
+      delete q.blocks;
+      gainPips(a, 1);
+    } else q.blocks = n;
+  };
   const fought = (a) => {
     const combat = c.actors[a.entityId], p = combat?.skills?.pips;
     if (p) p.idle = PIP_IDLE_TICKS;
@@ -107623,7 +107676,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const key3 = a.entityId + "/" + current + "/" + s.tick;
     if (arcing?.key !== key3) arcing = { key: key3, ids: /* @__PURE__ */ new Set() };
     arcing.ids.add(t.entityId);
-    if (arcing.ids.size >= 2) mageEarns(a, 1);
+    if (arcing.ids.size >= 2) mageEarns(a, arcing.ids.size >= OFFHAND_TOUCHES.stormChain && offhandKind(owner(a)) === "storm" ? 2 : 1);
   };
   let castElement2 = null;
   const healFlat = (a, n) => {
@@ -107654,7 +107707,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   })) || Object.values(c.controls ?? {}).some((e) => e.targetId === t.entityId && e.expiresTick > s.tick);
   const ailing = (t) => Object.values(c.effects).some((e) => e.targetId === t.entityId && e.expiresTick > s.tick) || Object.values(c.mastery ?? {}).some((b) => b.poisons?.[t.entityId]?.expiresTick > s.tick);
   const controlTicks = (a, ticks, cap7) => {
-    const bp = gearOf(a).controlDur;
+    const bp = gearOf(a).controlDur + (offhandKind(owner(a)) === "frost" ? 100 * OFFHAND_TOUCHES.frost : 0);
     return bp ? Math.min(cap7, Math.round(ticks * (1e4 + bp) / 1e4)) : ticks;
   }, ailmentTicks = (a, ticks) => {
     const bp = gearOf(a).ailmentDur;
@@ -108447,7 +108500,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       const def = definition2(t), phase2 = def.isBoss === true ? full(n) ? "chill" : "boss-slow" : !full(n) && (def.isElite === true || def.isMiniboss) ? "chill" : "freeze", id = a.entityId + "/" + t.entityId;
       c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase: phase2, stacks: phase2 === "chill" ? 3 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase2 === "chill" ? controlTicks(a, chill, 360) : phase2 === "boss-slow" ? 90 : controlTicks(a, Math.round((deep6 ? 90 : 60) * (100 + 10 * rank(a, "deep_freeze")) / 100) + 18 * n, freezeCap(t))), ...phase2 === "chill" ? chillSince(s, a, c.controls[id]) : {} };
       if (phase2 === "freeze") frozen.push(c.controls[id]);
-      mageEarns(a, phase2 === "freeze" ? 2 : 1);
+      mageEarns(a, phase2 === "freeze" ? freezePips(a) : 1);
     }
     const combat = c.actors[a.entityId];
     if (aug(a, "flashfreeze", 2) && frozen.length) {
@@ -108679,7 +108732,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const def = definition2(t), phase2 = def.isBoss === true ? "boss-slow" : !freeze2 || def.isElite === true || def.isMiniboss ? "chill" : "freeze", id = a.entityId + "/" + t.entityId, old2 = c.controls[id];
     if (old2 && old2.expiresTick > s.tick && (old2.phase === "freeze" || old2.phase === phase2)) return;
     c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase: phase2, stacks: phase2 === "chill" ? 1 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase2 === "chill" ? controlTicks(a, 240, 360) : phase2 === "boss-slow" ? 90 : controlTicks(a, 60, freezeCap(t))), ...phase2 === "chill" ? chillSince(s, a, old2) : {} };
-    mageEarns(a, phase2 === "freeze" ? 2 : 1);
+    mageEarns(a, phase2 === "freeze" ? freezePips(a) : 1);
   }
   function staticField2(a) {
     classSkillsRecord(c.actors[a.entityId]).field = { x: a.position.x, y: a.position.y, ticks: aug(a, "static_field", 0) ? FIELD_MAX : FIELD_TICKS, next: PULSE_TICKS };
@@ -108694,7 +108747,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const f = c.actors[a.entityId]?.skills?.field;
     return Boolean(f && Math.hypot(t.position.x - f.x, t.position.y - f.y) <= T88.staticField.radius + (t.hullRadius ?? 0));
   };
-  const conductor = (a, t) => aug(a, "static_field", 2) && fieldHolds(a, t) ? 2 : 0;
+  const conductor = (a, t) => (aug(a, "static_field", 2) && fieldHolds(a, t) ? 2 : 0) + (offhandKind(owner(a)) === "storm" ? OFFHAND_TOUCHES.stormHops : 0);
   function stepField(a, combat) {
     const f = combat.skills?.field;
     if (!f) return;
@@ -108956,7 +109009,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
         if (!Object.keys(k.spends).length) delete k.spends;
       }
     }
-    const record3 = classSkillsRecord(c.actors[a.entityId]), styled = skillId === "shield_bash" ? Math.ceil(scaled(CLASS_SKILLS[skillId].cooldownTicks, T88.styles[offhandStyle(owner(a))]?.cooldown)) : CLASS_SKILLS[skillId].cooldownTicks;
+    const kind = offhandKind(owner(a)), quick = kind === "buckler" && inGroup("move", heroOf(a), skillId) || kind === "kite" && inGroup("def", heroOf(a), skillId), own0 = quick ? Math.ceil(CLASS_SKILLS[skillId].cooldownTicks * (100 - OFFHAND_TOUCHES.recharge) / 100) : CLASS_SKILLS[skillId].cooldownTicks;
+    const record3 = classSkillsRecord(c.actors[a.entityId]), styled = skillId === "shield_bash" ? Math.ceil(scaled(own0, T88.styles[offhandStyle(owner(a))]?.cooldown)) : own0;
     const sigCut = (SIGNATURE_CUTS[skillId] ?? []).reduce((n, id) => n + rank(a, id), 0), base3 = sigCut ? Math.ceil(styled * (100 - 2 * sigCut) / 100) : styled;
     const longer = rank(a, "restless") ? [6, 5] : skillId === "cast" && rank(a, "overload") ? [13, 10] : [1, 1];
     record3.cooldowns[skillId] = Math.ceil((BREAKER.includes(skillId) && rank(a, "reckless") ? Math.ceil(base3 * 3 / 4) : base3) * longer[0] / longer[1]);
@@ -109042,7 +109096,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (up && !k?.guarding) {
       const r = classSkillsRecord(combat);
       r.guarding = true;
-      r.guardUp = PERFECT_TICKS + Math.min(PERFECT_GEAR_TICKS, gearOf(a).perfectWindow);
+      r.guardUp = PERFECT_TICKS + Math.min(PERFECT_GEAR_TICKS, gearOf(a).perfectWindow) + (offhandKind(owner(a)) === "buckler" ? BUCKLER_PERFECT_TICKS : 0);
     } else if (!up && k?.guarding) {
       delete k.guardUp;
       clearSkillState(combat, "guarding");
@@ -109273,6 +109327,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const coup = rank(source3, "coup_de_grace");
     if (coup && critical && target.maxHp !== void 0 && compareCombat(multiplyCombat(target.hp, 100, 1), multiplyCombat(target.maxHp, 25, 1)) < 0) out = pct3(out, 6 * coup);
     if (critical && mechanic === "lightning" && rank(source3, "overload")) out = multiplyCombat(out, 2, 1);
+    if (critical && offhandKind(owner(source3)) === "stiletto") out = pct3(out, OFFHAND_TOUCHES.critDmg);
     const overload = rank(source3, "elemental_overload"), element = ELEMENT_OF[mechanic];
     if (overload && element && trigger !== "periodic" && bucket2 && target.alive && !isPodCombatTargetV4(target)) {
       const was = bucket2.statuses[target.entityId + "/struck"];
@@ -109365,7 +109420,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     fought(source3);
     if (critical && heroOf(source3) === "rogue" && !(current && finisher(source3, current)) && !combat.skills?.pips?.crit) {
       gainPips(source3, 1);
-      combat.skills.pips.crit = Math.ceil(PIP_CRIT_TICKS * (10 - rank(source3, "blade_dance")) / 10);
+      combat.skills.pips.crit = Math.ceil((offhandKind(owner(source3)) === "stiletto" ? OFFHAND_TOUCHES.critPipTicks : PIP_CRIT_TICKS) * (10 - rank(source3, "blade_dance")) / 10);
     }
     if (mechanic === "lightning" && target.alive) arced(source3, target);
     {
@@ -109411,8 +109466,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (combat) {
       fought(target);
       const hero = heroOf(target);
-      if (hero === "knight" && defense.defense === "block") gainPips(target, defense.perfect ? 2 : 1);
-      else if (hero === "rogue" && defense.defense === "parry") gainPips(target, 2);
+      if (hero === "knight" && defense.defense === "block") {
+        gainPips(target, defense.perfect ? 2 : 1);
+        if (offhandKind(p) === "kite") kiteBlock(target, combat);
+      } else if (hero === "rogue" && defense.defense === "parry") gainPips(target, offhandKind(p) === "main-gauche" ? OFFHAND_TOUCHES.parryPips : 2);
     }
     if (defense.perfect && combat) {
       const k = classSkillsRecord(combat), G4 = gearOf(target);
@@ -109424,8 +109481,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
     const mirrored = attribution?.projectileImpact && (defense.defense === "block" && (defense.aegis || combat?.skills?.aegis) && aug(target, "aegis_pulse", 3) || defense.defense === "parry" && riposting && aug(target, "riposte", 3));
     if (mirrored) {
-      const back = addCombat(defense.prevented ?? 0, defense.damage ?? 0);
-      damage(target, source3, compareCombat(back, stats3.attack) > 0 ? back : stats3.attack, "riposte", null, { sourceItem: damageSourceItem(p, defense.defense === "block" ? "bash" : "offhand"), trigger: "reactive", mark: "mirror" });
+      const back = addCombat(defense.prevented ?? 0, defense.damage ?? 0), sent = compareCombat(back, stats3.attack) > 0 ? back : stats3.attack;
+      damage(target, source3, defense.defense === "parry" && offhandKind(p) === "main-gauche" ? pct3(sent, OFFHAND_TOUCHES.parryCut) : sent, "riposte", null, { sourceItem: damageSourceItem(p, defense.defense === "block" ? "bash" : "offhand"), trigger: "reactive", mark: "mirror" });
       if (!source3.alive) return;
     }
     if (defense.counter === "stance") {
@@ -109458,7 +109515,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (defense.defense === "parry" && rank(target, "en_garde") && combat) classSkillsRecord(combat).enGarde = EN_GARDE_TICKS;
     if (defense.defense === "parry" && combat?.skills?.riposte) {
       clearSkillState(combat, "riposte");
-      const combo = spendOf(target, "riposte"), cut2 = multiplyCombat(stats3.attack, ...aug(target, "riposte", 0) ? T88.riposte.counterCut : T88.riposte.attack);
+      const combo = spendOf(target, "riposte"), bare = multiplyCombat(stats3.attack, ...aug(target, "riposte", 0) ? T88.riposte.counterCut : T88.riposte.attack), cut2 = offhandKind(p) === "main-gauche" ? pct3(bare, OFFHAND_TOUCHES.parryCut) : bare;
       damage(target, source3, combo ? pct3(cut2, 30 * combo) : cut2, "riposte", null, { sourceItem: damageSourceItem(p, "offhand"), trigger: "reactive" });
       if (full(combo) && canStun(target)) {
         for (const t of around3(target, target.position, T88.smokeVeil.radius)) if (!isPodCombatTargetV4(t)) expose(target, t, T88.smokeVeil.expose);
@@ -109616,6 +109673,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function defeated(a, target) {
     if (!players.get(a.entityId)) return;
     {
+      const kind = offhandKind(owner(a));
+      if (kind === "kris" && c.effects[a.entityId + "/" + target.entityId + "/bleed"] || kind === "fire" && c.effects[a.entityId + "/" + target.entityId + "/burn"]) gainPips(a, 1);
+    }
+    {
       const burst3 = worn(a, "wightfang");
       if (burst3 && Object.values(c.effects).some((e) => e.targetId === target.entityId && e.kind === "bleed")) {
         const sourceItem = damageSourceItem(owner(a), "offhand");
@@ -109709,7 +109770,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   const effects2 = createMasteryEffects(s, { damage, eligible: eligible2, identity: identity2, getStats: stats3, awards: mastery, bleed: (a, t, captured) => periodic(a, t, "bleed", captured.attack, captured) });
   function periodic(source3, target, kind, attack, captured) {
     if (!target.alive) return;
-    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = heroRank(players.get(source3.entityId), kind === "bleed" ? "serrated_edge" : "searing"), lingering = kind === "bleed" ? heroRank(players.get(source3.entityId), "lingering_venom") : 0, eye6 = kind === "burn" ? wornUniqueValue(players.get(source3.entityId), "eye-of-the-sun")?.[0] ?? 0 : 0, life = kind === "sting" ? 240 : Math.min(kind === "bleed" ? 1350 : 540, Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) * (100 + eye6) * (100 + 10 * lingering) * (1e4 + gearAffixTotalsV2(players.get(source3.entityId)).ailmentDur) / 1e10) + (captured.extra ?? 0));
+    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = heroRank(players.get(source3.entityId), kind === "bleed" ? "serrated_edge" : "searing"), lingering = kind === "bleed" ? heroRank(players.get(source3.entityId), "lingering_venom") : 0, eye6 = kind === "burn" ? wornUniqueValue(players.get(source3.entityId), "eye-of-the-sun")?.[0] ?? 0 : 0, life = kind === "sting" ? 240 : Math.min(kind === "bleed" ? 1350 : 540, Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) * (100 + eye6) * (100 + 10 * lingering) * (1e4 + gearAffixTotalsV2(players.get(source3.entityId)).ailmentDur) / 1e10 * (offhandKind(players.get(source3.entityId)) === (kind === "bleed" ? "kris" : kind === "burn" ? "fire" : "") ? (100 + OFFHAND_TOUCHES.ailment) / 100 : 1)) + (captured.extra ?? 0));
     c.effects[id] = {
       id,
       sourceId: source3.entityId,
@@ -114055,7 +114116,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       const stats3 = progression.resolvedStats(target.entityId), suppressed = subweaponSuppressedD12_4I(state2, target.entityId);
       defenseStats = stats3;
       const defenseSource = attribution?.projectileDirection ? { ...source3, position: { x: target.position.x - attribution.projectileDirection.x * 32, y: target.position.y - attribution.projectileDirection.y * 32 } } : source3;
-      defense = incomingSubweaponHit({ combat: state2.subweaponCombat.actors[target.entityId], stats: stats3, raw, actor: target, source: defenseSource, knight: playerFor(target.entityId)?.d8?.heroClass === "knight", wall: classRank(playerFor(target.entityId)?.d8, "bulwark_colossus") ? 10 : heroRank(playerFor(target.entityId), "iron_wall"), steady: heroRank(playerFor(target.entityId), "unyielding"), boss: bossCombat.isBoss(source3.entityId) || Boolean(state2.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
+      defense = incomingSubweaponHit({ combat: state2.subweaponCombat.actors[target.entityId], stats: stats3, raw, actor: target, source: defenseSource, knight: playerFor(target.entityId)?.d8?.heroClass === "knight", wall: classRank(playerFor(target.entityId)?.d8, "bulwark_colossus") || offhandKind(playerFor(target.entityId)) === "kite" ? 10 : heroRank(playerFor(target.entityId), "iron_wall"), steady: heroRank(playerFor(target.entityId), "unyielding"), boss: bossCombat.isBoss(source3.entityId) || Boolean(state2.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
       raw = defense.damage;
       if (compareCombat(defense.absorbed, 0) > 0) barrierAbsorption = { absorbed: copyWire(defense.absorbed), remaining: copyWire(state2.subweaponCombat.actors[target.entityId].barrier), capacity: copyWire(stats3.maxBarrier) };
     }
@@ -124360,10 +124421,10 @@ function drawBossCardV1(c, id, { name = "" } = {}) {
   c.fillText(label7, 16, 32.8);
   c.restore();
 }
-var cache4 = /* @__PURE__ */ new Map();
+var cache5 = /* @__PURE__ */ new Map();
 function monsterCardCanvasV1(doc, family, scale = 3, boss = false) {
   const key3 = (boss ? "boss:" : "") + family + "/" + scale;
-  let cv = cache4.get(key3);
+  let cv = cache5.get(key3);
   if (cv) return cv;
   if (!doc?.createElement) return null;
   cv = doc.createElement("canvas");
@@ -124374,7 +124435,7 @@ function monsterCardCanvasV1(doc, family, scale = 3, boss = false) {
   c.scale(scale, scale);
   if (boss) drawBossCardV1(c, family, { name: BOSS_PAGE_NAMES[family] });
   else drawMonsterCardV1(c, family);
-  cache4.set(key3, cv);
+  cache5.set(key3, cv);
   return cv;
 }
 var urls = /* @__PURE__ */ new Map();
@@ -132751,7 +132812,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   doc.body.append(mini, atlas, toast, kneelBox, banner6, notice);
   let open2 = false, closed = false, meta = null, model = null, center3 = null, span2 = 600, selected = null, sheetMode = null, hits2 = [], lastPaint = -1, dirty = true, busy = false, metadataError = null, requests = 0, rasterBuilds = 0, cacheHits = 0, paintMs = 0, atlasSize = null, gesture = null;
   let questTarget = null, tracked = store.get("saq-map-track"), miniOffset = Number(store.get("saq-minimap-zoom")) || 0, kneel = null, toastUntil = 0, seen4 = null, bannerQueue = [], bannerUntil = 0, insideTown = null, placeLineUntil = 0, lastBanner = { id: null }, placesKey = null, placesList = [], bezel = null;
-  const cache8 = /* @__PURE__ */ new Map(), miniCache = /* @__PURE__ */ new Map(), pointers = /* @__PURE__ */ new Map(), phoneQuery = env.matchMedia?.("(max-width:600px)"), shortQuery = env.matchMedia?.("(max-height:500px)");
+  const cache9 = /* @__PURE__ */ new Map(), miniCache = /* @__PURE__ */ new Map(), pointers = /* @__PURE__ */ new Map(), phoneQuery = env.matchMedia?.("(max-width:600px)"), shortQuery = env.matchMedia?.("(max-height:500px)");
   loadMapFonts(env, () => {
     dirty = true;
     bezel = null;
@@ -133468,8 +133529,8 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     c.fillRect(0, 0, width2, height);
     if (!center3) center3 = { ...p };
     const shown2 = chartView(center3, span2, width2, height), rw = Math.min(512, Math.round(width2)), rh = Math.min(240, Math.round(height)), k = knowledge();
-    let result = requestRaster(cache8, shown2, Math.max(32, rw), Math.max(32, rh), width2, height, ratio, 6);
-    if (!result) result = [...cache8.values()].reverse().find((v) => v.raster.view.width / shown2.width < 3 && v.raster.view.width / shown2.width > 0.4) ?? null;
+    let result = requestRaster(cache9, shown2, Math.max(32, rw), Math.max(32, rh), width2, height, ratio, 6);
+    if (!result) result = [...cache9.values()].reverse().find((v) => v.raster.view.width / shown2.width < 3 && v.raster.view.width / shown2.width > 0.4) ?? null;
     if (result) {
       const visibleKey = Object.keys(k?.visited ?? {}).filter((id) => !id.startsWith("event:")).length;
       if (result.paintKey !== "a" + visibleKey) {
@@ -134019,7 +134080,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       if (m) startKneel(m);
       return Boolean(m);
     },
-    resources: () => ({ cartographyMode: "atlas-v2", mapLevel: span2, mapMaximumLevel: maxSpan(), mapRasterRequests: requests, mapRasterCacheEntries: cache8.size + miniCache.size, mapRasterBuilds: rasterBuilds, mapRasterCacheHits: cacheHits, mapRasterBusy: busy, mapPaintMs: Math.round(paintMs * 10) / 10, minimapTilesPerPixel: meta ? miniTpp() : null, kneeling: Boolean(kneel), bannerQueue: bannerQueue.length, mapError: metadataError }),
+    resources: () => ({ cartographyMode: "atlas-v2", mapLevel: span2, mapMaximumLevel: maxSpan(), mapRasterRequests: requests, mapRasterCacheEntries: cache9.size + miniCache.size, mapRasterBuilds: rasterBuilds, mapRasterCacheHits: cacheHits, mapRasterBusy: busy, mapPaintMs: Math.round(paintMs * 10) / 10, minimapTilesPerPixel: meta ? miniTpp() : null, kneeling: Boolean(kneel), bannerQueue: bannerQueue.length, mapError: metadataError }),
     destroy() {
       closed = true;
       sizeObserver?.disconnect();
@@ -134027,7 +134088,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       env.removeEventListener("orientationchange", invalidateSize);
       env.removeEventListener("keydown", key3);
       for (const e of [mini, atlas, style, toast, kneelBox, banner6]) e.remove();
-      cache8.clear();
+      cache9.clear();
       miniCache.clear();
     }
   };
@@ -134357,7 +134418,7 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
   footer.append(el3("span", "N \u2191"));
   atlas.append(header, large, detail);
   doc.body.append(mini, atlas);
-  let open2 = false, hudAllowed = true, center3 = null, level = 0, miniZoom = 1, busy = false, closed = false, lastKey = null, cache8 = [], cacheRevision = 0, lastModel = null, marks2 = [], miniMarks = [], reviewMarks = [], terrainHits = [], lastTime = -1e3, staticLayer = null, staticKey = null, staticBuilds = 0, staticHits = 0, miniBackingCenter = null, miniRequestedCenter = null, miniRecenters = 0;
+  let open2 = false, hudAllowed = true, center3 = null, level = 0, miniZoom = 1, busy = false, closed = false, lastKey = null, cache9 = [], cacheRevision = 0, lastModel = null, marks2 = [], miniMarks = [], reviewMarks = [], terrainHits = [], lastTime = -1e3, staticLayer = null, staticKey = null, staticBuilds = 0, staticHits = 0, miniBackingCenter = null, miniRequestedCenter = null, miniRecenters = 0;
   const atlasSize = createMapCanvasSizeCacheD9(large, environment), pointers = /* @__PURE__ */ new Map();
   let gesture = null;
   function syncVisibility() {
@@ -134509,7 +134570,7 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
       lastKey = key3;
       port.mapWindow(query).then((r) => {
         if (!closed) {
-          cache8 = r.pages;
+          cache9 = r.pages;
           if (requestMode === "minimap" && requestedMiniCenter) {
             if (miniBackingCenter && (miniBackingCenter.chunkX !== requestedMiniCenter.chunkX || miniBackingCenter.chunkY !== requestedMiniCenter.chunkY || miniBackingCenter.localX !== requestedMiniCenter.localX || miniBackingCenter.localY !== requestedMiniCenter.localY)) miniRecenters++;
             miniBackingCenter = requestedMiniCenter;
@@ -134533,7 +134594,7 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
       staticKey = null;
     }
     if (staticKey !== nextStaticKey) {
-      const paint3 = drawCartographyD9(staticLayer.getContext("2d"), { pages: cache8, pending: n.pending, viewport: v, width: backingWidth, height: backingHeight, scale, level: lod, boundSitesById: n.boundSitesById, boundSite: n.boundSite, navigableSitesById: n.navigableSitesById, planned });
+      const paint3 = drawCartographyD9(staticLayer.getContext("2d"), { pages: cache9, pending: n.pending, viewport: v, width: backingWidth, height: backingHeight, scale, level: lod, boundSitesById: n.boundSitesById, boundSite: n.boundSite, navigableSitesById: n.navigableSitesById, planned });
       marks2 = paint3.markers;
       terrainHits = paint3.visible.map(({ page, x, y, w, h }) => ({ x, y, w, h, label: page.region ? page.region.name + " \xB7 " + page.region.biome.replaceAll("-", " ") + " \xB7 Minimum Lv. " + formatLarge(typeof page.region.minimumLevel === "number" ? String(page.region.minimumLevel) : page.region.minimumLevel) : "Explored territory" }));
       staticKey = nextStaticKey;
@@ -141883,7 +141944,7 @@ var SUN = [18.6, -60];
 var SHADOW4 = { barrow_king: 22, sun_pharaoh: 21 };
 var PLAIN2 = { barrow_king: "#7d786d", sun_pharaoh: "#efe6cc" };
 var SUMMON_FAMILY = { wight: "barrow_wight", scarab: "sand_scarab" };
-var cache5 = /* @__PURE__ */ new Map();
+var cache6 = /* @__PURE__ */ new Map();
 var views2 = /* @__PURE__ */ new Map();
 var clamp42 = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 var ease14 = (v) => {
@@ -141904,7 +141965,7 @@ function surface2(w, h) {
 }
 function sprite4(key3, white) {
   const id = key3 + (white ? "/flash" : "");
-  if (cache5.has(id)) return cache5.get(id);
+  if (cache6.has(id)) return cache6.get(id);
   let out = null;
   try {
     if (canPaint()) {
@@ -141925,7 +141986,7 @@ function sprite4(key3, white) {
   } catch {
     out = null;
   }
-  cache5.set(id, out);
+  cache6.set(id, out);
   return out;
 }
 function stamp3(c, key3, flash) {
@@ -162219,11 +162280,11 @@ function tufts5(c, x, y, colors, r, n = 3, len = 7) {
     c.stroke();
   }
 }
-var cache6 = /* @__PURE__ */ new WeakMap();
+var cache7 = /* @__PURE__ */ new WeakMap();
 function siteEntrancesV1(space) {
   const v = space.visual, list = v?.blockers;
   if (!list) return [];
-  let found = cache6.get(list);
+  let found = cache7.get(list);
   if (found) return found;
   const t = space.collision.tileSize, groups = /* @__PURE__ */ new Map();
   for (const b of list) {
@@ -162249,7 +162310,7 @@ function siteEntrancesV1(space) {
     };
     return Object.freeze({ id: g.id, family, biome, stones: STONES2[family].map((c) => tintColorV1(c, biome)), x0: g.x0, y0: g.y0, x1: g.x1, y1: g.y1, foot: foot2, door: { x: dx, y: dy }, seed: hashText2(g.id) });
   });
-  cache6.set(list, found);
+  cache7.set(list, found);
   return found;
 }
 function drawSiteEntranceBlendV1(c, space, bounds2, phase2) {
@@ -162958,12 +163019,12 @@ function drawBarrierImpact(ctx, x, y, dx, dy, age, { remaining, capacity }) {
 
 // src/client/hit_icons_v2.js
 var INK60 = "#150d1f";
-var cache7 = /* @__PURE__ */ new Map();
+var cache8 = /* @__PURE__ */ new Map();
 var P17 = (d) => {
-  let p = cache7.get(d);
+  let p = cache8.get(d);
   if (!p) {
     p = new Path2D(d);
-    cache7.set(d, p);
+    cache8.set(d, p);
   }
   return p;
 };
@@ -172674,7 +172735,7 @@ var EASE_MS = 60;
 var CORRECT_MS = 220;
 var TICK_MS3 = 1e3 / 60;
 function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
-  let from = /* @__PURE__ */ new Map(), current = null, arrivedAt = 0, gap2 = 50, cache8 = null, cacheAt = -1;
+  let from = /* @__PURE__ */ new Map(), current = null, arrivedAt = 0, gap2 = 50, cache9 = null, cacheAt = -1;
   let intent = { x: 0, y: 0 }, intentAt = 0, releasedAt = null, hold = null, speed = 0, own = null, ownAt = -1, ownId = null, lastOwn = null, err = { x: 0, y: 0 }, jump3 = true, mode = "";
   let tickOffset = null;
   const frameAge = (model, t) => tickOffset === null || !Number.isFinite(model?.tick) ? t - arrivedAt : Math.max(0, t - (model.tick * TICK_MS3 + tickOffset));
@@ -172786,7 +172847,7 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       from = next;
       current = after;
       arrivedAt = t;
-      cache8 = null;
+      cache9 = null;
       jump3 = true;
     },
     // time: the screen frame's time (requestAnimationFrame), so motion is even on screen.
@@ -172796,16 +172857,16 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       const id = model.playersById?.[model.localPlayerId]?.entityId, e = id ? model.entitiesById[id] : null, mine = e ? ownPosition(model, id, e, t) : null;
       const gliding = model.entitiesById === current && from.size > 0 && t - arrivedAt < gap2;
       if (!gliding && (!mine || mine.x === e.position.x && mine.y === e.position.y)) return model;
-      if (cache8 && cacheAt === t) return cache8;
+      if (cache9 && cacheAt === t) return cache9;
       const entitiesById = { ...model.entitiesById };
       if (gliding) for (const g of from.keys()) {
         const x = current[g];
         if (x) entitiesById[g] = { ...x, position: drawn(g, x, t) };
       }
       if (mine) entitiesById[id] = { ...e, position: mine };
-      cache8 = { ...model, entitiesById };
+      cache9 = { ...model, entitiesById };
       cacheAt = t;
-      return cache8;
+      return cache9;
     },
     inspect: () => ({ gap: gap2, speed, rtt: rtt() })
   });

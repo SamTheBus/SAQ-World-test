@@ -25958,6 +25958,7 @@ var GOLD_TICKS = 900;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
+var BUCKLER_PERFECT_TICKS = 6;
 var PERFECT_GEAR_TICKS = 12;
 var SHARP_TICKS = 180;
 var HIT_CD_TICKS = 60;
@@ -26249,14 +26250,15 @@ function validateClassSkillState(s, combat, actor) {
     requireContract(unit3(k.flurry) && actor.alive, "Invalid Flurry");
   }
   if (k.pips !== void 0) {
-    closedRecord(k.pips, ["n", "idle"], ["el", "crit"]);
+    closedRecord(k.pips, ["n", "idle"], ["el", "crit", "blocks"]);
     safeInteger(k.pips.n, 0, PIPS_CAP);
     safeInteger(k.pips.idle, 1, PIP_IDLE_TICKS);
     if (k.pips.el !== void 0) requireContract(SPELL_ELEMENTS.includes(k.pips.el), "Invalid pip element");
     if (k.pips.crit !== void 0) safeInteger(k.pips.crit, 1, PIP_CRIT_TICKS);
+    if (k.pips.blocks !== void 0) safeInteger(k.pips.blocks, 1, 2);
   }
   if (k.guarding !== void 0) requireContract(k.guarding === true && actor.alive, "Invalid guarding");
-  if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS + PERFECT_GEAR_TICKS);
+  if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS + PERFECT_GEAR_TICKS + BUCKLER_PERFECT_TICKS);
   if (k.sharp !== void 0) safeInteger(k.sharp, 1, SHARP_TICKS);
   if (k.woven !== void 0) safeInteger(k.woven, 1, SHARP_TICKS);
   if (k.hitCd !== void 0) safeInteger(k.hitCd, 1, HIT_CD_TICKS);
@@ -26288,7 +26290,7 @@ function validateClassSkillState(s, combat, actor) {
     requireContract(Object.keys(k.earned).length > 0, "Invalid earned pips");
     for (const e of Object.values(k.earned)) {
       closedRecord(e, ["n", "ticks"]);
-      safeInteger(e.n, 1, 2);
+      safeInteger(e.n, 1, 3);
       safeInteger(e.ticks, 1, PIP_EARNED_TICKS);
     }
   }
