@@ -1051,7 +1051,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-6YDR3LVC.js";
+} from "./chunk-KF5YB6YM.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -99151,8 +99151,8 @@ var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var pipCostOf = (id) => PIP_COSTS[id] ?? 0;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
-var TIMED = ["sharp", "hitCd", "killCd", "perfCd", "guardUp", "mist", "veil", "gold", "surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow"];
-var LIVE = ["sharp", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var TIMED = ["sharp", "woven", "hitCd", "killCd", "perfCd", "guardUp", "mist", "veil", "gold", "surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow"];
+var LIVE = ["sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function skillCooldown(combat, skillId) {
   return combat?.skills?.cooldowns?.[skillId] ?? 0;
 }
@@ -99576,6 +99576,7 @@ function validateClassSkillState(s, combat, actor) {
   if (k.guarding !== void 0) requireContract(k.guarding === true && actor.alive, "Invalid guarding");
   if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS + PERFECT_GEAR_TICKS);
   if (k.sharp !== void 0) safeInteger(k.sharp, 1, SHARP_TICKS);
+  if (k.woven !== void 0) safeInteger(k.woven, 1, SHARP_TICKS);
   if (k.hitCd !== void 0) safeInteger(k.hitCd, 1, HIT_CD_TICKS);
   if (k.killCd !== void 0) safeInteger(k.killCd, 1, KILL_CD_TICKS);
   if (k.perfCd !== void 0) safeInteger(k.perfCd, 1, PERF_CD_TICKS);
@@ -108911,6 +108912,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const k = classSkillsRecord(c.actors[a.entityId]);
     const before = k.pips?.el;
     if (!ends && before && before !== el3) gainPips(a, 1);
+    if (before && before !== el3 && gearOf(a).weaveDmg) k.woven = SHARP_TICKS;
     const p = k.pips ??= { n: 0, idle: PIP_IDLE_TICKS };
     p.el = el3;
   }
@@ -109273,6 +109275,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
         if (gear2.perfectDmg && c.actors[source3.entityId]?.skills?.sharp) extra += gear2.perfectDmg;
         if (gear2.exposeDmg && marks2.on(target, "expose")) extra += gear2.exposeDmg;
         if (gear2.blinkDmg && c.actors[source3.entityId]?.skills?.sharp) extra += gear2.blinkDmg;
+        if (gear2.weaveDmg && c.actors[source3.entityId]?.skills?.woven) extra += gear2.weaveDmg;
         if (gear2.ccDmg && (marks2.on(target, "stun") || marks2.on(target, "daze") || marks2.on(target, "slow") || marks2.frosted(target))) extra += gear2.ccDmg;
       }
       if (extra) out = multiplyCombat(out, 1e4 + extra, 1e4);
@@ -126021,11 +126024,12 @@ var LABELS = {
   shatterCdr: "off all cooldowns on a Shatter",
   ccDmg: "Damage to enemies you crowd controlled",
   blinkDmg: "Damage for 3 s after a Blink",
-  blinkCdr: "off other cooldowns on a Blink"
+  blinkCdr: "off other cooldowns on a Blink",
+  weaveDmg: "Damage for 3 s after you switch elements"
 };
 var SECONDS = /* @__PURE__ */ new Set(["hitCdr", "killCdr", "perfectWindow", "perfectCdr", "exposeTime", "exposeCdr", "shatterCdr", "blinkCdr"]);
 var branchName = (id) => id ? id[0].toUpperCase() + id.slice(1) : "";
-var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct", "mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "cdr", "eliteDmg", "lifeKill", "rangedDmg", "areaDmg", "finisherDmg", "moveCdr", "defCdr", "heldDmg", "ailingDmg", "closeDmg", "farDmg", "fullDmg", "lowDmg", "controlDur", "ailmentDur", "eliteDr", "areaDr", "stunDr", "potionHeal", "keepPip", "perfectDmg", "exposeDmg", "shatterDmg", "shatterEase", "ccDmg", "blinkDmg"]);
+var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct", "mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "cdr", "eliteDmg", "lifeKill", "rangedDmg", "areaDmg", "finisherDmg", "moveCdr", "defCdr", "heldDmg", "ailingDmg", "closeDmg", "farDmg", "fullDmg", "lowDmg", "controlDur", "ailmentDur", "eliteDr", "areaDr", "stunDr", "potionHeal", "keepPip", "perfectDmg", "exposeDmg", "shatterDmg", "shatterEase", "ccDmg", "blinkDmg", "weaveDmg"]);
 var FLAT = ["attack", "defense", "maxHp", "str", "dex", "int"];
 var zero6 = (v) => statValue(v) === 0;
 var sign2 = (v) => {
@@ -126164,6 +126168,7 @@ var ICON_ALIAS = {
   ccDmg: "eliteDmg",
   blinkDmg: "critDamage",
   blinkCdr: "cdr",
+  weaveDmg: "lightningDmg",
   controlDur: "cdr",
   ailmentDur: "cdr",
   eliteDr: "defense",
