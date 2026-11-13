@@ -26475,6 +26475,7 @@ var HELL_SCALE = 4;
 var HELL_TILE = 24;
 var ISLES = [["A", 150, 72, 64, 30], ["B", 330, 64, 70, 31], ["C", 510, 74, 64, 30], ["D", 84, 180, 62, 31], ["E", 250, 172, 68, 33], ["F", 420, 178, 68, 32], ["G", 576, 170, 56, 30], ["H", 150, 288, 66, 32], ["I", 330, 282, 70, 33], ["J", 512, 290, 66, 32]];
 var LINKS = ["HD", "HE", "IE", "IJ", "JG", "EF", "FB", "DA", "AB", "BC", "GC", "FG", "DE"];
+var HELL_LINKS = Object.freeze(LINKS);
 var OX = 100;
 var OY = 150;
 var HELL_WIDTH = 2800;
@@ -26643,8 +26644,11 @@ var NIGHTMARE_RULES = Object.freeze({
   // bites reach this far past its hull; it stops walking a little inside that
   reach: 20,
   speed: 1.05,
-  // climbing out of the ground: no moves, nothing can hit it yet
-  riseTicks: 66,
+  // time's up to fully out (trip pass 6): 0.6 s after the call the ground cracks, tears open at 1.6 s, and it
+  // pushes up out of the split, out at 4.2 s. No moves and nothing can hit it until then.
+  riseTicks: 252,
+  // everyone on its island down: it sinks back into its split (and climbs out again when someone steps back on)
+  sinkTicks: 60,
   // health: the C-rank enemy curve at the heroes' level times this, plus 60% for each friend in the hellscape
   hpTimes: Object.freeze([12, 1]),
   friendHpTenths: 6,
@@ -26679,8 +26683,9 @@ var NIGHTMARE_FROG_RULES = Object.freeze({
   speed: 1.1,
   // a frog sits and waits: it only hops closer when you're farther than this (its tongue and leap do the rest)
   holdRange: 150,
-  // a peek over the split's edge, a sink, then a leap clean out
-  riseTicks: 84,
+  // the split as for the Sporecrown, then an eye peeks over the edge, sinks, and it leaps clean out (lands at 4 s)
+  riseTicks: 240,
+  sinkTicks: NIGHTMARE_RULES.sinkTicks,
   hpTimes: NIGHTMARE_RULES.hpTimes,
   friendHpTenths: NIGHTMARE_RULES.friendHpTenths,
   damageTimes: NIGHTMARE_RULES.damageTimes,
@@ -26759,10 +26764,11 @@ var nightmareIdV1 = (campaignId, eatTick) => id("boss/" + campaignId + "/" + eat
 var gazecapIdV1 = (campaignId, eatTick, n) => id("cap/" + campaignId + "/" + eatTick + "/" + n);
 
 // src/shared/contracts/trip_nightmare_world_v1.js
+var HELL_ISLANDS_BY = Object.fromEntries(HELL_ISLANDS.map((o) => [o.key, o]));
 var rulesOf = (n) => nightmareRulesV1(n.kind);
 var minionRules = (n) => n.kind === "frog" ? rulesOf(n).spawn : rulesOf(n).caps;
 var MOVES = Object.freeze({ sporecrown: ["bite", "ring", "rain", "caps"], frog: ["bite", "tongue", "croak", "spawn"] });
-var awake2 = (s, n) => n.dead === null && s.tick >= n.born + rulesOf(n).riseTicks;
+var awake2 = (s, n) => n.dead === null && n.sunk === null && s.tick >= n.born + rulesOf(n).riseTicks;
 var capOut = (s, n, m) => m.end === null && s.tick >= m.born + minionRules(n).growTicks;
 var isEgg = (s, m) => m.hatch !== void 0 && s.tick < m.hatch;
 var DIRS4 = Array.from({ length: 16 }, (_, k) => ({ x: Math.cos(k * Math.PI / 8), y: Math.sin(k * Math.PI / 8) }));
@@ -26801,7 +26807,12 @@ var point13 = (q, label2) => {
   requireContract(Number.isFinite(q.x) && Number.isFinite(q.y), label2);
 };
 function validateNightmareV1(s, h, n) {
-  closedRecord(n, ["version", "kind", "level", "born", "x", "y", "dx", "hp", "maxHp", "attack", "move", "next", "biteNext", "turn", "lastHit", "caps", "capN", "splats", "legs", "dead", "exit"]);
+  closedRecord(n, ["version", "kind", "level", "born", "x", "y", "dx", "hp", "maxHp", "attack", "move", "next", "biteNext", "turn", "lastHit", "caps", "capN", "splats", "legs", "dead", "exit", "isle", "sunk"]);
+  requireContract(HELL_ISLAND_KEYS.includes(n.isle), "Nightmare island");
+  if (n.sunk !== null) {
+    safeInteger(n.sunk, n.born, s.tick);
+    requireContract(n.dead === null && n.move === null && compareCombat(n.hp, n.maxHp) === 0, "Nightmare sunk");
+  }
   requireContract(n.version === TRIP_NIGHTMARE_V1 && NIGHTMARE_KINDS.includes(n.kind) && n.kind === nightmareKindForSnackV1(h.snack), "Unknown Nightmare");
   const R2 = rulesOf(n), T10 = minionRules(n);
   safeInteger(n.level, 1, 50);
