@@ -1097,7 +1097,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-YXZ4SAP4.js";
+} from "./chunk-Z7NBHHW3.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -111698,12 +111698,16 @@ function ferryPreparationChunks(id) {
 
 // src/shared/contracts/fast_travel_v1.js
 var FAST_TRAVEL_CLEAR_PX = 256;
-var FAST_TRAVEL_ID = /^(?:settlement-slot:[a-z-]+:[0-9]{2}|site:[a-f0-9]{32})$/;
+var FAST_TRAVEL_ID = /^(?:settlement-slot:[a-z-]+:[0-9]{2}|site:[a-f0-9]{32}|player:ply:[0-9a-f]{32})$/;
 var address2 = (p) => ({ chunkX: String(1024 + Math.floor(p.x / 32)), chunkY: String(1024 + Math.floor(p.y / 26)), localX: (p.x % 32 + 0.5) * 32, localY: (p.y % 26 + 0.5) * 32 });
 var tileOf2 = (a) => ({ x: Math.floor((Number(BigInt(a.chunkX) - 1024n) * 1024 + a.localX) / 32), y: Math.floor((Number(BigInt(a.chunkY) - 1024n) * 832 + a.localY) / 32) });
 function fastTravelOrigin(s, id) {
   const k = s.d9World?.navigation?.knowledge;
   if (!k || typeof id !== "string" || !FAST_TRAVEL_ID.test(id)) return null;
+  if (id.startsWith("player:")) {
+    const friend = friendForTravelV1(s, id.slice(7));
+    return friend ? { tiles: [tileOf2(localFramePositionD9(friend.position, s.d9World.runtime.frames))], near: 1 } : null;
+  }
   if (id.startsWith("settlement-slot:")) {
     const row2 = k.settlements.find((r3) => r3.id === id);
     if (!row2?.built) return null;
@@ -111718,6 +111722,10 @@ function fastTravelOrigin(s, id) {
   if (!r) return null;
   const e = tileOf2(r.socket.entrance);
   return { tiles: [{ x: e.x, y: e.y + 2 }], near: 0 };
+}
+function friendForTravelV1(s, playerId) {
+  const p = s.playersById?.[playerId], a = p && s.entitiesById[p.entityId];
+  return a?.alive && a.team === "party" && a.residency?.spaceInstanceId === s.overworldInstanceId && p.connectionStatus !== "disconnected" ? a : null;
 }
 var fastTravelArrivalAddress = (s, id) => {
   const o = fastTravelOrigin(s, id);
@@ -111742,8 +111750,10 @@ function fastTravelEligible(s, actor, payload) {
   if (!s.d9World?.plannedWorld || !actor?.alive || actor.residency.spaceInstanceId !== s.overworldInstanceId) return false;
   const p = s.primary.actorsById[actor.entityId];
   if (p?.current || p?.heldCommandId) return false;
-  const k = s.d9World.navigation?.knowledge;
-  if (!k || k.visited[payload.destinationId] === void 0 || !fastTravelOrigin(s, payload.destinationId)) return false;
+  const k = s.d9World.navigation?.knowledge, id = payload.destinationId;
+  if (typeof id === "string" && id.startsWith("player:")) {
+    if (s.playersById[id.slice(7)]?.entityId === actor.entityId || !fastTravelOrigin(s, id)) return false;
+  } else if (!k || k.visited[id] === void 0 || !fastTravelOrigin(s, id)) return false;
   return !fastTravelThreat(s, actor);
 }
 function fastTravelTarget(s, actor, payload) {
@@ -117691,14 +117701,22 @@ function moveResidency(state2, actor, spaceInstanceId, position4) {
   actor.position = { x: position4.x, y: position4.y };
   actor.movementIntent = { x: 0, y: 0 };
   actor.movedLastTick = false;
-  const primary = state2.primary.actorsById[actor.entityId];
-  if (primary) {
-    primary.current = null;
-    primary.heldCommandId = null;
-    primary.queuedCommandId = null;
-    primary.comboDeadline = null;
-    primary.nextComboStep = 1;
+  retireSeatPrimary(state2, actor.entityId);
+}
+function endSeatCombat(state2, entityId2) {
+  cancelSubweaponResidency(state2, entityId2);
+  cancelHostileProjectiles(state2, entityId2);
+  for (const key4 of ["webbedByEntityId", "slagBurnByEntityId"]) if (state2.eliteCombat?.[key4]) delete state2.eliteCombat[key4][entityId2];
+  if (state2.bossCombat?.statusesByEntityId) delete state2.bossCombat.statusesByEntityId[entityId2];
+}
+function retireSeatPrimary(state2, entityId2) {
+  const p = state2.primary?.actorsById[entityId2];
+  if (!p) return;
+  for (const r of [...Object.values(state2.primary.completedById).filter((r3) => r3.sourceEntityId === entityId2), ...p.current ? [p.current] : []]) {
+    delete state2.primary.completedById[r.primaryActionId];
+    delete state2.primaryContextsById[r.primaryActionId];
   }
+  Object.assign(p, { current: null, heldCommandId: null, queuedCommandId: null, comboDeadline: null, nextComboStep: 1, retiredSourceSequence: p.nextSourceSequence - 1 });
 }
 function setFrameMember(state2, pid, on, position4) {
   const w = state2.d9World;
@@ -117743,6 +117761,7 @@ function parkSeat(state2, pid, heirPid = null) {
   if (heir) eachTarget(state2, (row2, key4) => {
     if (row2[key4] === actor.entityId) row2[key4] = heir;
   });
+  endSeatCombat(state2, actor.entityId);
   moveResidency(state2, actor, room, { x: ROOM * 16, y: ROOM * 16 });
   setFrameMember(state2, pid, false);
   state2.playersById[pid].connectionStatus = "disconnected";
@@ -117952,11 +117971,18 @@ function seatComparable(s, kept, party4, room) {
       if (c.d9World?.positions) delete c.d9World.positions[id];
       continue;
     }
+    endSeatCombat(c, id);
     Object.assign(e, { residency: null, position: null, movementIntent: null, movedLastTick: null });
     delete c.residencyHistoryByEntityId[id];
     if (c.d9World?.positions) delete c.d9World.positions[id];
     const pr = c.primary.actorsById[id];
-    if (pr) Object.assign(pr, { current: null, heldCommandId: null, queuedCommandId: null, comboDeadline: null, nextComboStep: null });
+    if (pr) {
+      for (const r of [...Object.values(c.primary.completedById).filter((r3) => r3.sourceEntityId === id), ...pr.current ? [pr.current] : []]) {
+        delete c.primary.completedById[r.primaryActionId];
+        delete c.primaryContextsById[r.primaryActionId];
+      }
+      Object.assign(pr, { current: null, heldCommandId: null, queuedCommandId: null, comboDeadline: null, nextComboStep: null, retiredSourceSequence: null });
+    }
   }
   if (room) delete c.spacesByInstanceId[room];
   const strip = (frames) => {
@@ -126158,6 +126184,29 @@ function heroLookView(player) {
   return { cls: player?.d8?.heroClass ?? null, look: copyWire(heroLookOf(player?.d8)), gear: { helmet: piece3("helmet"), body: piece3("chest") ?? overall, legs: piece3("leggings") ?? overallLegs, gloves: piece3("gloves"), boots: piece3("boots"), main: piece3("weapon"), off: piece3("subweapon"), ...cape2 ? { cape: cape2 } : {} } };
 }
 
+// src/shared/contracts/coop_party_map_v1.js
+function coopPartyMapV1(state2, localPlayerId) {
+  const rows = [];
+  if (!state2.d9World?.runtime || state2.session.playerIds.length < 2) return rows;
+  for (const pid of [...state2.session.playerIds].sort()) {
+    if (pid === localPlayerId) continue;
+    const p = state2.playersById[pid], a = p && state2.entitiesById[p.entityId];
+    if (!a) continue;
+    if (state2.waitingRoom && a.residency.spaceInstanceId === state2.waitingRoom.spaceInstanceId) continue;
+    const cls = p.d8?.heroClass ?? null, outdoors = a.residency.spaceInstanceId === state2.overworldInstanceId;
+    rows.push({
+      playerId: pid,
+      name: heroLookOf(p.d8).name || HERO_CLASSES[cls]?.name || "Friend",
+      cls,
+      alive: Boolean(a.alive),
+      position: outdoors ? localFramePositionD9(a.position, state2.d9World.runtime.frames) : null,
+      facing: outdoors && state2.primary?.actorsById[a.entityId]?.facing ? { x: state2.primary.actorsById[a.entityId].facing.x, y: state2.primary.actorsById[a.entityId].facing.y } : null,
+      travel: Boolean(friendForTravelV1(state2, pid))
+    });
+  }
+  return rows;
+}
+
 // src/host/world_terrain_projection_d9.js
 function projectWorldTerrainD9(state2, compiled, { x, y, width: width2 = 88, height = 88 }) {
   requireContract(Number.isInteger(x) && Number.isInteger(y) && width2 <= 88 && height <= 88 && width2 > 0 && height > 0, "Terrain projection bound");
@@ -126855,7 +126904,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           eventBoon: boon ? Object.freeze({ boon: boon.boon, remainingTicks: boon.untilTick - state2.tick, totalTicks: SHRINE_POLICY.boonTicks }) : null,
           eventBlessing: blessing ? Object.freeze({ blessing: blessing.blessing, remainingTicks: blessing.untilTick - state2.tick, totalTicks: WAYSIDE_POLICY.blessingTicks }) : null,
           serviceNpcs: freezeProjection(serviceNpcs),
-          navigation: state2.d9World ? freezeProjection({ frames: copyWire(state2.d9World.runtime.frames), position: inOverworld ? localFramePositionD9(local8.position, state2.d9World.runtime.frames) : null, revision: state2.d9World.navigation.revision, knowledge: projectMapKnowledge(state2), root: state2.d9World.discoveryIndex, boundSitesById: Object.fromEntries(functionalSitesD10(state2).map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state2, site2.siteId, site2.label), state: site2.conqueredTick === null ? "active" : "completed" }])), navigableSitesById: Object.fromEntries(siteTruth.sites.map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state2, site2.siteId, site2.label), state: site2.completed || state2.campaign?.partyClearsById?.[site2.siteId] ? "completed" : site2.bound ? "active" : "unidentified" }])), pending: copyWire(state2.d9World.navigation.pending.filter((r) => r.playerId === localPlayerId)), pips: inOverworld ? visible3.filter((a) => a.alive && a.entityId !== local8.entityId && Math.hypot(a.position.x - local8.position.x, a.position.y - local8.position.y) <= revealRadiusD9(playersById[localPlayerId].stats.attributes.int) * 32).map((a) => ({ position: localFramePositionD9(a.position, state2.d9World.runtime.frames), kind: a.team === "party" ? "ally" : "hostile" })) : [] }) : null,
+          navigation: state2.d9World ? freezeProjection({ frames: copyWire(state2.d9World.runtime.frames), position: inOverworld ? localFramePositionD9(local8.position, state2.d9World.runtime.frames) : null, party: coopPartyMapV1(state2, localPlayerId), revision: state2.d9World.navigation.revision, knowledge: projectMapKnowledge(state2), root: state2.d9World.discoveryIndex, boundSitesById: Object.fromEntries(functionalSitesD10(state2).map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state2, site2.siteId, site2.label), state: site2.conqueredTick === null ? "active" : "completed" }])), navigableSitesById: Object.fromEntries(siteTruth.sites.map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state2, site2.siteId, site2.label), state: site2.completed || state2.campaign?.partyClearsById?.[site2.siteId] ? "completed" : site2.bound ? "active" : "unidentified" }])), pending: copyWire(state2.d9World.navigation.pending.filter((r) => r.playerId === localPlayerId)), pips: inOverworld ? visible3.filter((a) => a.alive && a.entityId !== local8.entityId && Math.hypot(a.position.x - local8.position.x, a.position.y - local8.position.y) <= revealRadiusD9(playersById[localPlayerId].stats.attributes.int) * 32).map((a) => ({ position: localFramePositionD9(a.position, state2.d9World.runtime.frames), kind: a.team === "party" ? "ally" : "hostile" })) : [] }) : null,
           combatPresentation: freezeProjection(projectCombatPresentation(state2, Object.keys(entitiesById))),
           tomeTarget,
           subweapon: freezeProjection({ suppressed: subweaponSuppressedD12_4I(state2, local8.entityId), guard: { ...state2.subweaponCombat.actors[local8.entityId].guard, integrity: presentCombat(state2.subweaponCombat.actors[local8.entityId].guard.integrity), direction: { ...state2.subweaponCombat.actors[local8.entityId].guard.direction } }, delivery: { ...state2.subweaponCombat.actors[local8.entityId].delivery }, pressure: state2.subweaponCombat.actors[local8.entityId].pressure, dash: { ...state2.subweaponCombat.actors[local8.entityId].dash }, skills: structuredClone(state2.subweaponCombat.actors[local8.entityId].skills ?? { cooldowns: {} }), barrier: presentCombat(state2.subweaponCombat.actors[local8.entityId].barrier), maxBarrier: playersById[localPlayerId].stats.maxBarrier, barrierRatio: integerRatio(state2.subweaponCombat.actors[local8.entityId].barrier, playersById[localPlayerId].stats.maxBarrier), barrierLabel: formatLarge(state2.subweaponCombat.actors[local8.entityId].barrier), maxBarrierLabel: formatLarge(playersById[localPlayerId].stats.maxBarrier) }),
@@ -143593,7 +143642,17 @@ function medal(c, x, y, r, kind, opt = {}) {
   c.arc(0, 0, r - 1, Math.PI * 1.05, Math.PI * 1.95);
   c.closePath();
   c.fill();
-  glyph(c, kind, r * 0.78);
+  if (opt.letter) {
+    c.font = "bold " + Math.round(r * 1.15) + "px " + UI_FONT;
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    c.lineJoin = "round";
+    c.lineWidth = Math.max(1.4, r * 0.26);
+    c.strokeStyle = "#1a120a";
+    c.strokeText(opt.letter, 0, r * 0.06);
+    c.fillStyle = "#fffaf0";
+    c.fillText(opt.letter, 0, r * 0.06);
+  } else glyph(c, kind, r * 0.78);
   if (opt.done) {
     c.fillStyle = "#2f8a4c";
     c.strokeStyle = "#0f2417";
@@ -143612,7 +143671,7 @@ function medal(c, x, y, r, kind, opt = {}) {
   }
   c.restore();
 }
-function rimPip(c, x, y, ang, kind, r) {
+function rimPip(c, x, y, ang, kind, r, opt = {}) {
   c.save();
   c.translate(x, y);
   c.save();
@@ -143632,7 +143691,7 @@ function rimPip(c, x, y, ang, kind, r) {
   c.closePath();
   c.fill();
   c.restore();
-  medal(c, 0, 0, r, kind, { shadow: false });
+  medal(c, 0, 0, r, kind, { ...opt, shadow: false });
   c.restore();
 }
 function inkLabel(c, text3, x, y, o = {}) {
@@ -143689,7 +143748,7 @@ function compassRose(c, x, y, r) {
   c.fillText("N", 0, -r - r * 0.28);
   c.restore();
 }
-function heroArrow(c, x, y, s, ang) {
+function heroArrow(c, x, y, s, ang, col2 = null) {
   c.save();
   c.translate(x, y);
   c.rotate(ang + Math.PI / 2);
@@ -143697,7 +143756,7 @@ function heroArrow(c, x, y, s, ang) {
   c.strokeStyle = "#14100a";
   c.lineWidth = 2.2;
   c.lineJoin = "round";
-  c.fillStyle = "#fff3c9";
+  c.fillStyle = col2?.fill ?? "#fff3c9";
   c.beginPath();
   c.moveTo(0, -7.5);
   c.lineTo(5.5, 6);
@@ -143706,7 +143765,7 @@ function heroArrow(c, x, y, s, ang) {
   c.closePath();
   c.stroke();
   c.fill();
-  c.fillStyle = "#e9b54a";
+  c.fillStyle = col2?.shade ?? "#e9b54a";
   c.beginPath();
   c.moveTo(0, -7.5);
   c.lineTo(5.5, 6);
@@ -144517,7 +144576,11 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     placesList = out4;
     return out4;
   }
-  const placeById = (id) => places().find((p) => p.id === id) ?? null;
+  const FRIEND_COL = { knight: "#73bedc", rogue: "#b88cff", mage: "#f0a35a" }, FRIEND_ARROW = { knight: { fill: "#8fd0ea", shade: "#3f8fb3" }, rogue: { fill: "#c9a6ff", shade: "#7d55cf" }, mage: { fill: "#f6b978", shade: "#c06f25" } };
+  const friendArrow = (c, x, y, s, m, ang = Math.atan2(m.facing?.y ?? -1, m.facing?.x ?? 0)) => heroArrow(c, x, y, s, ang, FRIEND_ARROW[m.cls] ?? { fill: "#e8dcc0", shade: "#9a8a66" });
+  const friends = () => (model?.navigation?.party ?? []).map((f) => ({ id: "player:" + f.playerId, kind: "friend", icon: "friend", label: f.name, cls: f.cls, alive: f.alive, travel: f.travel, facing: f.facing ?? null, outdoors: Boolean(f.position), ...f.position ? chartPosition(f.position) : { x: NaN, y: NaN } }));
+  const mopt = (m, o = {}) => m?.kind === "friend" ? { ...o, col: FRIEND_COL[m.cls] ?? "#e8dcc0", rim: "#fffaf0", letter: ([...m.label][0] ?? "?").toUpperCase() } : o;
+  const placeById = (id) => typeof id === "string" && id.startsWith("player:") ? friends().find((f) => f.id === id) ?? null : places().find((p) => p.id === id) ?? null;
   const eventName = (p) => {
     const me = heroEntity();
     if (!me) return p.label;
@@ -144810,6 +144873,13 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
         if (Math.abs(d) < 0.34) trackAng = -Math.PI / 2 + (d < 0 ? -0.34 : 0.34);
       }
     }
+    const friendRim = [];
+    for (const m of friends()) {
+      if (!m.outdoors) continue;
+      const q2 = at8(m.x, m.y);
+      if (inside5(q2, 7)) friendArrow(c, q2.x, q2.y, 6.5, m);
+      else friendRim.push({ m, a: Math.atan2(q2.y - cy2, q2.x - cx) });
+    }
     const f = model.primary?.actorsById?.[model.playersById?.[model.localPlayerId]?.entityId]?.facing ?? { x: 0, y: -1 }, ang = Math.atan2(f.y, f.x);
     c.save();
     c.translate(cx, cy2);
@@ -144859,6 +144929,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     }
     for (const m of keep7) rimPip(c, cx + Math.cos(m.a) * (R11 - 1), cy2 + Math.sin(m.a) * (R11 - 1), m.a, m.icon, 5.2);
     if (trackAng !== null) rimPip(c, cx + Math.cos(trackAng) * (R11 + 1), cy2 + Math.sin(trackAng) * (R11 + 1), trackAng, "quest", 6.6);
+    for (const { m, a } of friendRim) friendArrow(c, cx + Math.cos(a) * (R11 - 2), cy2 + Math.sin(a) * (R11 - 2), 6, m, a);
   }
   function show() {
     if (!player()) return;
@@ -145039,7 +145110,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     const m = placeById(selected.id) ?? selected;
     if (sheetMode === "confirm") {
       const head19 = el3("div", "m2-head");
-      head19.append(medalCanvas(m.icon, 48), el3("div"));
+      head19.append(medalCanvas(m.icon, 48, mopt(m)), el3("div"));
       head19.lastChild.append(el3("h3", void 0, "Travel to " + m.label + "?"), el3("div", "m2-sub", "You kneel for 3 seconds. Moving or taking a hit cancels it."));
       const b2 = el3("div", "m2-btns"), go = el3("button", "m2-gold", "Travel"), no = el3("button", "m2-plain", "Cancel");
       go.type = no.type = "button";
@@ -145057,6 +145128,31 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       b2.append(go, no);
       sheet.append(head19);
       if (block2) sheet.append(el3("p", "m2-note", block2));
+      sheet.append(b2, x);
+      sheet.hidden = false;
+      return;
+    }
+    if (m.kind === "friend") {
+      const head19 = el3("div", "m2-head");
+      head19.append(medalCanvas(m.icon, 48, mopt(m)), el3("div"));
+      head19.lastChild.append(el3("h3", void 0, m.label), el3("div", "m2-sub", (cap7(m.cls ?? "") || "Hero") + " \xB7 in your party"));
+      sheet.append(head19);
+      const status3 = el3("div", "m2-status"), p2 = player(), d2 = p2 && m.outdoors ? Math.hypot(m.x - p2.x, m.y - p2.y) : 0;
+      status3.append(el3("b", void 0, !m.alive ? "Defeated" : m.outdoors ? "Outdoors" : "Indoors"));
+      if (p2 && m.outdoors) status3.append(el3("span", void 0, d2 < 6 ? "Right beside you" : fmt(d2) + " tiles \xB7 " + walk(d2)));
+      sheet.append(status3);
+      if (!m.travel) sheet.append(el3("p", "m2-note", !m.alive ? "You can travel to them once they are back up." : "You can travel to them once they are outdoors."));
+      const b2 = el3("div", "m2-btns");
+      if (m.travel && d2 >= 6) {
+        const go = el3("button", "m2-gold", "Travel here");
+        go.type = "button";
+        go.onclick = (e) => {
+          e.preventDefault();
+          sheetMode = "confirm";
+          renderSheet();
+        };
+        b2.append(go);
+      }
       sheet.append(b2, x);
       sheet.hidden = false;
       return;
@@ -145281,6 +145377,21 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       inkLabel(c, stirName(r), q2.x, q2.y - rr3 - 30, { font: "18px " + MAP_FONT });
       inkLabel(c, r.started ? "Under way" : "Stirring", q2.x, q2.y - rr3 - 11, { font: 'italic 14px "IM Fell English",Georgia,serif', col: "#6a2a1a" });
     }
+    for (const m of friends()) {
+      if (!m.outdoors) continue;
+      const q2 = P20(m);
+      if (q2.x < -20 || q2.y < -20 || q2.x > width2 + 20 || q2.y > height + 20) continue;
+      if (selected?.id === m.id) {
+        c.strokeStyle = "#fff1c0";
+        c.lineWidth = 3;
+        c.beginPath();
+        c.arc(q2.x, q2.y, 16, 0, 7);
+        c.stroke();
+      }
+      friendArrow(c, q2.x, q2.y, 10, m);
+      inkLabel(c, m.label, q2.x, q2.y + 23, { font: "16px " + MAP_FONT });
+      hits2.push({ m, x: q2.x, y: q2.y, r: 18 });
+    }
     const me = P20(p), f = model.primary?.actorsById?.[model.playersById?.[model.localPlayerId]?.entityId]?.facing ?? { x: 0, y: -1 };
     heroArrow(c, me.x, me.y, 10, Math.atan2(f.y, f.x));
     if (kneel) {
@@ -145341,7 +145452,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     const x = kneelMedal.getContext("2d");
     x.setTransform(r, 0, 0, r, 0, 0);
     x.clearRect(0, 0, 34, 34);
-    medal(x, 17, 17, 14, m.icon, { shadow: false });
+    medal(x, 17, 17, 14, m.icon, mopt(m, { shadow: false }));
     kneelText.textContent = "Traveling to " + m.label;
     kneelBar.style.width = "0%";
     kneelBox.hidden = false;
@@ -145412,9 +145523,9 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     x.setTransform(r, 0, 0, r, 0, 0);
     x.clearRect(0, 0, W19, H7);
     const cx = W19 / 2;
-    const ink5 = (t, y, font, fill7 = "#f6e7c0", w = 5) => {
+    const ink5 = (t, y, font2, fill7 = "#f6e7c0", w = 5) => {
       x.save();
-      x.font = font;
+      x.font = font2;
       x.textAlign = "center";
       x.textBaseline = "middle";
       x.lineJoin = "round";
@@ -145624,9 +145735,11 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       let best = null, bd = 1e9;
       for (const h of hits2) {
         const d = Math.hypot(h.x - q2.x, h.y - q2.y);
-        if (d <= h.r && d < bd) {
+        if (d > h.r) continue;
+        const score = d - (h.m.kind === "friend" ? 20 : 0);
+        if (score < bd) {
           best = h;
-          bd = d;
+          bd = score;
         }
       }
       if (best) {
@@ -161170,6 +161283,38 @@ function drawRecoveredBossHudV1(c, canvas, model) {
   return true;
 }
 
+// src/client/hero_name_tag_v1.js
+var CLASS_COL = { knight: "#73bedc", rogue: "#b88cff", mage: "#f0a35a" };
+var font = '800 12px "Baloo 2", system-ui, sans-serif';
+function drawHeroNameTagV1(c, actor) {
+  const name = actor.heroLook?.look?.name || "";
+  if (!name) return;
+  c.save();
+  c.font = font;
+  c.textAlign = "center";
+  c.textBaseline = "middle";
+  c.lineJoin = "round";
+  const x = Math.round(actor.position.x), y = Math.round(actor.position.y) + 27, w = c.measureText(name).width, dot12 = CLASS_COL[actor.heroLook.cls];
+  const tx = dot12 ? x + 4 : x;
+  c.lineWidth = 3.5;
+  c.strokeStyle = "rgba(16,11,6,.92)";
+  c.strokeText(name, tx, y);
+  c.fillStyle = "#fff6df";
+  c.fillText(name, tx, y);
+  if (dot12) {
+    const dx = tx - w / 2 - 6;
+    c.fillStyle = "rgba(16,11,6,.92)";
+    c.beginPath();
+    c.arc(dx, y, 4.2, 0, 7);
+    c.fill();
+    c.fillStyle = dot12;
+    c.beginPath();
+    c.arc(dx, y, 2.8, 0, 7);
+    c.fill();
+  }
+  c.restore();
+}
+
 // src/client/wilderness_event_pilot_presentation_v3_7.js
 function landmarkParts(event, time3, completed) {
   const ground = [(ctx) => {
@@ -175366,7 +175511,7 @@ function createCombatFeedback() {
       const taken = style.tier === "taken", rise = easeOut4(t);
       let x = chosen.x + chosen.direction * TEXT_DRIFT * scale * t, y = taken ? chosen.y + 16 * scale * rise : chosen.y - 26 * scale * rise;
       if (taken && age < 110) x += Math.sin(age * 0.5) * 1.6 * scale;
-      const pop = n.critical ? 1 + 0.9 * (1 - backOut(Math.min(1, age / 150))) : 1 + 0.35 * (1 - easeOut4(Math.min(1, age / 90))), bump = n.bump != null ? 1 + 0.25 * (1 - Math.min(1, Math.max(0, time3 - n.bump) / 120)) : 1, zoom = pop * bump, font = style.size * zoom;
+      const pop = n.critical ? 1 + 0.9 * (1 - backOut(Math.min(1, age / 150))) : 1 + 0.35 * (1 - easeOut4(Math.min(1, age / 90))), bump = n.bump != null ? 1 + 0.25 * (1 - Math.min(1, Math.max(0, time3 - n.bump) / 120)) : 1, zoom = pop * bump, font2 = style.size * zoom;
       ctx.globalAlpha = t < 0.72 ? 1 : 1 - (t - 0.72) / 0.28;
       ctx.save();
       ctx.translate(x, y);
@@ -175384,7 +175529,7 @@ function createCombatFeedback() {
       ctx.fillStyle = n.rainbow ? rainbowFill(ctx, tx, width2 - iconWidth, (n.eventSequence ?? 0) % 97, t) : n.labelKind === "absorption" ? "#d49afa" : n.defended ? "#67e8f9" : n.player ? "#ff6a66" : n.critical ? "#ffe6a0" : MECHANIC_COLORS[n.mechanic] ?? (n.heavy ? "#ffe16b" : "#fff7db");
       ctx.fillText(n.text, tx, 0);
       ctx.restore();
-      lastLayout.push({ eventSequence: n.eventSequence, targetId: n.targetId, box: chosen.box, text: n.text, mechanic: n.mechanic, critical: n.critical, life: style.life, font, position: { x, y } });
+      lastLayout.push({ eventSequence: n.eventSequence, targetId: n.targetId, box: chosen.box, text: n.text, mechanic: n.mechanic, critical: n.critical, life: style.life, font: font2, position: { x, y } });
     }
     ctx.restore();
   }
@@ -182929,6 +183074,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
           drawToxicPoisonFrontD12_4F(ctx2, drawn, model.tick);
           drawNullifiedFrontD12_4I(ctx2, drawn, model.tick);
           drawWebbedFrontD12_4J(ctx2, drawn, model.tick);
+          if (!castingShadows && drawn.heroLook && id !== model.playersById[model.localPlayerId]?.entityId) drawHeroNameTagV1(ctx2, drawn);
           if (!unified) {
             ctx2.save();
             ctx2.translate(drawn.position.x, drawn.position.y);
@@ -186486,7 +186632,7 @@ async function createLocalEndlessSessionD9(options) {
     const e = s.entitiesById[p.entityId];
     return e.residency.spaceInstanceId + "/" + Math.floor(e.position.x / 64) + "," + Math.floor(e.position.y / 64);
   }).join("|")));
-  let saving = null, saveAgain = false, lastError = null, lastSavedTick = opened2.state.tick, lastLife = null, lastCritical = null, lastLifeSaveTick = -Infinity, savePhase = "idle", savePhaseAt = now3(), gateSince = null, gateTimedOut = false, durabilityFailed = false, fatalInvariant = null, failedCuts = 0, retriedCuts = 0, lastSuccessfulCommitAt = now3(), lastSaveAttemptAt = -Infinity, lastStreamServiceAt = -Infinity;
+  let saving = null, failStreak = 0, saveAgain = false, lastError = null, lastSavedTick = opened2.state.tick, lastLife = null, lastCritical = null, lastLifeSaveTick = -Infinity, savePhase = "idle", savePhaseAt = now3(), gateSince = null, gateTimedOut = false, durabilityFailed = false, fatalInvariant = null, failedCuts = 0, retriedCuts = 0, lastSuccessfulCommitAt = now3(), lastSaveAttemptAt = -Infinity, lastStreamServiceAt = -Infinity;
   const isGeometryFailure = (failure) => failure?.code === "WORLD_ACTOR_GEOMETRY_INVALID" || /Invalid canonical actor geometry/.test(failure?.reason ?? failure?.message ?? "");
   const liveGeometry = () => authority.withAuthority((a) => a.withAuthorityState((s) => firstInvalidActorGeometryD9(s, { mutation: "worker result live-state probe", phase: savePhase })));
   function discardStaleGeometry(failure, source3) {
@@ -186640,6 +186786,7 @@ async function createLocalEndlessSessionD9(options) {
       return { status: "failed", reason: e.message, code: e.code };
     }).finally(() => {
       saving = null;
+      failStreak = durabilityFailed ? failStreak + 1 : 0;
       if (savePhase === "committed") phase2("idle");
     });
     return saving;
@@ -186967,7 +187114,8 @@ async function createLocalEndlessSessionD9(options) {
       lastError = `World authority gate exceeded ${GATE_TIMEOUT_MS} ms during ${savePhase}. The confirmed campaign remains intact; wait for recovery or reopen.`;
     }
     if (!fatalInvariant && (authorityPhase === "unknown" || durabilityFailed || dirty >= D9_RUNTIME_POLICY.dirtyPages - 32)) {
-      if (!saving && at8 - lastSaveAttemptAt >= RETRY_MS) void save();
+      const wait2 = authorityPhase === "unknown" || dirty >= D9_RUNTIME_POLICY.dirtyPages - 32 ? RETRY_MS : Math.min(3e4, RETRY_MS * 2 ** Math.min(5, Math.max(0, failStreak - 1)));
+      if (!saving && at8 - lastSaveAttemptAt >= wait2) void save();
     }
     groundPrefetch.offer();
     if (!reviewTravelPending && !groundPreparation && authorityPhase === "ready" && savePhase !== "waiting-stream" && savePhase !== "preparing" && !functionalCommands.busy() && at8 - lastStreamServiceAt >= STREAM_SERVICE_MS) {
@@ -187119,7 +187267,7 @@ async function createLocalEndlessSessionD9(options) {
       if (tick % 4 === 0) authority.withReadyAuthority((a) => a.withAuthorityState((s) => measure2("explorationReveal", () => revealNavigationD9(s))));
       if (!saving && tick % 6 === 0) {
         const life = lifecycle(), critical = criticalLifecycle(), needsSave = stream.needsSave(), lifeDue = life !== lastLife && (critical !== lastCritical || tick - lastLifeSaveTick >= LIFECYCLE_SAVE_TICKS);
-        if ((lifeDue || needsSave || tick - lastSavedTick >= 600) && (!lastError || now3() - lastSaveAttemptAt >= RETRY_MS)) {
+        if ((lifeDue || needsSave || tick - lastSavedTick >= 600) && (!lastError || now3() - lastSaveAttemptAt >= Math.min(3e4, RETRY_MS * 2 ** Math.min(5, Math.max(0, failStreak - 1))))) {
           lastLife = life;
           lastCritical = critical;
           lastLifeSaveTick = tick;

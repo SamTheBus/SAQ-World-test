@@ -26055,7 +26055,7 @@ function validateCommand(command) {
     requireContract([command.payload.fromLandingId, command.payload.toLandingId].every((id) => /^ferry:(alpha|seeded):[0-9]{2}$/.test(id)) && command.payload.fromLandingId !== command.payload.toLandingId, "Invalid ferry connection");
   } else if (command.kind === "map.travel") {
     closedRecord(command.payload, ["destinationId"]);
-    requireContract(typeof command.payload.destinationId === "string" && /^(?:settlement-slot:[a-z-]+:[0-9]{2}|site:[a-f0-9]{32})$/.test(command.payload.destinationId), "Invalid fast travel destination");
+    requireContract(typeof command.payload.destinationId === "string" && /^(?:settlement-slot:[a-z-]+:[0-9]{2}|site:[a-f0-9]{32}|player:ply:[0-9a-f]{32})$/.test(command.payload.destinationId), "Invalid fast travel destination");
   } else if (command.kind === "site.transition") {
     closedRecord(command.payload, ["siteId", "direction"], ["transitionId", "extractionId"]);
     requireContract(/^loc:[a-f0-9]{32}$/.test(command.payload.siteId) || /^site:[a-f0-9]{32}$/.test(command.payload.siteId), "Invalid site transition identity");
@@ -26644,6 +26644,22 @@ var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
 var LIVE = ["bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+function prune(combat) {
+  const k = combat.skills;
+  if (k && !Object.keys(k.cooldowns).length && !LIVE.some((key9) => k[key9])) delete combat.skills;
+}
+function cancelClassSkillAction(combat) {
+  if (combat?.skills) {
+    delete combat.skills.flurry;
+    delete combat.skills.orbs;
+    delete combat.skills.trail;
+    delete combat.skills.pool;
+    delete combat.skills.ram;
+    delete combat.skills.thrown;
+    for (const key9 of ["banner", "smoke", "wall", "field", "leap", "cuts", "flower", "echo", "meteors", "crack", "storm", "blooms", "shake", "shade", "duel", "aftershock", "fault", "spin", "seeds", "thaw", "rime", "thunder", "twin", "bark", "web", "cocoon", "furrow", "vents", "strip"]) delete combat.skills[key9];
+    prune(combat);
+  }
+}
 function validateClassSkillState(s, combat, actor) {
   const k = combat.skills;
   if (k === void 0) return;
@@ -27148,6 +27164,12 @@ function validateMasteryCombat(s) {
       }
     }
   }
+}
+function cancelMasteryCombat(s, id) {
+  const all = s.subweaponCombat.mastery;
+  if (!all) return;
+  if (all[id]) all[id] = emptyMasteryCombat();
+  for (const b of Object.values(all)) for (const name of ["poisons", "statuses"]) for (const [key9, e] of Object.entries(b[name])) if (e.targetId === id) delete b[name][key9];
 }
 
 // src/shared/contracts/quests_v1.js
@@ -28614,6 +28636,29 @@ function validateSubweaponCombat(s) {
     const def = s.content.definitionsById[t.contentDefinitionId] ?? {};
     requireContract((e.phase === "chill" ? e.expiresTick - e.appliedTick >= 240 && e.expiresTick - e.appliedTick <= 360 : e.phase === "boss-slow" ? e.expiresTick - e.appliedTick === 90 : e.expiresTick - e.appliedTick >= 12 && e.expiresTick - e.appliedTick <= (def.isElite ? 68 : 135) + 126) && e.phase === "boss-slow" === (e.phase !== "chill" && def.isBoss === true), "Frost duration/classification");
   }
+}
+function cancelSubweaponResidency(s, id) {
+  const c = s.subweaponCombat;
+  if (!c) return;
+  cancelMasteryCombat(s, id);
+  const owner = Object.values(s.playersById).find((p) => p.entityId === id);
+  if (owner?.d8) {
+    owner.d8.transient = emptyMasteryTransient();
+    const actor = s.entitiesById[id], resolved = resolvePlayerStats(owner);
+    actor.attackDamage = copyWire(resolved.attack);
+    actor.moveSpeed = resolved.moveSpeed;
+  }
+  for (const [key9, e] of Object.entries(c.controls ?? {})) if (e.sourceId === id || e.targetId === id) delete c.controls[key9];
+  const a = c.actors[id];
+  if (a) {
+    lowerShield(a.guard, true);
+    a.dash.frames = 0;
+    a.dash.remaining = 0;
+    a.pressure = 0;
+    cancelClassSkillAction(a);
+  }
+  for (const [key9, b] of Object.entries(c.projectiles)) if (b.sourceId === id) delete c.projectiles[key9];
+  for (const [key9, e] of Object.entries(c.effects)) if (e.sourceId === id || e.targetId === id) delete c.effects[key9];
 }
 
 // src/shared/contracts/attack_haste.js
@@ -30668,11 +30713,20 @@ var vector = (v, unit3 = false) => {
   requireContract(Number.isFinite(v.x) && Number.isFinite(v.y), "Hostile projectile vector");
   if (unit3) requireContract(Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9, "Hostile projectile direction");
 };
+var idleHostileRangedAction = (tick) => ({ phase: "idle", phaseStartedTick: tick, phaseEndsTick: tick, targetEntityId: null, aim: null, actionSequence: 0 });
 function installHostileProjectiles(state) {
   if (!hasWorldCombat(state)) return;
   state.hostileCombat ??= { version: HOSTILE_PROJECTILES_VERSION, actionsByEntityId: {}, projectiles: {} };
   for (const a of Object.values(state.entitiesById)) if (a.alive && ranged3(a)) {
     if (!ranged3(a).meleeFallback && a.ai?.melee?.phase === "idle") delete a.ai.melee;
+  }
+}
+function cancelHostileProjectiles(state, entityId2) {
+  const root3 = state.hostileCombat;
+  if (!root3) return;
+  for (const [id, shot] of Object.entries(root3.projectiles)) if (shot.sourceId === entityId2 || shot.intendedTargetId === entityId2) delete root3.projectiles[id];
+  for (const [id, action] of Object.entries(root3.actionsByEntityId)) if (id === entityId2 || action.targetEntityId === entityId2) {
+    root3.actionsByEntityId[id] = { ...idleHostileRangedAction(state.tick), actionSequence: action.actionSequence, ...action.nextShotTick !== void 0 ? { nextShotTick: action.nextShotTick } : {} };
   }
 }
 function validateHostileProjectiles(state) {
@@ -33219,6 +33273,12 @@ function isWaiting(state, pid) {
   const id = waitingRoomId(state);
   return Boolean(id) && actorOf(state, pid).residency.spaceInstanceId === id;
 }
+function endSeatCombat(state, entityId2) {
+  cancelSubweaponResidency(state, entityId2);
+  cancelHostileProjectiles(state, entityId2);
+  for (const key9 of ["webbedByEntityId", "slagBurnByEntityId"]) if (state.eliteCombat?.[key9]) delete state.eliteCombat[key9][entityId2];
+  if (state.bossCombat?.statusesByEntityId) delete state.bossCombat.statusesByEntityId[entityId2];
+}
 var TARGET_KEYS = /* @__PURE__ */ new Set(["targetEntityId", "intendedTargetId", "targetId"]);
 var OWN_ROWS = ["playersById", "primary", "residencyHistoryByEntityId", "subweaponCombat", "d9World"];
 function eachTarget(state, visit) {
@@ -33276,11 +33336,18 @@ function seatComparable(s, kept, party2, room2) {
       if (c.d9World?.positions) delete c.d9World.positions[id];
       continue;
     }
+    endSeatCombat(c, id);
     Object.assign(e, { residency: null, position: null, movementIntent: null, movedLastTick: null });
     delete c.residencyHistoryByEntityId[id];
     if (c.d9World?.positions) delete c.d9World.positions[id];
     const pr = c.primary.actorsById[id];
-    if (pr) Object.assign(pr, { current: null, heldCommandId: null, queuedCommandId: null, comboDeadline: null, nextComboStep: null });
+    if (pr) {
+      for (const r of [...Object.values(c.primary.completedById).filter((r2) => r2.sourceEntityId === id), ...pr.current ? [pr.current] : []]) {
+        delete c.primary.completedById[r.primaryActionId];
+        delete c.primaryContextsById[r.primaryActionId];
+      }
+      Object.assign(pr, { current: null, heldCommandId: null, queuedCommandId: null, comboDeadline: null, nextComboStep: null, retiredSourceSequence: null });
+    }
   }
   if (room2) delete c.spacesByInstanceId[room2];
   const strip = (frames) => {
@@ -34261,6 +34328,7 @@ function alignWorldReceiptComparisonD9(state, frames) {
   }
   return state;
 }
+var partySizeLocked = (g, h) => g.partySize === void 0 && Number.isSafeInteger(h?.partySize) && h.partySize >= 2 && same39(g, (({ partySize, ...rest }) => rest)(h));
 async function validateWorldAdvanceD9(a, b, options) {
   validateActivityState(b);
   requireContract(a.d9World && b.d9World, "D9 transition required");
@@ -34336,7 +34404,7 @@ async function validateWorldAdvanceD9(a, b, options) {
     requireContract(h && (same39(g.entityIds, h.entityIds) || originUpgrade) && g.spaceInstanceId === h.spaceInstanceId && g.siteId === h.siteId, "Resident group identity changed");
     const renewed = encounterAdvanced(a, b, id);
     requireContract(!g.cleared || h.cleared || renewed, "Encounter clear regressed");
-    if (g.threatSnapshot && (g.siteId !== null || a.d9World.episodes[id]?.snapshot) && !renewed) requireContract(same39(g.threatSnapshot, h.threatSnapshot) || originUpgrade, "Frozen encounter rescaled");
+    if (g.threatSnapshot && (g.siteId !== null || a.d9World.episodes[id]?.snapshot) && !renewed) requireContract(same39(g.threatSnapshot, h.threatSnapshot) || partySizeLocked(g.threatSnapshot, h.threatSnapshot) || originUpgrade, "Frozen encounter rescaled");
   }
   for (const [id, actor] of Object.entries(a.entitiesById)) {
     if (retiredEntities.has(id)) {

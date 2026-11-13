@@ -5291,7 +5291,7 @@ function validateCommand(command) {
     requireContract([command.payload.fromLandingId, command.payload.toLandingId].every((id) => /^ferry:(alpha|seeded):[0-9]{2}$/.test(id)) && command.payload.fromLandingId !== command.payload.toLandingId, "Invalid ferry connection");
   } else if (command.kind === "map.travel") {
     closedRecord(command.payload, ["destinationId"]);
-    requireContract(typeof command.payload.destinationId === "string" && /^(?:settlement-slot:[a-z-]+:[0-9]{2}|site:[a-f0-9]{32})$/.test(command.payload.destinationId), "Invalid fast travel destination");
+    requireContract(typeof command.payload.destinationId === "string" && /^(?:settlement-slot:[a-z-]+:[0-9]{2}|site:[a-f0-9]{32}|player:ply:[0-9a-f]{32})$/.test(command.payload.destinationId), "Invalid fast travel destination");
   } else if (command.kind === "site.transition") {
     closedRecord(command.payload, ["siteId", "direction"], ["transitionId", "extractionId"]);
     requireContract(/^loc:[a-f0-9]{32}$/.test(command.payload.siteId) || /^site:[a-f0-9]{32}$/.test(command.payload.siteId), "Invalid site transition identity");
