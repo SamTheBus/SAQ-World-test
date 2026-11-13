@@ -67081,7 +67081,7 @@ function drawBanditV1(c, x, y, { kind = "cutthroat", gang = "woodland", face: fa
   c.translate(x, y);
   c.scale(s * face4, s);
   c.lineJoin = "round";
-  const hood = tone72(G5.hood), cloth2 = tone72(G5.cloth), lea = tone72(G5.leather), sk = tone72(G5.skin), sash6 = tone72(G5.sash), boot2 = tone72("#3b2c22");
+  const hood = tone72(G5.hood), cloth2 = tone72(G5.cloth), lea = tone72(G5.leather), sk = tone72(G5.skin), sash6 = tone72(G5.sash), boot3 = tone72("#3b2c22");
   if (kind === "archer") {
     c.save();
     c.rotate(-0.35);
@@ -67097,12 +67097,12 @@ function drawBanditV1(c, x, y, { kind = "cutthroat", gang = "woodland", face: fa
   c.save();
   c.translate(0, -lift[0]);
   R(c, -5.8, -6.5, 4.2, 5, tone72(shade3(G5.leather, -0.2)), { flat: true });
-  R(c, -6.2, -2.2, 5, 2.6, boot2, { r: 0.6 });
+  R(c, -6.2, -2.2, 5, 2.6, boot3, { r: 0.6 });
   c.restore();
   c.save();
   c.translate(0, -lift[1]);
   R(c, -0.6, -6.5, 4.2, 5, tone72(G5.leather), { flat: true });
-  R(c, -1, -2.2, 5, 2.6, boot2, { r: 0.6 });
+  R(c, -1, -2.2, 5, 2.6, boot3, { r: 0.6 });
   c.restore();
   const bw = kind === "brute" ? 13 : 11, bx = -bw / 2 - 0.6;
   R(c, bx, -16, bw, 10, kind === "captain" ? cloth2 : lea, { r: 1 });
@@ -67247,13 +67247,13 @@ function drawMerchantV1(c, x, y, { face: face4 = 1, pose = "idle", scale = 1 } =
   c.translate(x, y);
   c.scale(s * face4, s);
   c.lineJoin = "round";
-  const sk = tone72("#e8bf96"), shirt = tone72("#5f86b8"), apron = tone72("#efe3c6"), pants = tone72("#6a4a32"), boot2 = tone72("#3b2c22");
+  const sk = tone72("#e8bf96"), shirt = tone72("#5f86b8"), apron = tone72("#efe3c6"), pants = tone72("#6a4a32"), boot3 = tone72("#3b2c22");
   const crouch = pose === "cower" ? 2.2 : 0;
   c.translate(0, crouch);
   R(c, -5.8, -6.5, 4.2, 5, pants, { flat: true });
   R(c, -0.6, -6.5, 4.2, 5, pants, { flat: true });
-  R(c, -6.2, -2.2, 5, 2.6, boot2, { r: 0.6 });
-  R(c, -1, -2.2, 5, 2.6, boot2, { r: 0.6 });
+  R(c, -6.2, -2.2, 5, 2.6, boot3, { r: 0.6 });
+  R(c, -1, -2.2, 5, 2.6, boot3, { r: 0.6 });
   c.beginPath();
   c.roundRect(-8, -17.5, 14.6, 12, 5);
   c.fillStyle = shirt.b;
@@ -101757,17 +101757,14 @@ function legs3(c, w, S12, step2) {
   }
   if (w.boots === "none") return;
   const A2 = accOf(w.g.boots);
-  c.save();
-  c.translate(0, -lift[0]);
-  if (w.boots === "sabatons") R3(c, -7.2, 16.6, 5.4, 3.4, P12.plateDark, { nohi: true });
-  else if (w.boots === "gorehide-stompers") R3(c, -7.2, 15.2, 5.4, 4.8, { b: TROPHY.hide.d, d: TROPHY.hide.d }, { nohi: true });
-  else if (w.boots === "tall") R3(c, -7.2, 14.4, 5.4, 5.6, { b: P12.leather.d, d: P12.leather.d }, { nohi: true });
-  else if (w.boots === "boots") R3(c, -7.2, 15.8, 5.4, 4.2, { b: P12.strap.b, d: P12.strap.b }, { nohi: true });
-  else if (w.boots === "slippers" || w.boots === "apprentice-slippers") R3(c, -6.4, 18.2, 5, 1.8, { b: w.boots === "slippers" ? P12.cover.d : M.blue.d }, { lw: 1.1 });
-  else R3(c, -7, 17.4, 5, 2.6, { b: P12.shoe.d }, { lw: 1.2 });
-  c.restore();
-  c.save();
-  c.translate(0, -lift[1]);
+  for (const [k, dx] of [[0, -5.2], [1, 0]]) {
+    c.save();
+    c.translate(dx, -lift[k]);
+    boot(c, w, A2);
+    c.restore();
+  }
+}
+function boot(c, w, A2) {
   if (w.boots === "sabatons") {
     R3(c, -2, 16.6, 6.8, 3.4, P12.helm, { split: 0.7 });
     px3(c, 2.4, 17.2, 0.9, 2.8, A2.c);
@@ -101791,7 +101788,6 @@ function legs3(c, w, S12, step2) {
     R3(c, 4.6, 17.2, 1.8, 1.8, cloth2, { flat: true, lw: 1 });
     px3(c, 1.6, 18.6, 1.6, 0.9, A2.c);
   } else R3(c, -1.8, 17.4, 6.2, 2.6, P12.shoe, { lw: 1.2, nohi: true });
-  c.restore();
 }
 function robeBody(c, A2, acc2, cloth2, dark, inner, belt) {
   const robe3 = [-8, 0, 6, 0, 6.9, 8.2, 9.8, 18.4, 2, 18.4, 0.7, 16.8, -0.6, 18.4, -10.6, 18.4, -8.9, 8.2], shape3 = poly10(robe3);
@@ -127693,7 +127689,7 @@ var GLOVES2 = { gauntlets: (c, A2) => glove(c, A2, { hand: M2.steel, cuff: P15.p
   glove(c, A2, { hand: P15.strap, cuff: P15.leather });
   px4(c, 11, 15.4, 10, 0.7, "#ffffff22");
 }, wraps: (c, A2) => glove(c, A2, { hand: M2.blueDark, cuff: P15.linen, strips: [11.6, 15.6, 18.6] }) };
-function boot(c, A2, { body: body5, cuff, low = false, tall = false, lines: lines2 = false }) {
+function boot2(c, A2, { body: body5, cuff, low = false, tall = false, lines: lines2 = false }) {
   const top = tall ? 3.4 : 6;
   if (!low) R6(c, 9, top, 8.6, 20.4 - top, body5, { split: 0.62 });
   if (low) G4(c, [5, 18.6, 14.4, 18.6, 19, 20.6, 24, 20.2, 27.2, 15.4, 29.2, 16.8, 28.4, 22.6, 25.6, 26.4, 5, 26.4], body5, { split: 0.62 });
@@ -127712,11 +127708,11 @@ function boot(c, A2, { body: body5, cuff, low = false, tall = false, lines: line
   trim(c, low ? 8 : 9.6, low ? 22 : top + 6.4, low ? 8 : 7.4, A2);
 }
 var BOOTS = {
-  sabatons: (c, A2) => boot(c, A2, { body: P15.helm, cuff: P15.plateDark, lines: true }),
-  boots: (c, A2) => boot(c, A2, { body: P15.strap, cuff: P15.leather }),
-  tall: (c, A2) => boot(c, A2, { body: P15.leather, cuff: P15.leatherLight, tall: true }),
-  slippers: (c, A2) => boot(c, A2, { body: P15.cover, cuff: P15.purple, low: true }),
-  "apprentice-slippers": (c, A2) => boot(c, A2, { body: M2.blue, cuff: M2.rope, low: true })
+  sabatons: (c, A2) => boot2(c, A2, { body: P15.helm, cuff: P15.plateDark, lines: true }),
+  boots: (c, A2) => boot2(c, A2, { body: P15.strap, cuff: P15.leather }),
+  tall: (c, A2) => boot2(c, A2, { body: P15.leather, cuff: P15.leatherLight, tall: true }),
+  slippers: (c, A2) => boot2(c, A2, { body: P15.cover, cuff: P15.purple, low: true }),
+  "apprentice-slippers": (c, A2) => boot2(c, A2, { body: M2.blue, cuff: M2.rope, low: true })
 };
 var HELMETS = {
   // The steel box, visor and breathing holes on the face side, the rarity band, the red plume stepping up from the back.
@@ -128787,7 +128783,7 @@ BODIES["mossback-pelt"] = (c, A2) => {
   gem2(c, 16, 17.6, 1.8, A2.gem);
 };
 BOOTS["gorehide-stompers"] = (c, A2) => {
-  boot(c, A2, { body: TQ.leather, cuff: TQ.bristle });
+  boot2(c, A2, { body: TQ.leather, cuff: TQ.bristle });
   for (let i = 0; i < 6; i++) {
     const x = 8.4 + i * 1.8;
     G4(c, [x, 4, x + 0.9, 0.6 + i % 2 * 1.2, x + 1.8, 4], { b: TQ.bristle.b }, { flat: true, lw: 0.7 });
