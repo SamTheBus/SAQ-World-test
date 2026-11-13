@@ -167616,6 +167616,7 @@ var TICK_MOVES = Object.freeze({ burn: "Burn", bleed: "Bleed", poison: "Poison",
 var title = (s) => String(s ?? "").toLowerCase().replace(/[_-]+/g, " ").replace(/(^|\s)([a-z])/g, (m, a, b) => a + b.toUpperCase()).trim();
 function deathKillerV1(a) {
   if (!a || a.team === "party") return null;
+  if (a.tripNightmare) return { name: NIGHTMARE_NAMES[a.tripNightmare.kind] ?? "Nightmare", ring: "boss" };
   const family = a.enemyFamily, base3 = CARD_BY_FAMILY[family]?.name ?? (family ? title(family) : "An unseen foe"), named2 = NAMED_ELITES_V1[a.elite?.namedEliteId];
   if (a.boss) {
     const page = bossPageFor(a.boss.bossDefinitionId);
@@ -167786,7 +167787,7 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
     set("world-death-level", `Level ${xpText(xp.level)}`);
     set("world-death-xp", xp.capped ? `XP ${xpText(xp.totalXp)} \xB7 Maximum level` : `XP ${xpText(xp.totalXp)} total \xB7 ${xpText(xp.current)}/${xpText(xp.required)} to next level`);
     const arena = model.recovery.kind === "arena";
-    set("world-death-anchor", arena ? "Respawn outside the arena" : `Respawn at ${model.recovery.anchorLabel}`);
+    set("world-death-anchor", arena ? "Respawn outside the arena" : /^outside /.test(model.recovery.anchorLabel) ? `Respawn ${model.recovery.anchorLabel}` : `Respawn at ${model.recovery.anchorLabel}`);
     set("world-death-note", arena ? "No XP lost \xB7 The boss heals back to full if no one is left inside" : "No XP lost");
     const w = wakeMs ? Math.min(1, Math.round((now3() - shownAt) / wakeMs * 50) / 50) : 1;
     if (w !== wake2) {
