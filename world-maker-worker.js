@@ -1235,7 +1235,7 @@ function build(slot, size, biome, seed, dims, ring = null) {
       const sqr = center.kind === "green" ? { x: center.x - center.rx + 2, y: center.y + center.ry - 3, w: center.rx * 2 - 4, h: 3 } : { x: center.x + 1, y: center.y + 1, w: center.w - 2, h: 3 };
       const n = small ? 1 : size === "village" ? 2 : size === "town" ? 3 : 5;
       for (let k = 0; k < n; k++) {
-        const sx = sqr.x + Math.round((k + 0.5) * sqr.w / n) - 1;
+        const g = center.kind === "green" ? 1 : 0, sx = n < 2 ? sqr.x + Math.round(sqr.w / 2) - 1 : sqr.x + g + Math.round(k * (sqr.w - 2 * g - 3) / (n - 1));
         stalls.push({ x: sx, y: sqr.y });
       }
       features.push({ type: "stalls", stalls, building: s.b.id });
@@ -7636,7 +7636,7 @@ var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events:
 
 // src/shared/generation/world_maker_v1/make.js
 var TW4 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.19";
+var WORLD_MAKER_VERSION = "world-maker-v1.20";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];

@@ -1051,7 +1051,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-XDYZSVW6.js";
+} from "./chunk-JEN7CV5L.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -7184,9 +7184,9 @@ function plazaFurnitureDesert(p, size) {
     const d = size === "capital" ? 230 : 200;
     for (const sx of [-1, 1]) {
       items.push({ y: fy - 46 + 14, draw: (c) => palmPlanter(c, fx + sx * d, fy - 46) });
-      items.push({ y: fy + 8, draw: (c) => banco(c, fx + sx * (size === "capital" ? 160 : 140), fy + 8, sx > 0 ? 1 : 0) });
+      items.push({ y: fy + 8, draw: (c) => banco(c, fx + sx * (w / 2 - 60), fy + 8, sx > 0 ? 1 : 0) });
     }
-  } else for (const sx of [-1, 1]) items.push({ y: fy + 8, draw: (c) => banco(c, fx + sx * (size === "village" ? 80 : 104), fy + 8, sx > 0 ? 1 : 2) });
+  } else for (const sx of [-1, 1]) items.push({ y: fy + 8, draw: (c) => banco(c, fx + sx * (w / 2 - 56), fy + 8, sx > 0 ? 1 : 2) });
   return items;
 }
 function plazaDesert(c, p, size) {
@@ -8812,11 +8812,11 @@ function plazaFurnitureSnow(p, size) {
     const d = size === "capital" ? 230 : 200;
     for (const sx of [-1, 1]) {
       planter(fx + sx * d, fy - 46);
-      bench12(fx + sx * (size === "capital" ? 160 : 140), fy + 6);
+      bench12(fx + sx * (w / 2 - 60), fy + 6);
     }
   } else {
-    bench12(fx - (size === "village" ? 80 : 104), fy + 8);
-    bench12(fx + (size === "village" ? 80 : 104), fy + 8);
+    bench12(fx - (w / 2 - 56), fy + 8);
+    bench12(fx + (w / 2 - 56), fy + 8);
   }
   return items;
 }
@@ -31769,11 +31769,11 @@ function plazaFurniture(p, biome, size) {
     const d = size === "capital" ? 230 : 200;
     for (const sx of [-1, 1]) {
       planter(fx + sx * d, fy - 46);
-      bench12(fx + sx * (size === "capital" ? 160 : 140), fy + 6);
+      bench12(fx + sx * (w / 2 - 60), fy + 6);
     }
   } else {
-    bench12(fx - (size === "village" ? 80 : 104), fy + 8);
-    bench12(fx + (size === "village" ? 80 : 104), fy + 8);
+    bench12(fx - (w / 2 - 56), fy + 8);
+    bench12(fx + (w / 2 - 56), fy + 8);
   }
   if (biome === "wetland") items.push(...plazaReedsWetland(p));
   return items;
@@ -50502,7 +50502,7 @@ function townPiecesV1(t) {
     }
     add2("stall:" + k, biome === "upland" && !(art === "village" && USTQ.village === "grass") ? art === "village" ? () => stallVUp(s.x, s.y, k, slot) : () => stallUp(s.x, s.y, k, slot, "south") : biome === "wetland" && !(art === "village" && WSTQ.village === "grass") ? art === "village" ? () => stallVWet(s.x, s.y, k, slot) : () => stallWet(s.x, s.y, k, slot, "south") : biome === "frostland" ? art === "village" ? () => stallVSnow(s.x, s.y, k, slot) : () => stallSnow(s.x, s.y, k, slot, "south", { mix: true }) : biome === "desert" ? art === "village" ? () => stallVDesert(s.x, s.y, k, slot) : () => stallDesert(s.x, s.y, k, slot) : art === "village" ? () => stallV(s.x, s.y, biome, k, slot) : () => stall22(s.x, s.y, biome, k, slot), reg);
     const pz = plazas[0];
-    if (pz && zone) {
+    if (pz && zone && k !== Math.floor((f.stalls.length - 1) / 2)) {
       const y = pz.y + pz.h - 3;
       add2("stall-back:" + k, biome === "upland" ? () => stallUp(s.x, y, k + 5, slot, "north") : biome === "wetland" ? () => stallWet(s.x, y, k + 5, slot, "north") : biome === "frostland" ? () => stallSnow(s.x, y, k + 5, slot, "north", { mix: true }) : biome === "desert" ? () => stallDesert(s.x, y, k + 5, slot, "north") : () => stall22(s.x, y, biome, k + 5, slot, "north"), { x0: s.x * T74 - 60, y0: y * T74 - 150, x1: (s.x + 3) * T74 + 60, y1: (y + 2) * T74 + 50 });
     }
@@ -107516,9 +107516,9 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       } else reduceSkillCooldown(combat, id, ticks);
     }
   };
-  const allCooldowns = (combat, ticks) => {
+  const allCooldowns = (combat, ticks, dash = true) => {
     for (const id of Object.keys(combat.skills?.cooldowns ?? {})) reduceSkillCooldown(combat, id, ticks);
-    if (combat.dash.cooldown > combat.dash.frames) combat.dash.cooldown = Math.max(combat.dash.frames, combat.dash.cooldown - ticks);
+    if (dash && combat.dash.cooldown > combat.dash.frames) combat.dash.cooldown = Math.max(combat.dash.frames, combat.dash.cooldown - ticks);
   };
   const signatureCut = (a, cut2) => {
     const combat = c.actors[a.entityId];
@@ -109272,6 +109272,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
         if (gear2.lowDmg && low(source3, 50)) extra += gear2.lowDmg;
         if (gear2.perfectDmg && c.actors[source3.entityId]?.skills?.sharp) extra += gear2.perfectDmg;
         if (gear2.exposeDmg && marks2.on(target, "expose")) extra += gear2.exposeDmg;
+        if (gear2.blinkDmg && c.actors[source3.entityId]?.skills?.sharp) extra += gear2.blinkDmg;
+        if (gear2.ccDmg && (marks2.on(target, "stun") || marks2.on(target, "daze") || marks2.on(target, "slow") || marks2.frosted(target))) extra += gear2.ccDmg;
       }
       if (extra) out = multiplyCombat(out, 1e4 + extra, 1e4);
       if (gear2.lifeHit && trigger !== "periodic" && source3.alive) healFlat(source3, gear2.lifeHit);
@@ -109471,6 +109473,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const combat = c.actors[a.entityId];
     if (!combat) return;
     const from = { ...a.position }, to = pathEnd(a, combat.dash);
+    if (heroOf(a) === "mage") {
+      const G4 = gearOf(a);
+      if (G4.blinkDmg) classSkillsRecord(combat).sharp = SHARP_TICKS;
+      if (G4.blinkCdr) signatureCut(a, (own) => allCooldowns(own, G4.blinkCdr, false));
+    }
     if (rank(a, "restless")) {
       const k = classSkillsRecord(combat);
       if (k.spare) {
@@ -125997,11 +126004,14 @@ var LABELS = {
   exposeCdr: "off Movement and Defensive cooldowns when you Expose",
   shatterEase: "less Attack needed to Shatter",
   shatterDmg: "Shatter damage",
-  shatterCdr: "off all cooldowns on a Shatter"
+  shatterCdr: "off all cooldowns on a Shatter",
+  ccDmg: "Damage to enemies you crowd controlled",
+  blinkDmg: "Damage for 3 s after a Blink",
+  blinkCdr: "off other cooldowns on a Blink"
 };
-var SECONDS = /* @__PURE__ */ new Set(["hitCdr", "killCdr", "perfectWindow", "perfectCdr", "exposeTime", "exposeCdr", "shatterCdr"]);
+var SECONDS = /* @__PURE__ */ new Set(["hitCdr", "killCdr", "perfectWindow", "perfectCdr", "exposeTime", "exposeCdr", "shatterCdr", "blinkCdr"]);
 var branchName = (id) => id ? id[0].toUpperCase() + id.slice(1) : "";
-var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct", "mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "cdr", "eliteDmg", "lifeKill", "rangedDmg", "areaDmg", "finisherDmg", "moveCdr", "defCdr", "heldDmg", "ailingDmg", "closeDmg", "farDmg", "fullDmg", "lowDmg", "controlDur", "ailmentDur", "eliteDr", "areaDr", "stunDr", "potionHeal", "keepPip", "perfectDmg", "exposeDmg", "shatterDmg", "shatterEase"]);
+var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct", "mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "cdr", "eliteDmg", "lifeKill", "rangedDmg", "areaDmg", "finisherDmg", "moveCdr", "defCdr", "heldDmg", "ailingDmg", "closeDmg", "farDmg", "fullDmg", "lowDmg", "controlDur", "ailmentDur", "eliteDr", "areaDr", "stunDr", "potionHeal", "keepPip", "perfectDmg", "exposeDmg", "shatterDmg", "shatterEase", "ccDmg", "blinkDmg"]);
 var FLAT = ["attack", "defense", "maxHp", "str", "dex", "int"];
 var zero6 = (v) => statValue(v) === 0;
 var sign2 = (v) => {
@@ -126137,6 +126147,9 @@ var ICON_ALIAS = {
   shatterEase: "frostDmg",
   shatterDmg: "frostDmg",
   shatterCdr: "cdr",
+  ccDmg: "eliteDmg",
+  blinkDmg: "critDamage",
+  blinkCdr: "cdr",
   controlDur: "cdr",
   ailmentDur: "cdr",
   eliteDr: "defense",
