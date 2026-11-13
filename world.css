@@ -721,9 +721,9 @@ body #world-death[hidden]{display:none;}
 #world-death .ds{display:grid;justify-items:center;gap:10px;width:min(660px,100%);}
 /* The title in the game's own call voice (Time's up!, damage numbers; Sammy 2026-11-13, replacing the Souls-like
    serif YOU DIED): Baloo 2, round ink outline, white-to-coral fill, a boing pop-in, three dizzy stars circling over it.
-   The words: 'Waiting for a revive…' while a friend is standing, else 'Down for now…' (death_presentation.js). */
+   It says 'Slain' (it goes with the gravestone); in co-op the note adds 'Waiting for a revive' (death_presentation.js). */
 #world-death .ds-head{position:relative;display:grid;justify-items:center;padding-top:30px;}
-#world-death .ds-title{position:relative;margin:0;font:800 54px/1 "Baloo 2",system-ui,sans-serif;letter-spacing:0;padding:0;text-transform:none;color:#1a0f12;-webkit-text-stroke:11px #1a0f12;text-shadow:0 5px 0 #1a0f12;transform:rotate(-3deg);animation:ds-pop .55s cubic-bezier(.2,.9,.3,1.25) both;}
+#world-death .ds-title{position:relative;margin:0;font:800 72px/1 "Baloo 2",system-ui,sans-serif;letter-spacing:0;padding:0;text-transform:none;color:#1a0f12;-webkit-text-stroke:11px #1a0f12;text-shadow:0 5px 0 #1a0f12;transform:rotate(-3deg);animation:ds-pop .55s cubic-bezier(.2,.9,.3,1.25) both;}
 #world-death .ds-title::after{content:attr(data-text);position:absolute;inset:0;-webkit-text-stroke:0;text-shadow:none;color:transparent;background:linear-gradient(#ffffff 22%,#ffb19c 50%,#ff6b5e 72%,#d9423a);-webkit-background-clip:text;background-clip:text;}
 #world-death .ds-ko{position:absolute;left:50%;top:6px;width:0;height:0;animation:ds-ko-in .3s ease-out .35s both;}
 #world-death .ds-ko i{position:absolute;left:-17px;top:-17px;width:34px;height:34px;background:#1a0f12;clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%);animation:ds-orbit 2.2s linear infinite;}
@@ -757,8 +757,8 @@ body #world-death #world-death-download{min-height:28px;margin:0;padding:3px 8px
 #world-death .ds-note{margin:0;color:#d4e2cf;font:600 12.5px var(--rpg-ui,"Segoe UI"),system-ui,sans-serif;text-shadow:0 1px 0 #000,0 0 4px #000;}
 #world-death #world-death-status{margin:0;color:#ffd0a8;font-size:12px;text-shadow:0 1px 0 #000;}#world-death #world-death-status:empty{display:none;}
 @media (hover:none) and (pointer:coarse){#world-death .go kbd{display:none;}}
-@media (max-height:500px){body #world-death{padding-bottom:calc(14px + var(--world-safe-bottom));}#world-death .ds{gap:6px;width:min(610px,100%);}#world-death .ds-head{padding-top:14px;}#world-death .ds-title{font-size:38px;-webkit-text-stroke:8px #1a0f12;text-shadow:0 3px 0 #1a0f12;}#world-death .ds-ko{transform:scale(.7);}#world-death .dcard{padding:8px 10px;gap:12px;}#world-death canvas.pt{width:50px;height:50px;}#world-death .killer b{font-size:15.5px;}body #world-death .go{height:44px;min-height:44px;font-size:14px;}#world-death .go kbd{display:none;}#world-death .act{width:240px;}#world-death .ds-note{font-size:11px;}}
-@media (max-width:560px){#world-death .ds-title{font-size:40px;}#world-death .dcard{flex-wrap:wrap;}#world-death .act{width:100%;}}
+@media (max-height:500px){body #world-death{padding-bottom:calc(14px + var(--world-safe-bottom));}#world-death .ds{gap:6px;width:min(610px,100%);}#world-death .ds-head{padding-top:14px;}#world-death .ds-title{font-size:50px;-webkit-text-stroke:8px #1a0f12;text-shadow:0 3px 0 #1a0f12;}#world-death .ds-ko{transform:scale(.7);}#world-death .dcard{padding:8px 10px;gap:12px;}#world-death canvas.pt{width:50px;height:50px;}#world-death .killer b{font-size:15.5px;}body #world-death .go{height:44px;min-height:44px;font-size:14px;}#world-death .go kbd{display:none;}#world-death .act{width:240px;}#world-death .ds-note{font-size:11px;}}
+@media (max-width:560px){#world-death .ds-title{font-size:56px;}#world-death .dcard{flex-wrap:wrap;}#world-death .act{width:100%;}}
 
 /* Potion belt: one-tap health potion in the old rations slot. A flask sits in a dark
  socket and its liquid shows how full the belt is (--potion-fill); while the potion

@@ -140556,6 +140556,10 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
         const brood = nestBroodViewsV1(state2), hunts = huntChampionViewsV1(state2), dens = denActorViewsV1(state2), visible3 = engine.nearby(local8, 900).filter((a) => !eventActorDormant(state2, a.entityId) && bossActorTargetableD12_5A(state2, a.entityId));
         for (const defeated of Object.values(state2.entitiesById)) if (!defeated.alive && defeated.ai?.defeatedTick !== void 0 && state2.tick - defeated.ai.defeatedTick <= 36 && defeated.residency.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(defeated.position.x - local8.position.x, defeated.position.y - local8.position.y) <= 900 && !visible3.some((a) => a.entityId === defeated.entityId)) visible3.push(defeated);
         if (!visible3.some((a) => a.entityId === local8.entityId)) visible3.push(local8);
+        for (const p of Object.values(state2.playersById)) {
+          const e = state2.entitiesById[p.entityId];
+          if (e && !e.alive && e.residency?.spaceInstanceId === ctx.spaceInstanceId && !visible3.some((a) => a.entityId === e.entityId)) visible3.push(e);
+        }
         for (const a of visible3) {
           const creature = creatureDefinitionForProfile(a.contentDefinitionId), family = creature?.family ?? ordinaryEnemyForProfile(a.contentDefinitionId)?.family ?? null, group = Object.values(state2.groupsById).find((g) => g.entityIds.includes(a.entityId)), prior = creatureFacingViews.get(a.entityId), attackTarget = a.ai?.melee?.targetEntityId ? state2.entitiesById[a.ai.melee.targetEntityId] : null, presentationFacingX = a.team === "hostile" && family ? rustNibblerFacingD11_2({ position: a.position, previousPosition: prior?.position ?? null, movementIntentX: a.movementIntent?.x ?? 0, attackTargetPosition: attackTarget?.position ?? null, meleePhase: a.ai?.melee?.phase ?? "idle", lastFacing: prior?.facingX ?? 1, alive: a.alive }) : 1;
           creatureFacingViews.set(a.entityId, { position: { ...a.position }, facingX: presentationFacingX });
@@ -167611,7 +167615,7 @@ Worst 5s: ${legacy.worstMs.toFixed(1)} ms`;
 }
 
 // src/client/death_presentation.js
-var deathTitleV1 = (model) => Object.entries(model.playersById).some(([id2, p]) => id2 !== model.localPlayerId && model.entitiesById[p.entityId]?.alive) ? "Waiting for a revive\u2026" : "Down for now\u2026";
+var deathWaitingV1 = (model) => Object.entries(model.playersById).some(([id2, p]) => id2 !== model.localPlayerId && model.entitiesById[p.entityId]?.alive);
 var titleFontRequested = false;
 function loadTitleFont(doc) {
   if (titleFontRequested || typeof FontFace !== "function" || !doc.fonts) return;
@@ -167797,17 +167801,13 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
       return;
     }
     if (!wasShowing) button3.focus?.({ preventScroll: true });
-    const title3 = deathTitleV1(model), h = el3("world-death-title");
-    if (h && h.dataset && h.dataset.text !== title3) {
-      h.textContent = title3;
-      h.dataset.text = title3;
-    }
     const xp = participant.progression;
     set("world-death-level", `Level ${xpText(xp.level)}`);
     set("world-death-xp", xp.capped ? `XP ${xpText(xp.totalXp)} \xB7 Maximum level` : `XP ${xpText(xp.totalXp)} total \xB7 ${xpText(xp.current)}/${xpText(xp.required)} to next level`);
     const arena = model.recovery.kind === "arena";
     set("world-death-anchor", arena ? "Respawn outside the arena" : /^outside /.test(model.recovery.anchorLabel) ? `Respawn ${model.recovery.anchorLabel}` : `Respawn at ${model.recovery.anchorLabel}`);
-    set("world-death-note", arena ? "No XP lost \xB7 The boss heals back to full if no one is left inside" : "No XP lost");
+    const waiting = deathWaitingV1(model) ? "Waiting for a revive \xB7 " : "";
+    set("world-death-note", waiting + (arena ? "No XP lost \xB7 The boss heals back to full if no one is left inside" : "No XP lost"));
     const w = wakeMs ? Math.min(1, Math.round((now3() - shownAt) / wakeMs * 50) / 50) : 1;
     if (w !== wake2) {
       wake2 = w;
