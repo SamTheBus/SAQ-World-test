@@ -31558,6 +31558,16 @@ async function verifyBoundOverworldGeometry(state, { sha256 } = {}) {
   return true;
 }
 
+// src/shared/contracts/arena_fallen_v1.js
+var ARENA_FALLEN_VERSION = "arena-fallen-v1";
+function validateArenaFallenV1(s) {
+  const r = s.arenaFallenV1;
+  if (r === void 0) return;
+  closedRecord(r, ["version", "bySpace"]);
+  requireContract(r.version === ARENA_FALLEN_VERSION && r.bySpace && typeof r.bySpace === "object" && !Array.isArray(r.bySpace) && Object.keys(r.bySpace).length > 0, "Invalid arena fallen");
+  for (const [space, list2] of Object.entries(r.bySpace)) requireContract(s.spacesByInstanceId[space] && Array.isArray(list2) && list2.length > 0 && list2.every((pid, i) => typeof pid === "string" && s.playersById[pid] && (i === 0 || list2[i - 1] < pid)), "Invalid arena fallen list");
+}
+
 // src/shared/contracts/actor_residency.js
 function actorRules(actor) {
   const { residency, ...rules } = actor;
@@ -31721,8 +31731,9 @@ var same31 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function validateActivityState(s) {
   validateWorldEventsState(s);
   validateWire(s);
-  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "playerRevivesById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId", "waitingRoom", "bestiary", "trips"]);
+  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "playerRevivesById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId", "waitingRoom", "bestiary", "trips", "arenaFallenV1"]);
   validateBestiaryRootV1(s);
+  validateArenaFallenV1(s);
   validateTripRootV1(s);
   if (s.waitingRoom) {
     closedRecord(s.waitingRoom, ["version", "spaceInstanceId"]);
@@ -33983,6 +33994,7 @@ function seatComparable(s, kept, party2, room2) {
   only(c.trips?.groundByPlayerId);
   only(c.trips?.tripsByPlayerId);
   if (c.trips) delete c.trips.hell;
+  delete c.arenaFallenV1;
   eachTarget(c, (row2, key9) => {
     if (party2.entities.has(row2[key9])) row2[key9] = "?";
   });

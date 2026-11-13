@@ -118260,6 +118260,11 @@ function renewNightmareSeatV1(n, oldPid, playerId) {
     n.legs[playerId] = n.legs[oldPid];
     delete n.legs[oldPid];
   }
+  const i = n?.fallen?.indexOf(oldPid) ?? -1;
+  if (i >= 0) {
+    n.fallen[i] = playerId;
+    n.fallen.sort();
+  }
 }
 function hpValue2(v, label7) {
   requireContract(typeof v === "string" && compareCombat(v, 0) >= 0, label7);
@@ -127163,6 +127168,26 @@ async function upgradeDungeonMobCatalogV2(state2, { sha256 }) {
   return { changed: true };
 }
 
+// src/shared/contracts/arena_fallen_v1.js
+var ARENA_FALLEN_VERSION = "arena-fallen-v1";
+var arenaFallenInV1 = (state2, spaceInstanceId, pid) => Boolean(state2.arenaFallenV1?.bySpace?.[spaceInstanceId]?.includes(pid));
+function validateArenaFallenV1(s) {
+  const r = s.arenaFallenV1;
+  if (r === void 0) return;
+  closedRecord(r, ["version", "bySpace"]);
+  requireContract(r.version === ARENA_FALLEN_VERSION && r.bySpace && typeof r.bySpace === "object" && !Array.isArray(r.bySpace) && Object.keys(r.bySpace).length > 0, "Invalid arena fallen");
+  for (const [space, list] of Object.entries(r.bySpace)) requireContract(s.spacesByInstanceId[space] && Array.isArray(list) && list.length > 0 && list.every((pid, i) => typeof pid === "string" && s.playersById[pid] && (i === 0 || list[i - 1] < pid)), "Invalid arena fallen list");
+}
+function renewArenaFallenSeatV1(s, oldPid, playerId) {
+  for (const list of Object.values(s.arenaFallenV1?.bySpace ?? {})) {
+    const i = list.indexOf(oldPid);
+    if (i >= 0) {
+      list[i] = playerId;
+      list.sort();
+    }
+  }
+}
+
 // src/shared/contracts/actor_residency.js
 function actorRules(actor) {
   const { residency, ...rules } = actor;
@@ -127389,8 +127414,9 @@ var same7 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function validateActivityState(s) {
   validateWorldEventsState(s);
   validateWire(s);
-  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "playerRevivesById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId", "waitingRoom", "bestiary", "trips"]);
+  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "playerRevivesById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId", "waitingRoom", "bestiary", "trips", "arenaFallenV1"]);
   validateBestiaryRootV1(s);
+  validateArenaFallenV1(s);
   validateTripRootV1(s);
   if (s.waitingRoom) {
     closedRecord(s.waitingRoom, ["version", "spaceInstanceId"]);
@@ -129647,7 +129673,8 @@ function partyArenasV1(state2) {
 function projectBossArenaV1(state2, actor) {
   const arena = arenaForSpaceV1(state2, actor?.residency?.spaceInstanceId);
   if (!arena) return null;
-  return Object.freeze({ up: arenaWallUpV1(state2, arena), doors: Object.freeze(arena.doors.map((d) => Object.freeze({ x: d.x, y: d.y, nx: d.nx, ny: d.ny, half: d.half }))) });
+  const up2 = arenaWallUpV1(state2, arena), pid = Object.keys(state2.playersById).find((p) => state2.playersById[p].entityId === actor.entityId);
+  return Object.freeze({ up: up2, locked: up2 && Boolean(pid) && arenaFallenInV1(state2, arena.spaceInstanceId, pid), doors: Object.freeze(arena.doors.map((d) => Object.freeze({ x: d.x, y: d.y, nx: d.nx, ny: d.ny, half: d.half }))) });
 }
 
 // src/simulation/boss_arena_wall_v1.js
@@ -129665,8 +129692,8 @@ function createBossArenaWallV1(state2) {
       }
       hell = { isle: A2.isle, space: h.spaceInstanceId, inside: new Map(heroesOnIsleV1(state2, h, A2.isle).map(({ a }) => [a.entityId, { x: a.position.x, y: a.position.y }])), out: out4 };
     }
-    if (!state2.d9World?.plannedWorld) return;
-    for (const arena of partyArenasV1(state2)) {
+    const fallen = state2.arenaFallenV1?.bySpace ?? {}, fights = /* @__PURE__ */ new Set();
+    if (state2.d9World?.plannedWorld) for (const arena of partyArenasV1(state2)) {
       const bosses = arenaBossesV1(state2, arena), heroes2 = bosses.length ? arenaHeroesInsideV1(state2, arena) : [];
       if (!heroes2.length) {
         if (bosses.length && state2.tick % ARENA_REGEN_EVERY_TICKS === 0) for (const b of bosses) {
@@ -129679,8 +129706,20 @@ function createBossArenaWallV1(state2) {
       }
       const inside6 = /* @__PURE__ */ new Map();
       for (const a of Object.values(state2.entitiesById)) if (a.alive && (a.team === "party" || a.team === "hostile") && a.residency?.spaceInstanceId === arena.spaceInstanceId && inArenaBoxV1(arena.box, a.position)) inside6.set(a.entityId, { x: a.position.x, y: a.position.y });
-      held.push({ arena, inside: inside6 });
+      const space = arena.spaceInstanceId, list = new Set(fallen[space] ?? []), out4 = /* @__PURE__ */ new Map();
+      fights.add(space);
+      for (const [pid, p] of Object.entries(state2.playersById)) {
+        const a = state2.entitiesById[p.entityId];
+        if (!a || a.residency?.spaceInstanceId !== space) continue;
+        if (!a.alive && inArenaBoxV1(arena.box, a.position)) list.add(pid);
+        else if (a.alive && list.has(pid) && !inArenaBoxV1(arena.box, a.position)) out4.set(a.entityId, { x: a.position.x, y: a.position.y });
+      }
+      if (list.size) fallen[space] = [...list].sort();
+      held.push({ arena, inside: inside6, out: out4 });
     }
+    for (const space of Object.keys(fallen)) if (!fights.has(space)) delete fallen[space];
+    if (Object.keys(fallen).length) state2.arenaFallenV1 = { version: ARENA_FALLEN_VERSION, bySpace: fallen };
+    else delete state2.arenaFallenV1;
   }
   function finish4() {
     if (hell) {
@@ -129701,7 +129740,7 @@ function createBossArenaWallV1(state2) {
       }
       hell = null;
     }
-    for (const { arena, inside: inside6 } of held) {
+    for (const { arena, inside: inside6, out: out4 } of held) {
       const collision = state2.spacesByInstanceId[arena.spaceInstanceId]?.collision;
       if (!collision) continue;
       for (const [id2, start] of inside6) {
@@ -129710,6 +129749,14 @@ function createBossArenaWallV1(state2) {
         const door13 = [...arena.doors].sort((p, q2) => Math.hypot(p.x - a.position.x, p.y - a.position.y) - Math.hypot(q2.x - a.position.x, q2.y - a.position.y))[0];
         const slide = { x: door13?.nx ? start.x : a.position.x, y: door13?.ny ? start.y : a.position.y };
         a.position = inArenaBoxV1(arena.box, slide) && !collidesWithTiles(collision, slide.x, slide.y, a.hullRadius) ? slide : { ...start };
+        holds++;
+      }
+      for (const [id2, start] of out4) {
+        const a = state2.entitiesById[id2];
+        if (!a?.alive || a.residency.spaceInstanceId !== arena.spaceInstanceId || !inArenaBoxV1(arena.box, a.position)) continue;
+        const door13 = [...arena.doors].sort((p, q2) => Math.hypot(p.x - a.position.x, p.y - a.position.y) - Math.hypot(q2.x - a.position.x, q2.y - a.position.y))[0];
+        const slide = { x: door13?.nx ? start.x : a.position.x, y: door13?.ny ? start.y : a.position.y };
+        a.position = !inArenaBoxV1(arena.box, slide) && !collidesWithTiles(collision, slide.x, slide.y, a.hullRadius) ? slide : { ...start };
         holds++;
       }
     }
@@ -131163,6 +131210,7 @@ function renewSeat(state2, oldPid, { keepQuests = false } = {}) {
     }
   }
   renewTripHellSeatV1(state2, oldPid, playerId);
+  renewArenaFallenSeatV1(state2, oldPid, playerId);
   const quests = state2.d9World?.quests?.byPlayer;
   if (quests?.[oldPid]) {
     if (keepQuests) quests[playerId] = quests[oldPid];
@@ -131308,6 +131356,7 @@ function seatComparable(s, kept, party4, room) {
   only(c.trips?.groundByPlayerId);
   only(c.trips?.tripsByPlayerId);
   if (c.trips) delete c.trips.hell;
+  delete c.arenaFallenV1;
   eachTarget(c, (row2, key4) => {
     if (party4.entities.has(row2[key4])) row2[key4] = "?";
   });
