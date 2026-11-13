@@ -161810,7 +161810,12 @@ function reviveChoice(model, actor) {
   for (const [pid, p] of Object.entries(model.playersById ?? {})) {
     if (pid === model.localPlayerId) continue;
     const t = model.entitiesById?.[p.entityId];
-    if (t && !t.alive && t.position && Math.hypot(t.position.x - actor.position.x, t.position.y - actor.position.y) <= REVIVE_REACH - 4) return { exitId: REVIVE_CONTEXT_V2 + pid, label: `Revive the ${CLASS_NAMES3[t.subType] ?? "hero"}`, kind: model.revive?.holding?.playerId === pid ? `Reviving \xB7 ${Math.floor(model.revive.holding.progress * 100)}%` : "Hold to revive" };
+    if (t && !t.alive && t.position && Math.hypot(t.position.x - actor.position.x, t.position.y - actor.position.y) <= REVIVE_REACH - 4) return {
+      exitId: REVIVE_CONTEXT_V2 + pid,
+      label: t.heroLook?.look?.name ? `Revive ${t.heroLook.look.name}` : `Revive the ${CLASS_NAMES3[t.subType] ?? "hero"}`,
+      /* the friend's hero name (Sammy 2026-11-13), the class if it has none */
+      kind: model.revive?.holding?.playerId === pid ? `Reviving \xB7 ${Math.floor(model.revive.holding.progress * 100)}%` : "Hold to revive"
+    };
   }
   return null;
 }
@@ -167817,7 +167822,7 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
     const by = model.revive?.by, friend = by && model.entitiesById[model.playersById[by.playerId]?.entityId];
     show("world-death-revive", Boolean(by));
     if (by) {
-      set("world-death-revive-text", `The ${CLASS_NAMES4[friend?.subType] ?? "hero"} is reviving you \xB7 ${(by.progress * 3).toFixed(1)} / 3 s`);
+      set("world-death-revive-text", `${friend?.heroLook?.look?.name || `The ${CLASS_NAMES4[friend?.subType] ?? "hero"}`} is reviving you \xB7 ${(by.progress * 3).toFixed(1)} / 3 s`);
       el3("world-death-revive-bar")?.style?.setProperty?.("width", `${Math.round(by.progress * 100)}%`);
     }
     const disabled = !model.recovery.canRespawn || model.persistence.phase !== "encounter";
