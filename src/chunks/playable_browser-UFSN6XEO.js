@@ -129696,6 +129696,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
         scroll.append(sec);
       }
     }
+    const UNIQUE_LIST_NAMES = { sigDmg: "Perfect block, Expose or Blink damage", maxPip: "+1 max pip", keepPip: "Chance to keep a pip", startPips: "Start with pips", killCdr: "Kills cut all cooldowns", hitCdr: "Hits cut Defensive cooldowns" };
     const uqV3 = unique && gen?.progression?.affixes === "affixes-v3" && UNIQUE_LINES_V3[unique.id];
     if (uqV3) {
       const have = d.rarityTier ?? 0, tiers = [3, 4, 5].filter((t) => t > have);
@@ -129710,7 +129711,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
           row2.append(text3, tag);
           sec.append(row2);
         }
-        const owned2 = new Set((gen.affixes ?? []).map((a) => uniqueLineKeyV3(unique.id, a))), left = uniquePoolV3(unique.id, 5).filter((k) => !owned2.has(k)).map((k) => k === "sigDmg" ? "Perfect block, Expose or Blink damage" : lineLabel(affixLineKey(...k.split(":"))));
+        const owned2 = new Set((gen.affixes ?? []).map((a) => uniqueLineKeyV3(unique.id, a))), left = uniquePoolV3(unique.id, 5).filter((k) => !owned2.has(k)).map((k) => UNIQUE_LIST_NAMES[k] ?? lineLabel(affixLineKey(...k.split(":"))));
         if (left.length) sec.append(element("p", "Its list: " + left.join(", "), "gx-itemnote"));
         scroll.append(sec);
       }
