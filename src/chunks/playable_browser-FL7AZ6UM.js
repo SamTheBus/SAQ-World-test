@@ -57316,9 +57316,9 @@ function frostWyrmlingMotionV4(m, time3) {
     y: mix9(root4.y, head18.y, s.t),
     radius: s.radius
   }));
-  const mouth4 = { x: head18.x + u.x * (4 + 2 * weight2), y: head18.y + u.y * (4 + 2 * weight2), angle: angle3 };
-  const muzzle = { x: mouth4.x + u.x, y: mouth4.y + u.y };
-  return { segments, neckSegments, root: root4, head: head18, mouth: mouth4, muzzle, weight: weight2 };
+  const mouth5 = { x: head18.x + u.x * (4 + 2 * weight2), y: head18.y + u.y * (4 + 2 * weight2), angle: angle3 };
+  const muzzle = { x: mouth5.x + u.x, y: mouth5.y + u.y };
+  return { segments, neckSegments, root: root4, head: head18, mouth: mouth5, muzzle, weight: weight2 };
 }
 function polygon9(c, points2, fill7, outline4 = true) {
   c.beginPath();
@@ -69016,14 +69016,14 @@ function cloudGround(c, actor, k, tick) {
 function cloudItems(model, actor, k, tick, out) {
   if (!k.points) return;
   const { age } = ageOf2(k, MIRE, tick), id = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, lean = mireLean(k, tick).lean, R10 = MIRE.radius;
-  const mouth4 = { x: actor.position.x + face4 * (27 + lean * 14), y: actor.position.y - 54 + Math.abs(lean) * 3 };
+  const mouth5 = { x: actor.position.x + face4 * (27 + lean * 14), y: actor.position.y - 54 + Math.abs(lean) * 3 };
   k.points.forEach((p, i) => {
     if (k.phase === "belch") {
       const f = BELCH[i];
       if (age >= f && age < f + 18) {
         const u = (age - f) / 18;
         out.push({ id: id + "/belch" + i, anchorX: actor.position.x, anchorY: actor.position.y + (actor.hullRadius ?? 20) * 0.45 + 0.5, draw: (c) => {
-          for (let j = 0; j < 3; j++) dust(c, mouth4.x + face4 * (5 + u * 7 + j * 2.4), mouth4.y - 1 + j * 2 - u * 4, 1.4 + u * 2, (1 - u) * 0.9);
+          for (let j = 0; j < 3; j++) dust(c, mouth5.x + face4 * (5 + u * 7 + j * 2.4), mouth5.y - 1 + j * 2 - u * 4, 1.4 + u * 2, (1 - u) * 0.9);
         } });
       }
       if (age >= f) {
@@ -78829,17 +78829,17 @@ function vineItems(model, actor, k, tick, out) {
 }
 function seedItems(model, actor, k, tick, out) {
   if (!k.points) return;
-  const A = seedsTimeline(k, tick), face4 = k.direction?.x < 0 ? -1 : 1, mouth4 = rotMouth(actor, k, tick, face4), id = "lesser-vfx/" + actor.entityId, heroes2 = party3(model);
+  const A = seedsTimeline(k, tick), face4 = k.direction?.x < 0 ? -1 : 1, mouth5 = rotMouth(actor, k, tick, face4), id = "lesser-vfx/" + actor.entityId, heroes2 = party3(model);
   k.points.forEach((s, i) => {
     const land = ROT.windupTicks + ROT.lands[i], fire2 = ROT.windupTicks + SEED_FIRE[i];
     if (A >= fire2 && A < fire2 + 18) {
       const u = (A - fire2) / 18;
       out.push({ id: id + "/spit" + i, anchorX: actor.position.x, anchorY: actor.position.y + (actor.hullRadius ?? 20) * 0.45 + 0.5, draw: (c) => {
-        for (let j = 0; j < 3; j++) dust(c, mouth4.x + face4 * (4 + u * 6 + j * 2.5), mouth4.y - 2 + j * 2 - u * 5, 1.3 + u * 1.8, (1 - u) * 0.85);
+        for (let j = 0; j < 3; j++) dust(c, mouth5.x + face4 * (4 + u * 6 + j * 2.5), mouth5.y - 2 + j * 2 - u * 5, 1.3 + u * 1.8, (1 - u) * 0.85);
       } });
     }
     if (A >= fire2 && A < land) {
-      const u = (A - fire2) / (land - fire2), px7 = mix15(mouth4.x + face4 * 4, s.x, u), py = mix15(mouth4.y, s.y, u) - Math.sin(u * Math.PI) * (52 - i * 6), gy = mix15(actor.position.y, s.y, u);
+      const u = (A - fire2) / (land - fire2), px7 = mix15(mouth5.x + face4 * 4, s.x, u), py = mix15(mouth5.y, s.y, u) - Math.sin(u * Math.PI) * (52 - i * 6), gy = mix15(actor.position.y, s.y, u);
       out.push({ id: id + "/seed" + i, anchorX: px7, anchorY: gy + 0.4, draw: (c) => drawSeed(c, px7, py, (u * 9 + i) * face4, false, 1.25 + u * 0.3) });
     }
     const la = A - land;
@@ -92144,7 +92144,12 @@ function eyes(c, blink, y = -7.2) {
     px3(c, 1.2, y, 1.8, 2.4, "#1b2631");
     px3(c, 4.8, y, 1.6, 2.4, "#1b2631");
   }
+  mouth2(c, y);
 }
+var MOUTHC = "#7a4a3a";
+var mouth2 = (c, y = -7.2) => {
+  if (FACE2 !== "rosy") px3(c, 3, y + 4.5, 3.2, 0.9, MOUTHC);
+};
 var SHAVE = [-10.8, -15, 2.4, -15, 2.4, -13.4, -1.4, -12.6, -3, -10.8, -3.4, -8.6, -6.6, -8.4, -9.2, -7.2, -10.8, -7.2];
 var STUBBLE = [-3.4, -7.4, -2.2, -7.4, -1.6, -4.4, 0.8, -3.6, 8.6, -3.8, 8.6, 1.4, -3.8, 1.4];
 function shaved(c, shape3, S9, H7, grain = 0.3) {
@@ -92197,7 +92202,10 @@ function bareHead(c, st, S9, H7, blink, hat) {
 }
 function facialHair(c, b, H7, S9) {
   const MOUTH3 = "#3b2418", o = { bottom: true, split: 0.64, lw: 1.2 }, BEARD = [-3.6, -7.4, -2.2, -7.4, -1.4, -4.2, 1.2, -3.6, 8.2, -3.6, 8.4, 0.2, 6.8, 2.2, -0.8, 2.2, -3.4, 0.2];
-  if (b === "stubble") shaved(c, STUBBLE, S9, H7, 0.24);
+  if (b === "stubble") {
+    shaved(c, STUBBLE, S9, H7, 0.24);
+    mouth2(c);
+  }
   if (b === "mustache") G2(c, [1.4, -3.2, 2.4, -4.2, 7.4, -4.2, 8.4, -3.2, 7.2, -2.4, 4.8, -3.4, 2.4, -2.4], H7, { flat: true, lw: 1 });
   if (b === "handlebar") G2(c, [1, -3, 2.4, -4.2, 7.4, -4.2, 9.2, -3.6, 10, -5.6, 11, -4.4, 9.8, -2.2, 7.2, -2.6, 4.8, -3.4, 2.4, -2.6], H7, { flat: true, lw: 1 });
   if (b === "goatee") {
@@ -94713,7 +94721,9 @@ function mainWeaponOf(spec) {
 function drawBlockyHero(c, spec, pose = {}) {
   const w = kit(spec), look = toLook(spec.look);
   FACE2 = look.face ?? "classic";
-  const S9 = skinPal(look.skin), H7 = hairPal(look.hairColor), st = look.hair, t = pose.t ?? 0;
+  const S9 = skinPal(look.skin);
+  MOUTHC = mix19(S9.d, "#1e0f0a", 0.72);
+  const H7 = hairPal(look.hairColor), st = look.hair, t = pose.t ?? 0;
   const covered = Boolean(w.helmet) && look.helmet, hatOn = covered && HATS.has(w.helmet), red = P11.red, bob = pose.bob ?? 0, sway = pose.sway ?? 0;
   const blink = pose.still ? false : pose.blink ?? (t + 1.9) % 3.9 < 0.12, front2 = w.main || pose.active ? pose.front ?? -0.6 : 1.25, guard = Boolean(pose.guard) && w.offFamily === "shield";
   FLASH2 = Boolean(pose.flash);
@@ -138176,10 +138186,10 @@ function bossPolishDepthItems(model, tick, viewport = null) {
     if (q < 0.55) continue;
     const t = ease7((q - 0.55) / 0.45), g = { x: lerp7(row2.from.x, row2.to.x, t), y: lerp7(row2.from.y + 4, row2.to.y, t) }, h = lerp7(30, 4, t) + Math.sin(t * Math.PI) * 34;
     add2("spit/" + row2.startedTick, g, (c) => {
-      const mouth4 = { x: row2.from.x, y: row2.from.y - 22 };
+      const mouth5 = { x: row2.from.x, y: row2.from.y - 22 };
       c.save();
       c.globalAlpha *= 0.5;
-      stroke4(c, [[mouth4.x, mouth4.y], [g.x, g.y - h]], WEB_PALE, 1);
+      stroke4(c, [[mouth5.x, mouth5.y], [g.x, g.y - h]], WEB_PALE, 1);
       c.globalAlpha = 1;
       c.translate(g.x, g.y - h);
       poly12(c, [[-6, 0], [-4, -4], [1, -5.5], [5.5, -3], [6, 1], [2, 4.5], [-3, 4]], "#cfe8b8", INK35, 1.2);
@@ -145874,7 +145884,7 @@ function drawAshfang(c, actor2, tick, flash = false) {
   c.restore();
   return true;
 }
-function mouth2(actor2, p) {
+function mouth3(actor2, p) {
   const q = rotate2(-35, 5 + p.jaw * 7, p.headAngle);
   return point24(actor2.position.x + (p.bodyX - 15 + p.neckX + q.x) * p.orientation, actor2.position.y + p.bodyY - 31 + p.neckY + q.y);
 }
@@ -146052,7 +146062,7 @@ function drawAshfangGround(c, model2, tick) {
 function fireBurst(c, row2, tick, model2) {
   const age = tick - row2.resolvedTick;
   if (age < 0 || age >= 30) return;
-  const actor2 = model2.entitiesById?.[row2.sourceEntityId], caster2 = actor2 ? { ...actor2, alive: true, position: row2.originPosition, boss: { ...actor2.boss, pendingAction: null, lastAction: row2 } } : { position: row2.originPosition, boss: { lastAction: row2, facing: row2.facing } }, pose = ashfangAttackPose(caster2, row2.resolvedTick), from = mouth2(caster2, pose), sign3 = row2.facing < 0 ? -1 : 1, range2 = row2.range ?? 110, half = row2.halfAngle ?? 0.8, outer = point24(row2.originPosition.x + sign3 * range2, row2.originPosition.y - 13), width2 = range2 * Math.sin(half), fade = 1 - ease22((age - 6) / 24), burn = 1 - ease22(age / 15);
+  const actor2 = model2.entitiesById?.[row2.sourceEntityId], caster2 = actor2 ? { ...actor2, alive: true, position: row2.originPosition, boss: { ...actor2.boss, pendingAction: null, lastAction: row2 } } : { position: row2.originPosition, boss: { lastAction: row2, facing: row2.facing } }, pose = ashfangAttackPose(caster2, row2.resolvedTick), from = mouth3(caster2, pose), sign3 = row2.facing < 0 ? -1 : 1, range2 = row2.range ?? 110, half = row2.halfAngle ?? 0.8, outer = point24(row2.originPosition.x + sign3 * range2, row2.originPosition.y - 13), width2 = range2 * Math.sin(half), fade = 1 - ease22((age - 6) / 24), burn = 1 - ease22(age / 15);
   c.save();
   c.translate(from.x, from.y);
   c.scale(sign3, 1);
@@ -160670,7 +160680,7 @@ function drawCaveDecorationShadowD10(ctx, d, t) {
     ctx.restore();
   } else if (d.kind === "cave-trail-stones") trailStones(ctx, x, y);
 }
-function mouth3(ctx, x, y) {
+function mouth4(ctx, x, y) {
   ctx.fillStyle = "#050908";
   ctx.beginPath();
   ctx.moveTo(x - 48, y + 36);
@@ -161077,7 +161087,7 @@ function drawCaveDecorationD10(ctx, d, t) {
     ctx.translate(-x, -y);
   }
   ctx.lineJoin = "round";
-  if (d.kind === "cave-mouth") mouth3(ctx, x, y);
+  if (d.kind === "cave-mouth") mouth4(ctx, x, y);
   else if (d.kind === "cave-shrub") shrub(ctx, x, y, d.variant ?? 0);
   else if (d.kind === "cave-roots-exterior") roots(ctx, x, y);
   else if (d.kind === "cave-wall-roots") wallRoots(ctx, x, y);
