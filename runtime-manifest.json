@@ -1,6 +1,6 @@
 {
-  "runtimeId": "101b331c4b12ba47",
-  "runtimeSha256": "101b331c4b12ba478617bdbf3965de07cf28505d9169b9df14abf5fa6f8c79d9",
+  "runtimeId": "0b07e60713abca38",
+  "runtimeSha256": "0b07e60713abca385294c8a41583dc77548bb151683d9fd3aaea112c7a348fae",
   "files": [
     {
       "path": ".nojekyll",
@@ -111,31 +111,6 @@
       "path": "assets/fonts-v1/OFL.txt",
       "bytes": 4384,
       "sha256": "ad09b05dc8bc678c9daf7c4c5f7ef1f55e5726127f4330b2e98e40b9dffcb860"
-    },
-    {
-      "path": "assets/fort-art-pilot-v1/floor-v1.webp",
-      "bytes": 29546,
-      "sha256": "bda04884326685dd12cbf65ad45856c8a84a0b6a2e338575bd52745fdf72519b"
-    },
-    {
-      "path": "assets/fort-art-pilot-v1/keep-v1.webp",
-      "bytes": 155676,
-      "sha256": "15dcb0e040f304264a4a5ef92add9980279f7c7ea0776481d39e99af7a763fdf"
-    },
-    {
-      "path": "assets/fort-art-pilot-v1/kit-manifest.json",
-      "bytes": 2456,
-      "sha256": "da28f60ad0e692e0971fa8d0551bbef4869b15b3a173bf93f23f43d4d4a41faf"
-    },
-    {
-      "path": "assets/fort-art-pilot-v1/masonry-v1.webp",
-      "bytes": 69144,
-      "sha256": "af09bdc1959f7d9f8999415a32d991640080c2715ffc2d9c8519b58c5b336d34"
-    },
-    {
-      "path": "assets/fort-art-pilot-v1/tower-v1.webp",
-      "bytes": 161324,
-      "sha256": "64be2b17e32db4f9b1326ddd84b768d82fcd15311166dfa2676668ffb2db2172"
     },
     {
       "path": "assets/frostland-nature-v1/accents.webp",
@@ -589,8 +564,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 14423,
-      "sha256": "356488f50ee37e225822881749a3ab7270ecf50da9deab3e65886ee27d8ff353"
+      "bytes": 14213,
+      "sha256": "1c7acaa8f001647f742f1cf5100c60bc3087d4b57c0b197970e35ef04ee2378c"
     },
     {
       "path": "manifest.webmanifest",
@@ -613,9 +588,9 @@
       "sha256": "7db8c23d3d071f10af27f69428fb3f40deb5eeb8a332946192a66dc1e22e73e4"
     },
     {
-      "path": "src/chunks/playable_browser-KJFIAOMH.js",
-      "bytes": 10946596,
-      "sha256": "833ed5e57bd0f7976fc3f1a044e46fb06c4c74767ebfd8a0fbba988d118157d1"
+      "path": "src/chunks/playable_browser-Y5Z6LIY6.js",
+      "bytes": 10990105,
+      "sha256": "93adce68ab9372e844c111ba682f28bc5d0d2561a8b79b42acb3ec6a40172080"
     },
     {
       "path": "src/chunks/world_browser-4JFXSS35.js",
@@ -635,7 +610,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "8064b1711ac15c3a9afe0923ee3a561454c09d4c57ebee2bca3c6c38aba4b9be"
+      "sha256": "20061762a6a6748bf7f0cee5a641a4141403a8c27b6659e1cb86b29d8065bf14"
     },
     {
       "path": "world-maker-worker.js",
