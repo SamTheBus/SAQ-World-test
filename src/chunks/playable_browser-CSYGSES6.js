@@ -127765,10 +127765,7 @@ function renewSeat(state2, oldPid, { keepQuests = false } = {}) {
   if (state2.d9World?.navigation?.pending) {
     for (const row2 of state2.d9World.navigation.pending) if (row2.playerId === oldPid) row2.playerId = playerId;
   }
-  if (state2.playerRespawnsById?.[oldPid]) {
-    state2.playerRespawnsById[playerId] = state2.playerRespawnsById[oldPid];
-    delete state2.playerRespawnsById[oldPid];
-  }
+  if (state2.playerRespawnsById?.[oldPid]) delete state2.playerRespawnsById[oldPid];
   {
     const r = state2.playerRevivesById;
     if (r) {
