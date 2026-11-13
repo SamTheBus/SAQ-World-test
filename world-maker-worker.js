@@ -761,7 +761,7 @@ var ECONOMY_V1 = freezeWire({
   shopEpicLevel: 20,
   // Workshop: minutes of play for a Rare; other rarities scale by rarityPercent. Each earlier
   // reforge or resonance on the same item makes the next one cost repeatPercent as much.
-  workshopMinutes: { reforge: 5, resonance: 5, enchant: 10, purge: 2 },
+  workshopMinutes: { reforge: 5, resonance: 5, enchant: 10, purge: 2, rebind: 5 },
   awakenMinutes: [30, 38, 45, 53, 60],
   rarityPercent: [50, 75, 100, 150, 200, 300],
   repeatPercent: 150,
@@ -2617,7 +2617,7 @@ CAST["settlement-slot:village-outpost:01"] = freezeWire(Object.fromEntries([["ge
 
 // src/shared/content/settlement_services_v2.js
 var SERVICES_V2 = "settlement-services-candidate-v2";
-var SERVICE_ASSIGNMENTS = freezeWire({ "civilian:alpha:alderwood:smith": ["attune", "shatter"], "civilian:alpha:village:oren": ["attune", "shatter"], "civilian:alpha:town:bren": ["attune", "reforge", "awaken", "shatter", "materials"], "civilian:alpha:town:selene": ["enchant", "purge", "resonance", "shatter", "materials"] });
+var SERVICE_ASSIGNMENTS = freezeWire({ "civilian:alpha:alderwood:smith": ["attune", "shatter"], "civilian:alpha:village:oren": ["attune", "shatter"], "civilian:alpha:town:bren": ["attune", "reforge", "awaken", "shatter", "materials"], "civilian:alpha:town:selene": ["enchant", "purge", "resonance", "rebind", "shatter", "materials"] });
 var SPECIALIST_NPC = freezeWire({ id: "civilian:alpha:town:selene", name: "Selene", role: "enchanter", roleLabel: "Enchanter", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:007", band: 3, tile: { x: 5910, y: 5754 }, space: "exterior", color: "#806b9e" });
 var WORKSHOP_POLICY = freezeWire({ version: SERVICES_V2, serviceAssignments: SERVICE_ASSIGNMENTS, parent: "4af4d3519fb954a5161c799771d79e69ced9955044fb690fc78e6333a3fec8c4", stock: "unchanged personal band-derived ordinary gear; no wall-clock refresh", materials: { "Wakestone": "300", "Overlord's Sigil": "250", "Astral Essence": "500" }, reforge: "Dungeon execution formula: floor(150 * 1.045^((itemPower-1)*5) * 2^stars), 1 Sigil; one mutable affix", awaken: "2500*(stars+1) gold, stars+1 Wakestone, 5*(stars+1) target-tier scrap; same family and base identity; scaled existing affixes and one additional eligible line", enchant: "2+ stars, slot level 50+, 1 Astral Essence, one random active stat +25%, stars-1 capacity", purge: "1000*itemPower*max(stars,1) gold; remove enchants only", resonance: "Dungeon gold curve, 25+25*stars Monster Souls; World-supported stat sets, two/three-piece bonuses", shatter: "World ordinary salvage; protected/Unique/Sigil destruction forbidden. Dungeon Spectral Codex has no World authority", priceDomain: { maximumItemPower: 1e3 }, limits: { modifiedItems: 64, operationsPerItem: 32, materialPurchasesPerKind: 1e6 }, setMultipliers: "Dungeon constants.js: cumulative two/three-piece thresholds; eleven active-combat sets; inactive idle lines excluded" });
 var ORDINARY_SERVICE_NPCS = freezeWire([...LIFE_NPCS, ...STARTER_NPCS]);

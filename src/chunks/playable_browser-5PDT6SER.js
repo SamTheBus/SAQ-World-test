@@ -66,6 +66,7 @@ import {
   CARD_BY_FAMILY,
   CAVE_INTERIOR_NAVIGATION_D12_3A,
   CDR_CAP,
+  CLASS_GEAR,
   CLASS_KITS,
   CLASS_KIT_PIECES,
   CLASS_KIT_VERSION,
@@ -1065,7 +1066,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-EQSD2PXP.js";
+} from "./chunk-JIMYHDCS.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -105380,9 +105381,18 @@ function offhandKindOfItem(item2) {
   cache3.set(item2, kind);
   return kind;
 }
+var ELEMENT_KIND = Object.freeze({ fire: "fire", frost: "frost", lightning: "storm" });
 function offhandKind(player) {
-  const inv = player?.inventory, id = inv?.equipped?.subweapon;
-  return id ? offhandKindOfItem(inv.itemsById?.[id]) : null;
+  const inv = player?.inventory, id = inv?.equipped?.subweapon, item2 = id && inv.itemsById?.[id];
+  if (!item2) return null;
+  const kind = offhandKindOfItem(item2);
+  if (kind) return kind;
+  const d = itemDefinition(item2);
+  if (d?.subType !== "tome" || !TOME_ELEMENTS.includes(d.spellType)) return null;
+  const els = tomeElements(d.spellType);
+  if (els.length < 2) return null;
+  const cursor = Number(player.d8?.transient?.rotationCursor) || 0;
+  return ELEMENT_KIND[els[(cursor + els.length - 1) % els.length]] ?? null;
 }
 var OFFHAND_TOUCH_TEXT = Object.freeze({
   buckler: Object.freeze({ name: "Buckler", lines: Object.freeze(["Movement skills recharge 15% faster", "Perfect block window +0.1 s"]) }),
@@ -130707,6 +130717,8 @@ function createSettlementServicesMenu({ document: doc, adapter, readModel, clear
 }
 
 // src/client/settlement_services_menu_v1.js
+var NOUN_KIND = { "Buckler": "buckler", "Kite Shield": "kite", "Tower Shield": "tower", "Main-Gauche": "main-gauche", "Stiletto": "stiletto", "Kris": "kris", "Fire Tome": "fire", "Frost Tome": "frost", "Storm Tome": "storm" };
+var rebindable = (i) => i.generated?.definition?.slot === "subweapon" && Boolean(CLASS_GEAR[i.generated.progression?.gearClass]);
 function createSettlementServicesMenu2(options) {
   const { document: doc, adapter, readModel, clearInput, restoreFocus, reportError } = options;
   if (!doc.body.dataset.settlementServices) return createSettlementServicesMenu(options);
@@ -131129,7 +131141,7 @@ function createSettlementServicesMenu2(options) {
       }
     }
     shell2.append(wallet);
-    const modes = kind === "forge" ? [...[["attune", "Upgrade"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["shatter", "Salvage"], ["break", "Scraps"]].filter(([id]) => npc.services.includes(id === "break" ? "shatter" : id)), ...npc.stock?.length ? [["gear", "Buy"]] : []] : kind === "altar" ? [["enchant", "Enchant"], ["purge", "Purge"], ["resonance", "Resonance"]] : kind === "shop" ? [["gear", "Buy"], ["sell", "Sell"], ["supplies", "Potions"]] : [["supplies", "Potions"]];
+    const modes = kind === "forge" ? [...[["attune", "Upgrade"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["shatter", "Salvage"], ["break", "Scraps"]].filter(([id]) => npc.services.includes(id === "break" ? "shatter" : id)), ...npc.stock?.length ? [["gear", "Buy"]] : []] : kind === "altar" ? [["enchant", "Enchant"], ["purge", "Purge"], ["resonance", "Resonance"], ...npc.services?.includes("rebind") ? [["rebind", "Rebind"]] : []] : kind === "shop" ? [["gear", "Buy"], ["sell", "Sell"], ["supplies", "Potions"]] : [["supplies", "Potions"]];
     if (!modes.some(([id]) => id === mode)) mode = modes[0][0];
     if (modes.length > 1) {
       const tabs = el3("nav", void 0, "tn-tabs");
@@ -131315,10 +131327,10 @@ function createSettlementServicesMenu2(options) {
         shell2.append(foot2);
       } else body5.append(el3("p", "This slot is fully upgraded.", "tn-hint"));
     } else {
-      const worn = new Set(Object.values(inv.equipped)), items = Object.values(inv.itemsById).filter((i2) => i2.generated && !i2.unique && !i2.protected && !(mode === "shatter" && worn.has(i2.itemId)));
+      const worn = new Set(Object.values(inv.equipped)), items = Object.values(inv.itemsById).filter((i2) => i2.generated && !i2.unique && !i2.protected && !i2.generated.definition.unique && !(mode === "shatter" && worn.has(i2.itemId)) && (mode !== "rebind" || rebindable(i2)));
       if (!items.some((i2) => i2.itemId === selected)) selected = items[0]?.itemId;
       if (!items.length) {
-        body5.append(el3("p", "Bring gear with stars (drops or shop gear) to work on it here.", "tn-empty"));
+        body5.append(el3("p", mode === "rebind" ? "Bring a shield, dagger or Tome of your class to change its kind here. Uniques keep theirs." : "Bring gear with stars (drops or shop gear) to work on it here.", "tn-empty"));
         return;
       }
       const strip = el3("div", void 0, "tn-strip");
@@ -131337,6 +131349,8 @@ function createSettlementServicesMenu2(options) {
       card.style.borderTop = "3px solid " + (RARITY_COLORS[r.tier] ?? "#3a4654");
       card.append(itemHead(i, [RARITY_NAMES[r.tier], r.tier + "\u2605", r.enchants ? r.enchants + " enchant" + (r.enchants > 1 ? "s" : "") : null, r.set ? r.set + " set" : null].filter(Boolean).join(" \xB7 ")));
       body5.append(card);
+      const own = mode === "rebind" ? CLASS_GEAR[i.generated.progression.gearClass].subweapon : null;
+      if (own && (!(line33 >= 0 && line33 < own.length) || own[line33] === r.definition.noun)) line33 = own.findIndex((n) => n !== r.definition.noun);
       const q2 = workshopQuote(p, i, mode, line33);
       if (mode === "reforge") {
         const box6 = el3("div");
@@ -131386,10 +131400,29 @@ function createSettlementServicesMenu2(options) {
           grid.append(c);
         }
         body5.append(grid);
+      } else if (mode === "rebind") {
+        const box6 = el3("div");
+        box6.append(el3("p", "Pick its new kind", "tn-sect"));
+        own.forEach((n, index) => {
+          const now3 = n === r.definition.noun, t = OFFHAND_TOUCH_TEXT[NOUN_KIND[n]], b2 = button3("", () => {
+            line33 = index;
+            confirm = null;
+            redraw();
+          }, "kind:" + index, "tn-radio"), txt = el3("span");
+          txt.append(el3("b", n + (now3 ? " (now)" : "")));
+          for (const l of t?.lines ?? []) txt.append(el3("small", l, "tn-hint is-left"));
+          txt.style.display = "grid";
+          b2.append(el3("span", void 0, "tn-dot"), txt);
+          b2.disabled = busy || now3;
+          b2.setAttribute("aria-pressed", String(line33 === index));
+          box6.append(b2);
+        });
+        box6.append(el3("p", "It keeps every line and its stars. Its base stats become those of the new kind.", "tn-hint is-left"));
+        body5.append(box6);
       } else if (mode === "shatter" && q2.preview && typeof q2.preview === "object") body5.append(el3("p", "Salvage breaks this item for " + Object.entries(q2.preview).map(([k, v]) => v + " " + k).join(", ") + ". It is gone for good.", "tn-note"));
       else if (typeof q2.preview === "string") body5.append(el3("p", q2.preview, "tn-note"));
       if (q2.problem) body5.append(el3("p", q2.problem, "tn-note is-warn"));
-      const afford = q2.gold !== void 0 ? costs(body5, q2.gold, q2.materials, inv, npc, p) : false, risky = mode === "shatter" || mode === "purge", verb = { reforge: "Reforge this line", awaken: "Awaken \xB7 +1 star", enchant: "Enchant", purge: "Purge enchantments", resonance: "Change set", shatter: "Salvage" }[mode];
+      const afford = q2.gold !== void 0 ? costs(body5, q2.gold, q2.materials, inv, npc, p) : false, risky = mode === "shatter" || mode === "purge", verb = { reforge: "Reforge this line", awaken: "Awaken \xB7 +1 star", enchant: "Enchant", purge: "Purge enchantments", resonance: "Change set", rebind: "Rebind", shatter: "Salvage" }[mode];
       const b = button3(risky && confirm === i.itemId ? "Tap again to " + verb.toLowerCase() : verb, () => {
         if (!risky || confirm === i.itemId) issue("service.modify", { npcId, itemId: i.itemId, operation: mode, line: line33 });
         else {

@@ -2374,7 +2374,7 @@ var ECONOMY_V1 = freezeWire({
   shopEpicLevel: 20,
   // Workshop: minutes of play for a Rare; other rarities scale by rarityPercent. Each earlier
   // reforge or resonance on the same item makes the next one cost repeatPercent as much.
-  workshopMinutes: { reforge: 5, resonance: 5, enchant: 10, purge: 2 },
+  workshopMinutes: { reforge: 5, resonance: 5, enchant: 10, purge: 2, rebind: 5 },
   awakenMinutes: [30, 38, 45, 53, 60],
   rarityPercent: [50, 75, 100, 150, 200, 300],
   repeatPercent: 150,
@@ -4908,7 +4908,7 @@ function validateCommand(command) {
     safeInteger(command.payload.inventoryRevision);
     requireContract(/^civilian:[a-z0-9:-]{1,100}$/.test(command.payload.npcId), "Invalid specialist");
     if (command.kind === "service.modify") {
-      requireContract(/^item:ply:[0-9a-f]{32}:ent:[0-9a-f]{32}$/.test(command.payload.itemId) && ["awaken", "reforge", "enchant", "purge", "resonance", "shatter"].includes(command.payload.operation), "Invalid modification");
+      requireContract(/^item:ply:[0-9a-f]{32}:ent:[0-9a-f]{32}$/.test(command.payload.itemId) && ["awaken", "reforge", "enchant", "purge", "resonance", "rebind", "shatter"].includes(command.payload.operation), "Invalid modification");
       safeInteger(command.payload.line, 0, 4);
     } else {
       requireContract(typeof command.payload.material === "string" && command.payload.material.length <= 40, "Invalid material");
@@ -6181,6 +6181,48 @@ function uniqueDropV1({ from = null, biome = null, cls }, chance, pick6) {
   return pool.length && chance >= 1 - UNIQUE_DROP_CHANCE.world ? pool[Math.floor(pick6 * pool.length)] : null;
 }
 
+// src/shared/content/smart_offhand_v1.js
+var TREE_OFFHANDS = Object.freeze({
+  bastion: "Kite Shield",
+  breaker: "Tower Shield",
+  reprisal: "Buckler",
+  // Guard / stuns / perfect blocks and punishing
+  duelist: "Main-Gauche",
+  venom: "Kris",
+  skirmish: "Stiletto",
+  // parries / bleeds / crits on the move
+  ember: "Fire Tome",
+  rime: "Frost Tome",
+  conduit: "Storm Tome"
+});
+var SMART_OFFHAND_CHANCE = 0.6;
+var isClassTree = (cls, tree) => Boolean(CLASS_TREES[cls]?.some((t) => t.id === tree));
+function mainClassTree(cls, ranks) {
+  const trees = CLASS_TREES[cls];
+  if (!trees || !ranks) return null;
+  const spent = {};
+  for (const [id, r] of Object.entries(ranks)) {
+    const s = CLASS_TREE_SKILLS[id];
+    if (s?.classId === cls) spent[s.tree] = (spent[s.tree] ?? 0) + (Number(r) || 0);
+  }
+  let best = null, top = 0, tie = false;
+  for (const t of trees) {
+    const n = spent[t.id] ?? 0;
+    if (n > top) {
+      best = t.id;
+      top = n;
+      tie = false;
+    } else if (n > 0 && n === top) tie = true;
+  }
+  return tie ? null : best;
+}
+function smartOffhandNoun(cls, tree, random) {
+  const own3 = CLASS_GEAR[cls].subweapon, match = TREE_OFFHANDS[tree];
+  if (random() < SMART_OFFHAND_CHANCE) return match;
+  const rest = own3.filter((n) => n !== match);
+  return rest[Math.floor(random() * rest.length)];
+}
+
 // src/shared/content/reward_modifiers.js
 function validateRewardModifiers(v) {
   closedRecord(v, ["version", "goldHundredths", "occurrenceHundredths", "qualityHundredths", "dualEligible", "triEligible"]);
@@ -6198,7 +6240,8 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth", "questGear"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth", "questGear", "mainTree"]);
+  requireContract(v.mainTree === void 0 || v.gearClass !== void 0 && isClassTree(v.gearClass, v.mainTree), "Main tree policy");
   requireContract(v.questGear === void 0 || Object.hasOwn(QUEST_GEAR_GROUPS, v.questGear) && v.rarityPolicyHash !== void 0, "Quest gear policy");
   requireContract(v.lockedDepth === void 0 || v.episodeSnapshotId !== void 0 && progressionBigInt(v.lockedDepth) >= 1n, "Co-op reward depth policy");
   requireContract(v.bestiaryQuality === void 0 || Number.isSafeInteger(v.bestiaryQuality) && v.bestiaryQuality > 0 && v.bestiaryQuality <= 1e4 && v.rarityPolicyHash !== void 0, "Bestiary quality policy");
@@ -6807,7 +6850,7 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
   const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : progression.swiftKill && rolledTier < 1 ? 1 : rolledTier;
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = questGearFamiliesV1(cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES, progression.questGear);
-  const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own3 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own3 ?? [], ...shared, ...uq?.trophy ? [uq.noun] : []], n = noun ?? (shared.length && random() < 0.2 ? pick6(shared) : pick6(own3));
+  const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own3 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own3 ?? [], ...shared, ...uq?.trophy ? [uq.noun] : []], n = noun ?? (type === "subweapon" && cls && progression.mainTree ? smartOffhandNoun(cls, progression.mainTree, random) : shared.length && random() < 0.2 ? pick6(shared) : pick6(own3));
   requireContract((family2 ? cls ? classFamilies : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
   const E = c.dungeonScale(power2).E, R = c.q(100 + 7 * rarityTier, 100), P2 = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R, c.q(type === "overall" ? 18 : 10, 10));
   const I = (v) => {
@@ -6825,7 +6868,8 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
     raw.implicitType = roll2 < 0.33 ? "atk" : roll2 < 0.66 ? "maxHp" : "def";
     raw.implicitPctType = pick6(["atkPct", "maxHpPct", "defPct", "strPct", "dexPct", "intPct"]);
   }
-  if (sub === "tome") raw.spellType = cls ? TOME_NOUN_ELEMENTS[n] : progression.modifiers ? selectD8TomeElement(progressionBigInt(power2) >= 13n ? 13 : 1, rarityTier, random, progression.modifiers) : selectBaseTomeElement(progressionBigInt(power2) >= 13n ? 13 : 1, random, progression.tomeEligibility);
+  if (sub === "tome") raw.spellType = uq?.spellType ?? /* Tome fix 3A: a unique Tome sets its element, rarely two or all three */
+  (cls ? TOME_NOUN_ELEMENTS[n] : progression.modifiers ? selectD8TomeElement(progressionBigInt(power2) >= 13n ? 13 : 1, rarityTier, random, progression.modifiers) : selectBaseTomeElement(progressionBigInt(power2) >= 13n ? 13 : 1, random, progression.tomeEligibility));
   dungeonItemBasesD9(raw, power2, c);
   if (cls && !["subweapon", "ring"].includes(type)) plainClassBases(raw);
   if (progression.combatHash) {
@@ -7883,7 +7927,13 @@ function workshopResult(item) {
     const step = steps[ordinal], random = (label) => gearHash4(WORKSHOP_VERSION + "/" + g.seed + "/" + ordinal + "/" + step.kind + "/" + label) / 4294967296;
     if (step.kind === "awaken") {
       requireContract(tier < 5 && !enchants, "Purge before awakening; maximum five stars");
-      const next = generateGear3(g.seed, g.progression ?? g.contentDepth, { tier: tier + 1, family: g.definition.slot, subType: g.definition.subType ?? null, noun: g.definition.noun });
+      const next = generateGear3(g.seed, g.progression ?? g.contentDepth, {
+        tier: tier + 1,
+        family: g.definition.slot,
+        subType: g.definition.subType ?? null,
+        noun: definition.noun
+        /* the current noun: a rebind may have changed it */
+      });
       definition = copyWire(next.definition);
       for (const a of next.affixes) adjust(definition, a.key, a.value, 0);
       affixes = affixes.map((a) => a.key === "passiveRank" || isFixedV3(a.key) ? a : { ...a, value: scale(a.value, 100 + 15 * (tier + 1), 100 + 15 * tier, integer.has(a.key) || a.key === "lifeHit") });
@@ -7926,6 +7976,14 @@ function workshopResult(item) {
       adjust(definition, old.key, old.value, 0);
       adjust(definition, name, 0, value);
       affixes[step.line] = skill ? { key: name, value, skill } : { key: name, value };
+    } else if (step.kind === "rebind") {
+      const own3 = CLASS_GEAR[g.progression?.gearClass]?.subweapon;
+      requireContract(!enchants && own3 && g.definition.slot === "subweapon" && !definition.unique && Number.isInteger(step.line) && step.line >= 0 && step.line < own3.length && own3[step.line] !== definition.noun, "Invalid rebind");
+      const was = definition.noun, name = definition.name, next = generateGear3(g.seed, g.progression, { tier, family: "subweapon", subType: g.definition.subType, noun: own3[step.line] });
+      definition = copyWire(next.definition);
+      for (const a of next.affixes) adjust(definition, a.key, a.value, 0);
+      for (const a of affixes) adjust(definition, a.key, 0, a.value);
+      definition.name = name.replace(was, own3[step.line]);
     } else if (step.kind === "enchant") {
       requireContract(tier >= 2 && enchants < tier - 1, "Enchant capacity exceeded");
       unenchanted ??= copyWire(definition);
@@ -13900,7 +13958,7 @@ CAST["settlement-slot:village-outpost:01"] = freezeWire(Object.fromEntries([["ge
   const c = BUILT_CASTS["civilian:alpha:alderwood:" + k];
   return [role, { name, kit: c.kit, look: c.look, cloth: c.cloth, skirt: c.skirt }];
 })));
-var generatedShopServicesV1 = (role, size) => role === "smith" ? size === "village" || size === "hamlet" ? ["attune", "shatter"] : ["attune", "reforge", "awaken", "shatter", "materials"] : role === "enchanter" ? ["enchant", "purge", "resonance", "shatter", "materials"] : [];
+var generatedShopServicesV1 = (role, size) => role === "smith" ? size === "village" || size === "hamlet" ? ["attune", "shatter"] : ["attune", "reforge", "awaken", "shatter", "materials"] : role === "enchanter" ? ["enchant", "purge", "resonance", "rebind", "shatter", "materials"] : [];
 var at = null;
 var list = [];
 function generatedTownNpcsV1() {
@@ -13930,7 +13988,7 @@ function generatedTownNpcsV1() {
 // src/shared/content/settlement_services_v2.js
 var SERVICES_V2 = "settlement-services-candidate-v2";
 var SERVICES_V2_HASH = "23d063a4274a386f580788ecf149edafa58a646018606c70f22932f13e6280a2";
-var SERVICE_ASSIGNMENTS = freezeWire({ "civilian:alpha:alderwood:smith": ["attune", "shatter"], "civilian:alpha:village:oren": ["attune", "shatter"], "civilian:alpha:town:bren": ["attune", "reforge", "awaken", "shatter", "materials"], "civilian:alpha:town:selene": ["enchant", "purge", "resonance", "shatter", "materials"] });
+var SERVICE_ASSIGNMENTS = freezeWire({ "civilian:alpha:alderwood:smith": ["attune", "shatter"], "civilian:alpha:village:oren": ["attune", "shatter"], "civilian:alpha:town:bren": ["attune", "reforge", "awaken", "shatter", "materials"], "civilian:alpha:town:selene": ["enchant", "purge", "resonance", "rebind", "shatter", "materials"] });
 var SPECIALIST_NPC = freezeWire({ id: "civilian:alpha:town:selene", name: "Selene", role: "enchanter", roleLabel: "Enchanter", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:007", band: 3, tile: { x: 5910, y: 5754 }, space: "exterior", color: "#806b9e" });
 var WORKSHOP_POLICY = freezeWire({ version: SERVICES_V2, serviceAssignments: SERVICE_ASSIGNMENTS, parent: "4af4d3519fb954a5161c799771d79e69ced9955044fb690fc78e6333a3fec8c4", stock: "unchanged personal band-derived ordinary gear; no wall-clock refresh", materials: { "Wakestone": "300", "Overlord's Sigil": "250", "Astral Essence": "500" }, reforge: "Dungeon execution formula: floor(150 * 1.045^((itemPower-1)*5) * 2^stars), 1 Sigil; one mutable affix", awaken: "2500*(stars+1) gold, stars+1 Wakestone, 5*(stars+1) target-tier scrap; same family and base identity; scaled existing affixes and one additional eligible line", enchant: "2+ stars, slot level 50+, 1 Astral Essence, one random active stat +25%, stars-1 capacity", purge: "1000*itemPower*max(stars,1) gold; remove enchants only", resonance: "Dungeon gold curve, 25+25*stars Monster Souls; World-supported stat sets, two/three-piece bonuses", shatter: "World ordinary salvage; protected/Unique/Sigil destruction forbidden. Dungeon Spectral Codex has no World authority", priceDomain: { maximumItemPower: 1e3 }, limits: { modifiedItems: 64, operationsPerItem: 32, materialPurchasesPerKind: 1e6 }, setMultipliers: "Dungeon constants.js: cumulative two/three-piece thresholds; eleven active-combat sets; inactive idle lines excluded" });
 var hasServicesV2 = (b) => b?.settlementServicesVersion === SERVICES_V2 && b?.settlementServicesHash === SERVICES_V2_HASH;
@@ -21440,6 +21498,13 @@ function workshopQuote(p, item, op, line = 0) {
     if (!Number.isInteger(line) || line < 0 || line >= r.affixes.length || r.lockedLine !== null && r.lockedLine !== line) problem = "Select the unlocked reforge line";
     gold = world ? workshopGoldV1("reforge", power(item), r.tier, repeats("reforge")) : exponentialCost(150, item, [2, 1]);
     materials2["Overlord's Sigil"] = 1;
+  } else if (op === "rebind") {
+    const cls = item.generated.progression?.gearClass, own3 = cls && item.generated.definition.slot === "subweapon" ? CLASS_GEAR[cls]?.subweapon : null;
+    if (!own3) problem = "Only class off-hands can be rebound";
+    else if (r.enchants) problem = "Purge enchantments before rebinding";
+    else if (!Number.isInteger(line) || line < 0 || line >= own3.length || own3[line] === r.definition.noun) problem = "Pick a different kind";
+    gold = world ? workshopGoldV1("rebind", power(item), r.tier, repeats("rebind")) : "0";
+    materials2[SALVAGE_MATERIALS4[r.tier]] = 3;
   } else if (op === "enchant") {
     const slot = item.generated.definition.slot === "ring" ? "ring1" : item.generated.definition.slot, attunement = Math.max(p.inventory.economy.slotLevels[slot] ?? 0, slot === "ring1" ? p.inventory.economy.slotLevels.ring2 ?? 0 : 0);
     if (r.tier < 2) problem = "Magic (2-star) or better equipment required";
@@ -21457,7 +21522,7 @@ function workshopQuote(p, item, op, line = 0) {
     if (Object.values(p.inventory.equipped).includes(item.itemId)) problem = "Unequip before shattering";
   } else problem = "Unknown workshop operation";
   if ((item.workshop?.steps.length ?? 0) >= MAX_WORKSHOP_STEPS && op !== "shatter") problem = "This item has reached its bounded modification history";
-  return { gold, materials: materials2, problem, preview: op === "shatter" ? salvageQuote(p, item).materials : op === "enchant" ? "One random active stat +25%" : op === "purge" ? "Restore the pre-enchantment stats" : op === "resonance" ? "A different supported two/three-piece set" : op === "awaken" ? `${r.tier} \u2192 ${r.tier + 1} stars; one additional modifier` : "Reroll only the selected affix; other lines remain locked" };
+  return { gold, materials: materials2, problem, preview: op === "shatter" ? salvageQuote(p, item).materials : op === "enchant" ? "One random active stat +25%" : op === "purge" ? "Restore the pre-enchantment stats" : op === "resonance" ? "A different supported two/three-piece set" : op === "awaken" ? `${r.tier} \u2192 ${r.tier + 1} stars; one additional modifier` : op === "rebind" ? "A new kind; every line stays" : "Reroll only the selected affix; other lines remain locked" };
 }
 function workshopProblem(s, p, n, kind2, payload) {
   if (!hasServicesV2(s.d9World?.plannedWorld) || !p.inventory.services?.workshop) return "Workshop unavailable";
@@ -21533,7 +21598,7 @@ function applyWorkshop(s, p, c, order) {
   inv.revision++;
   record.receipts.push({ command: copyWire(c), authorityOrder: order, tick: s.tick, revision: inv.revision });
   item.workshop ??= { version: WORKSHOP_VERSION, steps: [] };
-  item.workshop.steps.push({ kind: op, ...op === "reforge" ? { line: c.payload.line } : {} });
+  item.workshop.steps.push({ kind: op, ...op === "reforge" || op === "rebind" ? { line: c.payload.line } : {} });
   workshopResult(item);
 }
 function workshopAccounting(p) {
@@ -21573,7 +21638,7 @@ function validateWorkshopItem(p, item) {
   requireContract(r && same15(r.baseItem, unmodifiedItem(item)), "Modification lacks original ownership");
   closedRecord(item.workshop, ["version", "steps"]);
   requireContract(item.workshop.version === WORKSHOP_VERSION, "Unknown modification version");
-  const expected = r.receipts.map((q) => ({ kind: q.command.payload.operation, ...q.command.payload.operation === "reforge" ? { line: q.command.payload.line } : {} }));
+  const expected = r.receipts.map((q) => ({ kind: q.command.payload.operation, ...q.command.payload.operation === "reforge" || q.command.payload.operation === "rebind" ? { line: q.command.payload.line } : {} }));
   requireContract(same15(expected, item.workshop.steps), "Modification history mismatch");
   workshopResult(item);
 }
@@ -21668,7 +21733,7 @@ function validateWorkshopProgress(before, after, pid) {
   }
 }
 function validWorkshopChange(p, a, b) {
-  return Boolean(b && workshopExtension(a, b) && p.inventory.services?.workshop?.records[b.itemId] && same15(b.workshop?.steps, p.inventory.services.workshop.records[b.itemId].receipts.map((r) => ({ kind: r.command.payload.operation, ...r.command.payload.operation === "reforge" ? { line: r.command.payload.line } : {} }))));
+  return Boolean(b && workshopExtension(a, b) && p.inventory.services?.workshop?.records[b.itemId] && same15(b.workshop?.steps, p.inventory.services.workshop.records[b.itemId].receipts.map((r) => ({ kind: r.command.payload.operation, ...r.command.payload.operation === "reforge" || r.command.payload.operation === "rebind" ? { line: r.command.payload.line } : {} }))));
 }
 
 // src/shared/contracts/gear_affix_totals_v2.js
@@ -27667,7 +27732,7 @@ function prepareEpisodeReward(state, p, source10, position, spaceInstanceId) {
   const worldProgression = ((w) => {
     const q = p.bestiary?.stats.itemQuality;
     return q && w.rarityPolicyHash !== void 0 ? { ...w, bestiaryQuality: q } : w;
-  })(captureQuickClearRewardV1(state, source10, captureBoonRewardV1(state, p, captureSiteRewardV1(state, source10, captureWorldRarityV2(state, p, source10, source10.progression ?? prototypeRewardProgression(source10.rank, id)))))), heroClass = heroClassOf(p.d8)?.id, world = worldProgression.combatHash === WORLD_COMBAT_HASH, baseProgression = heroClass && world ? { ...worldProgression, gearClass: heroClass, wardrobe: WARDROBE_V1, affixes: AFFIXES_V3 } : world ? { ...worldProgression, armor: "overall" } : worldProgression, modifiers = p.d8 ? progressionRewardWitness(p.d8) : null, progression = modifiers ? { ...baseProgression, quality: 1 + modifiers.qualityHundredths / 100, tomeEligibility: "personal-tome-d8-v1", modifiers } : baseProgression;
+  })(captureQuickClearRewardV1(state, source10, captureBoonRewardV1(state, p, captureSiteRewardV1(state, source10, captureWorldRarityV2(state, p, source10, source10.progression ?? prototypeRewardProgression(source10.rank, id)))))), heroClass = heroClassOf(p.d8)?.id, world = worldProgression.combatHash === WORLD_COMBAT_HASH, mainTree = heroClass && world ? mainClassTree(heroClass, p.d8?.classRanks) : null, baseProgression = heroClass && world ? { ...worldProgression, gearClass: heroClass, wardrobe: WARDROBE_V1, affixes: AFFIXES_V3, ...mainTree ? { mainTree } : {} } : world ? { ...worldProgression, armor: "overall" } : worldProgression, modifiers = p.d8 ? progressionRewardWitness(p.d8) : null, progression = modifiers ? { ...baseProgression, quality: 1 + modifiers.qualityHundredths / 100, tomeEligibility: "personal-tome-d8-v1", modifiers } : baseProgression;
   const ordinal = source10.kind === "enemy" ? safeInteger(inv.renewal.defeats + 1, 1) : 0, reward = rollContentReward(state, p, { ...source10, ...source10.progression ? { progression: worldProgression } : {}, ordinal, modifiers }), dropPosition = reward.definitionId ? freeGearPosition(state, p, spaceInstanceId, position) : { ...position };
   const unique2 = inv.d7 && reward.definitionId && heroClass && world ? uniqueRewardV1(state, source10, heroClass, gearSeed(state, p, id)) : null, dropped = unique2 ? { ...progression, unique: unique2 } : progression;
   const generated = inv.d7 && reward.definitionId ? generateGear3(gearSeed(state, p, id), dropped) : null;
@@ -30632,6 +30697,7 @@ export {
   validateBestiaryRootV1,
   projectBestiaryV1,
   WARDROBE_V1,
+  CLASS_GEAR,
   CDR_CAP,
   AFFIXES_V3,
   SKILL_GROUPS,
