@@ -26634,6 +26634,10 @@ function validateHellImpsV1(s, h, I) {
   }
 }
 
+// src/shared/contracts/trip_hell_arena_v1.js
+var WALL_OUT = 44;
+var OUT = WALL_OUT + 50;
+
 // src/shared/content/trip_nightmare_v1.js
 var TRIP_NIGHTMARE_V1 = "trip-nightmare-v1";
 var NIGHTMARE_KINDS = Object.freeze(["sporecrown", "frog"]);
@@ -26807,7 +26811,8 @@ var point13 = (q, label2) => {
   requireContract(Number.isFinite(q.x) && Number.isFinite(q.y), label2);
 };
 function validateNightmareV1(s, h, n) {
-  closedRecord(n, ["version", "kind", "level", "born", "x", "y", "dx", "hp", "maxHp", "attack", "move", "next", "biteNext", "turn", "lastHit", "caps", "capN", "splats", "legs", "dead", "exit", "isle", "sunk"]);
+  closedRecord(n, ["version", "kind", "level", "born", "x", "y", "dx", "hp", "maxHp", "attack", "move", "next", "biteNext", "turn", "lastHit", "caps", "capN", "splats", "legs", "dead", "exit", "isle", "sunk", "fallen"]);
+  requireContract(Array.isArray(n.fallen) && n.fallen.every((pid, i) => typeof pid === "string" && h.heroesByPlayerId[pid] && (i === 0 || n.fallen[i - 1] < pid)) && (n.sunk === null || n.fallen.length === 0), "Nightmare fallen");
   requireContract(HELL_ISLAND_KEYS.includes(n.isle), "Nightmare island");
   if (n.sunk !== null) {
     safeInteger(n.sunk, n.born, s.tick);
