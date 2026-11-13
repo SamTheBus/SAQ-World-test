@@ -199363,6 +199363,8 @@ function createCombatFeedback() {
   loadNumberFont();
   let domain = null, context = null, cursor = 0, numbers = [], impacts2 = [], peak = 0, lastModel = null, lastLayout = [], lastReserved = [];
   const reactions = /* @__PURE__ */ new Map(), primaries = /* @__PURE__ */ new Map(), ticks = /* @__PURE__ */ new Map();
+  const guessed = /* @__PURE__ */ new Map();
+  let guessedKey = -Infinity;
   let rainbow = false;
   const rainbowFill = (ctx, x, w, seq, t) => {
     const g = ctx.createLinearGradient(x, 0, x + Math.max(1, w), 0);
@@ -199392,6 +199394,15 @@ function createCombatFeedback() {
     numbers = numbers.filter((n) => n.shown === void 0 ? time3 - n.born <= HIT_FEEDBACK.placementMs : time3 - n.shown < combatTextStyle(n).life);
     impacts2 = impacts2.filter((n) => time3 - n.born < 520);
     for (const [id2, r] of reactions) if (time3 - r.born >= HIT_FEEDBACK.recoilMs) reactions.delete(id2);
+    for (const h of model.predictedHits ?? []) {
+      if (!(h.key > guessedKey)) continue;
+      guessedKey = h.key;
+      boundedSet(reactions, h.targetId, { born: time3, direction: { ...h.direction }, position: { ...h.position }, heavy: h.heavy, player: false, defended: false });
+      guessed.delete(h.targetId);
+      guessed.set(h.targetId, time3);
+      if (guessed.size > 64) guessed.delete(guessed.keys().next().value);
+    }
+    const ownId = model.playersById?.[model.localPlayerId]?.entityId;
     for (const e of model.primary?.events ?? []) {
       if (e.eventSequence <= cursor) continue;
       cursor = e.eventSequence;
@@ -199411,7 +199422,9 @@ function createCombatFeedback() {
       const dx = sourcePosition ? position4.x - sourcePosition.x : 0, dy = sourcePosition ? position4.y - sourcePosition.y : 0, length = Math.hypot(dx, dy);
       const direction3 = length > 1e-3 ? { x: dx / length, y: dy / length } : { x: 0, y: 0 };
       const player = target.team === "party";
-      boundedSet(reactions, e.subject.entityId, { born: time3, direction: direction3, position: position4, heavy: heavy2, player, defended: Boolean(e.payload.defenseKind) });
+      const shownEarly = e.kind === "combat.damageApplied" && e.payload.mechanic === "main" && e.source.entityId === ownId && time3 - (guessed.get(e.subject.entityId) ?? -Infinity) < 700;
+      if (shownEarly) guessed.delete(e.subject.entityId);
+      else boundedSet(reactions, e.subject.entityId, { born: time3, direction: direction3, position: position4, heavy: heavy2, player, defended: Boolean(e.payload.defenseKind) });
       const same12 = numbers.filter((n) => n.targetId === e.subject.entityId);
       if (same12.length >= HIT_FEEDBACK.maxPerTarget) numbers = numbers.filter((n) => n !== same12[0]);
       if (numbers.length >= HIT_FEEDBACK.maxNumbers) numbers.shift();
@@ -213018,8 +213031,10 @@ var CONTINUE_TICKS = SHIELD_SWORD_PRIMARY.continuationTicks;
 function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
   let frames = [], current = null, arrivedAt = 0, gap2 = 50, cache10 = null, cacheAt = -1, spacing = 33, jitter = 8, delay = 60, space = null;
   let intent = { x: 0, y: 0 }, intentAt = 0, releasedAt = null, hold = null, speed = 0, own = null, ownAt = -1, ownId = null, lastOwn = null, err = { x: 0, y: 0 }, jump3 = true, mode = "";
+  let vel = null;
   let tickOffset = null;
   let learned = {}, held = false, queued2 = false, tap = null, guess = null, lastSwing = null, skillGuess = null;
+  let pressAim = null, contactUntil = -Infinity, contactKey = 0;
   const frameAge = (model, t) => tickOffset === null || !Number.isFinite(model?.tick) ? t - arrivedAt : Math.max(0, t - (model.tick * TICK_MS3 + tickOffset));
   const leadTick = (t) => tickOffset === null ? null : (t - tickOffset + rtt()) / TICK_MS3;
   function bracket(t) {
@@ -213060,22 +213075,23 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       hold = null;
       return own;
     }
-    const base3 = placed(id2, e, br), isHeld = Math.hypot(intent.x, intent.y) > 0.1;
+    const base3 = e.position, isHeld = Math.hypot(intent.x, intent.y) > 0.1;
     let target = base3;
     let now_ = "base";
     if (isHeld && speed > 0) {
-      const k = 1 / Math.hypot(intent.x, intent.y), dx = intent.x * k, dy = intent.y * k, lead = Math.min(LEAD_MAX_MS, rtt() + frameAge(model, t));
-      target = reach(model, e, e.position, { x: e.position.x + dx * speed * lead, y: e.position.y + dy * speed * lead });
+      const k = 1 / Math.hypot(intent.x, intent.y), lead = Math.min(LEAD_MAX_MS, rtt() + frameAge(model, t));
+      const settled = vel && t - intentAt > rtt() + 150 && t - vel.at < 300, dx = settled ? vel.x : intent.x * k * speed, dy = settled ? vel.y : intent.y * k * speed;
+      target = reach(model, e, e.position, { x: e.position.x + dx * lead, y: e.position.y + dy * lead });
       if (own && Math.hypot(own.x - target.x, own.y - target.y) <= GLIDE_SNAP_PX) {
         if (mode !== "lead") mode = "lead";
         jump3 = false;
-        const walked = reach(model, e, own, { x: own.x + dx * speed * dt, y: own.y + dy * speed * dt }), f = 1 - Math.exp(-dt / CORRECT_MS);
+        const walked = reach(model, e, own, { x: own.x + dx * dt, y: own.y + dy * dt }), f = 1 - Math.exp(-dt / CORRECT_MS);
         own = { x: walked.x + (target.x - walked.x) * f, y: walked.y + (target.y - walked.y) * f };
         err = { x: own.x - target.x, y: own.y - target.y };
         return own;
       }
       now_ = "lead";
-    } else if (hold && t - releasedAt < rtt() + delay + 80) {
+    } else if (hold && t - releasedAt < rtt() + delay + 80 && !(vel && vel.at > releasedAt && Math.hypot(vel.x, vel.y) < 4e-3)) {
       target = hold;
       now_ = "hold";
     } else hold = null;
@@ -213155,6 +213171,23 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
     }
     return shown2 ?? phaseAt(guess, D2);
   }
+  function ownContact(model, id2, e, mine, w, D2, br, t) {
+    const T121 = timingFor(w.comboStep), activeAt2 = w.phase === "active" ? w.phaseStartedTick : w.phase === "recovery" ? w.phaseStartedTick - T121.active : null;
+    if (activeAt2 === null || activeAt2 < contactUntil || D2 - activeAt2 > T121.active + 6) return null;
+    contactUntil = activeAt2 + T121.active + T121.recovery;
+    const raw = w.primaryActionId === "guess" && pressAim ? pressAim : w.aim, len = Math.hypot(raw?.x ?? 0, raw?.y ?? 0);
+    if (!len) return null;
+    const ax = raw.x / len, ay = raw.y / len, found = [];
+    for (const [k, x] of Object.entries(model.entitiesById)) {
+      if (k === id2 || x.team !== "hostile" || !x.alive || !x.position) continue;
+      const p = br ? placed(k, x, br) : x.position, dx = p.x - mine.x, dy = p.y - mine.y, d = Math.hypot(dx, dy);
+      if (d - (e.hullRadius ?? 10) - (x.hullRadius ?? 10) > 34) continue;
+      if (d > 0 && (dx * ax + dy * ay) / d < 0.1) continue;
+      found.push({ targetId: k, d, position: { x: p.x, y: p.y }, direction: d > 0 ? { x: dx / d, y: dy / d } : { x: ax, y: ay } });
+    }
+    found.sort((m, n) => m.d - n.d);
+    return found.slice(0, [4, 6, 8][(w.comboStep - 1) % 3] ?? 4).map((h) => ({ key: t + ++contactKey * 1e-6, targetId: h.targetId, position: h.position, direction: h.direction, heavy: w.comboStep === 3 }));
+  }
   return Object.freeze({
     // The guest held a direction (or let go): {x, y} as sent to the host.
     intent(next) {
@@ -213171,6 +213204,7 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
     // The guest pressed or let go of Attack (combat.primaryIntent's payload).
     press(payload) {
       cache10 = null;
+      if (Number.isFinite(payload?.aim?.x) && Number.isFinite(payload?.aim?.y)) pressAim = { x: payload.aim.x, y: payload.aim.y };
       if (payload?.pressed) {
         if (!held) {
           const D2 = leadTick(now3());
@@ -213189,8 +213223,20 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       if (D2 !== null && typeof payload?.skillId === "string") skillGuess = { skillId: payload.skillId, tick: Math.round(D2), x: payload.aim?.x ?? 1, y: payload.aim?.y ?? 0 };
     },
     arrived(before, after, model = null) {
-      if (after === current) return;
       const t = now3();
+      const id2 = model?.playersById?.[model.localPlayerId]?.entityId, e = id2 ? after[id2] : null;
+      if (e?.position && e.alive) {
+        if (lastOwn && lastOwn.id === id2 && model.tick > lastOwn.tick) {
+          const ms = (model.tick - lastOwn.tick) * TICK_MS3, vx = (e.position.x - lastOwn.x) / ms, vy = (e.position.y - lastOwn.y) / ms;
+          vel = Math.hypot(vx, vy) < 2 ? { x: vx, y: vy, at: t } : null;
+        }
+        if (lastOwn && lastOwn.id === id2 && model.tick > lastOwn.tick && Math.hypot(intent.x, intent.y) > 0.1 && t - intentAt > rtt() + 150) {
+          const v = Math.hypot(e.position.x - lastOwn.x, e.position.y - lastOwn.y) / ((model.tick - lastOwn.tick) * 1e3 / 60);
+          if (v > 0.01 && v < 2) speed = speed ? speed * 0.7 + v * 0.3 : v;
+        }
+        lastOwn = { id: id2, tick: model.tick, x: e.position.x, y: e.position.y };
+      } else lastOwn = null;
+      if (after === current) return;
       const where = model?.context?.spaceInstanceId ?? null;
       if (!current || before !== current || where !== space || !Number.isFinite(model?.tick)) {
         frames = [];
@@ -213203,14 +213249,6 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       }
       space = where;
       if (current) gap2 = Math.max(16, Math.min(150, gap2 * 0.8 + (t - arrivedAt) * 0.2));
-      const id2 = model?.playersById?.[model.localPlayerId]?.entityId, e = id2 ? after[id2] : null;
-      if (e?.position && e.alive) {
-        if (lastOwn && lastOwn.id === id2 && model.tick > lastOwn.tick && Math.hypot(intent.x, intent.y) > 0.1 && t - intentAt > rtt() + 150) {
-          const v = Math.hypot(e.position.x - lastOwn.x, e.position.y - lastOwn.y) / ((model.tick - lastOwn.tick) * 1e3 / 60);
-          if (v > 0.01 && v < 2) speed = speed ? speed * 0.7 + v * 0.3 : v;
-        }
-        lastOwn = { id: id2, tick: model.tick, x: e.position.x, y: e.position.y };
-      } else lastOwn = null;
       const c = id2 ? model?.primary?.actorsById?.[id2]?.current : null;
       if (c && ["startup", "active", "recovery"].includes(c.phase) && c.phaseEndsTick > c.phaseStartedTick) (learned[c.comboStep] ??= {})[c.phase] = c.phaseEndsTick - c.phaseStartedTick;
       if (model && Number.isFinite(model.tick)) {
@@ -213249,7 +213287,8 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
         if (h && h.skillId === skillGuess.skillId && h.tick >= skillGuess.tick - 20 || Number.isFinite(model.tick) && model.tick >= skillGuess.tick + 12 || !e?.alive) skillGuess = null;
       }
       const a = id2 ? model.primary?.actorsById?.[id2] : null, swingChanged = swing !== void 0 && Boolean(a) && !(swing === null && a.current === null);
-      if (!br && !lead && !skillGuess && !swingChanged && (!mine || mine.x === e.position.x && mine.y === e.position.y)) return model;
+      const contact = e && mine && swing && D2 !== null ? ownContact(model, id2, e, mine, swing, D2, br, t) : null;
+      if (!br && !lead && !skillGuess && !swingChanged && !contact && (!mine || mine.x === e.position.x && mine.y === e.position.y)) return model;
       const entitiesById = { ...model.entitiesById };
       if (br) for (const [k, x] of Object.entries(model.entitiesById)) {
         if (k === id2) continue;
@@ -213257,13 +213296,22 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
         if (p !== x.position && (p.x !== x.position.x || p.y !== x.position.y)) entitiesById[k] = { ...x, position: p };
       }
       if (e) entitiesById[id2] = { ...e, ...mine ? { position: mine } : {}, ...lead ? { tickLead: lead } : {}, ...skillGuess ? { skillPose: skillGuess } : {} };
-      const out4 = { ...model, entitiesById, ...swingChanged ? { primary: { ...model.primary, actorsById: { ...model.primary.actorsById, [id2]: { ...a, current: swing } } } } : {} };
+      const out4 = { ...model, entitiesById, ...swingChanged ? { primary: { ...model.primary, actorsById: { ...model.primary.actorsById, [id2]: { ...a, current: swing } } } } : {}, ...contact ? { predictedHits: contact } : {} };
       cache10 = { model, out: out4 };
       cacheAt = t;
       return out4;
     },
     inspect: () => ({ gap: gap2, delay, spacing, jitter, frames: frames.length, speed, rtt: rtt() })
   });
+}
+function guestCollidesV1(model, e, p) {
+  const c = model?.space?.collision;
+  if (!c?.tiles && !c?.pages) return false;
+  try {
+    return collidesWithTiles(c, p.x, p.y, e.hullRadius ?? 12);
+  } catch {
+    return false;
+  }
 }
 function createCoopGuestSessionV1({ link, playerId, early = [], release = () => {
 }, cartographyWindow = null, onPassport, onEnd, onLobby = () => {
@@ -213274,15 +213322,7 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
     firstModel = resolve;
   });
   let rtt = 120;
-  const smooth30 = createGuestSmoothingV1(now3, { rtt: () => rtt, collides: (model, e, p) => {
-    const c = model.space?.collision;
-    if (!c) return true;
-    try {
-      return collidesWithTiles(c, p.x, p.y, e.hullRadius ?? 12);
-    } catch {
-      return true;
-    }
-  } });
+  const smooth30 = createGuestSmoothingV1(now3, { rtt: () => rtt, collides: guestCollidesV1 });
   const handle = (m) => {
     if (m.t === "m") {
       lastFrameAt = now3();
