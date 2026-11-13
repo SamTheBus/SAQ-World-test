@@ -3798,7 +3798,7 @@ function validatePulseRecord(state, e, definition, group) {
       const actor = state.entitiesById[row2.entityId];
       requireContract(actor?.team === "party" && actor.residency.spaceInstanceId === state.entitiesById[e.entityId].residency.spaceInstanceId && !seen.has(row2.entityId), "Invalid Glacial Warden snare target");
       seen.add(row2.entityId);
-      requireContract(row2.statusId === definition.pulse.statusId && row2.expiresTick === e.lastPulse.tick + definition.pulse.durationTicks && row2.movementMultiplier === definition.pulse.movementMultiplier.numerator / definition.pulse.movementMultiplier.denominator, "Invalid Glacial Warden snare pulse");
+      requireContract(row2.statusId === definition.pulse.statusId && row2.expiresTick > e.lastPulse.tick && row2.expiresTick <= e.lastPulse.tick + definition.pulse.durationTicks && row2.movementMultiplier === definition.pulse.movementMultiplier.numerator / definition.pulse.movementMultiplier.denominator, "Invalid Glacial Warden snare pulse");
     }
   } else if (e.affixIds[0] === NULLIFIER_AFFIX_ID) {
     requireContract(e.lastPulse.recipients.length <= Object.keys(state.playersById).length, "Invalid Nullifier pulse recipients");
@@ -3807,7 +3807,7 @@ function validatePulseRecord(state, e, definition, group) {
       const actor = state.entitiesById[row2.entityId];
       requireContract(actor?.team === "party" && Object.values(state.playersById).some((player) => player.entityId === row2.entityId) && !seen.has(row2.entityId), "Invalid Nullifier target");
       seen.add(row2.entityId);
-      requireContract(row2.statusId === definition.pulse.statusId && row2.expiresTick === e.lastPulse.tick + definition.pulse.durationTicks && row2.resistanceUntil === row2.expiresTick + definition.pulse.resistanceTicks, "Invalid Nullifier pulse");
+      requireContract(row2.statusId === definition.pulse.statusId && row2.expiresTick > e.lastPulse.tick && row2.expiresTick <= e.lastPulse.tick + definition.pulse.durationTicks && row2.resistanceUntil === row2.expiresTick + definition.pulse.resistanceTicks, "Invalid Nullifier pulse");
     }
   } else if (e.affixIds[0] === WEB_WEAVER_AFFIX_ID) {
     requireContract(e.lastPulse.recipients.length <= 1, "Invalid Web Weaver cast recipients");
@@ -3938,7 +3938,7 @@ function validateEliteCombatD12_4(state) {
         requireContract(source11?.affixIds[0] === GLACIAL_WARDEN_AFFIX_ID || source11?.namedEliteId === "sporecrown", "Invalid timed actor status source");
         safeInteger(status.applicationTick, 0, state.tick);
         safeInteger(status.expirationTick, status.applicationTick + 1, state.tick + GLACIAL_WARDEN_D12_4E.pulse.durationTicks);
-        requireContract(status.expirationTick === status.applicationTick + GLACIAL_WARDEN_D12_4E.pulse.durationTicks, "Timed actor status duration drift");
+        requireContract(status.expirationTick <= status.applicationTick + GLACIAL_WARDEN_D12_4E.pulse.durationTicks, "Timed actor status duration drift");
         closedRecord(status.magnitude, ["movementMultiplier"]);
         requireContract(status.magnitude.movementMultiplier === GLACIAL_WARDEN_D12_4E.pulse.movementMultiplier.numerator / GLACIAL_WARDEN_D12_4E.pulse.movementMultiplier.denominator, "Timed actor status magnitude drift");
         requireContract(state.tick < status.expirationTick, "Expired timed actor status retained");
@@ -3949,7 +3949,7 @@ function validateEliteCombatD12_4(state) {
         requireContract(source11?.affixIds[0] === NULLIFIER_AFFIX_ID, "Invalid Nullified source");
         safeInteger(status.applicationTick, 0, state.tick);
         safeInteger(status.expirationTick, state.tick + 1, state.tick + NULLIFIER_D12_4I.pulse.durationTicks);
-        requireContract(status.expirationTick === status.applicationTick + NULLIFIER_D12_4I.pulse.durationTicks && state.tick < status.expirationTick, "Nullified duration drift");
+        requireContract(status.expirationTick <= status.applicationTick + NULLIFIER_D12_4I.pulse.durationTicks && state.tick < status.expirationTick, "Nullified duration drift");
       } else {
         requireContract(statusId === TOXIC_DECAY_D12_4F.pulse.statusId, "Invalid timed actor status identity");
         closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "lastApplicationTick", "lastApplicationAdded", "expirationTick", "nextTickAt", "tickIntervalTicks", "stacks", "damagePerStack", "lastTick"]);

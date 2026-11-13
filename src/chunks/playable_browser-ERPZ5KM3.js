@@ -1051,7 +1051,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-JEN7CV5L.js";
+} from "./chunk-6YDR3LVC.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -109778,6 +109778,12 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   } };
 }
 
+// src/shared/contracts/hero_holds_v1.js
+function heroHoldTicks(state2, entityId2, ticks) {
+  const p = Object.values(state2.playersById ?? {}).find((x) => x.entityId === entityId2), cut = p ? gearAffixTotalsV2(p).stunDr : 0;
+  return cut ? Math.max(1, Math.round(ticks * (1e4 - cut) / 1e4)) : ticks;
+}
+
 // src/simulation/elite_combat_d12_4.js
 var ratioOrder = (a, b) => compareCombat(multiplyCombat(a.hp, b.maxHp), multiplyCombat(b.hp, a.maxHp)) || a.entityId.localeCompare(b.entityId);
 function selectVitalityWeaverTargetsD12_4(state2, e, { lineClear: lineClear2 }) {
@@ -110201,7 +110207,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
   }
   function applyGlacialSnare(root4, e, target) {
     const definition2 = GLACIAL_WARDEN_D12_4E, byStatus = root4.timedStatusesByEntityId[target.entityId] ??= {}, prior = byStatus[definition2.pulse.statusId], sourceEliteId = prior?.applicationTick === state2.tick ? [prior.sourceEliteId, e.eliteId].sort()[0] : e.eliteId;
-    byStatus[definition2.pulse.statusId] = { version: TIMED_ACTOR_STATUS_D12_4E_VERSION, entityId: target.entityId, statusId: definition2.pulse.statusId, sourceEliteId, applicationTick: state2.tick, expirationTick: state2.tick + definition2.pulse.durationTicks, magnitude: { movementMultiplier: definition2.pulse.movementMultiplier.numerator / definition2.pulse.movementMultiplier.denominator } };
+    byStatus[definition2.pulse.statusId] = { version: TIMED_ACTOR_STATUS_D12_4E_VERSION, entityId: target.entityId, statusId: definition2.pulse.statusId, sourceEliteId, applicationTick: state2.tick, expirationTick: state2.tick + heroHoldTicks(state2, target.entityId, definition2.pulse.durationTicks), magnitude: { movementMultiplier: definition2.pulse.movementMultiplier.numerator / definition2.pulse.movementMultiplier.denominator } };
     root4.timedStatusesByEntityId[target.entityId] = byStatus;
     counters.snaresApplied++;
     return byStatus[definition2.pulse.statusId];
@@ -110238,7 +110244,15 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       const recipients = [];
       for (const target of selectNullifierTargetsD12_4I(state2, e, { lineClear: lineClear2 })) {
         if (root4.timedStatusesByEntityId[target.entityId]?.[statusId] || root4.nullificationResistanceByEntityId[target.entityId]) continue;
-        const status2 = { version: TIMED_NULLIFIED_D12_4I_VERSION, entityId: target.entityId, statusId, sourceEliteId: e.eliteId, applicationTick: state2.tick, expirationTick: state2.tick + definition2.pulse.durationTicks };
+        const status2 = {
+          version: TIMED_NULLIFIED_D12_4I_VERSION,
+          entityId: target.entityId,
+          statusId,
+          sourceEliteId: e.eliteId,
+          applicationTick: state2.tick,
+          expirationTick: state2.tick + heroHoldTicks(state2, target.entityId, definition2.pulse.durationTicks)
+          /* gear: shorter crowd control */
+        };
         (root4.timedStatusesByEntityId[target.entityId] ??= {})[statusId] = status2;
         recipients.push({ entityId: target.entityId, statusId, expiresTick: status2.expirationTick, resistanceUntil: status2.expirationTick + definition2.pulse.resistanceTicks });
         counters.nullifiedApplied++;
@@ -111626,6 +111640,7 @@ function createRecoveredBossCombatV1(state2, { applyDirectDamage, eligible: elig
     b.pools.push({ id, kind, position: copyWire(position4), radius, createdTick: state2.tick, expiresTick: state2.tick + lifetime, nextDamageTick: state2.tick + 45 });
   }
   function effect(b, target, kind, duration, multiplier = 1) {
+    duration = heroHoldTicks(state2, target.entityId, duration);
     const previous = b.statusesByEntityId[target.entityId];
     b.statusesByEntityId[target.entityId] = {
       kind,
@@ -112314,7 +112329,7 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
     }
   }
   function applyRootStatus(boss, target) {
-    const prior = root4().statusesByEntityId[target.entityId], expirationTick = state2.tick + ARACHNID_TREANT_D12_5A.rootSnare.durationTicks;
+    const prior = root4().statusesByEntityId[target.entityId], expirationTick = state2.tick + heroHoldTicks(state2, target.entityId, ARACHNID_TREANT_D12_5A.rootSnare.durationTicks);
     root4().statusesByEntityId[target.entityId] = { version: BOSS_STATUS_D12_5A_VERSION, entityId: target.entityId, statusId: ARACHNID_TREANT_D12_5A.rootSnare.statusId, sourceBossId: boss.bossId, applicationTick: prior?.applicationTick ?? state2.tick, expirationTick: Math.max(prior?.expirationTick ?? 0, expirationTick), movementMultiplier: 0.4 };
   }
   function resolveTelegraph(boss, actor) {
@@ -113136,8 +113151,7 @@ function createLesserBossCombatV1(state2, { applyDirectDamage, eligible: eligibl
     return tag ? Number(tag.slice(8 + id.length)) : -1;
   };
   function freeze2(k, id, ticks) {
-    const p = Object.values(state2.playersById).find((x) => x.entityId === id), cut = p ? gearAffixTotalsV2(p).stunDr : 0;
-    if (cut) ticks = Math.max(1, Math.round(ticks * (1e4 - cut) / 1e4));
+    ticks = heroHoldTicks(state2, id, ticks);
     k.hitEntityIds = k.hitEntityIds.filter((x) => !x.startsWith("frozen:" + id + ":"));
     k.hitEntityIds.push("frozen:" + id + ":" + (state2.tick + ticks));
   }
@@ -113475,7 +113489,7 @@ function createLesserBossCombatV1(state2, { applyDirectDamage, eligible: eligibl
       const k = e.namedTrick, t = LESSER_BOSS_TRICKS_V1[e.namedEliteId];
       if (t.kind === "latch" && (k?.phase === "latch" || k?.phase === "lunge") && k.hitEntityIds.includes("latched:" + id)) m = Math.min(m, t.slow);
       if (!t.snare || k?.phase !== "up" || !k.hitEntityIds.includes("rooted:" + id)) continue;
-      if (t.upTicks - (k.phaseEndsTick - state2.tick) < t.rootTicks) return 0;
+      if (t.upTicks - (k.phaseEndsTick - state2.tick) < heroHoldTicks(state2, id, t.rootTicks)) return 0;
     }
     return m;
   }
@@ -125992,7 +126006,7 @@ var LABELS = {
   ailmentDur: "Ailment duration",
   eliteDr: "Less damage from elites and bosses",
   areaDr: "Less damage from area attacks",
-  stunDr: "Shorter stuns on you",
+  stunDr: "Shorter crowd control on you",
   potionHeal: "Potion healing",
   perfectDmg: "Damage after a perfect block",
   hitCdr: "off Defensive cooldowns when hit",
