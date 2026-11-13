@@ -26513,7 +26513,9 @@ function validateHellImpsV1(s, h, I) {
 
 // src/shared/content/trip_nightmare_v1.js
 var TRIP_NIGHTMARE_V1 = "trip-nightmare-v1";
-var NIGHTMARE_KINDS = Object.freeze(["sporecrown"]);
+var NIGHTMARE_KINDS = Object.freeze(["sporecrown", "frog"]);
+var nightmareKindForSnackV1 = (snack) => snack === "frog-leg" ? "frog" : "sporecrown";
+var NIGHTMARE_NAMES = Object.freeze({ sporecrown: "Nightmare Sporecrown", frog: "Nightmare Frog" });
 var NIGHTMARE_RULES = Object.freeze({
   hullRadius: 28,
   // bites reach this far past its hull; it stops walking a little inside that
@@ -26549,6 +26551,80 @@ var NIGHTMARE_RULES = Object.freeze({
   // ended Gazecaps and splats stay in the record this long so every screen can show the pop
   keepTicks: 2 * 60
 });
+var NIGHTMARE_FROG_RULES = Object.freeze({
+  hullRadius: 26,
+  reach: 18,
+  speed: 1.1,
+  // a frog sits and waits: it only hops closer when you're farther than this (its tongue and leap do the rest)
+  holdRange: 150,
+  // a peek over the split's edge, a sink, then a leap clean out
+  riseTicks: 84,
+  hpTimes: NIGHTMARE_RULES.hpTimes,
+  friendHpTenths: NIGHTMARE_RULES.friendHpTenths,
+  damageTimes: NIGHTMARE_RULES.damageTimes,
+  firstMoveTicks: 54,
+  restTicks: 132,
+  halfRestTicks: 78,
+  moveOrder: Object.freeze(["tongue", "croak", "spawn"]),
+  bite: NIGHTMARE_RULES.bite,
+  // lane from its mouth at windupTicks; the caught hero is reeled for reelTicks, then it crouches and leaps
+  // (leapTicks) onto them, flops, and the goo pool gives heavy legs while you stand in it (poolTicks long)
+  tongue: Object.freeze({
+    windupTicks: 60,
+    lashTicks: 7,
+    reelTicks: 50,
+    crouchTicks: 18,
+    leapTicks: 30,
+    recoverTicks: 36,
+    length: 300,
+    halfWidth: 15,
+    minRange: 80,
+    pullSpeed: 3.4,
+    pullStop: 62,
+    lashTenths: 6,
+    flopRadius: 34,
+    flopTenths: 14,
+    shove: 30,
+    maxLeap: 240,
+    poolTicks: 210,
+    poolRadius: 36,
+    poolLegsTicks: 60
+  }),
+  // each croak's gap fan opens windupTicks before it; rings start at start and roll out speed a tick
+  croak: Object.freeze({ windupTicks: 30, spawns: Object.freeze([0, 54, 108, 162]), start: 24, speed: 1.83, reach: 175, halfWidth: 6, gapHalf: 0.36, gaps: Object.freeze([0, 0.6, 0.05, 0.65]), tenths: 12, shove: 12, recoverTicks: 72 }),
+  // eggs leave its mouth at coughTicks, fly flyTicks (+ staggerTicks each) onto circles, hatch eggTicks after
+  // landing, and the Eyehoppers set off hatchWaitTicks later
+  spawn: Object.freeze({
+    coughTicks: 48,
+    flyTicks: 33,
+    staggerTicks: 5,
+    recoverTicks: 36,
+    count: 4,
+    perFriend: 1,
+    maxAlive: 8,
+    ahead: Object.freeze([70, 160]),
+    radius: 10,
+    eggTicks: 180,
+    hatchWaitTicks: 21,
+    hpTimes: Object.freeze([1, 10]),
+    speed: 1.1,
+    hullRadius: 7,
+    growTicks: 6,
+    triggerRadius: 14,
+    popRadius: 28,
+    tenths: 6,
+    lifeTicks: 900,
+    range: 320
+  }),
+  legsTicks: NIGHTMARE_RULES.legsTicks,
+  deathTicks: NIGHTMARE_RULES.deathTicks,
+  exitRadius: NIGHTMARE_RULES.exitRadius,
+  goldQuarters: NIGHTMARE_RULES.goldQuarters,
+  gearPieces: NIGHTMARE_RULES.gearPieces,
+  gearN: NIGHTMARE_RULES.gearN,
+  keepTicks: NIGHTMARE_RULES.keepTicks
+});
+var nightmareRulesV1 = (kind2) => kind2 === "frog" ? NIGHTMARE_FROG_RULES : NIGHTMARE_RULES;
 function h323(text) {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
@@ -26561,15 +26637,32 @@ var nightmareIdV1 = (campaignId, eatTick) => id("boss/" + campaignId + "/" + eat
 var gazecapIdV1 = (campaignId, eatTick, n) => id("cap/" + campaignId + "/" + eatTick + "/" + n);
 
 // src/shared/contracts/trip_nightmare_world_v1.js
-var awake2 = (s, n) => n.dead === null && s.tick >= n.born + NIGHTMARE_RULES.riseTicks;
-var capOut = (s, m) => m.end === null && s.tick >= m.born + NIGHTMARE_RULES.caps.growTicks;
+var rulesOf = (n) => nightmareRulesV1(n.kind);
+var minionRules = (n) => n.kind === "frog" ? rulesOf(n).spawn : rulesOf(n).caps;
+var MOVES = Object.freeze({ sporecrown: ["bite", "ring", "rain", "caps"], frog: ["bite", "tongue", "croak", "spawn"] });
+var awake2 = (s, n) => n.dead === null && s.tick >= n.born + rulesOf(n).riseTicks;
+var capOut = (s, n, m) => m.end === null && s.tick >= m.born + minionRules(n).growTicks;
+var isEgg = (s, m) => m.hatch !== void 0 && s.tick < m.hatch;
 var DIRS4 = Array.from({ length: 16 }, (_, k) => ({ x: Math.cos(k * Math.PI / 8), y: Math.sin(k * Math.PI / 8) }));
 function nightmareTargetsV1(s) {
   const h = s.trips?.hell, n = h?.nightmare;
   if (!n) return [];
-  const list2 = [], space = { spaceInstanceId: h.spaceInstanceId };
-  if (awake2(s, n)) list2.push({ kind: "actor", entityId: nightmareIdV1(s.campaign.campaignId, h.eatTick), team: "hostile", alive: true, hp: n.hp, maxHp: n.maxHp, position: { x: n.x, y: n.y }, hullRadius: NIGHTMARE_RULES.hullRadius, combatRadius: NIGHTMARE_RULES.hullRadius, residency: space, podResource: { nightmare: "boss" }, tripNightmare: { kind: n.kind, dx: n.dx, born: n.born } });
-  for (const [id2, m] of Object.entries(n.caps)) if (capOut(s, m)) list2.push({ kind: "actor", entityId: id2, team: "hostile", alive: true, hp: m.hp, maxHp: m.maxHp, position: { x: m.x, y: m.y }, hullRadius: NIGHTMARE_RULES.caps.hullRadius, combatRadius: NIGHTMARE_RULES.caps.hullRadius, residency: space, podResource: { nightmare: id2 }, tripGazecap: { n: m.n, born: m.born, dx: m.dx } });
+  const R2 = rulesOf(n), T10 = minionRules(n), list2 = [], space = { spaceInstanceId: h.spaceInstanceId };
+  if (awake2(s, n)) list2.push({ kind: "actor", entityId: nightmareIdV1(s.campaign.campaignId, h.eatTick), team: "hostile", alive: true, hp: n.hp, maxHp: n.maxHp, position: { x: n.x, y: n.y }, hullRadius: R2.hullRadius, combatRadius: R2.hullRadius, residency: space, podResource: { nightmare: "boss" }, tripNightmare: { kind: n.kind, dx: n.dx, born: n.born } });
+  for (const [id2, m] of Object.entries(n.caps)) if (capOut(s, n, m)) list2.push({
+    kind: "actor",
+    entityId: id2,
+    team: "hostile",
+    alive: true,
+    hp: m.hp,
+    maxHp: m.maxHp,
+    position: { x: m.x, y: m.y },
+    hullRadius: T10.hullRadius,
+    combatRadius: T10.hullRadius,
+    residency: space,
+    podResource: { nightmare: id2 },
+    tripGazecap: m.hatch === void 0 ? { n: m.n, born: m.born, dx: m.dx } : { n: m.n, born: m.born, dx: m.dx, hatch: m.hatch, egg: isEgg(s, m) }
+  });
   return list2;
 }
 var nightmareTargetV1 = (s, id2) => nightmareTargetsV1(s).find((t) => t.entityId === id2);
@@ -26587,7 +26680,8 @@ var point13 = (q, label2) => {
 };
 function validateNightmareV1(s, h, n) {
   closedRecord(n, ["version", "kind", "level", "born", "x", "y", "dx", "hp", "maxHp", "attack", "move", "next", "biteNext", "turn", "lastHit", "caps", "capN", "splats", "legs", "dead", "exit"]);
-  requireContract(n.version === TRIP_NIGHTMARE_V1 && NIGHTMARE_KINDS.includes(n.kind), "Unknown Nightmare");
+  requireContract(n.version === TRIP_NIGHTMARE_V1 && NIGHTMARE_KINDS.includes(n.kind) && n.kind === nightmareKindForSnackV1(h.snack), "Unknown Nightmare");
+  const R2 = rulesOf(n), T10 = minionRules(n);
   safeInteger(n.level, 1, 50);
   safeInteger(n.born, h.eatTick, s.tick);
   requireContract(n.born >= h.endTick, "Nightmare early");
@@ -26598,25 +26692,28 @@ function validateNightmareV1(s, h, n) {
   requireContract(compareCombat(n.hp, n.maxHp) <= 0, "Nightmare health");
   safeInteger(n.next, n.born, Number.MAX_SAFE_INTEGER);
   safeInteger(n.biteNext, n.born, Number.MAX_SAFE_INTEGER);
-  safeInteger(n.turn, 0, NIGHTMARE_RULES.moveOrder.length - 1);
+  safeInteger(n.turn, 0, R2.moveOrder.length - 1);
   if (n.lastHit !== null) safeInteger(n.lastHit, n.born, s.tick);
   if (n.move !== null) {
     const m = n.move;
     closedRecord(m, ["kind", "start", "origin", "spots", "target"]);
-    requireContract(["bite", "ring", "rain", "caps"].includes(m.kind), "Nightmare move");
+    requireContract(MOVES[n.kind].includes(m.kind), "Nightmare move");
     safeInteger(m.start, n.born, s.tick);
     point13(m.origin, "Nightmare move origin");
-    requireContract(m.spots === null || Array.isArray(m.spots) && m.spots.length <= NIGHTMARE_RULES.rain.extras + 8, "Nightmare rain");
-    for (const q of m.spots ?? []) point13(q, "Nightmare rain spot");
-    requireContract(m.target === null || typeof m.target === "string", "Nightmare bite");
+    requireContract(m.spots === null || Array.isArray(m.spots) && m.spots.length <= 13, "Nightmare move spots");
+    for (const q of m.spots ?? []) point13(q, "Nightmare move spot");
+    requireContract(m.target === null || typeof m.target === "string", "Nightmare target");
+    if (m.kind === "croak") requireContract(m.spots?.length === R2.croak.gaps.length, "Nightmare croak gaps");
+    if (m.kind === "tongue") requireContract(m.spots?.length === 1 || m.spots?.length === 2, "Nightmare tongue");
   }
   safeInteger(n.capN, 0, 1e5);
   const ns = /* @__PURE__ */ new Set();
   for (const [id2, m] of Object.entries(n.caps)) {
-    closedRecord(m, ["n", "born", "x", "y", "dx", "hp", "maxHp", "end", "endTick"]);
+    closedRecord(m, ["n", "born", "x", "y", "dx", "hp", "maxHp", "end", "endTick"], n.kind === "frog" ? ["hatch"] : []);
     safeInteger(m.n, 0, n.capN - 1);
     requireContract(!ns.has(m.n) && id2 === gazecapIdV1(s.campaign.campaignId, h.eatTick, m.n), "Gazecap identity");
     ns.add(m.n);
+    if (n.kind === "frog") requireContract(m.hatch === m.born + T10.eggTicks, "Egg hatch");
     safeInteger(m.born, n.born, s.tick);
     requireContract(Number.isFinite(m.x) && Number.isFinite(m.y) && (m.dx === 1 || m.dx === -1), "Gazecap position");
     hpValue2(m.hp, "Gazecap health");
@@ -26637,11 +26734,11 @@ function validateNightmareV1(s, h, n) {
   }
   for (const [pid, t] of Object.entries(n.legs)) {
     requireContract(s.playersById[pid], "Nightmare legs");
-    safeInteger(t, n.born, s.tick + NIGHTMARE_RULES.legsTicks);
+    safeInteger(t, n.born, s.tick + R2.legsTicks);
   }
   if (n.dead === null) requireContract(n.exit === null && compareCombat(n.hp, 0) > 0, "Nightmare alive");
   else {
-    safeInteger(n.dead, n.born + NIGHTMARE_RULES.riseTicks, s.tick);
+    safeInteger(n.dead, n.born + R2.riseTicks, s.tick);
     requireContract(compareCombat(n.hp, 0) === 0 && n.move === null, "Nightmare dead");
     point13(n.exit, "Nightmare exit");
   }
