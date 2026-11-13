@@ -909,6 +909,7 @@ import {
   siteClearXpV2,
   siteEndRoleV1,
   siteEndSpecV1,
+  siteEnterPointV1,
   siteFinaleDiagnosticD13D_B,
   siteInstanceId,
   siteOccupantsD13C,
@@ -1098,7 +1099,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-M6G5FOCC.js";
+} from "./chunk-WDY5R6KC.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -138682,7 +138683,8 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
               exits.push({ exitId: `site-exit:${functional.siteId}`, siteAction: payload, siteKind: functional.siteKind, x: anchor2.x, y: anchor2.y, radius: SITE_INTERACTION_RADIUS, available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)), label: functional.siteKind === "woodland-fort" ? "Leave Keep" : `Leave ${functional.label}` });
             }
           } else if (inOverworld) {
-            for (const { truth, anchor: anchor2 } of presentationSiteAnchors(siteTruth, state2.d9World.runtime.frames)) {
+            for (const { truth, anchor: front2 } of presentationSiteAnchors(siteTruth, state2.d9World.runtime.frames)) {
+              const anchor2 = siteEnterPointV1(truth.packageId, front2);
               const bound = state2.d9World.functionalSitesById[truth.siteId], keep8 = bound?.siteKind === "woodland-fort" || truth.packageId === "procedural-fort-family";
               if (Math.hypot(anchor2.x - local8.position.x, anchor2.y - local8.position.y) > 900) continue;
               const payload = { siteId: truth.siteId, direction: "enter" }, available = bound ? Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)) : local8.alive && !state2.primary.actorsById[local8.entityId].current && Math.hypot(anchor2.x - local8.position.x, anchor2.y - local8.position.y) <= SITE_INTERACTION_RADIUS;
@@ -209430,7 +209432,7 @@ async function prepareD9OriginMigration(state2, { sha256 }) {
 var keyFor2 = (domain, id2, sha256) => pageDigest({ version: "site-content-index-d9-v1", domain, id: id2 }, sha256);
 function activationState(state2, site, playerId, kind) {
   requireContract(["entry", "content-activation"].includes(kind), "Geography/discovery cannot bind content");
-  const player = state2.playersById[playerId], actor = state2.entitiesById[player?.entityId], point14 = projectToLocalFrameD9(site.entrance, state2.d9World.runtime.frames);
+  const player = state2.playersById[playerId], actor = state2.entitiesById[player?.entityId], point14 = siteEnterPointV1(state2.d9World.siteReservationsById?.[site.siteId]?.packageId ?? state2.d9World.functionalSitesById?.[site.siteId]?.packageId, projectToLocalFrameD9(site.entrance, state2.d9World.runtime.frames));
   requireContract(actor?.alive && actor.residency.spaceInstanceId === state2.overworldInstanceId && point14, "Site binding requires a living local participant");
   const distance12 = Math.hypot(actor.position.x - point14.x, actor.position.y - point14.y);
   requireContract(distance12 <= SITE_INTERACTION_RADIUS, "Site activation out of reach");

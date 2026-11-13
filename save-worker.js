@@ -23550,6 +23550,7 @@ function validateSiteRunEpisodeProgressD13B(before, after) {
 var same17 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var digest8 = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
 var FUNCTIONAL_SITE_D9 = "functional-site-d9-v1";
+var SITE_ENTER_OFFSET_V1 = Object.freeze({ "procedural-ruin-family": [0, -60], "procedural-crypt-family": [0, -48], "woodland-cave-family": [16, -4], "woodland-cave": [16, -4] });
 var isGeneratedCaveFamilyD12 = (site) => [FUNCTIONAL_SITE_FAMILY_D12, FUNCTIONAL_SITE_FAMILY_D12_1, FUNCTIONAL_SITE_FAMILY_D12_2].includes(site?.version);
 var functionalSitesD10 = (state) => Object.values(state.d9World?.functionalSitesById ?? {});
 var isGeneratedInteriorFamily = (site) => isGeneratedCaveFamilyD12(site) || isFortFamily(site) || isRuinFamily(site) || isCryptFamily(site);

@@ -23806,6 +23806,11 @@ var digest8 = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
 var FUNCTIONAL_SITE_D9 = "functional-site-d9-v1";
 var SITE_INTERACTION_RADIUS = 64;
 var DOOR_LINE_RADIUS2 = 4;
+var SITE_ENTER_OFFSET_V1 = Object.freeze({ "procedural-ruin-family": [0, -60], "procedural-crypt-family": [0, -48], "woodland-cave-family": [16, -4], "woodland-cave": [16, -4] });
+function siteEnterPointV1(packageId, point14) {
+  const o = SITE_ENTER_OFFSET_V1[packageId];
+  return point14 && o ? { x: point14.x + o[0], y: point14.y + o[1] } : point14;
+}
 var partyTarget = (state, actor, spaceInstanceId, anchor) => usesMultiroom(state.d9World?.plannedWorld) && hasBossHostingV1(state.d9World.plannedWorld) ? sitePartyArrivalTarget(state, actor, spaceInstanceId, anchor) : { spaceInstanceId, position: { x: anchor.x, y: anchor.y } };
 var isGeneratedCaveFamilyD12 = (site) => [FUNCTIONAL_SITE_FAMILY_D12, FUNCTIONAL_SITE_FAMILY_D12_1, FUNCTIONAL_SITE_FAMILY_D12_2].includes(site?.version);
 var functionalSitesD10 = (state) => Object.values(state.d9World?.functionalSitesById ?? {});
@@ -23916,7 +23921,7 @@ function functionalSiteTransitionTargetD9(state, actor, payload) {
     let source11, anchor2, destination2, targetSpace;
     if (payload.direction === "enter") {
       source11 = state.overworldInstanceId;
-      anchor2 = projectToLocalFrameD9(f3.socket.entrance, state.d9World.runtime.frames);
+      anchor2 = siteEnterPointV1(f3.packageId, projectToLocalFrameD9(f3.socket.entrance, state.d9World.runtime.frames));
       destination2 = f3.floors[0].entrance;
       targetSpace = f3.floors[0].spaceInstanceId;
     } else {
@@ -32051,6 +32056,7 @@ export {
   siteResetTransitionsD13C,
   validateSiteRunEpisodesD13B,
   validateSiteRunEpisodeProgressD13B,
+  siteEnterPointV1,
   functionalSitesD10,
   isGeneratedInteriorFamily,
   functionalSiteFloorsD12,
