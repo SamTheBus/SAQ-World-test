@@ -3223,7 +3223,8 @@ function huntChampionProfileV1(s, g, actor, profile2) {
 // src/shared/contracts/den_v1.js
 var PACK = DEN_POLICY.pack;
 var ALPHA = DEN_POLICY.alpha;
-var initialDenV1 = () => ({ rulesVersion: DEN_VERSION, den: { alarm: null, woke: Array(PACK).fill(null), ambush: Array(PACK).fill(null), alphaElapsed: null, roar: null, slowed: [], doneElapsed: null, fled: 0, waiting: false, resets: 0 } });
+var DEN_FLEE_TICKS = 120;
+var initialDenV1 = () => ({ rulesVersion: DEN_VERSION, den: { alarm: null, woke: Array(PACK).fill(null), ambush: Array(PACK).fill(null), alphaElapsed: null, roar: null, slowed: [], doneElapsed: null, doneTick: null, fled: 0, waiting: false, resets: 0 } });
 var denStagesV1 = () => Array.from({ length: DEN_MEMBERS }, () => ({ phase: "pending", at: 0 }));
 var denPointV1 = (a, [x, y]) => ({ x: a.x + x, y: a.y + y });
 var denMouthV1 = (a) => denPointV1(a, DEN_POLICY.mouth);
@@ -3239,11 +3240,12 @@ var tickOrNull = (v, max) => {
 };
 function validateDenV1(r) {
   requireContract(r.kind === "den" && r.rulesVersion === DEN_VERSION && r.stages.length === DEN_MEMBERS, "Den policy/membership");
-  closedRecord(r.den, ["alarm", "woke", "ambush", "alphaElapsed", "roar", "slowed", "doneElapsed", "fled", "waiting", "resets"]);
+  closedRecord(r.den, ["alarm", "woke", "ambush", "alphaElapsed", "roar", "slowed", "doneElapsed", ..."doneTick" in r.den ? ["doneTick"] : [], "fled", "waiting", "resets"]);
   const h = r.den, e = r.elapsedTicks, a = r.stages[ALPHA];
   tickOrNull(h.alarm, e);
   tickOrNull(h.alphaElapsed, e);
   tickOrNull(h.doneElapsed, e);
+  if (h.doneTick !== void 0 && h.doneTick !== null) requireContract(Number.isSafeInteger(h.doneTick) && h.doneTick >= 0 && h.doneElapsed !== null, "Den finish tick");
   safeInteger(h.resets);
   safeInteger(h.fled, 0, PACK);
   requireContract(typeof h.waiting === "boolean", "Den waiting");
@@ -3318,6 +3320,7 @@ function fell2(s, r, g) {
   const h = r.den;
   r.stages[ALPHA] = { phase: "defeated", at: r.elapsedTicks };
   h.doneElapsed = r.elapsedTicks;
+  h.doneTick = s.tick;
   h.roar = null;
   h.slowed = [];
   for (let n = 0; n < PACK; n++) {
@@ -3476,9 +3479,13 @@ function denStrikeV1(s, id) {
 }
 function projectDenV1(r, s, g) {
   const a = g ? s.entitiesById[g.entityIds[ALPHA]] : null, left = r ? r.stages.slice(0, PACK).filter((t2) => t2.phase !== "defeated").length : PACK;
-  const base = { pack: PACK, packLeft: left, packDown: PACK - left, alphaId: a?.entityId ?? null, resets: r?.den.resets ?? 0, alphaRatio: 1, alphaArrivedAgeTicks: null, roar: null, sleepers: [], ambushes: [], doneAgeTicks: null, fled: 0, slowTicks: DEN_POLICY.slowTicks };
+  const base = { pack: PACK, packLeft: left, packDown: PACK - left, alphaId: a?.entityId ?? null, resets: r?.den.resets ?? 0, alphaRatio: 1, alphaArrivedAgeTicks: null, roar: null, sleepers: [], ambushes: [], doneAgeTicks: null, fled: 0, runners: [], slowTicks: DEN_POLICY.slowTicks };
   if (!r || r.den.waiting) return { ...base, phase: "idle" };
-  const h = r.den, e = r.elapsedTicks, t = r.stages[ALPHA];
+  const landPack = (n) => {
+    const k = g ? denOfV1(nestBiomeV1(s, r.groupId))?.pack : null;
+    return k?.length ? k[n % k.length] : null;
+  };
+  const h = r.den, e = r.elapsedTicks, t = r.stages[ALPHA], done = h.doneElapsed === null ? null : Number.isSafeInteger(h.doneTick) ? Math.max(0, s.tick - h.doneTick) : e - h.doneElapsed;
   return {
     ...base,
     phase: t.phase === "defeated" ? "won" : t.phase === "hatched" ? "alpha" : h.alarm !== null ? "fight" : "sleep",
@@ -3487,8 +3494,13 @@ function projectDenV1(r, s, g) {
     roar: h.roar ? { ageTicks: e - h.roar.at, x: h.roar.x, y: h.roar.y, r: DEN_POLICY.roarRadius, flat: DEN_POLICY.roarFlat, ticks: DEN_POLICY.roarTicks } : null,
     sleepers: g ? r.stages.slice(0, PACK).flatMap((_, n) => asleep(s, g, r, n) ? [g.entityIds[n]] : []) : [],
     ambushes: g ? h.ambush.flatMap((k, n) => k !== null && e - k < 45 ? [{ entityId: g.entityIds[n], ageTicks: e - k }] : []) : [],
-    doneAgeTicks: h.doneElapsed === null ? null : e - h.doneElapsed,
-    fled: h.fled
+    doneAgeTicks: done,
+    fled: h.fled,
+    // The pack that fled: where each stood when the Alpha fell, for the client to run it to a burrow.
+    runners: g && done !== null && done < DEN_FLEE_TICKS ? r.stages.slice(0, PACK).flatMap((t2, n) => {
+      const a2 = t2.phase === "cancelled" ? s.entitiesById[g.entityIds[n]] : null, family2 = a2 ? ordinaryEnemyForProfile(a2.contentDefinitionId)?.family ?? landPack(n) : null;
+      return a2 && family2 ? [{ entityId: a2.entityId, family: family2, x: Math.round(a2.position.x), y: Math.round(a2.position.y) }] : [];
+    }) : []
   };
 }
 function denActorViewsV1(s) {
@@ -5975,6 +5987,8 @@ var IMP_RULES = Object.freeze({
   goldQuarters: Object.freeze({ coin: Object.freeze({ hit: 1, hitsPaid: 4, kill: 8 }), rare: Object.freeze({ hit: 2, hitsPaid: 4, kill: 16 }) }),
   starshardPerMille: Object.freeze({ coin: 30, rare: 200 }),
   gearPieces: Object.freeze({ coin: 0, rare: 2 }),
+  // XP for the kill, in ordinary kills at the hero's level (like the gold), for every hero close by.
+  xpKills: Object.freeze({ coin: 3, rare: 6 }),
   // Ended imps (killed or escaped) stay in the record this long so every screen can show the poof or rift.
   keepTicks: 3 * 60,
   // Recent personal gains (coins to the purse, Scrap to the Bag) kept for the screen.
@@ -31504,6 +31518,7 @@ export {
   noteAreaBossV1,
   BUILD_BALANCE_HASH,
   usesBuildBalanceV2,
+  balancedHeroKillXpV2,
   balancedMasteryAwardV2,
   buildBalanceDatabaseV2,
   siteClearXpV2,

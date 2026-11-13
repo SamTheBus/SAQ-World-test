@@ -3184,11 +3184,12 @@ var tickOrNull = (v, max2) => {
 };
 function validateDenV1(r) {
   requireContract(r.kind === "den" && r.rulesVersion === DEN_VERSION && r.stages.length === DEN_MEMBERS, "Den policy/membership");
-  closedRecord(r.den, ["alarm", "woke", "ambush", "alphaElapsed", "roar", "slowed", "doneElapsed", "fled", "waiting", "resets"]);
+  closedRecord(r.den, ["alarm", "woke", "ambush", "alphaElapsed", "roar", "slowed", "doneElapsed", ..."doneTick" in r.den ? ["doneTick"] : [], "fled", "waiting", "resets"]);
   const h = r.den, e = r.elapsedTicks, a = r.stages[ALPHA];
   tickOrNull(h.alarm, e);
   tickOrNull(h.alphaElapsed, e);
   tickOrNull(h.doneElapsed, e);
+  if (h.doneTick !== void 0 && h.doneTick !== null) requireContract(Number.isSafeInteger(h.doneTick) && h.doneTick >= 0 && h.doneElapsed !== null, "Den finish tick");
   safeInteger(h.resets);
   safeInteger(h.fled, 0, PACK);
   requireContract(typeof h.waiting === "boolean", "Den waiting");
@@ -14968,6 +14969,8 @@ var IMP_RULES = Object.freeze({
   goldQuarters: Object.freeze({ coin: Object.freeze({ hit: 1, hitsPaid: 4, kill: 8 }), rare: Object.freeze({ hit: 2, hitsPaid: 4, kill: 16 }) }),
   starshardPerMille: Object.freeze({ coin: 30, rare: 200 }),
   gearPieces: Object.freeze({ coin: 0, rare: 2 }),
+  // XP for the kill, in ordinary kills at the hero's level (like the gold), for every hero close by.
+  xpKills: Object.freeze({ coin: 3, rare: 6 }),
   // Ended imps (killed or escaped) stay in the record this long so every screen can show the poof or rift.
   keepTicks: 3 * 60,
   // Recent personal gains (coins to the purse, Scrap to the Bag) kept for the screen.

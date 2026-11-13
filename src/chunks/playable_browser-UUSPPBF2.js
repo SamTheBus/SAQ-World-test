@@ -430,6 +430,7 @@ import {
   awardEpisodeReward,
   awardForgeDefeat,
   awardPlayerXp,
+  balancedHeroKillXpV2,
   balancedMasteryAwardV2,
   beginPrimary,
   bestiaryDefeatV1,
@@ -1096,7 +1097,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-LP3566CS.js";
+} from "./chunk-KKCCHO5R.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -103708,7 +103709,7 @@ function hitHellImpV1(s, p, impId, requested) {
     const gold = quarters(p, rules.hit);
     if (pay(s, p, gold, null)) note(s, I, p.playerId, m, gold, null);
   }
-  const defeated = compareCombat(m.hp, 0) === 0;
+  const defeated = compareCombat(m.hp, 0) === 0, xp = [];
   if (defeated) {
     m.end = "dead";
     m.endTick = s.tick;
@@ -103718,9 +103719,10 @@ function hitHellImpV1(s, p, impId, requested) {
       const gold = quarters(q2, rules.kill), materials2 = m.kind === "coin" ? scrapFor(s, h, q2, m) : roll(s, h, `star/${m.n}/${q2.playerId}`) % 1e3 < IMP_RULES.starshardPerMille.rare ? { Starshard: 1 } : null;
       if (pay(s, q2, gold, materials2)) note(s, I, q2.playerId, m, gold, materials2);
       dropGear(s, h, q2, m);
+      xp.push({ playerId: q2.playerId, xp: String(BigInt(balancedHeroKillXpV2(levelOf(q2), levelOf(q2), "C", false, false)) * BigInt(IMP_RULES.xpKills[m.kind])) });
     }
   }
-  return { before, after: m.hp, damage: combatInteger(subtractCombat(before, m.hp)), defeated };
+  return { before, after: m.hp, damage: combatInteger(subtractCombat(before, m.hp)), defeated, xp };
 }
 function hellImpTargetsV1(s) {
   const h = s.trips?.hell, I = h?.imps;
@@ -123068,6 +123070,19 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       const hit2 = hitHellImpV1(state2, p, target.podResource.imp, packet.damage);
       if (!hit2) return;
       combat.rng = roll8.rng;
+      for (const g of hit2.xp) {
+        const q2 = state2.playersById[g.playerId];
+        if (!q2) continue;
+        const rate = progression.resolvedStats(q2.entityId)?.heroXpRate, before = q2.progression.level;
+        q2.progression = copyWire(awardPlayerXp(q2.progression, combatInteger(multiplyCombat(insightXpV1(state2, q2.playerId, multiplyCombat(g.xp, rate?.n ?? 1, rate?.d ?? 1)), 1e4 + (q2.bestiary?.stats.xpFind ?? 0), 1e4))));
+        if (q2.d8) q2.d8 = updateHighestHeroLevel(q2.d8, q2.progression.level);
+        if (q2.progression.level !== before) {
+          progression.equipmentChanged(q2);
+          const a = state2.entitiesById[q2.entityId];
+          a.hp = copyWire(a.maxHp);
+          family.reconcile(q2.entityId);
+        }
+      }
       target.hp = hit2.after;
       target.alive = !hit2.defeated;
       if (hit2.defeated) cancelSubweaponResidency(state2, target.entityId);
@@ -132893,6 +132908,8 @@ var HEAD4 = { young_yeti: -60, shardling: -40, tusk_boar: -36, sprout: -30, slim
 var burrows = (skin) => skin === "desert" ? [[-7, 31]] : [[-114, 26], [121, 19]];
 var ARRIVE = 50;
 var FLEE = 40;
+var RUN_SPEED = 2.6;
+var SINK2 = 10;
 function drawDenGroundV1InWorld(ctx, e, model, t) {
   const m = mouthOf(e), d = e.den, skin = skinOf2(e);
   scaled4(ctx, m.x, m.y, () => drawDenGroundV1(ctx, 0, 30, { skin, rx: 150, ry: 62, seed: seedOf4(e.groupId) % 9 + 1 }));
@@ -132928,9 +132945,26 @@ function denDepthItemsV1(e, model, t) {
     const face4 = alpha.presentationFacingX === -1 ? -1 : 1;
     put3("roar", alpha.position.x, alpha.position.y + 1, (ctx) => drawRoarArcsV1(ctx, alpha.position.x + 34 * face4, alpha.position.y - 22, { t: d.roar.ageTicks / d.roar.ticks * 2 % 1 }));
   }
-  if (d.fled && d.doneAgeTicks !== null && d.doneAgeTicks < FLEE) for (const [i, [bx, by]] of burrows(skin).entries()) {
-    const x = m.x + bx, y = m.y + by;
-    put3("flee" + i, x, y + 1, (ctx) => scaled4(ctx, x, y, () => burst2(ctx, 0, 0, d.doneAgeTicks / FLEE, K9)));
+  if (d.doneAgeTicks !== null) for (const [i, run2] of (d.runners ?? []).entries()) {
+    const age = d.doneAgeTicks, holes = burrows(skin).map(([bx, by]) => ({ x: m.x + bx, y: m.y + by })), hole = holes.reduce((a, b) => Math.hypot(b.x - run2.x, b.y - run2.y) < Math.hypot(a.x - run2.x, a.y - run2.y) ? b : a), dist3 = Math.hypot(hole.x - run2.x, hole.y - run2.y), dur = Math.max(24, Math.min(90, Math.round(dist3 / RUN_SPEED)));
+    if (age < dur) {
+      const k = age / dur, x = run2.x + (hole.x - run2.x) * k, y = run2.y + (hole.y - run2.y) * k, sink2 = Math.max(0, (age - (dur - SINK2)) / SINK2), tick = model.tick ?? Math.round(t * 60);
+      const actor = { alive: true, enemyFamily: run2.family, position: { x, y }, visualSeed: deterministicCreatureVisualSeed(run2.entityId), presentationDeferLabels: true, presentationFacingX: hole.x < run2.x ? -1 : 1, motion: { startedTick: tick - age, lastMovedTick: tick }, movedLastTick: true, meleePhase: null };
+      put3("run" + i, x, y, (ctx) => {
+        ctx.save();
+        if (sink2) {
+          ctx.globalAlpha = 1 - sink2 * 0.85;
+          ctx.translate(x, y);
+          ctx.scale(1 - sink2 * 0.35, 1 - sink2 * 0.6);
+          ctx.translate(-x, -y);
+        }
+        try {
+          drawCreatureD11(ctx, actor, tick);
+        } catch {
+        }
+        ctx.restore();
+      });
+    } else if (age < dur + FLEE) put3("flee" + i, hole.x, hole.y + 1, (ctx) => scaled4(ctx, hole.x, hole.y, () => burst2(ctx, 0, 0, (age - dur) / FLEE, K9)));
   }
   return out4;
 }
