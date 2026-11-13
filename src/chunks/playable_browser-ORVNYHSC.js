@@ -145739,6 +145739,657 @@ function drawAntlionPitHoardV1(c, { open: open3 = false, t = 0, ready = false } 
   if (ready) glow9(c, 0, -10, 40, "255,214,110", 0.3);
 }
 
+// src/client/den_art_yeti_v1.js
+var SNOW5 = { d2: "#9fb4c8", d: "#c6d4e2", m: "#e6eef6", l: "#f6faff", h: "#ffffff" };
+var PACK = { d2: "#93a8bd", d: "#b4c4d4", m: "#cfdbe6", l: "#e2ebf3", h: "#f4f8fc" };
+var GRAN = ramp5("#7a8490", "#1a2230", "#e6f0ff");
+var ICE4 = { d2: "#3f7aa8", d: "#6aa6d0", m: "#a8d4ee", l: "#d4eefa", h: "#ffffff" };
+var PINE = ramp5("#2f5a46", "#0c1a14", "#d0f0d8");
+var IVORY = ramp5("#efe4c8", "#4a3a20", "#ffffff");
+var FUR2 = ramp5("#8a6440");
+var ROPE3 = ramp5("#c8a46a");
+var BRASS22 = ramp5("#c89a3a", "#4a3008", "#fff2b8");
+var SAPH2 = ["#1d5f9e", "#3e9be8", "#d6f0ff"];
+function snowCap5(c, x, y, w, h, seed2, o = 1.1, nd = 2) {
+  const n = Math.max(3, Math.round(w / 16)), top = [];
+  top.push([x - w / 2 - h * 0.3, y + h * 0.25]);
+  for (let i = 0; i <= n; i++) {
+    const u = i / n, bx = x - w / 2 + u * w;
+    top.push([bx, y - h * (0.75 + rnd7(seed2 + i * 3) * 0.35)]);
+    if (i < n) top.push([bx + w / n / 2, y - h * (0.55 + rnd7(seed2 + i * 5) * 0.2)]);
+  }
+  top.push([x + w / 2 + h * 0.3, y + h * 0.25]);
+  const under = [[x + w / 2, y + h * 0.45], [x + w / 4, y + h * 0.6], [x, y + h * 0.45], [x - w / 4, y + h * 0.62], [x - w / 2, y + h * 0.45]], p = smooth23([...top, ...under]);
+  const drips = [];
+  for (let i = 0; i < nd; i++) {
+    const dx = x - w * 0.25 + i * w * 0.5 / Math.max(1, nd - 1) + (rnd7(seed2 + i * 7) - 0.5) * w * 0.1;
+    drips.push(ell11(dx, y + h * 0.62, 1.3, 2));
+  }
+  contour3(c, [p, ...drips], o);
+  for (const d of drips) fill4(c, d, SNOW5.d);
+  fill4(c, p, SNOW5.m);
+  clip21(c, p, () => {
+    c.fillStyle = SNOW5.d;
+    c.fill(smooth23([[x - w, y + h * 0.15], [x, y + h * 0.05], [x + w, y + h * 0.15], [x + w, y + h * 2], [x - w, y + h * 2]]));
+    c.fillStyle = SNOW5.d2;
+    c.fillRect(x - w, y + h * 0.48, w * 2, h);
+    c.save();
+    c.translate(-1, -1.6);
+    c.fillStyle = SNOW5.l;
+    c.fill(smooth23([...top.slice(1, -1).map(([px7, py]) => [px7, py + h * 0.3]), [x + w / 2, y - h * 0.1], [x - w / 2, y - h * 0.1]]));
+    c.restore();
+    for (let i = 0; i < n; i++) {
+      const bx = x - w / 2 + (i + 0.4) * w / n;
+      c.fillStyle = SNOW5.h;
+      c.beginPath();
+      c.ellipse(bx, y - h * 0.6, w / n * 0.22, h * 0.12, -0.2, 0, TAU168);
+      c.fill();
+    }
+  });
+}
+function granite2(c, pts2, seed2, o = 1.3) {
+  const p = poly14(pts2), xs = pts2.map((q2) => q2[0]), ys = pts2.map((q2) => q2[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), w = x1 - x0, h = y1 - y0;
+  contour3(c, [p], o);
+  fill4(c, p, GRAN.m);
+  clip21(c, p, () => {
+    c.fillStyle = GRAN.l;
+    c.fill(poly14([[x0 - 4, y1 + 4], [x0 - 4, y0 - 4], [x0 + w * 0.28, y0 - 4], [x0 + w * 0.36, y0 + h * 0.4], [x0 + w * 0.26, y1 + 4]]));
+    c.fillStyle = GRAN.h;
+    c.fill(poly14([[x0 - 4, y1 + 4], [x0 - 4, y0 - 4], [x0 + w * 0.12, y0 - 4], [x0 + w * 0.16, y0 + h * 0.5], [x0 + w * 0.1, y1 + 4]]));
+    c.fillStyle = GRAN.d;
+    c.fill(poly14([[x1 + 4, y1 + 4], [x0 + w * 0.66, y1 + 4], [x0 + w * 0.72, y0 + h * 0.45], [x0 + w * 0.62, y0 - 4], [x1 + 4, y0 - 4]]));
+    c.fillStyle = GRAN.d2;
+    c.fill(poly14([[x1 + 4, y1 + 4], [x0 + w * 0.84, y1 + 4], [x0 + w * 0.88, y0 + h * 0.5], [x0 + w * 0.8, y0 - 4], [x1 + 4, y0 - 4]]));
+    for (let i = 0; i < 6; i++) {
+      const x = x0 + w * (0.15 + rnd7(seed2 + i * 3) * 0.7), y = y0 + h * (0.25 + rnd7(seed2 + i * 5) * 0.6), a = 1.2 + rnd7(seed2 + i) * 0.8;
+      taper4(c, x, y, x + Math.cos(a) * 10, y + Math.sin(a) * 12, 0.8, 1, GRAN.d2);
+    }
+    for (let i = 0; i < 24; i++) {
+      const x = x0 + rnd7(seed2 * 3 + i) * w, y = y0 + rnd7(seed2 * 7 + i) * h;
+      c.fillStyle = i % 2 ? GRAN.d : GRAN.l;
+      c.beginPath();
+      c.arc(x, y, 0.6, 0, TAU168);
+      c.fill();
+    }
+  });
+}
+function icicle3(c, x, y, len, w = 2.2) {
+  const p = poly14([[x - w, y], [x + w, y], [x + 0.3, y + len * 0.7], [x, y + len]]);
+  contour3(c, [p], 0.6);
+  fill4(c, p, ICE4.m);
+  clip21(c, p, () => {
+    c.fillStyle = ICE4.d;
+    c.fillRect(x + 0.3, y, w, len);
+    c.fillStyle = ICE4.h;
+    c.fillRect(x - w * 0.6, y, 0.8, len * 0.6);
+  });
+}
+function crystals(c, x, y, s) {
+  const parts = [[0, 0, 3.4, 22, 0], [-6, 1, 2.6, 14, -0.35], [6, 1, 2.8, 16, 0.32], [-2.6, 2, 2.2, 10, -0.1]];
+  const ps = parts.map(([dx, dy, w, h, a]) => {
+    const cx = x + dx * s, cy2 = y + dy * s, ca = Math.cos(a), sa = Math.sin(a), pt = (u, v) => [cx + u * s * ca - v * s * sa, cy2 + u * s * sa + v * s * ca];
+    return poly14([pt(-w, 0), pt(-w, -h * 0.8), pt(0, -h), pt(w, -h * 0.8), pt(w, 0)]);
+  });
+  glow9(c, x, y - 10 * s, 22 * s, "190,235,255", 0.22);
+  contour3(c, ps, 0.9);
+  for (const p of ps) {
+    fill4(c, p, ICE4.m);
+    clip21(c, p, () => {
+      c.fillStyle = ICE4.d;
+      c.fillRect(x, y - 30 * s, 14 * s, 32 * s);
+      c.fillStyle = ICE4.l;
+      c.fillRect(x - 12 * s, y - 30 * s, 8 * s, 32 * s);
+    });
+  }
+  c.fillStyle = ICE4.h;
+  c.fillRect(x - 1.4 * s, y - 18 * s, 0.8 * s, 8 * s);
+  c.fillRect(x - 4.6 * s, y - 14.4 * s, 4 * s, 0.8 * s);
+}
+function shrub(c, x, y, s, seed2) {
+  const L = [[x - 8 * s, y - 4 * s, 5 * s], [x - 2 * s, y - 7 * s, 6 * s], [x + 5 * s, y - 6 * s, 5.6 * s], [x + 10 * s, y - 3 * s, 4 * s], [x, y - 2 * s, 6 * s]], p = lobes4(L);
+  contour3(c, [p], 0.9);
+  fill4(c, p, PINE.d);
+  clip21(c, p, () => {
+    c.save();
+    c.translate(-1, -1.2);
+    c.fillStyle = PINE.m;
+    c.fill(p);
+    c.restore();
+    c.fillStyle = PINE.l;
+    for (let i = 0; i < 8; i++) {
+      c.beginPath();
+      c.arc(x + (rnd7(seed2 + i) - 0.5) * 18 * s, y - 6 * s + rnd7(seed2 * 3 + i) * 6 * s, 1.1 * s, 0, TAU168);
+      c.fill();
+    }
+  });
+  snowCap5(c, x + 1 * s, y - 10 * s, 22 * s, 4.4 * s, seed2, 0.8, 0);
+  for (const [bx, by] of [[x - 5 * s, y - 4 * s], [x + 4 * s, y - 3 * s], [x + 1 * s, y - 6 * s]]) for (const [dx, dy] of [[0, 0], [1.4, -0.8], [-0.4, 1.2]]) {
+    const b = ell11(bx + dx * s, by + dy * s, 1.1 * s, 1.1 * s);
+    contour3(c, [b], 0.35);
+    fill4(c, b, "#d0283a");
+  }
+}
+function furTuft(c, x, y, a) {
+  for (let i = 0; i < 4; i++) {
+    const aa = a - 0.5 + i * 0.33;
+    taper4(c, x, y, x + Math.cos(aa) * 5, y + Math.sin(aa) * 5, 0.6, 0.4, i % 2 ? "#e8eef4" : "#a8b4c0");
+  }
+}
+function snowBurst(c, x, y, t) {
+  for (let i = 0; i < 16; i++) {
+    const a = Math.PI + 0.15 + rnd7(i * 3.3) * (Math.PI - 0.3), d = (14 + rnd7(i) * 40) * (0.4 + t), cx = x + Math.cos(a) * d * 1.3, cy2 = y - 6 + Math.sin(a) * d * 0.85 + t * t * 20 * rnd7(i + 5), p = ell11(cx, cy2, 2 + rnd7(i + 1) * 2.4, 1.6 + rnd7(i + 2) * 1.8);
+    contour3(c, [p], 0.6);
+    fill4(c, p, SNOW5.l);
+  }
+  c.save();
+  c.globalAlpha = 0.65 * (1 - t * 0.6);
+  for (let i = 0; i < 6; i++) {
+    const a = Math.PI + 0.3 + i * 0.5;
+    c.fillStyle = "rgba(240,248,255,.95)";
+    c.beginPath();
+    c.ellipse(x + Math.cos(a) * 30 * (0.5 + t), y - 10 + Math.sin(a) * 14 * (0.5 + t), 11 + t * 6, 6 + t * 3, 0, 0, TAU168);
+    c.fill();
+  }
+  c.restore();
+}
+function drawYetiCaveMouthV1(c, { t = 0, state: state2 = "sleep" } = {}) {
+  c.fillStyle = PACK.d;
+  c.fill(smooth23([[-74, -2], [-40, -9], [20, -10], [66, -6], [84, 0], [76, 8], [20, 9], [-40, 8], [-72, 6]]));
+  granite2(c, [[-70, 3], [-72, -18], [-64, -40], [-44, -58], [-14, -68], [16, -66], [42, -56], [62, -36], [70, -14], [70, 3]], 5);
+  const rim2 = P24();
+  rim2.moveTo(-26, 2);
+  rim2.quadraticCurveTo(-27, -44, 0, -44);
+  rim2.quadraticCurveTo(27, -44, 26, 2);
+  rim2.closePath();
+  const hole = P24();
+  hole.moveTo(-20, 2);
+  hole.quadraticCurveTo(-21, -37, 0, -37);
+  hole.quadraticCurveTo(21, -37, 20, 2);
+  hole.closePath();
+  contour3(c, [rim2], 1.2);
+  fill4(c, rim2, GRAN.d);
+  clip21(c, rim2, () => {
+    c.fillStyle = GRAN.l;
+    c.fill(poly14([[-28, 4], [-28, -28], [-14, -46], [2, -48], [-8, -40], [-22, -24], [-22, 4]]));
+    c.fillStyle = GRAN.d2;
+    c.fillRect(10, -48, 22, 54);
+  });
+  fill4(c, hole, "#16222f");
+  clip21(c, hole, () => {
+    c.fillStyle = "#0d1620";
+    c.fill(smooth23([[-16, 4], [-15, -24], [0, -31], [15, -24], [16, 4]]));
+    c.fillStyle = "#060b10";
+    c.fill(smooth23([[-9, 4], [-8, -14], [0, -20], [8, -14], [9, 4]]));
+  });
+  c.save();
+  c.strokeStyle = OL114;
+  c.lineWidth = 1.4;
+  c.stroke(hole);
+  c.restore();
+  if (state2 === "sleep") {
+    const k = t * 0.35 % 1, open3 = k > 0.93 ? Math.max(0.12, Math.abs(1 - (k - 0.93) * 28)) : 1;
+    glow9(c, 0, -17, 14, "150,220,255", 0.25);
+    for (const ex of [-6, 6]) {
+      c.fillStyle = "#d8f6ff";
+      c.beginPath();
+      c.ellipse(ex, -17, 2.6, 1.9 * open3, ex < 0 ? 0.2 : -0.2, 0, TAU168);
+      c.fill();
+      c.fillStyle = "#1a4a6a";
+      c.beginPath();
+      c.ellipse(ex, -17, 0.9, 1.3 * open3, 0, 0, TAU168);
+      c.fill();
+    }
+  }
+  const tongue6 = smooth23([[-20, 1], [20, 1], [24, 6], [0, 9], [-24, 6]]);
+  fill4(c, tongue6, PACK.d);
+  c.fillStyle = PACK.l;
+  c.beginPath();
+  c.ellipse(-6, 4, 8, 1, 0, 0, TAU168);
+  c.fill();
+  for (let k = 0; k < 3; k++) taper4(c, 32 + k * 3.4, -34 + k * 1.4, 38 + k * 3.4, -18 + k * 1.4, 0.8, 0, GRAN.h);
+  for (let k = 0; k < 3; k++) taper4(c, 32.8 + k * 3.4, -33 + k * 1.4, 38.8 + k * 3.4, -17 + k * 1.4, 0.4, 0, GRAN.d2);
+  furTuft(c, -24, -20, -2.6);
+  furTuft(c, 24, -14, -0.4);
+  furTuft(c, -18, -38, -2);
+  snowCap5(c, -2, -66, 94, 9, 3, 1.2, 3);
+  snowCap5(c, -50, -50, 30, 6.4, 7, 1.1, 1);
+  snowCap5(c, 46, -48, 28, 6.4, 9, 1.1, 1);
+  snowCap5(c, -64, -26, 14, 4.4, 11, 1, 0);
+  snowCap5(c, 64, -24, 13, 4.4, 13, 1, 0);
+  for (let i = 0; i < 9; i++) {
+    const a = Math.PI + 0.25 + i / 8 * (Math.PI - 0.5), x = Math.cos(a) * 24, y = -4 + Math.sin(a) * 40;
+    icicle3(c, x, y, 5 + rnd7(i * 3) * 7 + (i === 4 ? 4 : 0), 1.8);
+  }
+  for (const [x, len] of [[-40, 10], [-34, 7], [-58, 8], [36, 9], [42, 6], [56, 8]]) icicle3(c, x, x < 0 ? -46 - Math.abs(x + 46) * 0.2 : -44 - Math.abs(x - 46) * 0.2, len, 1.8);
+  crystals(c, -58, 4, 1);
+  shrub(c, 56, 4, 1, 21);
+  for (const [x, w, h, s] of [[-34, 20, 3.4, 1], [30, 16, 3, 2], [-74, 11, 2.8, 3], [76, 11, 2.6, 4]]) {
+    const p = smooth23([[x - w, 3], [x - w * 0.5, -h], [x + w * 0.3, -h * 0.8], [x + w, 3], [x, 4.4]]);
+    contour3(c, [p], 0.5);
+    fill4(c, p, SNOW5.m);
+    clip21(c, p, () => {
+      c.fillStyle = SNOW5.l;
+      c.fill(smooth23([[x - w, 0], [x - w * 0.4, -h * 0.9], [x + w * 0.1, -h * 0.6]]));
+      c.fillStyle = SNOW5.d;
+      c.fillRect(x - w, 1.5, w * 2, 4);
+    });
+  }
+  if (state2 === "roar") snowBurst(c, 0, 0, t);
+}
+function yetiPrint(c, x, y, a, s, col2, lit2) {
+  c.save();
+  c.translate(x, y);
+  c.rotate(a);
+  c.scale(s, s * 0.55);
+  c.fillStyle = col2;
+  c.beginPath();
+  c.ellipse(0, 0, 3.4, 5.2, 0, 0, TAU168);
+  c.fill();
+  for (const [tx, ty, r] of [[-3.4, -6, 1.3], [-1.2, -7.4, 1.4], [1.2, -7.4, 1.4], [3.4, -6, 1.3]]) {
+    c.beginPath();
+    c.ellipse(tx, ty, r, r * 1.2, 0, 0, TAU168);
+    c.fill();
+  }
+  c.fillStyle = lit2;
+  c.beginPath();
+  c.ellipse(0, 4.2, 3, 1, 0, 0, TAU168);
+  c.fill();
+  c.restore();
+}
+function fishBones(c, x, y, a, s) {
+  c.save();
+  c.translate(x, y);
+  c.rotate(a);
+  c.scale(s, s);
+  const head18 = smooth23([[-9, 0], [-6, -2.6], [-4, -2], [-4, 2], [-6, 2.6]]), tail2 = poly14([[6, 0], [9.6, -3], [9, 0], [9.6, 3]]);
+  c.save();
+  c.strokeStyle = OL114;
+  c.lineWidth = 2;
+  c.lineCap = "round";
+  c.beginPath();
+  c.moveTo(-4, 0);
+  c.lineTo(6.4, 0);
+  for (let i = -2; i <= 5; i += 1.6) {
+    c.moveTo(i, 0);
+    c.lineTo(i + 0.8, -2.4);
+    c.moveTo(i, 0);
+    c.lineTo(i + 0.8, 2.4);
+  }
+  c.stroke();
+  c.strokeStyle = IVORY.m;
+  c.lineWidth = 0.8;
+  c.stroke();
+  c.restore();
+  contour3(c, [head18, tail2], 0.6 / s);
+  fill4(c, head18, IVORY.m);
+  fill4(c, tail2, IVORY.d);
+  c.fillStyle = "#2a2a2a";
+  c.beginPath();
+  c.arc(-6.4, -0.6, 0.6, 0, TAU168);
+  c.fill();
+  c.restore();
+}
+function snowRock(c, x, y, s, seed2) {
+  const p = smooth23([[x - 7 * s, y + 1], [x - 6 * s, y - 4 * s], [x - 1 * s, y - 6 * s], [x + 5 * s, y - 4.4 * s], [x + 7 * s, y + 1], [x, y + 2 * s]]);
+  contour3(c, [p], 0.8);
+  fill4(c, p, GRAN.m);
+  clip21(c, p, () => {
+    c.fillStyle = GRAN.l;
+    c.fillRect(x - 8 * s, y - 7 * s, 6 * s, 9 * s);
+    c.fillStyle = GRAN.d;
+    c.fillRect(x + 2 * s, y - 7 * s, 6 * s, 9 * s);
+  });
+  snowCap5(c, x, y - 4.6 * s, 13 * s, 3 * s, seed2, 0.7, 0);
+}
+function snowHole(c, x, y, s) {
+  const lip2 = lobes4([[x - 12 * s, y - 1, 4.4 * s], [x - 6 * s, y - 4.6 * s, 5 * s], [x + 1 * s, y - 5.4 * s, 5.2 * s], [x + 8 * s, y - 4 * s, 4.6 * s], [x + 13 * s, y - 0.6, 4 * s]]), hole = ell11(x, y, 9.4 * s, 3.8 * s);
+  contour3(c, [lip2], 0.9);
+  fill4(c, lip2, SNOW5.m);
+  clip21(c, lip2, () => {
+    c.save();
+    c.translate(-0.8, -1.2);
+    c.fillStyle = SNOW5.l;
+    c.fill(lip2);
+    c.restore();
+    c.fillStyle = SNOW5.d;
+    c.fillRect(x - 18 * s, y - 1, 36 * s, 8);
+  });
+  fill4(c, hole, "#14202e");
+  clip21(c, hole, () => {
+    c.fillStyle = "#2a3e54";
+    c.fillRect(x - 10 * s, y - 4 * s, 20 * s, 2 * s);
+  });
+  c.save();
+  c.strokeStyle = OL114;
+  c.lineWidth = 1.1;
+  c.stroke(hole);
+  c.restore();
+  for (const [dx, dy, r] of [[-12, 3, 2.4], [11, 3.4, 2], [-4, 4.4, 1.6]]) {
+    const p = ell11(x + dx * s, y + dy, r * 1.6 * s, r * 0.7 * s);
+    fill4(c, p, SNOW5.l);
+  }
+}
+function drawYetiCaveClearingV1(c, { rx = 150, ry = 62, seed: seed2 = 4 } = {}) {
+  c.save();
+  c.translate(0, 30);
+  const outline5 = Array.from({ length: 40 }, (_, i) => {
+    const a = i / 40 * TAU168, w = 1 + (rnd7(seed2 + i * 1.7) - 0.5) * 0.14 + Math.sin(a * 3 + seed2) * 0.04;
+    return [Math.cos(a) * rx * w, Math.sin(a) * ry * w];
+  });
+  const patch = smooth23(outline5);
+  fill4(c, patch, PACK.m);
+  clip21(c, patch, () => {
+    c.fillStyle = PACK.d;
+    c.fill(smooth23([[-100, -40], [-40, -56], [40, -56], [104, -38], [70, -18], [20, -24], [-30, -20], [-84, -16]]));
+    for (const [pts2, w] of [[[[-20, -14], [-70, 0], [-112, -4]], 12], [[[20, -16], [70, -6], [118, -12]], 11], [[[0, -10], [-10, 20], [-4, 52]], 12]]) {
+      const p = P24();
+      p.moveTo(...pts2[0]);
+      p.quadraticCurveTo(...pts2[1], ...pts2[2]);
+      c.save();
+      c.lineCap = "round";
+      c.strokeStyle = PACK.d;
+      c.lineWidth = w;
+      c.stroke(p);
+      c.strokeStyle = mix23(PACK.d, PACK.m, 0.5);
+      c.lineWidth = w * 0.5;
+      c.stroke(p);
+      c.restore();
+    }
+    for (let i = 0; i < 40; i++) {
+      const a = rnd7(seed2 * 3 + i) * TAU168, r = Math.sqrt(rnd7(seed2 + i * 2.3)), x = Math.cos(a) * rx * r, y = Math.sin(a) * ry * r;
+      c.fillStyle = i % 3 ? PACK.d : PACK.h;
+      c.beginPath();
+      c.ellipse(x, y, 1.4 + rnd7(i) * 1.4, 0.6 + rnd7(i + 1) * 0.4, 0, 0, TAU168);
+      c.fill();
+    }
+    for (const [x, y, a] of [[-48, -2, -1.4], [-66, 4, -1.7], [-88, -2, -1.5], [48, -6, 1.5], [70, -2, 1.6], [92, -8, 1.4], [-6, 26, 0.1], [-2, 44, -0.1], [10, 10, 0.2]]) yetiPrint(c, x, y, a, 1, PACK.d2, PACK.h);
+  });
+  {
+    const pts2 = Array.from({ length: 20 }, (_, i) => {
+      const a = i / 20 * TAU168, w = 1 + (rnd7(91 + i) - 0.5) * 0.2;
+      return [-52 + Math.cos(a) * 36 * w, 22 + Math.sin(a) * 11 * w];
+    }), pool4 = smooth23(pts2);
+    contour3(c, [pool4], 0.9);
+    fill4(c, pool4, ICE4.m);
+    clip21(c, pool4, () => {
+      c.fillStyle = ICE4.d;
+      c.fill(smooth23([[-92, 20], [-60, 14], [-20, 18], [-14, 36], [-90, 36]]));
+      c.fillStyle = ICE4.l;
+      c.fill(smooth23([[-84, 18], [-66, 12], [-46, 12], [-58, 17]]));
+      for (const [x0, y0, x1, y1] of [[-60, 14, -50, 24], [-50, 24, -40, 20], [-50, 24, -56, 32], [-40, 20, -28, 24]]) {
+        taper4(c, x0, y0, x1, y1, 0.5, 0, ICE4.h);
+        taper4(c, x0 + 0.6, y0 + 0.8, x1 + 0.6, y1 + 0.8, 0.4, 0, ICE4.d2);
+      }
+      c.fillStyle = ICE4.h;
+      c.fillRect(-76, 16, 10, 0.8);
+      c.fillRect(-36, 26, 6, 0.7);
+      for (const [bx, by] of [[-64, 24], [-44, 28], [-30, 18]]) {
+        c.beginPath();
+        c.arc(bx, by, 0.9, 0, TAU168);
+        c.fill();
+      }
+    });
+  }
+  snowHole(c, -rx * 0.66, -ry * 0.12, 1);
+  snowHole(c, rx * 0.7, -ry * 0.22, 0.85);
+  for (const [x, y, a, s] of [[-rx * 0.3, ry * 0.62, 0.3, 1], [rx * 0.22, ry * 0.5, -0.5, 0.9], [rx * 0.58, ry * 0.1, 1.2, 0.8]]) boneV32(c, x, y, a, s);
+  for (const [x, y, a, s] of [[rx * 0.4, ry * 0.62, 0.3, 1], [-rx * 0.74, ry * 0.34, -0.4, 0.9], [rx * 0.04, ry * 0.82, 0.1, 0.85]]) fishBones(c, x, y, a, s);
+  for (const [x, y, s, sd] of [[-rx * 0.84, -ry * 0.1, 0.9, 1], [rx * 0.86, ry * 0.12, 0.8, 2], [rx * 0.6, ry * 0.62, 0.7, 3], [-rx * 0.46, -ry * 0.42, 0.7, 4]]) snowRock(c, x, y, s, sd * 17);
+  for (const [x, y, a] of [[-rx * 0.12, ry * 0.36, 0.5], [rx * 0.3, ry * 0.2, -1], [-rx * 0.54, ry * 0.6, 1.3], [rx * 0.72, ry * 0.42, 0.2]]) {
+    c.save();
+    c.translate(x, y);
+    c.rotate(a);
+    const p = poly14([[-4, -1.2], [4, -0.4], [4.6, 0], [4, 0.4], [-4, 1.2]]);
+    contour3(c, [p], 0.5);
+    fill4(c, p, ICE4.m);
+    c.fillStyle = ICE4.h;
+    c.fillRect(-3, -0.8, 5, 0.5);
+    c.restore();
+  }
+  for (const [x, y, a] of [[-rx * 0.2, ry * 0.12, 0.4], [rx * 0.12, ry * 0.7, -0.3]]) {
+    c.save();
+    c.translate(x, y);
+    c.rotate(a);
+    c.save();
+    c.strokeStyle = OL114;
+    c.lineWidth = 2;
+    c.lineCap = "round";
+    c.beginPath();
+    c.moveTo(-7, 0);
+    c.lineTo(7, 0);
+    c.stroke();
+    c.strokeStyle = "#6a4a30";
+    c.lineWidth = 0.9;
+    c.stroke();
+    c.restore();
+    for (let i = -5; i <= 5; i += 2.4) for (const s of [-1, 1]) taper4(c, i, 0, i + 2.4, s * 3, 0.5, 0, PINE.m);
+    c.restore();
+  }
+  const lip2 = P24();
+  for (let i = 0; i < outline5.length; i++) {
+    const a = i / 40 * TAU168, n = 3 + Math.round(rnd7(seed2 + i) * 2);
+    if (rnd7(seed2 * 9 + i) < 0.2) continue;
+    for (let k = 0; k < n; k++) {
+      const tt = k / n, aa = a + tt * (TAU168 / 40), w = 1 + (rnd7(seed2 + i * 1.7) - 0.5) * 0.14 + Math.sin(aa * 3 + seed2) * 0.04, px7 = Math.cos(aa) * rx * w * 1.005, py = Math.sin(aa) * ry * w * 1.005, r = 2 + rnd7(i * 5 + k) * 2.4;
+      lip2.moveTo(px7 + r * 1.3, py);
+      lip2.ellipse(px7, py, r * 1.3, r, 0, 0, TAU168);
+    }
+  }
+  c.fillStyle = SNOW5.d2;
+  c.save();
+  c.translate(0.4, 1.2);
+  c.fill(lip2);
+  c.restore();
+  c.fillStyle = SNOW5.d;
+  c.fill(lip2);
+  c.save();
+  c.beginPath();
+  c.clip(lip2);
+  c.fillStyle = SNOW5.l;
+  c.translate(-0.6, -1.2);
+  c.fill(lip2);
+  c.restore();
+  c.restore();
+}
+function goldHeap3(c, cx, cy2, W20, H7, n, seed2) {
+  const top = [];
+  for (let i = 0; i <= 10; i++) {
+    const x = -W20 + i / 10 * W20 * 2, h = H7 * Math.pow(Math.max(0, 1 - Math.pow(x / W20, 2)), 0.75);
+    top.push([cx + x, cy2 - 1 - h + (rnd7(seed2 + i * 7) - 0.5) * 1.4]);
+  }
+  const body5 = smooth23([[cx - W20 - 3, cy2 + 1], ...top, [cx + W20 + 3, cy2 + 1], [cx, cy2 + 3]]);
+  contour3(c, [body5], 1);
+  fill4(c, body5, GOLD26.m);
+  clip21(c, body5, () => {
+    c.fillStyle = GOLD26.d;
+    c.fill(smooth23([[cx + W20 * 0.25, cy2 - H7], [cx + W20 + 4, cy2 - 2], [cx + W20 + 4, cy2 + 4], [cx - W20 - 4, cy2 + 4], [cx - W20 - 4, cy2], [cx, cy2 - 1]]));
+    c.fillStyle = GOLD26.l;
+    c.fill(smooth23([[cx - W20 * 0.8, cy2 - H7 * 0.45], [cx - W20 * 0.4, cy2 - H7 * 0.95], [cx, cy2 - H7 - 1], [cx + W20 * 0.2, cy2 - H7 * 0.8], [cx - W20 * 0.2, cy2 - H7 * 0.5]]));
+  });
+  const coins = [];
+  for (let i = 0; i < n; i++) {
+    const x = (rnd7(seed2 + i * 3.1) * 2 - 1) * W20 * 0.9, hx2 = H7 * Math.pow(Math.max(0, 1 - Math.pow(x / W20, 2)), 0.75), u = Math.pow(rnd7(seed2 + i * 5.7), 0.7);
+    coins.push([cx + x, cy2 - 1 - hx2 * u, 0.78 + rnd7(seed2 + i * 1.3) * 0.3, 0.7 + rnd7(seed2 + i * 2.9) * 0.5]);
+  }
+  coins.sort((a, b) => a[1] - b[1]);
+  for (const [x, y, s, tl] of coins) hoardCoin2(c, x, y, s, tl);
+}
+function drawYetiCaveHoardV1(c, { open: open3 = false, t = 0, ready = false } = {}) {
+  const full = !open3;
+  c.fillStyle = PACK.d2;
+  c.fill(smooth23([[-30, 2], [-22, -5], [0, -8], [22, -6], [31, 1], [18, 6], [-16, 6]]));
+  const mound3 = smooth23([[-28, 3], [-24, -4], [-10, -8], [8, -8], [24, -4], [29, 3], [10, 6], [-12, 6]]);
+  contour3(c, [mound3], 0.9);
+  fill4(c, mound3, SNOW5.m);
+  clip21(c, mound3, () => {
+    c.fillStyle = SNOW5.l;
+    c.fill(smooth23([[-26, -2], [-10, -7], [6, -7], [-6, -3]]));
+    c.fillStyle = SNOW5.d;
+    c.fillRect(-30, 1, 60, 6);
+  });
+  {
+    const tusk = P24();
+    tusk.moveTo(-6, -8);
+    tusk.quadraticCurveTo(14, -6, 26, -20);
+    tusk.quadraticCurveTo(30, -30, 22, -38);
+    tusk.quadraticCurveTo(26, -28, 20, -22);
+    tusk.quadraticCurveTo(10, -12, -6, -14);
+    tusk.closePath();
+    contour3(c, [tusk], 1);
+    fill4(c, tusk, IVORY.m);
+    clip21(c, tusk, () => {
+      c.save();
+      c.translate(1.6, 1.8);
+      c.fillStyle = IVORY.d;
+      c.fill(tusk);
+      c.restore();
+      c.save();
+      c.translate(-0.6, -1.2);
+      c.fillStyle = IVORY.l;
+      c.globalAlpha = 0.9;
+      c.fill(tusk);
+      c.restore();
+      for (const [x, y] of [[4, -12], [12, -14], [19, -20], [24, -28]]) taper4(c, x, y - 2.6, x + 2, y + 2.6, 0.5, 0, IVORY.d2);
+    });
+  }
+  {
+    const shaft = poly14([[-5, -6], [-13.6, -36], [-12, -36.6], [-3.4, -6.6]]), head18 = poly14([[-21, -33], [-12.4, -38.6], [-4, -38], [-4.6, -36.6], [-11.8, -36.2], [-19.6, -31.6]]), spike = poly14([[-4.4, -38.2], [-2.4, -36.6], [-4.4, -36.4]]);
+    contour3(c, [shaft, head18, spike], 0.75);
+    fill4(c, shaft, "#8a5e36");
+    clip21(c, shaft, () => {
+      c.save();
+      c.translate(1, 0);
+      c.fillStyle = "#5a3a20";
+      c.fill(shaft);
+      c.restore();
+    });
+    fill4(c, head18, STEEL9.m);
+    clip21(c, head18, () => {
+      c.fillStyle = STEEL9.h;
+      c.fillRect(-22, -40, 20, 2.4);
+      c.fillStyle = STEEL9.d;
+      c.fillRect(-22, -36.4, 20, 4);
+    });
+    fill4(c, spike, STEEL9.l);
+    c.save();
+    c.strokeStyle = OL114;
+    c.lineWidth = 1.8;
+    c.beginPath();
+    c.moveTo(-10, -27);
+    c.quadraticCurveTo(-15, -20, -10, -17);
+    c.stroke();
+    c.strokeStyle = "#a8322e";
+    c.lineWidth = 0.9;
+    c.stroke();
+    c.restore();
+  }
+  if (full) goldHeap3(c, 4, -1, 14, 11, 36, 41);
+  else goldHeap3(c, 4, 0, 9, 4, 12, 43);
+  if (full) {
+    snowCap5(c, -4, -10, 14, 3.4, 5, 0.8, 0);
+    crystals(c, 14, -6, 0.55);
+    gem4(c, 4, -3, 0.62, SAPH2, 0.5);
+  }
+  {
+    c.save();
+    c.translate(-17, -4);
+    const body5 = poly14([[-4, 0], [-4, -9], [4, -9], [4, 0]]), top = poly14([[-5, -9], [0, -13], [5, -9]]), base3 = poly14([[-5, 0], [5, 0], [4.4, 2], [-4.4, 2]]), ring8 = P24();
+    ring8.arc(0, -14.6, 1.8, 0, TAU168);
+    contour3(c, [body5, top, base3], 0.8);
+    c.save();
+    c.strokeStyle = OL114;
+    c.lineWidth = 1.8;
+    c.stroke(ring8);
+    c.strokeStyle = BRASS22.d;
+    c.lineWidth = 0.8;
+    c.stroke(ring8);
+    c.restore();
+    fill4(c, body5, full ? "#fff0b8" : "#c8d8e6");
+    clip21(c, body5, () => {
+      c.fillStyle = full ? "#ffd270" : "#a8b8c8";
+      c.fillRect(-4, -5, 8, 5);
+      c.fillStyle = "rgba(255,255,255,.6)";
+      c.fillRect(-3.4, -8.4, 2, 8);
+    });
+    c.fillStyle = BRASS22.m;
+    c.fillRect(-0.5, -9, 1, 9);
+    fill4(c, top, BRASS22.m);
+    fill4(c, base3, BRASS22.d);
+    if (full) glow9(c, 0, -5, 12, "255,210,120", 0.35);
+    c.restore();
+  }
+  {
+    const r = [[-12, 4, 6, 2.4], [-12, 3, 4.4, 1.7], [-12, 2, 2.8, 1.1]];
+    for (const [x, y, a, b] of r) {
+      const p = ell11(x, y, a, b);
+      c.save();
+      c.strokeStyle = OL114;
+      c.lineWidth = 3;
+      c.stroke(p);
+      c.strokeStyle = ROPE3.m;
+      c.lineWidth = 1.4;
+      c.stroke(p);
+      c.restore();
+    }
+    c.save();
+    c.strokeStyle = OL114;
+    c.lineWidth = 3;
+    c.lineCap = "round";
+    c.beginPath();
+    c.moveTo(-6, 4);
+    c.quadraticCurveTo(-2, 6, 2, 5);
+    c.stroke();
+    c.strokeStyle = ROPE3.m;
+    c.lineWidth = 1.4;
+    c.stroke();
+    c.restore();
+  }
+  {
+    c.save();
+    c.translate(19, 3);
+    c.rotate(-0.25);
+    const crown5 = smooth23([[-6, 0], [-6, -5], [-3.6, -8.6], [0, -9.6], [3.6, -8.6], [6, -5], [6, 0]]), band10 = smooth23([[-6.6, 0.4], [-6.6, -3], [6.6, -3], [6.6, 0.4], [0, 1.6]]), pom = lobes4([[0, -10.6, 2.4], [-1.4, -11.6, 1.6], [1.4, -11.4, 1.6]]);
+    contour3(c, [crown5, band10, pom], 0.8);
+    fill4(c, crown5, "#c0362e");
+    clip21(c, crown5, () => {
+      c.fillStyle = "#e05a4a";
+      c.fillRect(-7, -10, 4, 10);
+      c.fillStyle = "#8a2420";
+      c.fillRect(2.4, -10, 5, 10);
+      c.strokeStyle = "#8a2420";
+      c.lineWidth = 0.5;
+      for (const y of [-7, -5]) {
+        c.beginPath();
+        c.moveTo(-6, y);
+        c.lineTo(6, y);
+        c.stroke();
+      }
+    });
+    fill4(c, band10, "#efe6d8");
+    clip21(c, band10, () => {
+      c.fillStyle = "#c8bca8";
+      for (let x = -6; x < 7; x += 1.6) c.fillRect(x, -3, 0.6, 4.6);
+      c.fillStyle = "#d8ccb8";
+      c.fillRect(2, -3, 6, 5);
+    });
+    fill4(c, pom, SNOW5.l);
+    clip21(c, pom, () => {
+      c.fillStyle = SNOW5.d;
+      c.fillRect(0, -12, 4, 4);
+    });
+    c.restore();
+  }
+  for (const [x, y] of full ? [[-28, 4], [26, 6], [6, 6], [-2, 5]] : [[-26, 3], [-18, 6], [14, 6], [24, 3], [-4, 6], [6, 6], [28, 0]]) hoardCoin2(c, x, y, 0.85, 1);
+  if (full) {
+    const k = t * 0.8 % 1;
+    for (const [gx, gy, o] of [[-2, -12, 0], [10, -10, 0.33], [16, -22, 0.66], [22, -34, 0.15]]) {
+      const a = Math.max(0, Math.sin((k + o) * TAU168));
+      if (a > 0.25) sparkle2(c, gx, gy, a * 4.2);
+    }
+  }
+  if (ready) glow9(c, 0, -10, 40, "255,214,110", 0.3);
+}
+
 // src/client/den_art_v1.js
 var TAU169 = Math.PI * 2;
 var INK34 = "#141518";
@@ -145821,6 +146472,13 @@ function drawDenGroundV1(c, x, y, { skin = "woodland", rx = 132, ry = 54, seed: 
     c.save();
     c.translate(x, y - 30);
     drawAntlionPitClearingV1(c, { rx, ry, seed: seed2, t, state: state2 });
+    c.restore();
+    return;
+  }
+  if (skin === "frostland") {
+    c.save();
+    c.translate(x, y - 30);
+    drawYetiCaveClearingV1(c, { rx, ry, seed: seed2 });
     c.restore();
     return;
   }
@@ -145946,6 +146604,13 @@ function drawDenMouthV1(c, x, y, { skin = "woodland", t = 0, state: state2 = "sl
     c.save();
     c.translate(x, y);
     drawAntlionPitMouthV1(c, { t, state: state2 });
+    c.restore();
+    return;
+  }
+  if (skin === "frostland") {
+    c.save();
+    c.translate(x, y);
+    drawYetiCaveMouthV1(c, { t, state: state2 });
     c.restore();
     return;
   }
@@ -146192,6 +146857,13 @@ function drawDenHoardV1(c, x, y, { skin = "woodland", open: open3 = false, t = 0
     c.save();
     c.translate(x, y);
     drawAntlionPitHoardV1(c, { open: open3, t, ready });
+    c.restore();
+    return;
+  }
+  if (skin === "frostland") {
+    c.save();
+    c.translate(x, y);
+    drawYetiCaveHoardV1(c, { open: open3, t, ready });
     c.restore();
     return;
   }
@@ -167577,7 +168249,7 @@ function drawChronosAssemblyV6(c, actor, tick, pose2, flash = false) {
 var TAU188 = Math.PI * 2;
 var INK48 = "#172531";
 var GOLD29 = "#dca942";
-var IVORY = "#fff1c7";
+var IVORY2 = "#fff1c7";
 var CYAN3 = "#9edfe3";
 var BRASS8 = "#93612d";
 var clamp50 = (n) => Math.max(0, Math.min(1, n));
@@ -167623,7 +168295,7 @@ function marks(c, radius, alpha = 1, reverse = false) {
   for (let i = 0; i < 12; i++) {
     const a = i * TAU188 / 12 - Math.PI / 2, major = i % 3 === 0;
     const r1 = radius - (major ? 11 : 6), r23 = radius - 3;
-    line28(c, [[Math.cos(a) * r1, Math.sin(a) * r1], [Math.cos(a) * r23, Math.sin(a) * r23]], major ? IVORY : GOLD29, major ? 2.4 : 1.4);
+    line28(c, [[Math.cos(a) * r1, Math.sin(a) * r1], [Math.cos(a) * r23, Math.sin(a) * r23]], major ? IVORY2 : GOLD29, major ? 2.4 : 1.4);
     if (major && reverse) {
       c.save();
       c.translate(Math.cos(a) * (radius - 17), Math.sin(a) * (radius - 17));
@@ -167683,11 +168355,11 @@ function drawChronosSlamGroundV6(c, row2, tick, pending) {
     ring4(c, r, INK48, 3.3);
     ring4(c, r, GOLD29, 1.6);
     marks(c, r, 0.56 + 0.44 * q2);
-    ring4(c, r - 3, IVORY, 2.1, -Math.PI / 2, -Math.PI / 2 + TAU188 * q2);
+    ring4(c, r - 3, IVORY2, 2.1, -Math.PI / 2, -Math.PI / 2 + TAU188 * q2);
     c.save();
     c.globalAlpha *= 0.32 + 0.46 * q2;
     const angle3 = -Math.PI / 2 + TAU188 * ease20(Math.min(1, q2 / 0.82));
-    line28(c, [[Math.cos(angle3) * r * -0.13, Math.sin(angle3) * r * -0.13], [Math.cos(angle3) * r * 0.58, Math.sin(angle3) * r * 0.58]], IVORY, 2.6);
+    line28(c, [[Math.cos(angle3) * r * -0.13, Math.sin(angle3) * r * -0.13], [Math.cos(angle3) * r * 0.58, Math.sin(angle3) * r * 0.58]], IVORY2, 2.6);
     const other = angle3 * 0.25;
     line28(c, [[0, 0], [Math.cos(other) * r * 0.31, Math.sin(other) * r * 0.31]], CYAN3, 2);
     disk2(c, 4, GOLD29);
@@ -167702,7 +168374,7 @@ function drawChronosSlamGroundV6(c, row2, tick, pending) {
     const wave = pose2.waveRadius;
     disk2(c, wave, "#efbc4e12");
     ring4(c, wave, INK48, 4.6);
-    ring4(c, wave, IVORY, 2.6);
+    ring4(c, wave, IVORY2, 2.6);
     if (wave > 7) ring4(c, wave - 6, CYAN3, 1.3);
     for (let i = 0; i < 12; i++) {
       const a = i * TAU188 / 12 - Math.PI / 2;
@@ -167711,15 +168383,15 @@ function drawChronosSlamGroundV6(c, row2, tick, pending) {
       const split = 2.5 + 6 * ease20(age / 16), inner = Math.max(2, wave - 12);
       c.translate(0, -split);
       c.globalAlpha *= 0.68;
-      ring4(c, Math.max(1, wave - split - 1), i % 3 === 0 ? IVORY : GOLD29, i % 3 === 0 ? 3.2 : 2.1, 0.09, TAU188 / 12 - 0.09);
+      ring4(c, Math.max(1, wave - split - 1), i % 3 === 0 ? IVORY2 : GOLD29, i % 3 === 0 ? 3.2 : 2.1, 0.09, TAU188 / 12 - 0.09);
       line28(c, [[inner, 0], [Math.max(inner, wave - split - 1), 0]], GOLD29, 1.2);
       c.restore();
     }
     if (age < 15) {
       c.save();
       c.globalAlpha *= 1 - ease20(age / 15);
-      line28(c, [[-17, 0], [17, 0]], IVORY, 3);
-      line28(c, [[0, -14], [0, 14]], IVORY, 3);
+      line28(c, [[-17, 0], [17, 0]], IVORY2, 3);
+      line28(c, [[0, -14], [0, 14]], IVORY2, 3);
       disk2(c, Math.max(1, 10 - age * 0.4), CYAN3);
       c.restore();
     }
@@ -167730,11 +168402,11 @@ function spectralHand(c, length, alpha = 1) {
   c.save();
   c.globalAlpha *= alpha;
   polygon18(c, [[-20, -5], [-11, -9], [-3, -5], [length - 27, -5], [length - 23, -11], [length, 0], [length - 23, 11], [length - 27, 5], [-3, 5], [-11, 9], [-20, 5]], GOLD29, 2.5);
-  polygon18(c, [[8, -2], [length - 27, -2], [length - 23, -7], [length - 5, 0], [length - 23, 4], [length - 27, 1], [8, 1]], IVORY, 0.6);
+  polygon18(c, [[8, -2], [length - 27, -2], [length - 23, -7], [length - 5, 0], [length - 23, 4], [length - 27, 1], [8, 1]], IVORY2, 0.6);
   line28(c, [[11, 3], [length - 28, 3]], BRASS8, 1.4);
   disk2(c, 8.5, INK48);
   disk2(c, 6.4, CYAN3);
-  disk2(c, 2.7, IVORY);
+  disk2(c, 2.7, IVORY2);
   c.restore();
 }
 function drawChronosSlamForceV6(c, row2, tick, pending) {
@@ -167766,7 +168438,7 @@ function drawChronosSlamForceV6(c, row2, tick, pending) {
       c.save();
       c.globalAlpha *= weight2 * 0.75;
       line28(c, [[-9, tipY - 22], [-10, tipY - 49]], CYAN3, 2.2);
-      line28(c, [[9, tipY - 17], [10, tipY - 39]], IVORY, 2.2);
+      line28(c, [[9, tipY - 17], [10, tipY - 39]], IVORY2, 2.2);
       c.restore();
     }
   } else {
@@ -167787,7 +168459,7 @@ function drawChronosSlamForceV6(c, row2, tick, pending) {
       c.translate(Math.cos(a) * radial, Math.sin(a) * radial * 0.74 - height);
       c.rotate(a + age * (i % 2 ? -0.046 : 0.046));
       polygon18(c, [[-5, -3], [3, -4], [6, 1], [1, 4], [-5, 2]], i % 3 === 0 ? CYAN3 : GOLD29, 1.1);
-      line28(c, [[-3, -2], [2, -2]], IVORY, 0.9);
+      line28(c, [[-3, -2], [2, -2]], IVORY2, 0.9);
       c.restore();
     }
   }
@@ -167810,11 +168482,11 @@ function drawChronosFieldV6(c, row2, tick, pending) {
   c.save();
   c.globalAlpha *= 0.35 + 0.32 * q2;
   const angle3 = -Math.PI / 2 + (pending ? TAU188 * ease20(q2) : TAU188 - age * 0.012);
-  line28(c, [[0, 0], [Math.cos(angle3) * radius * 0.57, Math.sin(angle3) * radius * 0.57]], IVORY, 2);
+  line28(c, [[0, 0], [Math.cos(angle3) * radius * 0.57, Math.sin(angle3) * radius * 0.57]], IVORY2, 2);
   line28(c, [[0, 0], [Math.cos(angle3 * 0.24) * radius * 0.34, Math.sin(angle3 * 0.24) * radius * 0.34]], CYAN3, 1.7);
   disk2(c, 3, GOLD29);
   c.restore();
-  if (pending) ring4(c, radius - 3, IVORY, 1.7, -Math.PI / 2, -Math.PI / 2 + TAU188 * q2);
+  if (pending) ring4(c, radius - 3, IVORY2, 1.7, -Math.PI / 2, -Math.PI / 2 + TAU188 * q2);
   else {
     for (let i = 0; i < 3; i++) {
       const a = i * TAU188 / 3 + 0.4, r = radius * 0.44;
@@ -167828,7 +168500,7 @@ function drawChronosFieldV6(c, row2, tick, pending) {
     c.save();
     c.globalAlpha *= 0.32;
     ring4(c, radius * 0.66, CYAN3, 1, 0.1, Math.PI * 0.83);
-    ring4(c, radius * 0.66, IVORY, 1, Math.PI * 1.12, Math.PI * 1.8);
+    ring4(c, radius * 0.66, IVORY2, 1, Math.PI * 1.12, Math.PI * 1.8);
     c.restore();
   }
   c.restore();
@@ -184422,7 +185094,7 @@ function mouth4(ctx, x, y) {
     ctx.stroke();
   }
 }
-function shrub(ctx, x, y, v) {
+function shrub2(ctx, x, y, v) {
   shadow70(ctx, x, y + 12, 31, 9, 0.28);
   const dark = v ? "#21452f" : "#264b32", mid = v ? "#397047" : "#3e7547", light2 = v ? "#6e9b5b" : "#78a963";
   for (const [dx, dy, rx, ry] of [[-18, 2, 16, 13], [-3, -9, 20, 17], [16, 0, 16, 14], [4, 7, 18, 13]]) {
@@ -184785,7 +185457,7 @@ function drawCaveDecorationD10(ctx, d, t) {
   }
   ctx.lineJoin = "round";
   if (d.kind === "cave-mouth") mouth4(ctx, x, y);
-  else if (d.kind === "cave-shrub") shrub(ctx, x, y, d.variant ?? 0);
+  else if (d.kind === "cave-shrub") shrub2(ctx, x, y, d.variant ?? 0);
   else if (d.kind === "cave-roots-exterior") roots2(ctx, x, y);
   else if (d.kind === "cave-wall-roots") wallRoots(ctx, x, y);
   else if (d.kind === "cave-vines-exterior") {
@@ -188212,20 +188884,20 @@ var shift3 = (p, dx, dy) => {
   q2.addPath(p, new DOMMatrix([1, 0, 0, 1, dx, dy]));
   return q2;
 };
-var SNOW5 = { d2: "#90a7bc", d: "#b7c9da", m: "#e4edf5", l: "#f5f9fc", h: "#ffffff" };
+var SNOW6 = { d2: "#90a7bc", d: "#b7c9da", m: "#e4edf5", l: "#f5f9fc", h: "#ffffff" };
 function drift8(c, list, o = 1.2) {
   const p = new Path2D();
   for (const [x, y, rx, ry] of list) p.addPath(ell15(x, y, rx, ry ?? rx * 0.6));
-  prop5(c, [[p, SNOW5.m]], o);
+  prop5(c, [[p, SNOW6.m]], o);
   const k = Math.min(3.2, o * 2.4);
   c.save();
   c.clip(p);
-  c.fillStyle = SNOW5.h;
+  c.fillStyle = SNOW6.h;
   c.fill(p);
-  c.fillStyle = SNOW5.d;
+  c.fillStyle = SNOW6.d;
   c.fill(shift3(p, k * 0.42, k * 0.66));
   c.clip(shift3(p, k * 0.42, k * 0.66));
-  c.fillStyle = SNOW5.m;
+  c.fillStyle = SNOW6.m;
   c.fill(shift3(p, -k * 0.5, -k * 0.8));
   c.restore();
 }
