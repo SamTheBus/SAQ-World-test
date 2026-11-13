@@ -2423,16 +2423,16 @@ var ATTUNE_SOULS = ATTUNE_GOLD.map((gold, level) => {
 });
 var attunementSoulsV1 = (level) => ATTUNE_SOULS[level];
 var DROP_MATERIALS_V1 = Object.freeze([...ECONOMY_V1.materialDrops.materials]);
-function rewardMaterialsV1(progression, kind2, draw) {
+function rewardMaterialsV1(progression, kind2, draw2) {
   const D = ECONOMY_V1.materialDrops, source10 = rewardSourceV1(progression);
   const key5 = kind2 === "chest" ? progression?.siteReward === "lair-chest" ? "lair-chest" : null : kind2 === "enemy" && source10 !== "ordinary" ? source10 : null;
   if (!key5 || !D.rolls[key5]) return {};
   const odds = key5 === "elite" ? D.elite : D.chances, out = {};
   for (let i = 0; i < D.rolls[key5]; i++) D.materials.forEach((m, j) => {
-    if (draw(m + "/" + i) % 100 < odds[j]) out[m] = (out[m] ?? 0) + 1;
+    if (draw2(m + "/" + i) % 100 < odds[j]) out[m] = (out[m] ?? 0) + 1;
   });
   if (key5 !== "elite" && !Object.keys(out).length) {
-    let r = draw("floor") % 100;
+    let r = draw2("floor") % 100;
     for (const [j, m] of D.materials.entries()) {
       if (r < D.chances[j]) {
         out[m] = 1;
@@ -2503,19 +2503,19 @@ function worldLevelGapMultiplier(heroLevel, enemyLevel) {
   const excess = enemy2 > hero + 2n ? enemy2 - hero - 2n : 0n, denominator = 4n + excess * excess;
   return { outgoing: combatAmount(4n, denominator), incoming: combatAmount(denominator > 16n ? 16n : denominator, 4n) };
 }
-function worldGearRarity(level, role, draw, qualityHundredths = 0) {
+function worldGearRarity(level, role, draw2, qualityHundredths = 0) {
   const l = progressionBigInt(level), q = progressionBigInt(qualityHundredths);
-  requireContract(l >= 1n && ["ordinary", "elite", "completion"].includes(role) && Number.isFinite(draw) && draw >= 0 && draw < 1, "World rarity input");
+  requireContract(l >= 1n && ["ordinary", "elite", "completion"].includes(role) && Number.isFinite(draw2) && draw2 >= 0 && draw2 < 1, "World rarity input");
   const band = WORLD_COMBAT_POLICY.rarity[l >= 41n ? "from41" : l >= 21n ? "from21" : "below21"], base = band[role === "ordinary" ? "ordinary" : "completion"];
   if (q === 0n) {
-    const roll2 = Math.floor(draw * 1e4);
+    const roll2 = Math.floor(draw2 * 1e4);
     let sum2 = 0;
     for (let i = 0; i < base.length; i++) {
       sum2 += base[i];
       if (roll2 < sum2) return i;
     }
   } else {
-    const weights = base.map((w, i) => BigInt(w) * (10000n + q * BigInt(i * 10))), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw * 4294967296)) * total;
+    const weights = base.map((w, i) => BigInt(w) * (10000n + q * BigInt(i * 10))), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw2 * 4294967296)) * total;
     let sum2 = 0n;
     for (let i = 0; i < weights.length; i++) {
       sum2 += weights[i];
@@ -4175,22 +4175,26 @@ function skillLoadout(d8) {
 }
 
 // src/shared/content/hero_looks_v1.js
-var HAIR_STYLES = Object.freeze(["short", "buzz", "spiky", "swept", "shaggy", "undercut", "mullet", "curly", "bob", "long", "mane", "ponytail", "pigtails", "braid", "bun", "dreads", "mohawk", "bald"]);
+var HAIR_STYLES = Object.freeze(["short", "buzz", "spiky", "swept", "shaggy", "undercut", "mullet", "curly", "bob", "long", "mane", "ponytail", "pigtails", "braid", "bun", "dreads", "mohawk", "pixie", "bangs", "waves", "sidebraid", "highpony", "twinbuns", "puff", "crown", "bald"]);
 var FACIAL_HAIR = Object.freeze(["none", "stubble", "mustache", "handlebar", "goatee", "chinstrap", "chops", "short", "long", "bushy", "braided"]);
 var HAIR_COLORS = Object.freeze(["black", "soft-black", "dark-brown", "brown", "light-brown", "auburn", "copper", "strawberry", "dark-blonde", "blonde", "platinum", "gray", "silver", "white", "red", "pink", "blue", "teal", "green", "violet"]);
 var SKIN_TONES = Object.freeze(["porcelain", "fair", "light", "peach", "golden", "olive", "tan", "bronze", "brown", "chestnut", "deep", "ebony"]);
+var FACES = Object.freeze(["classic", "lashes", "rosy", "freckles"]);
+var ACCESSORIES = Object.freeze(["none", "flower", "ribbon", "hairpin"]);
 var HERO_NAME_MAX = 16;
-var DEFAULT_LOOK = Object.freeze({ hair: "short", hairColor: "brown", skin: "light", facialHair: "none", helmet: true, name: "" });
+var DEFAULT_LOOK = Object.freeze({ hair: "short", hairColor: "brown", skin: "light", facialHair: "none", helmet: true, name: "", face: "classic", accessory: "none" });
 function validHeroName(name) {
   return typeof name === "string" && name === name.trim() && [...name].length <= HERO_NAME_MAX && /^[\p{L}\p{M}\p{N} '’.-]*$/u.test(name) && !/\s\s/.test(name);
 }
 function validateHeroLook(look) {
-  closedRecord(look, ["hair", "hairColor", "skin", "facialHair", "helmet", "name"]);
+  closedRecord(look, ["hair", "hairColor", "skin", "facialHair", "helmet", "name"], ["face", "accessory"]);
   requireContract(HAIR_STYLES.includes(look.hair), "Unknown hair style");
   requireContract(HAIR_COLORS.includes(look.hairColor), "Unknown hair color");
   requireContract(SKIN_TONES.includes(look.skin), "Unknown skin tone");
   requireContract(FACIAL_HAIR.includes(look.facialHair), "Unknown facial hair");
   requireContract(typeof look.helmet === "boolean", "Invalid helmet setting");
+  if (look.face !== void 0) requireContract(FACES.includes(look.face), "Unknown face");
+  if (look.accessory !== void 0) requireContract(ACCESSORIES.includes(look.accessory), "Unknown accessory");
   requireContract(validHeroName(look.name), "Names use up to 16 letters, numbers, spaces, hyphens or apostrophes");
   return look;
 }
@@ -5488,9 +5492,9 @@ function worldLootWeightsV3(encounter, hero, role, siteReward = null, qualityHun
   const boost = level >= BigInt(WORLD_LOOT_V3_POLICY.qualityFromLevel) ? q : 0n;
   return w.map((n, i) => level < BigInt(WORLD_LOOT_V3_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
 }
-function worldGearRarityV3(encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
-  requireContract(Number.isFinite(draw) && draw >= 0 && draw < 1, "Loot v3 draw");
-  const weights = worldLootWeightsV3(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw * 4294967296)) * total;
+function worldGearRarityV3(encounter, hero, role, siteReward, draw2, qualityHundredths = 0) {
+  requireContract(Number.isFinite(draw2) && draw2 >= 0 && draw2 < 1, "Loot v3 draw");
+  const weights = worldLootWeightsV3(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw2 * 4294967296)) * total;
   let sum2 = 0n;
   for (let i = 0; i < weights.length; i++) {
     sum2 += weights[i];
@@ -5549,9 +5553,9 @@ function worldLootWeightsV4(encounter, hero, role, siteReward = null, qualityHun
   const boost = level >= BigInt(WORLD_LOOT_V4_POLICY.qualityFromLevel) ? q : 0n;
   return w.map((n, i) => level < BigInt(WORLD_LOOT_V4_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
 }
-function worldGearRarityV4(encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
-  requireContract(Number.isFinite(draw) && draw >= 0 && draw < 1, "Loot v4 draw");
-  const weights = worldLootWeightsV4(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw * 4294967296)) * total;
+function worldGearRarityV4(encounter, hero, role, siteReward, draw2, qualityHundredths = 0) {
+  requireContract(Number.isFinite(draw2) && draw2 >= 0 && draw2 < 1, "Loot v4 draw");
+  const weights = worldLootWeightsV4(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw2 * 4294967296)) * total;
   let sum2 = 0n;
   requireContract(total > 0n, "Loot v4 weights empty");
   for (let i = 0; i < weights.length; i++) {
@@ -5565,9 +5569,9 @@ function lootGearPerMilleFor(hash17, role, siteReward = null, occurrenceHundredt
   requireContract(isSourceLootV4(hash17), "Loot table");
   return (hash17 === WORLD_LOOT_V4_HASH ? lootGearPerMilleV4 : lootGearPerMilleV3)(role, siteReward, occurrenceHundredths);
 }
-function worldGearRarityFor(hash17, encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
+function worldGearRarityFor(hash17, encounter, hero, role, siteReward, draw2, qualityHundredths = 0) {
   requireContract(isSourceLootV4(hash17), "Loot table");
-  return (hash17 === WORLD_LOOT_V4_HASH ? worldGearRarityV4 : worldGearRarityV3)(encounter, hero, role, siteReward, draw, qualityHundredths);
+  return (hash17 === WORLD_LOOT_V4_HASH ? worldGearRarityV4 : worldGearRarityV3)(encounter, hero, role, siteReward, draw2, qualityHundredths);
 }
 
 // src/shared/content/quest_gear_v1.js
@@ -5620,9 +5624,9 @@ function worldRarityWeightsV2(encounter, hero, role, qualityHundredths = 0) {
   const band = [...WORLD_RARITY_POLICY.bands].reverse().find((b) => level >= BigInt(b.minimumLevel));
   return band[role].map((w, i) => level < BigInt(WORLD_RARITY_POLICY.unlockHeroAndEncounterLevels[i]) ? 0n : BigInt(w) * (10000n + q * BigInt(i * 10)));
 }
-function worldGearRarityV2(encounter, hero, role, draw, qualityHundredths = 0) {
-  requireContract(Number.isFinite(draw) && draw >= 0 && draw < 1, "World rarity draw");
-  const weights = worldRarityWeightsV2(encounter, hero, role, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw * 4294967296)) * total;
+function worldGearRarityV2(encounter, hero, role, draw2, qualityHundredths = 0) {
+  requireContract(Number.isFinite(draw2) && draw2 >= 0 && draw2 < 1, "World rarity draw");
+  const weights = worldRarityWeightsV2(encounter, hero, role, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw2 * 4294967296)) * total;
   let sum2 = 0n;
   for (let i = 0; i < weights.length; i++) {
     sum2 += weights[i];
@@ -13695,6 +13699,18 @@ var CAST_KITS = freezeWire({
   innkeeper: { innkeeper: { hair: ["short", "buzz", "shaggy", "bald", "curly"], beard: ["handlebar", "mustache", "bushy", "short", "chops"] }, barmaid: { hair: ["braid", "bun", "pigtails", "ponytail", "long", "curly"], beard: ["none"] }, host: { hair: ["bald", "swept", "short", "curly"], beard: ["chops", "mustache", "goatee", "none", "handlebar"] } },
   enchanter: { mystic: { hair: ["long", "braid", "bun", "bob", "curly"], beard: ["none"], robe: true }, sage: { hair: ["long", "short", "bald"], beard: ["long", "bushy", "braided", "short"], old: true, robe: true }, young: { hair: ["bun", "short", "ponytail", "curly", "swept"], beard: ["none", "none", "stubble"], robe: true } }
 });
+var SHE = 0.4;
+var NOT_WOMEN = /* @__PURE__ */ new Set(["Arlo", "Perrin"]);
+var MENS_CUTS = /* @__PURE__ */ new Set(["short", "buzz", "bald", "swept", "shaggy", "undercut", "mohawk", "mullet"]);
+var WOMENS_STYLES = ["pixie", "bangs", "waves", "sidebraid", "highpony", "twinbuns", "puff", "crown", "bob", "long"];
+var NEW_STYLES = WOMENS_STYLES.slice(0, 8);
+var draw = (seed, n = 1) => rng(seed)() * n;
+function asWoman(look, seed) {
+  const a = draw(seed + "|hair"), b = draw(seed + "|new"), c = draw(seed + "|acc"), d = draw(seed + "|which");
+  const hair = MENS_CUTS.has(look.hair) ? WOMENS_STYLES[a * WOMENS_STYLES.length | 0] : b < 0.35 ? NEW_STYLES[a * NEW_STYLES.length | 0] : look.hair;
+  return { ...look, hair, face: draw(seed + "|face") < 0.7 ? "rosy" : "lashes", accessory: c < 0.3 ? ["flower", "ribbon", "hairpin"][d * 3 | 0] : "none" };
+}
+var HER_NAMES = ["Aveline", "Bettany", "Clemency", "Dorcas", "Elspeth", "Florence", "Gillian", "Honora", "Iona", "Jocasta", "Katrin", "Lettice", "Mabel", "Nora", "Ottilie", "Philippa", "Rosamund", "Sybil", "Tamar", "Una", "Viola", "Willa", "Agnes", "Beatrix", "Cora", "Eden", "Hilde", "Liesel", "Marigold", "Clover"];
 var CLOTH = ["#3f7a52", "#2f5f8a", "#8a3a3a", "#2f7a74", "#6a3a6e", "#a8742a", "#4a4f5a", "#7a4a6a", "#3a5a3a", "#8a5a2a"];
 var ROBES = ["#7d3c98", "#2f4f8a", "#8a2a3a", "#1f6a64", "#2f5a32", "#3a3a4a", "#9a5a1a", "#5a3a8a"];
 var ROLE_LABEL = { general: "General merchant", smith: "Smith", innkeeper: "Innkeeper", enchanter: "Enchanter" };
@@ -13786,7 +13802,17 @@ var CAST = {};
       } while (used.has(name));
       used.add(name);
       const cloth = K.robe ? pick2(r, ROBES) : pick2(r, CLOTH), skirt = pick2(r, CLOTH);
-      out[role] = freezeWire({ name, kit, look, cloth, skirt });
+      let woman = beard === "none" && smooth.includes(name) && !NOT_WOMEN.has(name);
+      if (!woman && K.beard.includes("none") && draw(slot + "|" + role + "|she") < SHE) {
+        const free = HER_NAMES.filter((n) => !used.has(n));
+        if (free.length) {
+          name = free[draw(slot + "|" + role + "|her", free.length) | 0];
+          used.add(name);
+          look.facialHair = "none";
+          woman = true;
+        }
+      }
+      out[role] = freezeWire({ name, kit, look: woman ? asWoman(look, slot + "|" + role) : look, cloth, skirt });
     }
     CAST["settlement-slot:" + slot] = out;
   }
@@ -13795,13 +13821,13 @@ var BUILT_CASTS = {
   "civilian:alpha:alderwood:merchant": { kit: "shopkeeper", look: { hair: "short", facialHair: "mustache", hairColor: "dark-brown", skin: "tan" }, cloth: "#3f7a52", skirt: "#2f5f8a" },
   "civilian:alpha:alderwood:smith": { kit: "blacksmith", look: { hair: "bald", facialHair: "bushy", hairColor: "soft-black", skin: "tan" }, cloth: "#3f7a52", skirt: "#4a4f5a" },
   "civilian:alpha:alderwood:innkeeper": { kit: "innkeeper", look: { hair: "short", facialHair: "handlebar", hairColor: "gray", skin: "light" }, cloth: "#b8463a", skirt: "#7a3f3a" },
-  "civilian:alpha:town:mara": { kit: "trader", look: { hair: "ponytail", facialHair: "none", hairColor: "black", skin: "brown" }, cloth: "#b8463a", skirt: "#3a5a3a" },
+  "civilian:alpha:town:mara": { kit: "trader", look: { hair: "highpony", facialHair: "none", hairColor: "black", skin: "brown", face: "rosy" }, cloth: "#b8463a", skirt: "#3a5a3a" },
   "civilian:alpha:town:bren": { kit: "armorer", look: { hair: "short", facialHair: "mustache", hairColor: "brown", skin: "light" }, cloth: "#3f7a52", skirt: "#4a4f5a" },
-  "civilian:alpha:town:ada": { kit: "barmaid", look: { hair: "braid", facialHair: "none", hairColor: "auburn", skin: "tan" }, cloth: "#3f6f52", skirt: "#7a3f3a" },
-  "civilian:alpha:town:selene": { kit: "mystic", look: { hair: "long", facialHair: "none", hairColor: "silver", skin: "light" }, cloth: "#7d3c98", skirt: "#5a3a8a" },
-  "civilian:alpha:village:ila": { kit: "shopkeeper", look: { hair: "bob", facialHair: "none", hairColor: "copper", skin: "fair" }, cloth: "#2f7a74", skirt: "#8a5a2a" },
+  "civilian:alpha:town:ada": { kit: "barmaid", look: { hair: "braid", facialHair: "none", hairColor: "auburn", skin: "tan", face: "rosy", accessory: "flower" }, cloth: "#3f6f52", skirt: "#7a3f3a" },
+  "civilian:alpha:town:selene": { kit: "mystic", look: { hair: "waves", facialHair: "none", hairColor: "silver", skin: "light", face: "rosy" }, cloth: "#7d3c98", skirt: "#5a3a8a" },
+  "civilian:alpha:village:ila": { kit: "shopkeeper", look: { hair: "bob", facialHair: "none", hairColor: "copper", skin: "fair", face: "rosy", accessory: "hairpin" }, cloth: "#2f7a74", skirt: "#8a5a2a" },
   "civilian:alpha:village:oren": { kit: "young", look: { hair: "short", facialHair: "stubble", hairColor: "dark-blonde", skin: "olive" }, cloth: "#3f7a52", skirt: "#4a4f5a" },
-  "civilian:alpha:village:nell": { kit: "host", look: { hair: "curly", facialHair: "none", hairColor: "light-brown", skin: "peach" }, cloth: "#7a2e3a", skirt: "#6a3a6e" }
+  "civilian:alpha:village:nell": { kit: "host", look: { hair: "puff", facialHair: "none", hairColor: "light-brown", skin: "peach", face: "rosy" }, cloth: "#7a2e3a", skirt: "#6a3a6e" }
 };
 var ROLE_DEFAULT = { general: "shopkeeper", smith: "blacksmith", innkeeper: "innkeeper", enchanter: "mystic" };
 function shopkeeperCastV1(n) {
@@ -30207,6 +30233,8 @@ export {
   classSkillsFor,
   wheelEntriesFor,
   skillLoadout,
+  FACES,
+  ACCESSORIES,
   HERO_NAME_MAX,
   DEFAULT_LOOK,
   validHeroName,

@@ -1,4 +1,5 @@
 import {
+  ACCESSORIES,
   ACCESS_DATABASE,
   ACCESS_HASH,
   ACCESS_VERSION,
@@ -120,6 +121,7 @@ import {
   ELITE_TYPES_V2,
   ENCHANTER_TOWER_V1,
   ENCOUNTER_PROGRESSION_VERSION,
+  FACES,
   FAR_REACH,
   FERRY_HASH,
   FERRY_NETWORK,
@@ -1051,7 +1053,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-W2ILQDQM.js";
+} from "./chunk-IASLGWAN.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -91830,7 +91832,7 @@ function createCurvedRoutesV1(env, review, prior) {
 var TAU132 = Math.PI * 2;
 var K4 = "#000000";
 var LOOK_OPTIONS = Object.freeze({
-  hairStyles: [["short", "Short"], ["buzz", "Buzz cut"], ["spiky", "Spiky"], ["swept", "Swept"], ["shaggy", "Shaggy"], ["undercut", "Undercut"], ["mullet", "Mullet"], ["curly", "Curly"], ["bob", "Bob"], ["long", "Long"], ["mane", "Mane"], ["ponytail", "Ponytail"], ["pigtails", "Pigtails"], ["braid", "Braid"], ["bun", "Bun"], ["dreads", "Dreadlocks"], ["mohawk", "Mohawk"], ["bald", "Bald"]],
+  hairStyles: [["short", "Short"], ["buzz", "Buzz cut"], ["spiky", "Spiky"], ["swept", "Swept"], ["shaggy", "Shaggy"], ["undercut", "Undercut"], ["mullet", "Mullet"], ["curly", "Curly"], ["bob", "Bob"], ["long", "Long"], ["mane", "Mane"], ["ponytail", "Ponytail"], ["pigtails", "Pigtails"], ["braid", "Braid"], ["bun", "Bun"], ["dreads", "Dreadlocks"], ["mohawk", "Mohawk"], ["pixie", "Pixie cut"], ["bangs", "Long with bangs"], ["waves", "Long waves"], ["sidebraid", "Side braid"], ["highpony", "High ponytail"], ["twinbuns", "Twin buns"], ["puff", "Puff"], ["crown", "Crown braid"], ["bald", "Bald"]],
   facialHair: [["none", "None"], ["stubble", "Stubble"], ["mustache", "Mustache"], ["handlebar", "Handlebar"], ["goatee", "Goatee"], ["chinstrap", "Chin strap"], ["chops", "Mutton chops"], ["short", "Short beard"], ["long", "Long beard"], ["bushy", "Bushy beard"], ["braided", "Braided beard"]],
   hairColors: [
     ["black", "Black", "#1c1b20"],
@@ -91854,6 +91856,8 @@ var LOOK_OPTIONS = Object.freeze({
     ["green", "Green", "#4b8f3f", true],
     ["violet", "Violet", "#7a4fa8", true]
   ],
+  faces: [["classic", "Classic"], ["lashes", "Lashes"], ["rosy", "Rosy"], ["freckles", "Freckles"]],
+  accessories: [["none", "None"], ["flower", "Flower"], ["ribbon", "Ribbon"], ["hairpin", "Hairpin"]],
   skins: [["porcelain", "Porcelain", "#fbe6d3"], ["fair", "Fair", "#f6d5bb"], ["light", "Light", "#f0c39b"], ["peach", "Peach", "#e9b38a"], ["golden", "Golden", "#dba676"], ["olive", "Olive", "#c4a07a"], ["tan", "Tan", "#b98055"], ["bronze", "Bronze", "#a46b45"], ["brown", "Brown", "#8c5a3a"], ["chestnut", "Chestnut", "#73462d"], ["deep", "Deep", "#5e3a26"], ["ebony", "Ebony", "#43281a"]]
 });
 function hexRgb(h) {
@@ -92059,7 +92063,19 @@ var FRONT6 = {
   pigtails: [SLICK, [-7.4, -8.6, -4.6, -9, -3.8, -3.6, -4.2, 2.2, -5.6, 5.6, -7.2, 2.2, -7.8, -3.4]],
   dreads: [[8.4, -11.4, 8.6, -13.8, 6.8, -15.6, 4.6, -16.4, 2.2, -15.4, -0.4, -16.6, -3, -15.4, -5.6, -16.4, -8.2, -15.2, -11, -12.8, -11, -5, -8.8, -3.6, -7.4, -5.4, -6.8, -9.8, -2.2, -11, 3.6, -10.8, 6.4, -11.8], [-8.6, -9.4, -6.4, -9.4, -6, 2.2, -7.2, 3.6, -8.6, 2.4]]
 };
-var NO_EAR = /* @__PURE__ */ new Set(["long", "bob", "shaggy", "pigtails"]);
+var BRAID_FRONT = [0, 1, 2, 3, 4].map((i) => oct4(-5.6 + i % 2 * 0.7 + i * 0.35, -5.2 + i * 2.9, 3.4, 3.2));
+var CROWN = [0, 1, 2, 3, 4, 5].map((i) => oct4(-10.4 + i * 2.9, -17.2 + i % 2 * 0.7, 3.4, 3));
+Object.assign(FRONT6, {
+  pixie: [[9.6, -10.4, 9.8, -13.8, 7.8, -16.4, -7.2, -16.8, -10.8, -14.4, -11.4, -9.6, -12.6, -6.6, -10.4, -6.8, -10.2, -4.4, -8.6, -6.6, -7, -9.4, -4.2, -10.4, -1.6, -9.2, 1.6, -10, 4, -8.6, 6, -9.4, 7.6, -7.2, 8.4, -9.4]],
+  bangs: [[8.6, -8.6, 8.8, -13.8, 7, -15.6, -8, -15.6, -11.6, -12.8, -11.8, -1, -7.8, -1, -6.8, -8.6, -2.2, -8.6]],
+  waves: [[8.6, -11.4, 8.6, -13.6, 6.8, -15.6, -7.8, -15.6, -11.6, -12.8, -11.8, -3, -7.6, -2, -6.4, -9.8, -2.2, -10.8, 3.6, -10.6, 6.4, -11.8], [-6.8, -10, -3, -10.8, -2.4, -6.2, -3.8, -2.6, -2.6, 0.8, -4.4, 3.8, -6.6, 1.8, -5.8, -1.4, -7, -4.6]],
+  sidebraid: [SLICK, ...BRAID_FRONT],
+  highpony: [SLICK],
+  twinbuns: [SLICK],
+  puff: [[8.4, -11.6, 8.6, -13.6, 7, -15.4, -7.6, -15.4, -10.8, -12.8, -10.8, -5, -8.8, -3.6, -7.2, -5.4, -6.6, -9.8, -4.4, -10.6, -2.2, -11.4, 0.4, -10.8, 2.6, -11.4, 4.6, -10.8, 6.4, -11.6]],
+  crown: [SLICK, ...CROWN]
+});
+var NO_EAR = /* @__PURE__ */ new Set(["long", "bob", "shaggy", "pigtails", "bangs", "waves"]);
 function hairBack(c, st, H7, hat) {
   const o = { bottom: true, split: 0.66, lw: 1.3 };
   if (st === "mullet") G2(c, [-6.6, -11.6, -11.4, -12.6, -12.6, -7, -12.2, -1.6, -13.8, 1.8, -13.2, 4.8, -11.6, 3.2, -11, 5.8, -9.4, 3, -8, 4.6, -7.4, 1, -6.6, -2.6], H7, o);
@@ -92086,8 +92102,50 @@ function hairBack(c, st, H7, hat) {
     G2(c, oct4(-9.8, -21, 7, 6.2, 1.6), H7, { bottom: true, split: 0.6, lw: 1.3 });
     R3(c, -9, -15.6, 5.6, 1.6, P11.tie, { flat: true, lw: 1 });
   }
+  if (st === "bangs") G2(c, [-6.4, -12, -11.8, -13, -12.8, -4, -12.8, 7.6, -10.4, 9, -7.8, 7.6, -6.4, 2], H7, o);
+  if (st === "waves") G2(c, [-6.4, -12, -11.8, -13, -13.8, -8, -12.4, -4, -14.2, 0, -12.6, 4, -13.8, 8, -11, 10.6, -9.2, 8.2, -8, 10.2, -6.4, 6.6, -7.6, 3, -6.4, 1], H7, o);
+  if (st === "sidebraid") G2(c, [-6.6, -11.4, -10.4, -12, -11.2, -8, -9.2, -4.4, -6.4, -4.2], H7, o);
+  if (st === "highpony") {
+    if (hat) G2(c, [-10.2, -10.8, -13.8, -9.6, -15.4, -5, -14.8, 2.2, -12.8, 5.8, -11.6, 1.6, -12.2, -4.4, -10.6, -7.8], H7, o);
+    else {
+      G2(c, [-4.6, -14.6, -8.4, -18.6, -13.2, -18.8, -16.6, -15, -17.4, -9, -16, -3, -13.8, 1, -14.2, -4.6, -13.6, -10, -11, -14, -7, -14.6], H7, o);
+      R3(c, -7.8, -18.6, 3, 3, P11.tie, { flat: true, lw: 1 });
+    }
+  }
+  if (st === "twinbuns" && !hat) {
+    G2(c, oct4(-14.2, -18.6, 6.6, 6.2, 1.4), H7, { bottom: true, split: 0.6, lw: 1.3 });
+    G2(c, oct4(-6.6, -21.6, 6.6, 6.2, 1.4), H7, { bottom: true, split: 0.6, lw: 1.3 });
+    R3(c, -12.6, -13.4, 3.8, 1.4, P11.tie, { flat: true, lw: 1 });
+    R3(c, -5, -16.4, 3.8, 1.4, P11.tie, { flat: true, lw: 1 });
+  }
+  if (st === "puff") {
+    const y = hat ? -15 : -19.6;
+    G2(c, oct4(-18.4, y, 11.4, 10.6, 2.6), H7, { bottom: true, split: 0.6, lw: 1.3 });
+    for (let i = 0; i < 5; i++) px3(c, -16.6 + i * 2, y + 2 + i % 2 * 1.6, 1, 1, H7.l);
+    R3(c, -10.6, y + 6.4, 2.6, 3, P11.tie, { flat: true, lw: 1 });
+  }
 }
+var FACE2 = "classic";
+var TRINKET = "none";
+var fineBrows = () => FACE2 === "lashes" || FACE2 === "rosy";
 function eyes(c, blink, y = -7.2) {
+  if (FACE2 === "freckles") for (const [x, dy] of [[5.4, 2.6], [6.8, 3.4], [7.4, 2.2], [1.6, 2.8], [2.8, 3.4]]) px3(c, x, y + dy, 0.7, 0.7, "#9a5a3aaa");
+  if (fineBrows()) {
+    const lash = "#1b2631";
+    if (!blink) {
+      px3(c, 1, y - 0.6, 2.4, 0.8, lash);
+      px3(c, 3, y - 1.3, 0.9, 0.8, lash);
+      px3(c, 4.6, y - 0.6, 2.2, 0.8, lash);
+      px3(c, 6.4, y - 1.3, 0.9, 0.8, lash);
+    } else {
+      px3(c, 2.8, y + 1.2, 0.9, 0.6, lash);
+      px3(c, 6.2, y + 1.2, 0.9, 0.6, lash);
+    }
+    if (FACE2 === "rosy") {
+      px3(c, 4.2, y + 4.6, 2.4, 0.9, "#b4525c");
+      px3(c, 6.6, y + 3, 1.4, 0.9, "#e88a8a66");
+    }
+  }
   if (blink) {
     px3(c, 1.2, y + 1.6, 1.8, 0.8, "#1b2631");
     px3(c, 4.8, y + 1.6, 1.6, 0.8, "#1b2631");
@@ -92116,8 +92174,15 @@ function bareHead(c, st, S9, H7, blink, hat) {
   }
   if (!NO_EAR.has(st)) R3(c, -5.8, -7.8, 2.6, 3.6, S9, { lw: 1.1, nohi: true });
   if (st === "bald") px3(c, -7.8, -12.6, 5.4, 1.1, "#ffffff59");
-  px3(c, 0.8, -9.4, 2.6, 1, H7.d);
-  px3(c, 4.4, -9.4, 2.4, 1, H7.d);
+  if (fineBrows()) {
+    px3(c, 1, -9.6, 2.4, 0.7, H7.d);
+    px3(c, 3.2, -10, 0.8, 0.7, H7.d);
+    px3(c, 4.6, -9.6, 2.2, 0.7, H7.d);
+    px3(c, 6.6, -10, 0.8, 0.7, H7.d);
+  } else {
+    px3(c, 0.8, -9.4, 2.6, 1, H7.d);
+    px3(c, 4.4, -9.4, 2.4, 1, H7.d);
+  }
   eyes(c, blink);
   c.save();
   if (hat) {
@@ -92129,6 +92194,38 @@ function bareHead(c, st, S9, H7, blink, hat) {
   if (st === "pigtails") R3(c, -7.8, -9.8, 3.6, 2.2, P11.tie, { flat: true, lw: 1 });
   if (!["bald", "mohawk", "buzz", "curly", "undercut"].includes(st)) px3(c, -6.4, -14.4, 7, 0.9, H7.l);
   c.restore();
+  if (!hat) trinket(c);
+}
+function trinket(c) {
+  const k = TRINKET;
+  if (k === "flower") {
+    const x = -6.6, y = -13.8;
+    for (let i = 0; i < 5; i++) {
+      const a = i * TAU132 / 5 - 1.2;
+      G2(c, oct4(x + Math.cos(a) * 1.9 - 1.4, y + Math.sin(a) * 1.9 - 1.4, 2.8, 2.8, 0.8), { b: "#f2f0ff", d: "#d6d0ee" }, { lw: 0.8, flat: true });
+    }
+    G2(c, oct4(x - 1.1, y - 1.1, 2.2, 2.2, 0.6), { b: "#f2c14e", d: "#d8a640" }, { lw: 0.7, flat: true });
+    G2(c, [x - 1, y + 2.2, x - 3.4, y + 3.6, x - 1.8, y + 1.4], { b: "#4f8a4a", d: "#3a6a36" }, { lw: 0.6, flat: true });
+  } else if (k === "ribbon") {
+    const x = -10.4, y = -13;
+    G2(c, [x, y, x - 4.4, y - 3, x - 4.6, y + 2.6], { b: "#c0392b", d: "#962d22" }, { lw: 0.9 });
+    G2(c, [x, y, x + 3.6, y - 3.2, x + 4, y + 2.4], { b: "#c0392b", d: "#962d22" }, { lw: 0.9 });
+    G2(c, oct4(x - 1.2, y - 1.2, 2.4, 2.4, 0.6), { b: "#e74c3c", d: "#c0392b" }, { lw: 0.8, flat: true });
+    G2(c, [x - 0.8, y + 1, x - 2.4, y + 6, x - 0.6, y + 5.2, x + 0.6, y + 1], { b: "#c0392b", d: "#962d22" }, { lw: 0.8, flat: true });
+  } else if (k === "hairpin") {
+    const x = -8.4, y = -14.6;
+    c.lineWidth = 2.4;
+    c.strokeStyle = K4;
+    c.beginPath();
+    c.moveTo(x - 3.6, y + 3.4);
+    c.lineTo(x + 3, y - 2.6);
+    c.stroke();
+    c.lineWidth = 1;
+    c.strokeStyle = "#e2b23c";
+    c.stroke();
+    G2(c, oct4(x + 1.6, y - 4.4, 3.2, 3.2, 0.9), { b: "#5ab0c8", d: "#3a8aa0" }, { lw: 0.8, flat: true });
+    px3(c, x + 2.2, y - 3.8, 0.9, 0.9, "#e6f6fa");
+  }
 }
 function facialHair(c, b, H7) {
   const MOUTH3 = "#3b2418", o = { bottom: true, split: 0.64, lw: 1.2 }, BEARD = [-3.6, -7.4, -2.2, -7.4, -1.4, -4.2, 1.2, -3.6, 8.2, -3.6, 8.4, 0.2, 6.8, 2.2, -0.8, 2.2, -3.4, 0.2];
@@ -94651,7 +94748,10 @@ function mainWeaponOf(spec) {
   return { staff: Boolean(STAVES[m]), tip: WEAPON_SPAN[m]?.[1] ?? 34 };
 }
 function drawBlockyHero(c, spec, pose = {}) {
-  const w = kit(spec), look = toLook(spec.look), S9 = skinPal(look.skin), H7 = hairPal(look.hairColor), st = look.hair, t = pose.t ?? 0;
+  const w = kit(spec), look = toLook(spec.look);
+  FACE2 = look.face ?? "classic";
+  TRINKET = look.accessory ?? "none";
+  const S9 = skinPal(look.skin), H7 = hairPal(look.hairColor), st = look.hair, t = pose.t ?? 0;
   const covered = Boolean(w.helmet) && look.helmet, hatOn = covered && HATS.has(w.helmet), red = P11.red, bob = pose.bob ?? 0, sway = pose.sway ?? 0;
   const blink = pose.still ? false : pose.blink ?? (t + 1.9) % 3.9 < 0.12, front2 = w.main || pose.active ? pose.front ?? -0.6 : 1.25, guard = Boolean(pose.guard) && w.offFamily === "shield";
   FLASH2 = Boolean(pose.flash);
@@ -94741,8 +94841,15 @@ function drawBlockyHero(c, spec, pose = {}) {
     };
     const coifFace = () => {
       R3(c, -1.4, -10.6, 8.8, 10.2, S9, { lw: 1.2, flat: true });
-      px3(c, 0.8, -9.4, 2.6, 1, H7.d);
-      px3(c, 4.4, -9.4, 2.4, 1, H7.d);
+      if (fineBrows()) {
+        px3(c, 1, -9.6, 2.4, 0.7, H7.d);
+        px3(c, 3.2, -10, 0.8, 0.7, H7.d);
+        px3(c, 4.6, -9.6, 2.2, 0.7, H7.d);
+        px3(c, 6.6, -10, 0.8, 0.7, H7.d);
+      } else {
+        px3(c, 0.8, -9.4, 2.6, 1, H7.d);
+        px3(c, 4.4, -9.4, 2.4, 1, H7.d);
+      }
       eyes(c, blink);
       c.save();
       c.beginPath();
@@ -94922,7 +95029,7 @@ function heroCard(spec) {
     if (!Number.isInteger(g.tier) || g.tier < 0 || g.tier > 5 || g.kind !== void 0 && !KIND2.test(g.kind)) return null;
     gear2[slot] = g.kind ? { tier: g.tier, kind: g.kind } : { tier: g.tier };
   }
-  return { cls: spec.cls ?? null, look: { hair: l.hair, hairColor: l.hairColor, skin: l.skin, facialHair: l.facialHair, helmet: l.helmet, name: "" }, gear: gear2, offType: spec.offType ?? null };
+  return { cls: spec.cls ?? null, look: { hair: l.hair, hairColor: l.hairColor, skin: l.skin, facialHair: l.facialHair, helmet: l.helmet, name: "", ...FACES.includes(l.face) ? { face: l.face } : {}, ...ACCESSORIES.includes(l.accessory) ? { accessory: l.accessory } : {} }, gear: gear2, offType: spec.offType ?? null };
 }
 var blank = (slot) => ({ slot, name: "", level: 1, hero: null, world: null, heroId: null, plays: null });
 var HERO_ID = /^hero:[0-9a-z-]{1,64}$/;
@@ -98393,14 +98500,16 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     paint3();
   });
   const nameField = field3("Name", [nameInput]);
-  const tiles7 = (list, key3, id) => {
+  const tiles7 = (list, key3, onPick = null) => {
     const box6 = el3("div", "hc-tiles"), map = {};
     for (const [value2, name] of list) {
       const b = el3("button", "hc-tile"), canvas = el3("canvas");
       b.type = "button";
       b.append(canvas, el3("span", "", name));
       b.addEventListener("click", () => {
+        const was = look[key3];
         look[key3] = value2;
+        onPick?.(value2, was);
         paint3();
       });
       map[value2] = { b, canvas };
@@ -98425,9 +98534,11 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     }
     return { box: box6, map };
   };
+  const faceTiles = tiles7(LOOK_OPTIONS.faces, "face"), faceField = field3("Face", [faceTiles.box]);
   const hairTiles = tiles7(LOOK_OPTIONS.hairStyles, "hair"), natural = swatches(LOOK_OPTIONS.hairColors.filter((x) => !x[3]), "hairColor"), bold = swatches(LOOK_OPTIONS.hairColors.filter((x) => x[3]), "hairColor"), skins = swatches(LOOK_OPTIONS.skins, "skin"), beardTiles = tiles7(LOOK_OPTIONS.facialHair, "facialHair");
   const hairField = field3("Hair", [hairTiles.box]), hairColorField = field3("Hair color", [natural.box, el3("p", "hc-sub", "Bold"), bold.box]), skinField = field3("Skin", [skins.box]), beardField = field3("Facial hair", [beardTiles.box]);
-  const lookFields = [nameField, hairField, hairColorField, skinField, beardField];
+  const accTiles = tiles7(LOOK_OPTIONS.accessories, "accessory"), accField = field3("Accessory", [accTiles.box]);
+  const lookFields = [nameField, faceField, hairField, hairColorField, skinField, beardField, accField];
   body5.append(preview, options);
   panel.append(head18, body5, foot2);
   root4.append(panel);
@@ -98474,7 +98585,8 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   }
   function randomLook() {
     const pick4 = (list) => list[Math.floor(Math.random() * list.length)][0];
-    look = { ...look, hair: pick4(LOOK_OPTIONS.hairStyles), hairColor: pick4(LOOK_OPTIONS.hairColors), skin: pick4(LOOK_OPTIONS.skins), facialHair: Math.random() < 0.55 ? "none" : pick4(LOOK_OPTIONS.facialHair) };
+    look = { ...look, hair: pick4(LOOK_OPTIONS.hairStyles), hairColor: pick4(LOOK_OPTIONS.hairColors), skin: pick4(LOOK_OPTIONS.skins), face: pick4(LOOK_OPTIONS.faces), facialHair: "none", accessory: Math.random() < 0.3 ? pick4(LOOK_OPTIONS.accessories.slice(1)) : "none" };
+    if (look.face !== "lashes" && look.face !== "rosy" && Math.random() >= 0.45) look.facialHair = pick4(LOOK_OPTIONS.facialHair);
     paint3();
   }
   function draw(canvas, spec, frame3, t) {
@@ -98501,6 +98613,8 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     const key3 = JSON.stringify([{ ...look, name: "" }, cls, mode]);
     if (key3 === thumbsKey) return;
     thumbsKey = key3;
+    for (const [value2, { canvas }] of Object.entries(faceTiles.map)) draw(canvas, { cls: null, look: { ...look, face: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
+    for (const [value2, { canvas }] of Object.entries(accTiles.map)) draw(canvas, { cls: null, look: { ...look, accessory: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
     for (const [value2, { canvas }] of Object.entries(hairTiles.map)) draw(canvas, { cls: null, look: { ...look, hair: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
     for (const [value2, { canvas }] of Object.entries(beardTiles.map)) draw(canvas, { cls: null, look: { ...look, facialHair: value2, helmet: false }, gear: {} }, headFrame(2, 0.6, 22), null);
     for (const [id, { canvas }] of Object.entries(cardButtons)) draw(canvas, specFor(id, kitGear(id)), (c, w, h) => {
@@ -98540,6 +98654,8 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     }
     laterClass.setAttribute("aria-pressed", String(deferClass));
     laterClass.disabled = busy;
+    for (const [v, { b }] of Object.entries(faceTiles.map)) b.setAttribute("aria-pressed", String(v === look.face));
+    for (const [v, { b }] of Object.entries(accTiles.map)) b.setAttribute("aria-pressed", String(v === look.accessory));
     for (const [v, { b }] of Object.entries(hairTiles.map)) b.setAttribute("aria-pressed", String(v === look.hair));
     for (const [v, { b }] of Object.entries(beardTiles.map)) b.setAttribute("aria-pressed", String(v === look.facialHair));
     for (const map of [natural.map, bold.map]) for (const [v, b] of Object.entries(map)) b.setAttribute("aria-pressed", String(v === look.hairColor));
@@ -118303,7 +118419,7 @@ var ICONS3 = {
 };
 var KIND_LABEL = { clear: "Clear a dungeon", hunt: "Hunt an elite", carry: "Carry a letter", find: "Find a lost thing", rescue: "Rescue a captive", collect: "Collect" };
 var COIN = '<svg viewBox="0 0 16 16" width="14" height="14"><circle cx="8" cy="8" r="6.5" fill="#f0c862" stroke="#8a6420" stroke-width="1.2"/><circle cx="8" cy="8" r="3.6" fill="none" stroke="#b8862e" stroke-width="1"/></svg>';
-var FACE2 = { general: "M", smith: "S", innkeeper: "I", enchanter: "E" };
+var FACE3 = { general: "M", smith: "S", innkeeper: "I", enchanter: "E" };
 var ARROW = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M21 12 4 4.5 8.5 12 4 19.5z" fill="currentColor"/></svg>';
 var ANGLE = { east: 0, "south-east": 45, south: 90, "south-west": 135, west: 180, "north-west": 225, north: 270, "north-east": 315 };
 var DIRS3 = Object.keys(ANGLE);
@@ -118786,7 +118902,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   function drawTalk() {
     const q = quests(), n = readModel().serviceNpcs?.find((v) => v.id === talkNpc), f = q?.folk?.[talkNpc];
     talk.replaceChildren();
-    const sheet = el3("div", null, "qx-sheet"), box6 = el3("div", null, "qx-talk"), face4 = el3("div", (n?.name?.[0] ?? FACE2[n?.role] ?? "?").toUpperCase(), "qx-face"), who = el3("div"), h = el3("h4", n?.name ?? "");
+    const sheet = el3("div", null, "qx-sheet"), box6 = el3("div", null, "qx-talk"), face4 = el3("div", (n?.name?.[0] ?? FACE3[n?.role] ?? "?").toUpperCase(), "qx-face"), who = el3("div"), h = el3("h4", n?.name ?? "");
     h.append(el3("small", n?.roleLabel ?? ""));
     who.append(h);
     const acts = el3("div", null, "qx-acts");
@@ -130374,7 +130490,7 @@ function createSettlementServicesMenu2(options) {
   const RESTOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="#d9b25f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
   const CLOSE2 = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#aeb5b6" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
   const FLASK = (full, size = "") => `<svg class="tn-flask" ${size} viewBox="0 0 20 26" aria-hidden="true"><path d="M7.4 7.6H12.6V11.6A6.6 6.6 0 1 1 7.4 11.6Z" fill="${full ? "#e8404a" : "#2a3542"}" stroke="#0c1219" stroke-width="1.4"/><rect x="7" y="4" width="6" height="3.6" rx="1" fill="#8a6a44"/>${full ? '<path d="M9 13.5a3 3 0 0 0-1.6 2.6" stroke="#ffb3a6" stroke-width="1.2" fill="none" stroke-linecap="round"/>' : ""}</svg>`;
-  const FACES2 = {
+  const FACES3 = {
     shop: '<svg viewBox="0 0 24 24" fill="none" stroke="#f0c862" stroke-width="1.8" stroke-linejoin="round"><path d="M4 9h16l-1.5 11h-13z"/><path d="M8 9V7a4 4 0 0 1 8 0v2"/></svg>',
     forge: '<svg viewBox="0 0 24 24" fill="none" stroke="#ff9a5a" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M3 10h13l3-3h2v4l-3 2H6z"/><path d="M8 13v3M14 13v3M6 19h10"/></svg>',
     altar: '<svg viewBox="0 0 24 24" fill="none" stroke="#c9a6ff" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 18.5 12 15.6 7 18.5l1.4-5.7L4 9l5.8-.7z"/></svg>',
@@ -130562,7 +130678,7 @@ function createSettlementServicesMenu2(options) {
     const kind = !npc ? "supplies" : npc.role === "enchanter" ? "altar" : npc.services?.includes("attune") ? "forge" : npc.role === "innkeeper" ? "inn" : "shop";
     panel.dataset.serviceKind = kind;
     panel.replaceChildren();
-    const shell2 = el3("div", void 0, "tn-shell"), head18 = el3("div", void 0, "tn-head"), face4 = markup(el3("div", void 0, "tn-npc"), FACES2[kind]), who = el3("div", void 0, "tn-who");
+    const shell2 = el3("div", void 0, "tn-shell"), head18 = el3("div", void 0, "tn-head"), face4 = markup(el3("div", void 0, "tn-npc"), FACES3[kind]), who = el3("div", void 0, "tn-who");
     const title2 = el3("h3", npc?.name ?? "Potions");
     if (npc?.tier && npc.stock?.length) title2.append(el3("span", { village: "Village", town: "Town", city: "City" }[npc.tier], "tn-tier"));
     who.append(title2, el3("small", npc?.roleLabel ?? "Your potion belt"));
@@ -144743,7 +144859,7 @@ var PINK2 = "#f12c94";
 var HOT = "#ff8bc9";
 var CYAN4 = "#50e1e5";
 var PALE7 = "#e5fbff";
-var FACE3 = "#30233f";
+var FACE4 = "#30233f";
 var LIGHT8 = "#573550";
 var TEAL7 = "#19bf9d";
 var clamp51 = (x) => Math.max(0, Math.min(1, x));
@@ -144947,7 +145063,7 @@ function prism(c, pose, size, flash) {
     polygon20(c, [a, z, back[j], back[i]], flash ? "#fff" : i === 0 ? pose.decoy ? "#286071" : LIGHT8 : pose.decoy ? "#1b4655" : "#392239", true);
     wire(c, [back[i], back[j]], i === 0 ? HOT : color82, 0.9, false);
   }
-  polygon20(c, verts, flash ? "#fff" : pose.decoy ? "#183541a8" : FACE3, true);
+  polygon20(c, verts, flash ? "#fff" : pose.decoy ? "#183541a8" : FACE4, true);
   if (!flash) {
     c.save();
     path9(c, verts, true);
@@ -152054,7 +152170,7 @@ function smith(c, x, y, kind, t, facing2 = 1, opts = {}) {
 }
 var I_LOOKS = {
   innkeeper: { look: { hair: "short", facialHair: "handlebar", hairColor: "gray", skin: "light" }, gear: { legs: { tier: 0, kind: "trousers" } } },
-  barmaid: { look: { hair: "braid", facialHair: "none", hairColor: "auburn", skin: "tan" }, gear: {} },
+  barmaid: { look: { hair: "braid", facialHair: "none", hairColor: "auburn", skin: "tan", face: "rosy" }, gear: {} },
   host: { look: { hair: "bald", facialHair: "chops", hairColor: "brown", skin: "brown" }, gear: { legs: { tier: 0, kind: "trousers" } } }
 };
 function innkeeper(c, x, y, kind, t, facing2 = -1, opts = {}) {
@@ -152103,9 +152219,9 @@ function innkeeper(c, x, y, kind, t, facing2 = -1, opts = {}) {
 var pulse = (t) => 0.5 + 0.5 * Math.sin(t * TAU168);
 var glowCol = (g, a = 1) => `rgba(${154 + Math.round(80 * g)},${124 + Math.round(86 * g)},${222 + Math.round(28 * g)},${a})`;
 var E_LOOKS = {
-  mystic: { name: "Selene", look: { hair: "long", facialHair: "none", hairColor: "silver", skin: "light" }, gear: { body: { tier: 0, kind: "robe" }, helmet: { tier: 0, kind: "circlet" } } },
+  mystic: { name: "Selene", look: { hair: "waves", facialHair: "none", hairColor: "silver", skin: "light", face: "rosy" }, gear: { body: { tier: 0, kind: "robe" }, helmet: { tier: 0, kind: "circlet" } } },
   sage: { name: "Aldous", look: { hair: "long", facialHair: "long", hairColor: "white", skin: "tan" }, gear: { body: { tier: 0, kind: "apprentice-robe" }, helmet: { tier: 0, kind: "moon-hat" } } },
-  young: { name: "Wren", look: { hair: "bun", facialHair: "none", hairColor: "black", skin: "brown" }, gear: { body: { tier: 0, kind: "robe" }, helmet: { tier: 0, kind: "hat" } } }
+  young: { name: "Wren", look: { hair: "bun", facialHair: "none", hairColor: "black", skin: "brown", face: "rosy" }, gear: { body: { tier: 0, kind: "robe" }, helmet: { tier: 0, kind: "hat" } } }
 };
 function enchanter(c, x, y, kind, t, facing2 = -1, opts = {}) {
   const L = E_LOOKS[kind], bob = Math.sin(t * TAU168) * 0.25, still = opts.idle, reach = still ? 1.92 : 1.2 + 0.06 * Math.sin(t * TAU168);
@@ -153334,10 +153450,10 @@ function stairsDown(c, p) {
   }
 }
 var RUNS = [[160, 32, 32, 64], [160, 160, 32, 96], [160, 320, 32, 38], [256, 32, 32, 64], [256, 160, 32, 96], [256, 320, 32, 38], [24, 192, 168, 32], [256, 192, 168, 32]];
-var FACES = [[24, 224, 136], [288, 224, 136], [160, 256, 32], [256, 256, 32], [160, 96, 32], [256, 96, 32]];
+var FACES2 = [[24, 224, 136], [288, 224, 136], [160, 256, 32], [256, 256, 32], [160, 96, 32], [256, 96, 32]];
 function partitions(c) {
   const cap7 = "#6a5640", top = "#8a7458";
-  for (const [x, y, w] of FACES) {
+  for (const [x, y, w] of FACES2) {
     prop2(c, [[rect3(x, y, w, 8), tone2(PLASTER6, -0.12)]], 1.2);
     px6(c, x, y + 5, w, 3, BEAM5);
   }
@@ -163724,7 +163840,7 @@ var BANDS2 = [[120, "#216497"], [78, "#2a74a8"], [46, "#3a8ebf"], [22, "#5fb6d4"
 var SAND5 = 6;
 var SAND_COLOR = "#ccb987";
 var WET = "#a6915f";
-var FACE4 = "#6a4c32";
+var FACE5 = "#6a4c32";
 var LIP2 = "#86673f";
 var LILIES = 6;
 var REEDS = 8;
@@ -163875,7 +163991,7 @@ function drawRiverMix(c, loops, open2, x, y, t, offset2, seed2, at8, waterAt2, b
       }
     };
     out(6);
-    c.fillStyle = FACE4;
+    c.fillStyle = FACE5;
     c.fill("evenodd");
     out(6 * 0.34);
     c.fillStyle = LIP2;
