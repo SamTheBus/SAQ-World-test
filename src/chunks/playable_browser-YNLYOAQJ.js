@@ -99448,7 +99448,7 @@ var THUNDER_TICKS = 60;
 var LEAP_HEAVY_TICKS = 30;
 var TWIN_TICKS = 2;
 var MAX_SEEDS = 2;
-var MAX_THAW = 10;
+var MAX_THAW = 40;
 var MAX_COUNTERS = 2;
 var WAVE_TICKS = 20;
 var SHAKE_TICKS = 10;
@@ -107704,18 +107704,18 @@ function settleTomeSustain(player, actor, combat, stats3) {
 
 // src/simulation/class_skills_v1.js
 var CLASS_SKILL_TUNING_V1 = Object.freeze({
-  bash: { reach: 48, cone: 0.85, targets: 5, attack: [4, 1], knockback: 22, eliteKnockback: 10, stun: 48, eliteStun: 24 },
-  flurry: { reach: 44, cone: 0.95, targets: 3, attack: [9, 4] },
+  bash: { reach: 48, cone: 0.85, attack: [4, 1], knockback: 22, eliteKnockback: 10, stun: 48, eliteStun: 24 },
+  flurry: { reach: 44, cone: 0.95, attack: [9, 4] },
   cast: { cone: 1.05, attack: [3, 1] },
-  earthBreaker: { radius: 70, targets: 8, attack: [2, 1], slow: 2, slowTicks: 180, stun: 60, pull: 30 },
-  rallyingCry: { heal: [15, 100], secondWind: [25, 100], radius: 90, targets: 12, weakenTicks: 360, pull: 24 },
+  earthBreaker: { radius: 70, attack: [2, 1], slow: 2, slowTicks: 180, stun: 60, pull: 30 },
+  rallyingCry: { heal: [15, 100], secondWind: [25, 100], radius: 90, weakenTicks: 360, pull: 24 },
   counter: { attack: [3, 1], stun: 60 },
   lunge: { reach: 110, cone: 0.5, attack: [5, 2], step: 64 },
   toxicFan: { reach: 120, cone: 0.6, targets: 5, attack: [4, 5], wideCone: 0.8, wideTargets: 7, slowTicks: 120 },
-  whirlingBlades: { radius: 60, targets: 8, hits: 3, attack: [3, 5], pull: 20 },
-  firebloom: { reach: 130, cone: 0.9, distance: 90, radius: 50, targets: 8, attack: [2, 1] },
-  flashfreeze: { radius: 80, targets: 10, attack: [1, 1] },
-  ballLightning: { speed: 1, radius: 46, targets: 4, attack: [3, 5], hop: 100 },
+  whirlingBlades: { radius: 60, hits: 3, attack: [3, 5], pull: 20 },
+  firebloom: { reach: 130, cone: 0.9, distance: 90, radius: 50, attack: [2, 1] },
+  flashfreeze: { radius: 80, attack: [1, 1] },
+  ballLightning: { speed: 1, radius: 46, attack: [3, 5], hop: 100 },
   // Row three. Shield Charge: reach, pixels a tick, the slam (Attack + Shield), its stuns, Battering Ram's
   // hit and how wide the Knight carries. Shield Throw: reach, aim cone, bounce range, pixels a tick,
   // bounces (Ricochet's), each hit (Attack + Shield). War Banner: radius, Attack and Defense %, Rally
@@ -107730,11 +107730,11 @@ var CLASS_SKILL_TUNING_V1 = Object.freeze({
   smokeVeil: { radius: 70, pulse: 30, hold: 45, expose: 3, choke: [2, 5] },
   // Flame Wall: how far ahead, half its length, how close counts as in it, the ring's radius, how close
   // Firewalker counts as near, how often it burns, each burn's hit and Burn. Ice Barrier: its worth in %
-  // of max HP (Thick Ice's). Static Field: radius, how many it sparks, each spark, Magnetic Field's pull
+  // of max HP (Thick Ice's). Static Field: radius, each spark, Magnetic Field's pull
   // a second and how close it draws them.
-  flameWall: { ahead: 60, half: 44, thick: 8, ring: 56, near: 60, pulse: 30, targets: 10, attack: [2, 5], burn: [1, 2] },
+  flameWall: { ahead: 60, half: 44, thick: 8, ring: 56, near: 60, pulse: 30, attack: [2, 5], burn: [1, 2] },
   iceBarrier: { worth: 25, thick: 37 },
-  staticField: { radius: 84, targets: 8, attack: [1, 2], pull: 14, core: 18 },
+  staticField: { radius: 84, attack: [1, 2], pull: 14, core: 18 },
   // Row four. Second Breath: % of max HP healed a rank, each second for 3 seconds. Red Harvest, Spreading
   // Flames and Contagious: how far a Bleed or burn jumps. Standard Bearer: ticks between bonus Guard points
   // at rank 1 (rank 5 is five times as often). Magnetic: pull a second a rank. Arcane Syphon: the share of
@@ -107756,7 +107756,7 @@ var CLASS_SKILL_TUNING_V1 = Object.freeze({
   // Noxious Bloom: radius and the burst. Shadowstep: how far it finds an enemy and its crit (Assassinate's).
   // Meteor: reach, aim cone, how far ahead with nobody there, impact radius and hit, how often the ground
   // burns and each burn, Meteor Shower's smaller meteors and how far apart, Impact Crater's extra ticks.
-  // Glacial Burst: radius, most hit, Ice Lances' reach and count. Thunderfall: radius, bolts, each bolt, the
+  // Glacial Burst: radius, Ice Lances' reach and count. Thunderfall: radius, bolts, each bolt, the
   // stun, how high the bolts start. Cracked ground: how often it slows and for how long. Pyromaniac: how
   // near and how many count. Afterimage: its burst's radius.
   aegisPulse: { radius: 80, shove: 40, worth: 20, overcharge: [7, 5] },
@@ -107766,7 +107766,7 @@ var CLASS_SKILL_TUNING_V1 = Object.freeze({
   noxiousBloom: { radius: 80, attack: [1, 1] },
   shadowstep: { reach: 160, crit: [2, 1], assassinate: [3, 1] },
   meteor: { reach: 160, cone: 0.9, distance: 110, radius: 64, attack: [3, 1], pulse: 30, ground: [1, 4], small: [3, 5], spacing: 40, crater: 180 },
-  glacialBurst: { radius: 90, targets: 12, lance: 170, lances: 8 },
+  glacialBurst: { radius: 90, lance: 170, lances: 8 },
   thunderfall: { radius: 130, bolts: 5, attack: [2, 1], stun: 60, sky: 150 },
   crack: { pulse: 30, hold: 45 },
   // Capstones.
@@ -107858,7 +107858,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const angle3 = bearing(a, t);
     return Math.abs(Math.atan2(Math.sin(angle3 - heading), Math.cos(angle3 - heading)));
   };
-  function cone6(a, aim2, reach, width2, limit) {
+  function cone6(a, aim2, reach, width2, limit = Infinity) {
     const heading = Math.atan2(aim2.y, aim2.x), A = effects2.area(a);
     return effects2.nearby(a, a, reach * A + 24).filter((t) => distance12(a, t) <= reach * A + (a.hullRadius ?? 0) + (t.hullRadius ?? 0) && (offAxis(a, t, heading) <= width2 || distance12(a, t) <= (a.hullRadius ?? 0) + (t.hullRadius ?? 0) + 6)).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId)).slice(0, limit);
   }
@@ -108078,7 +108078,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function bash(a, stats3, aim2, commandId) {
     const impact = rank(a, "impact_training"), spiked = rank(a, "spiked_shield"), base3 = addCombat(multiplyCombat(stats3.attack, ...T88.bash.attack), shieldPacket(stats3)), raw = impact ? pct3(base3, 6 * impact) : base3, style = T88.styles[offhandStyle(owner(a))] ?? {};
     let hits2 = 0;
-    for (const t of cone6(a, aim2, T88.bash.reach * (100 + 6 * rank(a, "seismic_reach")) / 100, T88.bash.cone, T88.bash.targets)) {
+    for (const t of cone6(a, aim2, T88.bash.reach * (100 + 6 * rank(a, "seismic_reach")) / 100, T88.bash.cone)) {
       damage(a, t, raw, "bash", commandId, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill", masteryArea: true });
       hits2++;
       if (spiked) bleed(a, t, stats3, 10 * spiked);
@@ -108118,7 +108118,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   }
   function cut(a, stats3, aim2, commandId, index = 0) {
     const combat = c.actors[a.entityId], style = T88.styles[offhandStyle(owner(a))] ?? {}, sword6 = index === FLURRY_SWORD_CUT;
-    for (const t of cone6(a, aim2, T88.flurry.reach, T88.flurry.cone, T88.flurry.targets)) {
+    for (const t of cone6(a, aim2, T88.flurry.reach, T88.flurry.cone)) {
       damage(a, t, multiplyCombat(stats3.attack, ...T88.flurry.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), sword6 ? "main" : "offhand"), trigger: "skill", ...combat.skills?.keen ? { critBonus: combatAmount(1) } : style.critBonus ? { critBonus: combatAmount(...style.critBonus) } : {} });
       if (!t.alive) continue;
       mastery?.primary(a, t, "proactive");
@@ -108189,7 +108189,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   }
   function earthBreaker2(a, stats3, aim2, commandId) {
     const E7 = T88.earthBreaker, impact = rank(a, "impact_training"), n = paid(a, "earth_breaker"), base3 = addCombat(multiplyCombat(stats3.attack, ...E7.attack), shieldPacket(stats3)), hard = impact ? pct3(base3, 6 * impact) : base3, raw = n ? pct3(hard, 20 * n) : hard, stunAll = aug(a, "earth_breaker", 0);
-    const reach = E7.radius * (100 + 6 * rank(a, "seismic_reach")) / 100 * (full(n) ? 1.5 : 1), targets = cone6(a, aim2, reach, Math.PI, E7.targets);
+    const reach = E7.radius * (100 + 6 * rank(a, "seismic_reach")) / 100 * (full(n) ? 1.5 : 1), targets = cone6(a, aim2, reach, Math.PI);
     if (aug(a, "earth_breaker", 1)) for (const t of targets) pull(a, t, E7.pull);
     const combat = c.actors[a.entityId], titan = combat.skills?.titan && rank(a, "titan") ? 15 * rank(a, "titan") : 0;
     clearSkillState(combat, "titan");
@@ -108237,7 +108237,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function rallyingCry2(a, stats3, aim2) {
     const R11 = T88.rallyingCry, secondWind = aug(a, "rallying_cry", 0), n = paid(a, "rallying_cry"), [hn, hd] = secondWind ? R11.secondWind : R11.heal;
     heal(a, stats3, hn + 3 * n * hd / 100, hd);
-    const near5 = cone6(a, aim2, R11.radius, Math.PI, R11.targets).filter((t) => !isPodCombatTargetV4(t));
+    const near5 = cone6(a, aim2, R11.radius, Math.PI).filter((t) => !isPodCombatTargetV4(t));
     if (aug(a, "rallying_cry", 1)) for (const t of near5) pull(a, t, R11.pull);
     if (!secondWind && canStun(a)) for (const t of near5) effects2.status(a, t, "weaken", 1, R11.weakenTicks);
     const k = classSkillsRecord(c.actors[a.entityId]);
@@ -108294,7 +108294,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
     if (--r.ticks > 0 && left > R11.step) return;
     clearSkillState(combat, "ram");
-    const slam = cone6(a, { x: r.dx, y: r.dy }, R11.slam, 0.9, 6), hit2 = crowd(a, rushHit(a, breakerHit(a, stats3, R11.attack)), slam.length), rush = full(spendOf(a, "shield_charge")) ? 2 : 1;
+    const slam = cone6(a, { x: r.dx, y: r.dy }, R11.slam, 0.9), hit2 = crowd(a, rushHit(a, breakerHit(a, stats3, R11.attack)), slam.length), rush = full(spendOf(a, "shield_charge")) ? 2 : 1;
     for (const t of slam) {
       const was = slowed(t);
       damage(a, t, hit2, "bash", null, { sourceItem, trigger: "skill" });
@@ -108572,7 +108572,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return { r: extent(a, reach), spread: width2 };
   }
   function whirlingBlades2(a, stats3, aim2, commandId) {
-    const W19 = T88.whirlingBlades, reach = aug(a, "whirling_blades", 0) ? scaled(W19.radius, T88.wide) : W19.radius, targets = cone6(a, aim2, reach, Math.PI, W19.targets);
+    const W19 = T88.whirlingBlades, reach = aug(a, "whirling_blades", 0) ? scaled(W19.radius, T88.wide) : W19.radius, targets = cone6(a, aim2, reach, Math.PI);
     if (aug(a, "whirling_blades", 1)) for (const t of targets) pull(a, t, W19.pull);
     const n = paid(a, "whirling_blades");
     for (const t of targets) for (let i = 0; i < W19.hits + n && t.alive; i++) damage(a, t, multiplyCombat(stats3.attack, ...W19.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
@@ -108588,7 +108588,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       return;
     }
     if (sp.hits && --sp.next <= 0) {
-      const W19 = T88.whirlingBlades, stats3 = getStats(a.entityId), targets = cone6(a, { x: 1, y: 0 }, sp.r, Math.PI, W19.targets);
+      const W19 = T88.whirlingBlades, stats3 = getStats(a.entityId), targets = cone6(a, { x: 1, y: 0 }, sp.r, Math.PI);
       if (aug(a, "whirling_blades", 1)) for (const t of targets) pull(a, t, W19.pull);
       for (const t of targets) damage(a, t, multiplyCombat(stats3.attack, ...W19.attack), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
       if (--sp.hits > 0) sp.next = T88.tornado.gap;
@@ -108812,7 +108812,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const B6 = T88.firebloom, n = paid(a, "firebloom"), marks2 = cone6(a, aim2, B6.reach, B6.cone, aug(a, "firebloom", 1) ? 2 : 1), radius = (aug(a, "firebloom", 0) ? scaled(B6.radius, T88.wide) : B6.radius) * effects2.area(a) * (100 + 12 * n) / 100, raw = spell(stats3, B6.attack), kindling = rank(a, "kindling"), base3 = combatInteger(multiplyCombat(stats3.attack, ...B6.attack)), hot = kindling ? combatInteger(pct3(base3, 6 * kindling)) : base3, burn3 = full(n) ? combatInteger(multiplyCombat(hot, 2, 1)) : hot, sourceItem = damageSourceItem(owner(a), "fire");
     const origins = marks2.length ? marks2.map((t) => ({ position: { ...t.position } })) : [landing2(a, aim2, B6.distance)];
     const linger = aug(a, "firebloom", 2) ? { extra: T88.linger } : {};
-    for (const origin of origins) for (const t of effects2.nearby(a, origin, radius).slice(0, B6.targets)) {
+    for (const origin of origins) for (const t of effects2.nearby(a, origin, radius)) {
       damage(a, t, raw, "fire", commandId, { sourceItem, trigger: "skill" });
       if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", burn3, { sourceItem, ...linger });
     }
@@ -108830,7 +108830,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       return;
     }
     const B6 = T88.firebloom, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), linger = aug(a, "firebloom", 2) ? { extra: T88.linger } : {};
-    for (const e of list) if (--e.ticks <= 0) for (const t of around3(a, e, e.r).slice(0, B6.targets)) {
+    for (const e of list) if (--e.ticks <= 0) for (const t of around3(a, e, e.r)) {
       damage(a, t, spell(stats3, B6.attack), "fire", null, { sourceItem, trigger: "skill" });
       if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", combatInteger(multiplyCombat(stats3.attack, ...B6.attack)), { sourceItem, ...linger });
     }
@@ -108841,7 +108841,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function flashfreeze2(a, stats3, aim2, commandId) {
     const F6 = T88.flashfreeze, n = paid(a, "flashfreeze"), raw = spell(stats3, F6.attack), chill = 240 + 24 * rank(a, "cold_snap"), reach = aug(a, "flashfreeze", 0) ? scaled(F6.radius, T88.wide) : F6.radius, deep6 = aug(a, "flashfreeze", 1), frozen = [];
     c.controls ??= {};
-    for (const t of cone6(a, aim2, reach, Math.PI, F6.targets)) {
+    for (const t of cone6(a, aim2, reach, Math.PI)) {
       damage(a, t, raw, "frost", commandId, { sourceItem: damageSourceItem(owner(a), "frost"), trigger: "skill" });
       if (!t.alive || isPodCombatTargetV4(t)) continue;
       const def = definition2(t), phase2 = def.isBoss === true ? full(n) ? "chill" : "boss-slow" : !full(n) && (def.isElite === true || def.isMiniboss) ? "chill" : "freeze", id = a.entityId + "/" + t.entityId;
@@ -108883,7 +108883,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return true;
   }
   function zap(a, stats3, o) {
-    const B6 = T88.ballLightning, raw = spell(stats3, B6.attack), sourceItem = damageSourceItem(owner(a), "lightning"), from = { entityId: a.entityId, position: { x: o.x, y: o.y } }, hit2 = effects2.nearby(a, { position: { x: o.x, y: o.y } }, B6.radius * effects2.area(a)).slice(0, B6.targets), chain2 = aug(a, "ball_lightning", 1);
+    const B6 = T88.ballLightning, raw = spell(stats3, B6.attack), sourceItem = damageSourceItem(owner(a), "lightning"), from = { entityId: a.entityId, position: { x: o.x, y: o.y } }, hit2 = effects2.nearby(a, { position: { x: o.x, y: o.y } }, B6.radius * effects2.area(a)), chain2 = aug(a, "ball_lightning", 1);
     for (const t of hit2) {
       damage(a, t, raw, "lightning", null, { sourceItem, trigger: "skill", chainFrom: from });
       if (chain2) {
@@ -109029,7 +109029,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (--w.next <= 0) {
       w.next = W19.pulse;
       const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), raw = spell(stats3, W19.attack), kindling = rank(a, "kindling"), base3 = combatInteger(multiplyCombat(stats3.attack, ...W19.burn)), burn3 = kindling ? combatInteger(pct3(base3, 6 * kindling)) : base3;
-      for (const t of effects2.nearby(a, { position: { x: w.x, y: w.y } }, (w.ring ? wallRing(w) : wallHalf(w)) + 40).filter((t2) => fromWall(w, t2.position) <= (t2.hullRadius ?? 0) + W19.thick).slice(0, W19.targets)) {
+      for (const t of effects2.nearby(a, { position: { x: w.x, y: w.y } }, (w.ring ? wallRing(w) : wallHalf(w)) + 40).filter((t2) => fromWall(w, t2.position) <= (t2.hullRadius ?? 0) + W19.thick)) {
         damage(a, t, raw, "fire", null, { sourceItem, trigger: "skill" });
         if (t.alive && !isPodCombatTargetV4(t)) {
           periodic(a, t, "burn", burn3, { sourceItem });
@@ -109088,7 +109088,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function inField(a) {
     const f = c.actors[a.entityId]?.skills?.field;
     if (!f || !a.alive) return [];
-    return around3(a, f, T88.staticField.radius).slice(0, T88.staticField.targets);
+    return around3(a, f, T88.staticField.radius);
   }
   const fieldHolds = (a, t) => {
     const f = c.actors[a.entityId]?.skills?.field;
@@ -109177,7 +109177,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const ticks = ice?.ticks ?? ICE_TICKS;
     clearSkillState(combat, "ice");
     if (compareCombat(old2, 0) > 0) combat.barrier = combatInteger(subtractCombat(old2, old2));
-    const raw = multiplyCombat(spent, 2, 1), sourceItem = damageSourceItem(owner(a), "frost"), hit2 = cone6(a, aim2, G4.radius, Math.PI, G4.targets), lances = aug(a, "glacial_burst", 1), deep6 = aug(a, "glacial_burst", 3);
+    const raw = multiplyCombat(spent, 2, 1), sourceItem = damageSourceItem(owner(a), "frost"), hit2 = cone6(a, aim2, G4.radius, Math.PI), lances = aug(a, "glacial_burst", 1), deep6 = aug(a, "glacial_burst", 3);
     for (const t of hit2) {
       damage(a, t, raw, "frost", commandId, { sourceItem, trigger: "skill" });
       if (canStun(a)) frost(a, t, deep6);
