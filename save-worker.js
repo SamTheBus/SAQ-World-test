@@ -18155,9 +18155,14 @@ var POTION_BELT_POLICY = Object.freeze({
   potencyStep: 10,
   maxPotencyUpgrades: 2,
   potencyPrices: Object.freeze(["60", "160"]),
+  // Sammy 2026-11-13 ("cheap"): upgrades cost minutes of play at the hero's level, like the shops (economy v1), kept
+  // in upgradeGold. The flat prices above only count what older saves already bought.
+  capacityMinutes: Object.freeze([20, 45, 90]),
+  potencyMinutes: Object.freeze([30, 75]),
   cooldownTicks: 240,
-  dropPercent: Object.freeze({ ordinary: 4, elite: 30, boss: 100 }),
-  bossBonusPercent: 25,
+  dropPercent: Object.freeze({ ordinary: 10, elite: 60, boss: 100 }),
+  bossBonusPercent: 50,
+  /* Sammy 2026-11-13: drop more often (was 4 / 30, boss bonus 25) */
   refillIntervalTicks: 60,
   offers: Object.freeze({ capacity: "potion-capacity", potency: "potion-potency" }),
   maximumGrants: 1e6,
@@ -18173,18 +18178,23 @@ function potionCount(p) {
   const l = p.inventory.services;
   return l ? l.supplyPurchases + potionBelt(p).grants - l.suppliesUsed : 0;
 }
-function potionUpgradeSpent(p) {
-  const b = potionBelt(p);
+function upgradeGold(b) {
+  if (b.upgradeGold !== void 0) return b.upgradeGold;
   let spent = "0";
   for (let i = 0; i < b.capacityUpgrades; i++) spent = addAmount(spent, B.capacityPrices[i]);
   for (let i = 0; i < b.potencyUpgrades; i++) spent = addAmount(spent, B.potencyPrices[i]);
+  return spent;
+}
+function potionUpgradeSpent(p) {
+  const b = potionBelt(p), spent = upgradeGold(b);
   return b.refillGold ? addAmount(spent, b.refillGold) : spent;
 }
 function validatePotionBelt(state, p, legacyMaximum) {
   const r = p.inventory.services?.potions;
   if (r) {
-    closedRecord(r, ["grants", "capacityUpgrades", "potencyUpgrades", "lastUseTick"], ["ground", "refillGold"]);
+    closedRecord(r, ["grants", "capacityUpgrades", "potencyUpgrades", "lastUseTick"], ["ground", "refillGold", "upgradeGold"]);
     if (r.refillGold !== void 0) amount(r.refillGold);
+    if (r.upgradeGold !== void 0) amount(r.upgradeGold);
     if (r.ground !== void 0) validateGroundPotions(state, r.ground);
     safeInteger(r.grants, 0, B.maximumGrants);
     safeInteger(r.capacityUpgrades, 0, B.maxCapacityUpgrades);
@@ -18213,7 +18223,7 @@ function validateGroundPotions(state, ground) {
 }
 function validatePotionProgress(x, y) {
   const a = x?.potions ?? EMPTY2, b = y?.potions ?? EMPTY2;
-  requireContract(compareAmount(b.refillGold ?? "0", a.refillGold ?? "0") >= 0 && b.grants >= a.grants && b.capacityUpgrades >= a.capacityUpgrades && b.potencyUpgrades >= a.potencyUpgrades && (a.lastUseTick === null || b.lastUseTick !== null && b.lastUseTick >= a.lastUseTick), "Potion belt regressed");
+  requireContract(compareAmount(b.refillGold ?? "0", a.refillGold ?? "0") >= 0 && compareAmount(upgradeGold(b), upgradeGold(a)) >= 0 && b.grants >= a.grants && b.capacityUpgrades >= a.capacityUpgrades && b.potencyUpgrades >= a.potencyUpgrades && (a.lastUseTick === null || b.lastUseTick !== null && b.lastUseTick >= a.lastUseTick), "Potion belt regressed");
   return b.capacityUpgrades - a.capacityUpgrades + b.potencyUpgrades - a.potencyUpgrades;
 }
 

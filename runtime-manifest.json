@@ -1,6 +1,6 @@
 {
-  "runtimeId": "22d5cbaf89a70cd7",
-  "runtimeSha256": "22d5cbaf89a70cd731ca0b6fd8bcca6e20980713742a5ace35d396cfc90bc109",
+  "runtimeId": "5dc818c4fe6c9bc2",
+  "runtimeSha256": "5dc818c4fe6c9bc255d59e0b2bf7720884c3b40529373209bf81fea5b3e45980",
   "files": [
     {
       "path": ".nojekyll",
@@ -590,7 +590,7 @@
     {
       "path": "index.html",
       "bytes": 14423,
-      "sha256": "7fafa99df6fb20f86d48a1bfc38ed1fc3ed7907fe2c56ee27fea138274710da7"
+      "sha256": "23cd3faacdaab263a9abe4381f97a43a0b3de2bf8adcda4bb860ae607bffb1aa"
     },
     {
       "path": "manifest.webmanifest",
@@ -599,13 +599,13 @@
     },
     {
       "path": "save-worker.js",
-      "bytes": 3227358,
-      "sha256": "cda1e59fc8ffc78d985b0d714ba16686eb93b4ed493bf5379f99468f55704f59"
+      "bytes": 3227973,
+      "sha256": "8f2c9343f3f0301c48bd26c645351e120e3e792ce0a24f42aeb6975b1d3e6b47"
     },
     {
-      "path": "src/chunks/chunk-3EFRC6TK.js",
-      "bytes": 2874953,
-      "sha256": "19c47c91f6a8c8088baf4dd4defdbc4f0888b430e1a152f937ef401c55d7154e"
+      "path": "src/chunks/chunk-W4ARCYAJ.js",
+      "bytes": 2876238,
+      "sha256": "2c329375c79c1ea04c22e389bef757c87254dfcb79b390708e42cf09cd7beb59"
     },
     {
       "path": "src/chunks/jsqr-1.4.0-NMFRJJEX.js",
@@ -613,14 +613,14 @@
       "sha256": "7db8c23d3d071f10af27f69428fb3f40deb5eeb8a332946192a66dc1e22e73e4"
     },
     {
-      "path": "src/chunks/playable_browser-ORVNYHSC.js",
-      "bytes": 10522989,
-      "sha256": "a3241657d6bd26ce99c72517db873b96141a301ffea50a540b226ede967959d7"
+      "path": "src/chunks/playable_browser-L2BPDA4P.js",
+      "bytes": 10523162,
+      "sha256": "ab8708b514a20bc003f8f7f34ac5a7ad59ff519753d275aacbeefe6bcb109ee0"
     },
     {
-      "path": "src/chunks/world_browser-DBVDDA2G.js",
+      "path": "src/chunks/world_browser-KPAKX3YK.js",
       "bytes": 1416,
-      "sha256": "f4d58175b868f76b8895851185326c3b30c5797e486785fd6fb47ce5dc3e9305"
+      "sha256": "9845bda1844d90ea1cf2b5af91a6d604daa3e6ee3db3a86c3db34bc4f756aa05"
     },
     {
       "path": "src/client/startup_camp_v1.js",
@@ -635,7 +635,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "118d6ae61321dfa3661f216df810f4ca95e837c9f2cebd556c7c4873a2f94d9f"
+      "sha256": "71f818bc903a397b7f31064375a0e4dc81d8fbebc320cbd78a04487a5a5e3f15"
     },
     {
       "path": "world-maker-worker.js",

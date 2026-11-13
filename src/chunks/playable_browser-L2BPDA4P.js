@@ -685,6 +685,7 @@ import {
   isCryptFamily,
   isFortFamily,
   isGeneratedInteriorFamily,
+  isGeneratedTownSafeV1,
   isLairSiteV1,
   isRareV1,
   isRuinFamily,
@@ -1097,7 +1098,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-3EFRC6TK.js";
+} from "./chunk-W4ARCYAJ.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -134243,6 +134244,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
         actor.hp = structuredClone(combatInteger(resolvePlayerStats(state2.playersById[command.playerId]).maxHp));
         actor.alive = true;
         actor.attackTimer = 0;
+        grantPotions(player, POTION_BELT_POLICY.maxCapacityUpgrades + POTION_BELT_POLICY.baseCharges);
         relocate(actor.entityId, anchor2.spaceInstanceId, anchor2.position, authorityOrder);
         (state2.playerRespawnsById ??= {})[command.playerId] = { version: near5 ? PLAYER_RESPAWN_V2 : PLAYER_RESPAWN_VERSION, count, command: copyWire(command), authorityOrder, tick: state2.tick, toResidencyRevision: actor.residency.residencyRevision, settlementId: anchor2.settlementId };
       });
@@ -134370,7 +134372,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       state2.tick = safeInteger(state2.tick + 1, 1);
       if (state2.d9World && state2.tick % POTION_BELT_POLICY.refillIntervalTicks === 0) for (const p of Object.values(state2.playersById)) {
         const a = state2.entitiesById[p.entityId];
-        if (a?.alive && a.residency.spaceInstanceId === state2.overworldInstanceId && (isStarterVillageSafe(state2, a.position) || isWorldPointSafe(manifest, a.position))) (hasWorldCombat(state2) ? refillPotionsV1 : grantPotions)(p, POTION_BELT_POLICY.maxCapacityUpgrades + POTION_BELT_POLICY.baseCharges);
+        if (a?.alive && a.residency.spaceInstanceId === state2.overworldInstanceId && (isStarterVillageSafe(state2, a.position) || isGeneratedTownSafeV1(state2, a.position) || isWorldPointSafe(manifest, a.position))) (hasWorldCombat(state2) ? refillPotionsV1 : grantPotions)(p, POTION_BELT_POLICY.maxCapacityUpgrades + POTION_BELT_POLICY.baseCharges);
       }
       if (state2.d9World) for (const p of Object.values(state2.playersById)) {
         collectGroundPotions(state2, p);
