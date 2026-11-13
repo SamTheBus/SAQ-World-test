@@ -1804,8 +1804,8 @@ var areaScalesV1 = (state, biome) => Boolean(biome && state?.campaign?.areaBosse
 var siteKey = (socket) => socket?.provenance?.reservationId ?? socket?.siteId ?? "";
 var isHighSiteV1 = (socket) => Boolean(siteKey(socket)) && !/(^|:)signature:/.test(siteKey(socket)) && SPAWN_LEVELS_V1.site.highTiers.includes(socket?.provenance?.sizeTier) && hash("spawn-levels-v1/high/" + siteKey(socket)) % SPAWN_LEVELS_V1.site.highEvery === 0;
 function siteLevelV1(state, socket) {
-  const page = pageAt(state, socket.entrance?.chunkX, socket.entrance?.chunkY), base = Number(page?.region?.minimumLevel ?? socket.minimumLevel), S = SPAWN_LEVELS_V1.site;
-  const offset = isHighSiteV1(socket) ? base < S.highOffset.lateFrom ? S.highOffset.early : S.highOffset.late : S.offsets[hash("spawn-levels-v1/offset/" + siteKey(socket)) % S.offsets.length];
+  const page = pageAt(state, socket.entrance?.chunkX, socket.entrance?.chunkY), base = Number(page?.region?.minimumLevel ?? socket.minimumLevel), S2 = SPAWN_LEVELS_V1.site;
+  const offset = isHighSiteV1(socket) ? base < S2.highOffset.lateFrom ? S2.highOffset.early : S2.highOffset.late : S2.offsets[hash("spawn-levels-v1/offset/" + siteKey(socket)) % S2.offsets.length];
   return cap(base + offset);
 }
 var siteMinimumLevelV1 = (state, socket) => usesSpawnLevelsV1(state) ? siteLevelV1(state, socket) : socket.minimumLevel;
@@ -1892,7 +1892,7 @@ async function hashBytes(bytes, sha256) {
 var ceilDiv = (n, d) => (n + d - 1n) / d;
 function numericContext(precision = 48) {
   requireContract(Number.isSafeInteger(precision) && precision >= 16 && precision <= 8192, "Invalid proof precision");
-  const S = 10n ** BigInt(precision);
+  const S2 = 10n ** BigInt(precision);
   let work = 0;
   const budget = () => {
     if (++work > 2e4) numericExtension("D9 numeric proof work");
@@ -1906,7 +1906,7 @@ function numericContext(precision = 48) {
     n = progressionBigInt(n);
     d = progressionBigInt(d);
     requireContract(d > 0n, "Zero denominator");
-    return pair(n * S / d, ceilDiv(n * S, d));
+    return pair(n * S2 / d, ceilDiv(n * S2, d));
   };
   const add = (a, b) => pair(a.lo + b.lo, a.hi + b.hi);
   const sub = (a, b) => {
@@ -1915,12 +1915,12 @@ function numericContext(precision = 48) {
   };
   const mul2 = (a, b) => {
     budget();
-    return pair(a.lo * b.lo / S, ceilDiv(a.hi * b.hi, S));
+    return pair(a.lo * b.lo / S2, ceilDiv(a.hi * b.hi, S2));
   };
   const div = (a, b) => {
     budget();
     requireContract(b.lo > 0n, "Unproven divisor");
-    return pair(a.lo * S / b.hi, ceilDiv(a.hi * S, b.lo));
+    return pair(a.lo * S2 / b.hi, ceilDiv(a.hi * S2, b.lo));
   };
   const power2 = (a, n) => {
     let out = q(1), base = a;
@@ -1944,12 +1944,12 @@ function numericContext(precision = 48) {
   }
   const root3 = (a, k) => {
     requireContract(Number.isSafeInteger(k) && k >= 1 && k <= 100, "Invalid root degree");
-    const factor = S ** BigInt(k - 1), lo = rootInteger(a.lo * factor, k), hi = rootInteger(a.hi * factor, k);
+    const factor = S2 ** BigInt(k - 1), lo = rootInteger(a.lo * factor, k), hi = rootInteger(a.hi * factor, k);
     return pair(lo, hi ** BigInt(k) === a.hi * factor ? hi : hi + 1n);
   };
   const frac = (a, p, d) => root3(power2(a, BigInt(p)), d);
   function lnReduced(a) {
-    requireContract(a.lo >= S && a.hi <= 2n * S, "Log reduction required");
+    requireContract(a.lo >= S2 && a.hi <= 2n * S2, "Log reduction required");
     const z = div(sub(a, q(1)), add(a, q(1))), z2 = mul2(z, z);
     let term = z, sum2 = pair(0n), i = 1n;
     for (; ; ) {
@@ -1970,9 +1970,9 @@ function numericContext(precision = 48) {
     return add(q(exponent), div(lnReduced(q(n, den)), ln2()));
   }
   function exp2(a) {
-    if (a.hi > 150000n * S) numericExtension("D9 exponential output admission");
+    if (a.hi > 150000n * S2) numericExtension("D9 exponential output admission");
     let x = a, k = 0;
-    while (x.hi > S / 8n) {
+    while (x.hi > S2 / 8n) {
       x = pair(x.lo / 2n, ceilDiv(x.hi, 2n));
       k++;
     }
@@ -1998,7 +1998,7 @@ function numericContext(precision = 48) {
     return { effective, E };
   };
   function endpoint(a, mode = "round", places = 0) {
-    const scale2 = 10n ** BigInt(places), f3 = (n) => mode === "ceil" ? ceilDiv(n * scale2, S) : mode === "floor" ? n * scale2 / S : (2n * n * scale2 + S) / (2n * S), lo = f3(a.lo), hi = f3(a.hi);
+    const scale2 = 10n ** BigInt(places), f3 = (n) => mode === "ceil" ? ceilDiv(n * scale2, S2) : mode === "floor" ? n * scale2 / S2 : (2n * n * scale2 + S2) / (2n * S2), lo = f3(a.lo), hi = f3(a.hi);
     if (lo !== hi) {
       const e = new RangeError("Numeric proof requires refinement");
       e.code = "NUMERIC_PROOF_REFINE";
@@ -2006,7 +2006,7 @@ function numericContext(precision = 48) {
     }
     return integerWire(lo);
   }
-  return { q, add, sub, mul: mul2, div, power: power2, root: root3, frac, log2Integer, exp: exp2, dungeonScale, endpoint, scale: S };
+  return { q, add, sub, mul: mul2, div, power: power2, root: root3, frac, log2Integer, exp: exp2, dungeonScale, endpoint, scale: S2 };
 }
 function certifyNumeric(evaluate) {
   for (const p of [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]) {
@@ -4156,13 +4156,13 @@ var containment = (definition, members, tick) => {
 async function buildDefinedFunctionalSiteD10(state, site, binding, definition, { sha256, identityDomain = null, frozenSnapshot = null } = {}) {
   const { package: pkg, template, groupSuffix } = definition;
   requireContract(binding.packageId === pkg.packageId && binding.packageVersion === pkg.packageVersion && binding.contentHash === pkg.contentHash, "Missing or corrupt site package");
-  const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([pkg.packageVersion, site.siteId, identityDomain === null ? key9 : identityDomain + "/" + key9]), sha256)).slice(0, 16));
-  const spaceInstanceId = "spi:" + await token7("space-instance"), logicalSpaceId = "spc:" + await token7("logical-space"), groupId = "site:" + site.siteId + ":" + groupSuffix;
+  const token8 = async (key9) => bytesToHex((await hashBytes(frameUtf8([pkg.packageVersion, site.siteId, identityDomain === null ? key9 : identityDomain + "/" + key9]), sha256)).slice(0, 16));
+  const spaceInstanceId = "spi:" + await token8("space-instance"), logicalSpaceId = "spc:" + await token8("logical-space"), groupId = "site:" + site.siteId + ":" + groupSuffix;
   const members = [], actors = [], entityIds = [];
   for (let n = 0; n < template.encounter.members.length; n++) {
     const spec = template.encounter.members[n], enemy2 = ORDINARY_ENEMIES.find((e) => e.family === spec.family);
     requireContract(enemy2, "Unknown site enemy");
-    const profile2 = worldOrdinaryMeleeProfile(state, resolveOrdinaryProfile(enemy2, template.encounter.rank)), entityId2 = "ent:" + await token7("enemy-" + n);
+    const profile2 = worldOrdinaryMeleeProfile(state, resolveOrdinaryProfile(enemy2, template.encounter.rank)), entityId2 = "ent:" + await token8("enemy-" + n);
     entityIds.push(entityId2);
     members.push({ entityId: entityId2, enemyDefinitionId: enemy2.enemyDefinitionId, profileId: profile2.contentDefinitionId, position: { x: spec.x, y: spec.y } });
   }
@@ -4186,13 +4186,13 @@ async function buildDefinedFunctionalSiteD10(state, site, binding, definition, {
 async function buildDefinedWorldCompoundD10(state, parcel2, binding, definition, { sha256 }) {
   const site = parcel2.socket, { package: pkg, template, groupSuffix } = definition;
   requireContract(template.placement === "overworld-compound" && site.siteId === parcel2.siteId && binding.packageId === pkg.packageId && binding.packageVersion === pkg.packageVersion && binding.contentHash === pkg.contentHash, "Invalid compound binding");
-  const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([pkg.packageVersion, site.siteId, key9]), sha256)).slice(0, 16));
-  const spaceInstanceId = "spi:" + await token7("space-instance"), logicalSpaceId = "spc:" + await token7("logical-space"), groupId = "site:" + site.siteId + ":" + groupSuffix;
+  const token8 = async (key9) => bytesToHex((await hashBytes(frameUtf8([pkg.packageVersion, site.siteId, key9]), sha256)).slice(0, 16));
+  const spaceInstanceId = "spi:" + await token8("space-instance"), logicalSpaceId = "spc:" + await token8("logical-space"), groupId = "site:" + site.siteId + ":" + groupSuffix;
   const members = [], actors = [], entityIds = [];
   for (let n = 0; n < template.encounter.members.length; n++) {
     const spec = template.encounter.members[n], enemy2 = ORDINARY_ENEMIES.find((e) => e.family === spec.family);
     requireContract(enemy2, "Unknown compound enemy");
-    const profile2 = worldOrdinaryMeleeProfile(state, resolveOrdinaryProfile(enemy2, template.encounter.rank)), entityId2 = "ent:" + await token7("enemy-" + n), stats = threatEndpointsD9(site.minimumLevel, template.encounter.rank, enemy2.budget), position2 = { x: spec.x, y: spec.y };
+    const profile2 = worldOrdinaryMeleeProfile(state, resolveOrdinaryProfile(enemy2, template.encounter.rank)), entityId2 = "ent:" + await token8("enemy-" + n), stats = threatEndpointsD9(site.minimumLevel, template.encounter.rank, enemy2.budget), position2 = { x: spec.x, y: spec.y };
     entityIds.push(entityId2);
     members.push({ entityId: entityId2, enemyDefinitionId: enemy2.enemyDefinitionId, profileId: profile2.contentDefinitionId, position: copyWire(position2) });
     actors.push({ entityId: entityId2, contentDefinitionId: profile2.contentDefinitionId, kind: "actor", ownerCharacterId: null, team: "hostile", hp: combatInteger(stats.maxHp), maxHp: combatInteger(stats.maxHp), position: copyWire(position2), hullRadius: profile2.hullRadius, combatRadius: profile2.combatRadius, movementIntent: { x: 0, y: 0 }, moveSpeed: profile2.moveSpeed, alive: true, attackDamage: combatInteger(stats.attackDamage), attackReach: profile2.attackReach, attackReachMode: profile2.attackReachMode, attackDelayTicks: profile2.attackDelayTicks, attackTimer: profile2.attackDelayTicks, nextAttackActionSequence: 1, movedLastTick: false, ai: actorAi(spec.family, state.tick), residency: { spaceInstanceId: state.overworldInstanceId, residencyRevision: 1 } });
@@ -4730,7 +4730,7 @@ var seededEnds = null;
 var seededRevision = -1;
 function seededEndsV1() {
   if (seededRevision === worldRevisionV1()) return seededEnds;
-  const S = SITE_ENDS_SEEDED_V1, affixes = SITE_ENDS_POLICY.eliteAffixes, byLand = /* @__PURE__ */ new Map(), out = /* @__PURE__ */ new Map();
+  const S2 = SITE_ENDS_SEEDED_V1, affixes = SITE_ENDS_POLICY.eliteAffixes, byLand = /* @__PURE__ */ new Map(), out = /* @__PURE__ */ new Map();
   for (const site of worldSitesV1() ?? []) {
     const family2 = site.id.split(":")[1], floorCount = multiroomFloorCountV1(site.tier, true), role = endRoleV1({ family: family2, tier: site.tier, index: floorCount - 1, floorCount, reservationId: site.id });
     if (role) {
@@ -4758,14 +4758,14 @@ function seededEndsV1() {
     for (const site of sites6) {
       if (site.creature) continue;
       if (site.role === "mini-boss" && lesser.length) {
-        const near2 = (c) => done3.reduce((n, o) => o.creature === c ? n + Math.max(0, S.nearCells - dist2(site.anchor, o.anchor)) / S.nearCells : n, 0);
-        const boss = lesser.map((b) => ({ b, k: S.lesserNearWeight * near2(b.family) - (b.sites.includes(site.family) ? S.lesserOwnBonus : 0) + (b.sites.length ? 0 : S.lesserUseWeight * (uses.get(b.family) ?? 0)), h: hash2(site.id + "/lesser/" + b.id) })).sort((x, y) => x.k - y.k || x.h - y.h)[0].b;
+        const near2 = (c) => done3.reduce((n, o) => o.creature === c ? n + Math.max(0, S2.nearCells - dist2(site.anchor, o.anchor)) / S2.nearCells : n, 0);
+        const boss = lesser.map((b) => ({ b, k: S2.lesserNearWeight * near2(b.family) - (b.sites.includes(site.family) ? S2.lesserOwnBonus : 0) + (b.sites.length ? 0 : S2.lesserUseWeight * (uses.get(b.family) ?? 0)), h: hash2(site.id + "/lesser/" + b.id) })).sort((x, y) => x.k - y.k || x.h - y.h)[0].b;
         take(site, boss.family, boss.affixId);
         out.get(site.id).named = boss.id;
         continue;
       }
-      const own3 = new Set(sitePoolV1(biome, site.family, site.role)), near = (c) => done3.reduce((n, o) => o.creature === c ? n + Math.max(0, S.nearCells - dist2(site.anchor, o.anchor)) / S.nearCells : n, 0);
-      const cost = (c) => S.nearWeight * near(c) + (uses.get(c) ?? 0) - (own3.has(c) ? S.ownBonus : 0);
+      const own3 = new Set(sitePoolV1(biome, site.family, site.role)), near = (c) => done3.reduce((n, o) => o.creature === c ? n + Math.max(0, S2.nearCells - dist2(site.anchor, o.anchor)) / S2.nearCells : n, 0);
+      const cost = (c) => S2.nearWeight * near(c) + (uses.get(c) ?? 0) - (own3.has(c) ? S2.ownBonus : 0);
       const creature = pool.map((c) => ({ c, k: cost(c), h: hash2(site.id + "/creature/" + c) })).sort((a, b) => a.k - b.k || a.h - b.h)[0]?.c;
       if (!creature) continue;
       const named2 = site.role === "elite" ? namedEliteForV1(biome, creature) : null;
@@ -6030,7 +6030,7 @@ function volcanoGeometry(d) {
 }
 var SLOPES = /* @__PURE__ */ new Set(["ramp", "stair", "causeway"]);
 function volcanoSlopesSafe(g) {
-  const b = g.bbox, C = g.cliff, S = g.gapStair;
+  const b = g.bbox, C = g.cliff, S2 = g.gapStair;
   const at2 = (x, y) => {
     const r = g.role(x, y);
     if (r && r.block) return null;
@@ -6043,7 +6043,7 @@ function volcanoSlopesSafe(g) {
       const E = g.levels[g.stair.k].E;
       return { lo: y > E + C ? g.stair.k - 1 : null, hi: y === E + 1 ? g.stair.k : null };
     }
-    const dd = S.d(x - S.x0);
+    const dd = S2.d(x - S2.x0);
     return { lo: dd === C ? 0 : null, hi: dd === 0 ? 1 : null };
   };
   const meets = (p, q) => p.level !== void 0 ? q.level !== void 0 ? p.level === q.level : q.lo === p.level || q.hi === p.level : q.level === void 0 || p.lo === q.level || p.hi === q.level;
@@ -6191,16 +6191,16 @@ function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio
       for (const m of [8, 10, 12]) {
         const d = { x, y, n: 1, sh, dir: 1, kind: "m", s: [Math.round((bx.x1 - bx.x0 + 1) / 2 + m), Math.round((bx.y1 - bx.y0 + 1) / 2 + m)], gap: [Math.min(...ys) - 1 - y, Math.max(...ys) + 1 - y] };
         if (!roughFit(d, s)) continue;
-        const g = volcanoGeometry(d), S = g.gapStair;
-        if (!S || S.R <= bx.x1 + 3 || xEnd < S.R + N_JOG + 1 || !volcanoSlopesSafe(g)) continue;
-        const add = [], remove = T_.filter(([tx]) => tx > S.R && tx <= S.R + N_JOG).map(([tx, ty]) => tx + "," + ty), gone = new Set(remove);
-        for (let j = 0; j < S.N; j++) {
-          const dd = S.d(j);
-          for (let ty = S.t0 + dd; ty <= S.t1 + dd; ty++) add.push(S.x0 + j + "," + ty);
+        const g = volcanoGeometry(d), S2 = g.gapStair;
+        if (!S2 || S2.R <= bx.x1 + 3 || xEnd < S2.R + N_JOG + 1 || !volcanoSlopesSafe(g)) continue;
+        const add = [], remove = T_.filter(([tx]) => tx > S2.R && tx <= S2.R + N_JOG).map(([tx, ty]) => tx + "," + ty), gone = new Set(remove);
+        for (let j = 0; j < S2.N; j++) {
+          const dd = S2.d(j);
+          for (let ty = S2.t0 + dd; ty <= S2.t1 + dd; ty++) add.push(S2.x0 + j + "," + ty);
         }
-        for (let k = 0; k < N_JOG - S.N; k++) {
+        for (let k = 0; k < N_JOG - S2.N; k++) {
           const dd = Math.max(0, CLIFF2 - 1 - k);
-          for (let ty = S.t0 + dd; ty <= S.t1 + dd; ty++) add.push(S.x1 + 1 + k + "," + ty);
+          for (let ty = S2.t0 + dd; ty <= S2.t1 + dd; ty++) add.push(S2.x1 + 1 + k + "," + ty);
         }
         if (!fitsSite(g, { ...s, trail: [...s.trail.filter((t) => !gone.has(t)), ...add] })) continue;
         trailEdits.set(s.id, { add, remove });
@@ -6349,7 +6349,7 @@ var bounded = (map, limit) => {
   return map;
 };
 function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, siteChunk = null, events = [], terraces = false, volcanoes = false, sites: sites6 = [], towns = [], keepOut = null }) {
-  const S = createStandField(seedDigest), K = S.K, W9 = terrain2.widthTiles;
+  const S2 = createStandField(seedDigest), K = S2.K, W9 = terrain2.widthTiles;
   const elevations = asset.cellRows.flatMap((r) => r.cells.map((c) => c[10])).sort((p, q) => p - q);
   const rank = (v) => {
     let lo = 0, hi = elevations.length;
@@ -6489,7 +6489,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     let s = stands.get(key9);
     if (s !== void 0) return s;
     const e = envAt(x, y);
-    s = e.walkable ? S.stand(x, y, e.biome, e.wet, e.high, e.guard) : 0;
+    s = e.walkable ? S2.stand(x, y, e.biome, e.wet, e.high, e.guard) : 0;
     bounded(stands, 1 << 16).set(key9, s);
     return s;
   };
@@ -6502,15 +6502,15 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     if (e.walkable && !e.clear) {
       const p = PROFILES[e.biome], s = standAt(x, y), roll = (h >>> 8 & 1023) / 1024;
       let kind2 = null, r = 0;
-      const rock = p.outcrop ? S.rockAt(x, y) + (e.high - 0.5) * 0.3 : 0;
+      const rock = p.outcrop ? S2.rockAt(x, y) + (e.high - 0.5) * 0.3 : 0;
       if (p.outcrop && rock > p.outcrop) {
         kind2 = e.biome === "d" ? "mesa" : e.biome === "l" ? "lava-rock" : "outcrop";
         r = 2.5 + (rock - p.outcrop) * 28;
       } else if (s >= p.core - 0.04 && roll < p.massCore) {
-        kind2 = p.grove && S.vnoise(K.grove, x / 60, y / 60) > 0.62 ? "bamboo" : "thicket";
+        kind2 = p.grove && S2.vnoise(K.grove, x / 60, y / 60) > 0.62 ? "bamboo" : "thicket";
         r = 3 + (s - p.core + 0.04) * 30;
       } else if (s >= p.forest && roll < p.massForest) {
-        kind2 = p.grove && S.vnoise(K.grove, x / 60, y / 60) > 0.55 ? "bamboo" : "thicket";
+        kind2 = p.grove && S2.vnoise(K.grove, x / 60, y / 60) > 0.55 ? "bamboo" : "thicket";
         r = 2.2 + roll * 4;
       }
       if (kind2 && (T10 && T10.near(x - r * 1.32, y - r * 1.32, x + r * 1.32, y + r * 1.32, 4) || V && V.near(x - r * 1.32, y - r * 1.32, x + r * 1.32, y + r * 1.32, 4))) kind2 = null;
@@ -6547,7 +6547,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     if (d < 0.01) return true;
     if (d > m.r * 1.32 + 0.5) return false;
     const ux = dx / d, uy = dy / d, ax = m.ax, bx = 1 - ax, along = Math.abs(ux * ax + uy * bx) / Math.sqrt(ax * ax + bx * bx);
-    const wob = 0.65 * S.vnoise(K.shape + m.pri % 97, m.x / 3 + ux * 1.6, m.y / 3 + uy * 1.6) + 0.35 * S.vnoise(K.shape + 7 + m.pri % 89, m.x / 2 + ux * 3.2, m.y / 2 + uy * 3.2), edge = m.r * (0.42 + 1.05 * wob) * (0.78 + (m.stretch - 0.78) * along * along);
+    const wob = 0.65 * S2.vnoise(K.shape + m.pri % 97, m.x / 3 + ux * 1.6, m.y / 3 + uy * 1.6) + 0.35 * S2.vnoise(K.shape + 7 + m.pri % 89, m.x / 2 + ux * 3.2, m.y / 2 + uy * 3.2), edge = m.r * (0.42 + 1.05 * wob) * (0.78 + (m.stretch - 0.78) * along * along);
     return d <= Math.min(edge, m.r * 1.32);
   }
   function massAt(x, y) {
@@ -6560,16 +6560,16 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
   }
   const trailAt = (x, y) => {
     const e = envAt(x, y);
-    return e.walkable && S.zone(standAt(x, y), e.biome) >= ZONE.FOREST && S.trailDist(x, y) < 0.75;
+    return e.walkable && S2.zone(standAt(x, y), e.biome) >= ZONE.FOREST && S2.trailDist(x, y) < 0.75;
   };
   const trunks = /* @__PURE__ */ new Map();
   function trunkAt(x, y) {
     const key9 = y * W9 + x;
     if (trunks.has(key9)) return trunks.get(key9);
     let out = null;
-    const e = envAt(x, y), t = S.slotTrunk(x, y);
+    const e = envAt(x, y), t = S2.slotTrunk(x, y);
     if (e.walkable && !e.clear && e.road > 1 && t.x === x && t.y === y) {
-      const p = PROFILES[e.biome], s = standAt(x, y), z = S.zone(s, e.biome), edge = s >= p.forest - 0.05 && s < p.forest + 0.015;
+      const p = PROFILES[e.biome], s = standAt(x, y), z = S2.zone(s, e.biome), edge = s >= p.forest - 0.05 && s < p.forest + 0.015;
       let chance = z >= ZONE.FOREST ? p.treeForest : z === ZONE.OPEN ? p.treeOpen : p.lone;
       if (edge) chance = Math.max(chance, 0.6);
       if (p.oasis && e.wet > 0.45) chance = Math.max(chance, 0.5);
@@ -6579,7 +6579,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
           free = false;
           break;
         }
-        if (free) out = { h: t.h, z, edge, tree: pickTree(S, e.biome, x, y, z, e, edge, t.h) };
+        if (free) out = { h: t.h, z, edge, tree: pickTree(S2, e.biome, x, y, z, e, edge, t.h) };
       }
     }
     bounded(trunks, 1 << 15).set(key9, out);
@@ -6591,7 +6591,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
       if (px !== lx || py !== y) continue;
       const e = envAt(lx, y), f3 = envAt(lx + 1, y);
       if (!e.walkable || !f3.walkable || e.clear || f3.clear || e.road <= 2 || f3.road <= 2) continue;
-      const z = S.zone(standAt(lx, y), e.biome);
+      const z = S2.zone(standAt(lx, y), e.biome);
       const want = z >= ZONE.FOREST ? 0.28 : e.biome === "l" || e.biome === "s" ? 0.1 : 0;
       if ((h >>> 9) % 100 / 100 >= want || trailAt(lx, y) || trailAt(lx + 1, y)) continue;
       let ok = true;
@@ -6608,7 +6608,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     if (!e.walkable || e.clear || e.road <= 2) return null;
     const sx = Math.floor(x / 4), sy = Math.floor(y / 4), h = standsTileHash(K.bush, sx, sy);
     if (sx * 4 + h % 3 !== x || sy * 4 + (h >>> 2) % 3 !== y) return null;
-    const p = PROFILES[e.biome], s = standAt(x, y), z = S.zone(s, e.biome), edge = s >= p.forest - 0.06 && s < p.forest + 0.02;
+    const p = PROFILES[e.biome], s = standAt(x, y), z = S2.zone(s, e.biome), edge = s >= p.forest - 0.06 && s < p.forest + 0.02;
     const want = edge ? 0.55 : z >= ZONE.FOREST ? 0.16 : z === ZONE.OPEN ? 0.1 : e.biome === "d" || e.biome === "r" || e.biome === "s" ? 0.06 : 0.02;
     if ((h >>> 8) % 100 / 100 >= want || trailAt(x, y)) return null;
     for (let yy = y - 1; yy <= y + 1; yy++) for (let xx = x - 1; xx <= x + 1; xx++) if (massAt(xx, yy) || trunkAt(xx, yy) || logAt(xx, yy)) return null;
@@ -6617,9 +6617,9 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
   function hedgeAt(x, y) {
     const e = envAt(x, y);
     if (!e.walkable || e.biome !== "a" || e.clear || e.road <= 2) return null;
-    if (S.zone(standAt(x, y), "a") !== ZONE.GLADE) return null;
-    if (S.vnoise(K.hedge + 9, x / 220, y / 220) < 0.32) return null;
-    const wy = y + Math.round((S.vnoise(K.hedge, x / 50, y / 50) - 0.5) * 6), wx = x + Math.round((S.vnoise(K.hedge + 1, x / 50, y / 50) - 0.5) * 6);
+    if (S2.zone(standAt(x, y), "a") !== ZONE.GLADE) return null;
+    if (S2.vnoise(K.hedge + 9, x / 220, y / 220) < 0.32) return null;
+    const wy = y + Math.round((S2.vnoise(K.hedge, x / 50, y / 50) - 0.5) * 6), wx = x + Math.round((S2.vnoise(K.hedge + 1, x / 50, y / 50) - 0.5) * 6);
     const onH = (wy % 28 + 28) % 28 === 0, onV = (wx % 36 + 36) % 36 === 0;
     if (!onH && !onV) return null;
     const seg = onH ? standsTileHash(K.hedge + 2, Math.floor(wx / 36), Math.floor(wy / 28)) : standsTileHash(K.hedge + 3, Math.floor(wx / 36), Math.floor(wy / 28));
@@ -6630,11 +6630,11 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     return (onH ? "h" : "v") + Math.floor(wx / 36) + "," + Math.floor(wy / 28);
   }
   function mountainTrunk(g, x, y, e) {
-    const t = S.slotTrunk(x, y);
+    const t = S2.slotTrunk(x, y);
     if (t.x !== x || t.y !== y || !g.free(x, y)) return null;
     const r = g.role(x, y);
     if ((t.h >>> 8) % 1e3 / 1e3 >= (g.piece ? [0.06, 0.12, 0.08, 0.04, 0] : [0.1, 0.34, 0.26, 0.16, 0.06])[r.level]) return null;
-    return pickTree(S, g.piece ? "l" : "r", x, y, 1, e, false, t.h);
+    return pickTree(S2, g.piece ? "l" : "r", x, y, 1, e, false, t.h);
   }
   function mountainTrunkNear(g, x, y, e) {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if ((dx || dy) && mountainTrunk(g, x + dx, y + dy, e)) return true;
@@ -6650,7 +6650,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
       bounded(tiles3, 1 << 15).set(key9, null);
       return null;
     }
-    const p = PROFILES[e.biome], s = standAt(x, y), zone = S.zone(s, e.biome);
+    const p = PROFILES[e.biome], s = standAt(x, y), zone = S2.zone(s, e.biome);
     out = { zone, cover: false, trail: false, block: null, kind: null, clusterId: null };
     const tm = T10?.at(x, y) ?? V?.at(x, y);
     if (tm) {
@@ -6672,7 +6672,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
           const stone = (b.h >>> 12) % 3 === 0;
           block2(stone ? "stone" : "bush", b.edge ? "edge" : "", x + "," + y, stone);
         } else {
-          const c = S.coverAt(x, y), boost = zone >= ZONE.FOREST ? 0.05 : zone === ZONE.OPEN ? 0 : -0.05;
+          const c = S2.coverAt(x, y), boost = zone >= ZONE.FOREST ? 0.05 : zone === ZONE.OPEN ? 0 : -0.05;
           out.cover = Boolean(p.cover && c + boost > p.coverAt);
         }
       }
@@ -6697,7 +6697,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
         block2(stone ? "stone" : "bush", b.edge ? "edge" : "", x + "," + y, stone);
       } else if (p.hedges && (h = hedgeAt(x, y))) block2("hedge", "", h);
       else {
-        const c = S.coverAt(x, y), boost = zone >= ZONE.FOREST ? 0.05 : zone === ZONE.OPEN ? 0 : -0.05;
+        const c = S2.coverAt(x, y), boost = zone >= ZONE.FOREST ? 0.05 : zone === ZONE.OPEN ? 0 : -0.05;
         out.cover = Boolean(p.cover && !trail && c + boost > p.coverAt);
       }
     }
@@ -6722,8 +6722,8 @@ var pick = (list2, h) => {
   }
   return list2[0];
 };
-function pickTree(S, code, x, y, z, e, edge, h) {
-  const c = S.conifer(x, y), n = h >>> 12;
+function pickTree(S2, code, x, y, z, e, edge, h) {
+  const c = S2.conifer(x, y), n = h >>> 12;
   switch (code) {
     case "w":
       return edge ? pick(["birch", 3, "oak", 1, "fir", 1], n) : c > 0.6 ? pick(["fir", 6, "oak", 1, "birch", 1], n) : c < 0.38 ? pick(["oak", 4, "linden", 3, "birch", 1], n) : pick(["oak", 3, "linden", 2, "fir", 3, "birch", 1], n);
@@ -13119,19 +13119,19 @@ async function derivePlannedCaveReservation(asset, binding, sha256, { reservatio
 var OUTDOOR_BRIDGE_VERSION = "outdoor-timber-bridge-v1";
 function createOutdoorBridgeDecks(records2, terrain2) {
   const tiles3 = /* @__PURE__ */ new Map();
-  for (const bridge of records2) {
-    const { start: a, end: b, widthTiles: w } = bridge, dx = Math.sign(b.x - a.x), dy = Math.sign(b.y - a.y);
-    requirePlan(/^bridge:[a-f0-9]+$/.test(bridge.id) && [3, 5].includes(w) && dx !== 0 !== (dy !== 0) && Math.abs(b.x - a.x) + Math.abs(b.y - a.y) <= (bridge.crossingVersion === "hydrology-crossing-v2" ? 40 : 20), "Invalid outdoor bridge geometry");
-    requirePlan(bridge.orientation === (dx ? "horizontal" : "vertical"), "Bridge orientation mismatch");
-    requirePlan(bridge.underlyingHydrologyPreserved === true && terrain2.base(a.x, a.y).walkable && terrain2.base(b.x, b.y).walkable, "Invalid bridge banks");
+  for (const bridge2 of records2) {
+    const { start: a, end: b, widthTiles: w } = bridge2, dx = Math.sign(b.x - a.x), dy = Math.sign(b.y - a.y);
+    requirePlan(/^bridge:[a-f0-9]+$/.test(bridge2.id) && [3, 5].includes(w) && dx !== 0 !== (dy !== 0) && Math.abs(b.x - a.x) + Math.abs(b.y - a.y) <= (bridge2.crossingVersion === "hydrology-crossing-v2" ? 40 : 20), "Invalid outdoor bridge geometry");
+    requirePlan(bridge2.orientation === (dx ? "horizontal" : "vertical"), "Bridge orientation mismatch");
+    requirePlan(bridge2.underlyingHydrologyPreserved === true && terrain2.base(a.x, a.y).walkable && terrain2.base(b.x, b.y).walkable, "Invalid bridge banks");
     let river = false;
     const length = Math.abs(b.x - a.x) + Math.abs(b.y - a.y), r = (w - 1) / 2;
     for (let n = 0; n <= length; n++) for (let cross = -r; cross <= r; cross++) {
       const x = a.x + dx * n - dy * cross, y = a.y + dy * n + dx * cross, c = terrain2.base(x, y);
-      requirePlan(c.landmassId === bridge.landmassId && (c.walkable || c.kind === "river"), "Bridge cannot cross ocean, lake, or another landmass");
+      requirePlan(c.landmassId === bridge2.landmassId && (c.walkable || c.kind === "river"), "Bridge cannot cross ocean, lake, or another landmass");
       if (c.kind === "river") river = true;
       const key9 = x + "," + y;
-      if (!tiles3.has(key9)) tiles3.set(key9, { id: bridge.id, material: dx ? "H" : "V", underlyingKind: c.kind, version: OUTDOOR_BRIDGE_VERSION });
+      if (!tiles3.has(key9)) tiles3.set(key9, { id: bridge2.id, material: dx ? "H" : "V", underlyingKind: c.kind, version: OUTDOOR_BRIDGE_VERSION });
     }
     requirePlan(river, "Bridge must cross a local channel");
   }
@@ -19921,8 +19921,8 @@ async function buildRuinFamilyV1(state, socket, binding, { sha256, runEpisode = 
     const recipe = recipeFor(socket.siteSeed, tier2, i), end = multi && siteEndsActiveV1(state) ? siteEndSpecV1({ family: family2, tier: tier2, index: i, floorCount: policy.floors.length, reservationId: socket.provenance.reservationId, biome: socket.region?.biome }) : null, spec = end ? null : bossHostingSpecV1({ family: family2, tier: tier2, index: i, floorCount: policy.floors.length, reservationId: socket.provenance.reservationId, enabled: hosting && multi && hasWorldCombat(state), wilderness: usesWildernessFairnessV3_2(state) });
     return end ? siteEndRecipeV1(recipe, end) : spec ? bossHostingRecipeV1(recipe, spec) : recipe;
   }), links2 = multi ? multiroomLinks(tier2, seeded2) : (familyDefinition?.links ?? (version === PLANNED_RUIN_V2 ? ruinFloorLinksV2 : ruinFloorLinks))(tier2);
-  const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([version, socket.siteId, key9]), sha256)).slice(0, 16));
-  for (let i = 0; i < recipes2.length; i++) floorIds.push("floor:" + await token7("floor-" + i));
+  const token8 = async (key9) => bytesToHex((await hashBytes(frameUtf8([version, socket.siteId, key9]), sha256)).slice(0, 16));
+  for (let i = 0; i < recipes2.length; i++) floorIds.push("floor:" + await token8("floor-" + i));
   for (let i = 0; i < recipes2.length; i++) {
     const recipe = recipes2[i], old = state.d9World.functionalSitesById[socket.siteId]?.floors[i], frozenSnapshot = runEpisode > 1 ? resetEncounterSnapshotV2(state.d9World.episodes[old?.groupId]?.snapshot, { tick: state.tick, minimumLevel: siteMinimumLevelV1(state, socket), participants: resetParticipants, scale: siteScalesV1(state, socket) }) : null;
     requireContract(runEpisode === 1 || frozenSnapshot, "Ruin reset lacks authoritative progression snapshot");
@@ -19974,7 +19974,7 @@ async function buildRuinFamilyV1(state, socket, binding, { sha256, runEpisode = 
       Object.assign(a, { hp: combatInteger(m.maxHp), maxHp: combatInteger(m.maxHp), attackDamage: combatInteger(m.attackDamage), hullRadius: m.hullRadius, combatRadius: m.combatRadius });
       elites.push(elite);
     }
-    floors.push({ ...copyWire(recipe), floorId: floorIds[i], index: i, floorSeed: await token7("floor-seed-" + i), logicalSpaceId: p.space.spaceId, spaceInstanceId: p.space.spaceInstanceId, groupId: p.group.groupId, enemyIds: copyWire(p.group.entityIds), rewardId: "reward:" + await token7("reward-" + i), transitions: { up: null, down: null } });
+    floors.push({ ...copyWire(recipe), floorId: floorIds[i], index: i, floorSeed: await token8("floor-seed-" + i), logicalSpaceId: p.space.spaceId, spaceInstanceId: p.space.spaceInstanceId, groupId: p.group.groupId, enemyIds: copyWire(p.group.entityIds), rewardId: "reward:" + await token8("reward-" + i), transitions: { up: null, down: null } });
     spaces.push(p.space);
     actors.push(...p.actors);
     groups.push(p.group);
@@ -19986,7 +19986,7 @@ async function buildRuinFamilyV1(state, socket, binding, { sha256, runEpisode = 
     const target = links2[f3.index][direction2];
     if (target === null) continue;
     const dest = floors[target], reverse = direction2 === "up" ? "down" : "up";
-    f3.transitions[direction2] = { transitionId: "transition:" + await token7(f3.index + "/" + direction2), floorId: dest.floorId, spaceInstanceId: dest.spaceInstanceId, anchor: copyWire(f3.stairAnchors[direction2]), targetAnchor: copyWire(dest.stairAnchors[reverse]), label: direction2 === "up" ? "Ascend to " + dest.role.replaceAll("-", " ") : "Descend to " + dest.role.replaceAll("-", " ") };
+    f3.transitions[direction2] = { transitionId: "transition:" + await token8(f3.index + "/" + direction2), floorId: dest.floorId, spaceInstanceId: dest.spaceInstanceId, anchor: copyWire(f3.stairAnchors[direction2]), targetAnchor: copyWire(dest.stairAnchors[reverse]), label: direction2 === "up" ? "Ascend to " + dest.role.replaceAll("-", " ") : "Descend to " + dest.role.replaceAll("-", " ") };
   }
   const layoutHash = bytesToHex(await hashBytes(utf8(canonicalStringify({ version, siteSeed: socket.siteSeed, tier: tier2, recipes: recipes2, links: links2, floorIds })), sha256)), first = floors[0], interior = { recipeVersion: version, siteId: socket.siteId, logicalSpaceId: first.logicalSpaceId, contentHash: binding.contentHash, collision: copyWire(first.collision), entrance: copyWire(first.entrance), rooms: copyWire(first.graph.rooms), decorations: copyWire(first.visual.decorations), groupId: first.groupId, visual: copyWire(first.visual) }, functionalSite = { version: familyDefinition?.functionalVersion ?? FUNCTIONAL_RUIN_FAMILY, siteId: socket.siteId, packageId, packageVersion: version, contentHash: binding.contentHash, label: reservation.parcel.label, siteKind, familyId: familyDefinition?.familyId ?? "site-family:ruin", siteSeed: socket.siteSeed, layoutSeed: reservation.parcel.layoutSeed, sizeTier: tier2, floorCount: floors.length, floorIds, layoutHash, socket: copyWire(socket), spaceInstanceId: first.spaceInstanceId, interior, floors, encounterProvenance: { version, floorMemberKeys: Object.fromEntries(floors.map((f3) => [f3.floorId, f3.encounter.members.map((m) => m.memberKey)])) }, conqueredTick: null, discoveredByPlayerIds: [], instanceHash: "" };
   functionalSite.instanceHash = bytesToHex(await hashBytes(utf8(canonicalStringify({ functionalSite: copyWire(functionalSite), groups: copyWire(groups), economies: copyWire(economies), episodes: copyWire(episodes), actors: copyWire(actors), resources: copyWire(resources), elites: copyWire(elites), ...bosses.length ? { bosses: copyWire(bosses) } : {} })), sha256));
@@ -21026,8 +21026,8 @@ async function buildFortFamilyV1(state, socket, binding, { sha256, runEpisode = 
     const recipe = recipeFor(socket.siteSeed, tier2, i), end = multi && siteEndsActiveV1(state) ? siteEndSpecV1({ family: "fort", tier: tier2, index: i, floorCount: policy.floors.length, reservationId: socket.provenance.reservationId, biome: socket.region?.biome }) : null, spec = end ? null : bossHostingSpecV1({ family: "fort", tier: tier2, index: i, floorCount: policy.floors.length, reservationId: socket.provenance.reservationId, enabled: hosting && multi && hasWorldCombat(state), wilderness: usesWildernessFairnessV3_2(state) });
     return end ? siteEndRecipeV1(recipe, end) : spec ? bossHostingRecipeV1(recipe, spec) : recipe;
   }), links2 = multi ? multiroomLinks(tier2, seeded2) : fortFloorLinks(tier2);
-  const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([version, socket.siteId, key9]), sha256)).slice(0, 16));
-  for (let i = 0; i < recipes2.length; i++) floorIds.push("floor:" + await token7("floor-" + i));
+  const token8 = async (key9) => bytesToHex((await hashBytes(frameUtf8([version, socket.siteId, key9]), sha256)).slice(0, 16));
+  for (let i = 0; i < recipes2.length; i++) floorIds.push("floor:" + await token8("floor-" + i));
   for (let i = 0; i < recipes2.length; i++) {
     const recipe = recipes2[i], old = state.d9World.functionalSitesById[socket.siteId]?.floors[i], frozenSnapshot = runEpisode > 1 ? resetEncounterSnapshotV2(state.d9World.episodes[old?.groupId]?.snapshot, { tick: state.tick, minimumLevel: siteMinimumLevelV1(state, socket), participants: resetParticipants, scale: siteScalesV1(state, socket) }) : null;
     requireContract(runEpisode === 1 || frozenSnapshot, "Fort reset lacks authoritative progression snapshot");
@@ -21126,7 +21126,7 @@ async function buildFortFamilyV1(state, socket, binding, { sha256, runEpisode = 
       const a = p.actors[0], m = siteEndBodyV1(recipe.encounter.siteEnd, { maxHp: a.maxHp, attackDamage: a.attackDamage, hullRadius: a.hullRadius, combatRadius: a.combatRadius });
       Object.assign(a, { hp: combatInteger(m.maxHp), maxHp: combatInteger(m.maxHp), attackDamage: combatInteger(m.attackDamage), hullRadius: m.hullRadius, combatRadius: m.combatRadius });
     }
-    floors.push({ ...copyWire(recipe), floorId: floorIds[i], index: i, floorSeed: await token7("floor-seed-" + i), logicalSpaceId: p.space.spaceId, spaceInstanceId: p.space.spaceInstanceId, groupId: p.group.groupId, enemyIds: copyWire(p.group.entityIds), rewardId: "reward:" + await token7("reward-" + i), transitions: { up: null, down: null } });
+    floors.push({ ...copyWire(recipe), floorId: floorIds[i], index: i, floorSeed: await token8("floor-seed-" + i), logicalSpaceId: p.space.spaceId, spaceInstanceId: p.space.spaceInstanceId, groupId: p.group.groupId, enemyIds: copyWire(p.group.entityIds), rewardId: "reward:" + await token8("reward-" + i), transitions: { up: null, down: null } });
     spaces.push(p.space);
     actors.push(...p.actors);
     groups.push(p.group);
@@ -21138,7 +21138,7 @@ async function buildFortFamilyV1(state, socket, binding, { sha256, runEpisode = 
     const target = links2[f3.index][direction2];
     if (target === null) continue;
     const dest = floors[target], reverse = direction2 === "up" ? "down" : "up";
-    f3.transitions[direction2] = { transitionId: "transition:" + await token7(f3.index + "/" + direction2), floorId: dest.floorId, spaceInstanceId: dest.spaceInstanceId, anchor: copyWire(f3.stairAnchors[direction2]), targetAnchor: copyWire(dest.stairAnchors[reverse]), label: direction2 === "up" ? "Ascend to " + dest.role.replaceAll("-", " ") : "Descend to " + dest.role.replaceAll("-", " ") };
+    f3.transitions[direction2] = { transitionId: "transition:" + await token8(f3.index + "/" + direction2), floorId: dest.floorId, spaceInstanceId: dest.spaceInstanceId, anchor: copyWire(f3.stairAnchors[direction2]), targetAnchor: copyWire(dest.stairAnchors[reverse]), label: direction2 === "up" ? "Ascend to " + dest.role.replaceAll("-", " ") : "Descend to " + dest.role.replaceAll("-", " ") };
   }
   const layoutHash = bytesToHex(await hashBytes(utf8(canonicalStringify({ version, siteSeed: socket.siteSeed, tier: tier2, recipes: recipes2, links: links2, floorIds })), sha256)), first = floors[0], interior = { recipeVersion: version, siteId: socket.siteId, logicalSpaceId: first.logicalSpaceId, contentHash: binding.contentHash, collision: copyWire(first.collision), entrance: copyWire(first.entrance), rooms: copyWire(first.graph.rooms), decorations: copyWire(first.visual.decorations), groupId: first.groupId, visual: copyWire(first.visual) }, functionalSite = { version: FUNCTIONAL_FORT_FAMILY, siteId: socket.siteId, packageId: FORT_FAMILY_PACKAGE_ID, packageVersion: version, contentHash: binding.contentHash, label: reservation.parcel.label, siteKind: "procedural-fort", familyId: "site-family:fort", siteSeed: socket.siteSeed, layoutSeed: reservation.parcel.layoutSeed, sizeTier: tier2, floorCount: floors.length, floorIds, layoutHash, socket: copyWire(socket), spaceInstanceId: first.spaceInstanceId, interior, floors, encounterProvenance: { version, floorMemberKeys: Object.fromEntries(floors.map((f3) => [f3.floorId, f3.encounter.members.map((m) => m.memberKey)])) }, conqueredTick: null, discoveredByPlayerIds: [], instanceHash: "" };
   functionalSite.instanceHash = bytesToHex(await hashBytes(utf8(canonicalStringify({ functionalSite: copyWire(functionalSite), groups: copyWire(groups), economies: copyWire(economies), episodes: copyWire(episodes), actors: copyWire(actors), resources: copyWire(resources), elites: copyWire(elites), ...bosses.length ? { bosses: copyWire(bosses) } : {} })), sha256));
@@ -21284,10 +21284,10 @@ async function buildWoodlandCaveFamilyD12(state, site, binding, { sha256 }) {
   requireContract(Number.isInteger(ordinal), "Missing D12 cave spawn provenance");
   const generated = await generateWoodlandCaveInstanceD12({ campaignSeed: state.campaign.seed.seedHex, site, spawnOrdinal: ordinal }, { sha256 });
   validateGeneratedWoodlandCaveD12(generated);
-  const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([WOODLAND_CAVE_FAMILY_PACKAGE_D12.packageVersion, site.siteId, key9]), sha256)).slice(0, 16));
+  const token8 = async (key9) => bytesToHex((await hashBytes(frameUtf8([WOODLAND_CAVE_FAMILY_PACKAGE_D12.packageVersion, site.siteId, key9]), sha256)).slice(0, 16));
   const spaces = [], groups = [], economies = [], episodes = [], actors = [], resources = [], floorRecords = [];
   for (const floor of generated.floors) {
-    const spaceInstanceId = "spi:" + await token7(`floor-${floor.index}-instance`), logicalSpaceId = "spc:" + await token7(`floor-${floor.index}-space`), groupId = `site:${site.siteId}:cave-floor-${floor.index}`, entityIds = [], members = [];
+    const spaceInstanceId = "spi:" + await token8(`floor-${floor.index}-instance`), logicalSpaceId = "spc:" + await token8(`floor-${floor.index}-space`), groupId = `site:${site.siteId}:cave-floor-${floor.index}`, entityIds = [], members = [];
     const episode = { ...unfrozenEpisodeD9(`site-anchor:${site.siteId}:floor:${floor.index}`, 0), geography: { chunkX: site.entrance.chunkX, chunkY: site.entrance.chunkY, anchorOrdinal: floor.index, minimumLevel: copyWire(site.minimumLevel), rank: floor.encounter.rank } };
     episode.snapshot = prepareEpisodeSnapshotD9(episode, { tick: state.tick, minimumLevel: site.minimumLevel, participants: Object.values(state.playersById).map((p) => {
       const a = state.entitiesById[p.entityId];
@@ -21296,7 +21296,7 @@ async function buildWoodlandCaveFamilyD12(state, site, binding, { sha256 }) {
     for (let n = 0; n < floor.encounter.members.length; n++) {
       const spec = floor.encounter.members[n], enemy2 = ORDINARY_ENEMIES.find((e) => e.family === spec.family);
       requireContract(enemy2, "Unknown D12 cave enemy");
-      const profile2 = resolveOrdinaryProfile(enemy2, floor.encounter.rank), entityId2 = "ent:" + await token7(`floor-${floor.index}-enemy-${n}`), resolved = state.content.definitionsById[profile2.contentDefinitionId], stats = threatEndpointsD9(episode.snapshot.effectiveLevel, floor.encounter.rank, enemy2.budget);
+      const profile2 = resolveOrdinaryProfile(enemy2, floor.encounter.rank), entityId2 = "ent:" + await token8(`floor-${floor.index}-enemy-${n}`), resolved = state.content.definitionsById[profile2.contentDefinitionId], stats = threatEndpointsD9(episode.snapshot.effectiveLevel, floor.encounter.rank, enemy2.budget);
       requireContract(resolved, "Missing D12 cave actor profile");
       entityIds.push(entityId2);
       members.push({ entityId: entityId2, enemyDefinitionId: enemy2.enemyDefinitionId, profileId: resolved.contentDefinitionId, position: copyWire(spec.position) });
@@ -21559,10 +21559,10 @@ async function buildWoodlandCaveFamilyD12_1(state, site, binding, { sha256 }) {
   requireContract(Number.isInteger(ordinal), "Missing D12.1 Cave spawn provenance");
   const generated = await generateWoodlandCaveInstanceD12_1({ campaignSeed: state.campaign.seed.seedHex, site, reservation: reservation.parcel, spawnOrdinal: ordinal }, { sha256 });
   validateGeneratedWoodlandCaveD12_1(generated);
-  const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([WOODLAND_CAVE_FAMILY_PACKAGE_D12_1.packageVersion, site.siteId, key9]), sha256)).slice(0, 16));
+  const token8 = async (key9) => bytesToHex((await hashBytes(frameUtf8([WOODLAND_CAVE_FAMILY_PACKAGE_D12_1.packageVersion, site.siteId, key9]), sha256)).slice(0, 16));
   const spaces = [], groups = [], economies = [], episodes = [], actors = [], resources = [], floorRecords = [];
   for (const floor of generated.floors) {
-    const spaceInstanceId = "spi:" + await token7(`floor-${floor.index}-instance`), logicalSpaceId = "spc:" + await token7(`floor-${floor.index}-space`), groupId = `site:${site.siteId}:cave-floor-${floor.index}`, entityIds = [], members = [];
+    const spaceInstanceId = "spi:" + await token8(`floor-${floor.index}-instance`), logicalSpaceId = "spc:" + await token8(`floor-${floor.index}-space`), groupId = `site:${site.siteId}:cave-floor-${floor.index}`, entityIds = [], members = [];
     const episode = { ...unfrozenEpisodeD9(`site-anchor:${site.siteId}:floor:${floor.index}`, 0), geography: { chunkX: site.entrance.chunkX, chunkY: site.entrance.chunkY, anchorOrdinal: floor.index, minimumLevel: copyWire(site.minimumLevel), rank: floor.encounter.rank } };
     episode.snapshot = prepareEpisodeSnapshotD9(episode, { tick: state.tick, minimumLevel: site.minimumLevel, participants: Object.values(state.playersById).map((p) => {
       const a = state.entitiesById[p.entityId];
@@ -21571,7 +21571,7 @@ async function buildWoodlandCaveFamilyD12_1(state, site, binding, { sha256 }) {
     for (let n = 0; n < floor.encounter.members.length; n++) {
       const spec = floor.encounter.members[n], enemy2 = ORDINARY_ENEMIES.find((e) => e.family === spec.family);
       requireContract(enemy2, "Unknown D12 cave enemy");
-      const profile2 = resolveOrdinaryProfile(enemy2, floor.encounter.rank), entityId2 = "ent:" + await token7(`floor-${floor.index}-enemy-${n}`), resolved = state.content.definitionsById[profile2.contentDefinitionId], stats = threatEndpointsD9(episode.snapshot.effectiveLevel, floor.encounter.rank, enemy2.budget);
+      const profile2 = resolveOrdinaryProfile(enemy2, floor.encounter.rank), entityId2 = "ent:" + await token8(`floor-${floor.index}-enemy-${n}`), resolved = state.content.definitionsById[profile2.contentDefinitionId], stats = threatEndpointsD9(episode.snapshot.effectiveLevel, floor.encounter.rank, enemy2.budget);
       requireContract(resolved, "Missing D12 cave actor profile");
       entityIds.push(entityId2);
       members.push({ entityId: entityId2, enemyDefinitionId: enemy2.enemyDefinitionId, profileId: resolved.contentDefinitionId, position: copyWire(spec.position) });
@@ -22397,12 +22397,12 @@ async function buildWoodlandCaveFamilyD12_2(state, site, binding, { sha256, runE
   const multi = usesMultiroom(state.d9World.plannedWorld), generated = await (multi ? generateMultiroomCave : generateWoodlandCaveInstanceD12_2)({ campaignSeed: state.campaign.seed.seedHex, site, reservation: reservation.parcel, combat: hasWorldCombat(state), spawnOrdinal: ordinal }, { sha256 });
   if (!multi) validateGeneratedWoodlandCaveD12_2(generated);
   const episodeKey = (key9) => runEpisode === 1 ? key9 : `episode-${runEpisode}/${key9}`;
-  const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([WOODLAND_CAVE_FAMILY_PACKAGE_D12_2.packageVersion, site.siteId, episodeKey(key9)]), sha256)).slice(0, 16));
+  const token8 = async (key9) => bytesToHex((await hashBytes(frameUtf8([WOODLAND_CAVE_FAMILY_PACKAGE_D12_2.packageVersion, site.siteId, episodeKey(key9)]), sha256)).slice(0, 16));
   const spaces = [], groups = [], economies = [], episodes = [], actors = [], resources = [], floorRecords = [], elites = [], bosses = [], smallFinale = generated.sizeTier === "small" ? deriveSmallCaveFinaleBindingsD13D_B(generated) : null, treant = arachnidTreantCaveHereV1(site.provenance?.reservationId), largeFinale = generated.sizeTier === "large" && treant ? deriveLargeCaveFinaleBindingsD13D_F(generated) : null, standardFinale = generated.sizeTier === "standard" && treant ? deriveStandardCaveFinaleBindingsD13D_D(generated) : null;
   const caveEnd = (floor) => multi && siteEndsActiveV1(state) ? siteEndSpecV1({ family: "cave", tier: generated.sizeTier, index: floor.index, floorCount: generated.floorCount, reservationId: site.provenance?.reservationId, biome: site.region?.biome }) : null;
   for (const generatedFloor of generated.floors) {
     const end = caveEnd(generatedFloor), floor = end ? { ...generatedFloor, encounter: copyWire(siteEndRecipeV1({ ...copyWire(generatedFloor), stairAnchors: Object.fromEntries(Object.entries(generatedFloor.transitions).filter(([, t]) => t).map(([k, t]) => [k, t.anchor])) }, end).encounter) } : generatedFloor;
-    const existingFloor = state.d9World.functionalSitesById?.[site.siteId]?.floors?.[floor.index], spaceInstanceId = runEpisode === 1 ? "spi:" + await token7(`floor-${floor.index}-instance`) : existingFloor?.spaceInstanceId, logicalSpaceId = runEpisode === 1 ? "spc:" + await token7(`floor-${floor.index}-space`) : existingFloor?.logicalSpaceId;
+    const existingFloor = state.d9World.functionalSitesById?.[site.siteId]?.floors?.[floor.index], spaceInstanceId = runEpisode === 1 ? "spi:" + await token8(`floor-${floor.index}-instance`) : existingFloor?.spaceInstanceId, logicalSpaceId = runEpisode === 1 ? "spc:" + await token8(`floor-${floor.index}-space`) : existingFloor?.logicalSpaceId;
     requireContract(spaceInstanceId && logicalSpaceId, "Reset Cave floor identity missing");
     const groupId = `site:${site.siteId}:cave-floor-${floor.index}${runEpisode === 1 ? "" : `:episode-${runEpisode}`}`, entityIds = [], members = [], reviewBossRoster = arachnidTreantReviewRosterD12_5A(state, reservation, floor), slagRoster = slagShaperReviewRosterD12_4K(state, reservation, floor), webRoster = webWeaverReviewRosterD12_4J(state, reservation, floor), nullifierRoster = nullifierReviewRosterD12_4I(state, reservation, floor), berserkerRoster = bloodBerserkerReviewRosterD12_4H_A(state, reservation, floor), citadelRoster = ironCitadelReviewRosterD12_4G(state, reservation, floor), toxicRoster = toxicDecayReviewRosterD12_4F(state, reservation, floor), glacialRoster = glacialWardenReviewRosterD12_4E(state, reservation, floor), swiftRoster = swiftCommanderReviewRosterD12_4D(state, reservation, floor), reviewRoster = reviewBossRoster ?? slagRoster ?? webRoster ?? nullifierRoster ?? berserkerRoster ?? citadelRoster ?? toxicRoster ?? glacialRoster ?? swiftRoster ?? vitalityWeaverReviewRosterD12_4(state, reservation, floor), productionBossRoster = (standardFinale ?? largeFinale) && floor.index === generated.floorCount - 1 && !reviewRoster ? (standardFinale ?? largeFinale).encounterBinding.members : null, bossRoster = reviewBossRoster ?? productionBossRoster, finaleMembers = smallFinale && floor.index === generated.floorCount - 1 && !reviewRoster ? smallFinale.encounterBinding.members : [], encounterMembers = bossRoster ? hasWorldCombat(state) ? [...bossRoster, ...floor.encounter.members.filter((m) => m.roomId !== bossRoster[0].roomId)] : bossRoster : reviewRoster ?? [...floor.encounter.members, ...finaleMembers];
     requireContract(!end || !reviewRoster && !bossRoster, "Cave site end meets a review or boss roster");
@@ -22419,7 +22419,7 @@ async function buildWoodlandCaveFamilyD12_2(state, site, binding, { sha256, runE
     for (let n = 0; n < encounterMembers.length; n++) {
       const spec = encounterMembers[n], boss = spec.role === "arachnid-treant", enemy2 = boss ? null : ORDINARY_ENEMIES.find((e) => e.family === spec.family);
       requireContract(boss || enemy2, "Unknown D12 cave enemy");
-      const profile2 = boss ? ARACHNID_TREANT_PROFILE : resolveOrdinaryProfile(enemy2, floor.encounter.rank), entityId2 = "ent:" + await token7(`floor-${floor.index}-enemy-${n}`), resolved = worldOrdinaryMeleeProfile(state, state.content.definitionsById[profile2.contentDefinitionId]), baseStats = boss ? hasWorldCombat(state) ? worldBossStats(episode.snapshot.effectiveLevel) : { maxHp: profile2.maxHp, attackDamage: profile2.attackDamage } : (hasWorldCombat(state) ? worldEnemyStats : threatEndpointsD9)(episode.snapshot.effectiveLevel, floor.encounter.rank, enemy2.budget), source11 = { campaignSeed: state.campaign.seed.seedHex, siteId: site.siteId, floorId: floor.floorId, groupId, roomId: spec.roomId, entityId: entityId2, activatedTick: state.tick }, elite = boss ? null : end && n === 0 ? await (floor.encounter.siteEnd.named ? createNamedEliteV1(source11, floor.encounter.siteEnd.named, { sha256 }) : createEliteForAffixD13D_B(source11, spec.eliteAffixId, { sha256 })) : spec.memberKey === LARGE_CAVE_FINALE_ELITE_KEY_D13D_F ? await createEliteForAffixD13D_B(source11, largeFinale.contentBinding.eliteAffixId, { sha256 }) : spec.memberKey === SMALL_CAVE_FINALE_LEADER_KEY_D13D_B ? await createEliteForAffixD13D_B(source11, smallFinale.contentBinding.eliteAffixId, { sha256 }) : slagRoster && n === 0 ? await createSlagShaperEliteD12_4K(source11, { sha256 }) : webRoster && n === 0 ? await createWebWeaverEliteD12_4J(source11, { sha256 }) : nullifierRoster && n === 0 ? await createNullifierEliteD12_4I(source11, { sha256 }) : berserkerRoster && n === 0 ? await createBloodBerserkerEliteD12_4H_A(source11, { sha256 }) : citadelRoster && n === 0 ? await createIronCitadelEliteD12_4G(source11, { sha256 }) : toxicRoster && n === 0 ? await createToxicDecayEliteD12_4F(source11, { sha256 }) : glacialRoster && n === 0 ? await createGlacialWardenEliteD12_4E(source11, { sha256 }) : swiftRoster && n === 0 ? await createSwiftCommanderEliteD12_4D(source11, { sha256 }) : swiftRoster && n === 1 ? await createVitalityWeaverEliteD12_4(source11, { sha256 }) : reviewRoster && !bossRoster && n === 0 ? await createVitalityWeaverEliteD12_4(source11, { sha256 }) : null, stats = applyEliteActorStatsD12_4(baseStats, elite);
+      const profile2 = boss ? ARACHNID_TREANT_PROFILE : resolveOrdinaryProfile(enemy2, floor.encounter.rank), entityId2 = "ent:" + await token8(`floor-${floor.index}-enemy-${n}`), resolved = worldOrdinaryMeleeProfile(state, state.content.definitionsById[profile2.contentDefinitionId]), baseStats = boss ? hasWorldCombat(state) ? worldBossStats(episode.snapshot.effectiveLevel) : { maxHp: profile2.maxHp, attackDamage: profile2.attackDamage } : (hasWorldCombat(state) ? worldEnemyStats : threatEndpointsD9)(episode.snapshot.effectiveLevel, floor.encounter.rank, enemy2.budget), source11 = { campaignSeed: state.campaign.seed.seedHex, siteId: site.siteId, floorId: floor.floorId, groupId, roomId: spec.roomId, entityId: entityId2, activatedTick: state.tick }, elite = boss ? null : end && n === 0 ? await (floor.encounter.siteEnd.named ? createNamedEliteV1(source11, floor.encounter.siteEnd.named, { sha256 }) : createEliteForAffixD13D_B(source11, spec.eliteAffixId, { sha256 })) : spec.memberKey === LARGE_CAVE_FINALE_ELITE_KEY_D13D_F ? await createEliteForAffixD13D_B(source11, largeFinale.contentBinding.eliteAffixId, { sha256 }) : spec.memberKey === SMALL_CAVE_FINALE_LEADER_KEY_D13D_B ? await createEliteForAffixD13D_B(source11, smallFinale.contentBinding.eliteAffixId, { sha256 }) : slagRoster && n === 0 ? await createSlagShaperEliteD12_4K(source11, { sha256 }) : webRoster && n === 0 ? await createWebWeaverEliteD12_4J(source11, { sha256 }) : nullifierRoster && n === 0 ? await createNullifierEliteD12_4I(source11, { sha256 }) : berserkerRoster && n === 0 ? await createBloodBerserkerEliteD12_4H_A(source11, { sha256 }) : citadelRoster && n === 0 ? await createIronCitadelEliteD12_4G(source11, { sha256 }) : toxicRoster && n === 0 ? await createToxicDecayEliteD12_4F(source11, { sha256 }) : glacialRoster && n === 0 ? await createGlacialWardenEliteD12_4E(source11, { sha256 }) : swiftRoster && n === 0 ? await createSwiftCommanderEliteD12_4D(source11, { sha256 }) : swiftRoster && n === 1 ? await createVitalityWeaverEliteD12_4(source11, { sha256 }) : reviewRoster && !bossRoster && n === 0 ? await createVitalityWeaverEliteD12_4(source11, { sha256 }) : null, stats = applyEliteActorStatsD12_4(baseStats, elite);
       requireContract(resolved, "Missing D12 cave actor profile");
       const body = siteEndBodyV1(end && n === 0 ? floor.encounter.siteEnd : null, { ...stats, hullRadius: resolved.hullRadius, combatRadius: resolved.combatRadius });
       if (elite) elites.push(elite);
@@ -24123,10 +24123,10 @@ function validateId(kind2, value) {
   );
   return value;
 }
-function createId(kind2, token7) {
-  requireContract(typeof token7 === "string", "ID token must be a string");
+function createId(kind2, token8) {
+  requireContract(typeof token8 === "string", "ID token must be a string");
   requireContract(Object.hasOwn(ID_PREFIXES, kind2), "Unknown ID class");
-  return validateId(kind2, `${ID_PREFIXES[kind2]}:${token7}`);
+  return validateId(kind2, `${ID_PREFIXES[kind2]}:${token8}`);
 }
 function validateRevision(kind2, value) {
   requireContract(kind2 === "spaceRevision" || kind2 === "saveRevision", "Unknown revision class");
@@ -25107,6 +25107,12 @@ var plannedStartSettlementId = (b, fallback) => hasStarterVillage(b) ? STARTER_V
 var TRIP_EAT_TICKS = 144;
 var TRIP_TICKS = 120 * 60;
 var TRIP_WEAR_OFF_TICKS = 72;
+var TRIP_BAD_PORTAL_TICKS = 126;
+var TRIP_BAD_PULL_TICKS = 150;
+var TRIP_PULL_TO_LAND_TICKS = 108;
+var TRIP_BAD_FALL_TICKS = TRIP_BAD_PULL_TICKS + TRIP_PULL_TO_LAND_TICKS;
+var TRIP_FRIEND_WINDOW_TICKS = TRIP_TICKS - TRIP_PULL_TO_LAND_TICKS;
+var TRIP_HEAVY_LEGS_TICKS = 15 * 60;
 var TRIP_SNACKS_V1 = Object.freeze({
   glowcap: Object.freeze({
     id: "glowcap",
@@ -25868,6 +25874,141 @@ function createCampaignStoreTransactions({
   });
 }
 
+// src/shared/content/trip_hell_v1.js
+var HELL_SCALE = 4;
+var HELL_TILE = 24;
+var ISLES = [["A", 150, 72, 64, 30], ["B", 330, 64, 70, 31], ["C", 510, 74, 64, 30], ["D", 84, 180, 62, 31], ["E", 250, 172, 68, 33], ["F", 420, 178, 68, 32], ["G", 576, 170, 56, 30], ["H", 150, 288, 66, 32], ["I", 330, 282, 70, 33], ["J", 512, 290, 66, 32]];
+var LINKS = ["HD", "HE", "IE", "IJ", "JG", "EF", "FB", "DA", "AB", "BC", "GC", "FG", "DE"];
+var OX = 100;
+var OY = 150;
+var HELL_WIDTH = 2800;
+var HELL_HEIGHT = 1650;
+var outline = (cx, cy, rx, ry, seed) => (a) => {
+  const w = 1 + 0.07 * Math.sin(3 * a + seed) + 0.05 * Math.sin(5 * a + seed * 2) + 0.025 * Math.sin(9 * a + seed * 3);
+  return [cx + Math.cos(a) * rx * w, cy + Math.sin(a) * ry * w];
+};
+var sampleOutline = (f3, a0, a1, n) => Array.from({ length: n }, (_, k) => f3(a0 + (a1 - a0) * k / (n - 1)));
+var S = HELL_SCALE;
+var HELL_ISLANDS = Object.freeze(ISLES.map(([key9, x, y, rx, ry], i) => {
+  const cx = OX + x * S, cy = OY + y * S, f3 = outline(cx, cy, rx * S, ry * S, i * 1.7 + 1);
+  return Object.freeze({ key: key9, x: cx, y: cy, rx: rx * S, ry: ry * S, at: f3, pts: sampleOutline(f3, 0, Math.PI * 2 * (1 - 1 / 96), 96), front: sampleOutline(f3, Math.PI * 0.1, Math.PI * 0.9, 48) });
+}));
+var byKey = Object.fromEntries(HELL_ISLANDS.map((o) => [o.key, o]));
+function edgePoint(a, b) {
+  const A = byKey[a], B2 = byKey[b], ang = Math.atan2((B2.y - A.y) / A.ry, (B2.x - A.x) / A.rx), [px, py] = A.at(ang), dx = A.x - px, dy = A.y - py, d = Math.hypot(dx, dy);
+  return [px + dx / d * 7 * S, py + dy / d * 7 * S];
+}
+function bridge(A, B2, hw, seed) {
+  const dx = B2[0] - A[0], dy = B2[1] - A[1], L2 = Math.hypot(dx, dy), nx = -dy / L2, ny = dx / L2, L1 = [], R2 = [];
+  for (let k = 0; k <= 12; k++) {
+    const u = k / 12, cx = A[0] + dx * u, cy = A[1] + dy * u, w = hw * (1 - 0.22 * Math.sin(Math.PI * u)) * (1 + 0.06 * Math.sin(u * 9 + seed));
+    L1.push([cx + nx * w, cy + ny * w]);
+    R2.push([cx - nx * w, cy - ny * w]);
+  }
+  const pts = [[A[0] - dx / L2 * 6 * S, A[1] - dy / L2 * 6 * S], ...L1, [B2[0] + dx / L2 * 6 * S, B2[1] + dy / L2 * 6 * S], ...R2.reverse()];
+  const lower = L1[6][1] > R2[6][1] ? L1 : [...R2].reverse();
+  return Object.freeze({ pts, front: lower.slice(1, -1), A, B: B2, dx: dx / L2, dy: dy / L2, nx, ny, hw });
+}
+var HELL_BRIDGES = Object.freeze(LINKS.map((l, i) => bridge(edgePoint(l[0], l[1]), edgePoint(l[1], l[0]), 8 * S, i + 1)));
+var HELL_WALLS = Object.freeze(["A", "B", "C"].map((k) => {
+  const o = byKey[k];
+  return Object.freeze({ key: k, base: sampleOutline(o.at, Math.PI * 1.08, Math.PI * 1.92, 64), eyeX: o.x });
+}));
+var HELL_LANDING = Object.freeze({ x: byKey.H.x, y: byKey.H.y });
+var HELL_ISLAND_KEYS = Object.freeze(ISLES.map((i) => i[0]));
+var tilesCache = null;
+function hellCollisionTiles() {
+  if (tilesCache) return tilesCache;
+  const T10 = HELL_TILE, w = Math.ceil(HELL_WIDTH / T10), h = Math.ceil(HELL_HEIGHT / T10), grid = Array.from({ length: h }, () => new Uint8Array(w));
+  const prep = (pts, grow) => {
+    const n = pts.length, X = new Float64Array(n), Y = new Float64Array(n);
+    let y0 = 1e9, y1 = -1e9;
+    for (let i = 0; i < n; i++) {
+      X[i] = pts[i][0];
+      Y[i] = pts[i][1];
+      y0 = Math.min(y0, Y[i]);
+      y1 = Math.max(y1, Y[i]);
+    }
+    return { n, X, Y, y0, y1, grow };
+  };
+  const shapes = [...HELL_ISLANDS.map((o) => prep(o.pts, 0)), ...HELL_BRIDGES.map((b) => prep(b.pts, T10 / 3))], xs = [];
+  for (let ty = 0; ty < h; ty++) {
+    const row2 = grid[ty];
+    for (const { n, X, Y, y0, y1, grow } of shapes) for (const y of grow ? [(ty + 0.5) * T10 - grow, (ty + 0.5) * T10, (ty + 0.5) * T10 + grow] : [(ty + 0.5) * T10]) {
+      if (y < y0 || y > y1) continue;
+      xs.length = 0;
+      for (let i = 0, j = n - 1; i < n; j = i++) if (Y[i] > y !== Y[j] > y) xs.push((X[j] - X[i]) * (y - Y[i]) / (Y[j] - Y[i]) + X[i]);
+      xs.sort((p, q) => p - q);
+      for (let k = 0; k + 1 < xs.length; k += 2) {
+        const a = Math.max(0, Math.ceil((xs[k] - grow) / T10 - 0.5)), b = Math.min(w - 1, Math.floor((xs[k + 1] + grow) / T10 - 0.5));
+        for (let tx = a; tx <= b; tx++) row2[tx] = 1;
+      }
+    }
+    for (let tx = 0; tx < w; tx++) if (row2[tx] && underWall((tx + 0.5) * T10, (ty + 0.5) * T10)) row2[tx] = 0;
+  }
+  tilesCache = Object.freeze({ width: w, height: h, tileSize: T10, tiles: Object.freeze(grid.map((r) => {
+    let s = "";
+    for (let i = 0; i < r.length; i++) s += r[i] ? "1" : "0";
+    return s;
+  })) });
+  return tilesCache;
+}
+function underWall(x, y) {
+  for (const w of HELL_WALLS) {
+    const b = w.base;
+    if (x < b[0][0] || x > b[b.length - 1][0]) continue;
+    let i = 0;
+    while (i < b.length - 2 && b[i + 1][0] < x) i++;
+    const [x0, y0] = b[i], [x1, y1] = b[i + 1], by = y0 + (y1 - y0) * ((x - x0) / (x1 - x0 || 1));
+    if (y < by + 10 && y > by - 80) return true;
+  }
+  return false;
+}
+
+// src/shared/contracts/trip_hell_world_v1.js
+var TRIP_HELL_V1 = "trip-hell-v1";
+var token6 = (campaignId, label2) => [0, 1, 2, 3].map((l) => compositionHashV1(TRIP_HELL_V1 + "/" + campaignId + "/" + label2 + "/" + l).toString(16).padStart(8, "0")).join("");
+var hellSpaceInstanceIdV1 = (s) => "spi:" + token6(s.campaign.campaignId, "space");
+var hellLogicalIdV1 = (s) => "spc:" + token6(s.campaign.campaignId, "logical");
+var hellSpaceIdsV1 = (s) => {
+  if (!s.campaign?.campaignId) return [];
+  const id = hellSpaceInstanceIdV1(s);
+  return s.spacesByInstanceId?.[id] ? [id] : [];
+};
+var canonTiles = null;
+var hellTilesCanon = () => canonTiles ??= canonicalStringify(hellCollisionTiles());
+function validateHellSpaceV1(s) {
+  for (const id of hellSpaceIdsV1(s)) {
+    const space = s.spacesByInstanceId[id];
+    requireContract(space.spaceId === hellLogicalIdV1(s) && space.spaceRevision === 1 && canonicalStringify(space.collision) === hellTilesCanon(), "Hellscape space drift");
+  }
+}
+function validateTripHellV1(s, h) {
+  closedRecord(h, ["version", "spaceInstanceId", "eaterPlayerId", "snack", "eatTick", "endTick", "portal", "heroesByPlayerId"]);
+  requireContract(h.version === TRIP_HELL_V1 && h.spaceInstanceId === hellSpaceInstanceIdV1(s), "Hellscape identity");
+  const space = s.spacesByInstanceId[h.spaceInstanceId];
+  requireContract(space && space.spaceId === hellLogicalIdV1(s) && canonicalStringify(space.collision) === hellTilesCanon(), "Hellscape space drift");
+  requireContract(typeof h.eaterPlayerId === "string" && typeof h.snack === "string", "Hellscape eater");
+  safeInteger(h.eatTick, 0, s.tick);
+  requireContract(h.endTick === h.eatTick + TRIP_BAD_FALL_TICKS + TRIP_TICKS && s.tick <= h.endTick, "Hellscape clock");
+  const p = h.portal;
+  closedRecord(p, ["spaceInstanceId", "openTick", "closeTick"], ["world", "position"]);
+  requireContract(s.spacesByInstanceId[p.spaceInstanceId] && p.spaceInstanceId !== h.spaceInstanceId && p.openTick === h.eatTick + TRIP_BAD_PORTAL_TICKS, "Hellscape portal");
+  if (p.closeTick !== null) safeInteger(p.closeTick, h.eatTick, h.endTick);
+  requireContract(p.world === void 0 !== (p.position === void 0), "Portal place");
+  if (p.world) validateWorldPosition(p.world);
+  else {
+    closedRecord(p.position, ["x", "y"]);
+    requireContract(Number.isFinite(p.position.x) && Number.isFinite(p.position.y), "Portal position");
+  }
+  for (const [pid, r] of Object.entries(h.heroesByPlayerId)) {
+    requireContract(s.playersById[pid], "Hellscape hero");
+    closedRecord(r, ["pullTick", "landTick"]);
+    safeInteger(r.pullTick, h.eatTick, h.endTick);
+    if (r.landTick !== null) safeInteger(r.landTick, r.pullTick, s.tick);
+  }
+}
+
 // src/shared/contracts/trip_snacks_world_v1.js
 var TRIP_ROOT_V1 = "trip-snacks-world-v1";
 var GROUND2 = Object.freeze({ settleTicks: 30, pickupRadius: 30, lifetimeTicks: 18e3, maximum: 12, spread: 16 });
@@ -25876,8 +26017,9 @@ var root2 = (s) => s.trips;
 function validateTripRootV1(s) {
   const r = root2(s);
   if (r === void 0) return;
-  closedRecord(r, ["version", "bagsByPlayerId", "groundByPlayerId", "tripsByPlayerId"]);
+  closedRecord(r, ["version", "bagsByPlayerId", "groundByPlayerId", "tripsByPlayerId"], ["hell"]);
   requireContract(r.version === TRIP_ROOT_V1, "Unsupported trip snacks root");
+  if (r.hell !== void 0) validateTripHellV1(s, r.hell);
   for (const [pid, bag] of Object.entries(r.bagsByPlayerId)) {
     requireContract(s.playersById[pid] && Object.keys(bag).length >= 1, "Invalid snack bag");
     for (const [k, n] of Object.entries(bag)) {
@@ -25903,9 +26045,9 @@ function validateTripRootV1(s) {
   for (const [pid, t] of Object.entries(r.tripsByPlayerId)) {
     requireContract(s.playersById[pid], "Trip without a hero");
     closedRecord(t, ["snack", "outcome", "eatTick", "startTick", "endTick"]);
-    requireContract(TRIP_SNACKS_V1[t.snack] && t.outcome === "good", "Invalid trip");
+    requireContract(TRIP_SNACKS_V1[t.snack] && ["good", "bad"].includes(t.outcome), "Invalid trip");
     safeInteger(t.eatTick, 0, s.tick);
-    requireContract(t.startTick === t.eatTick + TRIP_EAT_TICKS && t.endTick === t.startTick + TRIP_TICKS && s.tick < t.endTick + TRIP_WEAR_OFF_TICKS, "Trip timing");
+    requireContract(t.startTick === t.eatTick + (t.outcome === "bad" ? TRIP_BAD_FALL_TICKS : TRIP_EAT_TICKS) && t.endTick === t.startTick + TRIP_TICKS && s.tick < t.endTick + TRIP_WEAR_OFF_TICKS, "Trip timing");
   }
 }
 
@@ -28044,12 +28186,12 @@ function campaignTavernCollision(floor, services = false) {
   if (services && floor === "ground") c.tiles[6] = c.tiles[6].slice(0, 9) + "2" + c.tiles[6].slice(10);
   return c;
 }
-var token6 = (campaignId, label2) => [0, 1, 2, 3].map((lane) => mixPlan(PLANNED_TOWN_VERSION + "/" + campaignId + "/" + PLANNED_TOWN_ID + "/" + TOWN_TAVERN.id + "/" + label2 + "/" + lane).toString(16).padStart(8, "0")).join("");
+var token7 = (campaignId, label2) => [0, 1, 2, 3].map((lane) => mixPlan(PLANNED_TOWN_VERSION + "/" + campaignId + "/" + PLANNED_TOWN_ID + "/" + TOWN_TAVERN.id + "/" + label2 + "/" + lane).toString(16).padStart(8, "0")).join("");
 var same25 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var tavernSpaceIds = (s) => Object.values(s.d9World?.settlementInterior?.binding.floorSpaces ?? {});
 async function installCampaignTavern(s, sha256) {
   requireContract(s.d9World.plannedWorld?.townPrototype && [PLANNED_TOWN_VERSION, PLANNED_TOWN_START_VERSION].includes(s.d9World.plannedWorld.townPrototype) && !s.d9World.settlementInterior, "Tavern installation requires opted-in genesis");
-  const digest11 = async (label2) => token6(s.campaign.campaignId, label2);
+  const digest11 = async (label2) => token7(s.campaign.campaignId, label2);
   const binding = copyWire(createTavernBinding({ campaignId: s.campaign.campaignId, settlementId: PLANNED_TOWN_ID, buildingId: TOWN_TAVERN.id, exteriorSpaceId: s.overworldInstanceId, frontage: { x: 0, y: 0 }, exteriorDimensions: [14, 12] }));
   binding.frontage = copyWire(townFrontageV1());
   const floorLogicalIds = {};
@@ -28070,14 +28212,14 @@ function validateCampaignTavern(s) {
   }
   closedRecord(r, ["version", "siteId", "binding", "floorLogicalIds"]);
   const b = r.binding;
-  requireContract(r.version === PLANNED_TOWN_VERSION && r.siteId === "loc:" + token6(s.campaign.campaignId, "entrance") && b.campaignId === s.campaign.campaignId && b.settlementId === PLANNED_TOWN_ID && b.buildingId === TOWN_TAVERN.id && b.exteriorSpaceId === s.overworldInstanceId && same25(b.frontage, townFrontageV1()), "Tavern exterior identity drift");
+  requireContract(r.version === PLANNED_TOWN_VERSION && r.siteId === "loc:" + token7(s.campaign.campaignId, "entrance") && b.campaignId === s.campaign.campaignId && b.settlementId === PLANNED_TOWN_ID && b.buildingId === TOWN_TAVERN.id && b.exteriorSpaceId === s.overworldInstanceId && same25(b.frontage, townFrontageV1()), "Tavern exterior identity drift");
   const expected = createTavernBinding({ campaignId: b.campaignId, settlementId: b.settlementId, buildingId: b.buildingId, exteriorSpaceId: b.exteriorSpaceId, frontage: b.frontage, exteriorDimensions: [14, 12] });
   requireContract(b.identity === expected.identity && b.version === expected.version && b.recipeVersion === expected.recipeVersion && Object.keys(b).sort().join(",") === Object.keys(expected).sort().join(","), "Tavern recipe/binding drift");
   closedRecord(b.floorSpaces, ["ground", "upper"]);
   closedRecord(r.floorLogicalIds, ["ground", "upper"]);
   requireContract(new Set(Object.values(b.floorSpaces)).size === 2, "Tavern duplicate floor");
   for (const f3 of ["ground", "upper"]) {
-    requireContract(b.floorSpaces[f3] === "spi:" + token6(s.campaign.campaignId, f3) && r.floorLogicalIds[f3] === "spc:" + token6(s.campaign.campaignId, "logical/" + f3), "Tavern deterministic floor identity drift");
+    requireContract(b.floorSpaces[f3] === "spi:" + token7(s.campaign.campaignId, f3) && r.floorLogicalIds[f3] === "spc:" + token7(s.campaign.campaignId, "logical/" + f3), "Tavern deterministic floor identity drift");
     const space = s.spacesByInstanceId[b.floorSpaces[f3]];
     requireContract(space && space.spaceId === r.floorLogicalIds[f3] && same25(space.collision, campaignTavernCollision(f3, hasSettlementLife(s.d9World.plannedWorld))), "Tavern floor geometry drift");
   }
@@ -28091,8 +28233,8 @@ var same26 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function siteInstanceId(campaignId, siteId2) {
   validateId("campaignId", campaignId);
   validateId("locationId", siteId2);
-  const token7 = (BigInt("0x" + campaignId.slice(4)) ^ BigInt("0x" + siteId2.slice(4))).toString(16).padStart(32, "0");
-  return createId("spaceInstanceId", token7);
+  const token8 = (BigInt("0x" + campaignId.slice(4)) ^ BigInt("0x" + siteId2.slice(4))).toString(16).padStart(32, "0");
+  return createId("spaceInstanceId", token8);
 }
 function point13(p, c, r = 10) {
   closedRecord(p, ["x", "y"]);
@@ -30425,7 +30567,8 @@ function validateActivityState(s) {
     for (const chunk of s.d9World.runtime.chunks) for (const site of chunk.sites ?? []) validateSiteSocketD9(site);
   }
   const spaces = Object.values(s.spacesByInstanceId), functionalSpaceCount = functionalSitesD10(s).reduce((n, site) => n + functionalSiteSpaceIdsD12(site).length, 0);
-  requireContract(spaces.length >= 1 && spaces.length <= 2 + (manifest.siteInteriors?.length ?? 0) + functionalSpaceCount + tavernSpaceIds(s).length + townInteriorSpaceIds(s).length, "Instance bound");
+  requireContract(spaces.length >= 1 && spaces.length <= 2 + (manifest.siteInteriors?.length ?? 0) + functionalSpaceCount + tavernSpaceIds(s).length + townInteriorSpaceIds(s).length + hellSpaceIdsV1(s).length, "Instance bound");
+  validateHellSpaceV1(s);
   for (const [id, space] of Object.entries(s.spacesByInstanceId)) {
     closedRecord(space, ["spaceId", "spaceInstanceId", "spaceRevision", "collision"]);
     validateId("spaceId", space.spaceId);
@@ -32640,6 +32783,7 @@ function seatComparable(s, kept, party2, room2) {
   only(c.trips?.bagsByPlayerId);
   only(c.trips?.groundByPlayerId);
   only(c.trips?.tripsByPlayerId);
+  if (c.trips) delete c.trips.hell;
   eachTarget(c, (row2, key9) => {
     if (party2.entities.has(row2[key9])) row2[key9] = "?";
   });
@@ -33159,7 +33303,14 @@ async function prepareWorldSnapshotD9(state, { sha256, previous = null, checkpoi
     pages.set(id, { id, value });
     return id;
   };
-  const functionalIds = /* @__PURE__ */ new Set([...functionalSitesD10(state).flatMap(functionalSiteSpaceIdsD12), ...tavernSpaceIds(state), ...townInteriorSpaceIds(state), ...waitingRoomSpaceIds(state)]), origin2 = worldDocument("origin", { version: "world-origin-static-d9-v1", content: copyWire(state.content), origin: copyWire(state.d9World.origin), collisions: Object.fromEntries(Object.entries(state.spacesByInstanceId).filter(([id]) => !functionalIds.has(id)).map(([id, s]) => [id, copyWire(id === state.overworldInstanceId ? s.collision.origin : s.collision)])) });
+  const functionalIds = /* @__PURE__ */ new Set([
+    ...functionalSitesD10(state).flatMap(functionalSiteSpaceIdsD12),
+    ...tavernSpaceIds(state),
+    ...townInteriorSpaceIds(state),
+    ...waitingRoomSpaceIds(state),
+    ...hellSpaceIdsV1(state)
+    /* the bad trip's hellscape: runtime, made on the first bad bite */
+  ]), origin2 = worldDocument("origin", { version: "world-origin-static-d9-v1", content: copyWire(state.content), origin: copyWire(state.d9World.origin), collisions: Object.fromEntries(Object.entries(state.spacesByInstanceId).filter(([id]) => !functionalIds.has(id)).map(([id, s]) => [id, copyWire(id === state.overworldInstanceId ? s.collision.origin : s.collision)])) });
   const originPage = await add(origin2);
   if (previous && previous.root.originPage !== originPage) {
     const old = state.hostileCombat?.catalogUpgradeV2 ? previousDungeonMobOriginDocumentV2(state, origin2) : previousDungeonMobOriginDocument(state, origin2);
@@ -33204,7 +33355,7 @@ async function openWorldSnapshotD9(publication, { sha256, readPage, generatePlan
     requireContract(page.kind === "participant" && page.payload.version === "world-participant-cut-d9-v1" && page.payload.player.playerId === id, "Participant page owner mismatch");
     state.playersById[id] = copyWire(page.payload.player);
   }
-  const functionalIds = /* @__PURE__ */ new Set([...functionalSitesD10(state).flatMap(functionalSiteSpaceIdsD12), ...tavernSpaceIds(state), ...townInteriorSpaceIds(state), ...waitingRoomSpaceIds(state)]);
+  const functionalIds = /* @__PURE__ */ new Set([...functionalSitesD10(state).flatMap(functionalSiteSpaceIdsD12), ...tavernSpaceIds(state), ...townInteriorSpaceIds(state), ...waitingRoomSpaceIds(state), ...hellSpaceIdsV1(state)]);
   for (const [id, s] of Object.entries(state.spacesByInstanceId)) {
     if (functionalIds.has(id)) {
       requireContract(s.collision && origin2.payload.collisions[id] === void 0, "Functional site collision must belong to runtime cut");
@@ -33607,7 +33758,8 @@ async function validateWorldAdvanceD9(a, b, options) {
   const addedTown = a.d9World.townInteriors ? [] : townInteriorSpaceIds(b);
   requireContract(!addedTown.length || !a.d9World.plannedWorld && b.tick === 0, "Town interiors are genesis-only");
   const oldSpaces = Object.keys(a.spacesByInstanceId).sort(), newSpaces = Object.keys(b.spacesByInstanceId).sort(), addedSiteRecords = Object.entries(b.d9World.functionalSitesById).filter(([id]) => !a.d9World.functionalSitesById[id]), addedSites = addedSiteRecords.flatMap(([, site]) => functionalSiteSpaceIdsD12(site));
-  requireContract(same39([...oldSpaces, ...addedSites, ...addedTavern, ...addedTown].sort(), newSpaces), "Historical space inventory changed");
+  const addedHell = hellSpaceIdsV1(b).filter((id) => !a.spacesByInstanceId[id]);
+  requireContract(same39([...oldSpaces, ...addedSites, ...addedTavern, ...addedTown, ...addedHell].sort(), newSpaces), "Historical space inventory changed");
   for (const [id, space] of Object.entries(a.spacesByInstanceId)) {
     if (id !== a.overworldInstanceId) requireContract(same39(space, b.spacesByInstanceId[id]), "Historical interior changed");
     else {

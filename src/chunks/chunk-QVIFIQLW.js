@@ -4203,7 +4203,15 @@ var TRIP_TICKS_PER_SECOND = 60;
 var TRIP_EAT_TICKS = 144;
 var TRIP_TICKS = 120 * 60;
 var TRIP_WEAR_OFF_TICKS = 72;
-var BAD_TRIP_CHANCE = 0;
+var BAD_TRIP_CHANCE = 0.05;
+var TRIP_BAD_PORTAL_TICKS = 126;
+var TRIP_BAD_PULL_TICKS = 150;
+var TRIP_PULL_TO_LAND_TICKS = 108;
+var TRIP_BAD_FALL_TICKS = TRIP_BAD_PULL_TICKS + TRIP_PULL_TO_LAND_TICKS;
+var TRIP_FRIEND_WINDOW_TICKS = TRIP_TICKS - TRIP_PULL_TO_LAND_TICKS;
+var TRIP_PORTAL_STEP_RADIUS = 20;
+var TRIP_HEAVY_LEGS_TICKS = 15 * 60;
+var TRIP_HEAVY_LEGS_SPEED = 0.7;
 var TRIP_SNACKS_V1 = Object.freeze({
   glowcap: Object.freeze({
     id: "glowcap",
@@ -4246,9 +4254,9 @@ function tripSpeedMultiplierV1(trip, tick) {
   const b = tripBuffV1(trip, tick);
   return b?.buff === "speed" ? 1 + b.amount : 1;
 }
-function startTripV1(snack, tick, roll2) {
-  const outcome = roll2 < BAD_TRIP_CHANCE ? "bad" : "good", startTick = tick + TRIP_EAT_TICKS;
-  return Object.freeze({ snack, outcome: outcome === "bad" ? "good" : outcome, eatTick: tick, startTick, endTick: startTick + TRIP_TICKS });
+function startTripV1(snack, tick, roll2, badAllowed = true) {
+  const outcome = badAllowed && roll2 < BAD_TRIP_CHANCE ? "bad" : "good", startTick = tick + (outcome === "bad" ? TRIP_BAD_FALL_TICKS : TRIP_EAT_TICKS);
+  return Object.freeze({ snack, outcome, eatTick: tick, startTick, endTick: startTick + TRIP_TICKS });
 }
 function tripExpiredV1(trip, tick) {
   return !trip || tick >= trip.endTick + TRIP_WEAR_OFF_TICKS;
@@ -29095,6 +29103,15 @@ function complete(next, id, interrupted) {
   a.comboDeadline = interrupted ? null : next.tick + profile2.continuationTicks;
   return event;
 }
+function cancelPrimaryForMoveV1(next, id) {
+  const a = next.primary?.actorsById[id];
+  if (!a) return;
+  clearPrimaryInput(next, id);
+  complete(next, id, true);
+  a.nextComboStep = 1;
+  a.comboDeadline = null;
+  prunePrimaryHistory(next);
+}
 function cancelDefeatedPrimaries(next, onlyEntityId = null) {
   if (!next.primary) return;
   for (const [id, a] of Object.entries(next.primary.actorsById)) if ((onlyEntityId === null || onlyEntityId === id) && !actors(next)[id].alive) {
@@ -30295,6 +30312,14 @@ export {
   TRIP_EAT_TICKS,
   TRIP_TICKS,
   TRIP_WEAR_OFF_TICKS,
+  TRIP_BAD_PORTAL_TICKS,
+  TRIP_BAD_PULL_TICKS,
+  TRIP_PULL_TO_LAND_TICKS,
+  TRIP_BAD_FALL_TICKS,
+  TRIP_FRIEND_WINDOW_TICKS,
+  TRIP_PORTAL_STEP_RADIUS,
+  TRIP_HEAVY_LEGS_TICKS,
+  TRIP_HEAVY_LEGS_SPEED,
   TRIP_SNACKS_V1,
   TRIP_SNACK_IDS_V1,
   TRIP_SNACK_DROPS_V1,
@@ -31254,6 +31279,7 @@ export {
   applyPrimaryIntent,
   readyPrimarySources,
   beginPrimary,
+  cancelPrimaryForMoveV1,
   cancelDefeatedPrimaries,
   advancePrimaryPhases,
   primaryMovementIntent,
