@@ -6103,6 +6103,47 @@ var UNIQUE_TIERS = freezeWire({
   "emberjaw-fang": { lines: ["fireDmg", "atkPct", "critChance", "lifeHit", "maxHpPct"], stars: [20, 30, 40, 50], unit: "permille" }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
+var UNIQUE_LINES_V3 = freezeWire({
+  "sunshield": { always: "block", pool: ["skillDmg:shield_bash", "areaDmg", "ailmentDur", "ailingDmg", "perfectDmg", "defCdr"], leg: ["maxPip"] },
+  "pharaoh-khopesh": { always: "moveCdr", pool: ["mainDmg", "skillDmg:lunge", "ailingDmg", "ailmentDur", "critDamage", "eliteDmg"], leg: ["killCdr"] },
+  "undying-sun-staff": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "bonusAreaRadius", "critChance", "areaDmg", "eliteDmg"], leg: ["killCdr"] },
+  "eye-of-the-sun": { always: "ailmentDur", pool: ["atkPct", "critChance", "ailingDmg", "areaDmg", "eliteDmg", "lifeHit"], leg: ["maxPip"] },
+  "bristleback-mantle": { always: "stunDr", pool: ["maxHpPct", "defPct", "str", "lifeKill", "closeDmg", "hitCdr", "areaDr"], leg: [] },
+  "jacks-band": { always: "lowDmg", pool: ["atkPct", "critChance", "areaDmg", "lifeHit", "maxHpPct", "eliteDmg"], leg: ["killCdr"] },
+  "kheptra-signet": { always: "hitCdr", pool: ["defPct", "maxHpPct", "cdr", "atkPct", "fullDmg", "stunDr", "potionHeal"], leg: [] },
+  "glasstail-cloak": { always: "critChance", pool: ["critDamage", "dex", "bleedDmg", "ailingDmg", "ailmentDur", "lifeKill", "moveSpeed"], leg: [] },
+  "mossback-pelt": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "hitCdr", "fullDmg", "stunDr"], leg: [] },
+  "gorehide-stompers": { always: "moveCdr", pool: ["moveSpeed", "atkPct", "closeDmg", "maxHpPct", "lifeKill", "stunDr", "eliteDmg"], leg: [] },
+  "sunsting-grips": { always: "critChance", pool: ["critDamage", "atkPct", "ailingDmg", "ailmentDur", "lifeHit", "keepPip", "sigDmg"], leg: [] },
+  "rimecoil-hood": { always: "controlDur", pool: ["maxHpPct", "defPct", "ccDmg", "eliteDr", "cdr", "stunDr", "lifeHit"], leg: [] },
+  "mirewail-veil": { always: "moveSpeed", pool: ["critChance", "lifeKill", "defPct", "moveCdr", "fullDmg", "eliteDr"], leg: ["killCdr"] },
+  "goldcarapace-band": { always: "eliteDr", pool: ["defPct", "maxHpPct", "str", "lifeHit", "eliteDmg", "fullDmg", "stunDr"], leg: [] },
+  "briarfang-thornmantle": { always: "closeDmg", pool: ["maxHpPct", "defPct", "str", "atkPct", "lifeKill", "areaDr", "hitCdr"], leg: [] },
+  "emberjaw-fang": { always: "ailingDmg", pool: ["fireDmg", "atkPct", "critChance", "lifeHit", "ailmentDur", "maxHpPct", "areaDmg"], leg: [] }
+});
+var uniquePoolV3 = (id, tier) => {
+  const u = UNIQUE_LINES_V3[id];
+  return u ? [...u.pool, ...tier >= 4 ? u.leg : []] : [];
+};
+function rollUniqueLinesV3(id, tier, random) {
+  const u = UNIQUE_LINES_V3[id];
+  if (!u) return null;
+  const pool = uniquePoolV3(id, tier), out = [u.always];
+  for (let i = 1; i < tier && pool.length; i++) out.push(pool.splice(Math.floor(random() * pool.length), 1)[0]);
+  return out;
+}
+var SIG_DMG = Object.freeze(["perfectDmg", "exposeDmg", "blinkDmg"]);
+var CLASS_KINDS = Object.freeze(["shockDmg", "counterDmg", "bleedDmg", "poisonDmg", "fireDmg", "frostDmg", "lightningDmg"]);
+function uniqueLineKeyV3(id, affix) {
+  const u = UNIQUE_LINES_V3[id];
+  if (!u || !affix) return null;
+  const list2 = [u.always, ...u.pool, ...u.leg];
+  if (affix.skill && list2.includes(affix.key + ":" + affix.skill)) return affix.key + ":" + affix.skill;
+  if (list2.includes(affix.key)) return affix.key;
+  if (SIG_DMG.includes(affix.key) && list2.includes("sigDmg")) return "sigDmg";
+  if (CLASS_KINDS.includes(affix.key) && list2.includes("classDmg")) return "classDmg";
+  return affix.key;
+}
 function uniqueStarValue(id, tier) {
   const t = UNIQUE_TIERS[id];
   if (!t) return null;
@@ -6804,11 +6845,11 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
   }
   if (cls) applyClassFlavor(raw, classGearFlavor(cls, type, n));
   const v3 = Boolean(cls) && progression.affixes === AFFIXES_V3, v2 = Boolean(cls) && isAffixesV2Plus(progression.affixes), affixes = [], pool = v3 ? affixPoolV3(sub ?? type, rarityTier, cls) : v2 ? affixPoolV2(AFFIX_POOLS[sub ?? type], sub ?? type, rarityTier) : [...AFFIX_POOLS[sub ?? type]], bonus = {};
-  const uqLines = uq ? [...UNIQUE_TIERS[progression.unique]?.lines ?? []] : null;
+  const uqV3 = Boolean(uq) && v3 && Boolean(UNIQUE_LINES_V3[progression.unique]), uqLines = uqV3 ? rollUniqueLinesV3(progression.unique, rarityTier, random) : uq ? [...UNIQUE_TIERS[progression.unique]?.lines ?? []] : null;
   for (let i = 0; i < rarityTier && (uqLines ? uqLines.length : pool.length); i++) {
     let key5 = uqLines ? uqLines.shift() : pool.splice(Math.floor(random() * pool.length), 1)[0], value, skill = null;
     if (uqLines && key5.includes(":")) [key5, skill] = key5.split(":");
-    if (v3 && !uqLines) {
+    if (v3 && (!uqLines || uqV3)) {
       let named = null;
       [key5, named] = resolveV3Affix(key5, cls, sub ?? type, random);
       if (isV3Affix(key5)) {
@@ -7850,14 +7891,15 @@ function workshopResult(item) {
       requireContract(!enchants && Number.isInteger(step.line) && step.line >= 0 && step.line < affixes.length && (lockedLine === null || lockedLine === step.line), "Invalid locked reforge line");
       lockedLine = step.line;
       const cls = g.progression?.gearClass, v3 = g.progression?.affixes === AFFIXES_V3 && cls, v2 = (g.progression?.affixes === AFFIXES_V2 || v3) && cls, slot = g.definition.subType ?? g.definition.slot, classKey = (k) => Object.values(CLASS_DAMAGE).flat().includes(k) ? "classDmg" : v3 ? v3PoolKeyOf(k, slot) : k;
-      const old = affixes[step.line], pool = (v3 ? affixPoolV3(slot, tier, cls) : v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
-      let name = picked, skill = null;
+      const uqId = v3 && UNIQUE_LINES_V3[definition.unique] ? definition.unique : null, old = affixes[step.line], pool = uqId ? step.line === 0 ? [UNIQUE_LINES_V3[uqId].always] : uniquePoolV3(uqId, tier).filter((k) => !affixes.some((a, i) => i !== step.line && uniqueLineKeyV3(uqId, a) === k)) : (v3 ? affixPoolV3(slot, tier, cls) : v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
+      let name = picked, skill = null, fixedSkill = null;
+      if (uqId && picked.includes(":")) [name, fixedSkill] = picked.split(":");
       if (v3) {
-        [name, skill] = resolveV3Affix(picked, cls, slot, () => random("class"));
+        [name, skill] = resolveV3Affix(name, cls, slot, () => random("class"));
         if (name === "classDmg" || isNewAffix(name)) {
           skill = null;
           name = resolveNewAffix(name, cls, definition.spellType ?? null, () => random("class"));
-          skill = affixSkill(name, cls, () => random("skill"));
+          skill = fixedSkill ?? affixSkill(name, cls, () => random("skill"));
         }
       } else if (v2 && (picked === "classDmg" || isNewAffix(picked))) {
         name = resolveNewAffix(picked, g.progression.gearClass, definition.spellType ?? null, () => random("class"));
@@ -30574,6 +30616,9 @@ export {
   UNIQUE_ITEMS,
   UNIQUE_TIERS,
   UNIQUE_LINE_UNLOCKS,
+  UNIQUE_LINES_V3,
+  uniquePoolV3,
+  uniqueLineKeyV3,
   uniqueStarValue,
   uniqueEffectText,
   uniqueOf,

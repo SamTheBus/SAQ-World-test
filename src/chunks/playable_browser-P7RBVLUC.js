@@ -323,6 +323,7 @@ import {
   TROPICAL_CREATURES_V1_VERSION,
   TransactionPayloadConflictError,
   UNIQUE_ITEMS,
+  UNIQUE_LINES_V3,
   UNIQUE_LINE_UNLOCKS,
   UNIQUE_TIERS,
   VITALITY_WEAVER_AFFIX_ID,
@@ -946,7 +947,9 @@ import {
   tripSpeedMultiplierV1,
   unfrozenEpisodeD9,
   uniqueEffectText,
+  uniqueLineKeyV3,
   uniqueOf,
+  uniquePoolV3,
   uniqueStarValue,
   updateHighestHeroLevel,
   useEventLinksV1,
@@ -1053,7 +1056,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-P6PZAXOG.js";
+} from "./chunk-ZSR7F72O.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -126200,7 +126203,8 @@ var sign2 = (v) => {
 var sum = (a, b) => statDifference(a, statScale(b, -1));
 var affixLine = (k, skill) => ({ atk: "attack", def: "defense", maxHp: "maxHp", str: "str", dex: "dex", int: "int" })[k] ?? "fx:" + (k === "activeSpd" ? "activeSpeed" : k) + (skill ? ":" + skill : "");
 var affixLineKey = affixLine;
-var skillName = (id) => CLASS_TREE_SKILLS[id]?.name ?? id;
+var SIGNATURE_NAMES = { shield_bash: "Shield Bash", flurry: "Flurry", cast: "Cast" };
+var skillName = (id) => CLASS_TREE_SKILLS[id]?.name ?? SIGNATURE_NAMES[id] ?? id;
 function lineLabel(key3) {
   const [k, skill] = (key3.startsWith("fx:") ? key3.slice(3) : key3).split(":");
   const pip = PIP_NAMES[skill] ?? "pip";
@@ -129692,7 +129696,25 @@ function createInventoryPresentation({ document: document2, environment, readMod
         scroll.append(sec);
       }
     }
-    if (unique) {
+    const uqV3 = unique && gen?.progression?.affixes === "affixes-v3" && UNIQUE_LINES_V3[unique.id];
+    if (uqV3) {
+      const have = d.rarityTier ?? 0, tiers = [3, 4, 5].filter((t) => t > have);
+      if (tiers.length) {
+        const sec = element("section", "", "gx-section gx-locked");
+        sec.append(element("h5", "Unlocks at higher rarity", "gx-sectiontitle"));
+        for (const t of tiers) {
+          const row2 = element("div", "", "gx-line is-locked"), text3 = markup(element("span", "", "gx-linetext"), LOCK_BADGE);
+          text3.append("One more line from its list");
+          const tag = element("small", RARITY_NAMES[t], "gx-unlock");
+          tag.style.color = RARITY_COLORS[t];
+          row2.append(text3, tag);
+          sec.append(row2);
+        }
+        const owned2 = new Set((gen.affixes ?? []).map((a) => uniqueLineKeyV3(unique.id, a))), left = uniquePoolV3(unique.id, 5).filter((k) => !owned2.has(k)).map((k) => k === "sigDmg" ? "Perfect block, Expose or Blink damage" : lineLabel(affixLineKey(...k.split(":"))));
+        if (left.length) sec.append(element("p", "Its list: " + left.join(", "), "gx-itemnote"));
+        scroll.append(sec);
+      }
+    } else if (unique) {
       const have = d.rarityTier ?? 0, locked = (UNIQUE_TIERS[unique.id]?.lines ?? []).map((k, i) => [k, UNIQUE_LINE_UNLOCKS[i]]).filter(([, t]) => t > have);
       if (locked.length) {
         const sec = element("section", "", "gx-section gx-locked");
