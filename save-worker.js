@@ -15308,6 +15308,92 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "Your burns last {0} longer. Burning enemies take {1} more damage from you.",
     "It never blinks."
   ),
+  // Arachnid Treant: bark, roots, silk and spiders (Sammy 2026-11-12, all four passes approved).
+  unique(
+    "barkheart",
+    "Barkheart Bulwark",
+    "subweapon",
+    "shield",
+    "Tower Shield",
+    "knight",
+    "arachnid_treant",
+    "tropical",
+    "Each hit you block with Guard grows a bark plate on your shield, up to 3. When you lower Guard, the plates burst off at the enemies near you, each for {0} of your Attack.",
+    "It grew around every arrow, and kept them."
+  ),
+  unique(
+    "rootfang",
+    "Rootfang",
+    "subweapon",
+    "dagger",
+    "Stiletto",
+    "rogue",
+    "arachnid_treant",
+    "tropical",
+    "When you Expose an enemy, roots burst up under it and the enemies near it, holding them 60% slower for 3 s. Enemies held by the roots take {0} more damage from you.",
+    "The forest holds them still for you."
+  ),
+  unique(
+    "silkspinner",
+    "Silkspinner Staff",
+    "weapon",
+    null,
+    "Staff",
+    "mage",
+    "arachnid_treant",
+    "tropical",
+    "Every 4th Cast lobs a silk glob too. It bursts for {0} of your Attack and leaves a web for 3 s that slows enemies in it by 60% (not bosses).",
+    "Spun in the dark between its roots."
+  ),
+  unique(
+    "cocoonsilk",
+    "Cocoonsilk Wraps",
+    "gloves",
+    null,
+    "Wraps",
+    null,
+    "arachnid_treant",
+    "tropical",
+    "Every 6 s, your next hit wraps the enemy in silk and holds it in place. A moment later the cocoon bursts into spiderlings that bite every enemy near it for {0} of your Attack.",
+    "Something in there is always hatching."
+  ),
+  // Brimstone Colossus: its own attacks, molten (Sammy 2026-11-12; the Treads wait for their art pass).
+  unique(
+    "slagmaul",
+    "Slagmaul",
+    "weapon",
+    null,
+    "Warhammer",
+    "knight",
+    "overlord_iron_vault",
+    "volcanic",
+    "The third hit of your combo slams down: the ground splits in a cone ahead of you and lava spits up the cracks for {0} of your Attack. The cracks burn for 2 s, burning enemies who stand in them.",
+    "It was a fist once. The rest of him is still in the fort."
+  ),
+  unique(
+    "ventcutter",
+    "Ventcutter",
+    "weapon",
+    null,
+    "Saber",
+    "rogue",
+    "overlord_iron_vault",
+    "volcanic",
+    "Every 4th crit plants a vent under the enemy. It boils for 1 s, then erupts in a cross of lava that hits every enemy along its arms for {0} of your Attack and sets them burning.",
+    "Cut deep enough and the ground bleeds too."
+  ),
+  unique(
+    "coreheart",
+    "Coreheart Wand",
+    "weapon",
+    null,
+    "Wand",
+    "mage",
+    "overlord_iron_vault",
+    "volcanic",
+    "Blink primes the wand: your next Cast within 3 s becomes a Core Blast, a lance of molten fire through every enemy in a line for {0} of your Attack. It leaves a burning strip on the ground for 2 s.",
+    "A coal from its chest, still burning."
+  ),
   // Named elites, at the end of small sites.
   unique(
     "bristleback-mantle",
@@ -15466,6 +15552,14 @@ var UNIQUE_TIERS = freezeWire({
   "pharaoh-khopesh": { lines: ["mainDmg", "skillDmg:lunge", "critDamage", "activeSpd", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "undying-sun-staff": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [5, 4, 3, 2], unit: "nth" },
   "eye-of-the-sun": { lines: ["atkPct", "critChance", "eliteDmg", "lifeHit", "maxHpPct"], stars: [[30, 6], [40, 8], [50, 10], [65, 12]], unit: "eye" },
+  // Arachnid Treant and Brimstone Colossus (their v3 lines are below; these five are for gear made before v3).
+  "barkheart": { lines: ["block", "offDmg", "counterDmg", "cdr", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
+  "rootfang": { lines: ["offDmg", "critChance", "bleedDmg", "parry", "eliteDmg"], stars: [16, 20, 25, 32], unit: "pct" },
+  "silkspinner": { lines: ["mainDmg", "critChance", "activeSpd", "bonusAreaRadius", "eliteDmg"], stars: [80, 110, 140, 180], unit: "pct" },
+  "cocoonsilk": { lines: ["atkPct", "critChance", "lifeHit", "cdr", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
+  "slagmaul": { lines: ["mainDmg", "fireDmg", "str", "critDamage", "eliteDmg"], stars: [80, 110, 140, 180], unit: "pct" },
+  "ventcutter": { lines: ["mainDmg", "critDamage", "critChance", "dex", "eliteDmg"], stars: [90, 125, 160, 210], unit: "pct" },
+  "coreheart": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [100, 135, 170, 220], unit: "pct" },
   "bristleback-mantle": { lines: ["maxHpPct", "defPct", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
   "jacks-band": { lines: ["lifeHit", "atkPct", "maxHpPct", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
   "kheptra-signet": { lines: ["defPct", "maxHpPct", "cdr", "atkPct", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
@@ -15486,6 +15580,15 @@ var UNIQUE_LINES_V3 = freezeWire({
   "pharaoh-khopesh": { always: "moveCdr", pool: ["mainDmg", "skillDmg:lunge", "ailingDmg", "ailmentDur", "critDamage", "eliteDmg"], leg: ["killCdr"] },
   "undying-sun-staff": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "bonusAreaRadius", "critChance", "areaDmg", "eliteDmg"], leg: ["killCdr"] },
   "eye-of-the-sun": { always: "ailmentDur", pool: ["atkPct", "critChance", "ailingDmg", "areaDmg", "eliteDmg", "lifeHit"], leg: ["maxPip"] },
+  // Treant set (Sammy 2026-11-12): Barkheart's +1 goes to the Bastion branch.
+  "barkheart": { always: "perfectWindow", pool: ["block", "counterDmg", "defCdr", "eliteDr", "areaDmg", "perfectCdr"], leg: ["branchRank:bastion"] },
+  "rootfang": { always: "exposeTime", pool: ["ccDmg", "ailmentDur", "controlDur", "classDmg", "critChance", "exposeDmg"], leg: ["maxPip"] },
+  "silkspinner": { always: "rangedDmg", pool: ["mainDmg", "critChance", "activeSpd", "controlDur", "ccDmg", "eliteDmg"], leg: ["killCdr"] },
+  "cocoonsilk": { always: "ccDmg", pool: ["atkPct", "critChance", "lifeHit", "closeDmg", "keepPip", "cdr", "sigDmg"], leg: [] },
+  // Brimstone set (Sammy 2026-11-12).
+  "slagmaul": { always: "fireDmg", pool: ["mainDmg", "areaDmg", "closeDmg", "ailmentDur", "ailingDmg", "str"], leg: ["maxPip"] },
+  "ventcutter": { always: "critDamage", pool: ["critChance", "fireDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
+  "coreheart": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "bristleback-mantle": { always: "stunDr", pool: ["maxHpPct", "defPct", "str", "lifeKill", "closeDmg", "hitCdr", "areaDr"], leg: [] },
   "jacks-band": { always: "lowDmg", pool: ["atkPct", "critChance", "areaDmg", "lifeHit", "maxHpPct", "eliteDmg"], leg: ["killCdr"] },
   "kheptra-signet": { always: "hitCdr", pool: ["defPct", "maxHpPct", "cdr", "atkPct", "fullDmg", "stunDr", "potionHeal"], leg: [] },
@@ -15525,7 +15628,7 @@ function uniqueLineKeyV3(id, affix) {
   return affix.key;
 }
 var NTH = Object.freeze({ 2: "second", 3: "third", 4: "fourth", 5: "fifth" });
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault"]);
 var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.25, named: 0.1, world: 2e-3 });
 
 // src/shared/content/smart_offhand_v1.js
@@ -16064,7 +16167,12 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
   const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : progression.swiftKill && rolledTier < 1 ? 1 : progression.tripGear === "best" && rolledTier < tripFloor(progression) ? tripFloor(progression) : rolledTier;
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = questGearFamiliesV1(cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES, progression.questGear);
-  const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own3 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own3 ?? [], ...shared, ...uq?.trophy ? [uq.noun] : []], n = noun ?? (type === "subweapon" && cls && progression.mainTree ? smartOffhandNoun(cls, progression.mainTree, random) : shared.length && random() < 0.2 ? pick6(shared) : pick6(own3));
+  const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own3 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [
+    ...own3 ?? [],
+    ...shared,
+    ...uq?.trophy || uq?.family === "gloves" && uq.cls === null ? [uq.noun] : []
+    /* any-class unique gloves (Cocoonsilk Wraps) keep their own noun */
+  ], n = noun ?? (type === "subweapon" && cls && progression.mainTree ? smartOffhandNoun(cls, progression.mainTree, random) : shared.length && random() < 0.2 ? pick6(shared) : pick6(own3));
   requireContract((family2 ? cls ? classFamilies : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
   const E = c.dungeonScale(power2).E, R2 = c.q(100 + 7 * rarityTier, 100), P2 = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R2, c.q(type === "overall" ? 18 : 10, 10));
   const I = (v) => {
@@ -16118,6 +16226,7 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
     if (v3 && (!uqLines || uqV3)) {
       let named2 = null;
       [key9, named2] = resolveV3Affix(key9, cls, sub ?? type, random);
+      if (skill && key9 === "branchRank") named2 = skill;
       if (isV3Affix(key9)) {
         const fx = V3_FIXED[key9];
         if (fx) {
@@ -17170,6 +17279,7 @@ function workshopResult(item2) {
       if (uqId && picked.includes(":")) [name, fixedSkill] = picked.split(":");
       if (v3) {
         [name, skill] = resolveV3Affix(name, cls, slot, () => random("class"));
+        if (fixedSkill && name === "branchRank") skill = fixedSkill;
         if (name === "classDmg" || isNewAffix(name)) {
           skill = null;
           name = resolveNewAffix(name, cls, definition.spellType ?? null, () => random("class"));
@@ -24867,6 +24977,7 @@ var BY_NOUN = Object.freeze({
   Mantle: "mantle",
   "Backwards Cap": "backwards-cap",
   "Cloth Wraps": "wraps",
+  Wraps: "wraps",
   "Cloth Slippers": "apprentice-slippers",
   "Wizard Hat": "hat",
   "Silk Robe": "robe",
@@ -26490,6 +26601,19 @@ var MOSS_TICKS = 600;
 var MIST_TICKS = 180;
 var VEIL_MAX_TICKS = 480;
 var GOLD_TICKS = 900;
+var BARK_MAX = 3;
+var BARK_SHOT_TICKS = 30;
+var SILK_EVERY = 4;
+var WEB_TICKS = 180;
+var COCOON_EVERY = 360;
+var COCOON_TICKS = 90;
+var FURROW_TICKS = 120;
+var VENT_EVERY = 4;
+var VENT_TICKS = 60;
+var MAX_VENTS = 3;
+var CORE_TICKS = 180;
+var STRIP_TICKS = 120;
+var UQ_PULSE_TICKS = 30;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
@@ -26519,7 +26643,7 @@ var FREE_TICKS = 180;
 var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
-var LIVE = ["sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function validateClassSkillState(s, combat, actor) {
   const k = combat.skills;
   if (k === void 0) return;
@@ -26828,6 +26952,54 @@ function validateClassSkillState(s, combat, actor) {
       closedRecord(e, ["n", "ticks"]);
       safeInteger(e.n, 1, 3);
       safeInteger(e.ticks, 1, PIP_EARNED_TICKS);
+    }
+  }
+  {
+    const pos2 = (v) => Number.isFinite(v.x) && Number.isFinite(v.y);
+    if (k.bark !== void 0) {
+      safeInteger(k.bark, 1, BARK_MAX);
+      requireContract(actor.alive, "Invalid bark");
+    }
+    if (k.barkShot !== void 0) {
+      closedRecord(k.barkShot, ["ticks", "x", "y", "at"]);
+      safeInteger(k.barkShot.ticks, 1, BARK_SHOT_TICKS);
+      requireContract(pos2(k.barkShot) && Array.isArray(k.barkShot.at) && k.barkShot.at.length >= 1 && k.barkShot.at.length <= BARK_MAX, "Invalid bark burst");
+      for (const p of k.barkShot.at) {
+        closedRecord(p, ["x", "y"]);
+        requireContract(pos2(p), "Invalid bark burst");
+      }
+    }
+    for (const [key9, max2] of [["silk", SILK_EVERY - 1], ["vent", VENT_EVERY - 1], ["wrapCd", COCOON_EVERY], ["core", CORE_TICKS]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
+    if (k.web !== void 0) {
+      closedRecord(k.web, ["x", "y", "ticks", "next"]);
+      requireContract(pos2(k.web) && actor.alive, "Invalid web");
+      safeInteger(k.web.ticks, 1, WEB_TICKS);
+      safeInteger(k.web.next, 1, UQ_PULSE_TICKS);
+    }
+    if (k.cocoon !== void 0) {
+      closedRecord(k.cocoon, ["target", "x", "y", "ticks"]);
+      requireContract(typeof k.cocoon.target === "string" && k.cocoon.target.length <= 200 && pos2(k.cocoon) && actor.alive, "Invalid cocoon");
+      safeInteger(k.cocoon.ticks, 1, COCOON_TICKS);
+    }
+    if (k.furrow !== void 0) {
+      closedRecord(k.furrow, ["x", "y", "dx", "dy", "ticks", "next"]);
+      requireContract(pos2(k.furrow) && Math.abs(Math.hypot(k.furrow.dx, k.furrow.dy) - 1) < 1e-9 && actor.alive, "Invalid furrows");
+      safeInteger(k.furrow.ticks, 1, FURROW_TICKS);
+      safeInteger(k.furrow.next, 1, UQ_PULSE_TICKS);
+    }
+    if (k.vents !== void 0) {
+      requireContract(Array.isArray(k.vents) && k.vents.length >= 1 && k.vents.length <= MAX_VENTS && actor.alive, "Invalid vents");
+      for (const v of k.vents) {
+        closedRecord(v, ["x", "y", "ticks"]);
+        requireContract(pos2(v), "Invalid vent");
+        safeInteger(v.ticks, 1, VENT_TICKS);
+      }
+    }
+    if (k.strip !== void 0) {
+      closedRecord(k.strip, ["x", "y", "x2", "y2", "ticks", "next"]);
+      requireContract(pos2(k.strip) && Number.isFinite(k.strip.x2) && Number.isFinite(k.strip.y2) && actor.alive, "Invalid strip");
+      safeInteger(k.strip.ticks, 1, STRIP_TICKS);
+      safeInteger(k.strip.next, 1, UQ_PULSE_TICKS);
     }
   }
   requireContract(Object.keys(k.cooldowns).length || LIVE.some((key9) => k[key9]), "Empty skill record");
