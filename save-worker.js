@@ -262,7 +262,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-ranges";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-dens";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -2077,7 +2077,7 @@ var summitGroupV1 = (s, groupId) => Boolean(s?.d9World?.plannedWorld) && s.d9Wor
 var summitAlreadyAdmittedV1 = (anchor, episode) => isSummitAnchorV1(anchor) && Boolean(episode);
 
 // src/shared/content/planned_events_v1.js
-var BUILT_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "wayside_shrine", "raided_camp", "buried_cache", "trophy_hunt"]);
+var BUILT_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "wayside_shrine", "raided_camp", "buried_cache", "trophy_hunt", "den"]);
 var CATEGORIES = Object.freeze(["pathside", "backcountry", "deep_wild"]);
 var BASE = 1e5;
 var ROADSIDE_KINDS = Object.freeze(["road_ambush", "wayside_shrine"]);
@@ -2106,9 +2106,9 @@ function plannedEventKindV1(seedHex, ordinal, episode, built = BUILT_EVENT_KINDS
   let kind2 = plannedEventFirstKind(ordinal);
   if (!built.includes(kind2)) kind2 = null;
   if (PAIRED_KINDS.includes(kind2)) return kind2;
-  const shares = WORLD_EVENT_SHARES[plannedEventCategory(ordinal)], roadside = ROADSIDE_KINDS.includes(kind2);
+  const shares = WORLD_EVENT_SHARES[plannedEventCategory(ordinal)], roadside = ROADSIDE_KINDS.includes(kind2), den = kind2 === "den";
   for (let e = 1; e <= episode && kind2; e++) {
-    const options = Object.keys(shares).filter((k) => built.includes(k) && !PAIRED_KINDS.includes(k) && ROADSIDE_KINDS.includes(k) === roadside);
+    const options = Object.keys(shares).filter((k) => built.includes(k) && !PAIRED_KINDS.includes(k) && ROADSIDE_KINDS.includes(k) === roadside && (k !== "den" || den));
     if (!options.length) break;
     const pool = options.length > 1 ? options.filter((k) => k !== kind2) : options, total = pool.reduce((n, k) => n + shares[k], 0);
     let roll = unit(seedHex + "/planned-event/" + ordinal % 1e3 + "/" + e) * total;
@@ -2159,9 +2159,13 @@ var PLANNED_EVENT_FAMILIES = freezeWire({
   volcanic: [...mix("hell_bat", "lava_serpent"), "lava_serpent"]
 });
 var BROOD_ROSTER = freezeWire(["brood_mother", "broodling", "broodling", "broodling", ...Array(24).fill("hatchling")]);
-var plannedEventFamiliesV1 = (biome, category = null) => {
+var plannedEventFamiliesV1 = (biome, category = null, firstKind = null) => {
   const crew = [...PLANNED_EVENT_FAMILIES[biome] ?? PLANNED_EVENT_FAMILIES.woodland];
   if (category === "deep_wild") crew[12] = huntChampionOfV1(biome).family;
+  if (firstKind === "den") {
+    const d = denOfV1(biome);
+    for (let n = 0; n < 12; n++) crew[n] = n === DEN_POLICY.alpha ? d.alpha : d.pack[(n < DEN_POLICY.alpha ? n : n - DEN_POLICY.alpha - 1) % d.pack.length];
+  }
   return [...crew, ...BROOD_ROSTER];
 };
 var PLANNED_EVENT_CREW = 13;
@@ -2271,7 +2275,7 @@ var roadsideSkinOfV1 = (biome) => ROADSIDE_SKINS[biome] ?? "woodland";
 var roadsideChestV1 = (s, source11) => {
   if (source11.kind !== "chest") return false;
   const n = s.d9World?.episodes?.[source11.groupId]?.geography?.anchorOrdinal;
-  return Boolean(roadsideOrdinalV1(n) || summitGroupV1(s, source11.groupId) || plannedEventOrdinal(n) && (plannedEventFirstKind(n) === "buried_cache" || s.d9World.worldEvents?.records[source11.groupId]?.kind === "trophy_hunt"));
+  return Boolean(roadsideOrdinalV1(n) || summitGroupV1(s, source11.groupId) || plannedEventOrdinal(n) && (plannedEventFirstKind(n) === "buried_cache" || ["trophy_hunt", "den"].includes(s.d9World.worldEvents?.records[source11.groupId]?.kind)));
 };
 var ROADSIDE_LABELS = freezeWire({ road_ambush: "Road Ambush", wayside_shrine: "Wayside Shrine" });
 var CAMP_CREW = freezeWire(["bandit_cutthroat", "bandit_brute", "bandit_cutthroat", "bandit_archer", "bandit_cutthroat", "bandit_cutthroat"]);
@@ -2355,6 +2359,58 @@ var HUNT_CHAMPIONS = freezeWire({
 function huntChampionOfV1(biome) {
   return HUNT_CHAMPIONS[biome] ?? HUNT_CHAMPIONS.woodland;
 }
+var DEN_VERSION = "den-v1";
+var DEN_POLICY = freezeWire({
+  version: DEN_VERSION,
+  // The lair mouth's ground point (world px from the anchor, so the hoard sits on the anchor); from the
+  // mouth, the pack's sleeping spots and where the Alpha bursts out.
+  mouth: [-53, -12],
+  spots: [[-132, 38], [-74, 70], [-4, 84], [70, 74], [132, 42], [-46, 34]],
+  alphaAt: [4, 18],
+  pack: 6,
+  alpha: 6,
+  // A hero within settleRadius of the anchor finds the pack asleep at its spots; one within triggerRadius
+  // of the mouth wakes it. A hit wakes the sleeper struck (the ambush: x2) and the sleepers within
+  // hearRadius of it. Woken, they stand groggy for groggyTicks.
+  settleRadius: 600,
+  triggerRadius: 96,
+  hearRadius: 100,
+  groggyTicks: 60,
+  ambush: { numerator: 2, denominator: 1 },
+  // The Alpha comes out once halfAt of the pack are down (with the pack awake). It roars on arrival and
+  // every roarEveryTicks: a ground ring (roarRadius across, roarFlat as tall) fills for roarTicks while
+  // it stands still, then every hero inside is shoved shove px out and slowed to slowPercent for slowTicks.
+  halfAt: 3,
+  roarTicks: 60,
+  roarRadius: 96,
+  roarFlat: 0.42,
+  roarEveryTicks: 480,
+  shove: 44,
+  slowPercent: 60,
+  slowTicks: 90,
+  presentationScale: 1.75,
+  // On top of its elite numbers at rank C (4x health, 5/2 damage): 9x health and 2x damage, a Trophy Hunt
+  // champion's 36x and 5x. Its kill drops like a site mini-boss's (site_ends_v1.js).
+  alphaStats: { maxHp: { numerator: 9, denominator: 1 }, attackDamage: { numerator: 2, denominator: 1 } },
+  activeRadius: 768,
+  reward: "the Alpha drops like a site mini-boss; one hoard chest per hero who fought here, rolled like an elite drop",
+  reset: "nobody left nearby before the Alpha falls: the survivors go back to sleep at full health and the Alpha back into the lair; beaten pack members stay beaten",
+  simulationHz: 60
+});
+var DEN_MEMBERS = DEN_POLICY.pack + 1;
+var DENS = freezeWire({
+  woodland: { name: "Hidden Hollow", pack: ["sprout", "slime"], alpha: "slime", alphaName: "Hollow King" },
+  grassland: { name: "Boar Wallow", pack: ["tusk_boar"], alpha: "tusk_boar", alphaName: "Old Tusker" },
+  desert: { name: "Antlion Pit", pack: ["antlion", "dust_imp"], alpha: "antlion", alphaName: "Pit Queen" },
+  frostland: { name: "Yeti Cave", pack: ["young_yeti", "shardling"], alpha: "young_yeti", alphaName: "Frostback" },
+  wetland: { name: "Bog Hollow", pack: ["bog_frog", "leech"], alpha: "bog_frog", alphaName: "Mirecroak" },
+  upland: { name: "Griffin Aerie", pack: ["griffling"], alpha: "griffling", alphaName: "Skyclaw" },
+  tropical: { name: "Wyrm Hollow", pack: ["thorn_wyrm", "dart_frog"], alpha: "thorn_wyrm", alphaName: "Old Coil" },
+  volcanic: { name: "Cinder Tube", pack: ["cinder_crab", "ember_newt"], alpha: "cinder_crab", alphaName: "Slagshell" }
+});
+var denLandV1 = (biome) => DENS[biome] ? biome : "woodland";
+var denOfV1 = (biome) => DENS[denLandV1(biome)];
+var denAlphaAffixV1 = (biome) => NEST_POLICY.broodAffixes[denLandV1(biome)] ?? "web_weaver";
 
 // src/shared/content/world_profile_d9.js
 var D9_PROFILE = freezeWire({
@@ -3119,6 +3175,65 @@ function huntChampionProfileV1(s, g, actor, profile2) {
   return { ...profile2, maxHp: combatInteger(multiplyCombat(profile2.maxHp, m.maxHp.numerator, m.maxHp.denominator), "round"), attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, m.attackDamage.numerator, m.attackDamage.denominator), "round") };
 }
 
+// src/shared/contracts/den_v1.js
+var PACK = DEN_POLICY.pack;
+var ALPHA = DEN_POLICY.alpha;
+var denReadyV1 = (r) => r.stages[ALPHA].phase === "defeated" && r.stages.every((t) => ["defeated", "cancelled"].includes(t.phase));
+var tickOrNull = (v, max2) => {
+  if (v !== null) safeInteger(v, 0, max2);
+};
+function validateDenV1(r) {
+  requireContract(r.kind === "den" && r.rulesVersion === DEN_VERSION && r.stages.length === DEN_MEMBERS, "Den policy/membership");
+  closedRecord(r.den, ["alarm", "woke", "ambush", "alphaElapsed", "roar", "slowed", "doneElapsed", "fled", "waiting", "resets"]);
+  const h = r.den, e = r.elapsedTicks, a = r.stages[ALPHA];
+  tickOrNull(h.alarm, e);
+  tickOrNull(h.alphaElapsed, e);
+  tickOrNull(h.doneElapsed, e);
+  safeInteger(h.resets);
+  safeInteger(h.fled, 0, PACK);
+  requireContract(typeof h.waiting === "boolean", "Den waiting");
+  requireContract(Array.isArray(h.woke) && h.woke.length === PACK && Array.isArray(h.ambush) && h.ambush.length === PACK, "Den pack rows");
+  requireContract(Array.isArray(h.slowed) && h.slowed.length <= 4 && new Set(h.slowed).size === h.slowed.length && h.slowed.every((id) => /^ply:[a-f0-9]{32}$/.test(id)), "Den slowed heroes");
+  requireContract(["pending", "hatched", "defeated"].includes(a.phase) && h.alphaElapsed === null === (a.phase === "pending") && h.doneElapsed === null === (a.phase !== "defeated"), "Den Alpha phase");
+  if (h.alphaElapsed !== null) requireContract(h.alarm !== null && h.alphaElapsed >= h.alarm, "Den Alpha before the alarm");
+  if (h.doneElapsed !== null) requireContract(h.doneElapsed >= h.alphaElapsed, "Den finish");
+  for (let n = 0; n < PACK; n++) {
+    const t = r.stages[n], w = h.woke[n], k = h.ambush[n];
+    tickOrNull(w, e);
+    tickOrNull(k, e);
+    requireContract(["pending", "hatched", "defeated", "cancelled"].includes(t.phase), "Den pack phase");
+    requireContract(k === null || k === w, "Den ambush without waking");
+    requireContract(w === null || h.alarm !== null && w >= h.alarm, "Den waking before the alarm");
+    requireContract(t.phase !== "cancelled" || a.phase === "defeated", "Den pack fled early");
+    requireContract(t.phase !== "pending" || w === null, "Den hidden member awake");
+    if (!h.waiting) requireContract(t.phase !== "pending", "Den member left hiding");
+  }
+  requireContract(h.fled === r.stages.slice(0, PACK).filter((t) => t.phase === "cancelled").length, "Den fled count");
+  if (h.roar !== null) {
+    closedRecord(h.roar, ["at", "x", "y"]);
+    safeInteger(h.roar.at, h.alphaElapsed ?? 0, e);
+    requireContract(h.alphaElapsed !== null && a.phase === "hatched" && Number.isSafeInteger(h.roar.x) && Number.isSafeInteger(h.roar.y), "Den roar");
+  }
+  if (h.slowed.length) requireContract(h.roar !== null, "Den slow without a roar");
+  if (h.waiting) requireContract(h.alarm === null && a.phase === "pending" && h.roar === null && r.stages.slice(0, PACK).every((t) => ["pending", "defeated"].includes(t.phase)), "Waiting den");
+  if (r.status === "completed") requireContract(denReadyV1(r) && !h.waiting, "Incomplete den completion");
+}
+function denAlphaIdV1(s, g) {
+  if (!g || !plannedEventGroupV1(s, g.groupId)) return null;
+  const n = s.d9World.episodes[g.groupId].geography.anchorOrdinal;
+  return plannedEventKindV1(s.campaign.seed.seedHex, n, s.encounterEconomy?.groups[g.groupId]?.episode ?? 0) === "den" ? g.entityIds[ALPHA] ?? null : null;
+}
+function denAlphaElitesV1(s, g, { includeDefeated = false } = {}) {
+  const id = denAlphaIdV1(s, g);
+  if (!id || !includeDefeated && !s.entitiesById[id]?.alive) return [];
+  return [{ id, n: ALPHA, primary: denAlphaAffixV1(nestBiomeV1(s, g.groupId)) }];
+}
+function denAlphaProfileV1(s, g, actor, profile2) {
+  if (!profile2 || !s.eliteCombat?.elitesByEntityId[actor.entityId] || denAlphaIdV1(s, g) !== actor.entityId) return profile2;
+  const m = DEN_POLICY.alphaStats;
+  return { ...profile2, maxHp: combatInteger(multiplyCombat(profile2.maxHp, m.maxHp.numerator, m.maxHp.denominator), "round"), attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, m.attackDamage.numerator, m.attackDamage.denominator), "round") };
+}
+
 // src/shared/content/spore_outbreak_v5.js
 var SPORE_V5 = "spore-outbreak-v5-paced-pressure";
 var SPORE_V5_POLICY = Object.freeze({
@@ -3530,10 +3645,10 @@ function summitGuardElitesV1(s, g, { includeDefeated = false } = {}) {
   return [{ id, n: 0, primary: COMPOSITION_POLICY_V1.primaryAffixes[compositionHashV1(COMPOSITION_V1 + "/summit/" + s.campaign.seed.seedHex + "/" + g.groupId) % COMPOSITION_POLICY_V1.primaryAffixes.length] }];
 }
 function compositionCandidatesV1(s, g, level, { includeDefeated = false } = {}) {
-  const f3 = floorFor(s, g), champion = huntChampionIdV1(s, g), guard = summitGuardIdV1(s, g), chance = compositionBandV1(level).chancePercent, key9 = COMPOSITION_V1 + "/" + s.campaign.seed.seedHex + "/" + g.groupId + "/" + String(s.encounterEconomy.groups[g.groupId].episode) + "/" + String(level);
+  const f3 = floorFor(s, g), champion = huntChampionIdV1(s, g), alpha = denAlphaIdV1(s, g), guard = summitGuardIdV1(s, g), chance = compositionBandV1(level).chancePercent, key9 = COMPOSITION_V1 + "/" + s.campaign.seed.seedHex + "/" + g.groupId + "/" + String(s.encounterEconomy.groups[g.groupId].episode) + "/" + String(level);
   const candidates = g.entityIds.flatMap((id, n) => {
     const a = s.entitiesById[id], spec = f3?.encounter.members[n];
-    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId) || BROOD_CREATURE_FAMILIES_V1.includes(familyOf2(s, id)) || id === champion || id === guard) return [];
+    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId) || BROOD_CREATURE_FAMILIES_V1.includes(familyOf2(s, id)) || id === champion || id === alpha || id === guard) return [];
     return [{ id, n, roll: compositionHashV1(key9 + "/" + id), primary: COMPOSITION_POLICY_V1.primaryAffixes[compositionHashV1(key9 + "/" + id + "/primary") % COMPOSITION_POLICY_V1.primaryAffixes.length] }];
   }).sort((a, b) => a.roll - b.roll || a.id.localeCompare(b.id));
   const rolled = candidates.filter((c) => c.roll % 100 < chance);
@@ -3548,7 +3663,7 @@ function validateCompositionEliteV1(s, e) {
   requireContract(canonicalStringify(e.affixIds.slice(1)) === canonicalStringify(passiveEliteTraitsV1(e.identitySource, level)), "Composition passive roll changed");
   if (!e.composition.inherited) {
     requireContract(e.eliteId === generatedEliteId(e.identitySource), "Generated elite identity changed");
-    const row2 = [...broodElitesV1(s, g, { includeDefeated: true }), ...huntChampionElitesV1(s, g, { includeDefeated: true }), ...summitGuardElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
+    const row2 = [...broodElitesV1(s, g, { includeDefeated: true }), ...huntChampionElitesV1(s, g, { includeDefeated: true }), ...denAlphaElitesV1(s, g, { includeDefeated: true }), ...summitGuardElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
     requireContract(row2 && row2.primary === e.affixIds[0], "Composition candidate roll changed");
   }
 }
@@ -4099,7 +4214,7 @@ function encounterActorProfile(state, group, actor) {
     profile2 = { ...state.content.definitionsById[actor.contentDefinitionId], maxHp: stats.maxHp, attackDamage: stats.attackDamage };
   } else profile2 = enemy2 && level !== void 0 ? resolveOrdinaryProfile(enemy2, ordinaryTier(actor.contentDefinitionId), level) : state.content.definitionsById[actor.contentDefinitionId];
   if (hasWorldCombat(state) && profile2?.isBoss && level !== void 0) profile2 = { ...profile2, ...worldBossStats(level) };
-  const out = rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2))))));
+  const out = rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, denAlphaProfileV1(state, group, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2)))))));
   const party2 = partyHealthPercentV1(group.threatSnapshot);
   return party2 !== 100 && state.subweaponCombat && out?.maxHp !== void 0 ? { ...out, maxHp: combatInteger(multiplyCombat(out.maxHp, party2, 100)) } : out;
 }
@@ -4851,7 +4966,7 @@ function siteRewardKindV1(state, source11, spawnEntityId = null, standardChest =
   if (!["enemy", "chest"].includes(source11?.kind)) return null;
   if (source11.kind === "enemy") {
     const g = state.groupsById?.[source11.groupId], id2 = spawnEntityId ?? g?.entityIds[source11.spawnOrdinal ?? source11.ordinal];
-    if (id2 && huntChampionIdV1(state, g) === id2) return "mini-boss";
+    if (id2 && (huntChampionIdV1(state, g) === id2 || denAlphaIdV1(state, g) === id2)) return "mini-boss";
   }
   if (!siteEndsActiveV1(state)) return null;
   let site = null, floor = null;
@@ -10888,7 +11003,7 @@ async function createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed, sha25
         return t.collision === "1" && t.landmassId === slot.landmassId;
       })) continue;
     }
-    const own3 = roadside ? ROADSIDE_CREW : kind2 === "raided_camp" ? CAMP_CREW : kind2 === "buried_cache" ? CACHE_CREW : null, families = own3 ?? plannedEventFamiliesV1(biome, slot.category), crew = own3 ? own3.length : PLANNED_EVENT_CREW;
+    const own3 = roadside ? ROADSIDE_CREW : kind2 === "raided_camp" ? CAMP_CREW : kind2 === "buried_cache" ? CACHE_CREW : null, families = own3 ?? plannedEventFamiliesV1(biome, slot.category, kind2), crew = own3 ? own3.length : PLANNED_EVENT_CREW;
     const center2 = local(x, y), others = [...regularAnchors, ...otherAnchors, ...result].map((a) => a.position);
     const spots = [];
     for (let dy = -11; dy <= 11; dy++) for (let dx = -11; dx <= 11; dx++) {
@@ -17505,12 +17620,12 @@ function validateCacheV1(r) {
 
 // src/shared/contracts/world_events_v1.js
 var PLANNED_LEDGER_VERSION = "world-events-planned-v1";
-var WAVES = ["spore", "hollow", "cursed_shrine", "nests", "road_ambush", "wayside_shrine", "buried_cache", "trophy_hunt"];
-var CHEST0 = ["hollow", "cursed_shrine", "nests", "road_ambush", "wayside_shrine", "buried_cache", "trophy_hunt"];
+var WAVES = ["spore", "hollow", "cursed_shrine", "nests", "road_ambush", "wayside_shrine", "buried_cache", "trophy_hunt", "den"];
+var CHEST0 = ["hollow", "cursed_shrine", "nests", "road_ambush", "wayside_shrine", "buried_cache", "trophy_hunt", "den"];
 var ROADSIDE = ["road_ambush", "wayside_shrine"];
-var PLANNED_KINDS = ["cursed_shrine", "nests", ...ROADSIDE, "raided_camp", "buried_cache", "trophy_hunt"];
-var running = (r) => r.status === "active" && !r.nest?.waiting && !r.ambush?.waiting && !r.cache?.waiting && !r.hunt?.waiting;
-var membersOf = (kind2) => kind2 === "spore" ? 12 : kind2 === "hollow" ? 13 : kind2 === "cursed_shrine" ? SHRINE_MEMBERS : kind2 === "nests" ? NEST_MEMBERS : ROADSIDE.includes(kind2) ? ROADSIDE_MEMBERS : kind2 === "raided_camp" ? CAMP_MEMBERS : kind2 === "buried_cache" ? CACHE_MEMBERS : kind2 === "trophy_hunt" ? HUNT_MEMBERS : 0;
+var PLANNED_KINDS = ["cursed_shrine", "nests", ...ROADSIDE, "raided_camp", "buried_cache", "trophy_hunt", "den"];
+var running = (r) => r.status === "active" && !r.nest?.waiting && !r.ambush?.waiting && !r.cache?.waiting && !r.hunt?.waiting && !r.den?.waiting;
+var membersOf = (kind2) => kind2 === "spore" ? 12 : kind2 === "hollow" ? 13 : kind2 === "cursed_shrine" ? SHRINE_MEMBERS : kind2 === "nests" ? NEST_MEMBERS : ROADSIDE.includes(kind2) ? ROADSIDE_MEMBERS : kind2 === "raided_camp" ? CAMP_MEMBERS : kind2 === "buried_cache" ? CACHE_MEMBERS : kind2 === "trophy_hunt" ? HUNT_MEMBERS : kind2 === "den" ? DEN_MEMBERS : 0;
 function validateBlessings(b) {
   requireContract(b && typeof b === "object" && !Array.isArray(b) && Object.keys(b).length <= 8, "Blessing ledger");
   for (const [id, row2] of Object.entries(b)) {
@@ -17548,7 +17663,7 @@ function validateWorldEvents(root3) {
   if (w.stirring) validateStirringV1(w.stirring);
   let active3 = 0;
   for (const [id, r] of Object.entries(w.records)) {
-    closedRecord(r, ["groupId", "kind", "status", "startedTick", "elapsedTicks", "eligiblePlayerIds", "claimedPlayerIds", "stages"], ["rulesVersion", "partySize", "podLevel", "pods", "pressure", "hollow", "shrine", "nest", "ambush", "wayside", "camp", "cache", "hunt"]);
+    closedRecord(r, ["groupId", "kind", "status", "startedTick", "elapsedTicks", "eligiblePlayerIds", "claimedPlayerIds", "stages"], ["rulesVersion", "partySize", "podLevel", "pods", "pressure", "hollow", "shrine", "nest", "ambush", "wayside", "camp", "cache", "hunt", "den"]);
     if (r.kind === "hollow") {
       requireContract([HOLLOW_LEDGER_VERSION, PLANNED_LEDGER_VERSION].includes(w.version), "Hollow ledger successor required");
       validateHollowV1(r);
@@ -17581,6 +17696,10 @@ function validateWorldEvents(root3) {
       requireContract(w.version === PLANNED_LEDGER_VERSION, "Planned ledger successor required");
       validateHuntV1(r);
     } else requireContract(!r.hunt, "Unexpected hunt extension");
+    if (r.kind === "den") {
+      requireContract(w.version === PLANNED_LEDGER_VERSION, "Planned ledger successor required");
+      validateDenV1(r);
+    } else requireContract(!r.den, "Unexpected den extension");
     validateSporePressureV3(r);
     if (isSporeV2(r)) validateSporePodsV2(r);
     else if (!CHEST0.includes(r.kind) && r.kind !== "raided_camp") requireContract(!["rulesVersion", "partySize", "podLevel", "pods"].some((k) => Object.hasOwn(r, k)), "Unknown event extension");
@@ -17616,7 +17735,7 @@ function eventPersonalClaim(s, r, playerId) {
 }
 function eventReadyToClear(s, id) {
   const r = eventRecord(s, id);
-  return !eventKind(s, id) || Boolean(r && (r.kind === "legacy" || (r.kind === "hollow" ? hollowReadyV1(r) : r.kind === "cursed_shrine" ? shrineReadyV1(r) : r.kind === "nests" ? nestsReadyV1(r) : r.kind === "road_ambush" ? ambushReadyV1(r) : r.kind === "wayside_shrine" ? waysideReadyV1(r) : r.kind === "raided_camp" ? campReadyV1(r) : r.kind === "buried_cache" ? cacheReadyV1(r) : r.kind === "trophy_hunt" ? huntReadyV1(r) : [0, 1, 2].every((n) => podUsed(s, id, n)) && r.stages.every((t) => ["cancelled", "defeated"].includes(t.phase)))));
+  return !eventKind(s, id) || Boolean(r && (r.kind === "legacy" || (r.kind === "hollow" ? hollowReadyV1(r) : r.kind === "cursed_shrine" ? shrineReadyV1(r) : r.kind === "nests" ? nestsReadyV1(r) : r.kind === "road_ambush" ? ambushReadyV1(r) : r.kind === "wayside_shrine" ? waysideReadyV1(r) : r.kind === "raided_camp" ? campReadyV1(r) : r.kind === "buried_cache" ? cacheReadyV1(r) : r.kind === "trophy_hunt" ? huntReadyV1(r) : r.kind === "den" ? denReadyV1(r) : [0, 1, 2].every((n) => podUsed(s, id, n)) && r.stages.every((t) => ["cancelled", "defeated"].includes(t.phase)))));
 }
 function validateWorldEventsState(s) {
   const w = s.d9World?.worldEvents;
@@ -17627,7 +17746,7 @@ function validateWorldEventsState(s) {
     if (isSporeV3(r)) requireContract(r.pressure.adoptedTick <= s.tick, "Spore pressure adoption chronology");
     const g = s.groupsById[r.groupId];
     if (!g) continue;
-    requireContract(eventKind(s, r.groupId) === r.kind && g.spaceInstanceId === s.overworldInstanceId && g.entityIds.length === (["cursed_shrine", "trophy_hunt"].includes(r.kind) ? PLANNED_EVENT_MEMBERS : membersOf(r.kind) || 6), "Event group binding");
+    requireContract(eventKind(s, r.groupId) === r.kind && g.spaceInstanceId === s.overworldInstanceId && g.entityIds.length === (["cursed_shrine", "trophy_hunt", "den"].includes(r.kind) ? PLANNED_EVENT_MEMBERS : membersOf(r.kind) || 6), "Event group binding");
     requireContract(r.status === "completed" ? g.cleared : !g.cleared, "Event completion agreement");
     if (isSporeV2(r)) r.pods.forEach((p, n) => {
       requireContract(p.lastHitTick === null || p.lastHitTick <= s.tick, "Spore hit chronology");
@@ -17653,6 +17772,7 @@ function validateWorldEventsProgress(a, b) {
     if (r.kind === "road_ambush") requireContract(n && n.ambush && n.ambush.resets >= r.ambush.resets && (n.ambush.resets > r.ambush.resets || n.ambush.launchedWaves >= r.ambush.launchedWaves && n.ambush.merchantHp <= r.ambush.merchantHp && (!r.ambush.failed || n.ambush.failed)), "Ambush history regressed");
     if (r.kind === "buried_cache") requireContract(n && n.cache && n.cache.resets >= r.cache.resets && (n.cache.resets > r.cache.resets || n.cache.progress >= r.cache.progress && n.cache.launched >= r.cache.launched && (r.cache.doneElapsed === null || n.cache.doneElapsed === r.cache.doneElapsed)), "Cache history regressed");
     if (r.kind === "trophy_hunt") requireContract(n && n.hunt && n.hunt.resets >= r.hunt.resets && (n.hunt.resets > r.hunt.resets || n.hunt.hornElapsed >= r.hunt.hornElapsed && (r.hunt.doneElapsed === null || n.hunt.doneElapsed === r.hunt.doneElapsed && n.hunt.swift === r.hunt.swift)), "Hunt history regressed");
+    if (r.kind === "den") requireContract(n && n.den && n.den.resets >= r.den.resets && (n.den.resets > r.den.resets || (r.den.alarm === null || n.den.alarm === r.den.alarm) && r.den.woke.every((w, i) => w === null || n.den.woke[i] === w) && r.den.ambush.every((k, i) => k === null || n.den.ambush[i] === k) && (r.den.alphaElapsed === null || n.den.alphaElapsed === r.den.alphaElapsed) && (r.den.doneElapsed === null || n.den.doneElapsed === r.den.doneElapsed) && n.den.fled >= r.den.fled), "Den history regressed");
     if (r.kind === "raided_camp") requireContract(n && n.camp && n.camp.readerPlayerId === r.camp.readerPlayerId, "Camp history regressed");
     if (r.kind === "wayside_shrine") requireContract(n && n.wayside && n.wayside.prayerPlayerId === r.wayside.prayerPlayerId && (r.wayside.blessing === null || n.wayside.blessing === r.wayside.blessing), "Wayside history regressed");
     if (r.kind === "hollow") requireContract(n && n.rulesVersion === r.rulesVersion && n.hollow.policyHash === r.hollow.policyHash && n.hollow.launchedWaves >= r.hollow.launchedWaves, "Hollow history regressed");
@@ -17661,7 +17781,7 @@ function validateWorldEventsProgress(a, b) {
     else requireContract(!isSporeV2(n), "Legacy event cannot change policy during play");
     requireContract(n && n.groupId === id && n.kind === r.kind && n.startedTick === r.startedTick && n.elapsedTicks >= r.elapsedTicks && r.eligiblePlayerIds.every((id2) => n.eligiblePlayerIds.includes(id2)) && r.claimedPlayerIds.every((id2) => n.claimedPlayerIds.includes(id2)) && (r.status !== "completed" || n.status === "completed"), "Event history regressed");
     const generations = validateSporeGenerationProgressV4(r, n);
-    requireContract(r.stages.every((t, i) => r.kind === "nests" && n.nest.resets > r.nest.resets && t.phase === "hatched" && n.stages[i].phase === "pending" || r.kind === "road_ambush" && n.ambush.resets > r.ambush.resets && ["hatched", "growing", "cancelled"].includes(t.phase) && n.stages[i].phase === "pending" || r.kind === "buried_cache" && n.cache.resets > r.cache.resets && ["hatched", "growing"].includes(t.phase) && n.stages[i].phase === "pending" || r.kind === "trophy_hunt" && n.hunt.resets > r.hunt.resets && ["hatched", "growing"].includes(t.phase) && n.stages[i].phase === "pending" || adoptingSporeV5(r, n) && t.phase === "queued" && n.stages[i].phase === "pending" && n.stages[i].generation === t.generation || generations && n.stages[i].generation > t.generation || order2[n.stages[i].phase] >= order2[t.phase] && (!["cancelled", "defeated"].includes(t.phase) || n.stages[i].phase === t.phase)), "Event growth regressed");
+    requireContract(r.stages.every((t, i) => r.kind === "nests" && n.nest.resets > r.nest.resets && t.phase === "hatched" && n.stages[i].phase === "pending" || r.kind === "road_ambush" && n.ambush.resets > r.ambush.resets && ["hatched", "growing", "cancelled"].includes(t.phase) && n.stages[i].phase === "pending" || r.kind === "buried_cache" && n.cache.resets > r.cache.resets && ["hatched", "growing"].includes(t.phase) && n.stages[i].phase === "pending" || r.kind === "trophy_hunt" && n.hunt.resets > r.hunt.resets && ["hatched", "growing"].includes(t.phase) && n.stages[i].phase === "pending" || r.kind === "den" && n.den.resets > r.den.resets && t.phase === "hatched" && n.stages[i].phase === "pending" || adoptingSporeV5(r, n) && t.phase === "queued" && n.stages[i].phase === "pending" && n.stages[i].generation === t.generation || generations && n.stages[i].generation > t.generation || order2[n.stages[i].phase] >= order2[t.phase] && (!["cancelled", "defeated"].includes(t.phase) || n.stages[i].phase === t.phase)), "Event growth regressed");
   }
 }
 
@@ -24454,7 +24574,7 @@ function economicResources(s, m, playerId = null, spaceInstanceId = null) {
   const layout = encounterResourceLayout(s, m);
   return Object.values(layout).flat().filter((r) => eventResourceVisible(s, r) && (spaceInstanceId === null || r.spaceInstanceId === spaceInstanceId)).map((r) => {
     const group = s.groupsById[r.groupId], economy = s.encounterEconomy.groups[group.groupId], episode = economy.episode, sourceEntityId = episodeRewardId(group.groupId, episode, r.kind, r.ordinal), rewardClass = rewardClassForCompletionResourceD13D_C(s, r), claim = playerId ? eventPersonalClaim(s, r, playerId) ?? personalFinaleClaimD13D_G1(s, r.groupId, sourceEntityId, playerId) : null, record2 = economy.personalCompletionClaimsBySourceId?.[sourceEntityId], used = claim ? claim.claimed : record2 ? record2.eligiblePlayerIds.every((id) => record2.claimedByPlayerId[id]) : Boolean(economy.usedResources[sourceEntityId]);
-    return { ...r, ...eventKind(s, r.groupId) === "spore" && r.ordinal <= 3 ? { position: podPositionV2(s, r.groupId, r.ordinal, r.position) } : {}, ...eventKind(s, r.groupId) === "spore" && r.ordinal < 3 ? { eventPod: true } : {}, ...["spore", "hollow", "cursed_shrine", "nests", "buried_cache", "trophy_hunt"].includes(eventKind(s, r.groupId)) && r.kind === "chest" ? { eventChest: true, ...["cursed_shrine", "nests", "buried_cache", "trophy_hunt"].includes(eventKind(s, r.groupId)) ? { altarChest: true } : {} } : {}, ...r.art === "camp_crate" ? { campSkin: roadsideGangOfV1(s, r.groupId) } : {}, episode, sourceEntityId, ...rewardClass ? { rewardClass } : {}, ...claim ? { personalClaim: claim } : {}, used };
+    return { ...r, ...eventKind(s, r.groupId) === "spore" && r.ordinal <= 3 ? { position: podPositionV2(s, r.groupId, r.ordinal, r.position) } : {}, ...eventKind(s, r.groupId) === "spore" && r.ordinal < 3 ? { eventPod: true } : {}, ...["spore", "hollow", "cursed_shrine", "nests", "buried_cache", "trophy_hunt", "den"].includes(eventKind(s, r.groupId)) && r.kind === "chest" ? { eventChest: true, ...["cursed_shrine", "nests", "buried_cache", "trophy_hunt", "den"].includes(eventKind(s, r.groupId)) ? { altarChest: true } : {}, ...eventKind(s, r.groupId) === "den" ? { denHoard: true } : {} } : {}, ...r.art === "camp_crate" ? { campSkin: roadsideGangOfV1(s, r.groupId) } : {}, episode, sourceEntityId, ...rewardClass ? { rewardClass } : {}, ...claim ? { personalClaim: claim } : {}, used };
   });
 }
 function validateEncounterEconomy(s, m) {
