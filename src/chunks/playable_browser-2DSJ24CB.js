@@ -129688,7 +129688,6 @@ function createInventoryPresentation({ document: document2, environment, readMod
       const touch2 = OFFHAND_TOUCH_TEXT[offhandKindOfItem(item2)];
       if (touch2) {
         const sec = element("section", "", "gx-section gx-touches");
-        sec.append(element("h5", "Every " + touch2.name, "gx-sectiontitle"));
         for (const line33 of touch2.lines) sec.append(element("p", line33, "gx-touch"));
         scroll.append(sec);
       }
