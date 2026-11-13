@@ -105057,15 +105057,29 @@ var OFFHAND_TOUCHES = Object.freeze({
   stormChain: 4
 });
 var cache3 = /* @__PURE__ */ new WeakMap();
-function offhandKind(player) {
-  const inv = player?.inventory, id = inv?.equipped?.subweapon, item2 = id && inv.itemsById?.[id];
-  if (!item2) return null;
+function offhandKindOfItem(item2) {
+  if (!item2 || typeof item2 !== "object") return null;
   const hit2 = cache3.get(item2);
   if (hit2 !== void 0) return hit2;
   const kind = KINDS6[itemLookType(item2)] ?? null;
   cache3.set(item2, kind);
   return kind;
 }
+function offhandKind(player) {
+  const inv = player?.inventory, id = inv?.equipped?.subweapon;
+  return id ? offhandKindOfItem(inv.itemsById?.[id]) : null;
+}
+var OFFHAND_TOUCH_TEXT = Object.freeze({
+  buckler: Object.freeze({ name: "Buckler", lines: Object.freeze(["Movement skills recharge 15% faster", "Perfect block window +0.1 s"]) }),
+  kite: Object.freeze({ name: "Kite Shield", lines: Object.freeze(["Guard blocks from every side; Defensive skills recharge 15% faster", "Every third block gives 1 extra Grit"]) }),
+  tower: Object.freeze({ name: "Tower Shield", lines: Object.freeze(["All your stuns last 20% longer", "Stunning 3 or more at once gives 1 extra Grit"]) }),
+  "main-gauche": Object.freeze({ name: "Main-Gauche", lines: Object.freeze(["Riposte and parries cut back 50% harder", "A parry gives 3 Combo instead of 2"]) }),
+  stiletto: Object.freeze({ name: "Stiletto", lines: Object.freeze(["All your crits deal 10% more", "Crits give Combo up to 3 times a second instead of 2"]) }),
+  kris: Object.freeze({ name: "Kris", lines: Object.freeze(["All your Bleeds last 25% longer", "Killing a Bleeding enemy gives 1 Combo"]) }),
+  fire: Object.freeze({ name: "Fire Tome", lines: Object.freeze(["All your burns last 25% longer", "Killing a burning enemy gives 1 Arcana"]) }),
+  frost: Object.freeze({ name: "Frost Tome", lines: Object.freeze(["All your chills and freezes last 25% longer", "A freeze gives 3 Arcana instead of 2"]) }),
+  storm: Object.freeze({ name: "Storm Tome", lines: Object.freeze(["Cast's lightning jumps to 1 more enemy", "Lightning hitting 4 or more enemies gives 1 extra Arcana"]) })
+});
 
 // src/simulation/tome_element_rules.js
 var chillSince = (s, source3, old2) => heroRank(Object.values(s.playersById ?? {}).find((p) => p.entityId === source3.entityId), "winters_grasp") ? { since: old2 && old2.phase === "chill" && old2.expiresTick > s.tick && old2.since !== void 0 ? old2.since : s.tick } : {};
@@ -129661,6 +129675,15 @@ function createInventoryPresentation({ document: document2, environment, readMod
         sec.append(wrap3);
       }
       scroll.append(sec);
+    }
+    {
+      const touch2 = OFFHAND_TOUCH_TEXT[offhandKindOfItem(item2)];
+      if (touch2) {
+        const sec = element("section", "", "gx-section gx-touches");
+        sec.append(element("h5", "Every " + touch2.name, "gx-sectiontitle"));
+        for (const line33 of touch2.lines) sec.append(element("p", line33, "gx-touch"));
+        scroll.append(sec);
+      }
     }
     if (unique) {
       const have = d.rarityTier ?? 0, locked = (UNIQUE_TIERS[unique.id]?.lines ?? []).map((k, i) => [k, UNIQUE_LINE_UNLOCKS[i]]).filter(([, t]) => t > have);
