@@ -155916,7 +155916,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
         scroll.append(sec3);
       }
     }
-    const UNIQUE_LIST_NAMES = { sigDmg: "Perfect block, Expose or Blink damage", maxPip: "+1 max pip", keepPip: "Chance to keep a pip", startPips: "Start with pips", killCdr: "Kills cut all cooldowns", hitCdr: "Hits cut Defensive cooldowns" };
+    const UNIQUE_LIST_NAMES = { sigDmg: "Perfect block, Expose or Blink damage", maxPip: "+1 max pip", keepPip: "Chance to keep a pip", startPips: "Start with pips", killCdr: "Kills cut all cooldowns", hitCdr: "Hits cut Defensive cooldowns", classDmg: "Class damage", perfectCdr: "Perfect blocks cut Movement and Defensive cooldowns", exposeCdr: "Exposing cuts Movement and Defensive cooldowns", shatterCdr: "Shatters cut all cooldowns", blinkCdr: "Blinks cut other cooldowns", exposeTime: "Longer Expose", shatterEase: "Less Attack needed to Shatter" };
     const uqV3 = unique && gen?.progression?.affixes === "affixes-v3" && UNIQUE_LINES_V3[unique.id];
     if (uqV3) {
       const have = d.rarityTier ?? 0, tiers = [3, 4, 5].filter((t) => t > have);
