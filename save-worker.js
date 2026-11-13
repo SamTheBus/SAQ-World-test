@@ -15507,6 +15507,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "Every 8 s your crown marks the nearest enemy for 4 s. A marked enemy takes {0} more damage from everyone.",
     "It sees what you see. Then it sees more."
   ),
+  // Nightmare Frog, the boss at the end of a bad Frog Leg trip (trip passes 5d-3-1..5d-3-4, Sammy 2026-11-12/13).
+  // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
+  unique(
+    "croakhammer",
+    "Croakhammer",
+    "weapon",
+    null,
+    "Warhammer",
+    "knight",
+    "nightmare_frog",
+    null,
+    "Every 4th hit with your weapon lets out a croak: a purple ring runs out from you, hitting every enemy it reaches for {0} of your Attack and shoving them back.",
+    "Every swing, a little louder."
+  ),
+  unique(
+    "lashtongue-saber",
+    "Lashtongue Saber",
+    "weapon",
+    null,
+    "Saber",
+    "rogue",
+    "nightmare_frog",
+    null,
+    "Every 6 s, your next weapon attack also lashes an eye-tipped tongue at the farthest enemy within 5 tiles. It is yanked over to you and takes {0} of your Attack.",
+    "Come here. Closer."
+  ),
+  unique(
+    "frogspawn-wand",
+    "Frogspawn Wand",
+    "weapon",
+    null,
+    "Wand",
+    "mage",
+    "nightmare_frog",
+    null,
+    "Every 4th Cast lobs a frog-spawn egg instead. A moment later it hatches into an Eyehopper that hops at the nearest enemy and pops for {0} of your Attack, giving it heavy legs (30% slower) for 2 s.",
+    "They all love you. They all burst."
+  ),
+  unique(
+    "boilback-cloak",
+    "Boilback Cloak",
+    "cape",
+    null,
+    "Cloak",
+    null,
+    "nightmare_frog",
+    null,
+    "Glowing boils grow on your cloak, one every 4 s, up to three. When an enemy hits you, a boil bursts, dealing {0} of your Attack to every enemy within 2 tiles of you.",
+    "Go on. Touch it."
+  ),
   // Named elites, at the end of small sites.
   unique(
     "bristleback-mantle",
@@ -15683,6 +15733,11 @@ var UNIQUE_TIERS = freezeWire({
   "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
   "waking-eye-tome": { lines: ["offDmg", "int", "critChance", "activeSpd", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
   "eyestalk-crown": { lines: ["maxHpPct", "atkPct", "critChance", "lifeKill", "cdr"], stars: [10, 14, 18, 25], unit: "pct" },
+  // Nightmare Frog (v3 lines below; these five are the v2 fallback).
+  "croakhammer": { lines: ["mainDmg", "str", "maxHpPct", "critDamage", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
+  "lashtongue-saber": { lines: ["mainDmg", "dex", "critChance", "critDamage", "eliteDmg"], stars: [100, 140, 180, 240], unit: "pct" },
+  "frogspawn-wand": { lines: ["mainDmg", "int", "activeSpd", "critChance", "eliteDmg"], stars: [80, 110, 140, 180], unit: "pct" },
+  "boilback-cloak": { lines: ["maxHpPct", "defPct", "atkPct", "lifeKill", "cdr"], stars: [50, 70, 90, 120], unit: "pct" },
   "bristleback-mantle": { lines: ["maxHpPct", "defPct", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
   "jacks-band": { lines: ["lifeHit", "atkPct", "maxHpPct", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
   "kheptra-signet": { lines: ["defPct", "maxHpPct", "cdr", "atkPct", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
@@ -15722,6 +15777,11 @@ var UNIQUE_LINES_V3 = freezeWire({
   "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "classDmg", "eliteDmg"], leg: ["killCdr"] },
   "waking-eye-tome": { always: "critChance", pool: ["offDmg", "lightningDmg", "critDamage", "rangedDmg", "weaveDmg", "eliteDmg"], leg: ["maxPip"] },
   "eyestalk-crown": { always: "eliteDmg", pool: ["maxHpPct", "critChance", "cdr", "controlDur", "ailmentDur", "bonusAreaRadius", "startPips"], leg: [] },
+  // Nightmare Frog set (lines page, Sammy 2026-11-12).
+  "croakhammer": { always: "farDmg", pool: ["mainDmg", "str", "shockDmg", "critDamage", "controlDur", "eliteDmg"], leg: ["killCdr"] },
+  "lashtongue-saber": { always: "closeDmg", pool: ["mainDmg", "dex", "critChance", "critDamage", "exposeDmg", "moveCdr"], leg: ["killCdr"] },
+  "frogspawn-wand": { always: "ccDmg", pool: ["mainDmg", "int", "activeSpd", "critChance", "controlDur", "bonusAreaRadius"], leg: ["killCdr"] },
+  "boilback-cloak": { always: "hitCdr", pool: ["maxHpPct", "defPct", "atkPct", "lifeKill", "closeDmg", "eliteDr", "areaDmg"], leg: [] },
   "bristleback-mantle": { always: "stunDr", pool: ["maxHpPct", "defPct", "str", "lifeKill", "closeDmg", "hitCdr", "areaDr"], leg: [] },
   "jacks-band": { always: "lowDmg", pool: ["atkPct", "critChance", "areaDmg", "lifeHit", "maxHpPct", "eliteDmg"], leg: ["killCdr"] },
   "kheptra-signet": { always: "hitCdr", pool: ["defPct", "maxHpPct", "cdr", "atkPct", "fullDmg", "stunDr", "potionHeal"], leg: [] },
@@ -27016,6 +27076,18 @@ var EYE_TICKS = 105;
 var EYE_RAYS = Object.freeze([30, 48, 66]);
 var CROWN_EVERY = 480;
 var CROWN_MARK_TICKS = 240;
+var CROAK_EVERY = 4;
+var CROAK_TICKS = 45;
+var LASH_EVERY = 360;
+var LASH_TICKS = 84;
+var SPAWN_EVERY = 4;
+var HOPPER_MAX = 3;
+var HOP_SWELL = 15;
+var HOP_LIFE = 420;
+var HOP_POP_TICKS = 96;
+var BOIL_EVERY = 240;
+var BOIL_MAX = 3;
+var BOIL_POP_TICKS = 96;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
@@ -27045,7 +27117,7 @@ var FREE_TICKS = 180;
 var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
-var LIVE = ["lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function prune(combat) {
   const k = combat.skills;
   if (k && !Object.keys(k.cooldowns).length && !LIVE.some((key9) => k[key9])) delete combat.skills;
@@ -27387,7 +27459,7 @@ function validateClassSkillState(s, combat, actor) {
         requireContract(pos2(p), "Invalid bark burst");
       }
     }
-    for (const [key9, max2] of [["silk", SILK_EVERY - 1], ["vent", VENT_EVERY - 1], ["wrapCd", COCOON_EVERY], ["core", CORE_TICKS], ["treadCd", TREAD_EVERY], ["sporeCd", SPORE_EVERY], ["eyeCd", EYE_EVERY], ["crownCd", CROWN_EVERY]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
+    for (const [key9, max2] of [["silk", SILK_EVERY - 1], ["vent", VENT_EVERY - 1], ["wrapCd", COCOON_EVERY], ["core", CORE_TICKS], ["treadCd", TREAD_EVERY], ["sporeCd", SPORE_EVERY], ["eyeCd", EYE_EVERY], ["crownCd", CROWN_EVERY], ["croakN", CROAK_EVERY - 1], ["lashCd", LASH_EVERY], ["spawnN", SPAWN_EVERY - 1]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
     const id2 = (v) => typeof v === "string" && v.length > 0 && v.length <= 200;
     if (k.spores !== void 0) {
       closedRecord(k.spores, ["x", "y", "ticks"]);
@@ -27423,6 +27495,46 @@ function validateClassSkillState(s, combat, actor) {
       closedRecord(k.crownMark, ["target", "ticks"]);
       requireContract(id2(k.crownMark.target), "Invalid crown mark");
       safeInteger(k.crownMark.ticks, 1, CROWN_MARK_TICKS);
+    }
+    if (k.croak !== void 0) {
+      closedRecord(k.croak, ["x", "y", "ticks", "hit"]);
+      requireContract(pos2(k.croak) && Array.isArray(k.croak.hit) && k.croak.hit.length <= 200 && k.croak.hit.every(id2) && new Set(k.croak.hit).size === k.croak.hit.length, "Invalid croak");
+      safeInteger(k.croak.ticks, 1, CROAK_TICKS);
+    }
+    if (k.lash !== void 0) {
+      closedRecord(k.lash, ["target", "ticks"]);
+      requireContract(id2(k.lash.target), "Invalid lash");
+      safeInteger(k.lash.ticks, 1, LASH_TICKS);
+    }
+    if (k.hoppers !== void 0) {
+      requireContract(Array.isArray(k.hoppers) && k.hoppers.length >= 1 && k.hoppers.length <= HOPPER_MAX, "Invalid Eyehoppers");
+      for (const h of k.hoppers) {
+        closedRecord(h, ["n", "fx", "fy", "x", "y", "age", "target", "pop"]);
+        requireContract(pos2(h) && Number.isFinite(h.fx) && Number.isFinite(h.fy) && (h.target === "" || id2(h.target)), "Invalid Eyehopper");
+        safeInteger(h.n, 0, 1e9);
+        safeInteger(h.age, 0, HOP_LIFE + HOP_SWELL);
+        safeInteger(h.pop, 0, HOP_LIFE + HOP_SWELL);
+      }
+    }
+    if (k.hopPops !== void 0) {
+      requireContract(Array.isArray(k.hopPops) && k.hopPops.length >= 1 && k.hopPops.length <= HOPPER_MAX * 2, "Invalid Eyehopper pops");
+      for (const q of k.hopPops) {
+        closedRecord(q, ["x", "y", "ticks"]);
+        requireContract(pos2(q), "Invalid Eyehopper pop");
+        safeInteger(q.ticks, 1, HOP_POP_TICKS);
+      }
+    }
+    if (k.boil !== void 0) {
+      closedRecord(k.boil, ["n", "grow", "first"]);
+      safeInteger(k.boil.n, 0, BOIL_MAX - 1);
+      safeInteger(k.boil.grow, 1, BOIL_EVERY);
+      safeInteger(k.boil.first, 0, BOIL_MAX - 1);
+    }
+    if (k.boilPop !== void 0) {
+      closedRecord(k.boilPop, ["x", "y", "i", "ticks"]);
+      requireContract(pos2(k.boilPop), "Invalid boil burst");
+      safeInteger(k.boilPop.i, 0, BOIL_MAX - 1);
+      safeInteger(k.boilPop.ticks, 1, BOIL_POP_TICKS);
     }
     if (k.tread !== void 0) {
       closedRecord(k.tread, ["x", "y", "ticks"]);

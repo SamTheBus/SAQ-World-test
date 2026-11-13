@@ -6554,6 +6554,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "Every 8 s your crown marks the nearest enemy for 4 s. A marked enemy takes {0} more damage from everyone.",
     "It sees what you see. Then it sees more."
   ),
+  // Nightmare Frog, the boss at the end of a bad Frog Leg trip (trip passes 5d-3-1..5d-3-4, Sammy 2026-11-12/13).
+  // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
+  unique(
+    "croakhammer",
+    "Croakhammer",
+    "weapon",
+    null,
+    "Warhammer",
+    "knight",
+    "nightmare_frog",
+    null,
+    "Every 4th hit with your weapon lets out a croak: a purple ring runs out from you, hitting every enemy it reaches for {0} of your Attack and shoving them back.",
+    "Every swing, a little louder."
+  ),
+  unique(
+    "lashtongue-saber",
+    "Lashtongue Saber",
+    "weapon",
+    null,
+    "Saber",
+    "rogue",
+    "nightmare_frog",
+    null,
+    "Every 6 s, your next weapon attack also lashes an eye-tipped tongue at the farthest enemy within 5 tiles. It is yanked over to you and takes {0} of your Attack.",
+    "Come here. Closer."
+  ),
+  unique(
+    "frogspawn-wand",
+    "Frogspawn Wand",
+    "weapon",
+    null,
+    "Wand",
+    "mage",
+    "nightmare_frog",
+    null,
+    "Every 4th Cast lobs a frog-spawn egg instead. A moment later it hatches into an Eyehopper that hops at the nearest enemy and pops for {0} of your Attack, giving it heavy legs (30% slower) for 2 s.",
+    "They all love you. They all burst."
+  ),
+  unique(
+    "boilback-cloak",
+    "Boilback Cloak",
+    "cape",
+    null,
+    "Cloak",
+    null,
+    "nightmare_frog",
+    null,
+    "Glowing boils grow on your cloak, one every 4 s, up to three. When an enemy hits you, a boil bursts, dealing {0} of your Attack to every enemy within 2 tiles of you.",
+    "Go on. Touch it."
+  ),
   // Named elites, at the end of small sites.
   unique(
     "bristleback-mantle",
@@ -6730,6 +6780,11 @@ var UNIQUE_TIERS = freezeWire({
   "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
   "waking-eye-tome": { lines: ["offDmg", "int", "critChance", "activeSpd", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
   "eyestalk-crown": { lines: ["maxHpPct", "atkPct", "critChance", "lifeKill", "cdr"], stars: [10, 14, 18, 25], unit: "pct" },
+  // Nightmare Frog (v3 lines below; these five are the v2 fallback).
+  "croakhammer": { lines: ["mainDmg", "str", "maxHpPct", "critDamage", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
+  "lashtongue-saber": { lines: ["mainDmg", "dex", "critChance", "critDamage", "eliteDmg"], stars: [100, 140, 180, 240], unit: "pct" },
+  "frogspawn-wand": { lines: ["mainDmg", "int", "activeSpd", "critChance", "eliteDmg"], stars: [80, 110, 140, 180], unit: "pct" },
+  "boilback-cloak": { lines: ["maxHpPct", "defPct", "atkPct", "lifeKill", "cdr"], stars: [50, 70, 90, 120], unit: "pct" },
   "bristleback-mantle": { lines: ["maxHpPct", "defPct", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
   "jacks-band": { lines: ["lifeHit", "atkPct", "maxHpPct", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
   "kheptra-signet": { lines: ["defPct", "maxHpPct", "cdr", "atkPct", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
@@ -6769,6 +6824,11 @@ var UNIQUE_LINES_V3 = freezeWire({
   "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "classDmg", "eliteDmg"], leg: ["killCdr"] },
   "waking-eye-tome": { always: "critChance", pool: ["offDmg", "lightningDmg", "critDamage", "rangedDmg", "weaveDmg", "eliteDmg"], leg: ["maxPip"] },
   "eyestalk-crown": { always: "eliteDmg", pool: ["maxHpPct", "critChance", "cdr", "controlDur", "ailmentDur", "bonusAreaRadius", "startPips"], leg: [] },
+  // Nightmare Frog set (lines page, Sammy 2026-11-12).
+  "croakhammer": { always: "farDmg", pool: ["mainDmg", "str", "shockDmg", "critDamage", "controlDur", "eliteDmg"], leg: ["killCdr"] },
+  "lashtongue-saber": { always: "closeDmg", pool: ["mainDmg", "dex", "critChance", "critDamage", "exposeDmg", "moveCdr"], leg: ["killCdr"] },
+  "frogspawn-wand": { always: "ccDmg", pool: ["mainDmg", "int", "activeSpd", "critChance", "controlDur", "bonusAreaRadius"], leg: ["killCdr"] },
+  "boilback-cloak": { always: "hitCdr", pool: ["maxHpPct", "defPct", "atkPct", "lifeKill", "closeDmg", "eliteDr", "areaDmg"], leg: [] },
   "bristleback-mantle": { always: "stunDr", pool: ["maxHpPct", "defPct", "str", "lifeKill", "closeDmg", "hitCdr", "areaDr"], leg: [] },
   "jacks-band": { always: "lowDmg", pool: ["atkPct", "critChance", "areaDmg", "lifeHit", "maxHpPct", "eliteDmg"], leg: ["killCdr"] },
   "kheptra-signet": { always: "hitCdr", pool: ["defPct", "maxHpPct", "cdr", "atkPct", "fullDmg", "stunDr", "potionHeal"], leg: [] },
@@ -6829,8 +6889,8 @@ var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
 var uniquesFrom = (source10, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source10 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
 var trophyFromV1 = (biome) => Object.values(UNIQUE_ITEMS).find((u) => u.trophy && u.biome === biome)?.from ?? null;
 var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath"]);
-function nightmareUniqueV1(cls, pick6) {
-  const own3 = cls ? uniquesFrom("nightmare_sporecrown", cls) : [], mine = own3.find((id) => UNIQUE_ITEMS[id].cls === cls), any = own3.find((id) => UNIQUE_ITEMS[id].cls === null);
+function nightmareUniqueV1(cls, pick6, source10 = "nightmare_sporecrown") {
+  const own3 = cls ? uniquesFrom(source10, cls) : [], mine = own3.find((id) => UNIQUE_ITEMS[id].cls === cls), any = own3.find((id) => UNIQUE_ITEMS[id].cls === null);
   if (!mine) return null;
   return pick6 < 2 / 3 || !any ? mine : any;
 }
