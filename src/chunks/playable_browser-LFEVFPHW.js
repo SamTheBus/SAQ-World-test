@@ -1271,12 +1271,12 @@ function gameplayPresentationState(model, { foregroundModalOpen = false, fullScr
   });
 }
 function applyGameplayPresentationState(document2, state2) {
-  const root5 = document2.documentElement;
-  root5.dataset.activeGameplay = String(state2.activeGameplay);
-  root5.dataset.defeated = String(Boolean(state2.defeated));
-  root5.dataset.foregroundModalOpen = String(state2.foregroundModalOpen);
-  root5.dataset.fullScreenPanelOpen = String(state2.fullScreenPanelOpen);
-  root5.dataset.gameplayHudVisible = String(state2.gameplayHudVisible);
+  const root6 = document2.documentElement;
+  root6.dataset.activeGameplay = String(state2.activeGameplay);
+  root6.dataset.defeated = String(Boolean(state2.defeated));
+  root6.dataset.foregroundModalOpen = String(state2.foregroundModalOpen);
+  root6.dataset.fullScreenPanelOpen = String(state2.fullScreenPanelOpen);
+  root6.dataset.gameplayHudVisible = String(state2.gameplayHudVisible);
   return state2;
 }
 function selectedActor(model) {
@@ -1404,7 +1404,7 @@ function rect(element) {
   return { left: number(r.left), top: number(r.top), width: number(r.width), height: number(r.height) };
 }
 function capturePerformanceContextV1(environment, { batteryPresentation = false } = {}) {
-  const doc = environment?.document, nav = environment?.navigator ?? {}, root5 = doc?.documentElement, viewport = environment?.visualViewport;
+  const doc = environment?.document, nav = environment?.navigator ?? {}, root6 = doc?.documentElement, viewport = environment?.visualViewport;
   const get = (id2) => doc?.getElementById?.(id2) ?? null, canvas = get("world-view"), playtest = get("local-world-controls"), navigator = get("site-navigator-d12-4c"), fps = get("world-fps-overlay"), dps = get("world-dps-overlay");
   const backingWidth = number(canvas?.width, { positive: true }), backingHeight = number(canvas?.height, { positive: true });
   return freeze({
@@ -1412,7 +1412,7 @@ function capturePerformanceContextV1(environment, { batteryPresentation = false 
     scope: "local diagnostic snapshot only",
     browser: { userAgent: text(nav.userAgent), platform: text(nav.platform), hardwareConcurrency: number(nav.hardwareConcurrency, { positive: true }), deviceMemoryGiB: number(nav.deviceMemory, { positive: true }) },
     devicePixelRatio: number(environment?.devicePixelRatio, { positive: true }),
-    viewportCss: { innerWidth: number(environment?.innerWidth), innerHeight: number(environment?.innerHeight), rootClientWidth: number(root5?.clientWidth), rootClientHeight: number(root5?.clientHeight) },
+    viewportCss: { innerWidth: number(environment?.innerWidth), innerHeight: number(environment?.innerHeight), rootClientWidth: number(root6?.clientWidth), rootClientHeight: number(root6?.clientHeight) },
     visualViewportCss: viewport ? { width: number(viewport.width), height: number(viewport.height), offsetLeft: number(viewport.offsetLeft), offsetTop: number(viewport.offsetTop), scale: number(viewport.scale, { positive: true }) } : null,
     canvas: canvas ? { cssBounds: rect(canvas), backingPixels: { width: backingWidth, height: backingHeight } } : null,
     camera: { actualZoom: null, derivedProfileZoom: backingWidth && backingHeight ? cameraZoomForViewport(backingWidth, backingHeight) : null, basis: "Accepted viewport profile derived from backing dimensions; actual camera was not queried." },
@@ -2227,13 +2227,13 @@ function drawFlower(ctx, x, y, n) {
   ctx.ellipse(-2, -6, 5, 2, Math.PI / 4, 0, TAU);
   ctx.ellipse(2, -10, 4.5, 1.8, -Math.PI / 4, 0, TAU);
   ctx.fill();
-  for (let ring8 = 0; ring8 < 2; ring8++) {
-    ctx.fillStyle = ring8 ? FLOWERS[n % 6] : "#7e1b1b";
+  for (let ring9 = 0; ring9 < 2; ring9++) {
+    ctx.fillStyle = ring9 ? FLOWERS[n % 6] : "#7e1b1b";
     ctx.beginPath();
     for (let i = 0; i < 6; i++) {
-      const a = i * Math.PI / 3, cx = Math.cos(a) * (ring8 ? 5 : 6), cy2 = -16 + Math.sin(a) * (ring8 ? 5 : 6);
-      ctx.moveTo(cx + (ring8 ? 4.2 : 5), cy2);
-      ctx.arc(cx, cy2, ring8 ? 4.2 : 5, 0, TAU);
+      const a = i * Math.PI / 3, cx = Math.cos(a) * (ring9 ? 5 : 6), cy2 = -16 + Math.sin(a) * (ring9 ? 5 : 6);
+      ctx.moveTo(cx + (ring9 ? 4.2 : 5), cy2);
+      ctx.arc(cx, cy2, ring9 ? 4.2 : 5, 0, TAU);
     }
     ctx.fill();
   }
@@ -2838,7 +2838,7 @@ var FORT_ART_PILOT_VERSION = "fort-art-pilot-v1";
 var FORT_ART_PILOT_SITE = "site:ffe8b1fc8cecccfdb3fb9d44dd6a9aea";
 var FORT_ART_PILOT_RESERVATION = "repeatable-slot:fort:grassland:small:01";
 async function createFortArtPilotV1(environment, review, prior) {
-  const root5 = new URL("../../assets/fort-art-pilot-v1/", import.meta.url), response = await environment.fetch(new URL("kit-manifest.json", root5));
+  const root6 = new URL("../../assets/fort-art-pilot-v1/", import.meta.url), response = await environment.fetch(new URL("kit-manifest.json", root6));
   if (!response.ok) throw Error("Missing fort art manifest");
   const manifest = await response.json();
   if (manifest.version !== FORT_ART_PILOT_VERSION || manifest.scope.siteId !== FORT_ART_PILOT_SITE) throw Error("Invalid fort art binding");
@@ -2846,7 +2846,7 @@ async function createFortArtPilotV1(environment, review, prior) {
   let decodedBytes = 0, downloadBytes = 0, mode = "candidate", switches = 0;
   const draws = { blocker: 0, keep: 0, tower: 0, door: 0, interior: 0, interiorDoor: 0, banner: 0 };
   for (const file of manifest.files) {
-    const response2 = await environment.fetch(new URL(file.path, root5));
+    const response2 = await environment.fetch(new URL(file.path, root6));
     if (!response2.ok) throw Error("Missing fort art " + file.id);
     const bytes = await response2.arrayBuffer(), hash62 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", bytes)), (n) => n.toString(16).padStart(2, "0")).join("");
     if (hash62 !== file.sha256 || bytes.byteLength !== file.bytes) throw Error("Fort art commitment mismatch " + file.id);
@@ -5082,9 +5082,9 @@ function drawBoat(c, x, y, turn7, s) {
   c.translate(x, y);
   c.rotate(turn7);
   c.scale(s, s);
-  const hull2 = poly([[-26, -71], [26, -71], [30, 39], [0, 71], [-30, 39]]), inner = poly([[-18, -61], [18, -61], [20, 33], [0, 57], [-20, 33]]);
-  prop(c, [[hull2, "#7a4f2e"]], 2.6);
-  clip(c, hull2, () => {
+  const hull3 = poly([[-26, -71], [26, -71], [30, 39], [0, 71], [-30, 39]]), inner = poly([[-18, -61], [18, -61], [20, 33], [0, 57], [-20, 33]]);
+  prop(c, [[hull3, "#7a4f2e"]], 2.6);
+  clip(c, hull3, () => {
     for (let k = -24; k <= 24; k += 8) line(c, [[k, -71], [k * 1.12, 39], [k * 0.3, 71]], "#5d3b22", 1.2);
     c.fillStyle = "rgba(15,8,4,.25)";
     c.fillRect(8, -73, 30, 150);
@@ -5377,7 +5377,7 @@ function createLakeLandingsV1({ asset, terrain, routeAt, free }) {
       return { dir, dx, dy, px: px7, py, kind, biome, len, root: { x: rx0, y: ry0 }, score: road };
     }
     function finish4(c, id2) {
-      const { dx, dy, px: px7, py, root: root5, kind, len } = c, used = /* @__PURE__ */ new Set(), pieces = [];
+      const { dx, dy, px: px7, py, root: root6, kind, len } = c, used = /* @__PURE__ */ new Set(), pieces = [];
       const mark = (x, y, w, hh) => {
         for (let j = 0; j < hh; j++) for (let i = 0; i < w; i++) used.add(x + i + "," + (y + j));
       };
@@ -5392,11 +5392,11 @@ function createLakeLandingsV1({ asset, terrain, routeAt, free }) {
         pieces.push({ t, x, y });
         mark(x, y, SIZE[t][0], SIZE[t][1]);
       };
-      for (let k = -2; k <= Math.max(len, 0); k++) mark(root5.x + dx * k, root5.y + dy * k, 1, 1);
+      for (let k = -2; k <= Math.max(len, 0); k++) mark(root6.x + dx * k, root6.y + dy * k, 1, 1);
       if (kind === "i") {
         const ice = (x, y) => lake(x, y) && base3(x, y).biome === "s";
         for (let k = 3; k <= 6 && !pieces.length; k++) {
-          const hx2 = root5.x + dx * k - 1, hy = root5.y + dy * k - 1;
+          const hx2 = root6.x + dx * k - 1, hy = root6.y + dy * k - 1;
           if (fits(hx2, hy, 3, 2, ice)) put3("h", hx2, hy);
         }
         if (!pieces.length) return null;
@@ -5405,9 +5405,9 @@ function createLakeLandingsV1({ asset, terrain, routeAt, free }) {
         for (const [x, y] of [[H7.x + 3, H7.y + 3], [H7.x - 3, H7.y + 2], [H7.x + 4, H7.y - 1]]) if (!pieces.some((p) => p.t === "s") && fits(x, y, 2, 1, ice)) put3("s", x, y);
         return seal(c, id2, pieces);
       }
-      const side = (s) => ({ x: root5.x + px7 * s, y: root5.y + py * s });
+      const side = (s) => ({ x: root6.x + px7 * s, y: root6.y + py * s });
       if (kind === "j") {
-        put3("q", root5.x + dx * len, root5.y + dy * len);
+        put3("q", root6.x + dx * len, root6.y + dy * len);
         for (const s of [1, -1]) {
           const q2 = side(s);
           if (!pieces.some((p) => p.t === "z") && fits(q2.x, q2.y, 1, 1, open3)) put3("z", q2.x, q2.y);
@@ -5419,7 +5419,7 @@ function createLakeLandingsV1({ asset, terrain, routeAt, free }) {
       const boats = kind === "p" ? 1 : 2;
       for (const [k, s] of [[2, 1], [3, -1], [3, 1], [2, -1]]) {
         if (pieces.filter((p) => p.t === "b").length >= boats) break;
-        const x = root5.x + dx * k + px7 * s, y = root5.y + dy * k + py * s;
+        const x = root6.x + dx * k + px7 * s, y = root6.y + dy * k + py * s;
         if (lake(x, y) && lake(x + px7 * s, y + py * s)) put3("b", x, y);
       }
       for (const s of [1, -1]) {
@@ -5437,7 +5437,7 @@ function createLakeLandingsV1({ asset, terrain, routeAt, free }) {
         const [w, hh] = SIZE[t];
         let best = null, bs = 1e9;
         for (let j = -hi; j <= hi; j++) for (let i = -hi; i <= hi; i++) {
-          const x = root5.x + i, y = root5.y + j, cxp = x + (w - 1) / 2, cyp = y + (hh - 1) / 2, d = Math.max(Math.abs(cxp - root5.x), Math.abs(cyp - root5.y)), ahead = (cxp - root5.x) * dx + (cyp - root5.y) * dy;
+          const x = root6.x + i, y = root6.y + j, cxp = x + (w - 1) / 2, cyp = y + (hh - 1) / 2, d = Math.max(Math.abs(cxp - root6.x), Math.abs(cyp - root6.y)), ahead = (cxp - root6.x) * dx + (cyp - root6.y) * dy;
           if (d < lo || d > hi || ahead > 0 || !fits(x, y, w, hh, open3)) continue;
           let crowd = false;
           for (let jj = -1; jj <= hh && !crowd; jj++) for (let ii = -1; ii <= w; ii++) if (used.has(x + ii + "," + (y + jj)) && pieces.some((p) => ii + x >= p.x && ii + x < p.x + SIZE[p.t][0] && jj + y >= p.y && jj + y < p.y + SIZE[p.t][1])) {
@@ -7909,15 +7909,15 @@ function plazaTropical(c, p, size) {
 }
 function mosaicRing(c, cx, cy2, R11, n = 36) {
   const [a, b] = R11;
-  const ring8 = (rx, ry, col2, lw) => {
+  const ring9 = (rx, ry, col2, lw) => {
     c.strokeStyle = col2;
     c.lineWidth = lw;
     c.beginPath();
     c.ellipse(cx, cy2, rx, ry, 0, 0, TAU11);
     c.stroke();
   };
-  ring8(a + 8, b + 4.6, OL9, 15);
-  ring8(a + 8, b + 4.6, TR_TEAL, 12);
+  ring9(a + 8, b + 4.6, OL9, 15);
+  ring9(a + 8, b + 4.6, TR_TEAL, 12);
   for (let k = 0; k < n; k++) {
     const t = k / n * TAU11, px7 = cx + Math.cos(t) * (a + 8), py = cy2 + Math.sin(t) * (b + 4.6), ang = Math.atan2(Math.cos(t) * b, -Math.sin(t) * a);
     c.save();
@@ -7944,8 +7944,8 @@ function mosaicRing(c, cx, cy2, R11, n = 36) {
     }
     c.restore();
   }
-  ring8(a + 14.6, b + 8.4, tone(TR_PAVE, -0.42), 1.4);
-  ring8(a + 1.4, b + 0.8, tone(TR_PAVE, -0.42), 1.4);
+  ring9(a + 14.6, b + 8.4, tone(TR_PAVE, -0.42), 1.4);
+  ring9(a + 1.4, b + 0.8, tone(TR_PAVE, -0.42), 1.4);
 }
 function shell(c, x, y, spiral) {
   if (spiral) {
@@ -8940,11 +8940,11 @@ function plazaDesert(c, p, size) {
     c.stroke();
   }
   const R11 = size === "village" ? [58, 30] : size === "town" ? [84, 42] : [118, 64];
-  for (let ring8 = 0; ring8 < 2; ring8++) {
-    const r0 = R11[0] + 4 + ring8 * 9, r1 = R11[1] + 2 + ring8 * 5, n = Math.round(r0 * 0.5);
+  for (let ring9 = 0; ring9 < 2; ring9++) {
+    const r0 = R11[0] + 4 + ring9 * 9, r1 = R11[1] + 2 + ring9 * 5, n = Math.round(r0 * 0.5);
     for (let k = 0; k < n; k++) {
       const a0 = k / n * TAU12, a1 = (k + 1) / n * TAU12, ri = [r0, r1], ro = [r0 + 9, r1 + 5];
-      c.fillStyle = TILE[(k + ring8) % 2 ? 0 : 2];
+      c.fillStyle = TILE[(k + ring9) % 2 ? 0 : 2];
       c.beginPath();
       c.moveTo(fx + Math.cos(a0) * ri[0], fy + 6 + Math.sin(a0) * ri[1]);
       c.lineTo(fx + Math.cos(a1) * ri[0], fy + 6 + Math.sin(a1) * ri[1]);
@@ -11492,8 +11492,8 @@ function innGardenItemsSnow(E9, b, size = "town", opt = {}) {
         c.fill();
         snowCap(c, fx + sx - 12, fy + sy - 6, 24, 3);
       }
-      const ring8 = ell2(fx, fy, 20, 8);
-      prop2(c, [[ring8, "#8e959a"]], 1.4);
+      const ring9 = ell2(fx, fy, 20, 8);
+      prop2(c, [[ring9, "#8e959a"]], 1.4);
       c.fillStyle = "#3a3a40";
       c.beginPath();
       c.ellipse(fx, fy - 1, 14, 5, 0, 0, TAU16);
@@ -37083,7 +37083,7 @@ var clip10 = (c, p, fn) => {
 var stoneCol2 = (b) => b === "desert" ? "#d2b48a" : b === "frostland" ? "#b8c2cb" : "#b2ab9c";
 function treeSeat(g) {
   const tx = g.x * T51, ty = g.y * T51 + 10, R11 = 30, RY = 12, seatH = 9, items = [];
-  const ring8 = (c, from, to) => {
+  const ring9 = (c, from, to) => {
     const n = 8;
     for (let i = 0; i < n; i++) {
       const a0 = i / n * TAU60, a1 = (i + 1) / n * TAU60, mid = (a0 + a1) / 2;
@@ -37101,9 +37101,9 @@ function treeSeat(g) {
   };
   items.push({ y: ty - 1, draw: (c) => {
     shadow38(c, tx + 3, ty + 4, R11 + 6, RY + 3, 0.16);
-    ring8(c, -1, 0);
+    ring9(c, -1, 0);
   } });
-  items.push({ y: ty + RY + 2, draw: (c) => ring8(c, 1, 0) });
+  items.push({ y: ty + RY + 2, draw: (c) => ring9(c, 1, 0) });
   return items;
 }
 function well2(c, x, y, biome) {
@@ -37425,8 +37425,8 @@ function shadowEll(c, x, y, rx, ry, a = 0.22) {
   c.ellipse(x, y, rx, ry, 0, 0, TAU61);
   c.fill();
 }
-function post3(c, x, y, len = 26, ring8 = "rgba(230,248,255,.75)", col2 = "#4a3826") {
-  c.strokeStyle = ring8;
+function post3(c, x, y, len = 26, ring9 = "rgba(230,248,255,.75)", col2 = "#4a3826") {
+  c.strokeStyle = ring9;
   c.lineWidth = 1.6;
   c.beginPath();
   c.ellipse(x + 5, y + len, 10, 3.2, 0, 0, TAU61);
@@ -37717,9 +37717,9 @@ function rowboat(c, cx, cy2, turn7, hullCol = "#7a4f2e") {
     c.ellipse(0, 4, 18, 35, 0, a * Math.PI, b * Math.PI);
     c.stroke();
   }
-  const hull2 = poly([[0, -34], [11, -22], [14, 6], [11, 26], [0, 30], [-11, 26], [-14, 6], [-11, -22]]), inner = poly([[0, -27], [7, -18], [9, 6], [7, 21], [0, 24], [-7, 21], [-9, 6], [-7, -18]]);
-  prop(c, [[hull2, hullCol]], 2.4);
-  clip(c, hull2, () => {
+  const hull3 = poly([[0, -34], [11, -22], [14, 6], [11, 26], [0, 30], [-11, 26], [-14, 6], [-11, -22]]), inner = poly([[0, -27], [7, -18], [9, 6], [7, 21], [0, 24], [-7, 21], [-9, 6], [-7, -18]]);
+  prop(c, [[hull3, hullCol]], 2.4);
+  clip(c, hull3, () => {
     for (let k = -12; k <= 12; k += 6) line(c, [[k * 0.4, -34], [k, 6], [k * 0.7, 30]], tone(hullCol, -0.2), 1);
   });
   prop(c, [[inner, "#b07e50"]], 1.6);
@@ -37897,9 +37897,9 @@ function beachedBoat(c, x, y) {
   c.save();
   c.translate(x, y);
   c.rotate(Math.PI / 2 - 0.08);
-  const hull2 = poly([[0, -34], [11, -22], [14, 6], [11, 26], [0, 30], [-11, 26], [-14, 6], [-11, -22]]);
-  prop(c, [[hull2, "#6a4a30"]], 2.4);
-  clip(c, hull2, () => {
+  const hull3 = poly([[0, -34], [11, -22], [14, 6], [11, 26], [0, 30], [-11, 26], [-14, 6], [-11, -22]]);
+  prop(c, [[hull3, "#6a4a30"]], 2.4);
+  clip(c, hull3, () => {
     for (let k = -12; k <= 12; k += 6) line(c, [[k * 0.4, -34], [k, 6], [k * 0.7, 30]], "#553a24", 1.2);
     c.fillStyle = "rgba(255,240,210,.12)";
     c.fillRect(-14, -34, 9, 64);
@@ -51124,9 +51124,9 @@ function stallVWet(sx, sy, k, slot, opt = {}) {
     basketW(c, x + 2, gun + 4, 24, g0);
     basketW(c, x + 30, gun + 4, 24, g1);
     basketW(c, x + 58, gun + 4, 24, g2);
-    const hull2 = poly([[x - 20, gun - 10], [x - 8, gun], [x + w + 6, gun], [x + w + 16, gun - 10], [x + w + 12, front2 - 6], [x - 14, front2 - 6]]);
-    prop(c, [[hull2, "#7a5a3a"]], 1.8);
-    clip(c, hull2, () => {
+    const hull3 = poly([[x - 20, gun - 10], [x - 8, gun], [x + w + 6, gun], [x + w + 16, gun - 10], [x + w + 12, front2 - 6], [x - 14, front2 - 6]]);
+    prop(c, [[hull3, "#7a5a3a"]], 1.8);
+    clip(c, hull3, () => {
       for (let q2 = gun + 4; q2 < front2 - 6; q2 += 5) {
         c.fillStyle = "rgba(20,12,8,.32)";
         c.fillRect(x - 22, q2, w + 40, 1.2);
@@ -51965,15 +51965,15 @@ function stallVTrop(sx, sy, k, slot, opt = {}) {
       basketT(c, x + 4, top + 2, 24, g0, r);
       basketT(c, x + w / 2 - 12, top + 1, 24, g1, r);
       basketT(c, x + w - 28, top + 2, 24, g2, r);
-      const hull2 = new Path2D();
-      hull2.moveTo(x - 18, top - 9);
-      hull2.quadraticCurveTo(x + w / 2, top + 4, x + w + 18, top - 9);
-      hull2.quadraticCurveTo(x + w + 6, front2 - 6, x + w - 12, front2 - 6);
-      hull2.lineTo(x + 12, front2 - 6);
-      hull2.quadraticCurveTo(x - 6, front2 - 6, x - 18, top - 9);
-      hull2.closePath();
-      prop(c, [[hull2, WOODC]], 1.8);
-      clip(c, hull2, () => {
+      const hull3 = new Path2D();
+      hull3.moveTo(x - 18, top - 9);
+      hull3.quadraticCurveTo(x + w / 2, top + 4, x + w + 18, top - 9);
+      hull3.quadraticCurveTo(x + w + 6, front2 - 6, x + w - 12, front2 - 6);
+      hull3.lineTo(x + 12, front2 - 6);
+      hull3.quadraticCurveTo(x - 6, front2 - 6, x - 18, top - 9);
+      hull3.closePath();
+      prop(c, [[hull3, WOODC]], 1.8);
+      clip(c, hull3, () => {
         const band10 = new Path2D();
         band10.moveTo(x - 18, top - 4);
         band10.quadraticCurveTo(x + w / 2, top + 9, x + w + 18, top - 4);
@@ -67745,12 +67745,12 @@ function createWorldLightSourcesV1(prior, review) {
 
 // src/client/night_loot_art_v1.js
 var NIGHT_LOOT_ART_VERSION = "night-loot-art-v1";
-async function loadNightDebrisArtV1(env, { root: root5 = new URL("../../assets/night-loot-v1/", import.meta.url) } = {}) {
-  const response = await env.fetch(new URL("kit-manifest.json", root5));
+async function loadNightDebrisArtV1(env, { root: root6 = new URL("../../assets/night-loot-v1/", import.meta.url) } = {}) {
+  const response = await env.fetch(new URL("kit-manifest.json", root6));
   if (!response.ok) throw Error("Missing night-loot art manifest");
   const manifest = await response.json();
   if (manifest.version !== "night-loot-debris-art-v1" || manifest.slots.length !== 16 || manifest.decodeLongestEdge !== 64) throw Error("Invalid night-loot art contract");
-  const r = await env.fetch(new URL(manifest.path, root5));
+  const r = await env.fetch(new URL(manifest.path, root6));
   if (!r.ok) throw Error("Missing debris atlas");
   const bytes = await r.arrayBuffer(), digest2 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (n) => n.toString(16).padStart(2, "0")).join("");
   if (digest2 !== manifest.sha256 || bytes.byteLength !== manifest.bytes) throw Error("Debris atlas commitment mismatch");
@@ -67842,17 +67842,17 @@ var SPORE_V2_POLICY = freezeWire({
 });
 
 // src/client/spore_art_v1.js
-async function createSporeArtV1(env, prior, { root: root5 = new URL("../../assets/spore-outbreak-v1/", import.meta.url) } = {}) {
+async function createSporeArtV1(env, prior, { root: root6 = new URL("../../assets/spore-outbreak-v1/", import.meta.url) } = {}) {
   const sprites6 = /* @__PURE__ */ new Map();
   let error = null, bytes = 0, retainedBytes = 0, painted4 = 0;
   try {
-    const response = await env.fetch(new URL("kit-manifest.json", root5));
+    const response = await env.fetch(new URL("kit-manifest.json", root6));
     if (!response.ok) throw Error("Missing Spore art manifest");
     const m = await response.json();
     if (m.version !== "spore-outbreak-art-v1" || m.decodeLongestEdge !== 160 || m.files.length !== 3) throw Error("Invalid Spore kit");
     for (const row2 of m.files) {
       if (!["spore-pod", "spore-pod-open", "fungal-clump"].includes(row2.id) || row2.path !== row2.id + ".webp") throw Error("Invalid Spore sprite");
-      const r = await env.fetch(new URL(row2.path, root5));
+      const r = await env.fetch(new URL(row2.path, root6));
       if (!r.ok) throw Error("Missing Spore sprite");
       const b = await r.arrayBuffer(), sha = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
       if (sha !== row2.sha256 || b.byteLength !== row2.bytes) throw Error("Spore art commitment mismatch");
@@ -68056,17 +68056,17 @@ var HOLLOW_PLANT_LAYOUT = Object.freeze([
   ["leaf-plant", 113, 110, 22]
 ].map(Object.freeze));
 var ids = ["grass-tuft-a", "grass-tuft-b", "leaf-plant", "root-sprout", "low-fern"];
-async function createHollowGroundCoverV1(env, { root: root5 = new URL("../../assets/hollow-ground-cover-v1/", import.meta.url) } = {}) {
+async function createHollowGroundCoverV1(env, { root: root6 = new URL("../../assets/hollow-ground-cover-v1/", import.meta.url) } = {}) {
   const images2 = /* @__PURE__ */ new Map();
   let error = null, downloadBytes = 0, retainedBytes = 0, painted4 = 0;
   try {
-    const response = await env.fetch(new URL("kit-manifest.json", root5));
+    const response = await env.fetch(new URL("kit-manifest.json", root6));
     if (!response.ok) throw Error("Missing Hollow plant manifest");
     const m = await response.json();
     if (m.version !== HOLLOW_GROUND_COVER_VERSION || m.decodeLongestEdge !== 192 || m.files.length !== 5 || new Set(m.files.map((r) => r.id)).size !== 5 || new Set(m.files.map((r) => r.sha256)).size !== 5) throw Error("Invalid Hollow plant inventory");
     for (const row2 of m.files) {
       if (!ids.includes(row2.id) || row2.path !== row2.id + ".webp") throw Error("Unrecognized Hollow plant");
-      const response2 = await env.fetch(new URL(row2.path, root5));
+      const response2 = await env.fetch(new URL(row2.path, root6));
       if (!response2.ok) throw Error("Missing Hollow plant");
       const b = await response2.arrayBuffer(), hash62 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
       if (hash62 !== row2.sha256 || b.byteLength !== row2.bytes) throw Error("Hollow plant hash mismatch");
@@ -68133,17 +68133,17 @@ function hollowGroundCoverDepthItems(model, event, art) {
 }
 
 // src/client/hidden_hollow_art_v1.js
-async function createHollowArtV1(env, prior, { root: root5 = new URL("../../assets/hidden-hollow-v1/", import.meta.url) } = {}) {
+async function createHollowArtV1(env, prior, { root: root6 = new URL("../../assets/hidden-hollow-v1/", import.meta.url) } = {}) {
   const sprites6 = /* @__PURE__ */ new Map();
   let error = null, bytes = 0, retainedBytes = 0, painted4 = 0;
   try {
-    const response = await env.fetch(new URL("kit-manifest.json", root5));
+    const response = await env.fetch(new URL("kit-manifest.json", root6));
     if (!response.ok) throw Error("Missing Hollow kit");
     const m = await response.json();
     if (m.version !== "hidden-hollow-art-v1" || m.decodeLongestEdge !== 640 || m.files.length !== 1) throw Error("Invalid Hollow kit");
     for (const row2 of m.files) {
       if (row2.id !== "hidden-hollow" || row2.path !== "hidden-hollow.webp") throw Error("Invalid Hollow sprite");
-      const res = await env.fetch(new URL(row2.path, root5));
+      const res = await env.fetch(new URL(row2.path, root6));
       if (!res.ok) throw Error("Missing Hollow sprite");
       const b = await res.arrayBuffer(), sha = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
       if (sha !== row2.sha256 || b.byteLength !== row2.bytes) throw Error("Hollow art commitment");
@@ -68248,12 +68248,12 @@ function breakablePropVariantV1(id2) {
   for (let i = 0; i < id2.length; i++) h = Math.imul(h ^ id2.charCodeAt(i), 16777619) >>> 0;
   return h % 4 === 1 ? "cracked" : "intact";
 }
-async function loadBreakablePropArtV1(env, { root: root5 = new URL("../../assets/breakable-props-v1/", import.meta.url) } = {}) {
-  const r = await env.fetch(new URL("kit-manifest.json", root5));
+async function loadBreakablePropArtV1(env, { root: root6 = new URL("../../assets/breakable-props-v1/", import.meta.url) } = {}) {
+  const r = await env.fetch(new URL("kit-manifest.json", root6));
   if (!r.ok) throw Error("Missing breakable art manifest");
   const m = await r.json();
   if (m.version !== BREAKABLE_PROP_ART_VERSION || m.decodeLongestEdge !== 144 || m.slots.length !== 12 || new Set(m.slots.map((s) => s.key)).size !== 12 || m.slots.some((s) => !keys.includes(s.key))) throw Error("Invalid breakable art contract");
-  const image = await env.fetch(new URL(m.path, root5));
+  const image = await env.fetch(new URL(m.path, root6));
   if (!image.ok) throw Error("Missing breakable atlas");
   const bytes = await image.arrayBuffer(), digest2 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (n) => n.toString(16).padStart(2, "0")).join("");
   if (bytes.byteLength !== m.bytes || digest2 !== m.sha256) throw Error("Breakable atlas commitment mismatch");
@@ -70619,7 +70619,7 @@ function weapon2(c, m, cx, cy2, flash) {
 }
 function drawGargoyleV4(c, m, presentationTime, seed2) {
   const time3 = presentationTime, action2 = m.familyAttack, motion = gargoyleMotionV4(m, time3, seed2), cx = m.x + m.w / 2 + motion.x, cy2 = m.y + m.h - 12 + motion.y;
-  const flash = m.flashTimer > 0, outline5 = INK6, stone3 = flash ? "#fff" : "#60717a", stoneLight = flash ? "#fff" : "#8b9aa0", stoneDark = flash ? "#fff" : "#39474f", moss5 = flash ? "#fff" : "#42633a", core5 = "#e3a84a";
+  const flash = m.flashTimer > 0, outline5 = INK6, stone3 = flash ? "#fff" : "#60717a", stoneLight = flash ? "#fff" : "#8b9aa0", stoneDark = flash ? "#fff" : "#39474f", moss6 = flash ? "#fff" : "#42633a", core5 = "#e3a84a";
   c.save();
   c.strokeStyle = outline5;
   c.lineWidth = LINE4;
@@ -70753,7 +70753,7 @@ function drawGargoyleV4(c, m, presentationTime, seed2) {
     c.closePath();
     c.fill();
     c.restore();
-    c.fillStyle = moss5;
+    c.fillStyle = moss6;
     c.beginPath();
     c.ellipse(cx - 7, cy2 + 2, 4, 2.5, -0.35, 0, Math.PI * 2);
     c.ellipse(cx + 6, cy2 + 8, 3, 2, 0.4, 0, Math.PI * 2);
@@ -70978,11 +70978,11 @@ function local2(a, p) {
     y: ((-si * x + co * y) / b.scaleY + v.y) / (SCALE6 * size)
   };
 }
-function elbow(root5, wrist, side) {
-  const x = wrist.x - root5.x, y = wrist.y - root5.y, d = Math.hypot(x, y);
-  if (d < 1e-6) return { x: root5.x + side * BONE, y: root5.y };
+function elbow(root6, wrist, side) {
+  const x = wrist.x - root6.x, y = wrist.y - root6.y, d = Math.hypot(x, y);
+  if (d < 1e-6) return { x: root6.x + side * BONE, y: root6.y };
   const h = Math.sqrt(Math.max(0, BONE * BONE - d * d / 4));
-  return { x: root5.x + x / 2 + y / d * h * side, y: root5.y + y / 2 - x / d * h * side };
+  return { x: root6.x + x / 2 + y / d * h * side, y: root6.y + y / 2 - x / d * h * side };
 }
 function voidWraithMotionV4(m, time3, seed2 = 0) {
   const x = m.x + m.w / 2, y = m.y + m.h / 2 - 4 + Math.sin(time3 / 180) * 3.5, a = m.familyAttack;
@@ -70995,7 +70995,7 @@ function voidWraithMotionV4(m, time3, seed2 = 0) {
   }
   const rake = a?.phase === "impact" ? smooth4(a.progress) : a?.phase === "recovery" ? 1 : 0;
   const arms = [-1, 1].map((side) => {
-    const attacking = !!a && side === lead, root5 = { x: x + side * 8, y: y - 2 };
+    const attacking = !!a && side === lead, root6 = { x: x + side * 8, y: y - 2 };
     const idleAngle = side > 0 ? 1.05 : Math.PI - 1.05;
     const idle2 = { x: x + side * (16 + Math.sin(time3 / 330 + side) * 0.35), y: y + 8 + Math.sin(time3 / 370 + side) * 0.4 };
     const brace = side === lead ? { x: x + side * 18, y: y - 8 } : { x: x + side * 13, y: y + 1 };
@@ -71013,7 +71013,7 @@ function voidWraithMotionV4(m, time3, seed2 = 0) {
       const p = { x: wrist.x + aim2.x * (7.5 - Math.abs(i) * 0.8) + normal2.x * i * 2.8, y: wrist.y + aim2.y * (7.5 - Math.abs(i) * 0.8) + normal2.y * i * 2.8 };
       return goals ? blend2(p, goals[k], reach) : p;
     });
-    return { side, attacking, root: root5, wrist, elbow: elbow(root5, wrist, side), aim: aim2, normal: normal2, fingers };
+    return { side, attacking, root: root6, wrist, elbow: elbow(root6, wrist, side), aim: aim2, normal: normal2, fingers };
   });
   return { x, y, weight: weight2, strike: strike2, drift: Math.sin(time3 / 330 + seed2 % 13 * 0.17) * 1.6, arms };
 }
@@ -71198,13 +71198,13 @@ function toLocal(a, point14) {
     y: ((-si * x + co * y) / b.scaleY + pivot2.y) / (SCALE7 * size)
   };
 }
-function joint(root5, wrist, side) {
-  const dx = wrist.x - root5.x, dy = wrist.y - root5.y, d = Math.hypot(dx, dy);
+function joint(root6, wrist, side) {
+  const dx = wrist.x - root6.x, dy = wrist.y - root6.y, d = Math.hypot(dx, dy);
   const upper = 15.5, lower = 15.5;
-  if (d < 1e-6) return { x: root5.x + side * upper, y: root5.y };
+  if (d < 1e-6) return { x: root6.x + side * upper, y: root6.y };
   const along3 = (upper * upper - lower * lower + d * d) / (2 * d);
   const height = Math.sqrt(Math.max(0, upper * upper - along3 * along3));
-  return { x: root5.x + dx / d * along3 - dy / d * height * side, y: root5.y + dy / d * along3 + dx / d * height * side };
+  return { x: root6.x + dx / d * along3 - dy / d * height * side, y: root6.y + dy / d * along3 + dx / d * height * side };
 }
 function voidSpectreMotionV4(m, time3, seed2 = 0) {
   const x = m.x + m.w / 2, y = m.y + m.h / 2 + Math.sin(time3 / 150) * 5, a = m.familyAttack;
@@ -71212,7 +71212,7 @@ function voidSpectreMotionV4(m, time3, seed2 = 0) {
   const rake = a?.phase === "impact" ? smooth5(a.progress) : a?.phase === "recovery" ? 1 : 0;
   const sway = Math.sin(time3 / 410 + seed2 % 13 * 0.17) * 1.5;
   const arms = [-1, 1].map((side) => {
-    const root5 = { x: x + side * 8, y: y - 3 }, idleAngle = Math.atan2(-0.4, side * 0.9);
+    const root6 = { x: x + side * 8, y: y - 3 }, idleAngle = Math.atan2(-0.4, side * 0.9);
     const idleHand = { x: x + side * (19 + Math.sin(time3 / 310 + side) * 0.8), y: y - 1 + Math.sin(time3 / 370 + side) * 0.6 };
     const braceHand = { x: x + side * 22, y: y - 11 };
     const rest2 = pointMix(idleHand, braceHand, weight2);
@@ -71234,7 +71234,7 @@ function voidSpectreMotionV4(m, time3, seed2 = 0) {
       const idle2 = { x: wrist.x + u.x * (6 - Math.abs(i) * 0.6) + n.x * i * 1.8, y: wrist.y + u.y * (6 - Math.abs(i) * 0.6) + n.y * i * 1.8 };
       return attackTips ? pointMix(idle2, attackTips[k], strike2) : idle2;
     });
-    return { side, root: root5, wrist, elbow: joint(root5, wrist, side), aim: u, normal: n, fingers, tip };
+    return { side, root: root6, wrist, elbow: joint(root6, wrist, side), aim: u, normal: n, fingers, tip };
   });
   return { x, y, sway, weight: weight2, strike: strike2, arms };
 }
@@ -71407,8 +71407,8 @@ function voidCrawlerMotionV4(m, time3, seed2 = 0) {
     const x = (co * a.direction.x + si * a.direction.y) / a.body.scaleX * flip, y = (-si * a.direction.x + co * a.direction.y) / a.body.scaleY;
     turn7 = Math.atan2(-y, -x) * a.artWeight;
   }
-  const u = { x: -Math.cos(turn7), y: -Math.sin(turn7) }, root5 = segments[0];
-  const head18 = { x: root5.x + u.x * 5, y: root5.y + u.y * 5, turn: turn7, open: a ? a.limb.open * (1 - a.strikeBlend) : 1.2 };
+  const u = { x: -Math.cos(turn7), y: -Math.sin(turn7) }, root6 = segments[0];
+  const head18 = { x: root6.x + u.x * 5, y: root6.y + u.y * 5, turn: turn7, open: a ? a.limb.open * (1 - a.strikeBlend) : 1.2 };
   const tip = { x: head18.x + u.x * 15, y: head18.y + u.y * 15 };
   const walk = Math.max(0, Math.min(1, m.motionBlend ?? 0)), legs4 = [];
   for (const near5 of [false, true]) for (let i = 0; i < 6; i++) {
@@ -71892,16 +71892,16 @@ function drawMimicShieldV4(c, m, time3, seed2) {
   c.translate(m.x + m.w / 2, m.y + m.h / 2);
   c.lineJoin = "round";
   c.lineCap = "round";
-  const hull2 = HULL;
-  polygon7(c, hull2, color10(flash, "#b48743"), false);
+  const hull3 = HULL;
+  polygon7(c, hull3, color10(flash, "#b48743"), false);
   polygon7(c, [[-16, -16], [16, -16], [13, -13], [-13, -13], [-15, 1], [-18, 2]], color10(flash, "#edcd7d"), false);
   polygon7(c, [[18, 2], [0, 22], [-18, 2], [-15, 1], [0, 18], [15, 1]], color10(flash, "#8e622f"), false);
   c.strokeStyle = INK12;
   c.lineWidth = LINE10;
   c.beginPath();
-  c.moveTo(...hull2[0]);
-  for (const p of hull2.slice(1)) c.lineTo(...p);
-  c.lineTo(...hull2[0]);
+  c.moveTo(...hull3[0]);
+  for (const p of hull3.slice(1)) c.lineTo(...p);
+  c.lineTo(...hull3[0]);
   c.closePath();
   c.stroke();
   const inset = [[-13, -13], [13, -13], [15, 1], [0, 18], [-15, 1]];
@@ -73016,10 +73016,10 @@ function claws(c, tip, open3, scale, flash) {
   c.save();
   c.lineJoin = "round";
   for (const side of [-1, 1]) {
-    const root5 = { x: 6.6 * scale, y: side * 4.4 * scale }, joint4 = { x: 10.8 * scale + (tip - 13.2 * scale) * 0.2, y: side * (5.4 + 2.3 * open3) * scale }, end = { x: tip, y: side * (0.25 + 0.85 * open3) * scale };
+    const root6 = { x: 6.6 * scale, y: side * 4.4 * scale }, joint4 = { x: 10.8 * scale + (tip - 13.2 * scale) * 0.2, y: side * (5.4 + 2.3 * open3) * scale }, end = { x: tip, y: side * (0.25 + 0.85 * open3) * scale };
     c.save();
     c.scale(scale, scale);
-    bone(c, { x: root5.x / scale, y: root5.y / scale }, { x: joint4.x / scale, y: joint4.y / scale }, 1.55, 1.15, flash);
+    bone(c, { x: root6.x / scale, y: root6.y / scale }, { x: joint4.x / scale, y: joint4.y / scale }, 1.55, 1.15, flash);
     polygon8(c, [[joint4.x / scale - 1.2, joint4.y / scale], [joint4.x / scale + 1.1, joint4.y / scale + side * 0.9], [end.x / scale, end.y / scale], [end.x / scale - 2.4, side * 0.2], [joint4.x / scale - 1.2, joint4.y / scale - side * 1.1]], color13(flash, "#69afd9"), true);
     polygon8(c, [[joint4.x / scale, joint4.y / scale - side * 0.65], [end.x / scale, end.y / scale], [end.x / scale - 2.4, side * 0.2]], color13(flash, "#d3f0ff"));
     c.fillStyle = color13(flash, "#3875a5");
@@ -73191,15 +73191,15 @@ function drawNeonSpiderV4(c, m, time3, seed2) {
   c.lineJoin = "round";
   supports2(c, m, time3, seed2, cx, cy2);
   c.translate(cx, cy2);
-  const hull2 = [[-14, -3], [-10, -8], [-2, -8], [4, -5], [5, 5], [-2, 8], [-10, 8], [-14, 3]];
-  plate2(c, hull2, color14(flash, "#514761"), false);
+  const hull3 = [[-14, -3], [-10, -8], [-2, -8], [4, -5], [5, 5], [-2, 8], [-10, 8], [-14, 3]];
+  plate2(c, hull3, color14(flash, "#514761"), false);
   plate2(c, [[-14, 0], [5, 0], [5, 5], [-2, 8], [-10, 8], [-14, 3]], color14(flash, "#292334"), false);
   plate2(c, [[-10, -8], [-2, -8], [4, -5], [-3, -4], [-12, -3]], color14(flash, "#a494b4"), false);
   c.strokeStyle = INK16;
   c.lineWidth = LINE14;
   c.beginPath();
-  c.moveTo(...hull2[0]);
-  for (const p of hull2.slice(1)) c.lineTo(...p);
+  c.moveTo(...hull3[0]);
+  for (const p of hull3.slice(1)) c.lineTo(...p);
   c.closePath();
   c.stroke();
   plate2(c, [[-13, -2.7], [-9.6, -6], [-7, -5], [-9.1, 0], [-7, 5], [-9.6, 6], [-13, 2.7]], color14(flash, "#3b3448"));
@@ -73300,7 +73300,7 @@ function cyberWraithMotionV4(m, time3, seed2 = 0) {
   }
   const rake = a?.phase === "impact" ? smooth7(a.progress) : a?.phase === "recovery" ? 1 : 0;
   const arms = [-1, 1].map((side) => {
-    const attacking = !!a && side === lead, root5 = { x: x + side * 7, y: y - 1 };
+    const attacking = !!a && side === lead, root6 = { x: x + side * 7, y: y - 1 };
     const idleAngle = side > 0 ? 1 : Math.PI - 1;
     const idle2 = { x: x + side * (13 + Math.sin(time3 / 330 + side) * 0.3), y: y + 8 + Math.sin(time3 / 370 + side) * 0.4 };
     const brace = side === lead ? { x: x + side * 15, y: y - 5 } : { x: x + side * 12, y: y + 3 };
@@ -73318,7 +73318,7 @@ function cyberWraithMotionV4(m, time3, seed2 = 0) {
       const p = { x: wrist.x + aim2.x * 6.5 + normal2.x * i * 1.8, y: wrist.y + aim2.y * 6.5 + normal2.y * i * 1.8 };
       return goals ? blend3(p, goals[k], reach) : p;
     });
-    return { side, attacking, root: root5, wrist, elbow: elbow2(root5, wrist, side), aim: aim2, normal: normal2, tips };
+    return { side, attacking, root: root6, wrist, elbow: elbow2(root6, wrist, side), aim: aim2, normal: normal2, tips };
   });
   return { x, y, glitch, visorHeight: Math.max(1, 2 - (a?.limb.open ?? 0)), arms };
 }
@@ -73789,15 +73789,15 @@ function thornWyrmMotionV4(m, time3) {
   const a = m.rangedPose, weight2 = a?.artWeight ?? 0, walk = m.motionBlend ?? 0, step3 = m.stepPhase ?? 0;
   const wave = (i) => Math.sin(t - i * 0.8) * 3 * (1 - weight2 * (i === 0 ? 1 : 0.25)) + Math.sin(step3 - i * 0.65) * walk * 0.6 * (1 - weight2);
   const segments = Array.from({ length: 5 }, (_, i) => ({ index: i, x: x + i * 5.5, y: y + wave(i), radius: 6.2 - i * 0.7 }));
-  const root5 = { x, y: y + wave(0) }, target = a ? Math.atan2(a.direction.y, a.direction.x * a.drawFacingX) : Math.PI;
+  const root6 = { x, y: y + wave(0) }, target = a ? Math.atan2(a.direction.y, a.direction.x * a.drawFacingX) : Math.PI;
   const angle3 = Math.PI + turn5(target - Math.PI) * weight2, u = { x: Math.cos(angle3), y: Math.sin(angle3) };
-  const head18 = { x: root5.x + u.x * NECK, y: root5.y + u.y * NECK, radius: HEAD, aim: u, angle: angle3, gape: weight2 };
+  const head18 = { x: root6.x + u.x * NECK, y: root6.y + u.y * NECK, radius: HEAD, aim: u, angle: angle3, gape: weight2 };
   const muzzle = { x: head18.x + u.x * HEAD, y: head18.y + u.y * HEAD };
   const legs4 = segments.map((s) => {
     const stride = Math.sin(t * 2 + s.index) * (1 + walk * 0.65) * (1 - weight2 * 0.65);
     return { root: { x: s.x, y: s.y + s.radius - 1 }, knee: { x: s.x - 2 + stride * 0.3, y: s.y + 6 }, foot: { x: s.x - 3 + stride, y: s.y + 8 + Math.cos(t * 2 + s.index) * 0.6 } };
   });
-  return { segments, root: root5, head: head18, muzzle, legs: legs4, weight: weight2 };
+  return { segments, root: root6, head: head18, muzzle, legs: legs4, weight: weight2 };
 }
 function thorn(c, s, flash) {
   const { x, y, radius: r } = s;
@@ -74022,19 +74022,19 @@ function frostWyrmlingMotionV4(m, time3) {
     y: y + Math.sin(time3 / 200 - i * 0.8) * 6 * (1 - weight2 * (i === 0 ? 1 : 0.25)) + Math.sin(step3 - i * 0.7) * walk * 0.65 * (1 - weight2),
     radius: 8 - i * 1.2
   }));
-  const root5 = { x: segments[0].x, y: segments[0].y };
+  const root6 = { x: segments[0].x, y: segments[0].y };
   const target = a ? { x: a.direction.x * a.drawFacingX, y: a.direction.y } : { x: 0, y: 1 };
   const angle3 = Math.PI / 2 + turn6(Math.atan2(target.y, target.x) - Math.PI / 2) * weight2;
   const u = { x: Math.cos(angle3), y: Math.sin(angle3) };
-  const head18 = { x: mix10(x, root5.x + target.x * NECK_REACH, weight2), y: mix10(y - 14, root5.y + target.y * NECK_REACH, weight2), aim: u, gape: weight2 };
+  const head18 = { x: mix10(x, root6.x + target.x * NECK_REACH, weight2), y: mix10(y - 14, root6.y + target.y * NECK_REACH, weight2), aim: u, gape: weight2 };
   const neckSegments = [{ t: 0.34, radius: 5.5 }, { t: 0.68, radius: 4.8 }].map((s) => ({
-    x: mix10(root5.x, head18.x, s.t) - 1.2 * Math.sin(Math.PI * s.t) * (1 - weight2 * 0.5),
-    y: mix10(root5.y, head18.y, s.t),
+    x: mix10(root6.x, head18.x, s.t) - 1.2 * Math.sin(Math.PI * s.t) * (1 - weight2 * 0.5),
+    y: mix10(root6.y, head18.y, s.t),
     radius: s.radius
   }));
   const mouth6 = { x: head18.x + u.x * (4 + 2 * weight2), y: head18.y + u.y * (4 + 2 * weight2), angle: angle3 };
   const muzzle = { x: mouth6.x + u.x, y: mouth6.y + u.y };
-  return { segments, neckSegments, root: root5, head: head18, mouth: mouth6, muzzle, weight: weight2 };
+  return { segments, neckSegments, root: root6, head: head18, mouth: mouth6, muzzle, weight: weight2 };
 }
 function polygon9(c, points2, fill9, outline5 = true) {
   c.beginPath();
@@ -75168,12 +75168,12 @@ function lavaSerpentRangedPoseV4(actor, tick) {
 function lavaSerpentMotionV4(m, time3, seed2) {
   const action2 = m.familyAttack, weight2 = action2?.artWeight ?? 0, strike2 = action2?.strikeBlend ?? 0, walk = m.motionBlend ?? 0, step3 = m.stepPhase ?? 0, cx = m.x + m.w / 2, cy2 = m.y + m.h / 2 + 2, t = time3 / 140;
   const wave = (i) => Math.sin(t - i * 0.8) * (3.5 + walk * 0.8) * (1 - weight2 * (i === 0 ? 1 : 0.25)) + Math.sin(step3 - i * 0.7) * walk * 0.55 * (1 - weight2);
-  const root5 = { x: cx, y: cy2 + wave(0) }, u = action2 ? localDirection4(action2.direction, action2.body.rotation, action2.drawFacingX) : { x: -1, y: 0 };
+  const root6 = { x: cx, y: cy2 + wave(0) }, u = action2 ? localDirection4(action2.direction, action2.body.rotation, action2.drawFacingX) : { x: -1, y: 0 };
   const aim2 = Math.atan2(-u.y, -u.x), neckAngle = mix13(0.12, aim2, strike2) * weight2, angle3 = mix13(-0.22, aim2 + Math.atan2(1, 8), strike2) * weight2;
-  const head18 = { x: root5.x - Math.cos(neckAngle) * NECK3, y: root5.y - Math.sin(neckAngle) * NECK3, angle: angle3, gape: action2?.ranged ? weight2 * 0.28 : weight2 * (1 - strike2) * 0.34 };
+  const head18 = { x: root6.x - Math.cos(neckAngle) * NECK3, y: root6.y - Math.sin(neckAngle) * NECK3, angle: angle3, gape: action2?.ranged ? weight2 * 0.28 : weight2 * (1 - strike2) * 0.34 };
   const nose = { x: head18.x - Math.cos(angle3) * 8 - Math.sin(angle3), y: head18.y - Math.sin(angle3) * 8 + Math.cos(angle3) };
   const segments = Array.from({ length: 6 }, (_, i) => ({ x: cx + i * 5.5 - i * 0.6 * weight2 * (1 - strike2), y: cy2 + wave(i), radius: 6.5 - i * 0.7 }));
-  return { root: root5, head: head18, nose, segments, weight: weight2, strike: strike2, castHeat: action2?.ranged ? weight2 : 0, heat: 0.92 + Math.sin(time3 / 220 + seed2 % 11) * 0.08 };
+  return { root: root6, head: head18, nose, segments, weight: weight2, strike: strike2, castHeat: action2?.ranged ? weight2 : 0, heat: 0.92 + Math.sin(time3 / 220 + seed2 % 11) * 0.08 };
 }
 function polygon15(c, points2, fill9, outline5 = true) {
   c.fillStyle = fill9;
@@ -75780,9 +75780,9 @@ function bedV2(c, K12, x0, x1, h0, h1) {
   c.save();
   pts(c, [P9(x0, 0, h0), P9(x1, 0, h0), P9(x1, 0, h1), P9(x0, 0, h1)]);
   c.clip();
-  const plank = shade3(K12.paint ?? K12.wood, -0.32);
+  const plank2 = shade3(K12.paint ?? K12.wood, -0.32);
   for (const h of [h0 + (h1 - h0) * 0.36, h0 + (h1 - h0) * 0.7]) {
-    c.fillStyle = plank;
+    c.fillStyle = plank2;
     c.fillRect(x0, -h - 0.5, x1 - x0, 1);
   }
   c.fillStyle = "rgba(255,255,255,.18)";
@@ -78619,7 +78619,7 @@ var CACHE_SKINS_V1 = Object.freeze({
   frostland: { name: "Ice Cairn", stone: "#9aa7b0", moss: null, flag: "#3f7fc8", pole: "#6b4a2e", paint: "#c8402f", dirt: "#5e5a58", spoil: "#e8eef2", snow: true },
   wetland: { name: "Reed Marker", stone: "#6f7468", moss: "#7a8a3a", flag: "#c8602f", pole: "#8a7a4a", paint: "#e0c050", dirt: "#3e3424", spoil: "#54462e", reeds: true }
 });
-function drawCacheGroundV1(c, x, y, { skin = "woodland", dig = 0, ring: ring8 = false, dug = false } = {}) {
+function drawCacheGroundV1(c, x, y, { skin = "woodland", dig = 0, ring: ring9 = false, dug = false } = {}) {
   const K12 = CACHE_SKINS_V1[skin] ?? CACHE_SKINS_V1.woodland;
   c.save();
   c.translate(x, y);
@@ -78686,7 +78686,7 @@ function drawCacheGroundV1(c, x, y, { skin = "woodland", dig = 0, ring: ring8 = 
     c.strokeStyle = K12.spoil;
     c.stroke();
   }
-  if (ring8) {
+  if (ring9) {
     c.lineWidth = 2.4;
     c.strokeStyle = "rgba(20,21,24,.55)";
     c.beginPath();
@@ -97222,7 +97222,7 @@ function drawWebWeaverPass(c, actor, tick, front2) {
   if (actor.elite?.affixId !== "web_weaver" || !actor.alive) return;
   const phase2 = (tick + actor.visualSeed % 53) * 0.052, gather = Math.max(0, Math.min(1, (18 - (actor.elite.nextPulseTick - tick)) / 18));
   c.save();
-  for (let ring8 = 1; ring8 <= 2; ring8++) webArc(c, 32, 23, 0.48 + ring8 * 0.25, front2, 0.5 + gather * 0.28, 1.3 + ring8 * 0.2);
+  for (let ring9 = 1; ring9 <= 2; ring9++) webArc(c, 32, 23, 0.48 + ring9 * 0.25, front2, 0.5 + gather * 0.28, 1.3 + ring9 * 0.2);
   for (let i = 0; i < 8; i++) {
     const a = i * TAU146 / 8 + actor.visualSeed % 11 * 0.012, isFront = Math.sin(a) >= 0;
     if (layer !== "ground" && isFront !== front2) continue;
@@ -97290,14 +97290,14 @@ function groundWeb(c, row2, tick, pending) {
     if (row2.ageTicks < 10) contraction = 1.12 - row2.ageTicks * 0.012;
   }
   c.globalAlpha = Math.max(0, alpha);
-  for (let ring8 = 1; ring8 <= 4; ring8++) {
-    const r = ring8 / 4 * contraction, crooked = (seed2 >> ring8 & 3) - 1.5;
+  for (let ring9 = 1; ring9 <= 4; ring9++) {
+    const r = ring9 / 4 * contraction, crooked = (seed2 >> ring9 & 3) - 1.5;
     c.strokeStyle = WEB_INDIGO;
     c.lineWidth = 4;
     c.beginPath();
     c.ellipse(crooked, 0, rx * r, ry * r, 0, 0, TAU146);
     c.stroke();
-    c.strokeStyle = ring8 % 2 ? WEB_SILVER : WEB_CYAN;
+    c.strokeStyle = ring9 % 2 ? WEB_SILVER : WEB_CYAN;
     c.lineWidth = 1.6;
     c.stroke();
   }
@@ -97337,7 +97337,7 @@ function drawWebbedPass(c, actor, tick, front2) {
   c.save();
   c.translate(actor.position.x, actor.position.y);
   c.globalAlpha = 0.74;
-  for (let ring8 = 1; ring8 <= 2; ring8++) webArc(c, 20, 14, 0.48 + ring8 * 0.28, front2, 0.66, 1.25);
+  for (let ring9 = 1; ring9 <= 2; ring9++) webArc(c, 20, 14, 0.48 + ring9 * 0.28, front2, 0.66, 1.25);
   for (let i = 0; i < 5; i++) {
     const a = phase2 + i * TAU146 / 5, isFront = Math.sin(a) >= 0;
     if (!sideOn(isFront, front2)) continue;
@@ -97657,11 +97657,11 @@ function webbedIcon(c, size) {
     c.moveTo(0, 0);
     c.lineTo(Math.cos(a) * r, Math.sin(a) * r);
   }
-  for (let ring8 = 1; ring8 <= 2; ring8++) {
-    c.moveTo(r * ring8 / 2, 0);
+  for (let ring9 = 1; ring9 <= 2; ring9++) {
+    c.moveTo(r * ring9 / 2, 0);
     for (let i = 1; i <= 8; i++) {
       const a = i * TAU147 / 8;
-      c.lineTo(Math.cos(a) * r * ring8 / 2, Math.sin(a) * r * ring8 / 2);
+      c.lineTo(Math.cos(a) * r * ring9 / 2, Math.sin(a) * r * ring9 / 2);
     }
   }
   c.stroke();
@@ -98066,7 +98066,7 @@ function drawBossHealthEchoV3(c, canvas, actor, reading, time3) {
   drawHealthBarV4(c, { x: slot.x, y: slot.y, w: slot.w, h: slot.h, ratio: reading.actual, trail: reading.trail, impact: reading.impact, flash: reading.flash, fill: actor.boss?.shieldActive ? SHIELD_HEALTH_FILL_V4 : ENEMY_HEALTH_FILL_V4, edge: slot.accent ?? "#e9d7a8", ticks: 10, marker: 0.5, pad: 2 });
 }
 function createPlayerHealthHudV3(doc) {
-  const track2 = doc.querySelector(".hp-track"), root5 = doc.getElementById("world-app"), vitals = doc.getElementById("world-hud-vitals");
+  const track2 = doc.querySelector(".hp-track"), root6 = doc.getElementById("world-app"), vitals = doc.getElementById("world-hud-vitals");
   const trails2 = createHealthTrailsV3(), echo = track2 ? doc.createElement("span") : null;
   if (echo) {
     echo.className = "saq-hp-echo-v3";
@@ -98082,26 +98082,26 @@ function createPlayerHealthHudV3(doc) {
         echo.style.opacity = String(0.62 + data.impact * 0.38);
       }
       const low = data.actual > 0 && data.actual <= 0.35;
-      if (root5) {
-        root5.classList.toggle("saq-low-health-v3", low);
-        root5.style.setProperty("--saq-injury-opacity", String(low ? Math.min(0.88, Math.max(0.2, (0.35 - data.actual) / 0.35 * 0.88)) : "0"));
+      if (root6) {
+        root6.classList.toggle("saq-low-health-v3", low);
+        root6.style.setProperty("--saq-injury-opacity", String(low ? Math.min(0.88, Math.max(0.2, (0.35 - data.actual) / 0.35 * 0.88)) : "0"));
       }
       vitals?.classList.toggle("saq-critical-health-v3", data.actual > 0 && data.actual <= 0.2);
       return data;
     },
     reset() {
       trails2.clear();
-      if (root5) {
-        root5.classList.remove("saq-low-health-v3");
-        root5.style.removeProperty("--saq-injury-opacity");
+      if (root6) {
+        root6.classList.remove("saq-low-health-v3");
+        root6.style.removeProperty("--saq-injury-opacity");
       }
       vitals?.classList.remove("saq-critical-health-v3");
     },
     destroy() {
       echo?.remove();
-      if (root5) {
-        root5.classList.remove("saq-low-health-v3");
-        root5.style.removeProperty("--saq-injury-opacity");
+      if (root6) {
+        root6.classList.remove("saq-low-health-v3");
+        root6.style.removeProperty("--saq-injury-opacity");
       }
       vitals?.classList.remove("saq-critical-health-v3");
     }
@@ -101308,7 +101308,7 @@ function createWaterMotionV1(doc) {
     line39(7, 3.4, 0.25);
     line39(5, 1.3, 1);
   });
-  const ring8 = (col2, k) => spr("ring" + col2 + k, 24, 14, (g) => {
+  const ring9 = (col2, k) => spr("ring" + col2 + k, 24, 14, (g) => {
     g.strokeStyle = col2;
     g.lineWidth = 1.2;
     g.beginPath();
@@ -101371,7 +101371,7 @@ function createWaterMotionV1(doc) {
           a = 0.7 * (1 - u);
           if (a < 0.06) continue;
           ctx.globalAlpha = a;
-          put3(ctx, ring8(it.c, Math.min(5, Math.floor(u * 6))), it.x - 12, it.y - 7);
+          put3(ctx, ring9(it.c, Math.min(5, Math.floor(u * 6))), it.x - 12, it.y - 7);
           break;
         case 5:
           u = fr(ts / BUBBLE + it.p);
@@ -101382,7 +101382,7 @@ function createWaterMotionV1(doc) {
             a = 1 - (u - 0.7) / 0.3;
             if (a < 0.06) continue;
             ctx.globalAlpha = a;
-            put3(ctx, ring8("#fff3c0", Math.min(5, Math.floor((u - 0.7) / 0.3 * 6))), it.x - 12, it.y - 7);
+            put3(ctx, ring9("#fff3c0", Math.min(5, Math.floor((u - 0.7) / 0.3 * 6))), it.x - 12, it.y - 7);
           }
           break;
         default:
@@ -101909,12 +101909,12 @@ function woodlandFoliagePoseV2(n, size, hasCanopy) {
   return Object.freeze({ treeHeight: size * 1.36, treeAnchor: 0.94, bushIndex: (n >>> 3) % 3, bushWidth: hasCanopy ? size * 0.4 : size * (0.96 + n % 3 * 0.04), tuftIndex: 3 + (n >>> 7) % 2, hasCanopy: Boolean(hasCanopy) });
 }
 async function createWoodlandFoliageV2(environment, prior) {
-  const root5 = new URL("../../assets/woodland-foliage-v2/", import.meta.url), r = await environment.fetch(new URL("kit-manifest.json", root5));
+  const root6 = new URL("../../assets/woodland-foliage-v2/", import.meta.url), r = await environment.fetch(new URL("kit-manifest.json", root6));
   if (!r.ok) throw Error("Missing Woodland foliage manifest");
   const manifest = await r.json(), sprites6 = [], draws = { tree: 0, bush: 0, rootTuft: 0, groundTuft: 0 };
   let mode = "candidate", bytes = 0, decodedBytes = 0;
   for (const f of manifest.files) {
-    const r3 = await environment.fetch(new URL(f.path, root5));
+    const r3 = await environment.fetch(new URL(f.path, root6));
     if (!r3.ok) throw Error("Missing Woodland foliage " + f.path);
     const b = await r3.arrayBuffer(), hash62 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
     if (b.byteLength !== f.bytes || hash62 !== f.sha256) throw Error("Woodland foliage commitment mismatch");
@@ -102013,7 +102013,7 @@ function smoothSpriteContext(ctx) {
 // src/client/woodland_forest_art_v1.js
 async function createWoodlandForestArtV1(env, review, prior) {
   if (!hasWoodlandForest(review.binding)) throw Error("Forest artwork requires its explicit terrain successor");
-  const root5 = new URL("../../assets/woodland-forest-v1/", import.meta.url), response = await env.fetch(new URL("kit-manifest.json", root5));
+  const root6 = new URL("../../assets/woodland-forest-v1/", import.meta.url), response = await env.fetch(new URL("kit-manifest.json", root6));
   if (!response.ok) throw Error("Missing forest kit");
   const manifest = await response.json(), groups = [], draws = { tree: 0, shrub: 0, rock: 0, log: 0, stump: 0, sapling: 0, ground: 0 };
   let decodedBytes = 0, downloadBytes = 0;
@@ -102040,7 +102040,7 @@ async function createWoodlandForestArtV1(env, review, prior) {
       image.close();
     }
   }
-  for (const [i, f] of manifest.files.entries()) groups.push(await decode(f, root5, i === 0 ? 384 : f.decodeLimit));
+  for (const [i, f] of manifest.files.entries()) groups.push(await decode(f, root6, i === 0 ? 384 : f.decodeLimit));
   const propsRoot = new URL("../../assets/woodland-prop-clarity-v1/", import.meta.url), propsResponse = await env.fetch(new URL("kit-manifest.json", propsRoot));
   if (!propsResponse.ok) throw Error("Missing small prop kit");
   const propsManifest = await propsResponse.json();
@@ -102401,8 +102401,8 @@ var pickGround = (list, h) => {
 async function createBiomeNatureArtV1(env, review, prior) {
   const kits = {}, draws = { tree: 0, base: 0, rock: 0, ground: 0 };
   let decodedBytes = 0, downloadBytes = 0;
-  async function decode(f, root5) {
-    const r = await env.fetch(new URL(f.path, root5));
+  async function decode(f, root6) {
+    const r = await env.fetch(new URL(f.path, root6));
     if (!r.ok) throw Error("Missing nature sprite source");
     const bytes = await r.arrayBuffer(), sha = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (n) => n.toString(16).padStart(2, "0")).join("");
     if (sha !== f.sha256 || bytes.byteLength !== f.bytes) throw Error("Nature sprite commitment mismatch");
@@ -102425,12 +102425,12 @@ async function createBiomeNatureArtV1(env, review, prior) {
     }
   }
   for (const [code2, name] of Object.entries(BIOME_NATURE_KITS)) {
-    const root5 = new URL(`../../assets/${name}-nature-v1/`, import.meta.url), response = await env.fetch(new URL("kit-manifest.json", root5));
+    const root6 = new URL(`../../assets/${name}-nature-v1/`, import.meta.url), response = await env.fetch(new URL("kit-manifest.json", root6));
     if (!response.ok) throw Error("Missing " + name + " nature kit");
     const manifest = await response.json();
     if (manifest.version !== name + "-nature-v1" || !(manifest.pxPerUnit > 0) || !manifest.files?.length || manifest.files.some((f) => !ROLES.has(f.role) || !f.slots?.length)) throw Error("Invalid " + name + " nature kit");
     const ppu = manifest.pxPerUnit, byKind = {};
-    for (const f of manifest.files) for (const { kind, s, image } of await decode(f, root5)) (byKind[kind] ??= []).push(Object.freeze({ image, w: s.width / ppu, h: s.height / ppu, ax: s.anchor[0] / ppu, ay: s.anchor[1] / ppu }));
+    for (const f of manifest.files) for (const { kind, s, image } of await decode(f, root6)) (byKind[kind] ??= []).push(Object.freeze({ image, w: s.width / ppu, h: s.height / ppu, ax: s.anchor[0] / ppu, ay: s.anchor[1] / ppu }));
     for (const kind of new Set([...PICK[code2].tree, ...PICK[code2].base ?? [], ...PICK[code2].rock].filter((k) => typeof k === "string").concat(PICK[code2].ground.map((g) => g[0])))) if (!byKind[kind]) throw Error("Nature kit " + name + " lacks " + kind);
     kits[code2] = byKind;
   }
@@ -102911,14 +102911,14 @@ function cropMaterial(p, w, s) {
   return { width: s.width, height: s.height, data: out4 };
 }
 async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false } = {}) {
-  const root5 = new URL("../../assets/painted-paths-v1/", import.meta.url), r = await env.fetch(new URL("kit-manifest.json", root5));
+  const root6 = new URL("../../assets/painted-paths-v1/", import.meta.url), r = await env.fetch(new URL("kit-manifest.json", root6));
   if (!r.ok) throw Error("Missing painted path kit");
   const kit2 = await r.json();
   if (JSON.stringify(kit2.targets) !== JSON.stringify(PAINTED_REVIEW_TARGETS) || kit2.version !== PAINTED_ROUTE_VERSION || !isSeededBindingV1(review.binding) && (review.asset.assetId !== kit2.assetId || review.binding.assetHash !== kit2.assetHash)) throw Error("Painted path pilot input commitment mismatch");
   const begin2 = env.performance.now(), profiles2 = [], downloads = kit2.files.reduce((n, f) => n + f.bytes, 0);
   let material;
   for (const [file, f] of kit2.files.entries()) {
-    const response = await env.fetch(new URL(f.path, root5));
+    const response = await env.fetch(new URL(f.path, root6));
     if (!response.ok) throw Error("Missing painted path source");
     const bytes = await response.arrayBuffer(), hash62 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (v) => v.toString(16).padStart(2, "0")).join("");
     if (hash62 !== f.sha256 || bytes.byteLength !== f.bytes) throw Error("Painted path source commitment mismatch");
@@ -109319,12 +109319,12 @@ function net(c, x, y, r, spin, flat2 = 1, a = 1) {
   const lines2 = [];
   for (let k = 0; k < sp; k++) lines2.push([[0, 0], pts2(k)]);
   for (const rr3 of [0.45, 0.85]) {
-    const ring8 = [];
+    const ring9 = [];
     for (let k = 0; k <= sp; k++) {
       const [px7, py] = pts2(k);
-      ring8.push([px7 * rr3, py * rr3]);
+      ring9.push([px7 * rr3, py * rr3]);
     }
-    lines2.push(ring8);
+    lines2.push(ring9);
   }
   lines2.forEach((l) => strand(c, l, 0.9, 1));
   c.restore();
@@ -111208,9 +111208,9 @@ function wightfang(c, A2) {
   px3(c, 5, -0.2, 7.6, 0.4, "#9be37a");
 }
 function rootfang(c, A2) {
-  const bark = { b: "#8a5a3a", d: "#6a4430", l: "#b07a4e" }, sap = { b: "#e2c99a", d: "#c4a571", l: "#f6ead0" }, heart = "#8a5a34", moss5 = { b: "#6fa04f", d: "#4f7f3c" }, silk = { b: "#eef2e2", d: "#cbd3b8" };
+  const bark = { b: "#8a5a3a", d: "#6a4430", l: "#b07a4e" }, sap = { b: "#e2c99a", d: "#c4a571", l: "#f6ead0" }, heart = "#8a5a34", moss6 = { b: "#6fa04f", d: "#4f7f3c" }, silk = { b: "#eef2e2", d: "#cbd3b8" };
   G3(c, [0.4, -1.4, -0.9, -1.6, -1.6, -0.4, -1.2, 1.2, 0.4, 1.4], bark, { split: 0.5, lw: 0.8 });
-  G3(c, [-1.3, -0.9, -0.8, -1.7, 0.4, -1.6, 0.2, -0.7, -0.8, -0.4], moss5, { flat: true, lw: 0.6 });
+  G3(c, [-1.3, -0.9, -0.8, -1.7, 0.4, -1.6, 0.2, -0.7, -0.8, -0.4], moss6, { flat: true, lw: 0.6 });
   R3(c, 0.3, -1.1, 2.7, 2.2, bark, { split: 0.62, lw: 0.8 });
   R3(c, 1.2, -1.2, 1, 2.4, silk, { flat: true, lw: 0.6 });
   G3(c, [2.6, -1, 3.9, -1.2, 3.2, -2.6, 1.8, -3.5, 1.4, -2.6, 2.6, -2], bark, { split: 0.55, lw: 0.8 });
@@ -111404,15 +111404,15 @@ function sunshield(c, A2) {
   gem(c, x, y - 4.6, 1.4, A2.gem);
 }
 function barkheart(c, A2) {
-  const bark = { b: "#7a5236", d: "#5e3e28", l: "#a8784d" }, moss5 = { b: "#5f8f45", d: "#46703a" }, silk = { b: "#e9eedb", d: "#c3ccb0" }, grain = "#3f2a1c", hi = "#a8784d";
+  const bark = { b: "#7a5236", d: "#5e3e28", l: "#a8784d" }, moss6 = { b: "#5f8f45", d: "#46703a" }, silk = { b: "#e9eedb", d: "#c3ccb0" }, grain = "#3f2a1c", hi = "#a8784d";
   for (const p of [[-17.2, 20.4, -18.9, 23.3, -15.7, 22.1], [-11.6, 20.6, -12.6, 23.8, -9.9, 22.3], [-6.4, 20.4, -4.6, 23.1, -7.9, 22.4]]) G3(c, p, { b: "#5e3e28" }, { flat: true, lw: 1 });
   const slabs2 = [[-18.6, 4.4, -17, 1.2, -14.6, 3.2, -14.2, 21.4, -18.2, 21.2], [-14.6, 2.6, -12, -0.4, -9, 1.8, -8.6, 21.8, -14.2, 21.6], [-9, 2.8, -6.4, 0.8, -3.2, 3.4, -3.4, 21.2, -8.6, 21.6]];
   slabs2.forEach((s) => G3(c, s, bark, { split: 0.62, lw: 1.7 }));
   for (const [x, y, h] of [[-17.4, 6, 4.2], [-15.8, 12.6, 5], [-16.9, 17.4, 2.6], [-12.8, 4.4, 3.4], [-10.4, 9, 3], [-12.2, 15.6, 4.4], [-7.4, 5.6, 4.6], [-5, 12.8, 3.6], [-6.6, 17.2, 3]]) px3(c, x, y, 0.7, h, grain);
   for (const [x, y, h] of [[-17.9, 8.4, 6], [-13.6, 6, 7], [-8, 8, 6.4]]) px3(c, x, y, 0.8, h, hi);
-  G3(c, [-18.6, 4.6, -17, 1.4, -14.7, 3.3, -15.3, 5, -16.6, 3.9, -17.8, 5.4], moss5, { split: 0.6, lw: 1 });
-  G3(c, [-14.5, 2.8, -12, -0.2, -9.1, 2, -10, 3.6, -12.2, 2.4, -13.6, 4], moss5, { split: 0.6, lw: 1 });
-  G3(c, [-8.9, 3, -6.4, 1, -3.3, 3.6, -4.6, 4.8, -6.6, 3.4, -8, 4.6], moss5, { split: 0.6, lw: 1 });
+  G3(c, [-18.6, 4.6, -17, 1.4, -14.7, 3.3, -15.3, 5, -16.6, 3.9, -17.8, 5.4], moss6, { split: 0.6, lw: 1 });
+  G3(c, [-14.5, 2.8, -12, -0.2, -9.1, 2, -10, 3.6, -12.2, 2.4, -13.6, 4], moss6, { split: 0.6, lw: 1 });
+  G3(c, [-8.9, 3, -6.4, 1, -3.3, 3.6, -4.6, 4.8, -6.6, 3.4, -8, 4.6], moss6, { split: 0.6, lw: 1 });
   for (const y of [6.6, 16.6]) {
     R3(c, -18.8, y, 15.8, 1.8, silk, { split: 0.72, lw: 1 });
     for (let x = -17.6; x < -3.6; x += 2.2) px3(c, x, y + 0.3, 0.6, 1.2, "#aeb79a");
@@ -111545,7 +111545,7 @@ function silkLeg(c, p, w0, pal2, lw = 0.8) {
   return [tx, ty];
 }
 function silkspinner(c, A2, t) {
-  const bark = { b: "#7a5236", d: "#5c3c27", l: "#a3744c" }, silk = { b: "#eef2e2", d: "#c9d2b6" }, moss5 = { b: "#6fa04f", d: "#4f7f3c" };
+  const bark = { b: "#7a5236", d: "#5c3c27", l: "#a3744c" }, silk = { b: "#eef2e2", d: "#c9d2b6" }, moss6 = { b: "#6fa04f", d: "#4f7f3c" };
   const q2 = SILK_CHARGE, n = q2 == null ? 1.5 : Math.max(0, q2), regrow = q2 != null && q2 < 0 ? 1 + q2 : 1, ready = q2 != null && q2 >= 3;
   const s = (0.84 + n * 0.06) * (regrow < 1 ? 0.3 + 0.7 * regrow : 1), shake = ready ? Math.sin(t * 40) * 0.35 : 0, cy2 = -26.6;
   if (regrow > 0.3) glow4(c, 0, cy2, 6 + n * 1.4, "199,245,143", (0.12 + n * 0.07) * regrow);
@@ -111614,7 +111614,7 @@ function silkspinner(c, A2, t) {
     const tip = silkLeg(c, [f * 0.8, -21, f * 4.6, -27.4, f * 1.4, -32.2], 2.2, bark);
     G3(c, [tip[0] - f * 0.2, tip[1] + 1.2, tip[0] + f * 1.6, tip[1] - 0.6, tip[0] - f * 0.6, tip[1] - 1], accPal(A2), { flat: true, lw: 0.6 });
   }
-  G3(c, [-1.9, -20.4, -0.6, -22, 1.4, -21.8, 2, -20.4], moss5, { flat: true, lw: 0.6 });
+  G3(c, [-1.9, -20.4, -0.6, -22, 1.4, -21.8, 2, -20.4], moss6, { flat: true, lw: 0.6 });
   gem(c, 0, -21, 1.5, A2.gem);
 }
 var STAVES = { silkspinner, "undying-sun-staff": undyingSunStaff, staff, "crook-staff": crookStaff, "gnarled-staff": gnarledStaff };
@@ -116980,13 +116980,13 @@ function advanceStirringV1(s) {
     return t ? [t] : [];
   });
   if (!st && !heroes2.length) return false;
-  const root5 = install(s), loaded = new Set(s.d9World.runtime.chunks.map((c) => c.chunkX + "," + c.chunkY)), anchored = new Set(s.d9World.runtime.chunks.flatMap((c) => (c.anchors ?? []).map((a) => a.ordinal)));
+  const root6 = install(s), loaded = new Set(s.d9World.runtime.chunks.map((c) => c.chunkX + "," + c.chunkY)), anchored = new Set(s.d9World.runtime.chunks.flatMap((c) => (c.anchors ?? []).map((a) => a.ordinal)));
   let changed = !st;
-  for (const [key4, until] of Object.entries(root5.rest)) if (until <= s.tick) {
-    delete root5.rest[key4];
+  for (const [key4, until] of Object.entries(root6.rest)) if (until <= s.tick) {
+    delete root6.rest[key4];
     changed = true;
   }
-  for (const [key4, r] of Object.entries(root5.rows)) {
+  for (const [key4, r] of Object.entries(root6.rows)) {
     const g = groupAt(s, r.ordinal), rec = g ? s.d9World.worldEvents.records[g.groupId] : null, slot = slots.find((q2) => q2.n === r.ordinal % 1e3);
     if (g) {
       const anchor2 = s.d9World.runtime.groups.find((d) => d.groupId === g.groupId)?.anchor, q2 = anchor2 && tileOf(s, anchor2);
@@ -116997,19 +116997,19 @@ function advanceStirringV1(s) {
     }
     const running2 = rec && rec.status === "active", gone = !g && slot && !anchored.has(r.ordinal) && loaded.has(chunkKey(slot.x, slot.y)) && loaded.has(chunkKey(slot.home.x, slot.home.y));
     if (rec?.status === "completed" || g?.cleared && !running2 || s.tick >= r.untilTick && !running2 || gone || !slot) {
-      delete root5.rows[key4];
-      if (Object.keys(root5.rest).length < P21.maxRest) root5.rest[key4] = s.tick + P21.restTicks;
-      root5.nextTick = Math.max(root5.nextTick, s.tick + gap(s, r.ordinal));
+      delete root6.rows[key4];
+      if (Object.keys(root6.rest).length < P21.maxRest) root6.rest[key4] = s.tick + P21.restTicks;
+      root6.nextTick = Math.max(root6.nextTick, s.tick + gap(s, r.ordinal));
       changed = true;
     }
   }
   for (const h of heroes2) {
-    if (s.tick < root5.nextTick || Object.keys(root5.rows).length >= P21.maxRows) break;
-    const near5 = Object.values(root5.rows).filter((r) => Math.hypot(r.tile.x - h.x, r.tile.y - h.y) <= P21.reachTiles).length;
+    if (s.tick < root6.nextTick || Object.keys(root6.rows).length >= P21.maxRows) break;
+    const near5 = Object.values(root6.rows).filter((r) => Math.hypot(r.tile.x - h.x, r.tile.y - h.y) <= P21.reachTiles).length;
     if (near5 >= P21.perHero) continue;
     let best = null, low = Infinity;
     for (const q2 of slots) {
-      if (root5.rows[q2.n] || root5.rest[q2.n] !== void 0 || Math.hypot(q2.x - h.x, q2.y - h.y) > P21.reachTiles) continue;
+      if (root6.rows[q2.n] || root6.rest[q2.n] !== void 0 || Math.hypot(q2.x - h.x, q2.y - h.y) > P21.reachTiles) continue;
       const g = groupAt(s, q2.ordinal);
       if (g && (g.cleared || s.d9World.worldEvents.records[g.groupId])) continue;
       if (!kindAt(s, q2.ordinal)) continue;
@@ -117021,11 +117021,11 @@ function advanceStirringV1(s) {
     }
     if (!best) continue;
     const angle3 = unit4(s.campaign.seed.seedHex + "/stir-angle/" + best.n + "/" + s.tick) * Math.PI * 2, dist4 = P21.offsetTiles[0] + unit4(s.campaign.seed.seedHex + "/stir-dist/" + best.n + "/" + s.tick) * (P21.offsetTiles[1] - P21.offsetTiles[0]);
-    root5.rows[best.n] = { ordinal: best.ordinal, kind: kindAt(s, best.ordinal), startedTick: s.tick, untilTick: s.tick + P21.stirTicks, tile: { x: best.x, y: best.y }, center: { x: Math.max(0, Math.round(best.x + Math.cos(angle3) * dist4)), y: Math.max(0, Math.round(best.y + Math.sin(angle3) * dist4)) } };
-    root5.nextTick = s.tick + gap(s, best.ordinal);
+    root6.rows[best.n] = { ordinal: best.ordinal, kind: kindAt(s, best.ordinal), startedTick: s.tick, untilTick: s.tick + P21.stirTicks, tile: { x: best.x, y: best.y }, center: { x: Math.max(0, Math.round(best.x + Math.cos(angle3) * dist4)), y: Math.max(0, Math.round(best.y + Math.sin(angle3) * dist4)) } };
+    root6.nextTick = s.tick + gap(s, best.ordinal);
     changed = true;
   }
-  for (const r of Object.values(root5.rows)) {
+  for (const r of Object.values(root6.rows)) {
     const k = kindAt(s, r.ordinal);
     if (k && k !== r.kind) {
       r.kind = k;
@@ -117651,12 +117651,12 @@ var lanes = /* @__PURE__ */ new WeakMap();
 function laneFor(doc) {
   let lane2 = lanes.get(doc);
   if (lane2) return lane2;
-  const root5 = doc.createElement("div");
-  root5.className = "toast-lane-v1";
-  root5.setAttribute("role", "status");
-  root5.setAttribute("aria-live", "polite");
-  root5.dataset.gameplayHud = "";
-  doc.body.append(root5);
+  const root6 = doc.createElement("div");
+  root6.className = "toast-lane-v1";
+  root6.setAttribute("role", "status");
+  root6.setAttribute("aria-live", "polite");
+  root6.dataset.gameplayHud = "";
+  doc.body.append(root6);
   const cards = /* @__PURE__ */ new Map();
   function remove(card, how = "fade") {
     if (!card.isConnected) return;
@@ -117748,17 +117748,17 @@ function laneFor(doc) {
     const count = doc.createElement("span");
     count.className = "toast-count";
     card.append(badge, text3, count);
-    root5.prepend(card);
+    root6.prepend(card);
     cards.set(id2, card);
     swipe(card);
     arm12(card, ms);
-    const visible3 = [...root5.querySelectorAll(".toast-v1:not([data-leaving])")];
+    const visible3 = [...root6.querySelectorAll(".toast-v1:not([data-leaving])")];
     for (const old2 of visible3.slice(MAX_VISIBLE)) remove(old2);
     return card;
   }
   lane2 = { show, destroy() {
     for (const c of cards.values()) clearTimeout(c.timer);
-    root5.remove();
+    root6.remove();
     lanes.delete(doc);
   } };
   lanes.set(doc, lane2);
@@ -117804,11 +117804,11 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     b.addEventListener("click", onClick);
     return b;
   };
-  const root5 = el3("section", "hero-creator-v1" + (beforeGame ? " is-before-game" : ""));
-  root5.hidden = true;
-  root5.setAttribute("role", "dialog");
-  root5.setAttribute("aria-modal", "true");
-  root5.setAttribute("aria-labelledby", "hero-creator-title");
+  const root6 = el3("section", "hero-creator-v1" + (beforeGame ? " is-before-game" : ""));
+  root6.hidden = true;
+  root6.setAttribute("role", "dialog");
+  root6.setAttribute("aria-modal", "true");
+  root6.setAttribute("aria-labelledby", "hero-creator-title");
   const panel = el3("div", "hc-panel"), head18 = el3("header", "hc-head"), title2 = el3("h2", "", "Create your hero"), intro = el3("p", "hc-intro");
   title2.id = "hero-creator-title";
   head18.append(title2, intro);
@@ -117821,7 +117821,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   }), confirm = button3("hc-confirm", "", () => save());
   const switchHero = button3("hc-later", "Switch hero", () => {
     if (!busy && openHeroes) {
-      root5.hidden = true;
+      root6.hidden = true;
       opener = null;
       openHeroes();
     }
@@ -117935,9 +117935,9 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   const lookFields = [nameField, faceField, hairField, hairColorField, skinField, beardField];
   body5.append(preview, options);
   panel.append(head18, body5, foot2);
-  root5.append(panel);
-  document2.body.append(root5);
-  root5.addEventListener("keydown", (e) => {
+  root6.append(panel);
+  document2.body.append(root6);
+  root6.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !busy && mode !== "create") {
       e.preventDefault();
       close();
@@ -118063,7 +118063,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     const [label7, ready] = confirmState();
     confirm.textContent = label7;
     confirm.disabled = !ready;
-    if (!root5.hidden) paintThumbs();
+    if (!root6.hidden) paintThumbs();
   }
   async function chooseClass(classId) {
     const c = HERO_CLASSES[classId];
@@ -118133,7 +118133,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     }
     if (beforeGame) {
       status2.textContent = "";
-      root5.hidden = true;
+      root6.hidden = true;
       beforeGame.onDone({ look: next, cls, deferClass });
       return;
     }
@@ -118174,7 +118174,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     status2.textContent = "";
     thumbsKey = "";
     opener = document2.activeElement;
-    root5.hidden = false;
+    root6.hidden = false;
     paint3();
     paintStage(environment.performance?.now?.() / 1e3 || 0);
     if (startingHero && mode === "create") {
@@ -118199,17 +118199,17 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     facing3 = 1;
     status2.textContent = "";
     thumbsKey = "";
-    root5.hidden = false;
+    root6.hidden = false;
     paint3();
     const frame3 = () => {
-      if (root5.hidden) return;
+      if (root6.hidden) return;
       paintStage(environment.performance.now() / 1e3);
       environment.requestAnimationFrame(frame3);
     };
     frame3();
   }
   function close() {
-    root5.hidden = true;
+    root6.hidden = true;
     const back = opener;
     opener = null;
     if (back?.isConnected && back.closest("[role=dialog]:not([hidden])")) back.focus({ preventScroll: true });
@@ -118217,16 +118217,16 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   }
   function refresh(m, available) {
     const p = local8(m);
-    if (root5.hidden) {
+    if (root6.hidden) {
       if (available && p?.d8 && !p.d8.look && m.persistence?.phase === "encounter" && m.entitiesById[p.entityId]?.alive) open3(null);
       else if (available && !busy && !kitBusy && classKitDue(m)) grantKit(m);
       return;
     }
     paintStage((environment.performance?.now?.() ?? Date.now()) / 1e3);
   }
-  return Object.freeze({ open: open3, openBeforeGame, refresh, isOpen: () => !root5.hidden, destroy() {
+  return Object.freeze({ open: open3, openBeforeGame, refresh, isOpen: () => !root6.hidden, destroy() {
     document2.removeEventListener(HERO_CREATOR_OPEN_EVENT, onRequest);
-    root5.remove();
+    root6.remove();
   } });
 }
 
@@ -118255,11 +118255,11 @@ function dom(document2) {
     return s;
   };
   const dialog = (labelId) => {
-    const root5 = el3("section", "new-world-v1");
-    root5.setAttribute("role", "dialog");
-    root5.setAttribute("aria-modal", "true");
-    root5.setAttribute("aria-labelledby", labelId);
-    return root5;
+    const root6 = el3("section", "new-world-v1");
+    root6.setAttribute("role", "dialog");
+    root6.setAttribute("aria-modal", "true");
+    root6.setAttribute("aria-labelledby", labelId);
+    return root6;
   };
   return { el: el3, button: button3, icon: icon2, dialog };
 }
@@ -118272,7 +118272,7 @@ async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV
 function chooseWorld(document2, { pick: pick4, text: text3, roll: roll9 }) {
   const { el: el3, button: button3, icon: icon2, dialog } = dom(document2);
   return new Promise((resolve) => {
-    const root5 = dialog("new-world-title"), panel = el3("div", "nw-panel"), head18 = el3("header", "nw-head"), title2 = el3("h2", "", "Choose your world");
+    const root6 = dialog("new-world-title"), panel = el3("div", "nw-panel"), head18 = el3("header", "nw-head"), title2 = el3("h2", "", "Choose your world");
     title2.id = "new-world-title";
     head18.append(title2, el3("p", "nw-intro", "Each hero lives in one world. Play the classic map, or grow a new one from a seed."));
     const body5 = el3("div", "nw-body"), cards = el3("div", "nw-cards"), legend = el3("p", "nw-legend", "World");
@@ -118312,12 +118312,12 @@ function chooseWorld(document2, { pick: pick4, text: text3, roll: roll9 }) {
     const foot2 = el3("footer", "nw-foot"), next = button3("nw-next", "", () => {
       const seed2 = worldSeedV1(input.value);
       if (pick4 === "seeded" && !seed2) return;
-      root5.remove();
+      root6.remove();
       resolve(pick4 === "classic" ? { kind: "classic" } : { kind: "seeded", seed: seed2, text: input.value });
     });
     foot2.append(next);
     panel.append(head18, body5, foot2);
-    root5.append(panel);
+    root6.append(panel);
     input.addEventListener("input", paint3);
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -118342,7 +118342,7 @@ function chooseWorld(document2, { pick: pick4, text: text3, roll: roll9 }) {
       next.textContent = blocked3 ? "Type or roll a seed" : "Next: make your hero";
     }
     paint3();
-    document2.body.append(root5);
+    document2.body.append(root6);
     (pick4 === "seeded" ? seededCard : classicCard).focus({ preventScroll: true });
   });
 }
@@ -118402,18 +118402,18 @@ async function buildWithHero(environment, seed2, save, startBuild) {
 }
 function buildStrip(document2, seed2) {
   const { el: el3, icon: icon2 } = dom(document2);
-  const root5 = el3("div", "nw-strip"), title2 = el3("strong", "nw-strip-title"), detail = el3("span", "nw-strip-detail"), bar2 = el3("span", "nw-bar"), fill9 = el3("span", "nw-bar-fill"), percent = el3("span", "nw-strip-percent");
-  root5.setAttribute("role", "status");
+  const root6 = el3("div", "nw-strip"), title2 = el3("strong", "nw-strip-title"), detail = el3("span", "nw-strip-detail"), bar2 = el3("span", "nw-bar"), fill9 = el3("span", "nw-bar-fill"), percent = el3("span", "nw-strip-percent");
+  root6.setAttribute("role", "status");
   bar2.append(fill9);
-  root5.append(icon2("seeded", "nw-strip-icon"), title2, detail, bar2, percent);
+  root6.append(icon2("seeded", "nw-strip-icon"), title2, detail, bar2, percent);
   let last = "";
-  return { root: root5, paint(state2) {
+  return { root: root6, paint(state2) {
     const key4 = JSON.stringify([Math.floor(state2.fraction * 100), state2.stage, state2.failed]);
     if (key4 === last) return;
     last = key4;
     const done3 = state2.stage === WORLD_BUILD_STAGES.length, shown2 = Math.floor(state2.fraction * 100);
-    root5.classList.toggle("is-failed", Boolean(state2.failed));
-    root5.classList.toggle("is-done", done3);
+    root6.classList.toggle("is-failed", Boolean(state2.failed));
+    root6.classList.toggle("is-done", done3);
     title2.textContent = state2.failed ? "This world couldn\u2019t be built" : done3 ? "Your world is ready" : "Building your world";
     detail.textContent = state2.failed ? "Seed " + seed2.seed + " \xB7 you can try again after making your hero" : "Seed " + seed2.seed + (done3 ? "" : " \xB7 " + WORLD_BUILD_STAGES[state2.stage].label);
     bar2.hidden = percent.hidden = Boolean(state2.failed);
@@ -118423,10 +118423,10 @@ function buildStrip(document2, seed2) {
 }
 function waitingPanel(document2, environment, seed2) {
   const { el: el3, button: button3, dialog } = dom(document2);
-  const root5 = dialog("new-world-wait-title"), panel = el3("div", "nw-panel nw-wait-panel"), head18 = el3("header", "nw-head"), title2 = el3("h2", "", "Your world is almost ready"), intro = el3("p", "nw-intro");
+  const root6 = dialog("new-world-wait-title"), panel = el3("div", "nw-panel nw-wait-panel"), head18 = el3("header", "nw-head"), title2 = el3("h2", "", "Your world is almost ready"), intro = el3("p", "nw-intro");
   title2.id = "new-world-wait-title";
   head18.append(title2, intro);
-  root5.hidden = true;
+  root6.hidden = true;
   const body5 = el3("div", "nw-wait"), heroBox = el3("div", "nw-wait-hero"), portrait = el3("canvas", "nw-wait-portrait"), heroName = el3("strong", "nw-wait-name"), heroClass = el3("span", "nw-wait-class");
   portrait.setAttribute("aria-hidden", "true");
   heroBox.append(portrait, heroName, heroClass);
@@ -118450,7 +118450,7 @@ function waitingPanel(document2, environment, seed2) {
   const answer = (value2) => {
     const s = settle;
     settle = null;
-    root5.hidden = true;
+    root6.hidden = true;
     s?.(value2);
   };
   const back = button3("nw-quiet", "Back to hero", () => answer("back")), start = button3("nw-next", "Starts when the world is ready", () => {
@@ -118458,15 +118458,15 @@ function waitingPanel(document2, environment, seed2) {
   start.disabled = true;
   foot2.append(status2, back, classic, retry, start);
   panel.append(head18, body5, foot2);
-  root5.append(panel);
-  document2.body.append(root5);
+  root6.append(panel);
+  document2.body.append(root6);
   let name = "";
   return {
     show(hero, build2) {
       name = hero.look.name;
       heroName.textContent = name;
       heroClass.textContent = (hero.cls ? HERO_CLASSES[hero.cls].name : "No class yet") + " \xB7 Level 1";
-      root5.hidden = false;
+      root6.hidden = false;
       environment.requestAnimationFrame(() => {
         const r = portrait.getBoundingClientRect();
         if (!r.width) return;
@@ -118489,11 +118489,11 @@ function waitingPanel(document2, environment, seed2) {
     },
     paint: paint3,
     remove() {
-      root5.remove();
+      root6.remove();
     }
   };
   function paint3(state2) {
-    if (root5.hidden) return;
+    if (root6.hidden) return;
     const shown2 = Math.floor(state2.fraction * 100);
     fill9.style.width = shown2 + "%";
     percent.textContent = shown2 + "%";
@@ -119315,9 +119315,9 @@ function projectHollowV1(r, d = null, s = null) {
   if (!r) return { wave: 0, totalWaves: 3, living: 0, remaining: 13, nextWaveTicks: HOLLOW_POLICY.firstWaveTicks, guardian: false };
   return { wave: r.hollow.launchedWaves, totalWaves: 3, living: r.stages.filter((t) => t.phase === "hatched").length, remaining: r.stages.filter((t) => t.phase !== "defeated").length, nextWaveTicks: Math.max(0, r.hollow.nextWaveElapsed - r.elapsedTicks), guardian: r.hollow.launchedWaves === 3 && r.stages[12].phase !== "defeated", ...r.rulesVersion === HOLLOW_POUR_VERSION && d ? { mouth: hollowMouthPoints(d.anchor)[0], emergences: r.stages.flatMap((t, n) => t.phase === "hatched" && r.elapsedTicks - t.at < 90 ? [{ entityId: d.members[n].entityId, ageTicks: r.elapsedTicks - t.at, position: { ...s?.entitiesById[d.members[n].entityId]?.position ?? d.members[n].position } }] : []) } : {} };
 }
-function openLine(c, a, b, hull2) {
+function openLine(c, a, b, hull3) {
   const n = Math.ceil(Math.hypot(a.x - b.x, a.y - b.y) / 8);
-  for (let i = 0; i <= n; i++) if (collidesWithTiles(c, a.x + (b.x - a.x) * i / n, a.y + (b.y - a.y) * i / n, hull2)) return false;
+  for (let i = 0; i <= n; i++) if (collidesWithTiles(c, a.x + (b.x - a.x) * i / n, a.y + (b.y - a.y) * i / n, hull3)) return false;
   return true;
 }
 
@@ -119614,9 +119614,9 @@ var shrineHomes = (a, n = 0) => SHRINE_POLICY.homes.map((_, i) => {
   const [x, y] = SHRINE_POLICY.homes[(i + n) % SHRINE_POLICY.homes.length];
   return { x: a.x + x, y: a.y + y };
 });
-function openLine3(c, a, b, hull2) {
+function openLine3(c, a, b, hull3) {
   const n = Math.max(1, Math.ceil(Math.hypot(a.x - b.x, a.y - b.y) / 8));
-  for (let i = 0; i <= n; i++) if (collidesWithTiles(c, a.x + (b.x - a.x) * i / n, a.y + (b.y - a.y) * i / n, hull2)) return false;
+  for (let i = 0; i <= n; i++) if (collidesWithTiles(c, a.x + (b.x - a.x) * i / n, a.y + (b.y - a.y) * i / n, hull3)) return false;
   return true;
 }
 function sealShrineV1(s, r, g) {
@@ -119754,9 +119754,9 @@ function validateAmbushV1(r) {
   if (h.waiting) requireContract(!h.failed && h.merchantHp === AMBUSH_POLICY.merchantHp && r.stages.every((t) => ["pending", "defeated"].includes(t.phase)), "Waiting ambush");
   if (r.status === "completed") requireContract(ambushReadyV1(r) && !h.waiting, "Incomplete ambush completion");
 }
-function openLine4(c, a, b, hull2) {
+function openLine4(c, a, b, hull3) {
   const n = Math.max(1, Math.ceil(Math.hypot(a.x - b.x, a.y - b.y) / 8));
-  for (let i = 0; i <= n; i++) if (collidesWithTiles(c, a.x + (b.x - a.x) * i / n, a.y + (b.y - a.y) * i / n, hull2)) return false;
+  for (let i = 0; i <= n; i++) if (collidesWithTiles(c, a.x + (b.x - a.x) * i / n, a.y + (b.y - a.y) * i / n, hull3)) return false;
   return true;
 }
 function retire(s, g, n) {
@@ -120004,10 +120004,10 @@ function place3(g, a, p) {
   a.movementIntent = { x: 0, y: 0 };
   if (g.containment) g.containment.memberHomesById[a.entityId] = { ...p };
 }
-function cacheMoundV1(c, anchor2, n, resets, hull2 = 10) {
+function cacheMoundV1(c, anchor2, n, resets, hull3 = 10) {
   for (let i = 0; i < CACHE_POLICY.mounds.length; i++) {
     const p = cachePointV1(anchor2, CACHE_POLICY.mounds[(n * 5 + resets * 3 + i) % CACHE_POLICY.mounds.length]);
-    if (!c || !collidesWithTiles(c, p.x, p.y, hull2)) return p;
+    if (!c || !collidesWithTiles(c, p.x, p.y, hull3)) return p;
   }
   return null;
 }
@@ -120163,8 +120163,8 @@ function installWorldEvents(s) {
   if (s.d9World?.plannedWorld) s.d9World.worldEvents ??= { version: SPORE_VERSION, revision: 0, records: {} };
   return s;
 }
-function validateWorldEvents(root5) {
-  const w = root5.worldEvents;
+function validateWorldEvents(root6) {
+  const w = root6.worldEvents;
   if (!w) return;
   closedRecord(w, ["version", "revision", "records"], w.version === PLANNED_LEDGER_VERSION ? ["boons", "blessings", "stirring"] : []);
   requireContract([SPORE_VERSION, HOLLOW_LEDGER_VERSION, PLANNED_LEDGER_VERSION].includes(w.version), "Unknown event policy");
@@ -120788,10 +120788,10 @@ function fastTravelArrivalV1(s, actor, id2) {
   const collision = s.spacesByInstanceId[s.overworldInstanceId].collision, players = [...s.session.playerIds].sort(), index = Math.max(0, players.findIndex((id3) => s.playersById[id3].entityId === actor.entityId));
   const tiles9 = o.tiles.map((_, i) => o.tiles[(index + i) % o.tiles.length]), base3 = o.tiles[0];
   for (let r = Math.max(1, o.near); r <= 10; r++) {
-    const ring8 = [];
-    for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (Math.max(Math.abs(x), Math.abs(y)) === r) ring8.push({ x: base3.x + x, y: base3.y + y, o: -y * 4 + Math.abs(x) });
-    ring8.sort((a, b) => a.o - b.o);
-    tiles9.push(...ring8);
+    const ring9 = [];
+    for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (Math.max(Math.abs(x), Math.abs(y)) === r) ring9.push({ x: base3.x + x, y: base3.y + y, o: -y * 4 + Math.abs(x) });
+    ring9.sort((a, b) => a.o - b.o);
+    tiles9.push(...ring9);
   }
   for (const t of tiles9) {
     const world = address2(t), local8 = projectToLocalFrameD9(world, s.d9World.runtime.frames);
@@ -120936,11 +120936,11 @@ var emptyLog = () => ({ revision: 0, active: [], boardDone: {}, folkDone: {} });
 var ITEM_FAMILY = Object.fromEntries(Object.entries(QUEST_ITEMS).map(([f, it]) => [it.id, f]));
 var questLogV1 = (state2, playerId) => state2?.d9World?.quests?.byPlayer?.[playerId] ?? null;
 function ensureLog(state2, playerId) {
-  const root5 = state2.d9World.quests ??= { version: QUEST_STATE_VERSION, byPlayer: {} };
-  return root5.byPlayer[playerId] ??= emptyLog();
+  const root6 = state2.d9World.quests ??= { version: QUEST_STATE_VERSION, byPlayer: {} };
+  return root6.byPlayer[playerId] ??= emptyLog();
 }
-function validateQuestsV1(root5) {
-  const q2 = root5.quests;
+function validateQuestsV1(root6) {
+  const q2 = root6.quests;
   if (q2 === void 0) return;
   closedRecord(q2, ["version", "byPlayer"]);
   requireContract(q2.version === QUEST_STATE_VERSION && q2.byPlayer && typeof q2.byPlayer === "object" && !Array.isArray(q2.byPlayer) && Object.keys(q2.byPlayer).length <= 8, "Quest state shape");
@@ -121217,10 +121217,10 @@ function questDefeatV1(state2, player, target) {
   return got;
 }
 function advanceQuestsV1(state2) {
-  const root5 = state2.d9World?.quests;
-  if (!root5 || state2.tick % 30) return false;
+  const root6 = state2.d9World?.quests;
+  if (!root6 || state2.tick % 30) return false;
   let changed = false;
-  for (const log2 of Object.values(root5.byPlayer)) for (const r of log2.active) {
+  for (const log2 of Object.values(root6.byPlayer)) for (const r of log2.active) {
     if (r.status !== "active" || !["clear", "hunt"].includes(r.kind)) continue;
     const run2 = siteRun(state2, r.target);
     if (run2 && run2.status === "cleared" && run2.clearedTick !== null && run2.clearedTick >= r.takenTick) {
@@ -121492,11 +121492,11 @@ function overlayWoodlandCaveFamilyParcelsD12_2(chunk4, parcels = []) {
 
 // src/shared/contracts/world_root_contract_d9.js
 var D9_ROOT_VERSION = "world-root-d9-v1";
-function validateOriginHordeShape(root5) {
-  if (root5.originHordes === void 0) return;
-  const overlay = root5.originHordes;
+function validateOriginHordeShape(root6) {
+  if (root6.originHordes === void 0) return;
+  const overlay = root6.originHordes;
   closedRecord(overlay, ["version", "groupsById"]);
-  requireContract(hasWorldCombat(root5.plannedWorld) && overlay.version === "world-origin-horde-overlay-v1", "Unrecognized origin horde overlay");
+  requireContract(hasWorldCombat(root6.plannedWorld) && overlay.version === "world-origin-horde-overlay-v1", "Unrecognized origin horde overlay");
   requireContract(overlay.groupsById && typeof overlay.groupsById === "object" && !Array.isArray(overlay.groupsById) && Object.keys(overlay.groupsById).length <= 16, "Origin horde group bound");
   for (const [id2, row2] of Object.entries(overlay.groupsById)) {
     closedRecord(row2, ["groupId", "episode", "appliedTick", "status", "protectedEpisode", "definition"]);
@@ -121523,67 +121523,67 @@ function validateOriginHordeShape(root5) {
     }
   }
 }
-function validateD9Root(root5) {
-  validateWorldEvents(root5);
-  if (root5.ordinaryRosterV2) {
-    closedRecord(root5.ordinaryRosterV2, ["version", "activatedTick"]);
-    requireContract(hasWorldCombat(root5.plannedWorld) && root5.ordinaryRosterV2.version === "dungeon-ordinary-roster-v2", "Unrecognized V2 ordinary roster");
-    safeInteger(root5.ordinaryRosterV2.activatedTick);
+function validateD9Root(root6) {
+  validateWorldEvents(root6);
+  if (root6.ordinaryRosterV2) {
+    closedRecord(root6.ordinaryRosterV2, ["version", "activatedTick"]);
+    requireContract(hasWorldCombat(root6.plannedWorld) && root6.ordinaryRosterV2.version === "dungeon-ordinary-roster-v2", "Unrecognized V2 ordinary roster");
+    safeInteger(root6.ordinaryRosterV2.activatedTick);
   }
-  if (root5.ordinaryRoster) {
-    closedRecord(root5.ordinaryRoster, ["version", "activatedTick"]);
-    requireContract(hasWorldCombat(root5.plannedWorld) && root5.ordinaryRoster.version === "dungeon-ordinary-roster-v1", "Unrecognized ordinary roster");
-    safeInteger(root5.ordinaryRoster.activatedTick);
+  if (root6.ordinaryRoster) {
+    closedRecord(root6.ordinaryRoster, ["version", "activatedTick"]);
+    requireContract(hasWorldCombat(root6.plannedWorld) && root6.ordinaryRoster.version === "dungeon-ordinary-roster-v1", "Unrecognized ordinary roster");
+    safeInteger(root6.ordinaryRoster.activatedTick);
   }
-  validateOriginHordeShape(root5);
-  closedRecord(root5, ["version", "profile", "origin", "positions", "frame", "regionIndex", "discoveryIndex", "deadlineIndex", "migration", "runtime", "episodes", "content", "paging", "ownershipIndex", "groundIndex", "navigation", "runtimePolicy", "functionalSitesById", "siteReservationsById"], ["plannedWorld", "plannedStart", "settlementInterior", "townInteriors", "originHordes", "ordinaryRoster", "ordinaryRosterV2", "worldEvents", "quests"]);
-  validateQuestsV1(root5);
-  if (root5.plannedWorld) {
-    validatePlannedBinding(root5.plannedWorld);
-    validateWorldPosition(root5.plannedStart);
-  } else requireContract(!root5.plannedStart, "Unbound planned start");
-  requireContract(hasWorldCombat(root5.plannedWorld) ? [COMBAT_RUNTIME_VERSION, LEGACY_COMBAT_RUNTIME_VERSION].includes(root5.runtimePolicy) : root5.runtimePolicy === (hasAlphaPopulation(root5.plannedWorld) ? ALPHA_POPULATION_RETENTION.version : D9_RUNTIME_POLICY.version), "Unrecognized runtime admission policy");
-  requireContract(root5.version === D9_ROOT_VERSION && canonicalStringify(root5.profile) === canonicalStringify(D9_PROFILE), "Unknown pinned world profile");
-  requireContract(/^[a-f0-9]{64}$/.test(root5.origin.manifestHash), "Missing origin commitment");
-  for (const p of Object.values(root5.positions)) validateWorldPosition(p);
-  closedRecord(root5.runtime, ["revision", "frames", "chunks", "groups", "resources"]);
-  const siteGroupCount = Object.values(root5.functionalSitesById).reduce((n, site) => n + functionalSiteGroupsD12(site).length, 0);
-  requireContract(root5.runtime.frames.length <= D9_RUNTIME_POLICY.frames + Number(hasFerries(root5.plannedWorld)) && root5.runtime.chunks.length <= D9_RUNTIME_POLICY.residentChunks && root5.runtime.groups.length <= (usesHordeRetention({ d9World: root5 }) ? worldRetentionBudgets({ d9World: root5 }).groups : D9_RUNTIME_POLICY.proceduralGroups) + siteGroupCount, "D9 runtime admission bound");
-  validateSiteContentRootD9(root5.content);
-  validateWorldPagingD9(root5.paging);
-  validateNavigationD9(root5.navigation);
-  if (root5.navigation.knowledge) requireContract(root5.navigation.knowledge.assetHash === root5.plannedWorld?.assetHash, "Map knowledge asset mismatch");
-  requireContract(root5.functionalSitesById && typeof root5.functionalSitesById === "object" && !Array.isArray(root5.functionalSitesById) && Object.keys(root5.functionalSitesById).length <= 4096, "Functional site collection bound");
-  for (const [id2, site] of Object.entries(root5.functionalSitesById)) {
+  validateOriginHordeShape(root6);
+  closedRecord(root6, ["version", "profile", "origin", "positions", "frame", "regionIndex", "discoveryIndex", "deadlineIndex", "migration", "runtime", "episodes", "content", "paging", "ownershipIndex", "groundIndex", "navigation", "runtimePolicy", "functionalSitesById", "siteReservationsById"], ["plannedWorld", "plannedStart", "settlementInterior", "townInteriors", "originHordes", "ordinaryRoster", "ordinaryRosterV2", "worldEvents", "quests"]);
+  validateQuestsV1(root6);
+  if (root6.plannedWorld) {
+    validatePlannedBinding(root6.plannedWorld);
+    validateWorldPosition(root6.plannedStart);
+  } else requireContract(!root6.plannedStart, "Unbound planned start");
+  requireContract(hasWorldCombat(root6.plannedWorld) ? [COMBAT_RUNTIME_VERSION, LEGACY_COMBAT_RUNTIME_VERSION].includes(root6.runtimePolicy) : root6.runtimePolicy === (hasAlphaPopulation(root6.plannedWorld) ? ALPHA_POPULATION_RETENTION.version : D9_RUNTIME_POLICY.version), "Unrecognized runtime admission policy");
+  requireContract(root6.version === D9_ROOT_VERSION && canonicalStringify(root6.profile) === canonicalStringify(D9_PROFILE), "Unknown pinned world profile");
+  requireContract(/^[a-f0-9]{64}$/.test(root6.origin.manifestHash), "Missing origin commitment");
+  for (const p of Object.values(root6.positions)) validateWorldPosition(p);
+  closedRecord(root6.runtime, ["revision", "frames", "chunks", "groups", "resources"]);
+  const siteGroupCount = Object.values(root6.functionalSitesById).reduce((n, site) => n + functionalSiteGroupsD12(site).length, 0);
+  requireContract(root6.runtime.frames.length <= D9_RUNTIME_POLICY.frames + Number(hasFerries(root6.plannedWorld)) && root6.runtime.chunks.length <= D9_RUNTIME_POLICY.residentChunks && root6.runtime.groups.length <= (usesHordeRetention({ d9World: root6 }) ? worldRetentionBudgets({ d9World: root6 }).groups : D9_RUNTIME_POLICY.proceduralGroups) + siteGroupCount, "D9 runtime admission bound");
+  validateSiteContentRootD9(root6.content);
+  validateWorldPagingD9(root6.paging);
+  validateNavigationD9(root6.navigation);
+  if (root6.navigation.knowledge) requireContract(root6.navigation.knowledge.assetHash === root6.plannedWorld?.assetHash, "Map knowledge asset mismatch");
+  requireContract(root6.functionalSitesById && typeof root6.functionalSitesById === "object" && !Array.isArray(root6.functionalSitesById) && Object.keys(root6.functionalSitesById).length <= 4096, "Functional site collection bound");
+  for (const [id2, site] of Object.entries(root6.functionalSitesById)) {
     requireContract(id2 === site.siteId, "Functional site key mismatch");
     validateFunctionalSiteD9(site);
   }
-  requireContract(root5.siteReservationsById && typeof root5.siteReservationsById === "object" && !Array.isArray(root5.siteReservationsById) && Object.keys(root5.siteReservationsById).length <= 4096, "Site reservation collection bound");
+  requireContract(root6.siteReservationsById && typeof root6.siteReservationsById === "object" && !Array.isArray(root6.siteReservationsById) && Object.keys(root6.siteReservationsById).length <= 4096, "Site reservation collection bound");
   const packages = /* @__PURE__ */ new Set();
-  for (const [id2, r] of Object.entries(root5.siteReservationsById)) {
+  for (const [id2, r] of Object.entries(root6.siteReservationsById)) {
     closedRecord(r, ["version", "siteId", "packageId", "socket", "parcel"]);
     if (r.version === PLANNED_CRYPT_RESERVATION) {
       requireContract(id2 === r.siteId, "Crypt reservation key drift");
       validateSiteSocketD9(r.socket);
-      validatePlannedCryptReservation(root5, r);
+      validatePlannedCryptReservation(root6, r);
       continue;
     }
     if (r.version === PLANNED_RUIN_RESERVATION) {
       requireContract(id2 === r.siteId, "Ruin reservation key drift");
       validateSiteSocketD9(r.socket);
-      validatePlannedRuinReservation(root5, r);
+      validatePlannedRuinReservation(root6, r);
       continue;
     }
     if (r.version === PLANNED_FORT_RESERVATION) {
       requireContract(id2 === r.siteId, "Fort reservation key drift");
       validateSiteSocketD9(r.socket);
-      validatePlannedFortReservation(root5, r);
+      validatePlannedFortReservation(root6, r);
       continue;
     }
     if (r.version === PLANNED_CAVE_RESERVATION) {
       requireContract(id2 === r.siteId && r.socket.siteId === id2, "Planned Cave key mismatch");
       validateSiteSocketD9(r.socket);
-      validatePlannedCaveReservation(root5, r);
+      validatePlannedCaveReservation(root6, r);
       continue;
     }
     const family = r.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID, modernFamily = family && r.parcel?.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_1, naturalFamily = family && r.parcel?.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2;
@@ -121594,24 +121594,24 @@ function validateD9Root(root5) {
     if (r.packageId === WOODLAND_CAVE_PACKAGE_ID) requireContract(r.parcel.version === WOODLAND_CAVE_VERSION && r.parcel.pages.length === 1, "Cave reservation parcel");
     if (family) requireContract([WOODLAND_CAVE_FAMILY_PARCEL_D12, WOODLAND_CAVE_FAMILY_PARCEL_D12_1, WOODLAND_CAVE_FAMILY_PARCEL_D12_2].includes(r.parcel.version) && r.parcel.familyId === WOODLAND_CAVE_FAMILY_ID && r.parcel.spawnOrdinal >= 0 && r.parcel.spawnOrdinal < (naturalFamily ? 2 : modernFamily ? 16 : 4) && r.parcel.pages.length === 1 && (!(modernFamily || naturalFamily) || /^[a-f0-9]{64}$/.test(r.parcel.layoutSeed) && ["small", "standard", "large", "deep"].includes(r.parcel.tier)), "Cave family parcel");
   }
-  if (root5.plannedWorld?.cavePrototype) {
-    const expected = plannedCaveIds(root5.plannedWorld), actual = Object.values(root5.siteReservationsById).filter((r) => r.version === PLANNED_CAVE_RESERVATION).map((r) => r.socket.provenance.reservationId);
+  if (root6.plannedWorld?.cavePrototype) {
+    const expected = plannedCaveIds(root6.plannedWorld), actual = Object.values(root6.siteReservationsById).filter((r) => r.version === PLANNED_CAVE_RESERVATION).map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id2) => actual.includes(id2)), "Planned Cave composition mismatch");
   }
-  if (root5.plannedWorld?.fortPrototype) {
-    const expected = plannedFortIdsV2(root5.plannedWorld), actual = Object.values(root5.siteReservationsById).filter((r) => r.version === PLANNED_FORT_RESERVATION).map((r) => r.socket.provenance.reservationId);
+  if (root6.plannedWorld?.fortPrototype) {
+    const expected = plannedFortIdsV2(root6.plannedWorld), actual = Object.values(root6.siteReservationsById).filter((r) => r.version === PLANNED_FORT_RESERVATION).map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id2) => actual.includes(id2)), "Fort composition mismatch");
   }
-  if (root5.plannedWorld?.ruinPrototype) {
-    const expected = plannedRuinIdsV2(root5.plannedWorld), actual = Object.values(root5.siteReservationsById).filter((r) => r.version === PLANNED_RUIN_RESERVATION).map((r) => r.socket.provenance.reservationId);
+  if (root6.plannedWorld?.ruinPrototype) {
+    const expected = plannedRuinIdsV2(root6.plannedWorld), actual = Object.values(root6.siteReservationsById).filter((r) => r.version === PLANNED_RUIN_RESERVATION).map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id2) => actual.includes(id2)), "Ruin composition mismatch");
   }
-  if (root5.plannedWorld?.cryptPrototype) {
-    const rows = Object.values(root5.siteReservationsById).filter((r) => r.version === PLANNED_CRYPT_RESERVATION);
-    const expected = cryptIdsForBinding(root5.plannedWorld), actual = rows.map((r) => r.socket.provenance.reservationId);
+  if (root6.plannedWorld?.cryptPrototype) {
+    const rows = Object.values(root6.siteReservationsById).filter((r) => r.version === PLANNED_CRYPT_RESERVATION);
+    const expected = cryptIdsForBinding(root6.plannedWorld), actual = rows.map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id2) => actual.includes(id2)), "Crypt composition drift");
   }
-  return root5;
+  return root6;
 }
 
 // src/shared/contracts/origin_egress_d9.js
@@ -122784,24 +122784,24 @@ function installHostileProjectiles(state2) {
   }
 }
 function cancelHostileProjectiles(state2, entityId2) {
-  const root5 = state2.hostileCombat;
-  if (!root5) return;
-  for (const [id2, shot] of Object.entries(root5.projectiles)) if (shot.sourceId === entityId2 || shot.intendedTargetId === entityId2) delete root5.projectiles[id2];
-  for (const [id2, action2] of Object.entries(root5.actionsByEntityId)) if (id2 === entityId2 || action2.targetEntityId === entityId2) {
-    root5.actionsByEntityId[id2] = { ...idleHostileRangedAction(state2.tick), actionSequence: action2.actionSequence, ...action2.nextShotTick !== void 0 ? { nextShotTick: action2.nextShotTick } : {} };
+  const root6 = state2.hostileCombat;
+  if (!root6) return;
+  for (const [id2, shot] of Object.entries(root6.projectiles)) if (shot.sourceId === entityId2 || shot.intendedTargetId === entityId2) delete root6.projectiles[id2];
+  for (const [id2, action2] of Object.entries(root6.actionsByEntityId)) if (id2 === entityId2 || action2.targetEntityId === entityId2) {
+    root6.actionsByEntityId[id2] = { ...idleHostileRangedAction(state2.tick), actionSequence: action2.actionSequence, ...action2.nextShotTick !== void 0 ? { nextShotTick: action2.nextShotTick } : {} };
   }
 }
 function validateHostileProjectiles(state2) {
-  const root5 = state2.hostileCombat;
-  if (!root5) return;
+  const root6 = state2.hostileCombat;
+  if (!root6) return;
   requireContract(hasWorldCombat(state2), "Hostile projectiles outside World combat");
-  closedRecord(root5, ["version", "actionsByEntityId", "projectiles"], ["catalogUpgrade", "catalogUpgradeV2"]);
-  requireContract(root5.version === HOSTILE_PROJECTILES_VERSION, "Hostile projectile version");
-  closedRecord(root5.actionsByEntityId, [], Object.keys(root5.actionsByEntityId));
-  closedRecord(root5.projectiles, [], Object.keys(root5.projectiles));
-  requireContract(Object.keys(root5.actionsByEntityId).length <= Object.keys(state2.entitiesById).length, "Hostile ranged action bound");
+  closedRecord(root6, ["version", "actionsByEntityId", "projectiles"], ["catalogUpgrade", "catalogUpgradeV2"]);
+  requireContract(root6.version === HOSTILE_PROJECTILES_VERSION, "Hostile projectile version");
+  closedRecord(root6.actionsByEntityId, [], Object.keys(root6.actionsByEntityId));
+  closedRecord(root6.projectiles, [], Object.keys(root6.projectiles));
+  requireContract(Object.keys(root6.actionsByEntityId).length <= Object.keys(state2.entitiesById).length, "Hostile ranged action bound");
   const parties = new Set(Object.values(state2.playersById).map((p) => p.entityId));
-  for (const [id2, a] of Object.entries(root5.actionsByEntityId)) {
+  for (const [id2, a] of Object.entries(root6.actionsByEntityId)) {
     const source3 = state2.entitiesById[id2], profile = ranged(source3);
     requireContract(source3?.team === "hostile" && profile, "Hostile ranged action owner");
     closedRecord(a, ["phase", "phaseStartedTick", "phaseEndsTick", "targetEntityId", "aim", "actionSequence"], ["nextShotTick"]);
@@ -122824,14 +122824,14 @@ function validateHostileProjectiles(state2) {
       vector(a.aim, true);
     }
   }
-  requireContract(Object.keys(root5.projectiles).length <= HOSTILE_PROJECTILE_LIMITS.global, "Hostile projectile global bound");
+  requireContract(Object.keys(root6.projectiles).length <= HOSTILE_PROJECTILE_LIMITS.global, "Hostile projectile global bound");
   const counts = /* @__PURE__ */ new Map(), groupByActor = new Map(Object.values(state2.groupsById).flatMap((g) => g.entityIds.map((id2) => [id2, g])));
-  for (const [id2, b] of Object.entries(root5.projectiles)) {
+  for (const [id2, b] of Object.entries(root6.projectiles)) {
     closedRecord(b, ["id", "sourceId", "sourceResidencyRevision", "spaceInstanceId", "intendedTargetId", "position", "direction", "remaining", "remainingTicks", "firedTick", "radius", "type", "attack", "sourceLevel", "actionSequence"]);
     validateId("attackActionId", id2);
     requireContract(b.id === id2, "Hostile projectile identity");
     const source3 = state2.entitiesById[b.sourceId], profile = ranged(source3), g = groupByActor.get(b.sourceId);
-    requireContract(source3?.alive && source3.team === "hostile" && profile && root5.actionsByEntityId[b.sourceId], "Hostile projectile source");
+    requireContract(source3?.alive && source3.team === "hostile" && profile && root6.actionsByEntityId[b.sourceId], "Hostile projectile source");
     requireContract(source3.residency.spaceInstanceId === b.spaceInstanceId && source3.residency.residencyRevision === b.sourceResidencyRevision, "Hostile projectile source residency");
     requireContract(parties.has(b.intendedTargetId), "Hostile projectile intended target");
     requireContract(state2.entitiesById[b.intendedTargetId].residency.spaceInstanceId === b.spaceInstanceId, "Hostile projectile target residency");
@@ -123671,8 +123671,8 @@ function connectedRegionCut(bfs, slots2, settlementNeighbor, random, minimumHome
     roadPairs.add([keyFor(parent), keyFor(bfs[index])].sort().join("/"));
   }
   const candidates = [];
-  for (const root5 of bfs.slice(1)) {
-    const component = /* @__PURE__ */ new Set(), pending = [keyFor(root5)];
+  for (const root6 of bfs.slice(1)) {
+    const component = /* @__PURE__ */ new Set(), pending = [keyFor(root6)];
     while (pending.length) {
       const key4 = pending.pop();
       component.add(key4);
@@ -124233,12 +124233,12 @@ function createAegisMimicSimulation(state2) {
     return Object.values(b.mimicEncounter?.mimicsByEntityId ?? {}).sort((x, y) => x.ordinal - y.ordinal);
   }
   function cleanupHaste(ids4) {
-    const root5 = state2.eliteCombat;
-    if (!root5) return;
-    const elites = new Set(ids4.map((id2) => root5.elitesByEntityId?.[id2]?.eliteId));
-    for (const [id2, h] of Object.entries(root5.hasteByEntityId ?? {})) {
+    const root6 = state2.eliteCombat;
+    if (!root6) return;
+    const elites = new Set(ids4.map((id2) => root6.elitesByEntityId?.[id2]?.eliteId));
+    for (const [id2, h] of Object.entries(root6.hasteByEntityId ?? {})) {
       if (ids4.includes(id2) || !state2.entitiesById[id2]?.alive) {
-        delete root5.hasteByEntityId[id2];
+        delete root6.hasteByEntityId[id2];
         continue;
       }
       h.sourceEliteIds = h.sourceEliteIds.filter((id3) => !elites.has(id3));
@@ -124840,23 +124840,23 @@ function wallContact2(collision, start, delta3, radius) {
 }
 function createHostileProjectileSimulation(state2, { damage, eligible: eligible2, identity: identity2, lineClear: lineClear2, canAct = () => true, canLaunch = eligible2, getSourceLevel = () => 1 }) {
   const profile = ordinaryRangedProfile;
-  const root5 = () => state2.hostileCombat;
+  const root6 = () => state2.hostileCombat;
   const connected = (a) => Object.values(state2.playersById).some((p) => p.entityId === a?.entityId && p.connectionStatus === "connected");
   const resetAction = (action2) => ({ ...idle(state2.tick), ...action2?.nextShotTick !== void 0 ? { nextShotTick: action2.nextShotTick } : {} });
   function cancelSource(id2) {
-    const c = root5();
+    const c = root6();
     if (!c) return;
     delete c.actionsByEntityId[id2];
     for (const [key4, p] of Object.entries(c.projectiles)) if (p.sourceId === id2) delete c.projectiles[key4];
   }
   function cancelTarget(id2) {
-    const c = root5();
+    const c = root6();
     if (!c) return;
     for (const [key4, a] of Object.entries(c.actionsByEntityId)) if (a.targetEntityId === id2) c.actionsByEntityId[key4] = resetAction(a);
     for (const [key4, p] of Object.entries(c.projectiles)) if (p.intendedTargetId === id2) delete c.projectiles[key4];
   }
   function beginTick(activeIds) {
-    const c = root5();
+    const c = root6();
     if (!c) return;
     const active2 = new Set(activeIds);
     for (const [id2, action2] of Object.entries(c.actionsByEntityId)) {
@@ -124880,7 +124880,7 @@ function createHostileProjectileSimulation(state2, { damage, eligible: eligible2
     }
   }
   function observeTarget(source3, target, intent) {
-    const config = profile(source3), c = root5();
+    const config = profile(source3), c = root6();
     if (!config || !c) return intent;
     const action2 = c.actionsByEntityId[source3.entityId] ??= idle(state2.tick);
     if (action2.phase !== "idle") return { x: 0, y: 0 };
@@ -124899,7 +124899,7 @@ function createHostileProjectileSimulation(state2, { damage, eligible: eligible2
     return { x: 0, y: 0 };
   }
   function advance() {
-    const c = root5();
+    const c = root6();
     if (!c) return;
     for (const [id2, action2] of Object.entries(c.actionsByEntityId).sort(([a], [b]) => a.localeCompare(b))) {
       if (action2.phase !== "windup" || state2.tick < action2.phaseEndsTick) continue;
@@ -124970,7 +124970,7 @@ function createHostileProjectileSimulation(state2, { damage, eligible: eligible2
   function canMelee(source3, target) {
     const config = profile(source3);
     if (!config) return true;
-    if (!config.meleeFallback || !target || root5()?.actionsByEntityId[source3.entityId]?.phase !== "idle") return false;
+    if (!config.meleeFallback || !target || root6()?.actionsByEntityId[source3.entityId]?.phase !== "idle") return false;
     return Math.hypot(target.position.x - source3.position.x, target.position.y - source3.position.y) <= config.minimumRange;
   }
   return Object.freeze({ beginTick, observeTarget, advance, cancelSource, cancelTarget, isRanged: (a) => Boolean(profile(a)), canMelee });
@@ -125950,11 +125950,11 @@ function createWorldPursuitPathsV1() {
       return v === 1;
     };
   }
-  function nearestOpen2(open3, size, position4, ring8 = 2) {
+  function nearestOpen2(open3, size, position4, ring9 = 2) {
     const col2 = Math.floor(position4.x / size), row2 = Math.floor(position4.y / size);
     if (open3(col2, row2)) return { col: col2, row: row2 };
     let best = null;
-    for (let r = 1; r <= ring8 && !best; r++) for (let y = row2 - r; y <= row2 + r; y++) for (let x = col2 - r; x <= col2 + r; x++) {
+    for (let r = 1; r <= ring9 && !best; r++) for (let y = row2 - r; y <= row2 + r; y++) for (let x = col2 - r; x <= col2 + r; x++) {
       if (Math.max(Math.abs(x - col2), Math.abs(y - row2)) !== r || !open3(x, y)) continue;
       const d = ((x + 0.5) * size - position4.x) ** 2 + ((y + 0.5) * size - position4.y) ** 2;
       if (!best || d < best.d) best = { col: x, row: y, d };
@@ -127242,9 +127242,9 @@ function createActivityScheduler(state2, options = {}, { beforeSleep = () => tru
     for (const key4 of separatedSince.keys()) if (!relevantPairs.has(key4)) separatedSince.delete(key4);
     const components = /* @__PURE__ */ new Map();
     sorted.forEach((p, i) => {
-      const root5 = find(i);
-      if (!components.has(root5)) components.set(root5, { spaceInstanceId: p.residency.spaceInstanceId, playerEntityIds: [] });
-      components.get(root5).playerEntityIds.push(p.entityId);
+      const root6 = find(i);
+      if (!components.has(root6)) components.set(root6, { spaceInstanceId: p.residency.spaceInstanceId, playerEntityIds: [] });
+      components.get(root6).playerEntityIds.push(p.entityId);
     });
     clusters = [...components.values()];
     const activeIds = new Set(players.map((a) => a.entityId));
@@ -128969,10 +128969,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (--k.ticks <= 0) clearSkillState(combat, "strip");
   }
   function flameWall2(a, stats3, aim2) {
-    const W20 = T116.flameWall, ring8 = aug(a, "flame_wall", 1), at8 = ring8 ? { position: { ...a.position } } : landing2(a, aim2, W20.ahead);
+    const W20 = T116.flameWall, ring9 = aug(a, "flame_wall", 1), at8 = ring9 ? { position: { ...a.position } } : landing2(a, aim2, W20.ahead);
     const n = paid(a, "flame_wall");
-    classSkillsRecord(c.actors[a.entityId]).wall = { x: at8.position.x, y: at8.position.y, dx: aim2.x, dy: aim2.y, ticks: (aug(a, "flame_wall", 0) ? WALL_MAX : WALL_TICKS) + 60 * n, next: 1, ...ring8 ? { ring: true } : {}, ...full(n) ? { long: true } : {} };
-    return ring8 ? { r: W20.ring * (full(n) ? 1.5 : 1) } : landingOffset(a, at8.position);
+    classSkillsRecord(c.actors[a.entityId]).wall = { x: at8.position.x, y: at8.position.y, dx: aim2.x, dy: aim2.y, ticks: (aug(a, "flame_wall", 0) ? WALL_MAX : WALL_TICKS) + 60 * n, next: 1, ...ring9 ? { ring: true } : {}, ...full(n) ? { long: true } : {} };
+    return ring9 ? { r: W20.ring * (full(n) ? 1.5 : 1) } : landingOffset(a, at8.position);
   }
   const wallHalf = (w) => T116.flameWall.half * (w.long ? 2 : 1), wallRing = (w) => T116.flameWall.ring * (w.long ? 1.5 : 1);
   function fromWall(w, p) {
@@ -128984,7 +128984,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const w = c.actors[a.entityId]?.skills?.wall;
     return Boolean(w && a.alive && fromWall(w, a.position) <= T116.flameWall.near);
   };
-  function moss5(a, combat) {
+  function moss6(a, combat) {
     const share = a.alive ? worn(a, "mossback-pelt") : null, k = combat.skills;
     if (!share) {
       if (k?.moss) clearSkillState(combat, "moss");
@@ -129506,7 +129506,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     as("glacial_burst", stepRime, a, combat);
     as("thunderfall", stepThunder, a, combat);
     wail(a, combat);
-    moss5(a, combat);
+    moss6(a, combat);
     stepTread(a, combat);
     stepWeb(a, combat);
     stepCocoon(a, combat);
@@ -130359,21 +130359,21 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
   const contactQueue = /* @__PURE__ */ new Map();
   const swiftTargets = (e) => activeElite(e.entityId) ? selectSwiftCommanderTargetsD12_4D(state2, e) : [];
   const eliteRoot = () => {
-    const root5 = state2.eliteCombat;
-    if (root5) {
-      root5.hasteByEntityId ??= {};
-      root5.timedStatusesByEntityId ??= {};
-      root5.guardByEntityId ??= {};
-      root5.attackAuraByEntityId ??= {};
-      root5.nullificationResistanceByEntityId ??= {};
-      root5.pendingHazardsBySourceEliteId ??= {};
-      root5.hazardsById ??= {};
-      root5.webbedByEntityId ??= {};
-      root5.slagBurnByEntityId ??= {};
+    const root6 = state2.eliteCombat;
+    if (root6) {
+      root6.hasteByEntityId ??= {};
+      root6.timedStatusesByEntityId ??= {};
+      root6.guardByEntityId ??= {};
+      root6.attackAuraByEntityId ??= {};
+      root6.nullificationResistanceByEntityId ??= {};
+      root6.pendingHazardsBySourceEliteId ??= {};
+      root6.hazardsById ??= {};
+      root6.webbedByEntityId ??= {};
+      root6.slagBurnByEntityId ??= {};
     }
-    return root5;
+    return root6;
   };
-  function refreshHasteSources(root5, commanders) {
+  function refreshHasteSources(root6, commanders) {
     const sourcesByTarget = /* @__PURE__ */ new Map();
     for (const e of commanders) {
       for (const target of swiftTargets(e)) {
@@ -130384,16 +130384,16 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
     }
     for (const [entityId2, sources] of sourcesByTarget) {
       sources.sort();
-      const h = root5.hasteByEntityId[entityId2] ??= { version: ELITE_HASTE_D12_4D_VERSION, entityId: entityId2, stacks: 0, sourceEliteIds: [], lastRefreshTick: state2.tick, lingerExpiresTick: state2.tick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks, nextDecayTick: null, lastStackTick: null, lastDecayTick: null };
+      const h = root6.hasteByEntityId[entityId2] ??= { version: ELITE_HASTE_D12_4D_VERSION, entityId: entityId2, stacks: 0, sourceEliteIds: [], lastRefreshTick: state2.tick, lingerExpiresTick: state2.tick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks, nextDecayTick: null, lastStackTick: null, lastDecayTick: null };
       h.sourceEliteIds = sources;
       h.lastRefreshTick = state2.tick;
       h.lingerExpiresTick = state2.tick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks;
       h.nextDecayTick = h.lingerExpiresTick;
     }
-    for (const [entityId2, h] of Object.entries(root5.hasteByEntityId)) if (!sourcesByTarget.has(entityId2)) h.sourceEliteIds = [];
+    for (const [entityId2, h] of Object.entries(root6.hasteByEntityId)) if (!sourcesByTarget.has(entityId2)) h.sourceEliteIds = [];
     return sourcesByTarget;
   }
-  function advanceSwift(root5, commanders, sourcesByTarget) {
+  function advanceSwift(root6, commanders, sourcesByTarget) {
     for (const e of commanders) {
       if (state2.tick < e.nextPulseTick) continue;
       requireContract(state2.tick === e.nextPulseTick, "Swift Commander pulse schedule skipped");
@@ -130403,7 +130403,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       counters.hastePulses++;
       const recipients = [];
       for (const target of swiftTargets(e)) {
-        const h = root5.hasteByEntityId[target.entityId];
+        const h = root6.hasteByEntityId[target.entityId];
         requireContract(h && sourcesByTarget.get(target.entityId)?.includes(e.eliteId), "Swift Commander source refresh missing");
         const previousStacks = h.stacks;
         h.stacks = Math.min(SWIFT_COMMANDER_D12_4D.pulse.maxStacks, h.stacks + 1);
@@ -130415,11 +130415,11 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       counters.recipients += recipients.length;
     }
   }
-  function decayHaste(root5, sourcesByTarget) {
-    for (const [entityId2, h] of Object.entries(root5.hasteByEntityId)) {
+  function decayHaste(root6, sourcesByTarget) {
+    for (const [entityId2, h] of Object.entries(root6.hasteByEntityId)) {
       if (sourcesByTarget.has(entityId2)) continue;
       if (h.stacks === 0) {
-        delete root5.hasteByEntityId[entityId2];
+        delete root6.hasteByEntityId[entityId2];
         continue;
       }
       if (state2.tick < h.nextDecayTick) continue;
@@ -130430,14 +130430,14 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       h.nextDecayTick = h.stacks ? state2.tick + SWIFT_COMMANDER_D12_4D.pulse.decayTicks : null;
     }
   }
-  function cleanupGuard(root5) {
-    for (const [entityId2, g] of Object.entries(root5.guardByEntityId)) {
+  function cleanupGuard(root6) {
+    for (const [entityId2, g] of Object.entries(root6.guardByEntityId)) {
       const actor = state2.entitiesById[entityId2];
-      if (!actor?.alive || actor.team !== "hostile" || actor.residency.spaceInstanceId !== g.spaceInstanceId) delete root5.guardByEntityId[entityId2];
+      if (!actor?.alive || actor.team !== "hostile" || actor.residency.spaceInstanceId !== g.spaceInstanceId) delete root6.guardByEntityId[entityId2];
     }
   }
-  function refreshGuardSources(root5, citadels) {
-    cleanupGuard(root5);
+  function refreshGuardSources(root6, citadels) {
+    cleanupGuard(root6);
     const sourcesByTarget = /* @__PURE__ */ new Map();
     for (const e of citadels) {
       for (const target of selectIronCitadelTargetsD12_4G(state2, e)) {
@@ -130448,7 +130448,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
     }
     for (const [entityId2, sources] of sourcesByTarget) {
       sources.sort();
-      const actor = state2.entitiesById[entityId2], g = root5.guardByEntityId[entityId2] ??= { version: ELITE_GUARD_D12_4G_VERSION, entityId: entityId2, spaceInstanceId: actor.residency.spaceInstanceId, stacks: 0, sourceEliteIds: [], lastRefreshTick: state2.tick, lingerExpiresTick: state2.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks, nextDecayTick: state2.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks, lastStackTick: null, lastDecayTick: null, lastImpact: null };
+      const actor = state2.entitiesById[entityId2], g = root6.guardByEntityId[entityId2] ??= { version: ELITE_GUARD_D12_4G_VERSION, entityId: entityId2, spaceInstanceId: actor.residency.spaceInstanceId, stacks: 0, sourceEliteIds: [], lastRefreshTick: state2.tick, lingerExpiresTick: state2.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks, nextDecayTick: state2.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks, lastStackTick: null, lastDecayTick: null, lastImpact: null };
       g.sourceEliteIds = sources;
       g.spaceInstanceId = actor.residency.spaceInstanceId;
       g.lastRefreshTick = state2.tick;
@@ -130456,10 +130456,10 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       g.nextDecayTick = g.lingerExpiresTick;
       g.lastDecayTick = null;
     }
-    for (const [entityId2, g] of Object.entries(root5.guardByEntityId)) if (!sourcesByTarget.has(entityId2)) g.sourceEliteIds = [];
+    for (const [entityId2, g] of Object.entries(root6.guardByEntityId)) if (!sourcesByTarget.has(entityId2)) g.sourceEliteIds = [];
     return sourcesByTarget;
   }
-  function advanceIronCitadel(root5, citadels, sourcesByTarget) {
+  function advanceIronCitadel(root6, citadels, sourcesByTarget) {
     for (const e of citadels) {
       if (state2.tick < e.nextPulseTick) continue;
       requireContract(state2.tick === e.nextPulseTick, "Iron Citadel pulse schedule skipped");
@@ -130469,7 +130469,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       counters.guardPulses++;
       const recipients = [];
       for (const target of selectIronCitadelTargetsD12_4G(state2, e)) {
-        const g = root5.guardByEntityId[target.entityId];
+        const g = root6.guardByEntityId[target.entityId];
         requireContract(g && sourcesByTarget.get(target.entityId)?.includes(e.eliteId), "Iron Citadel source refresh missing");
         const previousStacks = g.stacks;
         g.stacks = Math.min(IRON_CITADEL_D12_4G.pulse.maxStacks, g.stacks + 1);
@@ -130481,11 +130481,11 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       counters.recipients += recipients.length;
     }
   }
-  function decayGuard(root5, sourcesByTarget) {
-    for (const [entityId2, g] of Object.entries(root5.guardByEntityId)) {
+  function decayGuard(root6, sourcesByTarget) {
+    for (const [entityId2, g] of Object.entries(root6.guardByEntityId)) {
       if (sourcesByTarget.has(entityId2)) continue;
       if (g.stacks === 0) {
-        delete root5.guardByEntityId[entityId2];
+        delete root6.guardByEntityId[entityId2];
         continue;
       }
       if (state2.tick < g.nextDecayTick) continue;
@@ -130494,24 +130494,24 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       g.lastDecayTick = state2.tick;
       counters.guardDecays++;
       if (g.stacks) g.nextDecayTick = state2.tick + IRON_CITADEL_D12_4G.pulse.decayTicks;
-      else delete root5.guardByEntityId[entityId2];
+      else delete root6.guardByEntityId[entityId2];
     }
   }
   function clearGuard(entityId2) {
-    const root5 = eliteRoot();
-    if (!root5?.guardByEntityId[entityId2]) return false;
-    delete root5.guardByEntityId[entityId2];
+    const root6 = eliteRoot();
+    if (!root6?.guardByEntityId[entityId2]) return false;
+    delete root6.guardByEntityId[entityId2];
     return true;
   }
   function clearGuardForGroup(groupId) {
-    const root5 = eliteRoot(), group = state2.groupsById[groupId];
-    if (!root5 || !group) return 0;
+    const root6 = eliteRoot(), group = state2.groupsById[groupId];
+    if (!root6 || !group) return 0;
     let count = 0;
     for (const entityId2 of group.entityIds) if (clearGuard(entityId2)) count++;
     return count;
   }
   function mitigateDirectDamage(source3, target, raw, { periodic = false, trigger = null, scripted = false } = {}) {
-    const root5 = eliteRoot(), g = root5?.guardByEntityId?.[target?.entityId];
+    const root6 = eliteRoot(), g = root6?.guardByEntityId?.[target?.entityId];
     if (periodic || trigger === "periodic" || scripted || source3?.team !== "party" || target?.team !== "hostile" || !target.alive || !g?.stacks || compareCombat(raw, 0) <= 0) return { damage: raw, guard: null };
     const percent = g.stacks * IRON_CITADEL_D12_4G.pulse.perStackMitigationPercent, damage = combatInteger(maxCombat(1, combatInteger(multiplyCombat(raw, 100 - percent, 100), "round")), "round"), mitigated2 = combatInteger(subtractCombat(raw, damage), "round");
     g.lastImpact = { tick: state2.tick, sourceEntityId: source3.entityId, damageBefore: copyWire(raw), damageAfter: copyWire(damage), mitigated: copyWire(mitigated2), stacks: g.stacks };
@@ -130519,14 +130519,14 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
     counters.guardDamagePrevented = combatInteger(addCombat(counters.guardDamagePrevented, mitigated2), "round");
     return { damage, guard: copyWire(g.lastImpact) };
   }
-  function cleanupAttackAura(root5) {
-    for (const [entityId2, aura4] of Object.entries(root5.attackAuraByEntityId)) {
+  function cleanupAttackAura(root6) {
+    for (const [entityId2, aura4] of Object.entries(root6.attackAuraByEntityId)) {
       const actor = state2.entitiesById[entityId2], group = state2.groupsById[aura4.groupId];
-      if (!actor?.alive || actor.team !== "hostile" || !group?.entityIds.includes(entityId2) || actor.residency.spaceInstanceId !== aura4.spaceInstanceId) delete root5.attackAuraByEntityId[entityId2];
+      if (!actor?.alive || actor.team !== "hostile" || !group?.entityIds.includes(entityId2) || actor.residency.spaceInstanceId !== aura4.spaceInstanceId) delete root6.attackAuraByEntityId[entityId2];
     }
   }
-  function refreshAttackAuraSources(root5, berserkers) {
-    cleanupAttackAura(root5);
+  function refreshAttackAuraSources(root6, berserkers) {
+    cleanupAttackAura(root6);
     const sourcesByTarget = /* @__PURE__ */ new Map();
     for (const e of berserkers) {
       for (const target of selectBloodBerserkerTargetsD12_4H_A(state2, e)) {
@@ -130537,7 +130537,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
     }
     for (const [entityId2, sources] of sourcesByTarget) {
       sources.sort();
-      const actor = state2.entitiesById[entityId2], group = state2.groupsById[berserkers.find((e) => sources.includes(e.eliteId)).groupId], aura4 = root5.attackAuraByEntityId[entityId2] ??= { version: ELITE_ATTACK_AURA_D12_4H_A_VERSION, entityId: entityId2, groupId: group.groupId, spaceInstanceId: actor.residency.spaceInstanceId, stacks: 0, sourceEliteIds: [], lastRefreshTick: state2.tick, lingerExpiresTick: state2.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks, nextDecayTick: state2.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks, lastStackTick: null, lastDecayTick: null };
+      const actor = state2.entitiesById[entityId2], group = state2.groupsById[berserkers.find((e) => sources.includes(e.eliteId)).groupId], aura4 = root6.attackAuraByEntityId[entityId2] ??= { version: ELITE_ATTACK_AURA_D12_4H_A_VERSION, entityId: entityId2, groupId: group.groupId, spaceInstanceId: actor.residency.spaceInstanceId, stacks: 0, sourceEliteIds: [], lastRefreshTick: state2.tick, lingerExpiresTick: state2.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks, nextDecayTick: state2.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks, lastStackTick: null, lastDecayTick: null };
       aura4.sourceEliteIds = sources;
       aura4.groupId = group.groupId;
       aura4.spaceInstanceId = actor.residency.spaceInstanceId;
@@ -130546,10 +130546,10 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       aura4.nextDecayTick = aura4.lingerExpiresTick;
       aura4.lastDecayTick = null;
     }
-    for (const [entityId2, aura4] of Object.entries(root5.attackAuraByEntityId)) if (!sourcesByTarget.has(entityId2)) aura4.sourceEliteIds = [];
+    for (const [entityId2, aura4] of Object.entries(root6.attackAuraByEntityId)) if (!sourcesByTarget.has(entityId2)) aura4.sourceEliteIds = [];
     return sourcesByTarget;
   }
-  function advanceBloodBerserker(root5, berserkers, sourcesByTarget) {
+  function advanceBloodBerserker(root6, berserkers, sourcesByTarget) {
     for (const e of berserkers) {
       if (state2.tick < e.nextPulseTick) continue;
       requireContract(state2.tick === e.nextPulseTick, "Berserker pulse schedule skipped");
@@ -130559,7 +130559,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       counters.attackAuraPulses++;
       const recipients = [];
       for (const target of selectBloodBerserkerTargetsD12_4H_A(state2, e)) {
-        const aura4 = root5.attackAuraByEntityId[target.entityId];
+        const aura4 = root6.attackAuraByEntityId[target.entityId];
         requireContract(aura4 && sourcesByTarget.get(target.entityId)?.includes(e.eliteId), "Berserker source refresh missing");
         const previousStacks = aura4.stacks;
         aura4.stacks = Math.min(BLOOD_BERSERKER_D12_4H_A.pulse.maxStacks, aura4.stacks + 1);
@@ -130571,11 +130571,11 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       counters.recipients += recipients.length;
     }
   }
-  function decayAttackAura(root5, sourcesByTarget) {
-    for (const [entityId2, aura4] of Object.entries(root5.attackAuraByEntityId)) {
+  function decayAttackAura(root6, sourcesByTarget) {
+    for (const [entityId2, aura4] of Object.entries(root6.attackAuraByEntityId)) {
       if (sourcesByTarget.has(entityId2)) continue;
       if (aura4.stacks === 0) {
-        delete root5.attackAuraByEntityId[entityId2];
+        delete root6.attackAuraByEntityId[entityId2];
         continue;
       }
       if (state2.tick < aura4.nextDecayTick) continue;
@@ -130584,30 +130584,30 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       aura4.lastDecayTick = state2.tick;
       counters.attackAuraDecays++;
       if (aura4.stacks) aura4.nextDecayTick = state2.tick + BLOOD_BERSERKER_D12_4H_A.pulse.decayTicks;
-      else delete root5.attackAuraByEntityId[entityId2];
+      else delete root6.attackAuraByEntityId[entityId2];
     }
   }
   function clearAttackAura(entityId2) {
-    const root5 = eliteRoot();
-    if (!root5?.attackAuraByEntityId[entityId2]) return false;
-    delete root5.attackAuraByEntityId[entityId2];
+    const root6 = eliteRoot();
+    if (!root6?.attackAuraByEntityId[entityId2]) return false;
+    delete root6.attackAuraByEntityId[entityId2];
     return true;
   }
   function clearWebbed(entityId2) {
-    const root5 = eliteRoot();
-    if (!root5?.webbedByEntityId[entityId2]) return false;
-    delete root5.webbedByEntityId[entityId2];
+    const root6 = eliteRoot();
+    if (!root6?.webbedByEntityId[entityId2]) return false;
+    delete root6.webbedByEntityId[entityId2];
     return true;
   }
   function clearSlagBurn(entityId2) {
-    const root5 = eliteRoot();
-    if (!root5?.slagBurnByEntityId[entityId2]) return false;
-    delete root5.slagBurnByEntityId[entityId2];
+    const root6 = eliteRoot();
+    if (!root6?.slagBurnByEntityId[entityId2]) return false;
+    delete root6.slagBurnByEntityId[entityId2];
     return true;
   }
   function clearAttackAuraForGroup(groupId) {
-    const root5 = eliteRoot(), group = state2.groupsById[groupId];
-    if (!root5 || !group) return 0;
+    const root6 = eliteRoot(), group = state2.groupsById[groupId];
+    if (!root6 || !group) return 0;
     let count = 0;
     for (const entityId2 of group.entityIds) if (clearAttackAura(entityId2)) count++;
     return count;
@@ -130619,66 +130619,66 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
     counters.attackAuraDirectHits++;
     return { damage, attackAura: { statusId: BLOOD_BERSERKER_D12_4H_A.pulse.statusId, stacks: aura4.stacks, multiplier: percent / 100, delivery } };
   }
-  function expireTimedStatuses(root5) {
-    for (const [entityId2, statuses] of Object.entries(root5.timedStatusesByEntityId)) {
+  function expireTimedStatuses(root6) {
+    for (const [entityId2, statuses] of Object.entries(root6.timedStatusesByEntityId)) {
       for (const [statusId, status2] of Object.entries(statuses)) if (statusId === GLACIAL_WARDEN_D12_4E.pulse.statusId && state2.tick >= status2.expirationTick) {
         delete statuses[statusId];
         counters.snaresExpired++;
       }
-      if (!Object.keys(statuses).length) delete root5.timedStatusesByEntityId[entityId2];
+      if (!Object.keys(statuses).length) delete root6.timedStatusesByEntityId[entityId2];
     }
   }
-  function advanceNullificationWindows(root5) {
+  function advanceNullificationWindows(root6) {
     const statusId = NULLIFIER_D12_4I.pulse.statusId;
-    for (const [entityId2, resistance] of Object.entries(root5.nullificationResistanceByEntityId)) {
+    for (const [entityId2, resistance] of Object.entries(root6.nullificationResistanceByEntityId)) {
       const actor = state2.entitiesById[entityId2];
       if (!actor?.alive || state2.tick >= resistance.expirationTick) {
-        delete root5.nullificationResistanceByEntityId[entityId2];
+        delete root6.nullificationResistanceByEntityId[entityId2];
         if (actor?.alive) counters.nullificationResistanceExpired++;
       }
     }
-    for (const [entityId2, statuses] of Object.entries(root5.timedStatusesByEntityId)) {
+    for (const [entityId2, statuses] of Object.entries(root6.timedStatusesByEntityId)) {
       const status2 = statuses[statusId];
       if (!status2) continue;
       const actor = state2.entitiesById[entityId2];
       if (!actor?.alive) {
         delete statuses[statusId];
-        if (!Object.keys(statuses).length) delete root5.timedStatusesByEntityId[entityId2];
+        if (!Object.keys(statuses).length) delete root6.timedStatusesByEntityId[entityId2];
         continue;
       }
       if (state2.tick < status2.expirationTick) continue;
       requireContract(state2.tick === status2.expirationTick, "Nullified expiration schedule skipped");
       delete statuses[statusId];
-      if (!Object.keys(statuses).length) delete root5.timedStatusesByEntityId[entityId2];
-      root5.nullificationResistanceByEntityId[entityId2] = { version: NULLIFICATION_RESISTANCE_D12_4I_VERSION, entityId: entityId2, statusId, sourceEliteId: status2.sourceEliteId, startedTick: state2.tick, expirationTick: state2.tick + NULLIFIER_D12_4I.pulse.resistanceTicks };
+      if (!Object.keys(statuses).length) delete root6.timedStatusesByEntityId[entityId2];
+      root6.nullificationResistanceByEntityId[entityId2] = { version: NULLIFICATION_RESISTANCE_D12_4I_VERSION, entityId: entityId2, statusId, sourceEliteId: status2.sourceEliteId, startedTick: state2.tick, expirationTick: state2.tick + NULLIFIER_D12_4I.pulse.resistanceTicks };
       counters.nullifiedExpired++;
     }
   }
   function clearNullification(entityId2) {
-    const root5 = eliteRoot();
-    if (!root5) return false;
-    const statuses = root5.timedStatusesByEntityId[entityId2], removed = Boolean(statuses?.[NULLIFIER_D12_4I.pulse.statusId] || root5.nullificationResistanceByEntityId[entityId2]);
+    const root6 = eliteRoot();
+    if (!root6) return false;
+    const statuses = root6.timedStatusesByEntityId[entityId2], removed = Boolean(statuses?.[NULLIFIER_D12_4I.pulse.statusId] || root6.nullificationResistanceByEntityId[entityId2]);
     if (statuses) {
       delete statuses[NULLIFIER_D12_4I.pulse.statusId];
-      if (!Object.keys(statuses).length) delete root5.timedStatusesByEntityId[entityId2];
+      if (!Object.keys(statuses).length) delete root6.timedStatusesByEntityId[entityId2];
     }
-    delete root5.nullificationResistanceByEntityId[entityId2];
+    delete root6.nullificationResistanceByEntityId[entityId2];
     return removed;
   }
   function clearHostilePoison(entityId2) {
-    const root5 = eliteRoot(), statuses = root5?.timedStatusesByEntityId?.[entityId2];
+    const root6 = eliteRoot(), statuses = root6?.timedStatusesByEntityId?.[entityId2];
     if (!statuses) return false;
     const removed = Boolean(statuses[TOXIC_DECAY_D12_4F.pulse.statusId]);
     delete statuses[TOXIC_DECAY_D12_4F.pulse.statusId];
-    if (!Object.keys(statuses).length) delete root5.timedStatusesByEntityId[entityId2];
+    if (!Object.keys(statuses).length) delete root6.timedStatusesByEntityId[entityId2];
     return removed;
   }
   function beginTick() {
-    const root5 = eliteRoot();
-    if (!root5) return;
-    maintainHostileHazards(root5);
-    advanceNullificationWindows(root5);
-    for (const [entityId2, statuses] of Object.entries(root5.timedStatusesByEntityId).sort(([a], [b]) => a.localeCompare(b))) {
+    const root6 = eliteRoot();
+    if (!root6) return;
+    maintainHostileHazards(root6);
+    advanceNullificationWindows(root6);
+    for (const [entityId2, statuses] of Object.entries(root6.timedStatusesByEntityId).sort(([a], [b]) => a.localeCompare(b))) {
       const status2 = statuses[TOXIC_DECAY_D12_4F.pulse.statusId];
       if (!status2) continue;
       const target = state2.entitiesById[entityId2];
@@ -130688,7 +130688,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       }
       if (state2.tick >= status2.nextTickAt && status2.nextTickAt <= status2.expirationTick) {
         requireContract(state2.tick === status2.nextTickAt, "Toxic Decay tick schedule skipped");
-        const resist = Math.min(5e3, Object.values(state2.playersById).find((p) => p.entityId === entityId2)?.bestiary?.stats.statusResist ?? 0), damage = combatInteger(multiplyCombat(multiplyCombat(status2.damagePerStack, status2.stacks), 1e4 - resist, 1e4), "round"), source3 = Object.values(root5.elitesByEntityId).find((row2) => row2.eliteId === status2.sourceEliteId), result = applyPeriodicDamage({ sourceEntityId: source3.entityId, targetEntityId: entityId2, damage, stacks: status2.stacks, statusId: status2.statusId, sourceEliteId: status2.sourceEliteId });
+        const resist = Math.min(5e3, Object.values(state2.playersById).find((p) => p.entityId === entityId2)?.bestiary?.stats.statusResist ?? 0), damage = combatInteger(multiplyCombat(multiplyCombat(status2.damagePerStack, status2.stacks), 1e4 - resist, 1e4), "round"), source3 = Object.values(root6.elitesByEntityId).find((row2) => row2.eliteId === status2.sourceEliteId), result = applyPeriodicDamage({ sourceEntityId: source3.entityId, targetEntityId: entityId2, damage, stacks: status2.stacks, statusId: status2.statusId, sourceEliteId: status2.sourceEliteId });
         counters.toxicTicks++;
         counters.toxicDamage = combatInteger(addCombat(counters.toxicDamage, result.damage), "round");
         status2.lastTick = { tick: state2.tick, damage: copyWire(result.damage), stacks: status2.stacks, sourceEliteId: status2.sourceEliteId, targetAlive: result.targetAlive };
@@ -130709,20 +130709,20 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
     return true;
   }
   function resolveContactMelee() {
-    const root5 = eliteRoot();
-    if (!root5) {
+    const root6 = eliteRoot();
+    if (!root6) {
       contactQueue.clear();
       return;
     }
     const rows = [...contactQueue.values()].sort((a, b) => a.sourceEntityId.localeCompare(b.sourceEntityId) || a.targetEntityId.localeCompare(b.targetEntityId));
     contactQueue.clear();
     for (const row2 of rows) {
-      const e = root5.elitesByEntityId[row2.sourceEntityId], target = state2.entitiesById[row2.targetEntityId];
+      const e = root6.elitesByEntityId[row2.sourceEntityId], target = state2.entitiesById[row2.targetEntityId];
       if (e?.affixIds[0] !== TOXIC_DECAY_AFFIX_ID || !target?.alive || state2.tick < e.nextPulseTick) continue;
-      const definition2 = TOXIC_DECAY_D12_4F, byStatus = root5.timedStatusesByEntityId[target.entityId] ??= {}, prior = byStatus[definition2.pulse.statusId], previousStacks = prior?.stacks ?? 0, stacks = Math.min(definition2.pulse.maxStacks, previousStacks + 1), sourceEliteId = prior?.lastApplicationTick === state2.tick ? [prior.sourceEliteId, e.eliteId].sort()[0] : e.eliteId, damagePerStack = combatInteger(maxCombat(1, combatInteger(multiplyCombat(target.maxHp, definition2.pulse.damageMaxHp.numerator, definition2.pulse.damageMaxHp.denominator), "round")), "round");
+      const definition2 = TOXIC_DECAY_D12_4F, byStatus = root6.timedStatusesByEntityId[target.entityId] ??= {}, prior = byStatus[definition2.pulse.statusId], previousStacks = prior?.stacks ?? 0, stacks = Math.min(definition2.pulse.maxStacks, previousStacks + 1), sourceEliteId = prior?.lastApplicationTick === state2.tick ? [prior.sourceEliteId, e.eliteId].sort()[0] : e.eliteId, damagePerStack = combatInteger(maxCombat(1, combatInteger(multiplyCombat(target.maxHp, definition2.pulse.damageMaxHp.numerator, definition2.pulse.damageMaxHp.denominator), "round")), "round");
       const status2 = { version: TIMED_PLAYER_POISON_D12_4F_VERSION, entityId: target.entityId, statusId: definition2.pulse.statusId, sourceEliteId, applicationTick: prior?.applicationTick ?? state2.tick, lastApplicationTick: state2.tick, lastApplicationAdded: stacks > previousStacks, expirationTick: state2.tick + definition2.pulse.durationTicks, nextTickAt: prior?.nextTickAt ?? state2.tick + definition2.pulse.tickTicks, tickIntervalTicks: definition2.pulse.tickTicks, stacks, damagePerStack, lastTick: prior?.lastTick ?? null };
       byStatus[definition2.pulse.statusId] = status2;
-      root5.timedStatusesByEntityId[target.entityId] = byStatus;
+      root6.timedStatusesByEntityId[target.entityId] = byStatus;
       e.pulseSequence++;
       e.nextPulseTick = state2.tick + definition2.pulse.cadenceTicks;
       e.lastPulse = { tick: state2.tick, sequence: e.pulseSequence, recipients: [{ entityId: target.entityId, statusId: status2.statusId, previousStacks, stacks, stackAdded: stacks > previousStacks, expiresTick: status2.expirationTick, nextTickAt: status2.nextTickAt }] };
@@ -130730,14 +130730,14 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       if (stacks > previousStacks) counters.toxicStacksAdded++;
     }
   }
-  function applyGlacialSnare(root5, e, target) {
-    const definition2 = GLACIAL_WARDEN_D12_4E, byStatus = root5.timedStatusesByEntityId[target.entityId] ??= {}, prior = byStatus[definition2.pulse.statusId], sourceEliteId = prior?.applicationTick === state2.tick ? [prior.sourceEliteId, e.eliteId].sort()[0] : e.eliteId;
+  function applyGlacialSnare(root6, e, target) {
+    const definition2 = GLACIAL_WARDEN_D12_4E, byStatus = root6.timedStatusesByEntityId[target.entityId] ??= {}, prior = byStatus[definition2.pulse.statusId], sourceEliteId = prior?.applicationTick === state2.tick ? [prior.sourceEliteId, e.eliteId].sort()[0] : e.eliteId;
     byStatus[definition2.pulse.statusId] = { version: TIMED_ACTOR_STATUS_D12_4E_VERSION, entityId: target.entityId, statusId: definition2.pulse.statusId, sourceEliteId, applicationTick: state2.tick, expirationTick: state2.tick + heroHoldTicks(state2, target.entityId, definition2.pulse.durationTicks), magnitude: { movementMultiplier: definition2.pulse.movementMultiplier.numerator / definition2.pulse.movementMultiplier.denominator } };
-    root5.timedStatusesByEntityId[target.entityId] = byStatus;
+    root6.timedStatusesByEntityId[target.entityId] = byStatus;
     counters.snaresApplied++;
     return byStatus[definition2.pulse.statusId];
   }
-  function advanceGlacial(root5, ordered) {
+  function advanceGlacial(root6, ordered) {
     for (const e of ordered) {
       if (e.affixIds[0] !== GLACIAL_WARDEN_AFFIX_ID) continue;
       const source3 = state2.entitiesById[e.entityId];
@@ -130748,14 +130748,14 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       counters.scheduledPulses++;
       counters.glacialPulses++;
       const recipients = (eliteTypeV2For(e, ordinaryEnemyForProfile(source3.contentDefinitionId)?.family) ? [] : selectGlacialWardenTargetsD12_4E(state2, e)).map((target) => {
-        const status2 = applyGlacialSnare(root5, e, target);
+        const status2 = applyGlacialSnare(root6, e, target);
         return { entityId: target.entityId, statusId: status2.statusId, expiresTick: status2.expirationTick, movementMultiplier: status2.magnitude.movementMultiplier };
       });
       e.lastPulse = { tick: state2.tick, sequence: e.pulseSequence, recipients };
       counters.recipients += recipients.length;
     }
   }
-  function advanceNullifier(root5, ordered) {
+  function advanceNullifier(root6, ordered) {
     const definition2 = NULLIFIER_D12_4I, statusId = definition2.pulse.statusId;
     for (const e of ordered) {
       if (e.affixIds[0] !== NULLIFIER_AFFIX_ID) continue;
@@ -130768,7 +130768,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       counters.nullifierPulses++;
       const recipients = [];
       for (const target of selectNullifierTargetsD12_4I(state2, e, { lineClear: lineClear2 })) {
-        if (root5.timedStatusesByEntityId[target.entityId]?.[statusId] || root5.nullificationResistanceByEntityId[target.entityId]) continue;
+        if (root6.timedStatusesByEntityId[target.entityId]?.[statusId] || root6.nullificationResistanceByEntityId[target.entityId]) continue;
         const status2 = {
           version: TIMED_NULLIFIED_D12_4I_VERSION,
           entityId: target.entityId,
@@ -130778,7 +130778,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
           expirationTick: state2.tick + heroHoldTicks(state2, target.entityId, definition2.pulse.durationTicks)
           /* gear: shorter crowd control */
         };
-        (root5.timedStatusesByEntityId[target.entityId] ??= {})[statusId] = status2;
+        (root6.timedStatusesByEntityId[target.entityId] ??= {})[statusId] = status2;
         recipients.push({ entityId: target.entityId, statusId, expiresTick: status2.expirationTick, resistanceUntil: status2.expirationTick + definition2.pulse.resistanceTicks });
         counters.nullifiedApplied++;
       }
@@ -130797,20 +130797,20 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
   function hazardLineClear(hazard, target) {
     return lineClear2({ position: hazard.position, hullRadius: 0, residency: { spaceInstanceId: hazard.spaceInstanceId } }, target);
   }
-  function refreshWebbed(root5) {
-    const active2 = Object.values(root5.hazardsById).filter((row2) => row2.kind === WEB_WEAVER_D12_4J.pulse.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId)), next = {};
+  function refreshWebbed(root6) {
+    const active2 = Object.values(root6.hazardsById).filter((row2) => row2.kind === WEB_WEAVER_D12_4J.pulse.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId)), next = {};
     for (const player of Object.values(state2.playersById).sort((a, b) => a.entityId.localeCompare(b.entityId))) {
       const actor = state2.entitiesById[player.entityId];
       if (!actor?.alive) continue;
       const hazardIds = active2.filter((hazard) => hazard.spaceInstanceId === actor.residency.spaceInstanceId && webHazardContainsActorD12_4J(hazard, actor) && hazardLineClear(hazard, actor)).map((hazard) => hazard.hazardId);
       if (!hazardIds.length) continue;
-      const prior = root5.webbedByEntityId[actor.entityId];
+      const prior = root6.webbedByEntityId[actor.entityId];
       next[actor.entityId] = { version: WEBBED_STATUS_D12_4J_VERSION, entityId: actor.entityId, statusId: WEB_WEAVER_D12_4J.pulse.statusId, spaceInstanceId: actor.residency.spaceInstanceId, hazardIds, startedTick: prior?.startedTick ?? state2.tick, lastEvaluatedTick: state2.tick, movementMultiplier: WEB_WEAVER_D12_4J.pulse.movementMultiplier.numerator / WEB_WEAVER_D12_4J.pulse.movementMultiplier.denominator };
     }
-    root5.webbedByEntityId = next;
+    root6.webbedByEntityId = next;
   }
-  function refreshSlagBurn(root5) {
-    const active2 = Object.values(root5.hazardsById).filter((row2) => row2.kind === SLAG_SHAPER_D12_4K.pulse.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId)), next = {};
+  function refreshSlagBurn(root6) {
+    const active2 = Object.values(root6.hazardsById).filter((row2) => row2.kind === SLAG_SHAPER_D12_4K.pulse.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId)), next = {};
     for (const hazard of active2) hazard.affectedEntityIds = [];
     for (const player of Object.values(state2.playersById).sort((a, b) => a.entityId.localeCompare(b.entityId))) {
       const actor = state2.entitiesById[player.entityId];
@@ -130818,14 +130818,14 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       const hazards = active2.filter((hazard) => hazard.spaceInstanceId === actor.residency.spaceInstanceId && hostileEllipseHazardContainsActorD12_4K(hazard, actor) && hazardLineClear(hazard, actor));
       if (!hazards.length) continue;
       for (const hazard of hazards) hazard.affectedEntityIds.push(actor.entityId);
-      const prior = root5.slagBurnByEntityId[actor.entityId];
+      const prior = root6.slagBurnByEntityId[actor.entityId];
       next[actor.entityId] = { version: SLAG_BURN_STATUS_D12_4K_VERSION, entityId: actor.entityId, statusId: SLAG_SHAPER_D12_4K.pulse.statusId, spaceInstanceId: actor.residency.spaceInstanceId, hazardIds: hazards.map((row2) => row2.hazardId), startedTick: prior?.startedTick ?? state2.tick, lastEvaluatedTick: state2.tick };
     }
-    root5.slagBurnByEntityId = next;
+    root6.slagBurnByEntityId = next;
   }
-  function processSlagDamage(root5) {
+  function processSlagDamage(root6) {
     const definition2 = SLAG_SHAPER_D12_4K.pulse;
-    for (const hazard of Object.values(root5.hazardsById).filter((row2) => row2.kind === definition2.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId))) {
+    for (const hazard of Object.values(root6.hazardsById).filter((row2) => row2.kind === definition2.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId))) {
       if (state2.tick < hazard.nextDamageTick) continue;
       requireContract(state2.tick === hazard.nextDamageTick && state2.tick < hazard.expirationTick, "Slag damage schedule skipped");
       counters.slagDamageOpportunities++;
@@ -130849,36 +130849,36 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       hazard.nextDamageTick += definition2.damageIntervalTicks;
     }
   }
-  function maintainHostileHazards(root5) {
-    for (const [hazardId, hazard] of Object.entries(root5.hazardsById).sort(([a], [b]) => a.localeCompare(b))) {
+  function maintainHostileHazards(root6) {
+    for (const [hazardId, hazard] of Object.entries(root6.hazardsById).sort(([a], [b]) => a.localeCompare(b))) {
       if (state2.tick < hazard.expirationTick) continue;
       requireContract(state2.tick === hazard.expirationTick, "Hostile hazard expiration schedule skipped");
-      delete root5.hazardsById[hazardId];
+      delete root6.hazardsById[hazardId];
       if (hazard.kind === WEB_WEAVER_D12_4J.pulse.hazardKind) counters.websExpired++;
       else counters.slagPoolsExpired++;
     }
-    for (const [sourceEliteId, pending] of Object.entries(root5.pendingHazardsBySourceEliteId).sort(([a], [b]) => a.localeCompare(b))) {
+    for (const [sourceEliteId, pending] of Object.entries(root6.pendingHazardsBySourceEliteId).sort(([a], [b]) => a.localeCompare(b))) {
       const source3 = state2.entitiesById[pending.sourceEntityId], web = pending.kind === WEB_WEAVER_D12_4J.pulse.hazardKind, definition2 = web ? WEB_WEAVER_D12_4J : SLAG_SHAPER_D12_4K;
       if (!source3?.alive || source3.residency.spaceInstanceId !== pending.spaceInstanceId) {
-        delete root5.pendingHazardsBySourceEliteId[sourceEliteId];
+        delete root6.pendingHazardsBySourceEliteId[sourceEliteId];
         if (web) counters.webCastsCancelled++;
         else counters.slagCastsCancelled++;
         continue;
       }
       if (state2.tick < pending.resolvesTick) continue;
       requireContract(state2.tick === pending.resolvesTick, "Hostile hazard windup schedule skipped");
-      const active2 = Object.values(root5.hazardsById).filter((row2) => row2.sourceEliteId === sourceEliteId && row2.kind === pending.kind).sort((a, b) => a.creationTick - b.creationTick || a.hazardId.localeCompare(b.hazardId));
-      if (active2.length >= definition2.pulse.maxActivePerSource) delete root5.hazardsById[active2[0].hazardId];
-      root5.hazardsById[pending.hazardId] = web ? { version: HOSTILE_FLOOR_HAZARD_D12_4J_VERSION, hazardId: pending.hazardId, ...webShape(), sourceEliteId, sourceEntityId: pending.sourceEntityId, spaceInstanceId: pending.spaceInstanceId, position: copyWire(pending.position), creationTick: state2.tick, expirationTick: state2.tick + definition2.pulse.durationTicks } : { version: HOSTILE_FLOOR_HAZARD_D12_4J_VERSION, hazardId: pending.hazardId, ...slagShape(), sourceEliteId, sourceEntityId: pending.sourceEntityId, spaceInstanceId: pending.spaceInstanceId, position: copyWire(pending.position), creationTick: state2.tick, expirationTick: state2.tick + definition2.pulse.durationTicks, nextDamageTick: state2.tick + definition2.pulse.damageIntervalTicks, affectedEntityIds: [], lastDamageEvents: [] };
-      delete root5.pendingHazardsBySourceEliteId[sourceEliteId];
+      const active2 = Object.values(root6.hazardsById).filter((row2) => row2.sourceEliteId === sourceEliteId && row2.kind === pending.kind).sort((a, b) => a.creationTick - b.creationTick || a.hazardId.localeCompare(b.hazardId));
+      if (active2.length >= definition2.pulse.maxActivePerSource) delete root6.hazardsById[active2[0].hazardId];
+      root6.hazardsById[pending.hazardId] = web ? { version: HOSTILE_FLOOR_HAZARD_D12_4J_VERSION, hazardId: pending.hazardId, ...webShape(), sourceEliteId, sourceEntityId: pending.sourceEntityId, spaceInstanceId: pending.spaceInstanceId, position: copyWire(pending.position), creationTick: state2.tick, expirationTick: state2.tick + definition2.pulse.durationTicks } : { version: HOSTILE_FLOOR_HAZARD_D12_4J_VERSION, hazardId: pending.hazardId, ...slagShape(), sourceEliteId, sourceEntityId: pending.sourceEntityId, spaceInstanceId: pending.spaceInstanceId, position: copyWire(pending.position), creationTick: state2.tick, expirationTick: state2.tick + definition2.pulse.durationTicks, nextDamageTick: state2.tick + definition2.pulse.damageIntervalTicks, affectedEntityIds: [], lastDamageEvents: [] };
+      delete root6.pendingHazardsBySourceEliteId[sourceEliteId];
       if (web) counters.websFormed++;
       else counters.slagPoolsFormed++;
     }
-    refreshWebbed(root5);
-    refreshSlagBurn(root5);
-    processSlagDamage(root5);
+    refreshWebbed(root6);
+    refreshSlagBurn(root6);
+    processSlagDamage(root6);
   }
-  function advanceWebWeaver(root5, ordered) {
+  function advanceWebWeaver(root6, ordered) {
     const definition2 = WEB_WEAVER_D12_4J;
     for (const e of ordered) {
       if (e.affixIds[0] !== WEB_WEAVER_AFFIX_ID) continue;
@@ -130895,7 +130895,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
         const target = selectWebWeaverTargetD12_4J(state2, e, { lineClear: lineClear2 });
         if (target) {
           const hazardId = hostileHazardIdD12_4J(e.eliteId, e.pulseSequence), shape3 = webShape(), pending = { version: PENDING_HOSTILE_HAZARD_D12_4J_VERSION, hazardId, ...shape3, sourceEliteId: e.eliteId, sourceEntityId: e.entityId, targetEntityId: target.entityId, spaceInstanceId: source3.residency.spaceInstanceId, position: copyWire(target.position), startedTick: state2.tick, resolvesTick: state2.tick + definition2.pulse.windupTicks };
-          root5.pendingHazardsBySourceEliteId[e.eliteId] = pending;
+          root6.pendingHazardsBySourceEliteId[e.eliteId] = pending;
           recipients = [{ entityId: target.entityId, hazardId, resolvesTick: pending.resolvesTick, position: copyWire(target.position) }];
           counters.webCasts++;
         }
@@ -130904,7 +130904,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       counters.recipients += recipients.length;
     }
   }
-  function advanceSlagShaper(root5, ordered) {
+  function advanceSlagShaper(root6, ordered) {
     const definition2 = SLAG_SHAPER_D12_4K;
     for (const e of ordered) {
       if (e.affixIds[0] !== SLAG_SHAPER_AFFIX_ID) continue;
@@ -130919,7 +130919,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       let recipients = [];
       if (engaged) {
         const hazardId = hostileHazardIdD12_4J(e.eliteId, e.pulseSequence), shape3 = slagShape(), pending = { version: PENDING_HOSTILE_HAZARD_D12_4J_VERSION, hazardId, ...shape3, sourceEliteId: e.eliteId, sourceEntityId: e.entityId, spaceInstanceId: source3.residency.spaceInstanceId, position: copyWire(source3.position), startedTick: state2.tick, resolvesTick: state2.tick + definition2.pulse.windupTicks };
-        root5.pendingHazardsBySourceEliteId[e.eliteId] = pending;
+        root6.pendingHazardsBySourceEliteId[e.eliteId] = pending;
         recipients = [{ hazardId, resolvesTick: pending.resolvesTick, position: copyWire(source3.position) }];
         counters.slagCasts++;
       }
@@ -130927,16 +130927,16 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
     }
   }
   function advance() {
-    const root5 = eliteRoot();
-    if (!root5) return;
-    expireTimedStatuses(root5);
-    for (const e of Object.values(root5.elitesByEntityId)) if (e.version === COMPOSITION_ELITE_V1 && e.affixIds[0] !== TOXIC_DECAY_AFFIX_ID && e.nextPulseTick < state2.tick) {
+    const root6 = eliteRoot();
+    if (!root6) return;
+    expireTimedStatuses(root6);
+    for (const e of Object.values(root6.elitesByEntityId)) if (e.version === COMPOSITION_ELITE_V1 && e.affixIds[0] !== TOXIC_DECAY_AFFIX_ID && e.nextPulseTick < state2.tick) {
       const cadence = eliteAffixDefinitionD12_4(e.affixIds[0]).pulse.cadenceTicks, missed = Math.ceil((state2.tick - e.nextPulseTick) / cadence);
       e.pulseSequence += missed;
       e.nextPulseTick += missed * cadence;
       e.lastPulse = null;
     }
-    for (const e of Object.values(root5.elitesByEntityId)) if (e.version === COMPOSITION_ELITE_V1 && e.affixIds[0] !== TOXIC_DECAY_AFFIX_ID && !activeElite(e.entityId)) {
+    for (const e of Object.values(root6.elitesByEntityId)) if (e.version === COMPOSITION_ELITE_V1 && e.affixIds[0] !== TOXIC_DECAY_AFFIX_ID && !activeElite(e.entityId)) {
       const cadence = eliteAffixDefinitionD12_4(e.affixIds[0]).pulse.cadenceTicks;
       if (state2.tick >= e.nextPulseTick) {
         const skipped = Math.floor((state2.tick - e.nextPulseTick) / cadence) + 1;
@@ -130945,7 +130945,7 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       }
       e.lastPulse = null;
     }
-    const ordered = Object.values(root5.elitesByEntityId).filter((e) => e.version !== COMPOSITION_ELITE_V1 || activeElite(e.entityId)).sort((a, b) => a.eliteId.localeCompare(b.eliteId)), commanders = ordered.filter((e) => e.affixIds[0] === SWIFT_COMMANDER_AFFIX_ID && state2.entitiesById[e.entityId]?.alive), sourcesByTarget = refreshHasteSources(root5, commanders), citadels = ordered.filter((e) => e.affixIds[0] === IRON_CITADEL_AFFIX_ID && state2.entitiesById[e.entityId]?.alive).sort((a, b) => a.entityId.localeCompare(b.entityId)), guardSourcesByTarget = refreshGuardSources(root5, citadels), berserkers = ordered.filter((e) => e.affixIds[0] === BLOOD_BERSERKER_AFFIX_ID && state2.entitiesById[e.entityId]?.alive), attackSourcesByTarget = refreshAttackAuraSources(root5, berserkers);
+    const ordered = Object.values(root6.elitesByEntityId).filter((e) => e.version !== COMPOSITION_ELITE_V1 || activeElite(e.entityId)).sort((a, b) => a.eliteId.localeCompare(b.eliteId)), commanders = ordered.filter((e) => e.affixIds[0] === SWIFT_COMMANDER_AFFIX_ID && state2.entitiesById[e.entityId]?.alive), sourcesByTarget = refreshHasteSources(root6, commanders), citadels = ordered.filter((e) => e.affixIds[0] === IRON_CITADEL_AFFIX_ID && state2.entitiesById[e.entityId]?.alive).sort((a, b) => a.entityId.localeCompare(b.entityId)), guardSourcesByTarget = refreshGuardSources(root6, citadels), berserkers = ordered.filter((e) => e.affixIds[0] === BLOOD_BERSERKER_AFFIX_ID && state2.entitiesById[e.entityId]?.alive), attackSourcesByTarget = refreshAttackAuraSources(root6, berserkers);
     for (const e of ordered) {
       if (e.affixIds[0] !== VITALITY_WEAVER_AFFIX_ID) continue;
       const source3 = state2.entitiesById[e.entityId];
@@ -130966,17 +130966,17 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
       counters.healingPulses++;
       counters.recipients += recipients.length;
     }
-    advanceSwift(root5, commanders, sourcesByTarget);
-    decayHaste(root5, sourcesByTarget);
-    advanceIronCitadel(root5, citadels, guardSourcesByTarget);
-    decayGuard(root5, guardSourcesByTarget);
-    advanceBloodBerserker(root5, berserkers, attackSourcesByTarget);
-    decayAttackAura(root5, attackSourcesByTarget);
-    advanceGlacial(root5, ordered);
-    advanceNullifier(root5, ordered);
-    advanceWebWeaver(root5, ordered);
-    advanceSlagShaper(root5, ordered);
-    maintainHostileHazards(root5);
+    advanceSwift(root6, commanders, sourcesByTarget);
+    decayHaste(root6, sourcesByTarget);
+    advanceIronCitadel(root6, citadels, guardSourcesByTarget);
+    decayGuard(root6, guardSourcesByTarget);
+    advanceBloodBerserker(root6, berserkers, attackSourcesByTarget);
+    decayAttackAura(root6, attackSourcesByTarget);
+    advanceGlacial(root6, ordered);
+    advanceNullifier(root6, ordered);
+    advanceWebWeaver(root6, ordered);
+    advanceSlagShaper(root6, ordered);
+    maintainHostileHazards(root6);
   }
   function movementMultiplier(entityId2) {
     const actor = state2.entitiesById[entityId2];
@@ -130985,9 +130985,9 @@ function createEliteCombatD12_4(state2, { lineClear: lineClear2, applyPeriodicDa
     return statuses.reduce((value2, status2) => Math.min(value2, status2.magnitude.movementMultiplier), webbed?.movementMultiplier ?? 1);
   }
   function chill(e, target) {
-    const root5 = eliteRoot();
-    if (!root5 || e.affixIds[0] !== GLACIAL_WARDEN_AFFIX_ID && e.namedEliteId !== "sporecrown" || target?.team !== "party" || !target.alive) return null;
-    return applyGlacialSnare(root5, e, target);
+    const root6 = eliteRoot();
+    if (!root6 || e.affixIds[0] !== GLACIAL_WARDEN_AFFIX_ID && e.namedEliteId !== "sporecrown" || target?.team !== "party" || !target.alive) return null;
+    return applyGlacialSnare(root6, e, target);
   }
   return Object.freeze({ beginTick, advance, chill, queueContactMelee, resolveContactMelee, clearHostilePoison, clearNullification, clearWebbed, clearSlagBurn, clearGuard, clearGuardForGroup, clearAttackAura, clearAttackAuraForGroup, mitigateDirectDamage, empowerDirectAttack, movementMultiplier, inspect: () => ({ ...counters, eliteCount: Object.keys(state2.eliteCombat?.elitesByEntityId ?? {}).length, hasteRecipientCount: Object.keys(state2.eliteCombat?.hasteByEntityId ?? {}).length, guardRecipientCount: Object.keys(state2.eliteCombat?.guardByEntityId ?? {}).length, attackAuraRecipientCount: Object.keys(state2.eliteCombat?.attackAuraByEntityId ?? {}).length, timedStatusActorCount: Object.keys(state2.eliteCombat?.timedStatusesByEntityId ?? {}).length, nullificationResistanceCount: Object.keys(state2.eliteCombat?.nullificationResistanceByEntityId ?? {}).length, pendingHazardCount: Object.keys(state2.eliteCombat?.pendingHazardsBySourceEliteId ?? {}).length, hostileFloorHazardCount: Object.keys(state2.eliteCombat?.hazardsById ?? {}).length, webbedActorCount: Object.keys(state2.eliteCombat?.webbedByEntityId ?? {}).length, slagBurnActorCount: Object.keys(state2.eliteCombat?.slagBurnByEntityId ?? {}).length, pendingToxicContacts: contactQueue.size }) });
 }
@@ -131187,14 +131187,14 @@ function segmentDistance(p, a, b) {
   const t = clip19(((p.x - a.x) * dx + (p.y - a.y) * dy) / length2);
   return Math.hypot(p.x - (a.x + dx * t), p.y - (a.y + dy * t));
 }
-function originalFireCone(origin, target, person, rangeLimit = 110, halfAngle = 0.8, hull2 = 9) {
+function originalFireCone(origin, target, person, rangeLimit = 110, halfAngle = 0.8, hull3 = 9) {
   const dx = person.x - origin.x, dy = person.y - origin.y, d = Math.hypot(dx, dy);
-  if (d > rangeLimit + hull2) return false;
+  if (d > rangeLimit + hull3) return false;
   const s = facing(origin, target), dot13 = dx * s;
-  if (dot13 < -hull2) return false;
-  if (d <= hull2) return true;
+  if (dot13 < -hull3) return false;
+  if (d <= hull3) return true;
   const angular = Math.atan2(Math.abs(dy), dot13);
-  return angular <= halfAngle + Math.asin(Math.min(1, hull2 / d));
+  return angular <= halfAngle + Math.asin(Math.min(1, hull3 / d));
 }
 function originalCinderRushEndpoint(collision, origin, target, radius = 28) {
   const dx = target.x - origin.x, dy = target.y - origin.y, d = Math.hypot(dx, dy) || 1;
@@ -131224,9 +131224,9 @@ function originalArenaRing(collision, home, index) {
   const minColumn = Math.max(0, centerX - half + 2 + index), maxColumn = Math.min(cols - 1, centerX + half - 2 - index);
   const minRow = Math.max(0, centerY - half + 2 + index), maxRow = Math.min(rows - 1, centerY + half - 2 - index);
   if (minColumn >= maxColumn || minRow >= maxRow) return null;
-  const ring8 = { index, minColumn, maxColumn, minRow, maxRow, tileSize: s };
-  const tiles9 = originalRingTiles(ring8).filter((p) => !collidesWithTiles(collision, p.x + s / 2, p.y + s / 2, s / 5));
-  return tiles9.length ? { ...ring8, tiles: tiles9 } : null;
+  const ring9 = { index, minColumn, maxColumn, minRow, maxRow, tileSize: s };
+  const tiles9 = originalRingTiles(ring9).filter((p) => !collidesWithTiles(collision, p.x + s / 2, p.y + s / 2, s / 5));
+  return tiles9.length ? { ...ring9, tiles: tiles9 } : null;
 }
 function originalRingTiles(r) {
   const out4 = [], s = r.tileSize;
@@ -131422,9 +131422,9 @@ function createArchivedBossFightRuntime(state2, { pool: pool4, damage, hit: hit2
   }
   function collapseRing(b, a, c) {
     if (b.bossDefinitionId !== "ashfang" || !b.archive) return false;
-    const idx = b.archive.collapsedRings.length, ring8 = originalArenaRing(c, b.homePosition, idx);
-    if (!ring8) return false;
-    b.archive.collapsedRings.push({ ...ring8, createdTick: state2.tick });
+    const idx = b.archive.collapsedRings.length, ring9 = originalArenaRing(c, b.homePosition, idx);
+    if (!ring9) return false;
+    b.archive.collapsedRings.push({ ...ring9, createdTick: state2.tick });
     b.collapseStep = Math.min(7, idx + 1);
     return true;
   }
@@ -131647,14 +131647,14 @@ var attackRadius = (ability) => ({
 })[ability] ?? BIOME_BOSS_REACH_V1[ability] ?? 75;
 function createRecoveredBossCombatV1(state2, { applyDirectDamage, eligible: eligible2 = () => true, lineClear: lineClear2 = () => true } = {}) {
   const observed = /* @__PURE__ */ new Map(), stats3 = { casts: 0, hits: 0, summons: 0, phaseTwos: 0, interrupts: 0, poolHits: 0, coinsSpawned: 0, coinHits: 0, coinRicochets: 0 };
-  const root5 = () => state2.bossCombat;
-  const records = () => Object.values(root5()?.bossesByEntityId ?? {}).filter(recoveredBossRecord).sort((a, b) => a.bossId.localeCompare(b.bossId));
+  const root6 = () => state2.bossCombat;
+  const records = () => Object.values(root6()?.bossesByEntityId ?? {}).filter(recoveredBossRecord).sort((a, b) => a.bossId.localeCompare(b.bossId));
   const record2 = (id2) => {
-    const b = root5()?.bossesByEntityId?.[id2];
+    const b = root6()?.bossesByEntityId?.[id2];
     return recoveredBossRecord(b) ? b : null;
   };
   const summon = (id2) => {
-    const row2 = root5()?.summonsByEntityId?.[id2];
+    const row2 = root6()?.summonsByEntityId?.[id2];
     return row2?.version === "recovered-boss-summon-v1" ? row2 : null;
   };
   const players = (a) => Object.values(state2.playersById).filter((p) => p.connectionStatus === "connected").map((p) => state2.entitiesById[p.entityId]).filter((t) => t?.alive && t.residency.spaceInstanceId === a.residency.spaceInstanceId && eligible2(a, t)).sort((x, y) => x.entityId.localeCompare(y.entityId));
@@ -132267,9 +132267,9 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
   const aegis = createAegisGoliathCombat(state2, { applyDirectDamage, eligible: eligible2, lineClear: lineClear2 }), brimstone = createBrimstoneCombat(state2, { applyDirectDamage, eligible: eligible2, lineClear: lineClear2 });
   const recovered = createRecoveredBossCombatV1(state2, { applyDirectDamage, eligible: eligible2, lineClear: lineClear2 });
   const observedTargets = /* @__PURE__ */ new Map(), counters = { webSpitCasts: 0, webSpitHits: 0, phaseTwoTriggers: 0, closeStrikes: 0, slamCasts: 0, slamHits: 0, rootSnareCasts: 0, rootSnareHits: 0, cocoonsActivated: 0, cocoonsHatched: 0, shieldBreaks: 0, websExpired: 0 };
-  const root5 = () => state2.bossCombat;
-  const bossFor = (id2) => root5()?.bossesByEntityId?.[id2] ?? null;
-  const summonFor = (id2) => root5()?.summonsByEntityId?.[id2] ?? null;
+  const root6 = () => state2.bossCombat;
+  const bossFor = (id2) => root6()?.bossesByEntityId?.[id2] ?? null;
+  const summonFor = (id2) => root6()?.summonsByEntityId?.[id2] ?? null;
   function isBoss(id2) {
     return Boolean(bossFor(id2));
   }
@@ -132289,13 +132289,13 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
     if (isBoss(source3.entityId)) observedTargets.set(source3.entityId, target?.entityId ?? null);
   }
   function clearStatus(entityId2) {
-    if (!root5()) return false;
-    const removed = Boolean(root5().statusesByEntityId[entityId2]);
-    delete root5().statusesByEntityId[entityId2];
+    if (!root6()) return false;
+    const removed = Boolean(root6().statusesByEntityId[entityId2]);
+    delete root6().statusesByEntityId[entityId2];
     return removed;
   }
   function beginTick() {
-    const r = root5();
+    const r = root6();
     if (!r) return;
     recovered.beginTick();
     for (const [id2, hazard] of Object.entries(r.hazardsById)) if (state2.tick >= hazard.expirationTick) {
@@ -132322,7 +132322,7 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
     actor.movementIntent = copyWire(zero2);
     actor.movedLastTick = false;
     for (const id2 of boss.summonEntityIds) {
-      const summon = root5().summonsByEntityId[id2], member = state2.entitiesById[id2];
+      const summon = root6().summonsByEntityId[id2], member = state2.entitiesById[id2];
       summon.stage = "cocoon";
       summon.activatedTick = state2.tick;
       summon.hatchTick = state2.tick + ARACHNID_TREANT_D12_5A.barkShield.hatchTicks;
@@ -132337,7 +132337,7 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
   }
   function syncSummons(boss) {
     for (const id2 of boss.summonEntityIds) {
-      const summon = root5().summonsByEntityId[id2], actor = state2.entitiesById[id2];
+      const summon = root6().summonsByEntityId[id2], actor = state2.entitiesById[id2];
       if (!actor.alive && summon.stage !== "dormant" && summon.stage !== "defeated") {
         summon.stage = "defeated";
         summon.defeatedTick = state2.tick;
@@ -132350,7 +132350,7 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
       }
     }
     if (boss.shieldActive && !boss.summonEntityIds.some((id2) => state2.entitiesById[id2].alive)) {
-      for (const [id2, h] of Object.entries(root5().hazardsById)) if (h.bossId === boss.bossId && h.kind === "treant_spit_warning") delete root5().hazardsById[id2];
+      for (const [id2, h] of Object.entries(root6().hazardsById)) if (h.bossId === boss.bossId && h.kind === "treant_spit_warning") delete root6().hazardsById[id2];
       boss.shieldActive = false;
       boss.shieldBrokenTick = state2.tick;
       boss.actionState = "idle";
@@ -132359,8 +132359,8 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
     }
   }
   function applyRootStatus(boss, target) {
-    const prior = root5().statusesByEntityId[target.entityId], expirationTick = state2.tick + heroHoldTicks(state2, target.entityId, ARACHNID_TREANT_D12_5A.rootSnare.durationTicks);
-    root5().statusesByEntityId[target.entityId] = { version: BOSS_STATUS_D12_5A_VERSION, entityId: target.entityId, statusId: ARACHNID_TREANT_D12_5A.rootSnare.statusId, sourceBossId: boss.bossId, applicationTick: prior?.applicationTick ?? state2.tick, expirationTick: Math.max(prior?.expirationTick ?? 0, expirationTick), movementMultiplier: 0.4 };
+    const prior = root6().statusesByEntityId[target.entityId], expirationTick = state2.tick + heroHoldTicks(state2, target.entityId, ARACHNID_TREANT_D12_5A.rootSnare.durationTicks);
+    root6().statusesByEntityId[target.entityId] = { version: BOSS_STATUS_D12_5A_VERSION, entityId: target.entityId, statusId: ARACHNID_TREANT_D12_5A.rootSnare.statusId, sourceBossId: boss.bossId, applicationTick: prior?.applicationTick ?? state2.tick, expirationTick: Math.max(prior?.expirationTick ?? 0, expirationTick), movementMultiplier: 0.4 };
   }
   function resolveTelegraph(boss, actor) {
     requireContract(state2.tick === boss.resolvesTick, "Boss telegraph schedule skipped");
@@ -132375,7 +132375,7 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
       counters.slamHits += hits2;
     } else {
       const hazardId = `bossweb:${boss.bossId.slice(5, 29)}${boss.abilitySequence.toString(16).padStart(8, "0")}`;
-      root5().hazardsById[hazardId] = { version: BOSS_HAZARD_D12_5A_VERSION, hazardId, kind: "treant_root_web", bossId: boss.bossId, sourceEntityId: actor.entityId, spaceInstanceId: actor.residency.spaceInstanceId, position: position4, createdTick: state2.tick, expirationTick: state2.tick + ARACHNID_TREANT_D12_5A.rootSnare.hazardDurationTicks, geometry: { radiusX: 75, radiusY: 33.75 }, movementMultiplier: 0.4 };
+      root6().hazardsById[hazardId] = { version: BOSS_HAZARD_D12_5A_VERSION, hazardId, kind: "treant_root_web", bossId: boss.bossId, sourceEntityId: actor.entityId, spaceInstanceId: actor.residency.spaceInstanceId, position: position4, createdTick: state2.tick, expirationTick: state2.tick + ARACHNID_TREANT_D12_5A.rootSnare.hazardDurationTicks, geometry: { radiusX: 75, radiusY: 33.75 }, movementMultiplier: 0.4 };
       for (const target of players) if (Math.hypot(target.position.x - position4.x, target.position.y - position4.y) <= ARACHNID_TREANT_D12_5A.rootSnare.impactRadius && pointLineClear(collision, position4, target.position, target.hullRadius * 0.25)) {
         applyDirectDamage(actor, target, combatInteger(multiplyCombat(actor.attackDamage, 13, 10), "round"), "treant_root_snare");
         if (target.alive) applyRootStatus(boss, target);
@@ -132394,7 +132394,7 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
     boss.nextActionTick = state2.tick + ARACHNID_TREANT_D12_5A.abilityRecoveryTicks;
   }
   function webSpit(boss, actor) {
-    const spit2 = ARACHNID_TREANT_D12_5A.webSpit, r = root5(), idBase = boss.bossId.slice(5, 29), pending = Object.values(r.hazardsById).find((h) => h.bossId === boss.bossId && h.kind === "treant_spit_warning");
+    const spit2 = ARACHNID_TREANT_D12_5A.webSpit, r = root6(), idBase = boss.bossId.slice(5, 29), pending = Object.values(r.hazardsById).find((h) => h.bossId === boss.bossId && h.kind === "treant_spit_warning");
     if (pending) {
       if (state2.tick !== pending.createdTick + spit2.telegraphTicks) return;
       delete r.hazardsById[pending.hazardId];
@@ -132421,7 +132421,7 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
     return distance12 < 64 && close < 0.8 ? "slam" : first < 0.5 ? "slam" : "root_snare";
   }
   function advance() {
-    const r = root5();
+    const r = root6();
     if (!r) return;
     for (const boss of Object.values(r.bossesByEntityId).sort((a, b) => a.bossId.localeCompare(b.bossId))) {
       if (aegis.owns(boss.entityId) || brimstone.owns(boss.entityId) || recovered.owns(boss.entityId)) continue;
@@ -132475,7 +132475,7 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
     recovered.advance();
   }
   function reconcile() {
-    const r = root5();
+    const r = root6();
     if (!r) return;
     for (const boss of Object.values(r.bossesByEntityId).sort((a, b) => a.bossId.localeCompare(b.bossId))) {
       if (aegis.owns(boss.entityId) || brimstone.owns(boss.entityId) || recovered.owns(boss.entityId)) continue;
@@ -132496,7 +132496,7 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
     recovered.reconcile();
   }
   function movementMultiplier(entityId2) {
-    const r = root5(), actor = state2.entitiesById[entityId2];
+    const r = root6(), actor = state2.entitiesById[entityId2];
     if (!r || !actor?.alive) return 1;
     if (recovered.owns(entityId2)) return recovered.movementMultiplier(entityId2);
     if (brimstone.owns(entityId2)) return brimstone.movementMultiplier(entityId2);
@@ -132527,7 +132527,7 @@ function createBossCombatD12_5A(state2, { applyDirectDamage, eligible: eligible2
     if (!boss.shieldActive) return { damage, shielded: false };
     return { damage: combatInteger(multiplyCombat(damage, ARACHNID_TREANT_D12_5A.barkShield.damageMultiplier.numerator, ARACHNID_TREANT_D12_5A.barkShield.damageMultiplier.denominator), "round"), shielded: true };
   }
-  return Object.freeze({ towerTarget: aegis.towerTarget, beginTick, advance, reconcile, isBoss, frozen, observeTarget, clearStatus, movementMultiplier, mitigateIncoming, primaryReady: recovered.primaryReady, inspect: () => ({ ...counters, aegis: aegis.inspect(), brimstone: brimstone.inspect(), recovered: recovered.inspect(), bossCount: Object.keys(root5()?.bossesByEntityId ?? {}).length, hazardCount: Object.keys(root5()?.hazardsById ?? {}).length, statusCount: Object.keys(root5()?.statusesByEntityId ?? {}).length }) });
+  return Object.freeze({ towerTarget: aegis.towerTarget, beginTick, advance, reconcile, isBoss, frozen, observeTarget, clearStatus, movementMultiplier, mitigateIncoming, primaryReady: recovered.primaryReady, inspect: () => ({ ...counters, aegis: aegis.inspect(), brimstone: brimstone.inspect(), recovered: recovered.inspect(), bossCount: Object.keys(root6()?.bossesByEntityId ?? {}).length, hazardCount: Object.keys(root6()?.hazardsById ?? {}).length, statusCount: Object.keys(root6()?.statusesByEntityId ?? {}).length }) });
 }
 
 // src/simulation/lesser_bosses_v1.js
@@ -136321,20 +136321,20 @@ function createWorldEventHudV4(document2, onActivate = () => {
 }) {
   const stack = document2.createElement("div");
   stack.id = "world-event-stack-v4";
-  const root5 = document2.createElement("aside");
-  root5.id = "world-event-hud-v4";
-  root5.hidden = true;
-  root5.setAttribute("data-gameplay-hud", "");
-  root5.setAttribute("aria-label", "Local event");
+  const root6 = document2.createElement("aside");
+  root6.id = "world-event-hud-v4";
+  root6.hidden = true;
+  root6.setAttribute("data-gameplay-hud", "");
+  root6.setAttribute("aria-label", "Local event");
   const tag2 = document2.createElement("small"), head18 = document2.createElement("div"), title2 = document2.createElement("strong"), timer = document2.createElement("time"), row2 = document2.createElement("div"), pips = document2.createElement("span"), bar2 = document2.createElement("span"), fill9 = document2.createElement("i"), barText = document2.createElement("b"), line39 = document2.createElement("p"), action2 = document2.createElement("button");
   head18.append(title2, timer);
   bar2.append(fill9, barText);
   row2.append(pips, bar2);
   action2.type = "button";
   action2.onclick = () => {
-    if (current && !root5.hidden && !action2.hidden && !action2.disabled) onActivate(current);
+    if (current && !root6.hidden && !action2.hidden && !action2.disabled) onActivate(current);
   };
-  root5.append(tag2, head18, row2, line39, action2);
+  root6.append(tag2, head18, row2, line39, action2);
   const badge = document2.createElement("div"), dial = document2.createElement("span"), badgeText = document2.createElement("span"), badgeName = document2.createElement("strong"), badgeTime = document2.createElement("time");
   badge.id = "world-event-boon-v4";
   badge.hidden = true;
@@ -136352,10 +136352,10 @@ function createWorldEventHudV4(document2, onActivate = () => {
   trip.firstChild.append(tripIcon);
   const dials = document2.createElement("div");
   dials.className = "wev-dials";
-  root5.append(dials);
-  stack.append(root5, badge, blessing, trip);
+  root6.append(dials);
+  stack.append(root6, badge, blessing, trip);
   function placeBadges() {
-    const inside5 = !root5.hidden;
+    const inside5 = !root6.hidden;
     for (const b of [badge, blessing, trip]) {
       const want = inside5 ? dials : stack;
       if (b.parentElement !== want) want.append(b);
@@ -136363,7 +136363,7 @@ function createWorldEventHudV4(document2, onActivate = () => {
       if (b.title !== t) b.title = t;
     }
     const on = inside5 && (!badge.hidden || !blessing.hidden || !trip.hidden);
-    if (root5.hasAttribute("data-dials") !== on) root5.toggleAttribute("data-dials", on);
+    if (root6.hasAttribute("data-dials") !== on) root6.toggleAttribute("data-dials", on);
   }
   const style = document2.createElement("style");
   style.textContent = `#world-event-stack-v4{position:absolute;z-index:7;top:76px;left:12px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}#world-event-hud-v4{--accent:#c27dff;position:relative;width:min(300px,56vw);padding:9px 13px 10px 16px;border-radius:7px;background:#11171ce0;box-shadow:inset 0 0 0 1px #ffffff14;color:#f3ead2;font:12px/1.35 system-ui;box-sizing:border-box}#world-event-hud-v4::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 2px 2px 0;background:var(--accent)}#world-event-stack-v4 [hidden]{display:none!important}#world-event-hud-v4 small{display:block;color:var(--accent);font-size:10px;font-weight:700;letter-spacing:.15em}#world-event-hud-v4>div:first-of-type{display:flex;align-items:baseline;gap:8px}#world-event-hud-v4 strong{flex:1;font:700 20px/1.2 Georgia,serif;margin:1px 0 4px}#world-event-hud-v4 time{font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;color:var(--accent)}#world-event-hud-v4 time:empty{display:none}#world-event-hud-v4>div:nth-of-type(2){display:flex;align-items:center;gap:10px;margin:3px 0 2px}#world-event-hud-v4>div:nth-of-type(2)[data-empty]{display:none}#world-event-hud-v4 em{display:inline-block;width:9px;height:9px;margin:0 5px 0 2px;transform:rotate(45deg);border:1.5px solid #ffffff5c;background:#ffffff14}#world-event-hud-v4 em[data-on]{border-color:#f2dcff;background:var(--accent)}#world-event-hud-v4 span:last-child{position:relative;flex:1;height:13px;border-radius:7px;background:#ffffff1a;overflow:hidden}#world-event-hud-v4 i{position:absolute;inset:0 auto 0 0;border-radius:7px;background:var(--accent);min-width:13px}#world-event-hud-v4 b{position:relative;padding-left:8px;font-size:10px;line-height:13px;color:#fff;text-shadow:0 1px 1px #0008}#world-event-hud-v4 p{margin:5px 0 0;color:#c9c2ae;font-size:12px}#world-event-hud-v4 p:empty{display:none}#world-event-hud-v4 button{pointer-events:auto;touch-action:manipulation;margin-top:8px;padding:6px 10px;font:600 12px system-ui;border:1px solid #e8c37a99;border-radius:5px;background:#1b232b;color:#f3ead2}#world-event-hud-v4 button:disabled{opacity:.6}
@@ -136390,21 +136390,21 @@ function createWorldEventHudV4(document2, onActivate = () => {
   const BOON_COLOR = { wrath: "#ff6a55", insight: "#6fb0ff", fortune: "#ffcf5a" }, BLESSING_COLOR = { swift: "#7fe0a0", vigor: "#ff7a8a", focus: "#8fb4ff" };
   function refresh(trackerRow, visible3 = true) {
     if (!visible3 || !trackerRow) {
-      root5.hidden = true;
+      root6.hidden = true;
       current = null;
       previous = "";
       placeBadges();
       return false;
     }
     const key4 = JSON.stringify(trackerRow);
-    if (key4 === previous && !root5.hidden) return true;
+    if (key4 === previous && !root6.hidden) return true;
     previous = key4;
-    root5.hidden = false;
+    root6.hidden = false;
     placeBadges();
     current = trackerRow.groupId;
     place4();
-    root5.style.setProperty("--accent", trackerRow.accent ?? "#c27dff");
-    root5.dataset.kind = trackerRow.kind ?? "";
+    root6.style.setProperty("--accent", trackerRow.accent ?? "#c27dff");
+    root6.dataset.kind = trackerRow.kind ?? "";
     tag2.textContent = trackerRow.tag ?? "";
     title2.textContent = trackerRow.title ?? "";
     timer.textContent = trackerRow.timer ?? "";
@@ -137081,16 +137081,16 @@ var BODIES = {
 };
 var RING_SCALE = 1.22;
 function band8(c, metal, { cx = 16, cy: cy2 = 20, rx = 6.4, ry = 4.6, thick: thick2 = 1.9 } = {}) {
-  const ring8 = () => {
+  const ring9 = () => {
     c.beginPath();
     c.ellipse(cx, cy2, rx, ry, 0, 0, Math.PI * 2);
     c.ellipse(cx, cy2, rx - thick2, ry - thick2 * 0.8, 0, 0, Math.PI * 2);
   };
-  ring8();
+  ring9();
   c.fillStyle = metal.b;
   c.fill("evenodd");
   c.save();
-  ring8();
+  ring9();
   c.clip("evenodd");
   c.fillStyle = metal.d;
   c.fillRect(cx + rx * 0.32, cy2 - ry - 1, rx, ry * 2 + 2);
@@ -139421,10 +139421,10 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       menuOpener = open3;
       closeMenu = close2;
     },
-    drawLogInto(root5) {
+    drawLogInto(root6) {
       const was = log2.open;
       drawLog();
-      root5.replaceChildren(...log2.firstChild ? [log2.firstChild] : []);
+      root6.replaceChildren(...log2.firstChild ? [log2.firstChild] : []);
       if (!was && log2.open) log2.close();
     },
     refresh(m, { visible: visible3 = true } = {}) {
@@ -141182,23 +141182,23 @@ var STONE26 = ramp3("#7b7486", "#141022", "#fff1dc");
 var FLAG7 = { desert: "#d9b98a", frostland: "#b9c8d6", wetland: "#8f9a86", tropical: "#a9a58a", volcanic: "#5d5552", upland: "#9a978c" };
 function flagstones(c, x, y, rx, ry, P21, seed2) {
   const R11 = rng26(seed2), slabs2 = [];
-  for (let ring8 = 0; ring8 < 3; ring8++) {
-    const n = [1, 7, 12][ring8], rr3 = [0, 0.5, 0.92][ring8];
+  for (let ring9 = 0; ring9 < 3; ring9++) {
+    const n = [1, 7, 12][ring9], rr3 = [0, 0.5, 0.92][ring9];
     for (let i = 0; i < n; i++) {
-      if (ring8 === 2 && R11() < 0.25) continue;
-      const a = i / n * TAU165 + R11() * 0.35 + ring8;
-      slabs2.push([x + Math.cos(a) * rx * rr3, y + Math.sin(a) * ry * rr3, ring8]);
+      if (ring9 === 2 && R11() < 0.25) continue;
+      const a = i / n * TAU165 + R11() * 0.35 + ring9;
+      slabs2.push([x + Math.cos(a) * rx * rr3, y + Math.sin(a) * ry * rr3, ring9]);
     }
   }
   slabs2.sort((a, b) => a[1] - b[1]);
-  for (const [sx, sy, ring8] of slabs2) {
-    const w = ring8 ? 13 + R11() * 7 : 24, h = ring8 ? 6 + R11() * 3 : 11, pts2 = [];
+  for (const [sx, sy, ring9] of slabs2) {
+    const w = ring9 ? 13 + R11() * 7 : 24, h = ring9 ? 6 + R11() * 3 : 11, pts2 = [];
     for (let i = 0; i < 6; i++) {
       const a = i / 6 * TAU165 + R11() * 0.5;
       pts2.push([sx + Math.cos(a) * w * (0.8 + R11() * 0.3), sy + Math.sin(a) * h * (0.8 + R11() * 0.3)]);
     }
     const top = rounded3(pts2, 0.06), edge = shift2(top, 0, 2.4);
-    prop4(c, [[edge, P21.d2], [top, ring8 === 2 && R11() < 0.4 ? P21.l : P21.m]], 1.4);
+    prop4(c, [[edge, P21.d2], [top, ring9 === 2 && R11() < 0.4 ? P21.l : P21.m]], 1.4);
     c.save();
     c.clip(top);
     c.fillStyle = P21.l;
@@ -144263,6 +144263,98 @@ var GRASS2 = { d: "#2f7a2c", m: "#3a9339", l: "#58a830", h: "#7cc244" };
 var FUNGUS2 = ramp5("#e2cfa0");
 var CAP3 = ramp5("#c8432c");
 var GLOWCAP2 = ramp5("#7fdcf2", "#103040", "#ffffff");
+function moss4(c, x, y, w, h, seed2, o = 1) {
+  const L = [], n = Math.max(3, Math.round(w / 3.4));
+  for (let i = 0; i < n; i++) {
+    const t = n === 1 ? 0.5 : i / (n - 1), r = h * 0.42 + rnd7(seed2 + i * 3) * h * 0.18;
+    L.push([x - w / 2 + r * 0.5 + t * (w - r), y - Math.sin(t * Math.PI) * h * 0.25 + (rnd7(seed2 + i) - 0.5) * h * 0.25, r]);
+  }
+  for (let i = 0; i < n - 1; i++) {
+    const [ax, ay, ar] = L[i], [bx, by, br] = L[i + 1];
+    L.push([(ax + bx) / 2, (ay + by) / 2 + h * 0.2, (ar + br) * 0.42]);
+  }
+  const p = lobes4(L);
+  contour3(c, [p], o);
+  fill4(c, p, MOSS13.d);
+  clip21(c, p, () => {
+    c.save();
+    c.translate(-0.7, -1);
+    c.fillStyle = MOSS13.m;
+    c.fill(p);
+    c.restore();
+    c.save();
+    c.translate(-1.5, -2.1);
+    c.fillStyle = MOSS13.l;
+    c.fill(lobes4(L.slice(0, n).map(([lx, ly, r]) => [lx, ly, r * 0.72])));
+    c.restore();
+    c.fillStyle = MOSS13.d2;
+    c.save();
+    c.translate(1.2, 1.6);
+    c.globalCompositeOperation = "source-atop";
+    c.restore();
+    for (let i = 0; i < n; i += 2) {
+      const [lx, ly, r] = L[i];
+      c.fillStyle = MOSS13.h;
+      c.beginPath();
+      c.ellipse(lx - r * 0.45, ly - r * 0.6, r * 0.26, r * 0.18, -0.4, 0, TAU168);
+      c.fill();
+    }
+  });
+}
+function shelf2(c, x, y, w, o = 1) {
+  const p = P24();
+  p.moveTo(x - w * 0.15, y - w * 0.12);
+  p.quadraticCurveTo(x + w * 0.5, y - w * 0.62, x + w, y - w * 0.05);
+  p.quadraticCurveTo(x + w * 0.55, y + w * 0.28, x - w * 0.15, y + w * 0.16);
+  p.closePath();
+  contour3(c, [p], o);
+  fill4(c, p, FUNGUS2.m);
+  clip21(c, p, () => {
+    c.fillStyle = FUNGUS2.d;
+    c.fillRect(x - w, y + w * 0.02, w * 3, w);
+    c.fillStyle = FUNGUS2.l;
+    c.beginPath();
+    c.ellipse(x + w * 0.35, y - w * 0.3, w * 0.35, w * 0.12, -0.25, 0, TAU168);
+    c.fill();
+  });
+  c.strokeStyle = FUNGUS2.d;
+  c.lineWidth = 0.6;
+  c.beginPath();
+  c.moveTo(x, y - w * 0.05);
+  c.quadraticCurveTo(x + w * 0.5, y - w * 0.4, x + w * 0.85, y - w * 0.06);
+  c.stroke();
+}
+function mushroom2(c, x, y, s, R11, spots2 = true, o = 0.9) {
+  const st = poly14([[x - 1.3 * s, y], [x - 1 * s, y - 6 * s], [x + 1 * s, y - 6 * s], [x + 1.5 * s, y]]), cap9 = P24();
+  cap9.moveTo(x - 5.4 * s, y - 5.6 * s);
+  cap9.quadraticCurveTo(x - 4.4 * s, y - 11.4 * s, x, y - 11.6 * s);
+  cap9.quadraticCurveTo(x + 4.6 * s, y - 11.4 * s, x + 5.4 * s, y - 5.6 * s);
+  cap9.quadraticCurveTo(x, y - 4.2 * s, x - 5.4 * s, y - 5.6 * s);
+  cap9.closePath();
+  contour3(c, [st, cap9], o);
+  fill4(c, st, "#efe4cc");
+  clip21(c, st, () => {
+    c.fillStyle = "#c9bb9c";
+    c.fillRect(x + 0.2 * s, y - 7 * s, 3 * s, 8 * s);
+  });
+  fill4(c, cap9, R11.m);
+  clip21(c, cap9, () => {
+    c.fillStyle = R11.d;
+    c.beginPath();
+    c.ellipse(x + 2.6 * s, y - 6 * s, 5 * s, 3.4 * s, 0, 0, TAU168);
+    c.fill();
+    c.fillStyle = R11.l;
+    c.beginPath();
+    c.ellipse(x - 1.8 * s, y - 9.4 * s, 2.6 * s, 1.4 * s, -0.4, 0, TAU168);
+    c.fill();
+  });
+  if (spots2) for (const [dx, dy, r] of [[-2.4, -8.2, 0.9], [1.4, -9.6, 0.7], [2.8, -7.2, 0.6]]) {
+    c.fillStyle = "#fbf2dc";
+    c.beginPath();
+    c.ellipse(x + dx * s, y + dy * s, r * s, r * 0.75 * s, 0, 0, TAU168);
+    c.fill();
+  }
+}
 function leafPath2(x, y, len, ang, w) {
   const tx = x + Math.cos(ang) * len, ty = y + Math.sin(ang) * len, nx = -Math.sin(ang), ny = Math.cos(ang), mx = (x + tx) / 2, my = (y + ty) / 2, p = P24();
   p.moveTo(x, y);
@@ -144316,6 +144408,35 @@ function boneV32(c, x, y, a, s) {
   fill4(c, knobs, B6.m);
   c.fillStyle = B6.d;
   c.fillRect(-6, 0.3, 12, 1);
+  c.restore();
+}
+function skullV32(c, x, y, s) {
+  c.save();
+  c.translate(x, y);
+  c.scale(s, s);
+  const B6 = ramp5("#ece2c8"), p = smooth23([[-6.4, -1], [-6.6, -7], [-3.6, -10.6], [3.6, -10.6], [6.6, -7], [6.4, -1], [3, 0.8], [-3, 0.8]]);
+  contour3(c, [p], 0.8);
+  fill4(c, p, B6.m);
+  clip21(c, p, () => {
+    c.fillStyle = B6.d;
+    c.fillRect(1, -12, 8, 14);
+    c.fillStyle = B6.l;
+    c.beginPath();
+    c.ellipse(-2.6, -8.4, 2.6, 1.2, 0, 0, TAU168);
+    c.fill();
+  });
+  for (const ex of [-2.6, 2.6]) {
+    c.fillStyle = "#2a221a";
+    c.beginPath();
+    c.ellipse(ex, -5.4, 1.7, 1.9, 0, 0, TAU168);
+    c.fill();
+  }
+  c.fillStyle = "#2a221a";
+  c.beginPath();
+  c.moveTo(0, -3.6);
+  c.lineTo(-0.8, -2);
+  c.lineTo(0.8, -2);
+  c.fill();
   c.restore();
 }
 function burrowV32(c, x, y, s) {
@@ -146295,16 +146416,16 @@ function drawYetiCaveHoardV1(c, { open: open3 = false, t = 0, ready = false } = 
   {
     c.save();
     c.translate(-17, -4);
-    const body5 = poly14([[-4, 0], [-4, -9], [4, -9], [4, 0]]), top = poly14([[-5, -9], [0, -13], [5, -9]]), base3 = poly14([[-5, 0], [5, 0], [4.4, 2], [-4.4, 2]]), ring8 = P24();
-    ring8.arc(0, -14.6, 1.8, 0, TAU168);
+    const body5 = poly14([[-4, 0], [-4, -9], [4, -9], [4, 0]]), top = poly14([[-5, -9], [0, -13], [5, -9]]), base3 = poly14([[-5, 0], [5, 0], [4.4, 2], [-4.4, 2]]), ring9 = P24();
+    ring9.arc(0, -14.6, 1.8, 0, TAU168);
     contour3(c, [body5, top, base3], 0.8);
     c.save();
     c.strokeStyle = OL114;
     c.lineWidth = 1.8;
-    c.stroke(ring8);
+    c.stroke(ring9);
     c.strokeStyle = BRASS22.d;
     c.lineWidth = 0.8;
-    c.stroke(ring8);
+    c.stroke(ring9);
     c.restore();
     fill4(c, body5, full ? "#fff0b8" : "#c8d8e6");
     clip21(c, body5, () => {
@@ -146385,6 +146506,907 @@ function drawYetiCaveHoardV1(c, { open: open3 = false, t = 0, ready = false } = 
   if (full) {
     const k = t * 0.8 % 1;
     for (const [gx, gy, o] of [[-2, -12, 0], [10, -10, 0.33], [16, -22, 0.66], [22, -34, 0.15]]) {
+      const a = Math.max(0, Math.sin((k + o) * TAU168));
+      if (a > 0.25) sparkle2(c, gx, gy, a * 4.2);
+    }
+  }
+  if (ready) glow9(c, 0, -10, 40, "255,214,110", 0.3);
+}
+
+// src/client/den_art_bog_v1.js
+var MUD3 = ramp5("#6e5c3e", "#1a1408", "#ecdca0");
+var WET = ramp5("#4a3f2c", "#120e06", "#c8b890");
+var BOGW = { d2: "#1a261c", d: "#26382a", m: "#36503a", l: "#557a4c", h: "#a6c88a" };
+var LOGB = ramp5("#6a4c34", "#16100a", "#ffe0b0");
+var ROT2 = ramp5("#b08a5c", "#2a1a0c", "#fff0c8");
+var LILY2 = ramp5("#4e8e36", "#0e2a12", "#e8ffb0");
+var REED2 = ramp5("#8c9c50", "#1e2a10", "#f4ffc0");
+var ROPE22 = "#c8a46a";
+var SLIME = ramp5("#9cb85a", "#1e3010", "#f4ffc8");
+var RUST4 = ramp5("#8a5a36", "#2a1408", "#f0c890");
+var SILV = ramp5("#b8c0c4", "#2a3038", "#ffffff");
+var AMETH = ["#5a2a8a", "#9a5ad8", "#ecd8ff"];
+function hull(pts2) {
+  pts2 = pts2.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
+  for (const p of pts2) {
+    while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop();
+    lo.push(p);
+  }
+  for (const p of pts2.slice().reverse()) {
+    while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop();
+    up.push(p);
+  }
+  return lo.slice(0, -1).concat(up.slice(0, -1));
+}
+var ring3 = (x, y, rx, ry, n, seed2, j = 0.06) => Array.from({ length: n }, (_, i) => {
+  const a = i / n * TAU168, w = 1 + (rnd7(seed2 + i * 1.3) - 0.5) * j;
+  return [x + Math.cos(a) * rx * w, y + Math.sin(a) * ry * w];
+});
+function cattails2(c, x, y, s, seed2, n = 4) {
+  const L = [];
+  for (let i = 0; i < n + 2; i++) {
+    const dx = (rnd7(seed2 + i) - 0.5) * 10 * s, h = (14 + rnd7(seed2 + i * 3) * 10) * s, lean = (rnd7(seed2 + i * 5) - 0.5) * 8 * s;
+    L.push([x + dx, y, x + dx + lean, y - h]);
+  }
+  for (const [x0, y0, x1, y1] of L.slice(n)) {
+    taper4(c, x0 - 1, y0, x1, y1 + 4 * s, 1.6 * s, 2 * s, OL114);
+    taper4(c, x0 - 0.6, y0, x1, y1 + 4 * s, 0.9 * s, 2 * s, REED2.m);
+  }
+  for (const [x0, y0, x1, y1] of L.slice(0, n)) {
+    c.save();
+    c.lineCap = "round";
+    c.strokeStyle = OL114;
+    c.lineWidth = 2.2 * s;
+    c.beginPath();
+    c.moveTo(x0, y0);
+    c.quadraticCurveTo(x0, (y0 + y1) / 2, x1, y1);
+    c.stroke();
+    c.strokeStyle = REED2.d;
+    c.lineWidth = 1 * s;
+    c.stroke();
+    c.restore();
+    const hd = P24();
+    hd.ellipse(x1, y1 + 3.4 * s, 1.9 * s, 4.4 * s, (x1 - x0) * 0.02, 0, TAU168);
+    contour3(c, [hd], 0.6);
+    fill4(c, hd, "#6a3c22");
+    c.fillStyle = "#8e5634";
+    c.beginPath();
+    c.ellipse(x1 - 0.6 * s, y1 + 2.4 * s, 0.8 * s, 2.8 * s, (x1 - x0) * 0.02, 0, TAU168);
+    c.fill();
+    c.save();
+    c.strokeStyle = REED2.l;
+    c.lineWidth = 0.7 * s;
+    c.beginPath();
+    c.moveTo(x1, y1 - 1 * s);
+    c.lineTo(x1 + (x1 - x0) * 0.05, y1 - 4 * s);
+    c.stroke();
+    c.restore();
+  }
+}
+function lilyPad3(c, x, y, r, a, seed2, flower2 = false) {
+  const p = P24();
+  p.moveTo(x, y);
+  p.ellipse(x, y, r, r * 0.5, 0, a + 0.28, a + TAU168 - 0.28);
+  p.closePath();
+  contour3(c, [p], 0.6);
+  fill4(c, p, LILY2.m);
+  clip21(c, p, () => {
+    c.fillStyle = LILY2.d;
+    c.fillRect(x - r, y + r * 0.1, r * 2, r);
+    c.fillStyle = LILY2.l;
+    c.beginPath();
+    c.ellipse(x - r * 0.3, y - r * 0.2, r * 0.45, r * 0.14, 0, 0, TAU168);
+    c.fill();
+    c.strokeStyle = LILY2.d2;
+    c.lineWidth = 0.4;
+    for (let k = 0; k < 5; k++) {
+      const aa = a + 0.6 + k * 1.1;
+      c.beginPath();
+      c.moveTo(x, y);
+      c.lineTo(x + Math.cos(aa) * r * 0.9, y + Math.sin(aa) * r * 0.45);
+      c.stroke();
+    }
+  });
+  if (flower2) {
+    for (let k = 0; k < 6; k++) {
+      const aa = k / 6 * TAU168, pp = leafPath2(x + r * 0.2, y - 1, 4.2, aa - Math.PI / 2 * 0.2 - 1.57 + (k - 2.5) * 0.42, 1.6);
+      contour3(c, [pp], 0.45);
+      fill4(c, pp, k % 2 ? "#f6b8cc" : "#e88aa8");
+    }
+    c.fillStyle = "#ffe07a";
+    c.beginPath();
+    c.arc(x + r * 0.2, y - 2.6, 1.2, 0, TAU168);
+    c.fill();
+  }
+}
+function frogspawn(c, x, y, s, seed2) {
+  const B6 = [];
+  for (let i = 0; i < 11; i++) {
+    const a = rnd7(seed2 + i) * TAU168, r = Math.sqrt(rnd7(seed2 + i * 2.1)) * 6 * s;
+    B6.push([x + Math.cos(a) * r * 1.5, y + Math.sin(a) * r * 0.7, 1.9 * s]);
+  }
+  const p = lobes4(B6);
+  contour3(c, [p], 0.5);
+  fill4(c, p, "#b8c8a0");
+  clip21(c, p, () => {
+    c.fillStyle = "#d8e6c4";
+    c.save();
+    c.translate(-0.5, -0.6);
+    c.fill(p);
+    c.restore();
+  });
+  for (const [bx, by, r] of B6) {
+    c.fillStyle = "#1c2414";
+    c.beginPath();
+    c.arc(bx + 0.2, by + 0.2, r * 0.42, 0, TAU168);
+    c.fill();
+    c.fillStyle = "#fff";
+    c.beginPath();
+    c.arc(bx - r * 0.4, by - r * 0.45, r * 0.22, 0, TAU168);
+    c.fill();
+  }
+}
+function root5(c, x, y, a, len, w, bend, seed2) {
+  const x1 = x + Math.cos(a) * len, y1 = y + Math.sin(a) * len, nx = -Math.sin(a), ny = Math.cos(a), mx = (x + x1) / 2 + nx * bend, my = (y + y1) / 2 + ny * bend, p = P24();
+  p.moveTo(x + nx * w, y + ny * w);
+  p.quadraticCurveTo(mx + nx * w * 0.55, my + ny * w * 0.55, x1, y1);
+  p.quadraticCurveTo(mx - nx * w * 0.55, my - ny * w * 0.55, x - nx * w, y - ny * w);
+  p.closePath();
+  contour3(c, [p], 0.9);
+  fill4(c, p, LOGB.d);
+  clip21(c, p, () => {
+    c.save();
+    c.translate(-nx * w * 0.4 - 0.4, -ny * w * 0.4 - 0.8);
+    c.fillStyle = LOGB.m;
+    c.fill(p);
+    c.restore();
+    c.save();
+    c.translate(-nx * w * 0.75 - 0.6, -ny * w * 0.75 - 1.2);
+    c.fillStyle = LOGB.l;
+    c.fill(p);
+    c.restore();
+  });
+  if (len > 22) {
+    const t = 0.6, bx = x + (x1 - x) * t + nx * bend * 0.5, by = y + (y1 - y) * t + ny * bend * 0.5;
+    const s2 = poly14([[bx, by], [bx + Math.cos(a + 0.7) * len * 0.3, by + Math.sin(a + 0.7) * len * 0.3], [bx + Math.cos(a) * 2, by + Math.sin(a) * 2]]);
+    contour3(c, [s2], 0.6);
+    fill4(c, s2, LOGB.m);
+  }
+}
+function drape(c, x, y, len, seed2, n = 3) {
+  for (let i = 0; i < n; i++) {
+    const dx = (i - (n - 1) / 2) * 2.4 + (rnd7(seed2 + i) - 0.5) * 1.4, l = len * (0.6 + rnd7(seed2 + i * 3) * 0.5);
+    taper4(c, x + dx, y - 1, x + dx + (rnd7(seed2 + i * 7) - 0.5) * 3, y + l, 1.9, 1, OL114);
+    taper4(c, x + dx, y - 0.6, x + dx + (rnd7(seed2 + i * 7) - 0.5) * 3, y + l - 0.6, 1.1, 1, i % 2 ? "#6a8a3c" : "#8ea852");
+  }
+}
+function mudSplash(c, x, y, t) {
+  for (let i = 0; i < 16; i++) {
+    const a = Math.PI + 0.15 + rnd7(i * 3.3) * (Math.PI - 0.3), d = (14 + rnd7(i) * 40) * (0.4 + t), cx = x + Math.cos(a) * d * 1.3, cy2 = y - 6 + Math.sin(a) * d * 0.85 + t * t * 20 * rnd7(i + 5), p = ell11(cx, cy2, 2 + rnd7(i + 1) * 2.4, 1.6 + rnd7(i + 2) * 1.8);
+    contour3(c, [p], 0.6);
+    fill4(c, p, i % 3 ? MUD3.m : BOGW.l);
+    c.fillStyle = i % 3 ? MUD3.l : BOGW.h;
+    c.beginPath();
+    c.ellipse(cx - 0.6, cy2 - 0.6, 1, 0.6, 0, 0, TAU168);
+    c.fill();
+  }
+  c.save();
+  c.globalAlpha = 0.5 * (1 - t * 0.6);
+  for (let i = 0; i < 5; i++) {
+    const a = Math.PI + 0.4 + i * 0.55;
+    c.fillStyle = "rgba(190,206,160,.85)";
+    c.beginPath();
+    c.ellipse(x + Math.cos(a) * 28 * (0.5 + t), y - 10 + Math.sin(a) * 14 * (0.5 + t), 10 + t * 6, 6 + t * 3, 0, 0, TAU168);
+    c.fill();
+  }
+  c.restore();
+}
+function drawBogHollowMouthV1(c, { t = 0, state: state2 = "sleep" } = {}) {
+  const N3 = [-8, -30], F6 = [58, -52];
+  c.fillStyle = WET.d;
+  c.fill(smooth23([[-62, -2], [-30, -12], [30, -30], [86, -36], [96, -24], [70, -6], [20, 8], [-40, 8], [-64, 4]]));
+  {
+    const R11 = [[-1.9, 34, 7, 4], [-1.5, 40, 8, -5], [-1.15, 38, 7, 6], [-0.75, 36, 6, -4], [-0.35, 34, 6, 5], [0.05, 30, 5, -3], [-2.4, 26, 6, 3], [-2.8, 22, 5, -3]];
+    const clod2 = lobes4([[F6[0], F6[1], 15], [F6[0] + 8, F6[1] - 8, 10], [F6[0] - 6, F6[1] - 10, 9], [F6[0] + 10, F6[1] + 4, 9]]);
+    contour3(c, [clod2], 1);
+    fill4(c, clod2, WET.m);
+    clip21(c, clod2, () => {
+      c.save();
+      c.translate(-1.5, -2);
+      c.fillStyle = MUD3.d;
+      c.fill(clod2);
+      c.restore();
+      for (let i = 0; i < 10; i++) {
+        c.fillStyle = i % 2 ? WET.d2 : MUD3.m;
+        c.beginPath();
+        c.arc(F6[0] - 12 + rnd7(i * 3) * 26, F6[1] - 16 + rnd7(i * 7) * 24, 0.9, 0, TAU168);
+        c.fill();
+      }
+    });
+    for (const [a, len, w, b] of R11) root5(c, F6[0] + Math.cos(a) * 8, F6[1] + Math.sin(a) * 8, a, len, w, b, a * 9);
+    for (const [x, y] of [[F6[0] + 28, F6[1] - 24], [F6[0] - 4, F6[1] - 34], [F6[0] + 36, F6[1] - 4]]) drape(c, x, y, 8, x, 2);
+  }
+  const near5 = ring3(N3[0], N3[1], 30, 31, 28, 3, 0.05), far = ring3(F6[0], F6[1], 23, 24, 24, 9, 0.06), tr = poly14(hull([...near5, ...far]));
+  contour3(c, [tr], 1.3);
+  fill4(c, tr, LOGB.d);
+  clip21(c, tr, () => {
+    c.save();
+    c.translate(-2, -3.4);
+    c.fillStyle = LOGB.m;
+    c.fill(tr);
+    c.restore();
+    const top = poly14(hull([...ring3(N3[0] - 2, N3[1] - 14, 24, 16, 20, 5), ...ring3(F6[0] - 2, F6[1] - 12, 18, 12, 20, 6)]));
+    c.fillStyle = LOGB.l;
+    c.fill(top);
+    c.fillStyle = LOGB.h;
+    c.fill(poly14(hull([...ring3(N3[0] - 6, N3[1] - 24, 12, 5, 12, 7), ...ring3(F6[0] - 6, F6[1] - 21, 9, 4, 12, 8)])));
+    c.fillStyle = LOGB.d2;
+    c.fill(poly14(hull([...ring3(N3[0] + 6, N3[1] + 26, 26, 8, 16, 2), ...ring3(F6[0] + 6, F6[1] + 20, 20, 7, 16, 4)])));
+    const ax = F6[0] - N3[0], ay = F6[1] - N3[1], al = Math.hypot(ax, ay), ux = ax / al, uy = ay / al, nx = -uy, ny = ux;
+    for (let i = 0; i < 16; i++) {
+      const o = (rnd7(i * 3.7) - 0.5) * 52, s0 = rnd7(i * 5.1) * al * 0.7, ln = 14 + rnd7(i * 2.3) * 20, x0 = N3[0] + ux * s0 + nx * o, y0 = N3[1] + uy * s0 + ny * o;
+      taper4(c, x0, y0, x0 + ux * ln, y0 + uy * ln, o < -10 ? 0.7 : 1, 0.6, o < -10 ? LOGB.m : LOGB.d2);
+    }
+    for (let i = 0; i < 10; i++) {
+      const o = (rnd7(i * 9.1) - 0.5) * 40, s0 = rnd7(i * 4.3) * al * 0.8, x0 = N3[0] + ux * s0 + nx * o, y0 = N3[1] + uy * s0 + ny * o;
+      c.fillStyle = o < 0 ? LOGB.h : LOGB.l;
+      c.fillRect(x0, y0, ux * 6 + 1, 1);
+    }
+  });
+  {
+    const sp = poly14([[18, -74], [22, -90], [27, -92], [29, -86], [26, -72]]);
+    contour3(c, [sp], 1);
+    fill4(c, sp, LOGB.m);
+    clip21(c, sp, () => {
+      c.fillStyle = LOGB.l;
+      c.fillRect(18, -94, 6, 24);
+      c.fillStyle = LOGB.d;
+      c.fillRect(26, -94, 6, 24);
+    });
+    const tip = poly14([[22, -90], [24, -95], [25.4, -91], [27, -96], [27.4, -91]]);
+    contour3(c, [tip], 0.6);
+    fill4(c, tip, ROT2.m);
+  }
+  moss4(c, 4, -66, 34, 8, 3, 1);
+  moss4(c, 34, -72, 26, 7, 7, 1);
+  moss4(c, 60, -74, 18, 6, 11, 1);
+  moss4(c, -30, -48, 12, 6, 13, 0.9);
+  shelf2(c, 28, -38, 11, 1);
+  shelf2(c, 38, -46, 9, 0.9);
+  shelf2(c, 22, -30, 7, 0.9);
+  const face5 = smooth23(near5), wood3 = smooth23(ring3(N3[0], N3[1], 26, 27, 24, 4, 0.05)), hole = smooth23(ring3(N3[0] + 1, N3[1] + 2, 19, 21, 22, 8, 0.08));
+  contour3(c, [face5], 1.3);
+  fill4(c, face5, LOGB.d);
+  clip21(c, face5, () => {
+    c.fillStyle = LOGB.m;
+    c.fill(ell11(N3[0] - 3, N3[1] - 3, 28, 28));
+    c.fillStyle = LOGB.l;
+    c.fill(ell11(N3[0] - 8, N3[1] - 10, 20, 18));
+  });
+  c.save();
+  c.strokeStyle = OL114;
+  c.lineWidth = 1.4;
+  c.stroke(wood3);
+  c.restore();
+  fill4(c, wood3, ROT2.m);
+  clip21(c, wood3, () => {
+    c.fillStyle = ROT2.d;
+    c.fill(ell11(N3[0] + 6, N3[1] + 6, 26, 26));
+    c.fillStyle = ROT2.l;
+    c.fill(ell11(N3[0] - 9, N3[1] - 11, 15, 11));
+    c.strokeStyle = ROT2.d;
+    c.lineWidth = 0.6;
+    for (const r of [23.5, 22]) {
+      c.beginPath();
+      c.ellipse(N3[0], N3[1], r, r + 1, 0, 0, TAU168);
+      c.stroke();
+    }
+    for (let i = 0; i < 10; i++) {
+      const a = i / 10 * TAU168 + 0.2;
+      taper4(c, N3[0] + Math.cos(a) * 20, N3[1] + Math.sin(a) * 21, N3[0] + Math.cos(a) * 26, N3[1] + Math.sin(a) * 27, 0.5, 0, ROT2.d2);
+    }
+  });
+  fill4(c, hole, "#141a10");
+  clip21(c, hole, () => {
+    c.fillStyle = "#0c100a";
+    c.fill(ell11(N3[0] + 5, N3[1] - 2, 15, 17));
+    c.fillStyle = "#050704";
+    c.fill(ell11(N3[0] + 8, N3[1] - 4, 9, 11));
+    c.fillStyle = BOGW.d;
+    c.fill(smooth23([[N3[0] - 20, N3[1] + 24], [N3[0] - 14, N3[1] + 14], [N3[0] + 2, N3[1] + 12], [N3[0] + 18, N3[1] + 16], [N3[0] + 22, N3[1] + 24]]));
+    c.fillStyle = BOGW.l;
+    c.fillRect(N3[0] - 10, N3[1] + 14.4, 10, 0.8);
+  });
+  c.save();
+  c.strokeStyle = OL114;
+  c.lineWidth = 1.5;
+  c.stroke(hole);
+  c.restore();
+  if (state2 === "sleep") {
+    const k = t * 0.3 % 1, open3 = k > 0.92 ? Math.max(0.12, Math.abs(1 - (k - 0.92) * 25)) : 1, ey = N3[1] + 2;
+    glow9(c, N3[0] + 1, ey, 14, "230,200,90", 0.22);
+    for (const ex of [-7, 9]) {
+      const x = N3[0] + ex;
+      c.fillStyle = "#e8b830";
+      c.beginPath();
+      c.ellipse(x, ey, 3.6, 3.2 * open3, 0, 0, TAU168);
+      c.fill();
+      c.fillStyle = "#fff2a0";
+      c.beginPath();
+      c.ellipse(x - 0.8, ey - 1 * open3, 1.6, 1.1 * open3, 0, 0, TAU168);
+      c.fill();
+      c.fillStyle = "#120c04";
+      c.beginPath();
+      c.ellipse(x, ey, 2.4, 0.7 * open3, 0, 0, TAU168);
+      c.fill();
+    }
+    for (const [bx, by, r] of [[N3[0] - 2, N3[1] + 16, 1.2], [N3[0] + 6, N3[1] + 17, 0.8]]) {
+      c.save();
+      c.strokeStyle = BOGW.h;
+      c.lineWidth = 0.5;
+      c.globalAlpha = 0.7;
+      c.beginPath();
+      c.arc(bx, by - (t * 0.6 + bx * 0.1) % 1 * 2, r, 0, TAU168);
+      c.stroke();
+      c.restore();
+    }
+  }
+  for (const [a, l] of [[-2.5, 12], [-1.95, 16], [-1.35, 13], [-0.8, 9]]) {
+    const x = N3[0] + Math.cos(a) * 24, y = N3[1] + Math.sin(a) * 25;
+    drape(c, x, y, l, a * 13, 4);
+  }
+  moss4(c, N3[0] - 8, N3[1] - 28, 22, 6, 17, 1);
+  moss4(c, N3[0] + 14, N3[1] - 22, 12, 5, 19, 0.9);
+  {
+    const pud = smooth23(ring3(N3[0] + 2, 3, 20, 3.8, 14, 61, 0.12));
+    contour3(c, [pud], 0.8);
+    fill4(c, pud, BOGW.m);
+    clip21(c, pud, () => {
+      c.fillStyle = BOGW.d;
+      c.fillRect(N3[0] - 24, 4, 50, 6);
+      c.fillStyle = BOGW.l;
+      c.fillRect(N3[0] - 10, 1.4, 9, 0.8);
+      c.fillRect(N3[0] + 8, 3, 5, 0.7);
+    });
+    for (const [dx, l] of [[-6, 5], [2, 7], [9, 4]]) {
+      const x = N3[0] + dx, y = N3[1] + 23;
+      taper4(c, x, y, x + 0.4, y + l, 1.4, 0, OL114);
+      taper4(c, x, y + 0.3, x + 0.4, y + l - 0.4, 0.8, 0, BOGW.l);
+      const d = ell11(x + 0.4, y + l + 1.6, 1, 1.3);
+      contour3(c, [d], 0.35);
+      fill4(c, d, BOGW.l);
+    }
+  }
+  {
+    const pool4 = smooth23(ring3(-50, 1, 16, 5, 14, 31, 0.1));
+    contour3(c, [pool4], 0.8);
+    fill4(c, pool4, BOGW.m);
+    clip21(c, pool4, () => {
+      c.fillStyle = BOGW.d;
+      c.fillRect(-70, 1, 40, 8);
+      c.fillStyle = BOGW.l;
+      c.fillRect(-60, -2, 9, 0.8);
+    });
+    lilyPad3(c, -56, 1, 4.4, 0.4, 1, true);
+    lilyPad3(c, -45, 2.4, 3.4, 2.2, 2);
+  }
+  cattails2(c, -66, 2, 1, 5, 4);
+  cattails2(c, -36, 4, 0.75, 9, 3);
+  cattails2(c, 74, -10, 1, 13, 4);
+  frogspawn(c, -26, 5, 0.8, 21);
+  mushroom2(c, 40, -12, 0.7, ramp5("#c8b070"), false, 0.8);
+  mushroom2(c, 46, -10, 0.5, ramp5("#c8b070"), false, 0.7);
+  for (const [x, w, h] of [[-74, 10, 2.6], [86, 12, 2.6]]) {
+    const p = smooth23([[x - w, 3], [x - w * 0.5, -h], [x + w * 0.3, -h * 0.8], [x + w, 3], [x, 4.4]]);
+    contour3(c, [p], 0.5);
+    fill4(c, p, WET.m);
+    clip21(c, p, () => {
+      c.fillStyle = MUD3.m;
+      c.fill(smooth23([[x - w, 0], [x - w * 0.4, -h * 0.9], [x + w * 0.1, -h * 0.6]]));
+      c.fillStyle = WET.d;
+      c.fillRect(x - w, 1.5, w * 2, 4);
+    });
+  }
+  if (state2 === "roar") mudSplash(c, N3[0] + 4, 4, t);
+}
+function frogPrint(c, x, y, a, s, col2) {
+  c.save();
+  c.translate(x, y);
+  c.rotate(a);
+  c.scale(s, s * 0.55);
+  c.fillStyle = col2;
+  const p = P24();
+  p.moveTo(0, 1.4);
+  p.lineTo(-3.6, -4.4);
+  p.quadraticCurveTo(-1.8, -3.2, 0, -5.6);
+  p.quadraticCurveTo(1.8, -3.2, 3.6, -4.4);
+  p.closePath();
+  c.fill(p);
+  for (const [tx, ty] of [[-3.6, -4.6], [0, -5.8], [3.6, -4.6]]) {
+    c.beginPath();
+    c.arc(tx, ty, 0.9, 0, TAU168);
+    c.fill();
+  }
+  c.restore();
+}
+function slither(c, x, y, len, a, col2, w = 2.2) {
+  c.save();
+  c.translate(x, y);
+  c.rotate(a);
+  c.strokeStyle = col2;
+  c.lineWidth = w;
+  c.lineCap = "round";
+  c.beginPath();
+  c.moveTo(0, 0);
+  for (let i = 1; i <= 8; i++) c.quadraticCurveTo((i - 0.5) * len / 8, i % 2 ? 3 : -3, i * len / 8, 0);
+  c.stroke();
+  c.restore();
+}
+function mudHole(c, x, y, s) {
+  const lip2 = lobes4([[x - 12 * s, y - 1, 4.2 * s], [x - 6 * s, y - 4.2 * s, 4.8 * s], [x + 1 * s, y - 5 * s, 5 * s], [x + 8 * s, y - 3.8 * s, 4.4 * s], [x + 13 * s, y - 0.6, 3.8 * s], [x, y + 2.6 * s, 6 * s]]), hole = ell11(x, y, 9.4 * s, 3.8 * s);
+  contour3(c, [lip2], 0.9);
+  fill4(c, lip2, MUD3.m);
+  clip21(c, lip2, () => {
+    c.save();
+    c.translate(-0.8, -1.2);
+    c.fillStyle = MUD3.l;
+    c.fill(lip2);
+    c.restore();
+    c.fillStyle = WET.m;
+    c.fillRect(x - 18 * s, y + 0.6, 36 * s, 8);
+  });
+  fill4(c, hole, BOGW.d2);
+  clip21(c, hole, () => {
+    c.fillStyle = BOGW.d;
+    c.fill(ell11(x + 1, y + 1.4, 8 * s, 2.6 * s));
+    c.strokeStyle = BOGW.l;
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.ellipse(x + 2 * s, y + 0.6, 3.4 * s, 1.2 * s, 0, 0, TAU168);
+    c.stroke();
+  });
+  c.save();
+  c.strokeStyle = OL114;
+  c.lineWidth = 1.1;
+  c.stroke(hole);
+  c.restore();
+  for (const [dx, dy, r] of [[-12, 3, 2.4], [11, 3.4, 2], [-4, 4.4, 1.6]]) {
+    const p = ell11(x + dx * s, y + dy, r * 1.4 * s, r * 0.6 * s);
+    contour3(c, [p], 0.4);
+    fill4(c, p, MUD3.l);
+  }
+}
+function plank(c, x, y, a, len, seed2) {
+  c.save();
+  c.translate(x, y);
+  c.rotate(a);
+  const p = poly14([[-len / 2, -3], [len / 2 - 1, -3.4], [len / 2, 2.6], [-len / 2 + 1, 3]]);
+  contour3(c, [p], 0.8);
+  fill4(c, p, "#7a6448");
+  clip21(c, p, () => {
+    c.fillStyle = "#5a4834";
+    c.fillRect(-len, 0.6, len * 2, 4);
+    c.fillStyle = "#9a8462";
+    c.fillRect(-len, -3.4, len * 2, 1.4);
+    c.strokeStyle = "#4a3a28";
+    c.lineWidth = 0.5;
+    c.beginPath();
+    c.moveTo(-len / 2 + 3, -0.6);
+    c.lineTo(len / 2 - 4, -0.2);
+    c.stroke();
+  });
+  for (const nx of [-len / 2 + 2.6, len / 2 - 2.6]) {
+    c.fillStyle = "#3a3430";
+    c.beginPath();
+    c.arc(nx, 0, 0.7, 0, TAU168);
+    c.fill();
+  }
+  c.fillStyle = BOGW.m;
+  c.fill(ell11(len * 0.22, 3.2, len * 0.24, 1.4));
+  c.restore();
+}
+function reedTuft(c, x, y, s, seed2) {
+  for (let i = 0; i < 6; i++) {
+    const a = -Math.PI / 2 + (i - 2.5) * 0.22 + (rnd7(seed2 + i) - 0.5) * 0.2, l = (8 + rnd7(seed2 + i * 3) * 6) * s;
+    taper4(c, x + (i - 2.5) * 1.2, y, x + (i - 2.5) * 1.2 + Math.cos(a) * l, y + Math.sin(a) * l, 1.5 * s, (i - 2.5) * 0.6, OL114);
+    taper4(c, x + (i - 2.5) * 1.2, y - 0.4, x + (i - 2.5) * 1.2 + Math.cos(a) * (l - 0.8), y + Math.sin(a) * (l - 0.8), 0.85 * s, (i - 2.5) * 0.6, i % 2 ? REED2.m : REED2.l);
+  }
+}
+function drawBogHollowClearingV1(c, { rx = 150, ry = 62, seed: seed2 = 4 } = {}) {
+  c.save();
+  c.translate(0, 30);
+  const outline5 = Array.from({ length: 40 }, (_, i) => {
+    const a = i / 40 * TAU168, w = 1 + (rnd7(seed2 + i * 1.7) - 0.5) * 0.14 + Math.sin(a * 3 + seed2) * 0.04;
+    return [Math.cos(a) * rx * w, Math.sin(a) * ry * w];
+  });
+  const patch = smooth23(outline5);
+  c.save();
+  c.translate(0, 2.4);
+  fill4(c, patch, WET.d);
+  c.restore();
+  fill4(c, patch, MUD3.m);
+  clip21(c, patch, () => {
+    c.fillStyle = WET.m;
+    c.fill(smooth23([[-104, -40], [-40, -56], [40, -58], [108, -40], [70, -18], [20, -24], [-30, -20], [-86, -16]]));
+    for (const [x, y, w, h, sd] of [[-96, 8, 26, 9, 1], [84, 24, 30, 10, 2], [28, 40, 24, 7, 3], [-14, -6, 20, 6, 4], [104, -12, 16, 5, 5]]) {
+      const p = smooth23(ring3(x, y, w, h, 12, sd * 11, 0.18));
+      c.fillStyle = WET.m;
+      c.fill(p);
+      c.save();
+      c.clip(p);
+      c.fillStyle = WET.d;
+      c.fill(ell11(x + 2, y + 2, w * 0.8, h * 0.7));
+      c.restore();
+      c.save();
+      c.strokeStyle = MUD3.l;
+      c.lineWidth = 0.8;
+      c.globalAlpha = 0.8;
+      c.beginPath();
+      c.ellipse(x, y, w * 0.92, h * 0.9, 0, Math.PI * 0.15, Math.PI * 0.85);
+      c.stroke();
+      c.restore();
+    }
+    for (let i = 0; i < 46; i++) {
+      const a = rnd7(seed2 * 3 + i) * TAU168, r = Math.sqrt(rnd7(seed2 + i * 2.3)), x = Math.cos(a) * rx * r, y = Math.sin(a) * ry * r;
+      c.fillStyle = i % 3 ? WET.m : MUD3.l;
+      c.beginPath();
+      c.ellipse(x, y, 1.2 + rnd7(i) * 1.6, 0.6 + rnd7(i + 1) * 0.5, 0, 0, TAU168);
+      c.fill();
+    }
+    slither(c, -30, 10, 46, 0.35, WET.d, 2.4);
+    slither(c, 40, -4, 52, -0.2, WET.d, 2.4);
+    slither(c, 10, 30, 40, 0.9, WET.d, 2.2);
+    for (const [x, y, a] of [[-48, -2, -1.3], [-62, 6, -1.6], [-82, 0, -1.4], [52, -8, 1.5], [68, 0, 1.7], [90, -6, 1.4], [-8, 24, 0.1], [0, 40, -0.2], [12, 12, 0.3], [-20, 46, 0.2]]) frogPrint(c, x, y, a, 0.85, WET.d);
+  });
+  {
+    const pool4 = smooth23(ring3(-52, 22, 36, 11, 20, 91, 0.2));
+    contour3(c, [pool4], 0.9);
+    fill4(c, pool4, BOGW.m);
+    clip21(c, pool4, () => {
+      c.fillStyle = BOGW.d;
+      c.fill(smooth23([[-92, 14], [-60, 18], [-20, 16], [-14, 36], [-90, 36]]));
+      c.fillStyle = BOGW.d2;
+      c.fill(ell11(-56, 30, 26, 6));
+      c.fillStyle = BOGW.l;
+      c.fillRect(-78, 15, 12, 0.9);
+      c.fillRect(-36, 24, 7, 0.8);
+      for (let i = 0; i < 34; i++) {
+        const x = -86 + rnd7(i * 3.1) * 68, y = 13 + rnd7(i * 7.7) * 20;
+        c.fillStyle = i % 3 ? "#7aa83c" : "#a2c850";
+        c.beginPath();
+        c.ellipse(x, y, 1 + rnd7(i) * 0.8, 0.6, 0, 0, TAU168);
+        c.fill();
+      }
+      c.save();
+      c.strokeStyle = BOGW.h;
+      c.lineWidth = 0.6;
+      c.globalAlpha = 0.7;
+      for (const [x, y, r] of [[-40, 20, 3], [-40, 20, 5.4]]) {
+        c.beginPath();
+        c.ellipse(x, y, r, r * 0.4, 0, 0, TAU168);
+        c.stroke();
+      }
+      c.restore();
+    });
+    c.save();
+    c.strokeStyle = OL114;
+    c.lineWidth = 1.4;
+    c.stroke(pool4);
+    c.restore();
+    lilyPad3(c, -70, 20, 5.4, 0.5, 3, true);
+    lilyPad3(c, -58, 27, 4.4, 2.6, 4);
+    lilyPad3(c, -30, 18, 4, 1.2, 5);
+    lilyPad3(c, -46, 30, 3.4, 4, 6);
+    const bub = ell11(-40, 19, 1.8, 1.4);
+    contour3(c, [bub], 0.4);
+    fill4(c, bub, BOGW.l);
+    c.fillStyle = "#fff";
+    c.fillRect(-40.8, 18.2, 0.8, 0.6);
+  }
+  mudHole(c, -rx * 0.66, -ry * 0.12, 1);
+  mudHole(c, rx * 0.7, -ry * 0.22, 0.85);
+  plank(c, rx * 0.36, ry * 0.58, -0.18, 28, 1);
+  plank(c, rx * 0.56, ry * 0.4, -0.3, 22, 2);
+  plank(c, -rx * 0.14, -ry * 0.36, 0.2, 20, 3);
+  for (const [x, y, a, s] of [[-rx * 0.3, ry * 0.66, 0.3, 1], [rx * 0.14, ry * 0.3, -0.5, 0.9], [rx * 0.62, ry * 0.06, 1.2, 0.8]]) boneV32(c, x, y, a, s);
+  skullV32(c, rx * 0.06, ry * 0.84, 0.8);
+  frogspawn(c, rx * 0.3, ry * 0.12, 0.7, 7);
+  frogspawn(c, -rx * 0.78, ry * 0.42, 0.6, 13);
+  for (const [x, y, s, sd] of [[-rx * 0.86, -ry * 0.06, 0.9, 1], [rx * 0.88, ry * 0.14, 0.8, 2], [-rx * 0.26, ry * 0.36, 0.7, 3], [rx * 0.84, ry * 0.5, 0.75, 4], [-rx * 0.5, -ry * 0.5, 0.7, 5], [rx * 0.44, -ry * 0.56, 0.7, 6]]) reedTuft(c, x, y, s, sd * 19);
+  cattails2(c, -rx * 0.12, ry * 0.46, 0.7, 31, 3);
+  cattails2(c, -rx * 0.82, ry * 0.2, 0.75, 37, 3);
+  const lip2 = P24();
+  for (let i = 0; i < outline5.length; i++) {
+    const a = i / 40 * TAU168, n = 3 + Math.round(rnd7(seed2 + i) * 2);
+    if (rnd7(seed2 * 9 + i) < 0.3) continue;
+    for (let k = 0; k < n; k++) {
+      const tt = k / n, aa = a + tt * (TAU168 / 40), w = 1 + (rnd7(seed2 + i * 1.7) - 0.5) * 0.14 + Math.sin(aa * 3 + seed2) * 0.04, px7 = Math.cos(aa) * rx * w * 1.002, py = Math.sin(aa) * ry * w * 1.002, r = 1.4 + rnd7(i * 5 + k) * 1.6;
+      lip2.moveTo(px7 + r * 1.8, py);
+      lip2.ellipse(px7, py, r * 1.8, r * 0.55, 0, 0, TAU168);
+    }
+  }
+  c.fillStyle = WET.m;
+  c.fill(lip2);
+  c.save();
+  c.beginPath();
+  c.clip(lip2);
+  c.fillStyle = MUD3.d;
+  c.translate(-0.4, -0.6);
+  c.fill(lip2);
+  c.restore();
+  for (let i = 0; i < 34; i++) {
+    const a = i / 34 * TAU168 + rnd7(seed2 + i) * 0.15, w = 1 + Math.sin(a * 3 + seed2) * 0.04, x = Math.cos(a) * rx * w * 0.99, y = Math.sin(a) * ry * w * 0.99;
+    if (rnd7(i * 3.3) < 0.2) continue;
+    for (let k = 0; k < 5; k++) {
+      const aa = -Math.PI / 2 + (k - 2) * 0.32, l = 4 + rnd7(i * 7 + k) * 3;
+      taper4(c, x + (k - 2) * 1.4, y + 1, x + (k - 2) * 1.4 + Math.cos(aa) * l, y + 1 + Math.sin(aa) * l, 1.3, 0.4, OL114);
+      taper4(c, x + (k - 2) * 1.4, y + 0.6, x + (k - 2) * 1.4 + Math.cos(aa) * (l - 0.6), y + 0.6 + Math.sin(aa) * (l - 0.6), 0.7, 0.4, k % 2 ? "#4e8a3a" : "#6aa448");
+    }
+  }
+  c.restore();
+}
+function goldHeap4(c, cx, cy2, W20, H7, n, seed2) {
+  const top = [];
+  for (let i = 0; i <= 10; i++) {
+    const x = -W20 + i / 10 * W20 * 2, h = H7 * Math.pow(Math.max(0, 1 - Math.pow(x / W20, 2)), 0.75);
+    top.push([cx + x, cy2 - 1 - h + (rnd7(seed2 + i * 7) - 0.5) * 1.4]);
+  }
+  const body5 = smooth23([[cx - W20 - 3, cy2 + 1], ...top, [cx + W20 + 3, cy2 + 1], [cx, cy2 + 3]]);
+  contour3(c, [body5], 1);
+  fill4(c, body5, GOLD26.m);
+  clip21(c, body5, () => {
+    c.fillStyle = GOLD26.d;
+    c.fill(smooth23([[cx + W20 * 0.25, cy2 - H7], [cx + W20 + 4, cy2 - 2], [cx + W20 + 4, cy2 + 4], [cx - W20 - 4, cy2 + 4], [cx - W20 - 4, cy2], [cx, cy2 - 1]]));
+    c.fillStyle = GOLD26.l;
+    c.fill(smooth23([[cx - W20 * 0.8, cy2 - H7 * 0.45], [cx - W20 * 0.4, cy2 - H7 * 0.95], [cx, cy2 - H7 - 1], [cx + W20 * 0.2, cy2 - H7 * 0.8], [cx - W20 * 0.2, cy2 - H7 * 0.5]]));
+  });
+  const coins = [];
+  for (let i = 0; i < n; i++) {
+    const x = (rnd7(seed2 + i * 3.1) * 2 - 1) * W20 * 0.9, hx2 = H7 * Math.pow(Math.max(0, 1 - Math.pow(x / W20, 2)), 0.75), u = Math.pow(rnd7(seed2 + i * 5.7), 0.7);
+    coins.push([cx + x, cy2 - 1 - hx2 * u, 0.78 + rnd7(seed2 + i * 1.3) * 0.3, 0.7 + rnd7(seed2 + i * 2.9) * 0.5]);
+  }
+  coins.sort((a, b) => a[1] - b[1]);
+  for (const [x, y, s, tl] of coins) hoardCoin2(c, x, y, s, tl);
+}
+function drawBogHollowHoardV1(c, { open: open3 = false, t = 0, ready = false } = {}) {
+  const full = !open3;
+  c.fillStyle = WET.d2;
+  c.fill(smooth23([[-30, 2], [-22, -5], [0, -8], [22, -6], [31, 1], [18, 6], [-16, 6]]));
+  const mound3 = smooth23([[-28, 3], [-24, -4], [-10, -8], [8, -8], [24, -4], [29, 3], [10, 6], [-12, 6]]);
+  contour3(c, [mound3], 0.9);
+  fill4(c, mound3, MUD3.m);
+  clip21(c, mound3, () => {
+    c.fillStyle = MUD3.l;
+    c.fill(smooth23([[-26, -2], [-10, -7], [6, -7], [-6, -3]]));
+    c.fillStyle = WET.m;
+    c.fillRect(-30, 1, 60, 6);
+    c.fillStyle = BOGW.m;
+    c.fill(ell11(14, 3, 9, 2));
+  });
+  {
+    c.save();
+    c.translate(20, -2);
+    c.rotate(0.12);
+    const sh3 = poly14([[-1.3, 0], [-1.3, -26], [1.3, -26], [1.3, 0]]), bl = smooth23([[-1.4, -22], [-5.6, -29], [-5.8, -42], [0, -45], [5.8, -42], [5.6, -29], [1.4, -22]]), brk = poly14([[-4.4, -41], [-2, -44.6], [-0.4, -42], [1.4, -45.4], [4.4, -42]]);
+    contour3(c, [sh3, bl], 0.8);
+    fill4(c, sh3, "#8a6e4a");
+    c.fillStyle = "#5a4630";
+    c.fillRect(0.3, -26, 1, 26);
+    fill4(c, bl, "#9a7c54");
+    clip21(c, bl, () => {
+      c.fillStyle = "#c09c6c";
+      c.fillRect(-5, -46, 3, 24);
+      c.fillStyle = "#6e5638";
+      c.fillRect(1.6, -46, 4, 24);
+      c.fillStyle = BOGW.m;
+      c.fillRect(-5, -30, 10, 6);
+      c.fillStyle = MUD3.d;
+      c.fillRect(-5, -26.4, 10, 3);
+    });
+    c.fillStyle = "#e8d2a0";
+    c.fill(brk);
+    c.save();
+    c.strokeStyle = OL114;
+    c.lineWidth = 0.6;
+    c.stroke(brk);
+    c.restore();
+    const rp = P24();
+    rp.moveTo(-3.6, -34);
+    rp.quadraticCurveTo(4, -20, 10, -28);
+    c.save();
+    c.strokeStyle = OL114;
+    c.lineWidth = 1.8;
+    c.lineCap = "round";
+    c.stroke(rp);
+    c.strokeStyle = ROPE22;
+    c.lineWidth = 0.8;
+    c.stroke(rp);
+    c.restore();
+    for (const [x, y] of [[-0.6, -28], [4.2, -24.6], [8.6, -26.6]]) {
+      const f = ell11(x, y, 2.4, 1.8);
+      contour3(c, [f], 0.45);
+      fill4(c, f, "#c8945a");
+      c.fillStyle = "#8a5a30";
+      c.fillRect(x - 0.3, y - 1.8, 0.6, 3.6);
+      c.fillStyle = "#ecc08a";
+      c.fillRect(x - 1.8, y - 1, 1.2, 0.7);
+    }
+    moss4(c, 0, -44, 8, 3.4, 5, 0.6);
+    c.restore();
+  }
+  {
+    c.save();
+    c.translate(-14, -2);
+    c.rotate(-0.08);
+    const box6 = poly14([[-11, 0], [-11, -10], [11, -10], [11, 0]]), mouth6 = poly14([[-11, -10], [11, -10], [9, -14], [-9, -14]]), lid = poly14([[-9, -14], [9, -14], [10.4, -25], [-10.4, -25]]), lip2 = poly14([[-10.4, -25], [10.4, -25], [10.8, -27], [-10.8, -27]]);
+    contour3(c, [box6, mouth6, lid, lip2], 0.9);
+    fill4(c, lid, WOODS2.d2);
+    clip21(c, lid, () => {
+      c.fillStyle = WOODS2.d;
+      c.fillRect(-11, -25, 22, 4);
+      c.strokeStyle = mix23(WOODS2.d2, "#000000", 0.3);
+      c.lineWidth = 0.6;
+      for (const y of [-17.6, -21.2]) {
+        c.beginPath();
+        c.moveTo(-11, y);
+        c.lineTo(11, y);
+        c.stroke();
+      }
+      for (const bx of [-6.6, 6.6]) {
+        c.fillStyle = RUST4.d;
+        c.fillRect(bx - 1.2, -25, 2.4, 11);
+      }
+    });
+    fill4(c, lip2, WOODS2.m);
+    fill4(c, mouth6, "#1c140c");
+    clip21(c, mouth6, () => {
+      c.fillStyle = "#34261a";
+      c.fillRect(-12, -14, 24, 1.6);
+    });
+    if (full) {
+      const heap2 = smooth23([[-9, -11], [-6, -15.6], [0, -17], [6, -15.6], [9, -11]]);
+      contour3(c, [heap2], 0.6);
+      fill4(c, heap2, GOLD26.m);
+      clip21(c, heap2, () => {
+        c.fillStyle = GOLD26.l;
+        c.fillRect(-8, -17, 7, 3);
+        c.fillStyle = GOLD26.d;
+        c.fillRect(2, -14, 8, 4);
+      });
+      for (const [x, y] of [[-5, -14], [0, -15.6], [5, -14], [-2, -12.4], [3, -12.6]]) hoardCoin2(c, x, y, 0.75, 0.9);
+    }
+    fill4(c, box6, WOODS2.m);
+    clip21(c, box6, () => {
+      c.fillStyle = WOODS2.l;
+      c.fillRect(-11, -10, 22, 2.2);
+      c.fillStyle = WOODS2.d;
+      c.fillRect(-11, -4, 22, 4);
+      c.strokeStyle = WOODS2.d2;
+      c.lineWidth = 0.5;
+      c.beginPath();
+      c.moveTo(-11, -6.4);
+      c.lineTo(11, -6.4);
+      c.stroke();
+    });
+    for (const bx of [-7, 7]) {
+      c.fillStyle = RUST4.m;
+      c.fillRect(bx - 1.4, -10, 2.8, 10);
+      c.fillStyle = RUST4.l;
+      c.fillRect(bx - 1.4, -10, 1, 10);
+      c.fillStyle = RUST4.d2;
+      c.beginPath();
+      c.arc(bx, -7.4, 0.6, 0, TAU168);
+      c.arc(bx, -2.6, 0.6, 0, TAU168);
+      c.fill();
+    }
+    const lk = poly14([[-2, -10], [2, -10], [2, -6], [0, -4.6], [-2, -6]]);
+    contour3(c, [lk], 0.5);
+    fill4(c, lk, GOLD26.m);
+    c.fillStyle = OL114;
+    c.fillRect(-0.4, -8.8, 0.8, 2);
+    moss4(c, -2, -27, 13, 4, 9, 0.7);
+    c.fillStyle = WET.d;
+    c.fill(ell11(0, 0.6, 13, 2.4));
+    c.restore();
+  }
+  if (full) goldHeap4(c, 4, -1, 14, 11, 36, 41);
+  else goldHeap4(c, 4, 0, 9, 4, 12, 43);
+  if (full) {
+    gem4(c, -3, -4, 0.62, EMER2, 0.5);
+    gem4(c, 11, -3, 0.55, AMETH, 0.5);
+    c.save();
+    c.translate(4, -12);
+    const body5 = smooth23([[-5, 0], [-5.6, -3], [-3.6, -6], [3.6, -6], [5.6, -3], [5, 0]]), eyes2 = lobes4([[-2.8, -6.2, 1.9], [2.8, -6.2, 1.9]]), feet = lobes4([[-5, 0.2, 1.6], [5, 0.2, 1.6]]);
+    contour3(c, [body5, eyes2, feet], 0.7);
+    fill4(c, feet, GOLD26.d);
+    fill4(c, body5, GOLD26.m);
+    clip21(c, body5, () => {
+      c.fillStyle = GOLD26.l;
+      c.fill(ell11(-1.6, -4, 3, 1.6));
+      c.fillStyle = GOLD26.d;
+      c.fillRect(1.4, -6, 5, 6);
+    });
+    fill4(c, eyes2, GOLD26.m);
+    for (const ex of [-2.8, 2.8]) {
+      c.fillStyle = RUBY2[1];
+      c.beginPath();
+      c.arc(ex, -6.2, 1, 0, TAU168);
+      c.fill();
+      c.fillStyle = RUBY2[2];
+      c.fillRect(ex - 0.6, -6.8, 0.6, 0.6);
+    }
+    c.strokeStyle = GOLD26.d2;
+    c.lineWidth = 0.5;
+    c.beginPath();
+    c.moveTo(-2.6, -2.6);
+    c.quadraticCurveTo(0, -1.4, 2.6, -2.6);
+    c.stroke();
+    c.restore();
+  }
+  {
+    c.save();
+    c.translate(-20, 4);
+    c.rotate(-0.18);
+    const dome3 = P24();
+    dome3.moveTo(-6.4, 0);
+    dome3.quadraticCurveTo(-6.8, -10, 0, -10.4);
+    dome3.quadraticCurveTo(6.8, -10, 6.4, 0);
+    dome3.closePath();
+    const crest = poly14([[-1, -10.2], [-0.6, -12.6], [0.6, -12.6], [1, -10.2]]), brim = ell11(0, 0, 7.6, 2);
+    contour3(c, [dome3, crest, brim], 0.8);
+    fill4(c, crest, IRON19.d);
+    fill4(c, dome3, IRON19.m);
+    clip21(c, dome3, () => {
+      c.fillStyle = IRON19.l;
+      c.fill(ell11(-2.6, -6.4, 2.6, 2.6));
+      c.fillStyle = IRON19.h;
+      c.fillRect(-4.4, -8, 1, 2.4);
+      c.fillStyle = IRON19.d;
+      c.fillRect(2, -11, 6, 11);
+      c.fillStyle = OL114;
+      c.fillRect(-5.4, -5.2, 10.8, 1.5);
+      c.fillStyle = IRON19.d;
+      c.fillRect(-0.8, -5.4, 1.6, 4.6);
+      for (const [x, y, r] of [[-3.4, -2, 1.4], [3, -7, 1.2], [4.4, -1.6, 1.1], [-1, -8.6, 0.8]]) {
+        c.fillStyle = RUST4.m;
+        c.beginPath();
+        c.arc(x, y, r, 0, TAU168);
+        c.fill();
+        c.fillStyle = RUST4.l;
+        c.beginPath();
+        c.arc(x - 0.3, y - 0.3, r * 0.4, 0, TAU168);
+        c.fill();
+      }
+    });
+    fill4(c, brim, IRON19.d);
+    c.restore();
+    lilyPad3(c, -27, 5, 3, 1.8, 7);
+    cattails2(c, -17, -3, 0.45, 51, 2);
+  }
+  {
+    c.save();
+    c.translate(22, 4);
+    c.rotate(0.5);
+    const cup = poly14([[-4, -3], [4, -3], [2.4, 2], [-2.4, 2]]), stem = poly14([[-0.7, 2], [0.7, 2], [0.7, 5], [-0.7, 5]]), foot2 = ell11(0, 5.4, 2.6, 0.9);
+    contour3(c, [cup, stem, foot2], 0.6);
+    fill4(c, cup, SILV.m);
+    clip21(c, cup, () => {
+      c.fillStyle = SILV.l;
+      c.fillRect(-4, -3, 2.4, 6);
+      c.fillStyle = SILV.d;
+      c.fillRect(1.4, -3, 3, 6);
+    });
+    fill4(c, stem, SILV.d);
+    fill4(c, foot2, SILV.m);
+    c.fillStyle = SILV.d2;
+    c.fill(ell11(0, -3, 4, 1));
+    c.restore();
+  }
+  for (const [x, y] of full ? [[-28, 4], [28, 6], [8, 6], [-2, 5], [14, 5]] : [[-26, 3], [-18, 6], [14, 6], [26, 3], [-4, 6], [6, 6], [30, 0]]) hoardCoin2(c, x, y, 0.85, 1);
+  if (full) {
+    const k = t * 0.8 % 1;
+    for (const [gx, gy, o] of [[-3, -10, 0], [10, -9, 0.33], [4, -22, 0.66], [-14, -16, 0.15]]) {
       const a = Math.max(0, Math.sin((k + o) * TAU168));
       if (a > 0.25) sparkle2(c, gx, gy, a * 4.2);
     }
@@ -146481,6 +147503,13 @@ function drawDenGroundV1(c, x, y, { skin = "woodland", rx = 132, ry = 54, seed: 
     c.save();
     c.translate(x, y - 30);
     drawYetiCaveClearingV1(c, { rx, ry, seed: seed2 });
+    c.restore();
+    return;
+  }
+  if (skin === "wetland") {
+    c.save();
+    c.translate(x, y - 30);
+    drawBogHollowClearingV1(c, { rx, ry, seed: seed2 });
     c.restore();
     return;
   }
@@ -146613,6 +147642,13 @@ function drawDenMouthV1(c, x, y, { skin = "woodland", t = 0, state: state2 = "sl
     c.save();
     c.translate(x, y);
     drawYetiCaveMouthV1(c, { t, state: state2 });
+    c.restore();
+    return;
+  }
+  if (skin === "wetland") {
+    c.save();
+    c.translate(x, y);
+    drawBogHollowMouthV1(c, { t, state: state2 });
     c.restore();
     return;
   }
@@ -146866,6 +147902,13 @@ function drawDenHoardV1(c, x, y, { skin = "woodland", open: open3 = false, t = 0
     c.save();
     c.translate(x, y);
     drawYetiCaveHoardV1(c, { open: open3, t, ready });
+    c.restore();
+    return;
+  }
+  if (skin === "wetland") {
+    c.save();
+    c.translate(x, y);
+    drawBogHollowHoardV1(c, { open: open3, t, ready });
     c.restore();
     return;
   }
@@ -147576,7 +148619,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     if (cls) e.className = cls;
     return e;
   };
-  const wheel = el3("div", "skill-wheel-v1"), ring8 = el3("div", "skill-wheel-ring"), done3 = el3("button", "skill-wheel-done");
+  const wheel = el3("div", "skill-wheel-v1"), ring9 = el3("div", "skill-wheel-ring"), done3 = el3("button", "skill-wheel-done");
   wheel.dataset.gameplayHud = "";
   wheel.setAttribute("aria-label", "Skills");
   done3.type = "button";
@@ -147602,7 +148645,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   }
   let pipPaint = "", pipCount = 0, pipRow = PIPS_MAX;
   const PIP_STEP = (PIP_LAST - PIP_FIRST) / (PIPS_MAX - 1);
-  wheel.append(ring8, pipBox);
+  wheel.append(ring9, pipBox);
   document2.getElementById("world-bag").parentElement.append(wheel, done3, attackSkill);
   const attackV2 = createAttackButtonV2({ document: document2, host: wheel.parentElement });
   const slots2 = [];
@@ -147719,17 +148762,17 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   }
   const flip = () => document2.documentElement.dataset.hand === "left" ? -1 : 1;
   const angleAt = (e) => Math.atan2(e.clientY - geometry.cy - geometry.top, (e.clientX - geometry.cx - geometry.left) * flip()) * 180 / Math.PI;
-  listen(ring8, "pointerdown", (e) => {
+  listen(ring9, "pointerdown", (e) => {
     if (!geometry || WHEEL_PAGES < 2) return;
     e.preventDefault();
     e.stopPropagation();
     drag = { start: angleAt(e), turn: turn7, id: e.pointerId };
     try {
-      ring8.setPointerCapture(e.pointerId);
+      ring9.setPointerCapture(e.pointerId);
     } catch {
     }
   });
-  listen(ring8, "pointermove", (e) => {
+  listen(ring9, "pointermove", (e) => {
     if (!drag || e.pointerId !== drag.id) return;
     let d = angleAt(e) - drag.start;
     if (d > 180) d -= 360;
@@ -147744,8 +148787,8 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     drag = null;
     setPage(moved ? turn7 > 0.5 ? 1 : 0 : page ? 0 : 1);
   };
-  listen(ring8, "pointerup", release);
-  listen(ring8, "pointercancel", release);
+  listen(ring9, "pointerup", release);
+  listen(ring9, "pointercancel", release);
   slots2.forEach((s, i) => {
     listen(s.b, "pointerdown", (e) => {
       e.preventDefault();
@@ -147806,7 +148849,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     const band10 = g.radius + g.slot / 2 + 10, hole = g.radius - g.slot / 2 - 10, circle9 = (r, c) => `M ${(c - r).toFixed(1)},${c.toFixed(1)} a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(2 * r).toFixed(1)},0 a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(-2 * r).toFixed(1)},0 Z`;
     wheel.style.setProperty("--slot", g.slot + "px");
     document2.body.style.setProperty("--wheel-slot", g.slot + "px");
-    ring8.style.cssText = `left:${(g.cx - band10).toFixed(1)}px;top:${(g.cy - band10).toFixed(1)}px;width:${(band10 * 2).toFixed(1)}px;height:${(band10 * 2).toFixed(1)}px;--hole:${hole.toFixed(1)}px;clip-path:path(evenodd,"${circle9(band10, band10)} ${circle9(hole, band10)}")`;
+    ring9.style.cssText = `left:${(g.cx - band10).toFixed(1)}px;top:${(g.cy - band10).toFixed(1)}px;width:${(band10 * 2).toFixed(1)}px;height:${(band10 * 2).toFixed(1)}px;--hole:${hole.toFixed(1)}px;clip-path:path(evenodd,"${circle9(band10, band10)} ${circle9(hole, band10)}")`;
     done3.style.cssText = `left:${(g.cx - g.hub).toFixed(1)}px;top:${(g.cy - g.hub).toFixed(1)}px;width:${(g.hub * 2).toFixed(1)}px;height:${(g.hub * 2).toFixed(1)}px`;
     attackSkill.style.left = done3.style.left;
     attackSkill.style.top = done3.style.top;
@@ -147962,18 +149005,18 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
 // src/client/level_up_celebration_v4.js
 var LEVEL_UP_CELEBRATION_V4 = Object.freeze({ durationMs: 3200, sparks: 22 });
 function createLevelUpCelebrationV4(doc) {
-  let root5 = null, timer = null;
+  let root6 = null, timer = null;
   function clear2() {
     clearTimeout(timer);
-    root5?.remove();
-    root5 = null;
+    root6?.remove();
+    root6 = null;
   }
   function play(level, detail = "") {
     clear2();
-    root5 = doc.createElement("div");
-    root5.className = "level-up-v4";
-    root5.setAttribute("role", "status");
-    root5.setAttribute("aria-live", "assertive");
+    root6 = doc.createElement("div");
+    root6.className = "level-up-v4";
+    root6.setAttribute("role", "status");
+    root6.setAttribute("aria-live", "assertive");
     const flash = doc.createElement("div");
     flash.className = "level-up-v4-flash";
     const stage2 = doc.createElement("div");
@@ -147999,8 +149042,8 @@ function createLevelUpCelebrationV4(doc) {
     sub.textContent = detail;
     emblem8.append(kicker, number2);
     stage2.append(rays, burst6, emblem8, sub);
-    root5.append(flash, stage2);
-    doc.body.append(root5);
+    root6.append(flash, stage2);
+    doc.body.append(root6);
     timer = setTimeout(clear2, LEVEL_UP_CELEBRATION_V4.durationMs);
   }
   return Object.freeze({ play, destroy: clear2 });
@@ -148557,11 +149600,11 @@ var rankColor = (t) => t === 2 ? "#5aaeea" : t >= 0 ? TIER_COLORS[t] : "#6b7886"
 var PORTRAIT_BOOST = { thorn_wyrm: 1.7, lava_serpent: 1.4, swamp_basilisk: 1.3, toxic_fly: 1.3, hell_bat: 1.2 };
 var GROUP_STAT_WORD = { cdr: "Cooldown reduction", rareChance: "Rare chance" };
 function createBestiaryViewV1({ document: document2, environment, issue }) {
-  const root5 = document2.createElement("section");
-  root5.id = "world-bestiary-view";
-  root5.className = "bestiary-v1";
-  root5.hidden = true;
-  root5.setAttribute("aria-label", "Bestiary");
+  const root6 = document2.createElement("section");
+  root6.id = "world-bestiary-view";
+  root6.className = "bestiary-v1";
+  root6.hidden = true;
+  root6.setAttribute("aria-label", "Bestiary");
   if (!document2.getElementById("bestiary-v1-css")) {
     const st = document2.createElement("style");
     st.id = "bestiary-v1-css";
@@ -148647,9 +149690,9 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
   const countOf = (p) => (p.boss ? album.bosses : album.cards)[p.id] ?? 0;
   const needOf = (p, t) => (p.boss ? BOSS_TIER_CARDS : TIER_CARDS)[Math.min(5, t + 1)];
   function render() {
-    root5.replaceChildren();
+    root6.replaceChildren();
     if (!album) {
-      root5.append(el3("div", "bv-empty", "The Bestiary opens once you are in a world."));
+      root6.append(el3("div", "bv-empty", "The Bestiary opens once you are in a world."));
       return;
     }
     const total = Object.values(album.cards).reduce((a, b) => a + b, 0) + Object.values(album.bosses).reduce((a, b) => a + b, 0);
@@ -148657,7 +149700,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     souls.append(soulCanvas(16), document2.createTextNode(String(album.souls) + (album.souls === 1 ? " Luminous Soul" : " Luminous Souls")));
     souls.title = "Luminous Souls, shared by every hero";
     top.append(cards, souls);
-    root5.append(top);
+    root6.append(top);
     const chips2 = el3("div", "bv-chips");
     for (const g2 of [...BESTIARY_GROUPS, { id: "bosses", name: "Bosses" }]) {
       const list2 = g2.id === "bosses" ? BOSS_PAGE_IDS.map((id2) => album.bosses[id2]) : BESTIARY_CARDS.filter((c) => c[2] === g2.id).map((c) => album.cards[c[0]]), open3 = list2.filter(Boolean).length;
@@ -148672,7 +149715,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
       });
       chips2.append(b);
     }
-    root5.append(chips2);
+    root6.append(chips2);
     const list = pages2(), setT = group === "bosses" ? bossSetTier(album, BOSS_PAGE_IDS) : setTier(album, group), g = BESTIARY_GROUPS.find((x) => x.id === group);
     const set = el3("div", "bv-set"), t = el3("div", "t"), pips = el3("div", "bv-pips");
     if (group === "bosses") {
@@ -148687,7 +149730,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
       pips.append(i);
     }
     set.append(t, pips);
-    root5.append(set);
+    root6.append(set);
     const grid = el3("div", "bv-grid");
     if (!selected || !list.some((p2) => p2.id === selected)) selected = (list.find((p2) => tierOf(p2) >= 0) ?? list[0]).id;
     for (const p2 of list) {
@@ -148708,9 +149751,9 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
       });
       grid.append(b);
     }
-    root5.append(grid);
+    root6.append(grid);
     const p = list.find((x) => x.id === selected);
-    if (p) root5.append(detail(p));
+    if (p) root6.append(detail(p));
   }
   function detail(p) {
     const tr = tierOf(p), known2 = tr >= 0, box6 = el3("div", "bv-detail"), info2 = el3("div");
@@ -148777,9 +149820,9 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     return box6;
   }
   return {
-    root: root5,
+    root: root6,
     refresh(m, visible3) {
-      root5.hidden = !visible3;
+      root6.hidden = !visible3;
       if (!visible3) return;
       album = m?.bestiary?.album ?? null;
       gold = m?.inventory?.gold ?? "0";
@@ -148789,7 +149832,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
       render();
     },
     destroy() {
-      root5.remove();
+      root6.remove();
     }
   };
 }
@@ -148832,13 +149875,13 @@ function createMenuHubV1({ document: doc, tiles: tiles9 }) {
     st.textContent = CSS4;
     doc.head.append(st);
   }
-  const root5 = doc.createElement("div");
-  root5.className = "mh";
-  root5.id = "world-menu-hub";
-  root5.hidden = true;
+  const root6 = doc.createElement("div");
+  root6.className = "mh";
+  root6.id = "world-menu-hub";
+  root6.hidden = true;
   const grid = doc.createElement("div");
   grid.className = "mh-grid";
-  root5.append(grid);
+  root6.append(grid);
   const parts = /* @__PURE__ */ new Map();
   for (const t of tiles9) {
     const b = doc.createElement("button");
@@ -148860,7 +149903,7 @@ function createMenuHubV1({ document: doc, tiles: tiles9 }) {
   }
   let last = "";
   return Object.freeze({
-    root: root5,
+    root: root6,
     // info: {id:{sub,badge,hidden}}
     paint(info2) {
       const key4 = JSON.stringify(info2);
@@ -148875,7 +149918,7 @@ function createMenuHubV1({ document: doc, tiles: tiles9 }) {
       }
     },
     refresh(visible3) {
-      root5.hidden = !visible3;
+      root6.hidden = !visible3;
     }
   });
 }
@@ -149101,10 +150144,10 @@ function factNames(rows) {
 // src/client/hero_slots_view_v1.js
 var CLASS_NAMES = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
 function createHeroSlotsView({ document: document2, environment, heroSlots }) {
-  const root5 = document2.createElement("section");
-  root5.id = "world-heroes-view";
-  root5.className = "hero-slots";
-  root5.hidden = true;
+  const root6 = document2.createElement("section");
+  root6.id = "world-heroes-view";
+  root6.className = "hero-slots";
+  root6.hidden = true;
   let shown2 = false, confirming = null, choosing = null, busy = null, error = "";
   function el3(tag2, cls, text3) {
     const e = document2.createElement(tag2);
@@ -149251,16 +150294,16 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
       partyBox.push(box6);
     }
     const status2 = busy === "delete" ? "Deleting\u2026" : busy === "undo" ? "Taking it back\u2026" : busy ? "Saving your hero\u2026" : error;
-    root5.replaceChildren(el3("p", "hero-slots-intro", story ? "Each hero has their own world, bag and gear, and can play in any hero\u2019s world. Switching saves this hero first." : "Each hero has their own world, bag and gear. After the story, they can also play alone in any hero\u2019s world. Switching saves this hero first."), grid, ...partyBox, ...coop, ...status2 ? [el3("p", "hero-slots-status", status2)] : []);
+    root6.replaceChildren(el3("p", "hero-slots-intro", story ? "Each hero has their own world, bag and gear, and can play in any hero\u2019s world. Switching saves this hero first." : "Each hero has their own world, bag and gear. After the story, they can also play alone in any hero\u2019s world. Switching saves this hero first."), grid, ...partyBox, ...coop, ...status2 ? [el3("p", "hero-slots-status", status2)] : []);
     environment.requestAnimationFrame(() => {
       for (const [canvas, hero] of portraits) paint3(canvas, hero);
     });
   }
   return Object.freeze({
-    root: root5,
+    root: root6,
     // The list is read when the tab opens; it only changes through this tab.
     refresh(visible3) {
-      root5.hidden = !visible3;
+      root6.hidden = !visible3;
       if (visible3 && !shown2) render();
       if (!visible3) {
         confirming = null;
@@ -149270,7 +150313,7 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
       shown2 = visible3;
     },
     destroy() {
-      root5.remove();
+      root6.remove();
     }
   });
 }
@@ -150644,7 +151687,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     void e.offsetWidth;
     e.classList.add(cls);
   };
-  const root5 = el3("div", "", only ? "skills-v2 only" : "skills-v2"), top = el3("div", "", "skills-top"), tabs = el3("nav", "", "skills-tabs"), tabButtons = {};
+  const root6 = el3("div", "", only ? "skills-v2 only" : "skills-v2"), top = el3("div", "", "skills-top"), tabs = el3("nav", "", "skills-tabs"), tabButtons = {};
   tabs.setAttribute("aria-label", "Constellations");
   for (const name of only ? [only] : TREES) {
     const b = button3("", "", () => choose(name)), badge = el3("b");
@@ -150663,7 +151706,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
   sheet.setAttribute("aria-label", "Skill details");
   sheet.append(grab, sheetBody);
   body5.append(scroll, sheet);
-  root5.append(top, body5);
+  root6.append(top, body5);
   let tree2 = null, view3 = "tree", selected = null, open3 = false, confirmReset = false, d = null, ready = false, built = null, shown2 = null, lastRanks = {}, lastXp = null, drag = null;
   function disc4(n, withRank = true) {
     const art = PROGRESSION_ICONS[n.iconKey], wrap3 = el3("span", "", "skill-disc"), rank = withRank && n.maxRank !== 1 ? el3("small") : null;
@@ -150770,7 +151813,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
   grab.addEventListener("pointerup", release);
   grab.addEventListener("pointercancel", release);
   function paintHead(points2) {
-    root5.style.setProperty("--tree", CONSTELLATIONS[tree2].color);
+    root6.style.setProperty("--tree", CONSTELLATIONS[tree2].color);
     for (const [name, { b, badge }] of Object.entries(tabButtons)) {
       const unspent = points2[name].unspent;
       b.setAttribute("aria-pressed", String(name === tree2));
@@ -150860,7 +151903,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
   function paintSheet() {
     const n = selected ? ACTIVE_NODES[selected] : null;
     sheet.classList.toggle("open", Boolean(open3 && n));
-    root5.classList.toggle("sheet-open", Boolean(open3 && n));
+    root6.classList.toggle("sheet-open", Boolean(open3 && n));
     if (!n) {
       sheetBody.replaceChildren(el3("p", "Tap a skill to see what it does and learn it.", "sheet-empty"));
       return;
@@ -150922,7 +151965,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     const height = open3 && selected ? sheet.offsetHeight : 0;
     scroll.style.setProperty("--sheet", `${Number.isFinite(height) ? height : 0}px`);
   }
-  return Object.freeze({ root: root5, render(next, isReady) {
+  return Object.freeze({ root: root6, render(next, isReady) {
     d = next;
     ready = isReady;
     paint3();
@@ -150969,11 +152012,11 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     void e.offsetWidth;
     e.classList.add(cls);
   };
-  const root5 = el3("div", "cs-view"), head18 = el3("div", "cs-head"), points2 = el3("div", "cs-points"), tabs = el3("nav", "cs-tabs"), body5 = el3("div", "cs-body"), utilityWrap = el3("div", "cs-utility"), wheelBar = el3("section", "cs-wheel");
+  const root6 = el3("div", "cs-view"), head18 = el3("div", "cs-head"), points2 = el3("div", "cs-points"), tabs = el3("nav", "cs-tabs"), body5 = el3("div", "cs-body"), utilityWrap = el3("div", "cs-utility"), wheelBar = el3("section", "cs-wheel");
   tabs.setAttribute("aria-label", "Skill trees");
   wheelBar.setAttribute("aria-label", "Skill wheel");
   head18.append(points2, tabs, wheelBar);
-  root5.append(head18, body5);
+  root6.append(head18, body5);
   utilityWrap.append(utility.root);
   let d = null, ready = false, classId = null, tree2 = null, selected = null, confirmReset = false, grids = {}, tabButtons = {}, lastRanks = {}, wheelPick = null;
   function icon2(id2, color28) {
@@ -151119,7 +152162,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
       badge.textContent = spent ? String(spent) : "";
       badge.hidden = !spent;
     }
-    root5.style.setProperty("--tree", trees2.find((t) => t.id === tree2)?.color ?? "#b7a077");
+    root6.style.setProperty("--tree", trees2.find((t) => t.id === tree2)?.color ?? "#b7a077");
     paintWheel();
   }
   function paintGrid(g) {
@@ -151241,7 +152284,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     paintGrid(g);
     if (body5.firstChild !== g.wrap) body5.replaceChildren(g.wrap);
   }
-  return Object.freeze({ root: root5, render(next, isReady) {
+  return Object.freeze({ root: root6, render(next, isReady) {
     d = next;
     ready = isReady;
     paint3();
@@ -152051,7 +153094,7 @@ var label5 = (k) => ({ ring1: "Ring 1", ring2: "Ring 2", subweapon: "Offhand" })
 var speedUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linejoin="round"><path d="M6 5h5v6l8 4c2 1 2 4-1 4H6V5zm3 2h2M9 9h2" /></svg>');
 var soulUrl2 = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(MONSTER_SOUL_ART);
 function createForgePresentation({ document: document2, issue, invalidate }) {
-  const root5 = document2.getElementById("world-forge-view"), materials2 = document2.getElementById("world-materials-view");
+  const root6 = document2.getElementById("world-forge-view"), materials2 = document2.getElementById("world-materials-view");
   let selected = "weapon";
   const icon2 = (url) => {
     const img = document2.createElement("img");
@@ -152090,15 +153133,15 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
     }
     if (section !== "forge") return;
     const focus = document2.activeElement?.dataset.forgeAction;
-    root5.replaceChildren();
+    root6.replaceChildren();
     const latest = Object.values(e.lastAttunementsBySlot).sort((a, b) => b.authorityOrder - a.authorityOrder)[0];
     if (latest) {
       const notice = el3("p", `Attuned ${label5(latest.command.payload.slot)} to Lv. ${e.slotLevels[latest.command.payload.slot]}!`, "stat-gain");
       notice.setAttribute("role", "status");
-      root5.append(notice);
+      root6.append(notice);
     }
-    if (review) root5.append(el3("p", "FUNDED FORGE REVIEW \u2014 starting funds are for testing only.", "forge-review-label"));
-    if (!m.forgeAccess) root5.append(el3("p", "Approach the Forge to attune.", "forge-access"));
+    if (review) root6.append(el3("p", "FUNDED FORGE REVIEW \u2014 starting funds are for testing only.", "forge-review-label"));
+    if (!m.forgeAccess) root6.append(el3("p", "Approach the Forge to attune.", "forge-access"));
     const layout = el3("div", "", "forge-layout"), list = el3("div", "", "forge-slots"), details = el3("div", "", "forge-details");
     for (const slot of listedEquipmentSlots(inv)) {
       const item3 = inv.itemsById[inv.equipped[slot]], d2 = itemDefinition(item3), b = el3("button", "", "forge-slot-card");
@@ -152165,8 +153208,8 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
       details.append(b);
     }
     layout.append(list, details);
-    root5.append(layout);
-    if (focus) root5.querySelector(`[data-forge-action="${focus}"]`)?.focus({ preventScroll: true });
+    root6.append(layout);
+    if (focus) root6.querySelector(`[data-forge-action="${focus}"]`)?.focus({ preventScroll: true });
   }
   return { render };
 }
@@ -152492,10 +153535,10 @@ function ago(ms) {
 }
 var heroLine = (h) => h?.name ? ` \xB7 ${h.name}${h.cls || h.level ? ` (${[CLASS_NAMES2[h.cls], h.level].filter(Boolean).join(" ")})` : ""}` : "";
 function createFriendsViewV1({ document: document2, environment, friends, actions = null }) {
-  const root5 = document2.createElement("section");
-  root5.id = "world-friends-view";
-  root5.className = "friends-page";
-  root5.hidden = true;
+  const root6 = document2.createElement("section");
+  root6.id = "world-friends-view";
+  root6.className = "friends-page";
+  root6.hidden = true;
   if (!document2.getElementById("friends-v1-css")) {
     const s = document2.createElement("style");
     s.id = "friends-v1-css";
@@ -152696,15 +153739,15 @@ function createFriendsViewV1({ document: document2, environment, friends, action
     }
     const s = el3("p", "fr-status", status2 || (me && st.error ? st.error : ""));
     s.setAttribute("aria-live", "polite");
-    root5.replaceChildren(s, ...out4);
+    root6.replaceChildren(s, ...out4);
   }
   const off = friends.subscribe(() => render());
   return Object.freeze({
-    root: root5,
+    root: root6,
     refresh(visible3) {
       if (visible3 === shown2) return;
       shown2 = visible3;
-      root5.hidden = !visible3;
+      root6.hidden = !visible3;
       removing = null;
       showBackup = false;
       friends.pace("page", visible3 ? PACE_MS.page : null);
@@ -152716,7 +153759,7 @@ function createFriendsViewV1({ document: document2, environment, friends, action
     destroy() {
       off();
       friends.pace("page", null);
-      root5.remove();
+      root6.remove();
     }
   });
 }
@@ -154035,11 +155078,11 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
 // src/client/world_event_hud_v3.js
 function createWorldEventHudV3(document2, onActivate = () => {
 }) {
-  const root5 = document2.createElement("aside");
-  root5.id = "world-event-hud-v3";
-  root5.hidden = true;
-  root5.setAttribute("data-gameplay-hud", "");
-  root5.setAttribute("aria-label", "Local event objectives");
+  const root6 = document2.createElement("aside");
+  root6.id = "world-event-hud-v3";
+  root6.hidden = true;
+  root6.setAttribute("data-gameplay-hud", "");
+  root6.setAttribute("aria-label", "Local event objectives");
   const tag2 = document2.createElement("small"), title2 = document2.createElement("strong"), objective = document2.createElement("p"), bars = document2.createElement("div"), detail = document2.createElement("span");
   const pods = Array.from({ length: 3 }, (_, n) => {
     const row2 = document2.createElement("div"), label7 = document2.createElement("span"), bar2 = document2.createElement("progress");
@@ -154054,24 +155097,24 @@ function createWorldEventHudV3(document2, onActivate = () => {
   const action2 = document2.createElement("button");
   action2.type = "button";
   action2.onclick = () => {
-    if (currentGroup && !root5.hidden && !action2.hidden && !action2.disabled) onActivate(currentGroup);
+    if (currentGroup && !root6.hidden && !action2.hidden && !action2.disabled) onActivate(currentGroup);
   };
-  root5.append(tag2, title2, objective, bars, detail, action2);
+  root6.append(tag2, title2, objective, bars, detail, action2);
   const style = document2.createElement("style");
   style.textContent = `#world-event-hud-v3{position:absolute;z-index:7;top:76px;left:12px;width:min(258px,52vw);padding:10px 13px;border:1px solid #8863a6;border-left:3px solid #b282d7;border-radius:3px 8px 8px 3px;background:linear-gradient(120deg,#152330f2,#17212ae8);color:#eef4f4;font:12px/1.4 system-ui;pointer-events:none;box-sizing:border-box}#world-event-hud-v3 button{pointer-events:auto;touch-action:manipulation;margin-top:8px;padding:7px 10px;font:600 12px system-ui;border:1px solid #ab87cc;border-radius:4px;background:#32404f;color:#f0e7fa}#world-event-hud-v3 button:disabled{opacity:.6}#world-event-hud-v3[hidden]{display:none!important}#world-event-hud-v3 small{display:block;color:#ceabea;letter-spacing:.14em;font-size:9px;font-weight:800}#world-event-hud-v3 strong{display:block;font-size:16px;margin:2px 0 5px}#world-event-hud-v3 p{margin:4px 0 7px}#world-event-hud-v3>span{display:block;margin-top:7px;font-size:11px;color:#bbcfd4}#world-event-hud-v3>div>div{display:flex;align-items:center;gap:8px;margin:3px 0}#world-event-hud-v3 progress{width:100%;height:7px;accent-color:#afdf9d}#world-event-hud-v3 div span{min-width:47px;font-size:10px}#world-event-hud-v3[data-state=completed]{border-color:#7fbd95}#world-event-hud-v3[data-state=dormant]>div{display:none}@media(max-width:600px){#world-event-hud-v3{top:68px;left:8px;width:min(210px,51vw);padding:7px 9px;font-size:11px}#world-event-hud-v3 strong{font-size:14px}}@media(max-height:450px){#world-event-hud-v3{top:62px;padding:5px 9px}#world-event-hud-v3>div{display:none}}`;
   document2.head.append(style);
-  (document2.getElementById("world-view")?.parentElement ?? document2.body).append(root5);
-  root5.dataset.expanded = "false";
-  root5.addEventListener?.("click", (e) => {
+  (document2.getElementById("world-view")?.parentElement ?? document2.body).append(root6);
+  root6.dataset.expanded = "false";
+  root6.addEventListener?.("click", (e) => {
     if (e.target === action2) return;
-    root5.dataset.expanded = String(root5.dataset.expanded !== "true");
+    root6.dataset.expanded = String(root6.dataset.expanded !== "true");
   });
   let previous = "", selected = null, enteredTick = 0, currentGroup = null;
   function refresh(model, visible3 = true) {
     const hero = model.entitiesById[model.playersById[model.localPlayerId].entityId];
     const event = (model.worldEvents ?? []).filter((e) => ["spore", "hollow"].includes(e.kind) && Math.hypot(hero.position.x - e.position.x, hero.position.y - e.position.y) < (e.status === "dormant" ? 220 : e.status === "completed" ? 340 : 768)).sort((a, b) => (a.status === "active" ? 0 : 1) - (b.status === "active" ? 0 : 1) || Math.hypot(hero.position.x - a.position.x, hero.position.y - a.position.y) - Math.hypot(hero.position.x - b.position.x, hero.position.y - b.position.y))[0];
-    root5.hidden = !(visible3 && hero.alive && model.space.overworld && event);
-    if (root5.hidden) {
+    root6.hidden = !(visible3 && hero.alive && model.space.overworld && event);
+    if (root6.hidden) {
       currentGroup = null;
       selected = null;
       previous = "";
@@ -154081,13 +155124,13 @@ function createWorldEventHudV3(document2, onActivate = () => {
       selected = event.groupId + "/" + event.status;
       enteredTick = model.tick;
     }
-    root5.dataset.kind = event.kind;
+    root6.dataset.kind = event.kind;
     if (event.kind === "hollow") {
       const h = event.hollow, key4 = JSON.stringify([selected, h, event.rewardClaimed, event.canActivate, model.tick - enteredTick < 150]);
       if (key4 === previous) return true;
       previous = key4;
       currentGroup = event.groupId;
-      root5.dataset.state = event.status;
+      root6.dataset.state = event.status;
       bars.hidden = true;
       action2.hidden = event.status !== "dormant";
       action2.disabled = !event.canActivate;
@@ -154106,7 +155149,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
     action2.hidden = event.status !== "dormant";
     action2.disabled = !event.canActivate;
     action2.textContent = event.canActivate ? "E / tap \xB7 Disturb pod" : "Approach a pod";
-    root5.dataset.state = event.status;
+    root6.dataset.state = event.status;
     tag2.textContent = event.status === "dormant" ? "LOCAL EVENT" : event.status === "completed" ? "EVENT COMPLETE" : model.tick - enteredTick < 150 ? "EVENT STARTED" : "LOCAL EVENT \xB7 ACTIVE";
     title2.textContent = "Spore Outbreak";
     objective.textContent = event.status === "dormant" ? "E / tap near a pod to disturb it." : event.status === "completed" ? event.rewardClaimed ? "Reward claimed." : "Claim your reward chest." : `Destroy the spore pods \xB7 ${destroyed}/3`;
@@ -154119,7 +155162,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
     return true;
   }
   return Object.freeze({ refresh, destroy() {
-    root5.remove();
+    root6.remove();
     style.remove();
   } });
 }
@@ -155267,9 +156310,9 @@ function createSettingsPageV1({ document: doc, environment: env }) {
     b.addEventListener("click", fn);
     return b;
   };
-  const root5 = el3("div", "st");
-  root5.id = "world-settings-view";
-  root5.hidden = true;
+  const root6 = el3("div", "st");
+  root6.id = "world-settings-view";
+  root6.hidden = true;
   const music = slider("Music volume", "music"), effects2 = slider("Sound effects volume", "effects"), mute = toggle("Mute all", "mute");
   const modeSelect = () => doc.getElementById("control-mode");
   const seg7 = el3("div", "st-seg"), joystick = el3("button", null, "Joystick"), cursor = el3("button", null, "Tap to move");
@@ -155331,7 +156374,7 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   perfActs.append(perfToggle, perfDownload);
   const perfLine = line39(perfName, perfActs);
   const gameSec = section("Game", line39(saveName, saveBtn), line39(campName, campActs), perfLine);
-  root5.append(
+  root6.append(
     section("Sound", line39(name("Music", null, true), music.r, music.v), line39(name("Sound effects", null, true), effects2.r, effects2.v), line39(name("Mute all"), mute)),
     section("Controls", line39(name("Movement"), seg7), line39(name("Left-handed", "Attack, skills and Potion swap to the left"), left)),
     section("Screen", line39(name("Damage numbers", "Numbers that pop off hits"), numbers)),
@@ -155360,11 +156403,11 @@ function createSettingsPageV1({ document: doc, environment: env }) {
     resetBtn.hidden = !byId("reset-local-world-data");
   }
   apply3();
-  return Object.freeze({ root: root5, settings: () => s, onChange(f) {
+  return Object.freeze({ root: root6, settings: () => s, onChange(f) {
     listeners.add(f);
     return () => listeners.delete(f);
   }, refresh(visible3) {
-    root5.hidden = !visible3;
+    root6.hidden = !visible3;
     if (visible3) paint3();
   } });
 }
@@ -155451,7 +156494,7 @@ function createVitalsHudV4(doc) {
   hpTrack?.prepend(hp);
   progression?.prepend(xp);
   const vitals = doc.getElementById("world-hud-vitals"), levelText = doc.getElementById("world-level"), NS = "http://www.w3.org/2000/svg";
-  let med = null, ring8 = null, medNum = null, medPar = null, lastLevel = null, lastRing = null, ringTimer = null;
+  let med = null, ring9 = null, medNum = null, medPar = null, lastLevel = null, lastRing = null, ringTimer = null;
   if (vitals && levelText) {
     med = doc.createElement("div");
     med.className = "vmed";
@@ -155459,7 +156502,7 @@ function createVitalsHudV4(doc) {
     const svg3 = doc.createElementNS(NS, "svg");
     svg3.setAttribute("viewBox", "0 0 60 60");
     svg3.innerHTML = '<defs><radialGradient id="vmed-slate" cx=".38" cy=".26" r=".8"><stop offset="0" stop-color="#5c6d78"/><stop offset=".55" stop-color="#2b3b46"/><stop offset="1" stop-color="#17242e"/></radialGradient></defs><circle cx="30" cy="31.4" r="28.4" fill="#070b10"/><circle cx="30" cy="30" r="28.4" fill="#0b1015"/><circle cx="30" cy="30" r="26.6" fill="url(#vmed-slate)"/><circle cx="30" cy="30" r="23.2" fill="none" stroke="#0b1015" stroke-width="4.2"/><circle class="vmed-ring" cx="30" cy="30" r="23.2" fill="none" stroke="#f0c862" stroke-width="3.4" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 30 30)"/><circle cx="30" cy="30" r="19.9" fill="none" stroke="#d4b98a" stroke-opacity=".9" stroke-width="1.1"/><path d="M15 23a17 17 0 0 1 30 0" fill="none" stroke="#fff" stroke-opacity=".06" stroke-width="3"/>';
-    ring8 = svg3.querySelector(".vmed-ring");
+    ring9 = svg3.querySelector(".vmed-ring");
     const lv = doc.createElement("b");
     lv.textContent = "Lv";
     medNum = doc.createElement("strong");
@@ -155469,13 +156512,13 @@ function createVitalsHudV4(doc) {
     vitals.append(med);
   }
   const setRing = (v, instant) => {
-    if (!ring8) return;
+    if (!ring9) return;
     const r = Math.max(0, Math.min(1, v)), key4 = r.toFixed(3) + (instant ? "i" : "");
     if (key4 === lastRing) return;
     lastRing = key4;
     med.classList.toggle("instant", Boolean(instant));
-    ring8.setAttribute("stroke-dasharray", `${(r * 100).toFixed(2)} 100`);
-    ring8.style.opacity = r < 4e-3 ? "0" : "1";
+    ring9.setAttribute("stroke-dasharray", `${(r * 100).toFixed(2)} 100`);
+    ring9.style.opacity = r < 4e-3 ? "0" : "1";
     if (instant) void med.offsetWidth;
   };
   function medallion() {
@@ -155595,13 +156638,13 @@ function createVitalsHudV4(doc) {
 
 // src/client/wilderness_event_clue_hud_v3_8.js
 function createWoodlandClueHudV3_8(document2) {
-  const root5 = document2.createElement("aside");
-  root5.id = "woodland-clue-v3-8";
-  root5.hidden = true;
-  root5.setAttribute("aria-label", "Nearby wilderness clue");
-  root5.setAttribute("data-gameplay-hud", "");
+  const root6 = document2.createElement("aside");
+  root6.id = "woodland-clue-v3-8";
+  root6.hidden = true;
+  root6.setAttribute("aria-label", "Nearby wilderness clue");
+  root6.setAttribute("data-gameplay-hud", "");
   const heading = document2.createElement("strong"), message = document2.createElement("span");
-  root5.append(heading, message);
+  root6.append(heading, message);
   const style = document2.createElement("style");
   style.textContent = [
     "#woodland-clue-v3-8{position:fixed;z-index:7;top:calc(114px + var(--world-safe-top,0px));left:calc(10px + var(--world-safe-left,0px));max-width:242px;box-sizing:border-box;padding:8px 12px 9px;pointer-events:none;border:1px solid rgba(158,141,93,.57);border-left:3px solid #9f9761;border-radius:3px 8px 8px 3px;background:linear-gradient(125deg,rgba(19,27,23,.94),rgba(13,21,23,.86));box-shadow:0 5px 19px rgba(0,0,0,.34);color:#e1d7b8;font:12px/1.4 Georgia,serif;text-shadow:0 1px 1px #0009}",
@@ -155612,12 +156655,12 @@ function createWoodlandClueHudV3_8(document2) {
     "@media(prefers-reduced-motion:reduce){#woodland-clue-v3-8{transition:none}}"
   ].join("\n");
   document2.head.append(style);
-  (document2.getElementById("world-app") ?? document2.body).append(root5);
+  (document2.getElementById("world-app") ?? document2.body).append(root6);
   let previous = "";
   function refresh(model, visible3 = true) {
     const clue = model?.woodlandPilotClues?.[0];
     const show = Boolean(visible3 && clue && model?.space?.overworld);
-    root5.hidden = !show;
+    root6.hidden = !show;
     if (!show) {
       previous = "";
       return;
@@ -155629,7 +156672,7 @@ function createWoodlandClueHudV3_8(document2) {
     message.textContent = clue.text + (clue.direction === "nearby" ? "" : " \xB7 " + clue.direction);
   }
   return Object.freeze({ refresh, destroy() {
-    root5.remove();
+    root6.remove();
     style.remove();
   } });
 }
@@ -156254,10 +157297,10 @@ function paintAtlasRaster(canvas, raster, meta, cssWidth, cssHeight, options = {
       r = SEA2[0] * (0.9 + 0.1 * s2);
       g = SEA2[1] * (0.9 + 0.1 * s2);
       b = SEA2[2] * (0.92 + 0.08 * s2);
-      for (const ring8 of [5, 10, 17]) {
-        const t = Math.abs(d - ring8);
+      for (const ring9 of [5, 10, 17]) {
+        const t = Math.abs(d - ring9);
         if (t < 0.7 && d < 26) {
-          const a = (1 - t / 0.7) * (ring8 === 5 ? 0.55 : ring8 === 10 ? 0.38 : 0.24);
+          const a = (1 - t / 0.7) * (ring9 === 5 ? 0.55 : ring9 === 10 ? 0.38 : 0.24);
           r = r * (1 - a) + 70 * a;
           g = g * (1 - a) + 98 * a;
           b = b * (1 - a) + 110 * a;
@@ -156973,7 +158016,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     c.height = Math.round(H7 * ratio);
     const x = c.getContext("2d");
     x.scale(ratio, ratio);
-    const ring8 = (r0, r1, fill9, dy = 0) => {
+    const ring9 = (r0, r1, fill9, dy = 0) => {
       x.fillStyle = fill9;
       x.beginPath();
       x.arc(cx, cy2 + dy, r1, 0, 7);
@@ -156986,13 +158029,13 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       x.arc(cx, cy2, r, 0, 7);
       x.stroke();
     };
-    ring8(R11 + 6, R11 + 13, "rgba(0,0,0,.22)", 5);
-    ring8(R11, R11 + 11.5, "#070b10", 3);
+    ring9(R11 + 6, R11 + 13, "rgba(0,0,0,.22)", 5);
+    ring9(R11, R11 + 11.5, "#070b10", 3);
     const g = x.createRadialGradient(cx - R11 * 0.35, cy2 - R11 * 0.7, R11 * 0.2, cx, cy2, R11 + 11);
     g.addColorStop(0, "#6a7c88");
     g.addColorStop(0.75, "#2b3b46");
     g.addColorStop(1, "#17242e");
-    ring8(R11, R11 + 10, g);
+    ring9(R11, R11 + 10, g);
     line39(R11 + 10, "#0b1015", 2.2);
     line39(R11 + 0.9, "#0b1015", 2);
     line39(R11 + 2.6, "#d4b98a", 1.4);
@@ -159395,7 +160438,7 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
   function snapFromScreen(c, S13, a) {
     const view3 = el3("world-view"), cam = camera?.();
     if (!view3?.width || !cam || !a?.position) return false;
-    const hull2 = a.hullRadius ?? 20, side = Math.max(96, Math.min(260, hull2 * 5)) * cam.zoom, cx = (a.position.x - cam.x) * cam.zoom, cy2 = (a.position.y - hull2 * 0.9 - cam.y) * cam.zoom;
+    const hull3 = a.hullRadius ?? 20, side = Math.max(96, Math.min(260, hull3 * 5)) * cam.zoom, cx = (a.position.x - cam.x) * cam.zoom, cy2 = (a.position.y - hull3 * 0.9 - cam.y) * cam.zoom;
     if (cx < 0 || cy2 < 0 || cx > view3.width || cy2 > view3.height) return false;
     try {
       c.fillStyle = "#141e29";
@@ -159989,7 +161032,7 @@ function drawAmbientV1(ctx, view3, frame3, paintLights = null) {
   ctx.restore();
   if (paintLights) paintLights(ctx);
 }
-function hull(points2) {
+function hull2(points2) {
   const p = points2.sort((a, b) => a.x - b.x || a.y - b.y), cross7 = (a, b, c) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x), low = [], high = [];
   for (const q2 of p) {
     while (low.length > 1 && cross7(low.at(-2), low.at(-1), q2) <= 0) low.pop();
@@ -160009,7 +161052,7 @@ function shadowPolygonV1(caster2, frame3) {
       points2.push({ x, y }, { x: x + vx, y: y + vy });
     }
   } else for (const [x, y] of [[caster2.x, caster2.y], [caster2.x + caster2.w, caster2.y], [caster2.x + caster2.w, caster2.y + caster2.h], [caster2.x, caster2.y + caster2.h]]) points2.push({ x, y }, { x: x + vx, y: y + vy });
-  return hull(points2);
+  return hull2(points2);
 }
 function casterFor(b, t, offset2) {
   const kind = b.kind, heights = { "fort-wall": 62, "fort-tower-base": 150, "fort-keep-base": 128, "fort-gatehouse-base": 100, "ruin-exterior-masonry": 48, "cave-rock-wall": 72, "civilian-building": 132, building: 132, fence: 26, trees: 70, thicket: 52, rock: 24 };
@@ -160455,7 +161498,7 @@ function createHeroLevelUpV3() {
     return { u: active2.elapsed / HERO_LEVEL_UP_V3.durationMs, fade: Math.min(1, active2.elapsed / 140 + 0.08) * Math.min(1, (HERO_LEVEL_UP_V3.durationMs - active2.elapsed) / 450) };
   }
   const RINGS2 = [[0, 0.8, 24], [0.12, 0.8, 21], [0.24, 0.76, 18]];
-  function ring8(ctx, u, [delay, span3, radius], half) {
+  function ring9(ctx, u, [delay, span3, radius], half) {
     const t = (u - delay) / span3;
     if (t <= 0 || t >= 1) return;
     const ease33 = t * t * (3 - 2 * t), y = 5 - 44 * ease33, r = radius + 6 * Math.sin(t * Math.PI), alpha = Math.min(1, t / 0.12) * (1 - t) ** 0.6;
@@ -160496,7 +161539,7 @@ function createHeroLevelUpV3() {
       ctx.fill();
     }
     ctx.restore();
-    for (const r of RINGS2) ring8(ctx, u, r, "back");
+    for (const r of RINGS2) ring9(ctx, u, r, "back");
     ctx.restore();
     return true;
   }
@@ -160528,7 +161571,7 @@ function createHeroLevelUpV3() {
     ctx.save();
     ctx.translate(actor.position.x, actor.position.y);
     ctx.globalAlpha = fade;
-    for (const r of RINGS2) ring8(ctx, u, r, "front");
+    for (const r of RINGS2) ring9(ctx, u, r, "front");
     for (let i = 0; i < HERO_LEVEL_UP_V3.maximumParticles; i++) {
       const angle3 = i * 2.399 + u * 3, climb = (u * 1.4 + i / HERO_LEVEL_UP_V3.maximumParticles) % 1, r = (10 + i % 5 * 6) * (1 - climb * 0.5), x = Math.cos(angle3) * r, y = 5 - climb * 150, size = 1.4 + i % 3 * 0.8;
       if (Math.sin(angle3) < 0 && climb < 0.35) continue;
@@ -160599,7 +161642,7 @@ function arachnidTreantAnatomyV4(tick, moving = false, pose2 = NO_POSE) {
     const phase2 = tick * 0.105 + index * Math.PI * 0.66 + (side < 0 ? Math.PI : 0);
     const stride = moving ? Math.sin(phase2) * 2.4 : 0, lifted2 = moving ? Math.max(0, Math.cos(phase2)) * 2 : 0;
     const [r, k, a, f] = LEGS[index];
-    const root5 = point6(side * r[0], r[1] - lift);
+    const root6 = point6(side * r[0], r[1] - lift);
     let knee = point6(side * (k[0] + Math.sin(phase2) * (moving ? 1.2 : 0.35)), k[1] + stride * 0.3 - lift * 0.6);
     let ankle = point6(side * a[0], a[1] + stride - lifted2);
     let foot2 = point6(side * f[0], f[1] + stride - lifted2);
@@ -160618,7 +161661,7 @@ function arachnidTreantAnatomyV4(tick, moving = false, pose2 = NO_POSE) {
       ankle = point6(ankle.x, ankle.y + dig * 1.2);
       foot2 = point6(foot2.x, foot2.y + dig * 2.4);
     }
-    legs4.push({ index, side, root: root5, knee, ankle, foot: foot2, dig });
+    legs4.push({ index, side, root: root6, knee, ankle, foot: foot2, dig });
   }
   return { legs: legs4, eyes: EYES };
 }
@@ -160989,7 +162032,7 @@ function crown2(c, flash, tick) {
     c.fill();
   });
   c.restore();
-  const moss5 = (ctx) => {
+  const moss6 = (ctx) => {
     ctx.beginPath();
     ctx.moveTo(-22, -18);
     ctx.quadraticCurveTo(-15, -28, -7, -25);
@@ -161000,7 +162043,7 @@ function crown2(c, flash, tick) {
     ctx.lineTo(-21, -13);
     ctx.closePath();
   };
-  finish3(c, moss5, MOSS14, flash, () => {
+  finish3(c, moss6, MOSS14, flash, () => {
     polygon16(c, [point6(-25, -21), point6(-12, -29), point6(-5, -24), point6(-15, -20), point6(-23, -16)], MOSS_LIGHT, false);
   });
   if (flash) return;
@@ -161355,7 +162398,7 @@ function cocoonCupPath(c) {
 function drawTreantCocoonD12_5A(c, actor, tick) {
   if (actor.bossSummon?.stage !== "cocoon") return false;
   const ink5 = "#11151a", bark = "#71503a", lightBark = "#a8784d", darkBark = "#433025";
-  const moss5 = "#568347", lightMoss = "#8ab75c", darkMoss = "#315437";
+  const moss6 = "#568347", lightMoss = "#8ab75c", darkMoss = "#315437";
   c.save();
   c.translate(actor.position.x, actor.position.y);
   c.fillStyle = "#11180e77";
@@ -161367,7 +162410,7 @@ function drawTreantCocoonD12_5A(c, actor, tick) {
   c.lineCap = "round";
   c.lineJoin = "round";
   cocoonShellPath(c);
-  c.fillStyle = moss5;
+  c.fillStyle = moss6;
   c.fill();
   c.save();
   cocoonShellPath(c);
@@ -161429,7 +162472,7 @@ function drawTreantCocoonD12_5A(c, actor, tick) {
   c.strokeStyle = ink5;
   c.lineWidth = 1.26 / pulse3;
   c.stroke();
-  c.fillStyle = moss5;
+  c.fillStyle = moss6;
   c.strokeStyle = ink5;
   c.lineWidth = 0.85 / pulse3;
   c.beginPath();
@@ -161579,11 +162622,11 @@ function rootWeb(c, row2, tick) {
   c.strokeStyle = WEB3;
   c.lineWidth = 1.7;
   c.stroke();
-  for (let ring8 = 1; ring8 <= 3; ring8++) {
-    c.strokeStyle = ring8 % 2 ? ELDRITCH : WEB3;
+  for (let ring9 = 1; ring9 <= 3; ring9++) {
+    c.strokeStyle = ring9 % 2 ? ELDRITCH : WEB3;
     c.lineWidth = 1.2;
     c.beginPath();
-    c.ellipse(0, 0, rx * ring8 / 4, ry * ring8 / 4, 0, 0, TAU173);
+    c.ellipse(0, 0, rx * ring9 / 4, ry * ring9 / 4, 0, 0, TAU173);
     c.stroke();
   }
   for (let i = 0; i < 10; i++) {
@@ -163390,13 +164433,13 @@ function wardenDepthItems(model, tick, viewport = null) {
           c.restore();
         });
       }
-      for (let ring8 = 0; ring8 < 3; ring8++) {
-        const rr3 = (38 + ring8 * 13) * kB, born = ring8 * 2.2, la = age - born;
+      for (let ring9 = 0; ring9 < 3; ring9++) {
+        const rr3 = (38 + ring9 * 13) * kB, born = ring9 * 2.2, la = age - born;
         if (la < 0 || la > 16) continue;
-        const n = Math.round((5 + ring8 * 2) * Math.max(kB, kH));
+        const n = Math.round((5 + ring9 * 2) * Math.max(kB, kH));
         for (let i = 0; i < n; i++) {
-          const a = im.angle - BH + i / (n - 1) * 2 * BH, x = im.boss.x + Math.cos(a) * rr3, y = im.boss.y + Math.sin(a) * rr3, h = (16 + ring8 * 5 + rnd10(i + ring8 * 9, 3) * 10) * Math.sin(clamp37(la / 16) * Math.PI) * (la < 3 ? ease10(la / 3) * 1.2 : 1);
-          add2(x, y, (c) => shard4(c, x, y, h, 5 + ring8 + rnd10(i, 4) * 2, (a - im.angle) * 0.9 + (rnd10(i + ring8, 5) - 0.5) * 0.4, i + ring8 * 20, 1 - ease10((la - 11) / 5)));
+          const a = im.angle - BH + i / (n - 1) * 2 * BH, x = im.boss.x + Math.cos(a) * rr3, y = im.boss.y + Math.sin(a) * rr3, h = (16 + ring9 * 5 + rnd10(i + ring9 * 9, 3) * 10) * Math.sin(clamp37(la / 16) * Math.PI) * (la < 3 ? ease10(la / 3) * 1.2 : 1);
+          add2(x, y, (c) => shard4(c, x, y, h, 5 + ring9 + rnd10(i, 4) * 2, (a - im.angle) * 0.9 + (rnd10(i + ring9, 5) - 0.5) * 0.4, i + ring9 * 20, 1 - ease10((la - 11) / 5)));
         }
       }
       if (age < 18) for (let i = 0; i < 2; i++) {
@@ -163538,7 +164581,7 @@ var IRON20 = "#7f7a6f";
 var IRON_LIT = "#a7a194";
 var IRON_SH = "#5d5951";
 var IRON_DP = "#403d38";
-var RUST4 = "#94502f";
+var RUST5 = "#94502f";
 var RUST_LIT = "#b56a40";
 var GOLD27 = "#e3b53e";
 var GOLD_LIT = "#fff0a6";
@@ -163746,7 +164789,7 @@ function torso2(c, t, ph2, breath) {
   poly18(c, [[-12.6, top], [0, top], [0, -27.6], [-10.4, -27.6], [-14, -36.5]], IRON_LIT, false);
   poly18(c, [[0, top], [1.1, top], [1, -27.6], [0, -27.6]], IRON_SH, false);
   for (const [x, y, rx, ry, r] of [[-6.5, -32, 2.8, 1.9, 0.3], [7, -39, 2.2, 1.5, -0.4], [4.4, -30.4, 1.6, 1.1, 0], [-9, -40, 1.4, 1, 0.5]]) {
-    path6(c, (c2) => c2.ellipse(x, y, rx, ry, r, 0, TAU177), RUST4, false);
+    path6(c, (c2) => c2.ellipse(x, y, rx, ry, r, 0, TAU177), RUST5, false);
     path6(c, (c2) => c2.ellipse(x - rx * 0.25, y - ry * 0.3, rx * 0.5, ry * 0.45, r, 0, TAU177), RUST_LIT, false);
   }
   poly18(c, [[8.6, -35.4], [12.8, -36.2], [11, -30], [7.6, -30.6], [9, -33]], "#120e0c");
@@ -164286,7 +165329,7 @@ var BONE_SH2 = "#bdb79e";
 var IRON21 = "#7f7a6f";
 var IRON_LIT2 = "#a7a194";
 var IRON_SH2 = "#5d5951";
-var RUST5 = "#94502f";
+var RUST6 = "#94502f";
 var RUST_LIT2 = "#b56a40";
 var GOLD28 = "#e3b53e";
 var GOLD_SH2 = "#a8781c";
@@ -164410,7 +165453,7 @@ function leg8(c, side, lift, hipY, hipX) {
   bone3(c, hx2, hipY, kx, ky, 2.3);
   poly19(c, [[kx - 1.6, ky - 0.2], [kx + 1.6, ky - 0.2], [fx + 1.5, fy - 2.4], [fx - 1.5, fy - 2.4]], IRON21);
   poly19(c, [[kx + 0.4, ky], [kx + 1.6, ky - 0.2], [fx + 1.5, fy - 2.4], [fx + 0.4, fy - 2.4]], IRON_SH2, false);
-  poly19(c, [[kx - 1.4, ky + 1.2], [kx - 0.3, ky + 1.4], [kx - 0.6, ky + 3.6], [kx - 1.3, ky + 3.2]], RUST5, false);
+  poly19(c, [[kx - 1.4, ky + 1.2], [kx - 0.3, ky + 1.4], [kx - 0.6, ky + 3.6], [kx - 1.3, ky + 3.2]], RUST6, false);
   dot10(c, kx, ky - 0.2, 1.25, IRON_LIT2, true);
   path7(c, (c2) => {
     c2.moveTo(fx - 1.9, fy - 2.6);
@@ -164451,7 +165494,7 @@ function torso3(c, t, breath, ph) {
   poly19(c, [[0, -27.4], [1.9, -24.6], [0, -24.6]], GOLD_SH2, false);
   glow13(c, "rgba(157,255,122,.9)", 3, () => dot10(c, 0, -24.6, 0.8, GHOST2));
   poly19(c, [[-4.3, -18.6], [4.3, -18.6], [4.4, -16.8], [-4.4, -16.8]], LEATHER5);
-  poly19(c, [[-1, -18.9], [1, -18.9], [1, -16.5], [-1, -16.5]], RUST5, true, 0.45);
+  poly19(c, [[-1, -18.9], [1, -18.9], [1, -16.5], [-1, -16.5]], RUST6, true, 0.45);
   dot10(c, 0, -17.7, 0.35, RUST_LIT2);
   c.save();
   c.globalAlpha = 0.55 + breath * 0.25;
@@ -164479,7 +165522,7 @@ function spaulder(c, side) {
     c2.quadraticCurveTo(x + 0.4 * side, y - 3, x + 2.2 * side, y - 1.4);
     c2.quadraticCurveTo(x + 0.4 * side, y - 1.7, x - 1.6 * side, y - 0.9);
   }, IRON_LIT2, false);
-  poly19(c, [[x + 0.6 * side, y + 0.4], [x + 2.2 * side, y + 0.1], [x + 2.3 * side, y + 1.6], [x + 0.9 * side, y + 1.4]], RUST5, false);
+  poly19(c, [[x + 0.6 * side, y + 0.4], [x + 2.2 * side, y + 0.1], [x + 2.3 * side, y + 1.6], [x + 0.9 * side, y + 1.4]], RUST6, false);
   dot10(c, x + 0.2 * side, y - 0.2, 0.35, IRON_LIT2, true);
   c.restore();
 }
@@ -164566,7 +165609,7 @@ function head16(c, t, tilt, flare, jaw2) {
     c2.quadraticCurveTo(0, -7.6, 6.6, -5.9);
     c2.quadraticCurveTo(0, -7, -6.6, -5.9);
   }, IRON_SH2, false);
-  poly19(c, [[-5.4, -7.2], [-3.6, -7.7], [-3.4, -6.7], [-5.2, -6.3]], RUST5, false);
+  poly19(c, [[-5.4, -7.2], [-3.6, -7.7], [-3.4, -6.7], [-5.2, -6.3]], RUST6, false);
   for (const x of [-3, 0, 3]) dot10(c, x, -7.4 + Math.abs(x) * 0.12, 0.32, IRON_LIT2, true);
   c.restore();
 }
@@ -164629,7 +165672,7 @@ function shield2(c, x, y, rot2) {
     const a = i / 6 * TAU178 + 0.3;
     dot10(c, Math.cos(a) * 5.4, Math.sin(a) * 6.3, 0.38, IRON_LIT2, true);
   }
-  ell13(c, 0, -0.6, 1.6, 1.7, RUST5, true, 0.5);
+  ell13(c, 0, -0.6, 1.6, 1.7, RUST6, true, 0.5);
   dot10(c, -0.5, -1.1, 0.55, RUST_LIT2);
   c.restore();
 }
@@ -164660,7 +165703,7 @@ function arm8(c, sx, sy, hx2, hy, bend) {
   c.translate(bx, by);
   c.rotate(a);
   poly19(c, [[-2.3, -1.8], [2.3, -1.5], [2.3, 1.5], [-2.3, 1.8]], IRON21);
-  poly19(c, [[-2.3, 0.4], [2.3, 0.4], [2.3, 1.5], [-2.3, 1.8]], RUST5, false);
+  poly19(c, [[-2.3, 0.4], [2.3, 0.4], [2.3, 1.5], [-2.3, 1.8]], RUST6, false);
   c.restore();
   return j;
 }
@@ -165595,7 +166638,7 @@ function drawGraveCleaveImpactGround(c, { center: center3, strike: strike2, sinc
 function slabs(center3) {
   const out4 = [];
   for (let i = 0; i < 16; i++) {
-    const ring8 = i % 2, a = i / 16 * TAU180 + hash45(i * 7) * 0.25, r = CLEAVE_REACH * (ring8 ? 0.8 : 0.52) + hash45(i) * 5, at8 = ease14(0) + (r - 18) / (CLEAVE_REACH - 18) * 12;
+    const ring9 = i % 2, a = i / 16 * TAU180 + hash45(i * 7) * 0.25, r = CLEAVE_REACH * (ring9 ? 0.8 : 0.52) + hash45(i) * 5, at8 = ease14(0) + (r - 18) / (CLEAVE_REACH - 18) * 12;
     out4.push({ x: center3.x + Math.cos(a) * r, y: center3.y + Math.sin(a) * r, a, w: 7 + hash45(i * 3) * 4, at: at8, stone: hash45(i * 11) > 0.72, i });
   }
   return out4;
@@ -166208,7 +167251,7 @@ function drawBiomeBossV1(c, a, t, flash = false) {
   if (paint3 && a.alive && eliteLayerD12_4() !== "body") drawRelease(c, a, q2, v.facing);
   return true;
 }
-function ring3(c, x, y, r, color28, alpha, width2) {
+function ring4(c, x, y, r, color28, alpha, width2) {
   c.save();
   c.globalAlpha = alpha;
   c.strokeStyle = color28;
@@ -166236,11 +167279,11 @@ function drawTelegraph(c, model, q2, t) {
   if (q2.ability === "grave_cleave" || q2.ability === "crown_flame") {
     const center3 = q2.ability === "grave_cleave" ? q2.originPosition : q2.position, r = BIOME_BOSS_REACH_V1[q2.ability];
     disc3(c, center3.x, center3.y, r, color28, 0.06 + p * 0.16);
-    ring3(c, center3.x, center3.y, r, color28, 0.45 + p * 0.5, 1.5 + p * 2);
+    ring4(c, center3.x, center3.y, r, color28, 0.45 + p * 0.5, 1.5 + p * 2);
     c.save();
     c.setLineDash([4, 7]);
     c.lineDashOffset = -t * 0.6;
-    ring3(c, center3.x, center3.y, r * (0.95 - 0.5 * p), color28, 0.6, 1.4);
+    ring4(c, center3.x, center3.y, r * (0.95 - 0.5 * p), color28, 0.6, 1.4);
     c.restore();
     if (p > 0.85) disc3(c, center3.x, center3.y, r, color28, (p - 0.85) * 1.4);
   } else if (q2.ability === "solar_beam") {
@@ -166266,7 +167309,7 @@ function drawTelegraph(c, model, q2, t) {
     for (const d of sunfallDiscsV1(q2.selectionSeed, q2.sequence, q2.position)) {
       const r = BIOME_BOSS_REACH_V1.sunfall;
       disc3(c, d.x, d.y, r * (0.3 + 0.7 * p), "#3a2410", 0.12 + p * 0.22);
-      ring3(c, d.x, d.y, r, color28, 0.5 + p * 0.45, 1.5 + p * 2);
+      ring4(c, d.x, d.y, r, color28, 0.5 + p * 0.45, 1.5 + p * 2);
       if (p > 0.85) disc3(c, d.x, d.y, r, "#fff1a8", (p - 0.85) * 1.8);
     }
   } else if (q2.ability === "barrow_call" || q2.ability === "scarab_swarm") {
@@ -166294,7 +167337,7 @@ function drawPool(c, p, t) {
   if (life <= 0) return;
   const ghost = p.kind === "ghostfire", color28 = ghost ? "#7fe08a" : "#ffbf3a", ember = ghost ? "#d8ffc8" : "#fff1a8";
   disc3(c, p.position.x, p.position.y, p.radius, color28, 0.24 * life);
-  ring3(c, p.position.x, p.position.y, p.radius, color28, 0.55 * life, 2);
+  ring4(c, p.position.x, p.position.y, p.radius, color28, 0.55 * life, 2);
   for (let i = 0; i < 9; i++) {
     const a = i * TAU181 / 9 + (i % 2 ? t * 0.01 : -t * 8e-3), r = p.radius * (0.25 + 0.6 * (i * 37 % 10) / 10), x = p.position.x + Math.cos(a) * r, y = p.position.y + Math.sin(a) * r * 0.7, h = 4 + 3 * Math.sin(t * 0.18 + i * 1.7);
     c.save();
@@ -166318,7 +167361,7 @@ function drawImpact(c, a, t) {
   const since2 = t - l.resolvedTick;
   if (l.ability === "grave_cleave" && since2 < 16) {
     const k = since2 / 16;
-    ring3(c, a.position.x, a.position.y, 20 + ease15(k) * (BIOME_BOSS_REACH_V1.grave_cleave - 20), "#c8ff9a", 1 - k, 6 * (1 - k) + 1);
+    ring4(c, a.position.x, a.position.y, 20 + ease15(k) * (BIOME_BOSS_REACH_V1.grave_cleave - 20), "#c8ff9a", 1 - k, 6 * (1 - k) + 1);
   }
   if (l.ability === "crown_flame" && since2 >= 8 && since2 < 26) {
     const k = (since2 - 8) / 18;
@@ -166328,7 +167371,7 @@ function drawImpact(c, a, t) {
     const k = since2 / 18;
     for (const d of sunfallDiscsV1(a.boss.selectionSeed, a.boss.abilitySequence, l.targetPosition)) {
       disc3(c, d.x, d.y, BIOME_BOSS_REACH_V1.sunfall * (0.6 + 0.4 * ease15(k)), "#fff1a8", 0.8 * (1 - k));
-      ring3(c, d.x, d.y, BIOME_BOSS_REACH_V1.sunfall * (0.8 + 0.6 * k), "#ffbf3a", 1 - k, 3);
+      ring4(c, d.x, d.y, BIOME_BOSS_REACH_V1.sunfall * (0.8 + 0.6 * k), "#ffbf3a", 1 - k, 3);
     }
   }
 }
@@ -166617,7 +167660,7 @@ function corrosivePseudopodGeometryV7(side, pose2, tick) {
   const g = pose2.goo, flow = g?.flow ?? 0, phase2 = g?.phase ?? 0;
   const bodyX = pose2.bodyX ?? 0, bodyY = pose2.bodyY ?? 0;
   const anchor2 = corrosiveGoopPointV5(pose2, side * 29, -28);
-  const root5 = point7(anchor2.x + bodyX, anchor2.y + bodyY);
+  const root6 = point7(anchor2.x + bodyX, anchor2.y + bodyY);
   const drag = g?.tendrilDrag ?? 0, sway = Math.sin(tick * 0.045 + side * 1.4) * 1.4;
   const rest2 = point7(
     side * (59 + sway + Math.sin(phase2 + side) * 2 * flow) - drag * 0.45,
@@ -166629,8 +167672,8 @@ function corrosivePseudopodGeometryV7(side, pose2, tick) {
   let c2 = point7(side * 47 - drag * 0.45, 7 + bodyY + sway);
   if (targeted) {
     const quick = pose2.ability === "strike";
-    const reach = unit8(tip.x - root5.x, tip.y - root5.y);
-    const bend1 = quick ? point7(mix25(root5.x, tip.x, 0.34) + side * 7, mix25(root5.y, tip.y, 0.34) + 7) : point7(root5.x + side * 24, root5.y - 32 - (pose2.slamWeight ?? 0) * 7);
+    const reach = unit8(tip.x - root6.x, tip.y - root6.y);
+    const bend1 = quick ? point7(mix25(root6.x, tip.x, 0.34) + side * 7, mix25(root6.y, tip.y, 0.34) + 7) : point7(root6.x + side * 24, root6.y - 32 - (pose2.slamWeight ?? 0) * 7);
     const carry = 23 + (pose2.slamWeight ?? 0) * 6;
     const bend2 = quick ? point7(tip.x - reach.x * 19, tip.y - reach.y * 19 + 4) : point7(tip.x - reach.x * carry, tip.y - reach.y * carry);
     c1 = lerp14(c1, bend1, amount2);
@@ -166644,13 +167687,13 @@ function corrosivePseudopodGeometryV7(side, pose2, tick) {
     c1.y -= amount2 * 12;
     c2.y -= amount2 * 19;
   }
-  const start = unit8(c1.x - root5.x, c1.y - root5.y), end = unit8(tip.x - c2.x, tip.y - c2.y);
+  const start = unit8(c1.x - root6.x, c1.y - root6.y), end = unit8(tip.x - c2.x, tip.y - c2.y);
   const rootNormal = point7(-start.y, start.x), tipNormal = point7(-end.y, end.x);
   const rootHalfWidth = 11.5 + amount2 * 1.3;
   const tipRadius = 7.1 + (targeted ? amount2 * 2.1 : 0) + (pose2.ability === "slam" && targeted ? (pose2.slamWeight ?? 0) * 2.5 : 0);
   const capCenter = shifted(tip, end, -tipRadius);
   return {
-    root: root5,
+    root: root6,
     c1,
     c2,
     tip,
@@ -166666,8 +167709,8 @@ function corrosivePseudopodGeometryV7(side, pose2, tick) {
   };
 }
 function outline4(c, g, close) {
-  const { root: root5, c1, c2, tip, rootNormal: n, tipNormal: e, capCenter, rootHalfWidth: w, tipRadius: r } = g;
-  const a = shifted(root5, n, w), b = shifted(capCenter, e, r), d = shifted(capCenter, e, -r), z = shifted(root5, n, -w);
+  const { root: root6, c1, c2, tip, rootNormal: n, tipNormal: e, capCenter, rootHalfWidth: w, tipRadius: r } = g;
+  const a = shifted(root6, n, w), b = shifted(capCenter, e, r), d = shifted(capCenter, e, -r), z = shifted(root6, n, -w);
   c.beginPath();
   c.moveTo(a.x, a.y);
   c.bezierCurveTo(c1.x + n.x * w, c1.y + n.y * w, c2.x + e.x * r * 1.15, c2.y + e.y * r * 1.15, b.x, b.y);
@@ -166678,7 +167721,7 @@ function outline4(c, g, close) {
 }
 function drawCorrosivePseudopodV7(c, side, pose2, tick, flash = false) {
   const g = corrosivePseudopodGeometryV7(side, pose2, tick);
-  const { root: root5, c1, c2, rootNormal: n, tipNormal: e, capCenter, rootHalfWidth: w, tipRadius: r } = g;
+  const { root: root6, c1, c2, rootNormal: n, tipNormal: e, capCenter, rootHalfWidth: w, tipRadius: r } = g;
   c.save();
   c.lineCap = "round";
   c.lineJoin = "round";
@@ -166689,12 +167732,12 @@ function drawCorrosivePseudopodV7(c, side, pose2, tick, flash = false) {
     c.save();
     outline4(c, g, true);
     c.clip();
-    const a = shifted(root5, n, w * 0.47), b = shifted(capCenter, e, r * 0.45);
+    const a = shifted(root6, n, w * 0.47), b = shifted(capCenter, e, r * 0.45);
     c.beginPath();
     c.moveTo(a.x, a.y);
     c.bezierCurveTo(c1.x + n.x * w * 0.58, c1.y + n.y * w * 0.58, c2.x + e.x * r * 0.57, c2.y + e.y * r * 0.57, b.x, b.y);
     c.quadraticCurveTo(capCenter.x, capCenter.y, capCenter.x - e.x * r * 0.11, capCenter.y - e.y * r * 0.11);
-    c.bezierCurveTo(c2.x - e.x * r * 0.18, c2.y - e.y * r * 0.18, c1.x - n.x * w * 0.14, c1.y - n.y * w * 0.14, root5.x - n.x * w * 0.22, root5.y - n.y * w * 0.22);
+    c.bezierCurveTo(c2.x - e.x * r * 0.18, c2.y - e.y * r * 0.18, c1.x - n.x * w * 0.14, c1.y - n.y * w * 0.14, root6.x - n.x * w * 0.22, root6.y - n.y * w * 0.22);
     c.closePath();
     c.fillStyle = LIGHT4;
     c.fill();
@@ -167005,20 +168048,20 @@ function drawCorrosiveMinionGround(c, rows, tick) {
     c.restore();
   }
 }
-function strand2(c, root5, tip, amount2) {
+function strand2(c, root6, tip, amount2) {
   if (amount2 <= 0) return;
-  const d = unit9(tip.x - root5.x, tip.y - root5.y), n = point8(-d.y, d.x), w = 3.8 * amount2, thin = 0.8 * amount2, m = point8(mix26(root5.x, tip.x, 0.55), mix26(root5.y, tip.y, 0.55) + 5 * amount2);
+  const d = unit9(tip.x - root6.x, tip.y - root6.y), n = point8(-d.y, d.x), w = 3.8 * amount2, thin = 0.8 * amount2, m = point8(mix26(root6.x, tip.x, 0.55), mix26(root6.y, tip.y, 0.55) + 5 * amount2);
   c.beginPath();
-  c.moveTo(root5.x + n.x * w, root5.y + n.y * w);
+  c.moveTo(root6.x + n.x * w, root6.y + n.y * w);
   c.quadraticCurveTo(m.x + n.x * w * 0.4, m.y + n.y * w * 0.4, tip.x + n.x * thin, tip.y + n.y * thin);
   c.lineTo(tip.x - n.x * thin, tip.y - n.y * thin);
-  c.quadraticCurveTo(m.x - n.x * w * 0.4, m.y - n.y * w * 0.4, root5.x - n.x * w, root5.y - n.y * w);
+  c.quadraticCurveTo(m.x - n.x * w * 0.4, m.y - n.y * w * 0.4, root6.x - n.x * w, root6.y - n.y * w);
   c.closePath();
   fillSludge(c, CORROSIVE_SLUDGE_PALETTE_V7.base, true);
   c.strokeStyle = CORROSIVE_SLUDGE_PALETTE_V7.light;
   c.lineWidth = 0.8 * amount2;
   c.beginPath();
-  c.moveTo(root5.x - n.x * w * 0.4, root5.y - n.y * w * 0.4);
+  c.moveTo(root6.x - n.x * w * 0.4, root6.y - n.y * w * 0.4);
   c.quadraticCurveTo(m.x, m.y, tip.x, tip.y);
   c.stroke();
 }
@@ -167060,8 +168103,8 @@ function minionBody(c, row2, tick, model, bodyPoseForActor) {
     const event = (model.bossHazards?.corrosiveSheds ?? []).find((s) => s.spawnedMinionIds.includes(row2.id));
     if (event && pose2.age < 8) {
       const boss = model.entitiesById?.[row2.sourceEntityId] ?? Object.values(model.entitiesById ?? {}).find((a) => a.boss?.bossId === row2.bossId), local8 = tearOffset(event), body5 = boss && bodyPoseForActor ? bodyPoseForActor(boss, tick) : { bodyX: 0, bodyY: 0 };
-      const anchor2 = corrosiveGoopPointV5(body5, local8.x, local8.y - 33), root5 = boss ? point8(boss.position.x + anchor2.x + body5.bodyX, boss.position.y + anchor2.y + body5.bodyY) : point8(event.originPosition.x, event.originPosition.y - 33);
-      strand2(c, root5, point8(row2.position.x, row2.position.y - pose2.height), 1 - ease17((pose2.age - 3) / 5));
+      const anchor2 = corrosiveGoopPointV5(body5, local8.x, local8.y - 33), root6 = boss ? point8(boss.position.x + anchor2.x + body5.bodyX, boss.position.y + anchor2.y + body5.bodyY) : point8(event.originPosition.x, event.originPosition.y - 33);
+      strand2(c, root6, point8(row2.position.x, row2.position.y - pose2.height), 1 - ease17((pose2.age - 3) / 5));
     }
     chunk3(c, row2, pose2);
     return;
@@ -167481,14 +168524,14 @@ function spore(c, row2, tick) {
 function stormPod(c, row2, p, index, tick) {
   const q2 = clamp47((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick)), growth = ease18((q2 - 0.12) / 0.88);
   if (growth <= 0) return;
-  const o = row2.originPosition, seed2 = index * 2.2, root5 = point9(o.x, o.y - 31), tip = point9(p.x, p.y - 7);
+  const o = row2.originPosition, seed2 = index * 2.2, root6 = point9(o.x, o.y - 31), tip = point9(p.x, p.y - 7);
   c.save();
   c.globalAlpha = 0.35 + growth * 0.55;
   c.strokeStyle = DARK14;
   c.lineWidth = 1.2;
   c.beginPath();
-  c.moveTo(root5.x, root5.y);
-  c.quadraticCurveTo(mix27(root5.x, tip.x, 0.7), Math.min(root5.y, tip.y) - 8 - growth * 7, tip.x, tip.y);
+  c.moveTo(root6.x, root6.y);
+  c.quadraticCurveTo(mix27(root6.x, tip.x, 0.7), Math.min(root6.y, tip.y) - 8 - growth * 7, tip.x, tip.y);
   c.stroke();
   ellipse4(c, p.x, p.y - 7, 1 + growth * 5.5, 1.3 + growth * 5.2, BASE5, true, 1.1);
   ellipse4(c, p.x - 1.3, p.y - 8.5, 0.6 + growth * 1.7, 0.5 + growth * 1.3, LIGHT6, false);
@@ -167845,8 +168888,8 @@ function collapseGround(c, row2, tick) {
   }
   if (age < 18) {
     c.globalAlpha = 1 - ease19(age / 18);
-    const ring8 = r * (1 - ease19(age / 15));
-    circle2(c, p.x, p.y, ring8, "#ec72c1", 1.8);
+    const ring9 = r * (1 - ease19(age / 15));
+    circle2(c, p.x, p.y, ring9, "#ec72c1", 1.8);
   }
   c.globalAlpha = 1;
   accretion(c, p, 1, tick, age / 18);
@@ -168261,7 +169304,7 @@ var ease20 = (n) => {
 };
 var progress = (row2, tick) => clamp50((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 var position2 = (row2) => row2.position ?? row2.targetPosition;
-function ring4(c, radius, color28, width2 = 1, start = 0, end = TAU188) {
+function ring5(c, radius, color28, width2 = 1, start = 0, end = TAU188) {
   c.beginPath();
   c.arc(0, 0, Math.max(0.01, radius), start, end);
   c.strokeStyle = color28;
@@ -168354,10 +169397,10 @@ function drawChronosSlamGroundV6(c, row2, tick, pending) {
   c.globalAlpha *= fade;
   if (pending) {
     disk2(c, r, "#bf8c2b15");
-    ring4(c, r, INK48, 3.3);
-    ring4(c, r, GOLD29, 1.6);
+    ring5(c, r, INK48, 3.3);
+    ring5(c, r, GOLD29, 1.6);
     marks(c, r, 0.56 + 0.44 * q2);
-    ring4(c, r - 3, IVORY2, 2.1, -Math.PI / 2, -Math.PI / 2 + TAU188 * q2);
+    ring5(c, r - 3, IVORY2, 2.1, -Math.PI / 2, -Math.PI / 2 + TAU188 * q2);
     c.save();
     c.globalAlpha *= 0.32 + 0.46 * q2;
     const angle3 = -Math.PI / 2 + TAU188 * ease20(Math.min(1, q2 / 0.82));
@@ -168369,15 +169412,15 @@ function drawChronosSlamGroundV6(c, row2, tick, pending) {
     if (q2 >= 0.72) {
       c.save();
       c.globalAlpha *= ease20((q2 - 0.72) / 0.1) * 0.55;
-      ring4(c, r - 13, CYAN3, 1.2);
+      ring5(c, r - 13, CYAN3, 1.2);
       c.restore();
     }
   } else {
     const wave = pose2.waveRadius;
     disk2(c, wave, "#efbc4e12");
-    ring4(c, wave, INK48, 4.6);
-    ring4(c, wave, IVORY2, 2.6);
-    if (wave > 7) ring4(c, wave - 6, CYAN3, 1.3);
+    ring5(c, wave, INK48, 4.6);
+    ring5(c, wave, IVORY2, 2.6);
+    if (wave > 7) ring5(c, wave - 6, CYAN3, 1.3);
     for (let i = 0; i < 12; i++) {
       const a = i * TAU188 / 12 - Math.PI / 2;
       c.save();
@@ -168385,7 +169428,7 @@ function drawChronosSlamGroundV6(c, row2, tick, pending) {
       const split = 2.5 + 6 * ease20(age / 16), inner = Math.max(2, wave - 12);
       c.translate(0, -split);
       c.globalAlpha *= 0.68;
-      ring4(c, Math.max(1, wave - split - 1), i % 3 === 0 ? IVORY2 : GOLD29, i % 3 === 0 ? 3.2 : 2.1, 0.09, TAU188 / 12 - 0.09);
+      ring5(c, Math.max(1, wave - split - 1), i % 3 === 0 ? IVORY2 : GOLD29, i % 3 === 0 ? 3.2 : 2.1, 0.09, TAU188 / 12 - 0.09);
       line28(c, [[inner, 0], [Math.max(inner, wave - split - 1), 0]], GOLD29, 1.2);
       c.restore();
     }
@@ -168478,8 +169521,8 @@ function drawChronosFieldV6(c, row2, tick, pending) {
   c.translate(p.x, p.y);
   c.globalAlpha *= fade;
   disk2(c, radius, "#43677d22");
-  ring4(c, radius, INK48, 3.1);
-  ring4(c, radius, GOLD29, 1.3);
+  ring5(c, radius, INK48, 3.1);
+  ring5(c, radius, GOLD29, 1.3);
   marks(c, radius, pending ? ease20(q2 / 0.72) : 0.83, true);
   c.save();
   c.globalAlpha *= 0.35 + 0.32 * q2;
@@ -168488,7 +169531,7 @@ function drawChronosFieldV6(c, row2, tick, pending) {
   line28(c, [[0, 0], [Math.cos(angle3 * 0.24) * radius * 0.34, Math.sin(angle3 * 0.24) * radius * 0.34]], CYAN3, 1.7);
   disk2(c, 3, GOLD29);
   c.restore();
-  if (pending) ring4(c, radius - 3, IVORY2, 1.7, -Math.PI / 2, -Math.PI / 2 + TAU188 * q2);
+  if (pending) ring5(c, radius - 3, IVORY2, 1.7, -Math.PI / 2, -Math.PI / 2 + TAU188 * q2);
   else {
     for (let i = 0; i < 3; i++) {
       const a = i * TAU188 / 3 + 0.4, r = radius * 0.44;
@@ -168501,8 +169544,8 @@ function drawChronosFieldV6(c, row2, tick, pending) {
     }
     c.save();
     c.globalAlpha *= 0.32;
-    ring4(c, radius * 0.66, CYAN3, 1, 0.1, Math.PI * 0.83);
-    ring4(c, radius * 0.66, IVORY2, 1, Math.PI * 1.12, Math.PI * 1.8);
+    ring5(c, radius * 0.66, CYAN3, 1, 0.1, Math.PI * 0.83);
+    ring5(c, radius * 0.66, IVORY2, 1, Math.PI * 1.12, Math.PI * 1.8);
     c.restore();
   }
   c.restore();
@@ -169875,12 +170918,12 @@ function mouth3(actor2, p) {
   return point24(actor2.position.x + (p.bodyX - 15 + p.neckX + q2.x) * p.orientation, actor2.position.y + p.bodyY - 31 + p.neckY + q2.y);
 }
 function ringWarning(c, row2, tick) {
-  const ring8 = row2.ring;
-  if (!ring8) return;
+  const ring9 = row2.ring;
+  if (!ring9) return;
   const q2 = progress4(row2, tick), pulse3 = 0.7 + 0.3 * Math.sin(tick * 0.4);
   c.save();
-  for (const tile of ring8.tiles ?? []) {
-    const seed2 = (tile.column * 71 + tile.row * 97) % 19, x = tile.x, y = tile.y, s2 = tile.size ?? ring8.tileSize;
+  for (const tile of ring9.tiles ?? []) {
+    const seed2 = (tile.column * 71 + tile.row * 97) % 19, x = tile.x, y = tile.y, s2 = tile.size ?? ring9.tileSize;
     c.fillStyle = `rgba(170,45,37,${0.035 + 0.09 * q2})`;
     c.fillRect(x + 0.5, y + 0.5, s2 - 1, s2 - 1);
     const reach = ease23((q2 - seed2 * 0.011) / 0.66), a = [[x + s2 * 0.08, y + s2 * 0.24], [x + s2 * 0.36, y + s2 * 0.48], [x + s2 * 0.52, y + s2 * 0.33], [x + s2 * 0.67, y + s2 * 0.68], [x + s2 * 0.94, y + s2 * 0.82]];
@@ -169898,7 +170941,7 @@ function ringWarning(c, row2, tick) {
       c.globalAlpha = 1;
     }
   }
-  const s = ring8.tileSize, l = ring8.minColumn * s, t = ring8.minRow * s, r = (ring8.maxColumn + 1) * s, b = (ring8.maxRow + 1) * s;
+  const s = ring9.tileSize, l = ring9.minColumn * s, t = ring9.minRow * s, r = (ring9.maxColumn + 1) * s, b = (ring9.maxRow + 1) * s;
   c.strokeStyle = "#e06c4b";
   c.lineWidth = 0.9;
   c.strokeRect(l + 0.4, t + 0.4, r - l - 0.8, b - t - 0.8);
@@ -169906,13 +170949,13 @@ function ringWarning(c, row2, tick) {
   c.restore();
 }
 function collapsedRing(c, row2, tick) {
-  const ring8 = row2.ring;
-  if (!ring8) return;
+  const ring9 = row2.ring;
+  if (!ring9) return;
   const age = tick - row2.createdTick;
   if (age < 0) return;
   c.save();
-  for (const tile of ring8.tiles ?? []) {
-    const s2 = tile.size ?? ring8.tileSize, x = tile.x, y = tile.y, seed2 = (tile.column * 71 + tile.row * 97) % 19;
+  for (const tile of ring9.tiles ?? []) {
+    const s2 = tile.size ?? ring9.tileSize, x = tile.x, y = tile.y, seed2 = (tile.column * 71 + tile.row * 97) % 19;
     c.fillStyle = "#070810";
     c.fillRect(x - 0.2, y - 0.2, s2 + 0.4, s2 + 0.4);
     c.save();
@@ -169958,7 +171001,7 @@ function collapsedRing(c, row2, tick) {
     }
     c.restore();
   }
-  const s = ring8.tileSize, l = ring8.minColumn * s, t = ring8.minRow * s, r = (ring8.maxColumn + 1) * s, b = (ring8.maxRow + 1) * s;
+  const s = ring9.tileSize, l = ring9.minColumn * s, t = ring9.minRow * s, r = (ring9.maxColumn + 1) * s, b = (ring9.maxRow + 1) * s;
   c.strokeStyle = age < 24 ? "#e48157" : "#663b53";
   c.lineWidth = age < 24 ? 1.4 : 0.9;
   c.strokeRect(l + s - 0.2, t + s - 0.2, r - l - 2 * s + 0.4, b - t - 2 * s + 0.4);
@@ -170177,7 +171220,7 @@ function ellipse9(c, x, y, rx, ry, color82, edge = null, width2 = 1) {
     c.stroke();
   }
 }
-function ring5(c, x, y, r, color82, width2 = 1) {
+function ring6(c, x, y, r, color82, width2 = 1) {
   c.beginPath();
   c.arc(x, y, Math.max(0.01, r), 0, TAU192);
   c.strokeStyle = color82;
@@ -170516,10 +171559,10 @@ function fireGround(c, row2, tick) {
   ellipse9(c, 0, 0, r, r, `rgba(22,19,24,${active2 ? 0.44 * fade : 0.22 * ignite})`);
   if (active2) {
     ellipse9(c, 0, 0, r * 0.88, r * 0.79, `rgba(171,52,27,${0.17 * fade})`);
-    ring5(c, 0, 0, r, "#e3803c66", 0.7 * fade + 0.3);
+    ring6(c, 0, 0, r, "#e3803c66", 0.7 * fade + 0.3);
   } else {
     c.setLineDash([2, 3]);
-    ring5(c, 0, 0, r, "#e7ae62b8", 0.9);
+    ring6(c, 0, 0, r, "#e7ae62b8", 0.9);
     c.setLineDash([]);
   }
   for (let i = 0; i < 4; i++) {
@@ -170565,7 +171608,7 @@ function landingWarning(c, row2, tick) {
   c.translate(row2.position.x, row2.position.y);
   c.globalAlpha *= 0.25 + 0.6 * ease24(u);
   c.setLineDash([2, 4]);
-  ring5(c, 0, 0, r, "#f8b766", 0.7);
+  ring6(c, 0, 0, r, "#f8b766", 0.7);
   c.setLineDash([]);
   for (let i = 0; i < 3; i++) {
     const a = i * TAU192 / 3 - Math.PI / 2, rr3 = r * (0.5 + 0.32 * (1 - u));
@@ -170600,7 +171643,7 @@ function callWarning(c, row2, tick) {
   const p = row2.originPosition, q2 = progress5(row2, tick), r = row2.radius;
   c.save();
   c.globalAlpha *= 0.35 + 0.5 * q2;
-  ring5(c, p.x, p.y, r, "#e8974e", 0.85);
+  ring6(c, p.x, p.y, r, "#e8974e", 0.85);
   for (let i = 0; i < row2.spawnCount; i++) {
     const a = i * TAU192 / row2.spawnCount + 0.6, x = p.x + Math.cos(a) * r, y = p.y + Math.sin(a) * r;
     c.save();
@@ -170627,7 +171670,7 @@ function drawCinderhartGround(c, model2, tick) {
     const p = row2.originPosition;
     c.save();
     c.globalAlpha *= 0.6 * (1 - ease24(age / 24));
-    ring5(c, p.x, p.y, 20 + 38 * ease24(age / 24), FIRE3, 1.3);
+    ring6(c, p.x, p.y, 20 + 38 * ease24(age / 24), FIRE3, 1.3);
     c.restore();
   }
   for (const actor2 of Object.values(model2.entitiesById ?? {})) {
@@ -170636,7 +171679,7 @@ function drawCinderhartGround(c, model2, tick) {
     if (age >= 0 && age < 36) {
       c.save();
       c.globalAlpha *= (1 - ease24(age / 36)) * 0.75;
-      ring5(c, actor2.position.x, actor2.position.y, 27 + 62 * ease24(age / 36), "#ee8b43", 1.4);
+      ring6(c, actor2.position.x, actor2.position.y, 27 + 62 * ease24(age / 36), "#ee8b43", 1.4);
       c.restore();
     }
   }
@@ -171441,7 +172484,7 @@ function ellipse11(c, x, y, rx, ry, fill9, outline5 = false, width2 = 1.26) {
     c.stroke();
   }
 }
-function ring6(c, x, y, r, stroke7, width2 = 1) {
+function ring7(c, x, y, r, stroke7, width2 = 1) {
   c.beginPath();
   c.arc(x, y, Math.max(1e-3, r), 0, TAU195);
   c.strokeStyle = stroke7;
@@ -171718,8 +172761,8 @@ function drawMarcusTheOutlaw(c, actor2, tick, flash = false) {
 }
 function warning2(c, p, r, q2, color82 = GOLD33) {
   ellipse11(c, p.x, p.y, r, r, color82 === VIOLET3 ? "#9f64d20b" : "#e3b5430b");
-  ring6(c, p.x, p.y, r, INK54, 2.5);
-  ring6(c, p.x, p.y, r, color82, 1.05);
+  ring7(c, p.x, p.y, r, INK54, 2.5);
+  ring7(c, p.x, p.y, r, color82, 1.05);
   c.beginPath();
   c.arc(p.x, p.y, r - 3, -Math.PI / 2, -Math.PI / 2 + TAU195 * q2);
   c.strokeStyle = color82 === VIOLET3 ? "#e4bdff" : PALE10;
@@ -171804,14 +172847,14 @@ function drawMarcusGround(c, model2, tick) {
       c.save();
       c.globalAlpha *= 1 - ease25(age / 36);
       ellipse11(c, p.x, p.y, 120, 120, "#9d58d418");
-      ring6(c, p.x, p.y, 120, VIOLET3, 1.15);
-      ring6(c, p.x, p.y, 12 + 108 * ease25(age / 14), "#e6baff", 1.3);
+      ring7(c, p.x, p.y, 120, VIOLET3, 1.15);
+      ring7(c, p.x, p.y, 12 + 108 * ease25(age / 14), "#e6baff", 1.3);
       reversalMarks(c, p, 104, -Math.PI - age * 0.035, 0.7);
       c.restore();
     } else if (row2.ability === "barrage" && age < 12) {
       c.save();
       c.globalAlpha *= 1 - ease25(age / 12);
-      ring6(c, p.x, p.y, 12 + 14 * ease25(age / 12), LIGHT9, 0.85);
+      ring7(c, p.x, p.y, 12 + 14 * ease25(age / 12), LIGHT9, 0.85);
       c.restore();
     }
   }
@@ -171820,9 +172863,9 @@ function drawMarcusGround(c, model2, tick) {
     if (age < 0 || age >= 22) continue;
     c.save();
     c.globalAlpha *= 1 - ease25(age / 22);
-    ring6(c, row2.position.x, row2.position.y, 12 + 24 * ease25(age / 22), MOLTEN, 1.2);
+    ring7(c, row2.position.x, row2.position.y, 12 + 24 * ease25(age / 22), MOLTEN, 1.2);
     if (Math.hypot(row2.originPosition.x - row2.position.x, row2.originPosition.y - row2.position.y) > 1) {
-      ring6(c, row2.originPosition.x, row2.originPosition.y, 27 * (1 - ease25(age / 22)) + 3, GOLD33, 1);
+      ring7(c, row2.originPosition.x, row2.originPosition.y, 27 * (1 - ease25(age / 22)) + 3, GOLD33, 1);
     }
     c.restore();
   }
@@ -171882,7 +172925,7 @@ function lasso(c, row2, tick, model2, pending) {
     if (coil > 0.1) {
       c.save();
       c.globalAlpha *= coil * 0.5;
-      ring6(c, end.x, end.y, 8 + 7 * cast2, PALE10, 1.1);
+      ring7(c, end.x, end.y, 8 + 7 * cast2, PALE10, 1.1);
       c.restore();
     }
   } else if (hit2 && age < 15) {
@@ -172379,16 +173422,16 @@ function wing11(c, side, pose2, flash) {
   c.restore();
 }
 function armGeometry(side, pose2) {
-  const root5 = point26(side * 25, 4), idle2 = point26(side * (32 - 11 * pose2.armFold), 24 + pose2.armLift), hand32 = { ...idle2 };
+  const root6 = point26(side * 25, 4), idle2 = point26(side * (32 - 11 * pose2.armFold), 24 + pose2.armLift), hand32 = { ...idle2 };
   if (side === pose2.strikeSide && pose2.strike > 0) {
-    const vx = pose2.aim.x - pose2.actorX - pose2.bodyX, vy = pose2.aim.y - pose2.actorY - 17 - pose2.bodyY, u = rotate4(vx, vy, -pose2.rotation), d = unit15(u.x - root5.x, u.y - root5.y);
+    const vx = pose2.aim.x - pose2.actorX - pose2.bodyX, vy = pose2.aim.y - pose2.actorY - 17 - pose2.bodyY, u = rotate4(vx, vy, -pose2.rotation), d = unit15(u.x - root6.x, u.y - root6.y);
     hand32.x = mix33(hand32.x, u.x - d.x * 10, pose2.strike);
     hand32.y = mix33(hand32.y, u.y - d.y * 10, pose2.strike);
   }
-  const dx = hand32.x - root5.x, dy = hand32.y - root5.y, length = Math.hypot(dx, dy) || 1, bend = Math.max(4, Math.min(11, 19 - length * 0.18));
-  const elbow22 = point26(root5.x + dx * 0.45 + side * bend, root5.y + dy * 0.45 - 3);
+  const dx = hand32.x - root6.x, dy = hand32.y - root6.y, length = Math.hypot(dx, dy) || 1, bend = Math.max(4, Math.min(11, 19 - length * 0.18));
+  const elbow22 = point26(root6.x + dx * 0.45 + side * bend, root6.y + dy * 0.45 - 3);
   const direction3 = pose2.strike > 0 && side === pose2.strikeSide ? unit15(hand32.x - elbow22.x, hand32.y - elbow22.y) : unit15(side * 0.12, 1);
-  return { root: root5, elbow: elbow22, hand: hand32, angle: Math.atan2(direction3.y, direction3.x) - Math.PI / 2 };
+  return { root: root6, elbow: elbow22, hand: hand32, angle: Math.atan2(direction3.y, direction3.x) - Math.PI / 2 };
 }
 function ingotLimb(c, a, b, width2, flash) {
   const d = unit15(b.x - a.x, b.y - a.y), n = point26(-d.y, d.x), p = [[a.x + n.x * width2, a.y + n.y * width2], [b.x + n.x * width2 * 0.85, b.y + n.y * width2 * 0.85], [b.x - n.x * width2 * 0.85, b.y - n.y * width2 * 0.85], [a.x - n.x * width2, a.y - n.y * width2]];
@@ -173959,7 +175002,7 @@ var BASALT_LIT = "#5f555b";
 var BASALT_TOP = "#7a6e70";
 var CRUST = "#2c2427";
 var CRACK3 = "#241b1e";
-var RUST6 = "#a04f35";
+var RUST7 = "#a04f35";
 var LAVA2 = "#f6662c";
 var DEEP3 = "#c9361f";
 var GOLD36 = "#ffbd53";
@@ -174310,7 +175353,7 @@ function slamWarnGround(c, t, q2, tick) {
   c.fillStyle = "#f1703514";
   c.fill();
   const rumble = q2 > 0.55 ? (q2 - 0.55) / 0.45 : 0;
-  const cracks4 = slamCracks2(seed2), ring8 = ringCrack(seed2, 38);
+  const cracks4 = slamCracks2(seed2), ring9 = ringCrack(seed2, 38);
   for (const [i, p] of cracks4.entries()) {
     const open3 = partial2(p, ease29(q2 * 1.6));
     taper5(c, open3, 3.6, 1, CRACK3);
@@ -174321,7 +175364,7 @@ function slamWarnGround(c, t, q2, tick) {
       if (q2 > 0.7) taper5(c, lit2, 0.8, 0.2, GOLD36);
     }
   }
-  if (q2 > 0.35) for (const [i, s] of ring8.entries()) {
+  if (q2 > 0.35) for (const [i, s] of ring9.entries()) {
     const open3 = partial2(s, ease29((q2 - 0.35) * 2.4));
     taper5(c, open3, 2.4, 2.4, CRACK3);
     if (q2 > 0.62) line34(c, partial2(s, ease29((q2 - 0.62) * 3)), q2 > 0.85 ? GOLD36 : LAVA2, 1);
@@ -174367,7 +175410,7 @@ function slamHitGround(c, s, tick) {
   c.save();
   c.translate(p.x, p.y);
   c.globalAlpha *= fade;
-  const cracks4 = slamCracks2(seed2), ring8 = ringCrack(seed2, 38);
+  const cracks4 = slamCracks2(seed2), ring9 = ringCrack(seed2, 38);
   for (const cr of cracks4) {
     taper5(c, cr, 8, 2.6, CRACK3, INK56, 0.9);
     c.save();
@@ -174376,7 +175419,7 @@ function slamHitGround(c, s, tick) {
     taper5(c, cr, 2, 0.4, GOLD36);
     c.restore();
   }
-  for (const s2 of ring8) {
+  for (const s2 of ring9) {
     taper5(c, s2, 3.4, 3.4, CRACK3);
     c.save();
     c.globalAlpha *= cool;
@@ -174489,7 +175532,7 @@ function ventWarnGround(c, p, q2, seed2) {
   for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
     c.save();
     c.rotate(Math.atan2(dy, dx));
-    polygon25(c, [[19, -3.2], [27 + q2 * 6, -1.6], [30 + q2 * 6, 0], [27 + q2 * 6, 1.6], [19, 3.2]], q2 > 0.6 ? GOLD36 : RUST6, INK56, 0.9);
+    polygon25(c, [[19, -3.2], [27 + q2 * 6, -1.6], [30 + q2 * 6, 0], [27 + q2 * 6, 1.6], [19, 3.2]], q2 > 0.6 ? GOLD36 : RUST7, INK56, 0.9);
     c.restore();
   }
   c.beginPath();
@@ -179582,14 +180625,14 @@ function drawBashImpact(ctx, x, y, dx, dy, age, crit = false) {
 }
 function drawBashStun(ctx, x, y, time3, halos = 1) {
   const t = time3 / 1e3;
-  for (let ring8 = 0; ring8 < halos; ring8++) {
-    const hy = y - 26 - ring8 * 5, rx = 9 + ring8 * 2;
+  for (let ring9 = 0; ring9 < halos; ring9++) {
+    const hy = y - 26 - ring9 * 5, rx = 9 + ring9 * 2;
     glowStroke(ctx, KNIGHT_BLUE, 6, 0.8, () => {
       ctx.beginPath();
       ctx.ellipse(x, hy, rx, 2.4, 0, 0, TAU171);
     }, false);
     for (let i = 0; i < 3; i++) {
-      const a = t * (ring8 ? -5 : 5) + i * TAU171 / 3;
+      const a = t * (ring9 ? -5 : 5) + i * TAU171 / 3;
       star42(ctx, x + Math.cos(a) * rx, hy + Math.sin(a) * 2.4, 2.2, KNIGHT_BLUE, 1);
     }
   }
@@ -179719,12 +180762,12 @@ function drawGuardWard(ctx, x, y, angle3, type, open3, runes, blockAge, time3, m
     const f = Math.max(0, back - i * 0.06), px7 = lerp5(hit2.x, face5.x, smooth25(f)), py = lerp5(hit2.y, face5.y, smooth25(f)) - Math.sin(f * Math.PI) * 4;
     mote(ctx, px7, py, 1.1 - i * 0.2, i ? KNIGHT_BLUE : KNIGHT_CORE, 1 - i * 0.22);
   }
-  const ring8 = (blockAge - 320) / 280;
-  if (ring8 >= 0 && ring8 < 1) {
-    bloom3(ctx, face5.x, face5.y, 7, KNIGHT_BLUE, 0.5 * (1 - ring8));
-    glowStroke(ctx, KNIGHT_BLUE, 5, 1 * (1 - ring8 * 0.5), () => {
+  const ring9 = (blockAge - 320) / 280;
+  if (ring9 >= 0 && ring9 < 1) {
+    bloom3(ctx, face5.x, face5.y, 7, KNIGHT_BLUE, 0.5 * (1 - ring9));
+    glowStroke(ctx, KNIGHT_BLUE, 5, 1 * (1 - ring9 * 0.5), () => {
       ctx.beginPath();
-      ctx.arc(face5.x, face5.y, 5, -Math.PI / 2, -Math.PI / 2 + TAU171 * smooth25(ring8));
+      ctx.arc(face5.x, face5.y, 5, -Math.PI / 2, -Math.PI / 2 + TAU171 * smooth25(ring9));
     }, false);
   }
 }
@@ -180846,11 +181889,11 @@ function wallPoints(w, n) {
   return out4;
 }
 function flameWall(ctx, b, age) {
-  const K12 = FIRE4(), ring8 = !Number.isFinite(b.ox), w = { x: b.x + (ring8 ? 0 : b.ox), y: b.y + (ring8 ? 0 : b.oy), dx: b.dx, dy: b.dy, ring: ring8 }, run2 = easeOut2(age / 260), fade = 1 - smooth25((age - 260) / 260), pts2 = wallPoints(w, 24);
+  const K12 = FIRE4(), ring9 = !Number.isFinite(b.ox), w = { x: b.x + (ring9 ? 0 : b.ox), y: b.y + (ring9 ? 0 : b.oy), dx: b.dx, dy: b.dy, ring: ring9 }, run2 = easeOut2(age / 260), fade = 1 - smooth25((age - 260) / 260), pts2 = wallPoints(w, 24);
   if (groundPassV1()) neon(ctx, K12, 3 * fade + 0.4, () => {
     ctx.beginPath();
     const n = Math.max(1, Math.round(pts2.length * run2));
-    if (ring8) {
+    if (ring9) {
       ctx.arc(w.x, w.y, WALL10.ring, -Math.PI / 2, -Math.PI / 2 + TAU171 * run2);
     } else {
       const mid = Math.floor(pts2.length / 2), h = Math.floor(n / 2);
@@ -186008,7 +187051,7 @@ function organicBlob(ctx, x, y, rx, ry, seed2, fill9, stroke7 = null, width2 = 1
     ctx.stroke();
   }
 }
-function moss4(ctx, x, y, scale, seed2, spread = 1) {
+function moss5(ctx, x, y, scale, seed2, spread = 1) {
   ctx.save();
   ctx.lineJoin = "round";
   const count = 3 + hash58(seed2, 5, 71) % 3;
@@ -186237,13 +187280,13 @@ function pillar2(ctx, x, y, variant = 0) {
   ctx.lineWidth = 2;
   ctx.strokeRect(-26, -2, 52, 12);
   poly25(ctx, [[-23, -54], [-15, -67], [8, -64], [20, -51], [8, -44], [-17, -46]], STONE_LIGHT, INK61, 2);
-  moss4(ctx, -5, -59, 20, 551 + variant, 0.9);
+  moss5(ctx, -5, -59, 20, 551 + variant, 0.9);
   ctx.restore();
   weeds(ctx, x, y + 7, variant + 50, 5);
 }
 function wallRoots2(ctx, x, y) {
   rootCluster(ctx, x - 5, y - 54, 74, 601, 5, 0.62);
-  moss4(ctx, x - 1, y - 50, 14, 631, 0.75);
+  moss5(ctx, x - 1, y - 50, 14, 631, 0.75);
 }
 function shrine(ctx, x, y) {
   shadow71(ctx, x, y + 15, 63, 17, 0.42);
@@ -186269,7 +187312,7 @@ function shrine(ctx, x, y) {
   ctx.strokeStyle = INK61;
   ctx.lineWidth = 1.5;
   ctx.stroke();
-  moss4(ctx, x - 24, y - 44, 17, 733, 0.8);
+  moss5(ctx, x - 24, y - 44, 17, 733, 0.8);
 }
 function perch(ctx, x, y) {
   shadow71(ctx, x, y + 10, 38, 11, 0.34);
@@ -186344,7 +187387,7 @@ function drawRuinSurfaceD11_3(ctx, space) {
   ctx.moveTo(w * 0.5, h * 0.94);
   ctx.bezierCurveTo(w * 0.49, h * 0.76, w * 0.56, h * 0.65, w * 0.5, h * 0.49);
   ctx.stroke();
-  for (const [x, y, size, seed2, spread] of [[8.1, 9.9, 49, 1201, 1.55], [15.8, 8.3, 45, 1217, 1.5], [11.8, 4.2, 43, 1231, 1.65], [18.2, 4.8, 37, 1249, 1.35]]) moss4(ctx, x * t, y * t, size, seed2, spread);
+  for (const [x, y, size, seed2, spread] of [[8.1, 9.9, 49, 1201, 1.55], [15.8, 8.3, 45, 1217, 1.5], [11.8, 4.2, 43, 1231, 1.65], [18.2, 4.8, 37, 1249, 1.35]]) moss5(ctx, x * t, y * t, size, seed2, spread);
   for (let i = 0; i < 42; i++) {
     const n = hash58(i, 41, 19), x = 3 + n % 1800 / 100, y = 3 + (n >>> 10) % 1250 / 100;
     if (rows[Math.floor(y)]?.[Math.floor(x)] !== "1") continue;
@@ -186361,13 +187404,13 @@ function drawRuinSurfaceD11_3(ctx, space) {
   for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) if (rows[y][x] === "0" && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => rows[y + dy]?.[x + dx] === "1")) {
     const n = hash58(x, y, 77), px7 = x * t + 2 + n % 5, py = y * t + 3 + (n >>> 4) % 4, south = rows[y + 1]?.[x] === "1";
     stone2(ctx, px7, py, t - 4, t - (south ? 1 : 7), n);
-    if (n % 4 === 0) moss4(ctx, px7 + 14, py + 6, 11, n + 1301, 0.82);
+    if (n % 4 === 0) moss5(ctx, px7 + 14, py + 6, 11, n + 1301, 0.82);
   }
   for (const d of space.visual.decorations ?? []) {
     const x = d.x * t, y = d.y * t;
     if (d.kind === "ruin-rubble-flat") rubble5(ctx, x, y, d.variant);
     else if (d.kind === "ruin-moss-patch") {
-      moss4(ctx, x, y, 34, 1401 + d.variant * 37, 1.35);
+      moss5(ctx, x, y, 34, 1401 + d.variant * 37, 1.35);
       weeds(ctx, x, y + 4, 110 + d.variant, 7);
     } else if (d.kind === "ruin-threshold-weeds") weeds(ctx, x, y + 14, 191, 10);
     else if (d.kind === "ruin-light-shaft") {
@@ -186409,8 +187452,8 @@ function drawRuinExteriorGroundD11_3(ctx, exit, seed2 = 0, roadAnchor = null, ti
   poly25(ctx, [[x - 43, y - 1], [x + 43, y - 1], [x + 35, y + 24], [x - 37, y + 24]], "#59645a", INK61, 2);
   poly25(ctx, [[x - 37, y + 1], [x + 37, y + 1], [x + 31, y + 8], [x - 32, y + 8]], "#8f9887", null);
   for (const [dx, dy, w, h, s] of [[-84, 51, 25, 15, 1], [77, 55, 26, 16, 2], [-119, 76, 32, 18, 3], [113, 82, 29, 17, 4]]) stone2(ctx, x + dx - w / 2, y + dy - h / 2, w, h, seed2 + 1550 + s);
-  moss4(ctx, x - 68, y + 72, 17, seed2 + 1567, 1.1);
-  moss4(ctx, x + 69, y + 74, 15, seed2 + 1571, 1);
+  moss5(ctx, x - 68, y + 72, 17, seed2 + 1567, 1.1);
+  moss5(ctx, x + 69, y + 74, 15, seed2 + 1571, 1);
   weeds(ctx, x - 111, y + 88, seed2 + 5, 6);
   weeds(ctx, x + 108, y + 91, seed2 + 6, 6);
   ctx.restore();
@@ -186466,10 +187509,10 @@ function drawRuinExteriorArchD11_3(ctx, exit, seed2 = 0) {
   for (const [dx, dy, w, h, s] of [[-142, -71, 44, 89, 1], [-101, -80, 47, 98, 2], [-64, -70, 43, 88, 3], [99, -78, 47, 96, 4], [56, -68, 43, 86, 5], [133, -62, 33, 80, 6], [-58, -123, 49, 38, 7], [-13, -139, 45, 36, 8], [32, -130, 48, 38, 9]]) stone2(ctx, x + dx, y + dy, w, h, seed2 + 1700 + s * 19);
   vine(ctx, x - 68, y + 6, 108, seed2 + 1973);
   for (const [dx, dy, w, h, s] of [[-127, 20, 48, 27, 1], [-88, 27, 39, 25, 2], [-56, 31, 31, 22, 3], [91, 26, 42, 27, 4], [127, 20, 48, 29, 5]]) stone2(ctx, x + dx - w / 2, y + dy - h / 2, w, h, seed2 + 1900 + s * 13);
-  for (const [dx, dy, size, s, spread] of [[-120, -75, 24, 1, 1.35], [-62, -118, 19, 2, 1.2], [-12, -142, 18, 3, 1.15], [34, -133, 20, 4, 1.2], [104, -75, 24, 5, 1.35]]) moss4(ctx, x + dx, y + dy, size, seed2 + 1940 + s * 23, spread);
+  for (const [dx, dy, size, s, spread] of [[-120, -75, 24, 1, 1.35], [-62, -118, 19, 2, 1.2], [-12, -142, 18, 3, 1.15], [34, -133, 20, 4, 1.2], [104, -75, 24, 5, 1.35]]) moss5(ctx, x + dx, y + dy, size, seed2 + 1940 + s * 23, spread);
   vine(ctx, x + 104, y - 5, 77, seed2 + 1981);
-  moss4(ctx, x - 112, y + 103, 16, seed2 + 2053, 0.9);
-  moss4(ctx, x + 112, y + 103, 16, seed2 + 2063, 0.9);
+  moss5(ctx, x - 112, y + 103, 16, seed2 + 2053, 0.9);
+  moss5(ctx, x + 112, y + 103, 16, seed2 + 2063, 0.9);
   weeds(ctx, x - 112, y + 111, seed2 + 1991, 6);
   weeds(ctx, x + 112, y + 111, seed2 + 1999, 6);
   ctx.restore();
@@ -188266,7 +189309,7 @@ var BASE7 = "#1d5a87";
 var BANDS2 = [[120, "#216497"], [78, "#2a74a8"], [46, "#3a8ebf"], [22, "#5fb6d4"], [9, "#8fd4e4"]];
 var SAND9 = 6;
 var SAND_COLOR = "#ccb987";
-var WET = "#a6915f";
+var WET2 = "#a6915f";
 var FACE6 = "#6a4c32";
 var LIP2 = "#86673f";
 var LILIES = 6;
@@ -188370,7 +189413,7 @@ function drawRiverMix(c, loops, open3, x, y, t, offset2, seed2, at8, waterAt2, b
     c.strokeStyle = SAND_COLOR;
     c.lineWidth = 2 * SAND9;
     c.stroke();
-    c.strokeStyle = WET;
+    c.strokeStyle = WET2;
     c.lineWidth = SAND9 * 0.9;
     c.stroke();
     for (const v of verts) {
@@ -192052,7 +193095,7 @@ function portalFront(c, x, y, r, t, open3) {
     c.restore();
   }
 }
-function ring7(c, x, y, r, frac, t, blink) {
+function ring8(c, x, y, r, frac, t, blink) {
   if (frac <= 0) return;
   const rx = r * 1.5, ry = r * PR5 * 1.5;
   c.save();
@@ -193668,7 +194711,7 @@ function drawTripPortalGroundV1(ctx, model, time3) {
   fairyRing(ctx, x, y, R10, st.closedAge - 0.05);
   shock(ctx, x, y, st.closedAge / 0.7);
   portalBack(ctx, x, y, R10, t, st.open);
-  if (st.open > 0 && st.ring > 0) ring7(ctx, x, y, R10, st.ring * Math.min(1, st.open), t, st.blink);
+  if (st.open > 0 && st.ring > 0) ring8(ctx, x, y, R10, st.ring * Math.min(1, st.open), t, st.blink);
   if (st.open > 0) suction(ctx, x, y, R10, t, st.open * st.suck);
 }
 function tripPortalDepthItemsV1(model, time3, depthItem2) {
@@ -198415,9 +199458,9 @@ function validateOwnedGearPageD9(row2) {
   }
   return row2;
 }
-async function readGroundChunkD9(root5, address3, { readPage, sha256 }) {
-  if (!root5) return null;
-  const tx = createPageTransaction({ root: root5, readPage, sha256 }), ref = await tx.get(await gearChunkKeyD9(address3, sha256));
+async function readGroundChunkD9(root6, address3, { readPage, sha256 }) {
+  if (!root6) return null;
+  const tx = createPageTransaction({ root: root6, readPage, sha256 }), ref = await tx.get(await gearChunkKeyD9(address3, sha256));
   if (!ref) return null;
   const doc = await readPage(ref.pageId);
   requireContract(await pageDigest(doc, sha256) === ref.pageId && doc.kind === "ground-chunk" && same9(doc.payload.address, address3), "Ground chunk commitment/address mismatch");
@@ -198462,9 +199505,9 @@ function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.d
   function stage2(pages2) {
     prepareStage(pages2)();
   }
-  async function readChunk(root5, address3) {
-    if (!root5) return null;
-    const tx = createPageTransaction({ root: root5, readPage: read2, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address3, sha256));
+  async function readChunk(root6, address3) {
+    if (!root6) return null;
+    const tx = createPageTransaction({ root: root6, readPage: read2, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address3, sha256));
     if (!ref) return null;
     requireContract(ref.version === "world-page-ref-d9-v1", "Chunk index reference version");
     const doc = await read2(ref.pageId);
@@ -198472,10 +199515,10 @@ function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.d
     requireContract(doc.payload.chunkX === address3.chunkX && doc.payload.chunkY === address3.chunkY, "Chunk delta address mismatch");
     return copyWire(doc.payload);
   }
-  async function prepareChunk(root5, delta3) {
-    const doc = worldDocument("chunk-delta", delta3), pageId = await pageDigest(doc, sha256), tx = createPageTransaction({ root: root5, readPage: read2, sha256 });
+  async function prepareChunk(root6, delta3) {
+    const doc = worldDocument("chunk-delta", delta3), pageId = await pageDigest(doc, sha256), tx = createPageTransaction({ root: root6, readPage: read2, sha256 });
     await tx.set(await chunkDeltaKeyD9(delta3, sha256), { version: "world-page-ref-d9-v1", pageId });
-    return { expectedRoot: root5, root: tx.root(), pages: [{ id: pageId, value: doc }, ...tx.pages()] };
+    return { expectedRoot: root6, root: tx.root(), pages: [{ id: pageId, value: doc }, ...tx.pages()] };
   }
   return {
     readPage: read2,
@@ -198837,7 +199880,7 @@ function revealNavigationD9(state2) {
   observations.set(state2, nextKeys);
   return changed;
 }
-function acknowledgeNavigationD9(state2, { expectedRoot, root: root5, rows }) {
+function acknowledgeNavigationD9(state2, { expectedRoot, root: root6, rows }) {
   const w = state2.d9World;
   requireContract(w.discoveryIndex === expectedRoot, "Navigation root changed during preparation");
   const acknowledged = new Map(rows.map((r) => [navigationIdentityD9(r), r]));
@@ -198847,7 +199890,7 @@ function acknowledgeNavigationD9(state2, { expectedRoot, root: root5, rows }) {
     const tiles9 = [...r.tiles].map((v, i) => a.tiles[i] === v ? "?" : v).join(""), markers = r.markers.filter((m) => !a.markers.some((x) => x.id === m.id));
     return (w.plannedWorld ? /[^?]/.test(tiles9) : tiles9.includes("w") || tiles9.includes("r") || tiles9.includes("m") || tiles9.includes("o") || tiles9.includes("p")) || markers.length ? [{ ...r, tiles: tiles9, markers }] : [];
   });
-  w.discoveryIndex = root5;
+  w.discoveryIndex = root6;
   w.navigation.revision++;
 }
 
@@ -199651,22 +200694,22 @@ function activationState(state2, site, playerId, kind) {
 async function prepareSiteBindingD9({ state: state2, site, playerId, kind, catalog, readPage, sha256 }) {
   validateSiteSocketD9(site);
   validateSiteCatalogD9(catalog);
-  const root5 = state2.d9World.content;
-  validateSiteContentRootD9(root5);
+  const root6 = state2.d9World.content;
+  validateSiteContentRootD9(root6);
   const reservation = Object.keys(state2.d9World.siteReservationsById ?? {}).length ? state2.d9World.siteReservationsById[site.siteId] : null;
   if (Object.keys(state2.d9World.siteReservationsById ?? {}).length) requireContract(reservation, "Socket has no campaign reservation");
   const admitted2 = state2.d9World.runtime.chunks.flatMap((c) => c.sites ?? []).find((s) => s.siteId === site.siteId);
   requireContract(admitted2 && canonicalStringify(admitted2) === canonicalStringify(site), "Unknown authoritative site socket");
-  const activation = activationState(state2, site, playerId, kind), expected = canonicalStringify(root5), index = createPageTransaction({ root: root5.index, readPage, sha256 });
+  const activation = activationState(state2, site, playerId, kind), expected = canonicalStringify(root6), index = createPageTransaction({ root: root6.index, readPage, sha256 });
   const bindingKey = await keyFor2("binding", site.siteId, sha256), previous = await index.get(bindingKey);
   if (previous) {
     validateSiteBindingD9(previous);
     requireContract(!reservation || previous.packageId === reservation.packageId, "Reserved binding/package mismatch");
-    return freezeWire({ expected, activation, site, playerId, kind, binding: previous, nextRoot: root5, pages: [], replay: true });
+    return freezeWire({ expected, activation, site, playerId, kind, binding: previous, nextRoot: root6, pages: [], replay: true });
   }
   const candidates = [];
   for (const [priority, p] of catalog.packages.entries()) {
-    const representationKey = await keyFor2("representation", p.packageId, sha256), r = await index.get(representationKey), historical = root5.historical.filter((b) => b.packageId === p.packageId).length;
+    const representationKey = await keyFor2("representation", p.packageId, sha256), r = await index.get(representationKey), historical = root6.historical.filter((b) => b.packageId === p.packageId).length;
     if (r) {
       requireContract(r.version === "content-representation-d9-v1" && r.packageId === p.packageId, "Invalid representation record");
       requireContract(progressionBigInt(r.count) > 0n, "Invalid representation count");
@@ -199682,7 +200725,7 @@ async function prepareSiteBindingD9({ state: state2, site, playerId, kind, catal
   const count = progressionWire(chosen.count + 1n);
   await index.set(bindingKey, binding);
   await index.set(chosen.representationKey, { version: "content-representation-d9-v1", packageId: chosen.p.packageId, count, lastSiteId: site.siteId });
-  return freezeWire({ expected, activation, site, playerId, kind, binding, nextRoot: { ...root5, catalogVersion: catalog.catalogVersion, index: index.root() }, pages: index.pages(), replay: false });
+  return freezeWire({ expected, activation, site, playerId, kind, binding, nextRoot: { ...root6, catalogVersion: catalog.catalogVersion, index: index.root() }, pages: index.pages(), replay: false });
 }
 function commitSiteBindingD9(state2, plan) {
   requireContract(canonicalStringify(state2.d9World.content) === plan.expected, "Stale site binding plan");
@@ -199695,13 +200738,13 @@ async function prepareFortReservationBindingD10(state2, parcel2, { readPage, sha
   const site = parcel2.socket;
   validateSiteSocketD9(site);
   requireContract(parcel2.siteId === site.siteId && packageEligibleD9(site, WOODLAND_FORT_D11_PACKAGE, false), "Fort reservation eligibility");
-  const root5 = state2.d9World.content, index = createPageTransaction({ root: root5.index, readPage, sha256 }), expected = canonicalStringify(root5), bindingKey = await keyFor2("binding", site.siteId, sha256), representationKey = await keyFor2("representation", WOODLAND_FORT_D11_PACKAGE.packageId, sha256);
+  const root6 = state2.d9World.content, index = createPageTransaction({ root: root6.index, readPage, sha256 }), expected = canonicalStringify(root6), bindingKey = await keyFor2("binding", site.siteId, sha256), representationKey = await keyFor2("representation", WOODLAND_FORT_D11_PACKAGE.packageId, sha256);
   requireContract(!await index.get(bindingKey) && !await index.get(representationKey), "Fort already bound or represented");
   const binding = { version: SITE_BINDING_D9, siteId: site.siteId, status: "bound", packageId: WOODLAND_FORT_D11_PACKAGE.packageId, packageVersion: WOODLAND_FORT_D11_PACKAGE.packageVersion, contentHash: WOODLAND_FORT_D11_PACKAGE.contentHash, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, policyVersion: "seed-reserved-fort-d10-v1", boundTick: state2.tick, causedByPlayerId: null };
   validateSiteBindingD9(binding);
   await index.set(bindingKey, binding);
   await index.set(representationKey, { version: "content-representation-d9-v1", packageId: WOODLAND_FORT_D11_PACKAGE.packageId, count: "1", lastSiteId: site.siteId });
-  return freezeWire({ expected, binding, nextRoot: { ...root5, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, index: index.root() }, pages: index.pages() });
+  return freezeWire({ expected, binding, nextRoot: { ...root6, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, index: index.root() }, pages: index.pages() });
 }
 function commitFortReservationBindingD10(state2, plan) {
   requireContract(canonicalStringify(state2.d9World.content) === plan.expected, "Fort reservation changed before admission");
@@ -199713,13 +200756,13 @@ async function prepareReservedBindingD10(state2, parcel2, pkg, policy, { readPag
   validateSiteSocketD9(site);
   requireContract(parcel2.siteId === site.siteId && packageEligibleD9(site, pkg, false), "Reserved site eligibility");
   requireContract(state2.d9World.siteReservationsById?.[site.siteId]?.packageId === pkg.packageId, "Reserved site/package mismatch");
-  const root5 = state2.d9World.content, index = createPageTransaction({ root: root5.index, readPage, sha256 }), expected = canonicalStringify(root5), bindingKey = await keyFor2("binding", site.siteId, sha256), representationKey = await keyFor2("representation", pkg.packageId, sha256);
+  const root6 = state2.d9World.content, index = createPageTransaction({ root: root6.index, readPage, sha256 }), expected = canonicalStringify(root6), bindingKey = await keyFor2("binding", site.siteId, sha256), representationKey = await keyFor2("representation", pkg.packageId, sha256);
   requireContract(!await index.get(bindingKey) && !await index.get(representationKey), "Reserved site already bound or represented");
   const binding = { version: SITE_BINDING_D9, siteId: site.siteId, status: "bound", packageId: pkg.packageId, packageVersion: pkg.packageVersion, contentHash: pkg.contentHash, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, policyVersion: policy, boundTick: state2.tick, causedByPlayerId: null };
   validateSiteBindingD9(binding);
   await index.set(bindingKey, binding);
   await index.set(representationKey, { version: "content-representation-d9-v1", packageId: pkg.packageId, count: "1", lastSiteId: site.siteId });
-  return freezeWire({ expected, binding, nextRoot: { ...root5, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, index: index.root() }, pages: index.pages() });
+  return freezeWire({ expected, binding, nextRoot: { ...root6, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, index: index.root() }, pages: index.pages() });
 }
 var prepareCaveReservationBindingD10 = (state2, parcel2, options) => prepareReservedBindingD10(state2, parcel2, WOODLAND_CAVE_D11_PACKAGE, "seed-reserved-site-d10-v1", options);
 function commitCaveReservationBindingD10(state2, plan) {
@@ -200123,7 +201166,7 @@ async function createLocalEndlessSessionD9(options) {
   }
   function latchFatal(failure, source3) {
     if (fatalInvariant) return fatalInvariant;
-    const reason = failure.reason ?? failure.message ?? String(failure), publication = authority.readConfirmed(), root5 = publication?.root ?? null;
+    const reason = failure.reason ?? failure.message ?? String(failure), publication = authority.readConfirmed(), root6 = publication?.root ?? null;
     let liveGeometry2 = null, liveTick = null, liveProbeError = null;
     try {
       authority.withAuthority((a) => a.withAuthorityState((s) => {
@@ -200155,7 +201198,7 @@ async function createLocalEndlessSessionD9(options) {
       stack: failure.stack ?? null,
       streaming: streaming ? { residentKeys: streaming.residentKeys, wantedKeys: streaming.wantedKeys, wantedMissing: streaming.wantedMissing, preparedKeys: streaming.preparedKeys, wantedReady: streaming.wantedReady, error: streaming.error, errorCode: streaming.errorCode, errorStack: streaming.errorStack, progressState: streaming.progressState, progressDetail: streaming.progressDetail } : null,
       dirtyPages: pages2.resources(),
-      confirmedRoot: root5 ? { id: publication.id, revision: root5.revision, tick: root5.tick, previous: root5.previous, campaignId: root5.campaignId } : null,
+      confirmedRoot: root6 ? { id: publication.id, revision: root6.revision, tick: root6.tick, previous: root6.previous, campaignId: root6.campaignId } : null,
       failedCuts,
       retriedCuts,
       lastSuccessfulCommitTick: lastSavedTick
@@ -200429,8 +201472,8 @@ async function createLocalEndlessSessionD9(options) {
     return false;
   };
   const landingFor = (record2, preferred = null, preparedTarget = null) => authority.withReadyAuthority((a) => a.withAuthorityState((s) => {
-    const player = s.playersById[localPlayerId], actor = s.entitiesById[player.entityId], entrance = record2.entrance, base3 = preferred?.position ?? preparedTarget ?? record2.approachAnchor, away = directionFromEntrance(record2, base3), side = { x: -away.y, y: away.x }, starts = preferred ? [{ x: 0, y: 0 }] : [{ x: 0, y: 0 }, { x: away.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize }, { x: side.x * D9_PROFILE.tileSize, y: side.y * D9_PROFILE.tileSize }, { x: -side.x * D9_PROFILE.tileSize, y: -side.y * D9_PROFILE.tileSize }, { x: away.x * D9_PROFILE.tileSize + side.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize + side.y * D9_PROFILE.tileSize }, { x: away.x * D9_PROFILE.tileSize - side.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize - side.y * D9_PROFILE.tileSize }], offsets = starts.concat(Array.from({ length: 4 }, (_, ring8) => {
-      const d = D9_PROFILE.tileSize * (ring8 + 2);
+    const player = s.playersById[localPlayerId], actor = s.entitiesById[player.entityId], entrance = record2.entrance, base3 = preferred?.position ?? preparedTarget ?? record2.approachAnchor, away = directionFromEntrance(record2, base3), side = { x: -away.y, y: away.x }, starts = preferred ? [{ x: 0, y: 0 }] : [{ x: 0, y: 0 }, { x: away.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize }, { x: side.x * D9_PROFILE.tileSize, y: side.y * D9_PROFILE.tileSize }, { x: -side.x * D9_PROFILE.tileSize, y: -side.y * D9_PROFILE.tileSize }, { x: away.x * D9_PROFILE.tileSize + side.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize + side.y * D9_PROFILE.tileSize }, { x: away.x * D9_PROFILE.tileSize - side.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize - side.y * D9_PROFILE.tileSize }], offsets = starts.concat(Array.from({ length: 4 }, (_, ring9) => {
+      const d = D9_PROFILE.tileSize * (ring9 + 2);
       return [{ x: away.x * d, y: away.y * d }, { x: side.x * d, y: side.y * d }, { x: -side.x * d, y: -side.y * d }];
     }).flat()), collision = s.spacesByInstanceId[s.overworldInstanceId].collision, revealDistance = navigatorRevealDistance(s);
     const rejected = { unprojected: 0, insideReveal: 0, blockedLanding: 0, blockedApproach: 0 };
@@ -200767,14 +201810,14 @@ async function createLocalEndlessSessionD9(options) {
 function measureWorldViewport(environment) {
   const valid = (value2) => typeof value2 === "number" && Number.isFinite(value2) && value2 > 0;
   const fallback = (primary, secondary) => valid(primary) ? primary : valid(secondary) ? secondary : 1;
-  const viewport = environment.visualViewport, root5 = environment.document.documentElement;
+  const viewport = environment.visualViewport, root6 = environment.document.documentElement;
   const visual = valid(viewport?.width) && valid(viewport?.height);
   const offset2 = (value2) => Number.isFinite(value2) ? Math.max(0, value2) : 0;
   return Object.freeze({
     left: visual ? offset2(viewport.offsetLeft) : 0,
     top: visual ? offset2(viewport.offsetTop) : 0,
-    width: Math.max(1, Math.round(visual ? viewport.width : fallback(root5.clientWidth, environment.innerWidth))),
-    height: Math.max(1, Math.round(visual ? viewport.height : fallback(root5.clientHeight, environment.innerHeight)))
+    width: Math.max(1, Math.round(visual ? viewport.width : fallback(root6.clientWidth, environment.innerWidth))),
+    height: Math.max(1, Math.round(visual ? viewport.height : fallback(root6.clientHeight, environment.innerHeight)))
   });
 }
 function coordinateWorldViewport({ environment, shell: shell3, onResize = () => {
@@ -203848,17 +204891,17 @@ async function scanQr(environment, host) {
   return result;
 }
 function shell2(environment, title2, intro) {
-  const document2 = environment.document, root5 = el(document2, "div", "coop-screen"), card = el(document2, "div", "coop-card");
-  root5.setAttribute("role", "dialog");
-  root5.setAttribute("aria-label", title2);
+  const document2 = environment.document, root6 = el(document2, "div", "coop-screen"), card = el(document2, "div", "coop-card");
+  root6.setAttribute("role", "dialog");
+  root6.setAttribute("aria-label", title2);
   card.append(el(document2, "h2", "coop-title", title2), el(document2, "p", "coop-intro", intro));
-  root5.append(card);
-  document2.body.append(root5);
+  root6.append(card);
+  document2.body.append(root6);
   const status2 = el(document2, "p", "coop-status");
   status2.setAttribute("aria-live", "polite");
-  return { document: document2, root: root5, card, status: status2, say: (t) => {
+  return { document: document2, root: root6, card, status: status2, say: (t) => {
     status2.textContent = t;
-  }, close: () => root5.remove() };
+  }, close: () => root6.remove() };
 }
 function playerList(document2) {
   const list = el(document2, "ul", "coop-players");
@@ -204215,9 +205258,9 @@ function createFriendsFlowV1({ environment, friends, game, now: now3 = () => Dat
     const c = cards.shift();
     if (!c) return;
     shown2 = c;
-    const root5 = el3("div", "fr-toast"), acts = el3("div", "fr-toast-acts");
-    root5.setAttribute("role", "status");
-    root5.append(el3("div", "fr-toast-av", nameOf(c.who).slice(0, 1).toUpperCase()), el3("p", "", c.title), el3("small", "", c.sub ?? ""), acts);
+    const root6 = el3("div", "fr-toast"), acts = el3("div", "fr-toast-acts");
+    root6.setAttribute("role", "status");
+    root6.append(el3("div", "fr-toast-av", nameOf(c.who).slice(0, 1).toUpperCase()), el3("p", "", c.title), el3("small", "", c.sub ?? ""), acts);
     for (const [text3, cls, fn] of c.buttons) {
       const b = el3("button", cls, text3);
       b.type = "button";
@@ -204230,14 +205273,14 @@ function createFriendsFlowV1({ environment, friends, game, now: now3 = () => Dat
     if (c.ms) {
       const bar2 = el3("div", "fr-toast-bar");
       bar2.style.animationDuration = c.ms + "ms";
-      root5.append(bar2);
+      root6.append(bar2);
       c.timer = environment.setTimeout(() => {
         close(c);
         c.onTimeout?.();
       }, c.ms);
     }
-    c.root = root5;
-    document2.body.append(root5);
+    c.root = root6;
+    document2.body.append(root6);
   }
   function close(c) {
     if (c.timer !== null) environment.clearTimeout(c.timer);
@@ -204530,18 +205573,18 @@ function button2(document2, cls, text3, onClick) {
 var fromWords = (names2) => names2.length <= 1 ? names2[0] ?? "A friend" : names2.slice(0, -1).join(", ") + " and " + names2.at(-1);
 function showPartyCardV1({ environment, world, review = false, onAdd, onSkip, onClose = () => {
 } }) {
-  const document2 = environment.document, root5 = el2(document2, "div", "coop-screen party-screen"), card = el2(document2, "div", "coop-card");
-  root5.setAttribute("role", "dialog");
-  root5.setAttribute("aria-label", "While you were apart");
-  root5.append(card);
-  document2.body.append(root5);
+  const document2 = environment.document, root6 = el2(document2, "div", "coop-screen party-screen"), card = el2(document2, "div", "coop-card");
+  root6.setAttribute("role", "dialog");
+  root6.setAttribute("aria-label", "While you were apart");
+  root6.append(card);
+  document2.body.append(root6);
   const offers = {};
   for (const g of GROUPS) offers[g] = { ...world.waiting[g], ...review ? world.skipped[g] : {} };
   const done3 = {}, status2 = el2(document2, "p", "coop-status");
   status2.setAttribute("aria-live", "polite");
   let busy = false, confirming = false;
   const close = () => {
-    root5.remove();
+    root6.remove();
     onClose();
   };
   const names2 = [...new Set(Object.values(offers).flatMap((o) => Object.values(o)).map((o) => o.from))];
@@ -204626,7 +205669,7 @@ function showPartyCardV1({ environment, world, review = false, onAdd, onSkip, on
       if (!confirming && !busy) paint3();
     }
   }
-  return Object.freeze({ close, update, element: root5 });
+  return Object.freeze({ close, update, element: root6 });
 }
 
 // src/entrypoints/playable_browser.js
