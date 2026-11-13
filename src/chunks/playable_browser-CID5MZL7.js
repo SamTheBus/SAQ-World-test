@@ -162174,7 +162174,6 @@ var KEEP_SITES = 40;
 var DUNGEON_MINI_TILES = [16, 24, 36];
 var PALETTE = { ring: { void: "#0d1013", wall: "#3b3226", floor: "#a8926a", floor2: "#a18b63", edge: "#f0d9a4" }, sheet: { void: "#1b1f23", wall: "#4a3f30", floor: "#c9b48a", floor2: "#c4ae83", edge: "#2a1d12" } };
 var roomAt = (f, x, y) => f.rooms.find((r) => x >= r.x && y >= r.y && x < r.x + r.w && y < r.y + r.h) ?? null;
-var roomName = (r) => r.kind ? r.kind.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ") : "";
 function segDist2(px7, py, a, b) {
   const dx = b.x - a.x, dy = b.y - a.y, l = dx * dx + dy * dy;
   let t = l ? ((px7 - a.x) * dx + (py - a.y) * dy) / l : 0;
@@ -162444,19 +162443,6 @@ function createDungeonMapV1({ document: doc, environment: env, store: store2, re
     c.imageSmoothingEnabled = s < PX;
     c.drawImage(p.canvas, ox, oy, f.width * s, f.height * s);
     c.imageSmoothingEnabled = true;
-    c.font = (W21 < 520 ? "12px " : "15px ") + MAP_FONT;
-    c.textAlign = "center";
-    c.textBaseline = "middle";
-    for (const rm of f.rooms) {
-      if (!p.set.has(rm.id)) continue;
-      const name = roomName(rm);
-      if (!name) continue;
-      const q2 = at8(rm.x + rm.w / 2, rm.y + 0.9), tw = c.measureText(name).width + 10;
-      c.fillStyle = "rgba(255,248,230,.6)";
-      c.fillRect(q2.x - tw / 2, q2.y - 8, tw, 16);
-      c.fillStyle = "#2a1d12";
-      c.fillText(name, q2.x, q2.y);
-    }
     const mr = Math.max(8, Math.min(13, s * 1.3));
     for (const m of floorMarkersV1(f, p.set, p.mask)) {
       const q2 = at8(m.x, m.y);
