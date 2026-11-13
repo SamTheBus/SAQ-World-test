@@ -12498,10 +12498,17 @@ var TOWN_PROPS = propsFor(OPEN_TOWN_TEMPLATE_V1);
 var plannedStartTiles = (b) => hasStarterVillage(b) ? starterArrivalTilesV1() : b?.townPrototype === PLANNED_TOWN_START_VERSION ? townStartTilesV1() : null;
 var plannedStartSettlementId = (b, fallback) => hasStarterVillage(b) ? STARTER_VILLAGE_ID : b?.townPrototype === PLANNED_TOWN_START_VERSION ? PLANNED_TOWN_ID : fallback;
 var plannedStartLabel = (b, fallback) => hasStarterVillage(b) ? STARTER_VILLAGE_NAME : b?.townPrototype === PLANNED_TOWN_START_VERSION ? "town street" : fallback;
+var safeMemo = { state: null, tick: null, frames: null, byPoint: /* @__PURE__ */ new Map() };
 function isStarterVillageSafe(state, position) {
   if (!hasStarterVillage(state) || !position) return false;
-  const q = localFramePositionD9(position, state.d9World.runtime.frames), x = (Number(q.chunkX) - 1024) * 32 + q.localX / 32, y = (Number(q.chunkY) - 1024) * 26 + q.localY / 32, o = townOriginV1(STARTER_VILLAGE_ID);
-  return x >= o.x && x < o.x + 64 && y >= o.y && y < o.y + 52;
+  const frames = state.d9World.runtime.frames;
+  if (safeMemo.state !== state || safeMemo.tick !== state.tick || safeMemo.frames !== frames) safeMemo = { state, tick: state.tick, frames, byPoint: /* @__PURE__ */ new Map() };
+  const key5 = position.x + "," + position.y, kept = safeMemo.byPoint.get(key5);
+  if (kept !== void 0) return kept;
+  const q = localFramePositionD9(position, frames), x = (Number(q.chunkX) - 1024) * 32 + q.localX / 32, y = (Number(q.chunkY) - 1024) * 26 + q.localY / 32, o = townOriginV1(STARTER_VILLAGE_ID);
+  const safe = x >= o.x && x < o.x + 64 && y >= o.y && y < o.y + 52;
+  if (safeMemo.byPoint.size < 64) safeMemo.byPoint.set(key5, safe);
+  return safe;
 }
 function isGeneratedTownSafeV1(state, position) {
   const towns = generatedTownsV1();
@@ -29749,7 +29756,7 @@ function readyPrimarySources(state) {
     return !state.subweaponCombat?.actors[id]?.guard?.requested && !a.current && (a.queuedCommandId || a.heldCommandId) && actors(state)[id].alive && p.connectionStatus === "connected";
   });
 }
-function beginPrimary(next, entityId, ids) {
+function beginPrimary(next, entityId, ids, stats = null) {
   requireContract(readyPrimarySources(next).includes(entityId), "Primary source is not ready");
   const a = next.primary.actorsById[entityId], profile2 = primaryProfile(next, entityId);
   requireContract(next.primary.actionIdHighWatermark === null || ids.primaryActionId > next.primary.actionIdHighWatermark, "Primary identity fence violation");
@@ -29757,7 +29764,7 @@ function beginPrimary(next, entityId, ids) {
   requireContract(ids.startEventId !== ids.finishEventId && eventIds.every((id) => next.primary.eventIdHighWatermark === null || id > next.primary.eventIdHighWatermark), "Primary event reservation fence violation");
   next.primary.actionIdHighWatermark = ids.primaryActionId;
   next.primary.eventIdHighWatermark = eventIds.sort().at(-1);
-  const player = Object.values(next.playersById).find((p) => p.entityId === entityId), timing = hastedTiming(profile2.steps[a.nextComboStep - 1], resolvePlayerStats(player).activeHaste);
+  const player = Object.values(next.playersById).find((p) => p.entityId === entityId), timing = hastedTiming(profile2.steps[a.nextComboStep - 1], (stats ?? resolvePlayerStats(player)).activeHaste);
   const record = {
     ...player.inventory?.d7 ? { timing } : {},
     primaryActionId: ids.primaryActionId,

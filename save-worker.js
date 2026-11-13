@@ -34629,10 +34629,11 @@ function createWorldSaveTaskD9({ store, sha256, generatePlannedChunk = null }) {
   }
   async function commit(request) {
     requireContract(!busy && !pending, "World save already owns a cut");
-    closedRecord(request, ["state", "expectedRoot", "checkpointId"], ["stagedPages"]);
+    closedRecord(request, ["expectedRoot", "checkpointId"], ["state", "stateText", "stagedPages"]);
+    requireContract("state" in request !== "stateText" in request, "World save takes the state or its text");
     busy = true;
     try {
-      const { state } = request, head = await store.worldPages.readRoot(state.campaign.campaignId);
+      const state = request.state ?? JSON.parse(request.stateText), head = await store.worldPages.readRoot(state.campaign.campaignId);
       if ((head?.id ?? null) !== request.expectedRoot) return { status: "conflict", reason: "Stale world save root" };
       let legacyCheckpoint = null;
       if (!head) {
@@ -35230,6 +35231,10 @@ function createWorldWorkerTaskD9({ store, sha256, plannedAssets = null }) {
     return plannedAssets.generate(request);
   } });
   return async function run(kind2, request) {
+    if (kind2 === "world.commit" && typeof request?.stateText === "string" && !Object.hasOwn(request, "state")) {
+      const { stateText, ...rest } = request;
+      request = { ...rest, state: JSON.parse(stateText) };
+    }
     validateWire(request);
     if (kind2 === "world.bindPlanned") {
       closedRecord(request, ["state", "binding"]);

@@ -1096,7 +1096,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-7ZA6RRK6.js";
+} from "./chunk-XS5L5YY4.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -125795,8 +125795,15 @@ function createOrdinaryEvade(state2, manifest, { onHomeReset = () => {
 var MELEE_ASSIST_RADIUS = 64;
 function meleeLineClear(collision, source3, target) {
   const a = source3.position, b = target.position, size = collision.tileSize, dx = b.x - a.x, dy = b.y - a.y;
-  for (let row2 = Math.floor(Math.min(a.y, b.y) / size); row2 <= Math.floor(Math.max(a.y, b.y) / size); row2++)
-    for (let col2 = Math.floor(Math.min(a.x, b.x) / size); col2 <= Math.floor(Math.max(a.x, b.x) / size); col2++) {
+  const colMin = Math.floor(Math.min(a.x, b.x) / size), colMax = Math.floor(Math.max(a.x, b.x) / size);
+  for (let row2 = Math.floor(Math.min(a.y, b.y) / size); row2 <= Math.floor(Math.max(a.y, b.y) / size); row2++) {
+    let c0 = colMin, c1 = colMax;
+    if (dy !== 0) {
+      const t1 = (row2 * size - a.y) / dy, t2 = ((row2 + 1) * size - a.y) / dy, lo = Math.max(0, Math.min(t1, t2)), hi = Math.min(1, Math.max(t1, t2)), x1 = a.x + dx * lo, x2 = a.x + dx * hi;
+      c0 = Math.max(colMin, Math.floor(Math.min(x1, x2) / size) - 1);
+      c1 = Math.min(colMax, Math.floor(Math.max(x1, x2) / size) + 1);
+    }
+    for (let col2 = c0; col2 <= c1; col2++) {
       if (collisionTile(collision, col2, row2) === "1") continue;
       let lo = 0, hi = 1;
       for (const [origin, d, min, max] of [[a.x, dx, col2 * size, (col2 + 1) * size], [a.y, dy, row2 * size, (row2 + 1) * size]]) {
@@ -125814,6 +125821,7 @@ function meleeLineClear(collision, source3, target) {
       }
       if (lo <= hi) return false;
     }
+  }
   return true;
 }
 function captureMeleeAssistAim(source3, candidates, collision) {
@@ -125858,9 +125866,15 @@ var solid2 = (collision, col2, row2) => {
   return tile === "0" || tile === "2";
 };
 function hullLineClearV1(collision, a, b, radius) {
-  const size = collision.tileSize, dx = b.x - a.x, dy = b.y - a.y;
-  for (let row2 = Math.floor((Math.min(a.y, b.y) - radius) / size); row2 <= Math.floor((Math.max(a.y, b.y) + radius) / size); row2++)
-    for (let col2 = Math.floor((Math.min(a.x, b.x) - radius) / size); col2 <= Math.floor((Math.max(a.x, b.x) + radius) / size); col2++) {
+  const size = collision.tileSize, dx = b.x - a.x, dy = b.y - a.y, colMin = Math.floor((Math.min(a.x, b.x) - radius) / size), colMax = Math.floor((Math.max(a.x, b.x) + radius) / size);
+  for (let row2 = Math.floor((Math.min(a.y, b.y) - radius) / size); row2 <= Math.floor((Math.max(a.y, b.y) + radius) / size); row2++) {
+    let c0 = colMin, c1 = colMax;
+    if (dy !== 0) {
+      const t1 = (row2 * size - radius - a.y) / dy, t2 = ((row2 + 1) * size + radius - a.y) / dy, lo = Math.max(0, Math.min(t1, t2)), hi = Math.min(1, Math.max(t1, t2)), x1 = a.x + dx * lo, x2 = a.x + dx * hi;
+      c0 = Math.max(colMin, Math.floor((Math.min(x1, x2) - radius) / size) - 1);
+      c1 = Math.min(colMax, Math.floor((Math.max(x1, x2) + radius) / size) + 1);
+    }
+    for (let col2 = c0; col2 <= c1; col2++) {
       if (!solid2(collision, col2, row2)) continue;
       let lo = 0, hi = 1;
       for (const [origin, d, min, max] of [[a.x, dx, col2 * size - radius, (col2 + 1) * size + radius], [a.y, dy, row2 * size - radius, (row2 + 1) * size + radius]]) {
@@ -125878,6 +125892,7 @@ function hullLineClearV1(collision, a, b, radius) {
       }
       if (lo <= hi) return false;
     }
+  }
   return true;
 }
 var NumberHeap = class {
@@ -133857,7 +133872,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
         assist.maxCandidates = Math.max(assist.maxCandidates, candidates.length);
         return captureMeleeAssistAim(actor, candidates.filter((target) => canActivityTargetActor(state2, manifest, actor, target)), collision);
       });
-      const event = beginPrimary(state2, id2, { primaryActionId: identity2("pra"), startEventId: identity2("evt"), finishEventId: identity2("evt") });
+      const event = beginPrimary(state2, id2, { primaryActionId: identity2("pra"), startEventId: identity2("evt"), finishEventId: identity2("evt") }, progression.resolvedStats(id2));
       const action2 = state2.primary.actorsById[id2].current;
       if (aim2) {
         action2.aim = aim2;
@@ -134162,14 +134177,34 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     if (motion.lastMovedTick === null || state2.tick - motion.lastMovedTick > 1) motion.startedTick = state2.tick;
     motion.lastMovedTick = state2.tick;
   }
+  const revisionByReceipt = /* @__PURE__ */ new WeakMap(), commandResidencyRevision = (r) => {
+    let v = revisionByReceipt.get(r);
+    if (v === void 0 || v.canonical !== r.commandCanonical) {
+      v = { canonical: r.commandCanonical, revision: JSON.parse(r.commandCanonical).residencyRevision };
+      revisionByReceipt.set(r, v);
+    }
+    return v.revision;
+  };
   function pruneContexts() {
     const records = [...Object.values(state2.primary.completedById), ...Object.values(state2.primary.actorsById).map((a) => a.current).filter(Boolean)], recordIds = new Set(records.map((r) => r.primaryActionId));
     for (const id2 of Object.keys(state2.primaryContextsById)) if (!recordIds.has(id2)) delete state2.primaryContextsById[id2];
-    for (const [entityId2, history] of Object.entries(state2.residencyHistoryByEntityId)) {
-      const needed = /* @__PURE__ */ new Set([state2.entitiesById[entityId2].residency.residencyRevision]);
-      for (const r of records) if (r.sourceEntityId === entityId2) needed.add(state2.primaryContextsById[r.primaryActionId].residencyRevision);
-      for (const r of Object.values(state2.appliedCommandsById)) if (state2.playersById[r.playerId].entityId === entityId2) needed.add(JSON.parse(r.commandCanonical).residencyRevision);
-      for (const revision of Object.keys(history)) if (!needed.has(Number(revision))) delete history[revision];
+    const histories = state2.residencyHistoryByEntityId, neededBy = /* @__PURE__ */ new Map(), need = (entityId2, revision) => {
+      if (!Object.hasOwn(histories, entityId2)) return;
+      let s = neededBy.get(entityId2);
+      if (!s) neededBy.set(entityId2, s = /* @__PURE__ */ new Set());
+      s.add(revision);
+    };
+    for (const r of records) need(r.sourceEntityId, state2.primaryContextsById[r.primaryActionId]?.residencyRevision);
+    for (const r of Object.values(state2.appliedCommandsById)) {
+      const entityId2 = state2.playersById[r.playerId]?.entityId;
+      if (entityId2 !== void 0 && Object.hasOwn(histories, entityId2)) need(entityId2, commandResidencyRevision(r));
+    }
+    for (const [entityId2, history] of Object.entries(histories)) {
+      const current = state2.entitiesById[entityId2].residency.residencyRevision, needed = neededBy.get(entityId2);
+      for (const revision of Object.keys(history)) {
+        const n = Number(revision);
+        if (n !== current && !needed?.has(n)) delete history[revision];
+      }
     }
   }
   function pruneCommands() {
@@ -134705,6 +134740,19 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       };
       freeze2(snapshot);
       return snapshot;
+    },
+    // The save copy as one JSON text: one pass instead of copy + freeze + the Worker's structured clone,
+    // so a co-op host's save freezes its frame for about a third as long (Sammy 2026-11-13: lag).
+    captureDurableTextV1: ({ saveRevision, checkpointId }) => {
+      safeInteger(saveRevision, 0);
+      validateId("checkpointId", checkpointId);
+      const campaign = state2.campaign, kept = { saveRevision: campaign.saveRevision, checkpointId: campaign.checkpointId };
+      Object.assign(campaign, { saveRevision, checkpointId });
+      try {
+        return { tick: state2.tick, text: JSON.stringify(state2) };
+      } finally {
+        Object.assign(campaign, kept);
+      }
     },
     confirmDurability: ({ saveRevision, checkpointId }) => {
       safeInteger(saveRevision, state2.campaign.saveRevision + 1);
@@ -199936,11 +199984,11 @@ function createPagedWorldAuthorityD9({ initialState, publication, task, measure:
     validateId("transactionId", request.transactionId);
     validateId("checkpointId", request.checkpointId);
     const cursor = authority.withAuthorityState((s) => ({ saveRevision: s.campaign.saveRevision, checkpointId: s.campaign.checkpointId }));
-    const state2 = measure2("saveCapture", () => authority.captureForDurability(cursor).state), pages2 = capturePages();
-    pending = { tick: state2.tick, saveRevision: cursor.saveRevision, checkpointId: request.checkpointId, pages: pages2 };
+    const cut = measure2("saveCapture", () => authority.captureDurableTextV1(cursor)), pages2 = capturePages();
+    pending = { tick: cut.tick, saveRevision: cursor.saveRevision, checkpointId: request.checkpointId, pages: pages2 };
     busy = true;
     try {
-      return settle(await task.commit({ state: state2, expectedRoot: confirmed.id, checkpointId: request.checkpointId, stagedPages: pages2 }));
+      return settle(await task.commit({ stateText: cut.text, expectedRoot: confirmed.id, checkpointId: request.checkpointId, stagedPages: pages2 }));
     } catch (error) {
       return settle({ status: "unknown", reason: error.message });
     } finally {
