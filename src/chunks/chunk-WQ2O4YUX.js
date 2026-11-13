@@ -8492,6 +8492,12 @@ var FORGE_MATERIAL_COSTS = Object.freeze([
   Object.freeze({ "Mythic Scrap": 2022, "Astral Shards": 66 })
 ]);
 
+// src/shared/contracts/attunement_curve_v1.js
+var attuneTenths = (level) => level <= 50 ? 5 * level : 250 + 15 * (level - 50);
+var attunePercent = (level) => attuneTenths(level) / 10;
+var attuneScale = (level, curve2 = true) => 1e3 + (curve2 ? attuneTenths(level) : 10 * level);
+var attuneSteps = (level, n) => attuneTenths(level) * n / 10;
+
 // src/shared/content/forge.js
 var FORGE_MATERIALS = Object.freeze(["Monster Soul", "Common Scrap", "Uncommon Scrap", "Luminous Soul", "Rare Scrap", "Epic Scrap", "Astral Shards", "Legendary Scrap", "Mythic Scrap", "Wakestone", "Overlord's Sigil", "Astral Essence", "Starshard"]);
 var mul = multiplyAmount;
@@ -8512,8 +8518,9 @@ for (let level = 0; level < 100; level++) {
 var attunementSpent = (level, player = null) => combatPlayer(player) ? combatAttuneSpent(safeInteger(level, 0, 100)) : totals[safeInteger(level, 0, 100)];
 function effectiveEquipmentBonuses(definition, slot, level = 0, combat = false) {
   safeInteger(level, 0, 100);
-  const bonus = Object.fromEntries(Object.entries(definition.bonuses).map(([k, v]) => [k, definition.numericVersion ? progressionWire(BigInt(combatInteger(multiplyCombat(asCombatAmount(v), 100 + level, 100), "ceil"))) : Math.ceil(v * (100 + level) / 100)]));
+  const bonus = Object.fromEntries(Object.entries(definition.bonuses).map(([k, v]) => [k, definition.numericVersion ? progressionWire(BigInt(combatInteger(combat ? multiplyCombat(asCombatAmount(v), attuneScale(level), 1e3) : multiplyCombat(asCombatAmount(v), 100 + level, 100), "ceil"))) : combat ? Math.ceil(v * attuneScale(level) / 1e3) : Math.ceil(v * (100 + level) / 100)]));
   if (definition.numericVersion) {
+    if (combat) return bonus;
     const plus = (k, n) => bonus[k] = progressionWire(progressionBigInt(bonus[k]) + BigInt(n));
     if (slot === "weapon") plus("attack", level * (combat ? 2 : 15));
     if (["chest", "leggings", "overall"].includes(slot)) {
@@ -8526,14 +8533,14 @@ function effectiveEquipmentBonuses(definition, slot, level = 0, combat = false) 
     }
     return bonus;
   }
-  if (slot === "weapon") bonus.attack += level * (combat ? 2 : 15);
+  if (slot === "weapon") bonus.attack += combat ? attuneSteps(level, 2) : level * 15;
   if (["chest", "leggings", "overall"].includes(slot)) {
-    bonus.maxHp += level * (combat ? 8 : 50);
-    bonus.defense += level * (combat ? 2 : 10);
+    bonus.maxHp += combat ? attuneSteps(level, 8) : level * 50;
+    bonus.defense += combat ? attuneSteps(level, 2) : level * 10;
   }
   if (["ring1", "ring2"].includes(slot)) {
-    bonus.attack += level * (combat ? 2 : 10);
-    bonus.maxHp += level * (combat ? 6 : 30);
+    bonus.attack += combat ? attuneSteps(level, 2) : level * 10;
+    bonus.maxHp += combat ? attuneSteps(level, 6) : level * 30;
   }
   return bonus;
 }
@@ -8632,7 +8639,7 @@ function equipmentBonuses(p) {
     const level = p.inventory.economy?.slotLevels[slot] ?? 0, bonus = d.numericVersion ? null : effectiveEquipmentBonuses(d, slot, level, combatPlayer(p));
     for (const key5 of Object.keys(result)) {
       const extra = combatPlayer(p) ? 0 : slot === "weapon" && key5 === "attack" ? level * (combatPlayer(p) ? 2 : 15) : ["chest", "leggings", "overall"].includes(slot) ? key5 === "maxHp" ? level * (combatPlayer(p) ? 8 : 50) : key5 === "defense" ? level * (combatPlayer(p) ? 2 : 10) : 0 : ["ring1", "ring2"].includes(slot) ? key5 === "attack" ? level * (combatPlayer(p) ? 2 : 10) : key5 === "maxHp" ? level * (combatPlayer(p) ? 6 : 30) : 0 : 0;
-      const value = d.rarityTier !== void 0 ? addCombat(d.numericVersion ? multiplyCombat(asCombatAmount(d.bonuses[key5]), 100 + level, 100) : combatAmount(d.bonuses[key5] * (100 + level), 100), extra) : bonus[key5];
+      const value = d.rarityTier !== void 0 ? addCombat(d.numericVersion ? multiplyCombat(asCombatAmount(d.bonuses[key5]), attuneScale(level, combatPlayer(p)), 1e3) : combatAmount(d.bonuses[key5] * attuneScale(level, combatPlayer(p)), 1e3), extra) : bonus[key5];
       result[key5] = value?.n !== void 0 || result[key5]?.n !== void 0 ? addCombat(result[key5], value) : result[key5] + value;
     }
   }
@@ -22125,7 +22132,7 @@ function gearAffixTotalsV2(player) {
   for (const [slot, id] of Object.entries(inv.equipped)) {
     const item = id && inv.itemsById[id];
     if (!item?.generated) continue;
-    const scale2 = 100 + Number(levels2[slot] ?? 0), grow = (v) => Math.round(bp(v) * scale2 / 100);
+    const scale2 = attuneScale(Number(levels2[slot] ?? 0)), grow = (v) => Math.round(bp(v) * scale2 / 1e3);
     for (const a of workshopResult(item).affixes ?? []) {
       if (!isNewAffix(a.key) && !isV3Affix(a.key)) continue;
       t.any = true;
@@ -22135,7 +22142,7 @@ function gearAffixTotalsV2(player) {
       else if (a.key === "startPips" || a.key === "maxPip") t[a.key] += Number(a.value);
       else if (a.key === "shatterEase") t.shatterEase += bp(a.value);
       else if (isFixedV3(a.key)) t[a.key] += ticks(a.value);
-      else if (a.key === "lifeHit") t.lifeHit += Math.round(Number(a.value) * scale2 / 100);
+      else if (a.key === "lifeHit") t.lifeHit += Math.round(Number(a.value) * scale2 / 1e3);
       else t[a.key] += grow(a.value);
     }
   }
@@ -28805,13 +28812,13 @@ var BESTIARY_EFFECT_KEYS = Object.freeze({ atkPct: "atkPct", defPct: "defPct", m
 function resolveD9PlayerStats(player) {
   const inv = player.inventory, level = d9LevelStats(player.progression.level), bonus = equipmentBonuses(player), base = { version: "resolved-player-stats-integer-v2", maxHp: addCombat(level.maxHp, bonus.maxHp), attack: addCombat(level.attack, bonus.attack), defense: addCombat(level.defense, bonus.defense), moveSpeed: 3, pickupRadius: player.bestiary?.stats?.pickupRange ? Math.round(BASE_PICKUP_RADIUS * (1e4 + player.bestiary.stats.pickupRange) / 1e4) : BASE_PICKUP_RADIUS };
   if (!inv?.subweapons) return { ...base, ...Object.fromEntries(["maxHp", "attack", "defense"].map((k) => [k, combatInteger(base[k])])) };
-  const definition = itemDefinition(inv.itemsById[inv.equipped.subweapon]), family2 = definition?.subType ?? null, scale2 = 100 + (inv.economy.slotLevels.subweapon ?? 0), attributes = Object.fromEntries(["str", "dex", "int"].map((k) => [k, addCombat(5, combatAmount(progressionBigInt(player.d8?.allocated[k] ?? 0)))])), effects = Object.fromEntries(Object.entries(resonanceEffects(inv)).map(([k, v]) => [k, exactDecimal(v)]));
+  const definition = itemDefinition(inv.itemsById[inv.equipped.subweapon]), family2 = definition?.subType ?? null, scale2 = attuneScale(inv.economy.slotLevels.subweapon ?? 0, combatPlayer(player)), attributes = Object.fromEntries(["str", "dex", "int"].map((k) => [k, addCombat(5, combatAmount(progressionBigInt(player.d8?.allocated[k] ?? 0)))])), effects = Object.fromEntries(Object.entries(resonanceEffects(inv)).map(([k, v]) => [k, exactDecimal(v)]));
   for (const [slot, id] of Object.entries(inv.equipped)) {
     const d = itemDefinition(inv.itemsById[id]);
     if (!d) continue;
-    const scale3 = 100 + (inv.economy.slotLevels[slot] ?? 0);
-    for (const [k, v] of Object.entries(d.effects ?? {})) effects[k] = addCombat(effects[k] ?? 0, multiplyCombat(exactDecimal(v), scale3, 100));
-    for (const k of ["str", "dex", "int"]) attributes[k] = addCombat(attributes[k], multiplyCombat(exactDecimal(d.attributes?.[k] ?? 0), scale3, 100));
+    const scale3 = attuneScale(inv.economy.slotLevels[slot] ?? 0, combatPlayer(player));
+    for (const [k, v] of Object.entries(d.effects ?? {})) effects[k] = addCombat(effects[k] ?? 0, multiplyCombat(exactDecimal(v), scale3, 1e3));
+    for (const k of ["str", "dex", "int"]) attributes[k] = addCombat(attributes[k], multiplyCombat(exactDecimal(d.attributes?.[k] ?? 0), scale3, 1e3));
   }
   for (const [k, v] of Object.entries(classTreeEffects(player.d8))) effects[k] = addCombat(effects[k] ?? 0, v);
   {
@@ -28826,7 +28833,7 @@ function resolveD9PlayerStats(player) {
   const effect = (k) => effects[k] ?? combatAmount(0), quantize = (v) => multiplyCombat(roundCombat(multiplyCombat(v, 1e6)), 1, 1e6), pct2 = (v, k) => times2(v, quantize(addCombat(1, effect(k))));
   for (const k of ["str", "dex", "int"]) attributes[k] = combatInteger(roundCombat(times2(attributes[k], addCombat(1, effect(k + "Pct"))), "floor"));
   const str = subtractCombat(maxCombat(attributes.str, 5), 5), dex = subtractCombat(maxCombat(attributes.dex, 5), 5), intel = subtractCombat(maxCombat(attributes.int, 5), 5), f3 = definition?.family ?? {};
-  const gear = (k) => multiplyCombat(exactDecimal(definition?.bonuses[k] ?? 0), scale2, 100);
+  const gear = (k) => multiplyCombat(exactDecimal(definition?.bonuses[k] ?? 0), scale2, 1e3);
   const perkBp = (pts, cap3) => {
     const n = BigInt(pts.n) * BigInt(STAT_PERKS_V1.basisPointsPerPoint) / BigInt(pts.d);
     return Number(n < BigInt(cap3) ? n : BigInt(cap3));
@@ -31137,6 +31144,7 @@ export {
   workshopResult,
   SUBWEAPON_TYPES,
   SUBWEAPONS,
+  attunePercent,
   FORGE_MATERIALS,
   attunementCost,
   attunementSpent,

@@ -418,6 +418,7 @@ import {
   assertActorGeometryD9,
   assertNoNewActorGeometryFailureD9,
   assertReleasedActorFootprintsD9,
+  attunePercent,
   attunementCost,
   attunementSpent,
   augmentAvailability,
@@ -1086,7 +1087,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-QSMHPLUQ.js";
+} from "./chunk-WQ2O4YUX.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -139130,7 +139131,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       const level = inv.economy?.slotLevels?.[equippedSlot] ?? 0, att = element("div", "", "gx-attune"), bar2 = element("span", "", "gx-attunebar"), fill7 = element("span", "");
       fill7.style.width = Math.min(100, level) + "%";
       bar2.append(fill7);
-      att.append(element("span", `${SLOT_NAMES[equippedSlot].replace(/ \d$/, "")} slot attunement`), bar2, element("b", "Lv " + level));
+      att.append(element("span", `${SLOT_NAMES[equippedSlot].replace(/ \d$/, "")} slot attunement`), bar2, element("b", "Lv " + level + " \xB7 +" + attunePercent(level) + "%"));
       scroll.append(att);
       if (equippedSlot === "helmet" && local8.d8?.look) {
         const shown2 = local8.d8.look.helmet !== false, sw = button3("", toggleHelmet);
@@ -140311,7 +140312,7 @@ function createSettlementServicesMenu2(options) {
       const lv = inv.economy.slotLevels[selected], i = inv.itemsById[inv.equipped[selected]], d = itemDefinition(i), card = el3("div", void 0, "tn-card"), bar2 = el3("div", void 0, "tn-bar"), fill7 = el3("i");
       fill7.style.width = lv + "%";
       bar2.append(fill7);
-      card.append(el3("p", slotName(selected) + " slot \xB7 +" + lv + (lv < 100 ? " \u2192 +" + (lv + 1) : " \xB7 max"), "tn-sect"), bar2);
+      card.append(el3("p", slotName(selected) + " slot \xB7 Lv " + lv + " \xB7 +" + attunePercent(lv) + "%" + (lv < 100 ? " \u2192 +" + attunePercent(lv + 1) + "%" : " \xB7 max"), "tn-sect"), bar2);
       if (d && lv < 100) {
         const before = effectiveEquipmentBonuses(d, selected, lv, combatPlayer(p)), after = effectiveEquipmentBonuses(d, selected, lv + 1, combatPlayer(p));
         for (const k of Object.keys(before)) {
@@ -140324,7 +140325,7 @@ function createSettlementServicesMenu2(options) {
           card.append(row2);
         }
       }
-      card.append(el3("p", "Stays with the slot when you change gear \xB7 max +100", "tn-hint is-left"));
+      card.append(el3("p", "Stays with the slot when you change gear \xB7 +0.5% a step to Lv 50, then +1.5% \xB7 max +100%", "tn-hint is-left"));
       body5.append(card);
       if (lv < 100) {
         const q2 = attunementCost(lv, p), afford = costs(body5, q2.gold, q2.materials, inv, npc, p);
