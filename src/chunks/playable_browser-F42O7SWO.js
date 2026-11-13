@@ -197191,9 +197191,11 @@ function prewarmSiteEntranceV3(e, art = null) {
 }
 var STAIRS = { crypt: paintStoneStairsV3, ruin: paintStoneStairsV3, cave: paintCaveStairsV3, fort: paintFortStairsV3 };
 var EXIT = { crypt: paintStoneExitV3, ruin: paintStoneExitV3, cave: paintCaveExitV3, fort: paintFortDoorV3 };
+var EXIT_LIFT_V1 = Object.freeze({ crypt: 24, ruin: 24, cave: 16, fort: 0 });
+var SITE_EXIT_SORT_V1 = -4;
 function drawSiteInteriorExitV3(ctx, space, exit) {
   const site = space.site ?? space.functionalSite, k = sitePremiumKitV1(site);
-  stamp5(ctx, sprite5("exit/" + k.family + "/" + k.biome, BOX3.exit, (c) => EXIT[k.family](c, 0, 0, k, k.biome)), exit.x, exit.y);
+  stamp5(ctx, sprite5("exit/" + k.family + "/" + k.biome, BOX3.exit, (c) => EXIT[k.family](c, 0, 0, k, k.biome)), exit.x, exit.y - (EXIT_LIFT_V1[k.family] ?? 0));
 }
 function drawSiteInteriorStairsV3(ctx, space, x, y, dir, facing3 = 0) {
   const site = space.site ?? space.functionalSite, k = sitePremiumKitV1(site);
@@ -197622,7 +197624,7 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
         items.push(depthItem({ id: "site-decoration/" + (d.id ?? `${d.kind}/${d.x}/${d.y}`), anchorX: x, anchorY: caveDecorationAnchorD10(d, t), draw: (ctx) => stairs2 ? drawSiteInteriorStairsV3(ctx, space, x, y, stairs2[2], stairs2[1] === "stairs" ? d.facing : 0) : drawCaveDecorationD10(ctx, d, t) }));
       }
       const door14 = space.exits?.find((e) => e.siteAction?.direction === "exit");
-      if (door14 && visible3(door14.x, door14.y, 100)) items.push(depthItem({ id: "site-exit/" + door14.exitId, anchorX: door14.x, anchorY: door14.y + 25, draw: (ctx) => drawSiteInteriorExitV3(ctx, space, door14) }));
+      if (door14 && visible3(door14.x, door14.y, 100)) items.push(depthItem({ id: "site-exit/" + door14.exitId, anchorX: door14.x, anchorY: door14.y + SITE_EXIT_SORT_V1, draw: (ctx) => drawSiteInteriorExitV3(ctx, space, door14) }));
       return items;
     }
     if (["woodland-ruin", "procedural-ruin", "procedural-crypt"].includes(site.siteKind)) {
@@ -197634,7 +197636,7 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
       }
       for (const stair of space.exits?.filter((e) => ["up", "down"].includes(e.siteAction?.direction)) ?? []) if (visible3(stair.x, stair.y)) items.push(depthItem({ id: "ruin-stair/" + stair.exitId, anchorX: stair.x, anchorY: stair.y, draw: (ctx) => drawSiteInteriorStairsV3(ctx, space, stair.x, stair.y, stair.siteAction.direction, stair.stairFacing) }));
       const door14 = site.siteKind === "procedural-ruin" ? space.exits?.find((e) => e.siteAction?.direction === "exit") : space.exits?.[0];
-      if (door14 && visible3(door14.x, door14.y, 110)) items.push(depthItem({ id: "site-exit/" + door14.exitId, anchorX: door14.x, anchorY: door14.y + 27, draw: (ctx) => drawSiteInteriorExitV3(ctx, space, door14) }));
+      if (door14 && visible3(door14.x, door14.y, 110)) items.push(depthItem({ id: "site-exit/" + door14.exitId, anchorX: door14.x, anchorY: door14.y + SITE_EXIT_SORT_V1, draw: (ctx) => drawSiteInteriorExitV3(ctx, space, door14) }));
       return items;
     }
     const ways = (space.exits ?? []).filter((e) => ["exit", "up", "down"].includes(e.siteAction?.direction)), covers = (d) => ways.some((e) => e.x > d.x * t - 32 && e.x < (d.x + (d.width ?? 4)) * t + 32 && e.y > d.y * t - 32 && e.y < (d.y + (d.height ?? 2)) * t + 32);
