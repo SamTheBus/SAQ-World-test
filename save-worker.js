@@ -2592,7 +2592,7 @@ var BIOME_BOSSES_V1 = Object.freeze({
 });
 var BIOME_BOSS_IDS_V1 = Object.freeze(Object.keys(BIOME_BOSSES_V1));
 var BIOME_BOSS_DAMAGE_V1 = Object.freeze({ grave_cleave: 19, crown_flame: 15, solar_beam: 17, sunfall: 15 });
-var BIOME_BOSS_REACH_V1 = Object.freeze({ grave_cleave: 78, crown_flame: 70, solar_beam: 280, solarBeamHalfWidth: 24, sunfall: 40 });
+var BIOME_BOSS_REACH_V1 = Object.freeze({ grave_cleave: 104, crown_flame: 70, solar_beam: 280, solarBeamHalfWidth: 24, sunfall: 40 });
 var BIOME_BOSS_POOLS_V1 = Object.freeze({ ghostfire: Object.freeze([44, 300]), sunfire: Object.freeze([30, 240]) });
 
 // src/shared/content/bestiary_bosses_v1.js
