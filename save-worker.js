@@ -579,27 +579,27 @@ function rewardMaterialsV1(progression, kind2, draw2) {
   const D = ECONOMY_V1.materialDrops, source11 = rewardSourceV1(progression);
   const key9 = kind2 === "chest" ? progression?.siteReward === "lair-chest" ? "lair-chest" : null : kind2 === "enemy" && source11 !== "ordinary" ? source11 : null;
   if (!key9 || !D.rolls[key9]) return {};
-  const odds = key9 === "elite" ? D.elite : D.chances, out = {};
+  const odds = key9 === "elite" ? D.elite : D.chances, out2 = {};
   for (let i = 0; i < D.rolls[key9]; i++) D.materials.forEach((m, j) => {
-    if (draw2(m + "/" + i) % 100 < odds[j]) out[m] = (out[m] ?? 0) + 1;
+    if (draw2(m + "/" + i) % 100 < odds[j]) out2[m] = (out2[m] ?? 0) + 1;
   });
-  if (key9 !== "elite" && !Object.keys(out).length) {
+  if (key9 !== "elite" && !Object.keys(out2).length) {
     let r = draw2("floor") % 100;
     for (const [j, m] of D.materials.entries()) {
       if (r < D.chances[j]) {
-        out[m] = 1;
+        out2[m] = 1;
         break;
       }
       r -= D.chances[j];
     }
   }
-  return out;
+  return out2;
 }
 function attunementMaterialsV1(level) {
-  const A = ECONOMY_V1.attunement, [lo, hi] = A.bandMaterialRamp, band = Math.floor(level / 20), out = {}, ramp = (k, len) => lo + Math.round((hi - lo) * k / (len - 1));
-  for (const m of A.bands[band]) out[m] = ramp(level % 20, 20);
-  if (level + 1 >= A.mythicFromStep) out["Mythic Scrap"] = ramp(level + 1 - A.mythicFromStep, 101 - A.mythicFromStep);
-  return out;
+  const A = ECONOMY_V1.attunement, [lo, hi] = A.bandMaterialRamp, band = Math.floor(level / 20), out2 = {}, ramp = (k, len) => lo + Math.round((hi - lo) * k / (len - 1));
+  for (const m of A.bands[band]) out2[m] = ramp(level % 20, 20);
+  if (level + 1 >= A.mythicFromStep) out2["Mythic Scrap"] = ramp(level + 1 - A.mythicFromStep, 101 - A.mythicFromStep);
+  return out2;
 }
 
 // src/shared/content/world_combat_v1.js
@@ -1923,14 +1923,14 @@ function numericContext(precision = 48) {
     return pair(a.lo * S2 / b.hi, ceilDiv(a.hi * S2, b.lo));
   };
   const power2 = (a, n) => {
-    let out = q(1), base = a;
+    let out2 = q(1), base = a;
     while (n) {
       budget();
-      if (n & 1n) out = mul2(out, base);
+      if (n & 1n) out2 = mul2(out2, base);
       n >>= 1n;
       if (n) base = mul2(base, base);
     }
-    return out;
+    return out2;
   };
   function rootInteger(n, k) {
     if (n < 2n) return n;
@@ -2892,10 +2892,10 @@ function compositionBandV1(level) {
   return [...COMPOSITION_POLICY_V1.bands].reverse().find((b) => n >= BigInt(b.from));
 }
 function passiveEliteTraitsV1(source11, level) {
-  const n = progressionBigInt(level), key9 = COMPOSITION_V1 + "/" + source11.campaignSeed + "/" + source11.entityId + "/" + String(level), out = [];
-  if (n >= 15n && compositionHashV1(key9 + "/second") % 100 < (n >= 45n ? 100 : n >= 30n ? 75 : 35)) out.push(compositionHashV1(key9 + "/trait") % 2 ? "brutal" : "hardened");
-  if (n >= 30n && out.length && compositionHashV1(key9 + "/third") % 100 < (n >= 45n ? 60 : 25)) out.push(out[0] === "brutal" ? "hardened" : "brutal");
-  return out;
+  const n = progressionBigInt(level), key9 = COMPOSITION_V1 + "/" + source11.campaignSeed + "/" + source11.entityId + "/" + String(level), out2 = [];
+  if (n >= 15n && compositionHashV1(key9 + "/second") % 100 < (n >= 45n ? 100 : n >= 30n ? 75 : 35)) out2.push(compositionHashV1(key9 + "/trait") % 2 ? "brutal" : "hardened");
+  if (n >= 30n && out2.length && compositionHashV1(key9 + "/third") % 100 < (n >= 45n ? 60 : 25)) out2.push(out2[0] === "brutal" ? "hardened" : "brutal");
+  return out2;
 }
 
 // src/shared/content/named_elites_v1.js
@@ -4214,9 +4214,9 @@ function encounterActorProfile(state, group, actor) {
     profile2 = { ...state.content.definitionsById[actor.contentDefinitionId], maxHp: stats.maxHp, attackDamage: stats.attackDamage };
   } else profile2 = enemy2 && level !== void 0 ? resolveOrdinaryProfile(enemy2, ordinaryTier(actor.contentDefinitionId), level) : state.content.definitionsById[actor.contentDefinitionId];
   if (hasWorldCombat(state) && profile2?.isBoss && level !== void 0) profile2 = { ...profile2, ...worldBossStats(level) };
-  const out = rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, denAlphaProfileV1(state, group, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2)))))));
+  const out2 = rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, denAlphaProfileV1(state, group, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2)))))));
   const party2 = partyHealthPercentV1(group.threatSnapshot);
-  return party2 !== 100 && state.subweaponCombat && out?.maxHp !== void 0 ? { ...out, maxHp: combatInteger(multiplyCombat(out.maxHp, party2, 100)) } : out;
+  return party2 !== 100 && state.subweaponCombat && out2?.maxHp !== void 0 ? { ...out2, maxHp: combatInteger(multiplyCombat(out2.maxHp, party2, 100)) } : out2;
 }
 function validateEncounterProgression(state, group) {
   requireContract(typeof group.threatReady === "boolean", "Missing encounter reset state");
@@ -4480,12 +4480,12 @@ function box(room2) {
   return room2.bounds ?? { x: room2.cx - room2.rx, y: room2.cy - room2.ry, width: room2.rx * 2 + 1, height: room2.ry * 2 + 1 };
 }
 function bossRoomCellsV1(recipe, room2, hull = 9) {
-  const b = box(room2), out = [];
+  const b = box(room2), out2 = [];
   for (let y = b.y; y < b.y + b.height; y++) for (let x = b.x; x < b.x + b.width; x++) {
     const p = { x: (x + 0.5) * TILE, y: (y + 0.5) * TILE };
-    if (!collidesWithTiles(recipe.collision, p.x, p.y, hull)) out.push(p);
+    if (!collidesWithTiles(recipe.collision, p.x, p.y, hull)) out2.push(p);
   }
-  return out;
+  return out2;
 }
 var brimstoneFortHereV1 = (reservationId) => !worldSiteV1(reservationId);
 function bossHostingSpecV1({ family: family2, tier: tier2, index, floorCount, reservationId, enabled: enabled2 = true, wilderness = true }) {
@@ -4845,7 +4845,7 @@ var seededEnds = null;
 var seededRevision = -1;
 function seededEndsV1() {
   if (seededRevision === worldRevisionV1()) return seededEnds;
-  const S2 = SITE_ENDS_SEEDED_V1, affixes = SITE_ENDS_POLICY.eliteAffixes, byLand = /* @__PURE__ */ new Map(), out = /* @__PURE__ */ new Map();
+  const S2 = SITE_ENDS_SEEDED_V1, affixes = SITE_ENDS_POLICY.eliteAffixes, byLand = /* @__PURE__ */ new Map(), out2 = /* @__PURE__ */ new Map();
   for (const site of worldSitesV1() ?? []) {
     const family2 = site.id.split(":")[1], floorCount = multiroomFloorCountV1(site.tier, true), role = endRoleV1({ family: family2, tier: site.tier, index: floorCount - 1, floorCount, reservationId: site.id });
     if (role) {
@@ -4863,7 +4863,7 @@ function seededEndsV1() {
       uses.set(creature, (uses.get(creature) ?? 0) + 1);
       pairs.set(creature + "/" + affixId, (pairs.get(creature + "/" + affixId) ?? 0) + 1);
       affixUses.set(affixId, (affixUses.get(affixId) ?? 0) + 1);
-      out.set(site.id, { creature, affixId });
+      out2.set(site.id, { creature, affixId });
     };
     for (const site of sites6) if (site.role === "elite" && SITE_ENDS_POLICY.picks[biome]) {
       const picks = SITE_ENDS_POLICY.picks[biome].elite, creature = picks[(eliteTurnV1(site.id) ?? hash2(site.id + "/creature")) % picks.length], named2 = namedEliteForV1(biome, creature);
@@ -4876,7 +4876,7 @@ function seededEndsV1() {
         const near2 = (c) => done3.reduce((n, o) => o.creature === c ? n + Math.max(0, S2.nearCells - dist2(site.anchor, o.anchor)) / S2.nearCells : n, 0);
         const boss = lesser.map((b) => ({ b, k: S2.lesserNearWeight * near2(b.family) - (b.sites.includes(site.family) ? S2.lesserOwnBonus : 0) + (b.sites.length ? 0 : S2.lesserUseWeight * (uses.get(b.family) ?? 0)), h: hash2(site.id + "/lesser/" + b.id) })).sort((x, y) => x.k - y.k || x.h - y.h)[0].b;
         take(site, boss.family, boss.affixId);
-        out.get(site.id).named = boss.id;
+        out2.get(site.id).named = boss.id;
         continue;
       }
       const own3 = new Set(sitePoolV1(biome, site.family, site.role)), near = (c) => done3.reduce((n, o) => o.creature === c ? n + Math.max(0, S2.nearCells - dist2(site.anchor, o.anchor)) / S2.nearCells : n, 0);
@@ -4888,9 +4888,9 @@ function seededEndsV1() {
       take(site, creature, affixId);
     }
   }
-  seededEnds = out;
+  seededEnds = out2;
   seededRevision = worldRevisionV1();
-  return out;
+  return out2;
 }
 function siteEndSpecV1({ family: family2, tier: tier2, index, floorCount, reservationId, biome }) {
   const role = endRoleV1({ family: family2, tier: tier2, index, floorCount, reservationId });
@@ -5036,7 +5036,7 @@ var QUEST_POLICY = freezeWire({
 });
 var clearings = [];
 function useQuestWorldV1(asset) {
-  const out = [];
+  const out2 = [];
   for (const c of asset?.wildernessExtension?.eventCapacities ?? []) {
     let event = null;
     try {
@@ -5044,9 +5044,9 @@ function useQuestWorldV1(asset) {
     } catch {
       event = null;
     }
-    if (Number.isFinite(c?.position?.x) && Number.isFinite(c?.position?.y)) out.push(Object.freeze({ slot: c.eventSlotId, id: "event:" + Math.floor(c.position.x) + "," + Math.floor(c.position.y), x: Math.floor(c.position.x) + 0.5, y: Math.floor(c.position.y) + 0.5, category: c.category, event, landmassId: c.landmassId ?? null }));
+    if (Number.isFinite(c?.position?.x) && Number.isFinite(c?.position?.y)) out2.push(Object.freeze({ slot: c.eventSlotId, id: "event:" + Math.floor(c.position.x) + "," + Math.floor(c.position.y), x: Math.floor(c.position.x) + 0.5, y: Math.floor(c.position.y) + 0.5, category: c.category, event, landmassId: c.landmassId ?? null }));
   }
-  clearings = out;
+  clearings = out2;
 }
 
 // src/shared/generation/portable_math_v1.js
@@ -5751,7 +5751,7 @@ function createUplandTerraces({ hash: hash22, ground, high, open: open2, biomeAt
   function segment(k, j) {
     const key9 = k + "," + j;
     if (segs.has(key9)) return segs.get(key9);
-    const out = [];
+    const out2 = [];
     const near2 = j & 1 ? [...segment(k, j - 1), ...segment(k, j + 1)] : [];
     const X0 = k * SEG, X1 = X0 + SEG - 1 - R_MX, Y0 = j * CELL, YA = Y0 - R_WANDER, YB = Y0 + CELL - 1 + R_WANDER, h0 = terraceTileHash(hash22 ^ 739982445, k, j);
     let cur = X0 + R_MX + h0 % 24, y = Y0 + 40 + (h0 >>> 8) % 31 - 15, minCx = -1e9, clear = null;
@@ -5785,14 +5785,14 @@ function createUplandTerraces({ hash: hash22, ground, high, open: open2, biomeAt
         break;
       }
       if (placed) {
-        out.push(placed);
+        out2.push(placed);
         cur = placed.bbox.x1 + 10 + (h >>> 16) % 9;
         minCx = (Math.floor(placed.d.x / CELL) + 1) * CELL;
       } else cur += 12;
     }
     if (segs.size > R_SEGS) segs.clear();
-    segs.set(key9, out);
-    return out;
+    segs.set(key9, out2);
+    return out2;
   }
   function mountain2(cx, cy) {
     for (const g of segment(Math.floor(cx / 8), cy)) if (Math.floor(g.d.x / CELL) === cx) return g;
@@ -6198,18 +6198,18 @@ function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio
   function volcano(cx, cy) {
     const key9 = cx + "," + cy;
     if (vcells.has(key9)) return vcells.get(key9);
-    let out = null;
+    let out2 = null;
     const h = terraceTileHash(hash22 ^ 31293, cx, cy), x = cx * VCELL + 48 + h % (VCELL - 96), y = cy * VCELL + 44 + (h >>> 8) % (VCELL - 88);
     if (ground(x, y) && high(x, y) >= VHIGH && h % 100 < VKEEP && deep(x, y)) for (const n of peak(x, y) ? [4, 3] : [3]) {
       const d = { x, y, n, sh: mix3(h ^ 1540483477), dir: h >>> 20 & 1 ? 1 : -1, kind: "v" };
       if (fits(volcanoBox(d))) {
-        out = volcanoGeometry(d);
+        out2 = volcanoGeometry(d);
         break;
       }
     }
     if (vcells.size > 128) vcells.clear();
-    vcells.set(key9, out);
-    return out;
+    vcells.set(key9, out2);
+    return out2;
   }
   const nearVolcano = (x0, y0, x1, y1, pad) => {
     for (let cy = Math.floor((y0 - pad - 156) / VCELL); cy <= Math.floor((y1 + pad - 14) / VCELL); cy++) for (let cx = Math.floor((x0 - pad - 153) / VCELL); cx <= Math.floor((x1 + pad - 6) / VCELL); cx++) {
@@ -6223,18 +6223,18 @@ function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio
   function mesa(cx, cy) {
     const key9 = cx + "," + cy;
     if (mcells.has(key9)) return mcells.get(key9);
-    let out = null;
+    let out2 = null;
     const h = terraceTileHash(hash22 ^ 15889, cx, cy), x = cx * MCELL + 28 + h % (MCELL - 56), y = cy * MCELL + 22 + (h >>> 8) % (MCELL - 44);
     if (ground(x, y) && h % 100 < MKEEP) for (const n of (h >>> 16) % 3 ? [2, 1] : [1]) {
       const d = { x, y, n, sh: mix3(h ^ 461845907), dir: h >>> 20 & 1 ? 1 : -1, kind: "m" }, b = volcanoBox(d);
       if (!nearVolcano(b.x0, b.y0, b.x1, b.y1, 12) && !nearPieces(sitePieces(), b, 12) && fits(b)) {
-        out = volcanoGeometry(d);
+        out2 = volcanoGeometry(d);
         break;
       }
     }
     if (mcells.size > 256) mcells.clear();
-    mcells.set(key9, out);
-    return out;
+    mcells.set(key9, out2);
+    return out2;
   }
   let pieces = null;
   const trailEdits = /* @__PURE__ */ new Map(), openMemo = /* @__PURE__ */ new Map();
@@ -6642,7 +6642,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     const key9 = cx + "," + cy;
     if (masses.has(key9)) return masses.get(key9);
     const c = candidate(cx, cy);
-    let out = null;
+    let out2 = null;
     if (c) {
       let r = c.r;
       for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
@@ -6652,10 +6652,10 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
         const d = Math.sqrt((n.x - c.x) ** 2 + (n.y - c.y) ** 2);
         r = Math.min(r, (d - n.r * 1.32 - GAP) / 1.32);
       }
-      if (r >= 2) out = Object.freeze({ ...c, r });
+      if (r >= 2) out2 = Object.freeze({ ...c, r });
     }
-    bounded(masses, 4096).set(key9, out);
-    return out;
+    bounded(masses, 4096).set(key9, out2);
+    return out2;
   }
   function inMass(m, x, y) {
     const dx = x - m.x, dy = y - m.y, d = Math.sqrt(dx * dx + dy * dy);
@@ -6681,7 +6681,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
   function trunkAt(x, y) {
     const key9 = y * W9 + x;
     if (trunks.has(key9)) return trunks.get(key9);
-    let out = null;
+    let out2 = null;
     const e = envAt(x, y), t = S2.slotTrunk(x, y);
     if (e.walkable && !e.clear && e.road > 1 && t.x === x && t.y === y) {
       const p = PROFILES[e.biome], s = standAt(x, y), z = S2.zone(s, e.biome), edge = s >= p.forest - 0.05 && s < p.forest + 0.015;
@@ -6694,11 +6694,11 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
           free = false;
           break;
         }
-        if (free) out = { h: t.h, z, edge, tree: pickTree(S2, e.biome, x, y, z, e, edge, t.h) };
+        if (free) out2 = { h: t.h, z, edge, tree: pickTree(S2, e.biome, x, y, z, e, edge, t.h) };
       }
     }
-    bounded(trunks, 1 << 15).set(key9, out);
-    return out;
+    bounded(trunks, 1 << 15).set(key9, out2);
+    return out2;
   }
   function logAt(x, y) {
     for (const ox of [0, -1]) {
@@ -6758,29 +6758,29 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
   const tiles3 = /* @__PURE__ */ new Map();
   function tileAt(x, y) {
     const key9 = y * W9 + x;
-    let out = tiles3.get(key9);
-    if (out !== void 0) return out;
+    let out2 = tiles3.get(key9);
+    if (out2 !== void 0) return out2;
     const e = envAt(x, y);
     if (!e.walkable) {
       bounded(tiles3, 1 << 15).set(key9, null);
       return null;
     }
     const p = PROFILES[e.biome], s = standAt(x, y), zone = S2.zone(s, e.biome);
-    out = { zone, cover: false, trail: false, block: null, kind: null, clusterId: null };
+    out2 = { zone, cover: false, trail: false, block: null, kind: null, clusterId: null };
     const tm = T10?.at(x, y) ?? V?.at(x, y);
     if (tm) {
       const g = tm.g;
       if (tm.r.block) {
         const piece = g.piece ?? TERRACE_PIECE;
-        out.block = piece;
-        out.kind = "rock";
-        out.clusterId = FOREST_STANDS_PREFIX + piece + ":" + (g.piece ? g.detail + ":" + g.key : terraceDetail(g.d) + ":" + terraceKey(g.d));
+        out2.block = piece;
+        out2.kind = "rock";
+        out2.clusterId = FOREST_STANDS_PREFIX + piece + ":" + (g.piece ? g.detail + ":" + g.key : terraceDetail(g.d) + ":" + terraceKey(g.d));
       } else if (!e.clear && !g.onPath(x, y) && tm.r.role !== "ramp" && tm.r.role !== "stair") {
         let t, b;
         const block2 = (piece, detail, id, rock = false) => {
-          out.block = piece;
-          out.kind = rock ? "rock" : "thicket";
-          out.clusterId = FOREST_STANDS_PREFIX + piece + ":" + detail + ":" + id;
+          out2.block = piece;
+          out2.kind = rock ? "rock" : "thicket";
+          out2.clusterId = FOREST_STANDS_PREFIX + piece + ":" + detail + ":" + id;
         };
         if (g.free(x, y) && (t = mountainTrunk(g, x, y, e))) block2("trunk", t, x + "," + y);
         else if (g.free(x, y) && !mountainTrunkNear(g, x, y, e) && (b = bushAt(x, y))) {
@@ -6788,20 +6788,20 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
           block2(stone ? "stone" : "bush", b.edge ? "edge" : "", x + "," + y, stone);
         } else {
           const c = S2.coverAt(x, y), boost = zone >= ZONE.FOREST ? 0.05 : zone === ZONE.OPEN ? 0 : -0.05;
-          out.cover = Boolean(p.cover && c + boost > p.coverAt);
+          out2.cover = Boolean(p.cover && c + boost > p.coverAt);
         }
       }
-      Object.freeze(out);
-      bounded(tiles3, 1 << 15).set(key9, out);
-      return out;
+      Object.freeze(out2);
+      bounded(tiles3, 1 << 15).set(key9, out2);
+      return out2;
     }
     if (!e.clear) {
       const trail = trailAt(x, y), m = massAt(x, y);
-      out.trail = trail;
+      out2.trail = trail;
       const block2 = (piece, detail, id, rock = false) => {
-        out.block = piece;
-        out.kind = rock ? "rock" : "thicket";
-        out.clusterId = FOREST_STANDS_PREFIX + piece + ":" + detail + ":" + id;
+        out2.block = piece;
+        out2.kind = rock ? "rock" : "thicket";
+        out2.clusterId = FOREST_STANDS_PREFIX + piece + ":" + detail + ":" + id;
       };
       let t, l, b, h;
       if (m && !trail) block2("mass", m.kind, m.cx + "," + m.cy, ROCK_MASSES.includes(m.kind));
@@ -6813,12 +6813,12 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
       } else if (p.hedges && (h = hedgeAt(x, y))) block2("hedge", "", h);
       else {
         const c = S2.coverAt(x, y), boost = zone >= ZONE.FOREST ? 0.05 : zone === ZONE.OPEN ? 0 : -0.05;
-        out.cover = Boolean(p.cover && !trail && c + boost > p.coverAt);
+        out2.cover = Boolean(p.cover && !trail && c + boost > p.coverAt);
       }
     }
-    Object.freeze(out);
-    bounded(tiles3, 1 << 15).set(key9, out);
-    return out;
+    Object.freeze(out2);
+    bounded(tiles3, 1 << 15).set(key9, out2);
+    return out2;
   }
   function massByKey(key9) {
     const [cx, cy] = key9.split(",").map(Number);
@@ -6976,16 +6976,16 @@ function townLakeWaterV1(t) {
 }
 function townLakePiecesV1(t) {
   if (t.arch !== "lake") return [];
-  const out = [];
+  const out2 = [];
   for (const f3 of t.features) {
-    if (["smokehouse", "rack", "nets", "beached", "namesign"].includes(f3.type)) out.push({ x: f3.x, y: f3.y, w: f3.w, h: f3.h });
-    if (f3.type === "well") out.push({ x: f3.x - 1, y: f3.y - 1, w: 2, h: 2 });
+    if (["smokehouse", "rack", "nets", "beached", "namesign"].includes(f3.type)) out2.push({ x: f3.x, y: f3.y, w: f3.w, h: f3.h });
+    if (f3.type === "well") out2.push({ x: f3.x - 1, y: f3.y - 1, w: 2, h: 2 });
     if (f3.type === "icecamp") {
-      out.push(f3.hut);
-      if (f3.sled) out.push(f3.sled);
+      out2.push(f3.hut);
+      if (f3.sled) out2.push(f3.sled);
     }
   }
-  return out;
+  return out2;
 }
 var hyp3 = PM.hypot;
 var r3 = (v) => Math.round(v * 1e3) / 1e3;
@@ -7000,7 +7000,7 @@ var segDist = (pts, x, y, closed = false) => {
 };
 var townConnectorsV1 = (t) => t.connectors ?? (t.connector ? [t.connector] : []);
 function streetEnds(streets, W9, H9) {
-  const out = [];
+  const out2 = [];
   for (const [pts, w] of streets) {
     if (pts.length < 2) continue;
     for (const end of [0, 1]) {
@@ -7010,10 +7010,10 @@ function streetEnds(streets, W9, H9) {
       if (k < 0 || k >= pts.length) continue;
       const p = pts[k], l = hyp3(e[0] - p[0], e[1] - p[1]), ux = (e[0] - p[0]) / l, uy = (e[1] - p[1]) / l;
       const tx = ux > 1e-6 ? (W9 - e[0]) / ux : ux < -1e-6 ? -e[0] / ux : Infinity, ty = uy > 1e-6 ? (H9 - e[1]) / uy : uy < -1e-6 ? -e[1] / uy : Infinity, edge = Math.max(0, Math.min(tx, ty));
-      if (edge <= 3.5) out.push({ e, ux, uy, w, edge });
+      if (edge <= 3.5) out2.push({ e, ux, uy, w, edge });
     }
   }
-  return out;
+  return out2;
 }
 var lists = /* @__PURE__ */ new WeakMap();
 var loaded = [];
@@ -7044,15 +7044,15 @@ function segX(a, b, c, d) {
 function townCrossingsV1(streets, line, closed = false) {
   const L2 = closed ? [...line, line[0]] : line, acc = [0];
   for (let i = 1; i < L2.length; i++) acc.push(acc[i - 1] + hyp3(L2[i][0] - L2[i - 1][0], L2[i][1] - L2[i - 1][1]));
-  const out = [];
+  const out2 = [];
   for (const [pts, w] of streets) for (let i = 1; i < pts.length; i++) for (let k = 1; k < L2.length; k++) {
     const h = segX(pts[i - 1], pts[i], L2[k - 1], L2[k]);
     if (!h) continue;
-    const s = acc[k - 1] + h.j * (acc[k] - acc[k - 1]), o = out.find((o2) => hyp3(o2.x - h.x, o2.y - h.y) < Math.max(w, o2.w) + 1.5);
+    const s = acc[k - 1] + h.j * (acc[k] - acc[k - 1]), o = out2.find((o2) => hyp3(o2.x - h.x, o2.y - h.y) < Math.max(w, o2.w) + 1.5);
     if (o) o.parts.push({ s, w, ang: h.ang });
-    else out.push({ ...h, w, s, parts: [{ s, w, ang: h.ang }] });
+    else out2.push({ ...h, w, s, parts: [{ s, w, ang: h.ang }] });
   }
-  return { list: out, len: acc.at(-1), acc, L: L2 };
+  return { list: out2, len: acc.at(-1), acc, L: L2 };
 }
 var allStreets = (t) => [...t.streets, ...townConnectorsV1(t).map((c) => [c.pts, c.w])];
 var GATE_ART = { village: { WH: 36, TW: 34, k: 0.9 }, town: { WH: 40, TW: 36, k: 1 }, city: { WH: 50, TW: 40, k: 1.15 }, capital: { WH: 58, TW: 44, k: 1.3 } };
@@ -7207,11 +7207,11 @@ var frng = (seed) => {
 };
 var planCache = /* @__PURE__ */ new WeakMap();
 function townStreetPlanV1(t) {
-  let out = planCache.get(t);
-  if (out) return out;
-  out = [];
-  planCache.set(t, out);
-  if (!townNewArtV1(t)) return out;
+  let out2 = planCache.get(t);
+  if (out2) return out2;
+  out2 = [];
+  planCache.set(t, out2);
+  if (!townNewArtV1(t)) return out2;
   const [W9, H9] = t.core, grid = townGridV1(t), occ = Uint8Array.from(grid), r = frng(fhash(W9, H9, 301)), village = t.size === "village" || t.size === "hamlet";
   const fit = (x, y, w, h) => {
     for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) {
@@ -7222,11 +7222,11 @@ function townStreetPlanV1(t) {
   const take = (x, y, w, h) => {
     for (let yy = y - 1; yy <= y + h; yy++) for (let xx = x - 1; xx <= x + w; xx++) if (xx >= 0 && yy >= 0 && xx < W9 && yy < H9) occ[yy * W9 + xx] = 9;
   };
-  const far = (x, y, d) => out.every((o) => hyp3(o.x - x, o.y - y) >= d);
+  const far = (x, y, d) => out2.every((o) => hyp3(o.x - x, o.y - y) >= d);
   const put3 = (kind2, x, y, w, h, d = 3) => {
     if (!fit(x, y, w, h) || !far(x + w / 2, y + h, d)) return false;
     take(x, y, w, h);
-    out.push({ kind: kind2, x: x + w / 2, y: y + h, tile: { x, y, w, h } });
+    out2.push({ kind: kind2, x: x + w / 2, y: y + h, tile: { x, y, w, h } });
     return true;
   };
   const cf = t.features.find((f3) => f3.type === "plaza" || f3.type === "green"), CB = cf ? cf.type === "green" ? { x: cf.x - cf.rx, y: cf.y - cf.ry, w: cf.rx * 2, h: cf.ry * 2 } : { x: cf.x, y: cf.y, w: cf.w, h: cf.h } : null, inC = (x, y) => CB && x >= CB.x - 1 && x <= CB.x + CB.w && y >= CB.y - 1 && y <= CB.y + CB.h;
@@ -7275,7 +7275,7 @@ function townStreetPlanV1(t) {
       if (!inC(tx, ty)) put3(k, tx, ty, k === "cart" ? 2 : 1, 1, 6);
     }
   }
-  return out;
+  return out2;
 }
 var artCache = /* @__PURE__ */ new WeakMap();
 function townArtBuildingsV1(t) {
@@ -7298,9 +7298,9 @@ function townArtBuildingsV1(t) {
   return A;
 }
 function townCastleYewsV1(f3) {
-  const T10 = 32, k = f3.keep, cx = (f3.x + f3.w / 2) * T10, G2 = (k.y + k.h) * T10, yb = (f3.y + f3.h - 1) * T10, out = [];
-  for (let y = G2 + 2.8 * T10; y < yb - 6.2 * T10; y += 2.2 * T10) for (const sd of [-1, 1]) out.push({ x: cx + sd * (2.6 * T10 + 16), y });
-  return out;
+  const T10 = 32, k = f3.keep, cx = (f3.x + f3.w / 2) * T10, G2 = (k.y + k.h) * T10, yb = (f3.y + f3.h - 1) * T10, out2 = [];
+  for (let y = G2 + 2.8 * T10; y < yb - 6.2 * T10; y += 2.2 * T10) for (const sd of [-1, 1]) out2.push({ x: cx + sd * (2.6 * T10 + 16), y });
+  return out2;
 }
 var townFountainArtV1 = (t) => {
   if (!townNewArtV1(t) || t.arch === "lake") return [];
@@ -7309,13 +7309,13 @@ var townFountainArtV1 = (t) => {
 };
 var blockCache = /* @__PURE__ */ new WeakMap();
 function townArtBlockersV1(t) {
-  let out = blockCache.get(t);
-  if (out) return out;
-  out = [];
-  blockCache.set(t, out);
-  if (!townNewArtV1(t)) return out;
+  let out2 = blockCache.get(t);
+  if (out2) return out2;
+  out2 = [];
+  blockCache.set(t, out2);
+  if (!townNewArtV1(t)) return out2;
   const T10 = 32;
-  const tile = (x, y) => out.push({ x: Math.floor(x / T10), y: Math.floor(y / T10), w: 1, h: 1 });
+  const tile = (x, y) => out2.push({ x: Math.floor(x / T10), y: Math.floor(y / T10), w: 1, h: 1 });
   const span2 = (p0, p1) => {
     let a = Math.ceil(p0 / T10 - 0.5), b = Math.floor(p1 / T10 - 0.5);
     if (b < a) a = b = Math.floor((p0 + p1) / 2 / T10);
@@ -7323,12 +7323,12 @@ function townArtBlockersV1(t) {
   };
   const box3 = (x0, y0, x1, y1) => {
     const [a, w] = span2(x0, x1), [b, h] = span2(y0, y1);
-    out.push({ x: a, y: b, w, h });
+    out2.push({ x: a, y: b, w, h });
   };
   const oval = (cx, cy, rx, ry) => {
     for (let y = Math.floor((cy - ry) / T10); y <= Math.floor((cy + ry) / T10); y++) for (let x = Math.floor((cx - rx) / T10); x <= Math.floor((cx + rx) / T10); x++) {
       const dx = ((x + 0.5) * T10 - cx) / rx, dy = ((y + 0.5) * T10 - cy) / ry;
-      if (dx * dx + dy * dy <= 1) out.push({ x, y, w: 1, h: 1 });
+      if (dx * dx + dy * dy <= 1) out2.push({ x, y, w: 1, h: 1 });
     }
     tile(cx, cy);
   };
@@ -7336,10 +7336,10 @@ function townArtBlockersV1(t) {
   const ring = (R2, gate) => {
     const gx = (R2.x + R2.w / 2) * T10;
     for (let x = R2.x; x < R2.x + R2.w; x++) {
-      out.push({ x, y: R2.y, w: 1, h: 1 });
-      if (Math.abs((x + 0.5) * T10 - gx) >= gate) out.push({ x, y: R2.y + R2.h - 1, w: 1, h: 1 });
+      out2.push({ x, y: R2.y, w: 1, h: 1 });
+      if (Math.abs((x + 0.5) * T10 - gx) >= gate) out2.push({ x, y: R2.y + R2.h - 1, w: 1, h: 1 });
     }
-    out.push({ x: R2.x, y: R2.y, w: 1, h: R2.h }, { x: R2.x + R2.w - 1, y: R2.y, w: 1, h: R2.h });
+    out2.push({ x: R2.x, y: R2.y, w: 1, h: R2.h }, { x: R2.x + R2.w - 1, y: R2.y, w: 1, h: R2.h });
   };
   for (const [, R2, k] of t.places) if (k === "garden") {
     ring(R2, 20);
@@ -7362,14 +7362,14 @@ function townArtBlockersV1(t) {
         box3(bx - 18, fy - 8, bx + 18, fy + 10);
       }
       for (const st of t.features.filter((f3) => f3.type === "stalls")) st.stalls.forEach((s, k) => {
-        if (k !== Math.floor((st.stalls.length - 1) / 2)) out.push({ x: s.x, y: p.y + p.h - 3, w: 3, h: 2 });
+        if (k !== Math.floor((st.stalls.length - 1) / 2)) out2.push({ x: s.x, y: p.y + p.h - 3, w: 3, h: 2 });
       });
     } else if (t.arch !== "lake") {
       const d = p.w * T10 / 2 - 56;
       for (const s of [-1, 1]) box3(fx + s * d - 18, fy - 6, fx + s * d + 18, fy + 12);
     }
   }
-  for (const st of t.features.filter((f3) => f3.type === "stalls")) for (const s of st.stalls) out.push({ x: s.x, y: s.y, w: 3, h: 2 });
+  for (const st of t.features.filter((f3) => f3.type === "stalls")) for (const s of st.stalls) out2.push({ x: s.x, y: s.y, w: 3, h: 2 });
   for (const g of t.features.filter((f3) => f3.type === "green")) {
     oval(g.x * T10, g.y * T10 + 10, 30, 12);
     oval(g.x * T10 + g.rx * T10 * 0.55, g.y * T10 - g.ry * T10 * 0.15, 26, 10);
@@ -7385,7 +7385,7 @@ function townArtBlockersV1(t) {
     }
     if (f3.type === "forge" && f3.pad) {
       const E = f3.pad, x = E.x * T10, y = E.y * T10;
-      out.push({ x: E.x, y: E.y, w: E.w, h: Math.min(4, E.h) });
+      out2.push({ x: E.x, y: E.y, w: E.w, h: Math.min(4, E.h) });
       tile(x + 134, y + 208);
       box3(x + 168, y + 162, x + 208, y + 178);
       tile(x + 30, y + 180);
@@ -7394,7 +7394,7 @@ function townArtBlockersV1(t) {
     }
     if (f3.type === "chapel" && f3.yard) {
       const E = f3.yard, gc = Math.floor(E.x + E.w / 2);
-      for (let y = E.y; y < E.y + E.h; y++) for (let x = E.x; x < E.x + E.w; x++) if (x !== gc || y === E.y) out.push({ x, y, w: 1, h: 1 });
+      for (let y = E.y; y < E.y + E.h; y++) for (let x = E.x; x < E.x + E.w; x++) if (x !== gc || y === E.y) out2.push({ x, y, w: 1, h: 1 });
     }
     if (f3.type === "manor" && f3.building) {
       const b = t.buildings.find((q) => q.id === f3.building);
@@ -7406,7 +7406,7 @@ function townArtBlockersV1(t) {
       }
     }
     if (f3.type === "field") ring(f3, 26);
-    if (f3.type === "yard") out.push({ x: f3.x, y: f3.y, w: f3.w, h: f3.h });
+    if (f3.type === "yard") out2.push({ x: f3.x, y: f3.y, w: f3.w, h: f3.h });
     if (f3.type === "monument") {
       const x = f3.x * T10, y = f3.y * T10, R2 = (f3.r - 0.7) * T10, E = 0.8;
       oval(x, y + 24, 62, 26);
@@ -7431,7 +7431,7 @@ function townArtBlockersV1(t) {
         const bx0 = sx < 0 ? x + 16 : cx + gap, by0 = sy < 0 ? y + 16 : cy + gap, bw = w / 2 - 16 - gap, bh = h / 2 - 16 - gap;
         for (let ty = Math.floor(by0 / T10); ty <= Math.floor((by0 + bh) / T10); ty++) for (let tx = Math.floor(bx0 / T10); tx <= Math.floor((bx0 + bw) / T10); tx++) {
           const mx = (tx + 0.5) * T10, my = (ty + 0.5) * T10;
-          if (mx > bx0 && mx < bx0 + bw && my > by0 && my < by0 + bh) out.push({ x: tx, y: ty, w: 1, h: 1 });
+          if (mx > bx0 && mx < bx0 + bw && my > by0 && my < by0 + bh) out2.push({ x: tx, y: ty, w: 1, h: 1 });
         }
       }
     }
@@ -7440,8 +7440,8 @@ function townArtBlockersV1(t) {
       for (const ty of [py0 + 30, north ? y + 70 : y + h - 50]) box3(x + w / 2 - 30, ty - 6, x + w / 2 + 22, ty + 22);
       const gy = north ? y + h - 26 : y + 40;
       box3(x + w - 64, gy - 10, x + w - 34, gy);
-      out.push({ x: E.x, y: Math.floor((y + 12) / T10), w: 1, h: Math.floor((y + h - 13) / T10) - Math.floor((y + 12) / T10) + 1 });
-      out.push({ x: E.x, y: north ? E.y + E.h - 1 : E.y, w: E.w, h: 1 });
+      out2.push({ x: E.x, y: Math.floor((y + 12) / T10), w: 1, h: Math.floor((y + h - 13) / T10) - Math.floor((y + 12) / T10) + 1 });
+      out2.push({ x: E.x, y: north ? E.y + E.h - 1 : E.y, w: E.w, h: 1 });
     }
   }
   const A = townArtBuildingsV1(t);
@@ -7459,7 +7459,7 @@ function townArtBlockersV1(t) {
     tile(cx + 70, G2 + 18);
     box3(x1 - 114, G2 + 12, x1 - 46, G2 + 44);
   }
-  return out;
+  return out2;
 }
 var backRows = /* @__PURE__ */ new WeakMap();
 function townBackRowsV1(t) {
@@ -7794,10 +7794,10 @@ var TOWN_SHOP_ROLES = Object.freeze({ hamlet: ["general", "innkeeper"], village:
 var stationCache = /* @__PURE__ */ new WeakMap();
 var townShopRolesV1 = (t) => t.arch === "lake" ? ["general"] : TOWN_SHOP_ROLES[t.size] ?? [];
 function townStationsV1(t) {
-  let out = stationCache.get(t);
-  if (out) return out;
-  out = [];
-  stationCache.set(t, out);
+  let out2 = stationCache.get(t);
+  if (out2) return out2;
+  out2 = [];
+  stationCache.set(t, out2);
   const R2 = townRasterV1(t), o = t.origin, art = townNewArtV1(t), roles = townShopRolesV1(t), F = (type) => t.features.find((f3) => f3.type === type);
   const free = (x, y) => {
     if (x < R2.x0 || y < R2.y0 || x >= R2.x0 + R2.w || y >= R2.y0 + R2.h) return false;
@@ -7810,7 +7810,7 @@ function townStationsV1(t) {
   };
   const RING3 = [[0, 0], [1, 0], [-1, 0], [0, 1], [1, 1], [-1, 1], [0, -1], [2, 0], [-2, 0], [2, 1], [-2, 1], [0, 2]];
   const add = (role, p, facing, building, extra) => {
-    if (p) out.push({ role, x: o.x + p[0], y: o.y + p[1], facing, building: building ?? null, ...extra });
+    if (p) out2.push({ role, x: o.x + p[0], y: o.y + p[1], facing, building: building ?? null, ...extra });
   };
   const st = F("stalls");
   if (roles.includes("general") && st?.stalls?.length) {
@@ -7844,14 +7844,14 @@ function townStationsV1(t) {
     const E = tw.circle;
     add("enchanter", E ? near(E.x + 3, E.y + 2, RING3) : null, -1, tw.building, {});
   }
-  return out;
+  return out2;
 }
 var entranceCache = /* @__PURE__ */ new WeakMap();
 function townEntrancesV1(t) {
-  let out = entranceCache.get(t);
-  if (out) return out;
-  out = [];
-  entranceCache.set(t, out);
+  let out2 = entranceCache.get(t);
+  if (out2) return out2;
+  out2 = [];
+  entranceCache.set(t, out2);
   const R2 = townRasterV1(t), o = t.origin, free = (x, y) => {
     if (x < R2.x0 || y < R2.y0 || x >= R2.x0 + R2.w || y >= R2.y0 + R2.h) return false;
     const i = (y - R2.y0) * R2.w + (x - R2.x0);
@@ -7870,9 +7870,9 @@ function townEntrancesV1(t) {
     } else if (TOWN_NEW_ART.has(t.biome) && b.doorSide === "north" && type === "inn") for (const k of [0, 1]) for (const x of [b.x + 2, b.x + 1, b.x + 3]) seen.push([x, b.y + b.h + k]);
     const reach = townReachV1(t), walk = (x, y) => free(x, y) && reach[(y - R2.y0) * R2.w + (x - R2.x0)] === 1;
     const p = seen.find((q) => walk(...q)) ?? c.find((q) => free(...q));
-    if (p) out.push(Object.freeze({ recipe, building: b.id, x: o.x + p[0], y: o.y + p[1] }));
+    if (p) out2.push(Object.freeze({ recipe, building: b.id, x: o.x + p[0], y: o.y + p[1] }));
   }
-  return out;
+  return out2;
 }
 var INSIDE_ROLE = { innkeeper: "inn", enchanter: "hall" };
 function townStationInsideV1(t, s) {
@@ -7880,18 +7880,18 @@ function townStationInsideV1(t, s) {
   return recipe ? townEntrancesV1(t).find((e) => e.recipe === recipe) ?? null : null;
 }
 function generatedTownChunkBlockers(towns, cx, cy) {
-  const x = cx * 32, y = cy * 26, out = [];
+  const x = cx * 32, y = cy * 26, out2 = [];
   for (const t of towns) {
     const o = t.origin, [W9, H9] = t.core;
     if (x + 32 <= o.x || x >= o.x + W9 || y + 26 <= o.y || y >= o.y + H9) continue;
     const clip = (bx, by, bw, bh) => ({ x: Math.max(x, bx) - x, y: Math.max(y, by) - y, width: Math.min(x + 32, bx + bw) - Math.max(x, bx), height: Math.min(y + 26, by + bh) - Math.max(y, by) });
-    out.push({ id: t.id + ":clearing:" + cx + "," + cy, kind: "civilian-clearing", ...clip(o.x, o.y, W9, H9), detail: "" });
+    out2.push({ id: t.id + ":clearing:" + cx + "," + cy, kind: "civilian-clearing", ...clip(o.x, o.y, W9, H9), detail: "" });
     for (const b0 of townTemplateV1(t).buildings) {
       const b = townSolidRectV1(t, b0);
-      if (b.x + o.x < x + 32 && b.x + b.w + o.x > x && b.y + o.y < y + 26 && b.y + b.h + o.y > y) out.push({ id: t.id + ":" + b0.id, kind: "civilian-building", ...clip(b.x + o.x, b.y + o.y, b.w, b.h), detail: b0.label });
+      if (b.x + o.x < x + 32 && b.x + b.w + o.x > x && b.y + o.y < y + 26 && b.y + b.h + o.y > y) out2.push({ id: t.id + ":" + b0.id, kind: "civilian-building", ...clip(b.x + o.x, b.y + o.y, b.w, b.h), detail: b0.label });
     }
   }
-  return out;
+  return out2;
 }
 function townOutlineV1(t) {
   const o = t.origin, w = t.features.find((f3) => f3.type === "wall");
@@ -7936,8 +7936,8 @@ function perWorldV1(make) {
   };
 }
 var moved2 = (list2, place) => {
-  const out = list2.map(place);
-  return out.every((v, i) => v === list2[i]) ? list2 : freezeWire(out);
+  const out2 = list2.map(place);
+  return out2.every((v, i) => v === list2[i]) ? list2 : freezeWire(out2);
 };
 var townTilesV1 = (id, list2) => moved2(list2, (t) => townTileV1(id, t));
 var generatedStarterV1 = () => generatedTownV1(STARTER_VILLAGE_ID);
@@ -8214,7 +8214,7 @@ var CAST = {};
 {
   const used = /* @__PURE__ */ new Set(["Ada", "Bren", "Mara", "Selene", "Ila", "Nell", "Oren"]);
   for (const [slot, size] of SPOTS) {
-    const out = {};
+    const out2 = {};
     for (const role of size === "lake" ? ["general"] : size === "village" ? ["general", "smith", "innkeeper"] : ["general", "smith", "innkeeper", "enchanter"]) {
       const r = rng(slot + "|" + role), kit = KIT_OF[slot + "|" + role], K = CAST_KITS[role][kit];
       const beard = pick2(r, K.beard), look = { hair: pick2(r, K.hair), facialHair: beard, hairColor: K.old ? pick2(r, OLD) : pick2(r, COLORS), skin: pick2(r, SKINS) };
@@ -8237,9 +8237,9 @@ var CAST = {};
           woman = true;
         }
       }
-      out[role] = freezeWire({ name, kit, look: woman ? asWoman(look, slot + "|" + role) : look, cloth, skirt });
+      out2[role] = freezeWire({ name, kit, look: woman ? asWoman(look, slot + "|" + role) : look, cloth, skirt });
     }
-    CAST["settlement-slot:" + slot] = out;
+    CAST["settlement-slot:" + slot] = out2;
   }
 }
 var BUILT_CASTS = {
@@ -8302,11 +8302,11 @@ var serviceNpcsFor = (b) => {
     listsFor = ordinary2;
     lists3.set("seeded", seeded2);
   }
-  let out = lists3.get(v2);
-  if (out) return out;
-  out = v2 ? [...ordinary2, townNpcV1(SPECIALIST_NPC)].map((n) => ({ ...n, services: SERVICE_ASSIGNMENTS[n.id] ?? [] })).concat(seeded2.map((n) => ({ ...n, services: generatedShopServicesV1(n.role, n.townSize) }))) : seeded2.length ? [...ordinary2, ...seeded2] : ordinary2;
-  lists3.set(v2, out);
-  return out;
+  let out2 = lists3.get(v2);
+  if (out2) return out2;
+  out2 = v2 ? [...ordinary2, townNpcV1(SPECIALIST_NPC)].map((n) => ({ ...n, services: SERVICE_ASSIGNMENTS[n.id] ?? [] })).concat(seeded2.map((n) => ({ ...n, services: generatedShopServicesV1(n.role, n.townSize) }))) : seeded2.length ? [...ordinary2, ...seeded2] : ordinary2;
+  lists3.set(v2, out2);
+  return out2;
 };
 var serviceNpcByIdV1 = (id) => ORDINARY_SERVICE_NPCS.find((n) => n.id === id) ?? generatedTownNpcsV1().find((n) => n.id === id) ?? null;
 
@@ -10959,7 +10959,7 @@ function roadTiles(asset, slot) {
     roadCache.set(asset, byWorld);
   }
   if (byWorld.has(slot.eventSlotId)) return byWorld.get(slot.eventSlotId);
-  const { x, y } = slot.position, out = /* @__PURE__ */ new Map();
+  const { x, y } = slot.position, out2 = /* @__PURE__ */ new Map();
   for (const e of asset.routes?.edges ?? []) {
     const c = e.centerline;
     if (!Array.isArray(c) || c.length < 4) continue;
@@ -10972,11 +10972,11 @@ function roadTiles(asset, slot) {
         const px = ax + (bx - ax) * k / steps, py = ay + (by - ay) * k / steps, d = Math.hypot(px - x, py - y);
         if (d > ROADSIDE_REACH) continue;
         const tx = Math.round(px), ty = Math.round(py), key9 = tx + "," + ty, score = d + steep;
-        if (!out.has(key9) || out.get(key9).score > score) out.set(key9, { x: tx, y: ty, score });
+        if (!out2.has(key9) || out2.get(key9).score > score) out2.set(key9, { x: tx, y: ty, score });
       }
     }
   }
-  const list2 = [...out.values()].sort((a, b) => a.score - b.score || a.y - b.y || a.x - b.x);
+  const list2 = [...out2.values()].sort((a, b) => a.score - b.score || a.y - b.y || a.x - b.x);
   byWorld.set(slot.eventSlotId, list2);
   return list2;
 }
@@ -11968,9 +11968,9 @@ var TYPE = { cave: ["Cave", "Cave", "Hollow", "Grotto"], fort: ["Fort", "Fort", 
 var cap2 = (s) => s[0].toUpperCase() + s.slice(1);
 var named = /* @__PURE__ */ new WeakMap();
 function siteNamesV1(asset) {
-  let out = named.get(asset);
-  if (out) return out;
-  out = /* @__PURE__ */ new Map();
+  let out2 = named.get(asset);
+  if (out2) return out2;
+  out2 = /* @__PURE__ */ new Map();
   const first = worldRolesV1().firstCave, used = /* @__PURE__ */ new Set(), seed = String(asset.campaignSeedHex ?? asset.seedDigest ?? "");
   const sites6 = (asset.sites ?? []).map((s) => s.id).filter((id) => !id.includes(":signature:") && id !== first).sort();
   for (const id of sites6) {
@@ -11988,10 +11988,10 @@ function siteNamesV1(asset) {
     const order2 = [...best].sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).map(([n]) => n);
     const name = order2.find((n) => !used.has(n)) ?? order2.map((n) => "Old " + n).find((n) => !used.has(n)) ?? order2[0];
     used.add(name);
-    out.set(id, name);
+    out2.set(id, name);
   }
-  named.set(asset, out);
-  return out;
+  named.set(asset, out2);
+  return out2;
 }
 var siteNameV1 = (asset, id) => siteNamesV1(asset).get(id) ?? null;
 
@@ -12926,23 +12926,23 @@ function moduleForNode(topology, node, index, floorIndex, floorCount, bytes, cha
   return WOODLAND_CAVE_FORMATIONS_BY_ID_D12_2[["chamber-kidney", "chamber-teardrop", "chamber-split-lobed", "chamber-crescent", "chamber-offset", "chamber-pinched"][pick3(bytes, 6, 101 + index)]];
 }
 function expanded(cells3, radius = 2) {
-  const out = /* @__PURE__ */ new Set();
-  for (const c of cells3) for (let y = c.y - radius; y <= c.y + radius; y++) for (let x = c.x - radius; x <= c.x + radius; x++) out.add(key3(x, y));
-  return out;
+  const out2 = /* @__PURE__ */ new Set();
+  for (const c of cells3) for (let y = c.y - radius; y <= c.y + radius; y++) for (let x = c.x - radius; x <= c.x + radius; x++) out2.add(key3(x, y));
+  return out2;
 }
 function pathfind(start, goal, blocked2) {
   const q = [start], from = /* @__PURE__ */ new Map([[key3(start.x, start.y), null]]);
   for (let i = 0; i < q.length && i < 18e3; i++) {
     const p = q[i];
     if (p.x === goal.x && p.y === goal.y) {
-      const out = [];
+      const out2 = [];
       let k = key3(p.x, p.y);
       while (k) {
         const [x, y] = k.split(",").map(Number);
-        out.push({ x, y });
+        out2.push({ x, y });
         k = from.get(k);
       }
-      return out.reverse();
+      return out2.reverse();
     }
     const dirs4 = [[1, 0], [0, 1], [-1, 0], [0, -1]].sort((a, b) => {
       const da = Math.abs(goal.x - (p.x + a[0])) + Math.abs(goal.y - (p.y + a[1])), db = Math.abs(goal.x - (p.x + b[0])) + Math.abs(goal.y - (p.y + b[1]));
@@ -13259,12 +13259,12 @@ var CW = 32;
 var CH = 26;
 var REACH2 = 720;
 function mountainsIn(terraces, cx, cy) {
-  const out = [], x0 = cx * CW, y0 = cy * CH, C = terraces.CELL;
+  const out2 = [], x0 = cx * CW, y0 = cy * CH, C = terraces.CELL;
   for (let j = Math.floor(y0 / C) - 1; j <= Math.floor((y0 + CH) / C) + 1; j++) for (let i = Math.floor(x0 / C) - 1; i <= Math.floor((x0 + CW) / C) + 1; i++) {
     const g = terraces.mountain(i, j);
-    if (g && SUMMIT_GUARDS[g.n] && g.cairn.x >= x0 && g.cairn.x < x0 + CW && g.cairn.y >= y0 && g.cairn.y < y0 + CH) out.push(g);
+    if (g && SUMMIT_GUARDS[g.n] && g.cairn.x >= x0 && g.cairn.x < x0 + CW && g.cairn.y >= y0 && g.cairn.y < y0 + CH) out2.push(g);
   }
-  return out;
+  return out2;
 }
 var plain = (g, tile, x, y, minLevel) => {
   const r = g.role(x, y);
@@ -13318,14 +13318,14 @@ function summitPlanV1(g, tile, cx, cy, otherAnchors = []) {
 }
 async function createSummitAnchorsV1({ terraces, cx, cy, seed, sha256, tile, otherAnchors = [] }) {
   if (!terraces) return [];
-  const out = [];
+  const out2 = [];
   for (const g of mountainsIn(terraces, cx, cy)) {
-    const plan = summitPlanV1(g, tile, cx, cy, [...otherAnchors, ...out]);
+    const plan = summitPlanV1(g, tile, cx, cy, [...otherAnchors, ...out2]);
     if (!plan) continue;
     const identity = await worldIdentity(seed, "anchor", ["upland-summit-v1", g.d.x, g.d.y], sha256);
-    out.push({ id: identity.id, ordinal: SUMMIT_ORDINAL, position: plan.position, rank: plan.rank, combatVersion: WORLD_COMBAT_VERSION, members: plan.members, summit: { levels: g.n, chests: plan.chests } });
+    out2.push({ id: identity.id, ordinal: SUMMIT_ORDINAL, position: plan.position, rank: plan.rank, combatVersion: WORLD_COMBAT_VERSION, members: plan.members, summit: { levels: g.n, chests: plan.chests } });
   }
-  return out;
+  return out2;
 }
 
 // src/shared/generation/volcano_summit_anchors_v1.js
@@ -13334,12 +13334,12 @@ var T3 = 32;
 var CW2 = 32;
 var CH2 = 26;
 function volcanoesIn(volcanoes, cx, cy) {
-  const out = [], x0 = cx * CW2, y0 = cy * CH2, C = volcanoes.VCELL;
+  const out2 = [], x0 = cx * CW2, y0 = cy * CH2, C = volcanoes.VCELL;
   for (let j = Math.floor(y0 / C) - 1; j <= Math.floor((y0 + CH2) / C) + 1; j++) for (let i = Math.floor(x0 / C) - 1; i <= Math.floor((x0 + CW2) / C) + 1; i++) {
     const g = volcanoes.volcano(i, j);
-    if (g && g.kind === "v" && SUMMIT_GUARDS[g.n] && g.cairn.x >= x0 && g.cairn.x < x0 + CW2 && g.cairn.y >= y0 && g.cairn.y < y0 + CH2) out.push(g);
+    if (g && g.kind === "v" && SUMMIT_GUARDS[g.n] && g.cairn.x >= x0 && g.cairn.x < x0 + CW2 && g.cairn.y >= y0 && g.cairn.y < y0 + CH2) out2.push(g);
   }
-  return out;
+  return out2;
 }
 var plain2 = (g, tile, x, y, minLevel) => {
   const r = g.role(x, y);
@@ -13377,14 +13377,14 @@ function volcanoSummitPlanV1(g, tile, cx, cy, otherAnchors = []) {
 }
 async function createVolcanoSummitAnchorsV1({ volcanoes, cx, cy, seed, sha256, tile, otherAnchors = [] }) {
   if (!volcanoes) return [];
-  const out = [];
+  const out2 = [];
   for (const g of volcanoesIn(volcanoes, cx, cy)) {
-    const plan = volcanoSummitPlanV1(g, tile, cx, cy, [...otherAnchors, ...out]);
+    const plan = volcanoSummitPlanV1(g, tile, cx, cy, [...otherAnchors, ...out2]);
     if (!plan) continue;
     const identity = await worldIdentity(seed, "anchor", ["volcano-summit-v1", g.d.x, g.d.y], sha256);
-    out.push({ id: identity.id, ordinal: SUMMIT_ORDINAL, position: plan.position, rank: plan.rank, combatVersion: WORLD_COMBAT_VERSION, members: plan.members, summit: { levels: g.n, chests: plan.chests } });
+    out2.push({ id: identity.id, ordinal: SUMMIT_ORDINAL, position: plan.position, rank: plan.rank, combatVersion: WORLD_COMBAT_VERSION, members: plan.members, summit: { levels: g.n, chests: plan.chests } });
   }
-  return out;
+  return out2;
 }
 
 // src/shared/generation/lake_landings_v1.js
@@ -13435,9 +13435,9 @@ function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
     return got;
   }
   const forChunk = (cx, cy) => {
-    const out = [];
-    for (const b of near.get(cx + "," + cy) ?? []) out.push(...landingsOf(b));
-    return out;
+    const out2 = [];
+    for (const b of near.get(cx + "," + cy) ?? []) out2.push(...landingsOf(b));
+    return out2;
   };
   const touch = (x, y) => {
     for (const b of near.get(Math.floor(x / 32) + "," + Math.floor(y / 26)) ?? []) landingsOf(b);
@@ -13453,13 +13453,13 @@ function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
     return clear.has(x + "," + y);
   }
   function blockers2(cx, cy) {
-    const out = [], x0 = cx * 32, y0 = cy * 26;
+    const out2 = [], x0 = cx * 32, y0 = cy * 26;
     for (const L2 of forChunk(cx, cy)) {
       const b = L2.box;
       if (b.x1 < x0 || b.x0 >= x0 + 32 || b.y1 < y0 || b.y0 >= y0 + 26) continue;
-      out.push({ id: "lake-landing:" + L2.id, x: L2.root.x - x0, y: L2.root.y - y0, width: 1, height: 1, kind: "civilian-lake-landing", detail: L2.detail });
+      out2.push({ id: "lake-landing:" + L2.id, x: L2.root.x - x0, y: L2.root.y - y0, width: 1, height: 1, kind: "civilian-lake-landing", detail: L2.detail });
     }
-    return out;
+    return out2;
   }
   function plan(b) {
     const memo = /* @__PURE__ */ new Map(), base = (x, y) => {
@@ -14345,9 +14345,9 @@ function validateClassRanks(d8) {
   }
 }
 function classTreeEffects(d8) {
-  const r = (id) => classRank(d8, id), out = {};
-  for (const [key9, id, percent] of [["defPct", "heavy_plating", 25], ["atkPct", "glass_blade", 30]]) if (r(id)) out[key9] = combatAmount(percent * r(id), 100);
-  return out;
+  const r = (id) => classRank(d8, id), out2 = {};
+  for (const [key9, id, percent] of [["defPct", "heavy_plating", 25], ["atkPct", "glass_blade", 30]]) if (r(id)) out2[key9] = combatAmount(percent * r(id), 100);
+  return out2;
 }
 function classTreeMaxHpScale(d8) {
   return classRank(d8, "glass_furnace") ? [85, 100] : null;
@@ -14943,6 +14943,50 @@ function h32(text) {
 }
 var questGearSourceIdV1 = (seedHex, playerId, questId) => "ent:" + [0, 1, 2, 3].map((i) => h32(QUEST_GEAR_VERSION + "/" + seedHex + "/" + playerId + "/" + questId + "/" + i).toString(16).padStart(8, "0")).join("");
 
+// src/shared/content/trip_imps_v1.js
+var TRIP_IMPS_V1 = "trip-imps-v1";
+var IMP_RULES = Object.freeze({
+  coinPerIsland: Object.freeze([6, 10]),
+  treasureOneIn: 3,
+  // The second half of an island's imps (and its treasure imp) climb out this long after the first.
+  waveGapTicks: 4 * 60,
+  climbTicks: 42,
+  // A hero this close (or a hit) gives an imp a fright: "!" and a cackle, then it bolts.
+  scareRadius: Object.freeze({ coin: 120, rare: 140 }),
+  alarmTicks: 24,
+  // It keeps running while any hero is this close; farther off it stops to catch its breath.
+  calmRadius: 300,
+  speed: Object.freeze({ coin: 2.5, rare: 2.85 }),
+  hullRadius: 7,
+  // From its first fright it has this long before it tears a rift and dives in (Escaping! shows for the last 1.4 s).
+  escapeTicks: Object.freeze({ coin: 8 * 60, rare: 12 * 60 }),
+  warnTicks: 84,
+  riftTicks: 54,
+  // Health: the C-rank object curve (like Nests) times this.
+  hpTimes: Object.freeze({ coin: Object.freeze([6, 5]), rare: Object.freeze([4, 1]) }),
+  // Gold in quarters of a kill's gold at the hero's level: each of the first few hits, then the kill.
+  goldQuarters: Object.freeze({ coin: Object.freeze({ hit: 1, hitsPaid: 4, kill: 8 }), rare: Object.freeze({ hit: 2, hitsPaid: 4, kill: 16 }) }),
+  starshardPerMille: Object.freeze({ coin: 30, rare: 200 }),
+  gearPieces: Object.freeze({ coin: 0, rare: 2 }),
+  // Ended imps (killed or escaped) stay in the record this long so every screen can show the poof or rift.
+  keepTicks: 3 * 60,
+  // Recent personal gains (coins to the purse, Scrap to the Bag) kept for the screen.
+  gainTicks: 4 * 60,
+  gainsKept: 10
+});
+var IMP_SCRAP = Object.freeze([[1, "Common Scrap", "Uncommon Scrap", 350], [10, "Uncommon Scrap", "Rare Scrap", 350], [20, "Rare Scrap", "Epic Scrap", 350], [35, "Epic Scrap", "Legendary Scrap", 350], [50, "Legendary Scrap", "Mythic Scrap", 200]]);
+function h322(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  h = Math.imul(h ^ h >>> 16, 2246822507);
+  h = Math.imul(h ^ h >>> 13, 3266489909);
+  return (h ^ h >>> 16) >>> 0;
+}
+var impIdV1 = (campaignId, eatTick, n) => "ent:" + [0, 1, 2, 3].map((i) => h322(TRIP_IMPS_V1 + "/imp/" + campaignId + "/" + eatTick + "/" + n + "/" + i).toString(16).padStart(8, "0")).join("");
+var TRIP_GEAR_TRIP = /^(\d{1,15})\/(\d{1,3})\/([01])$/;
+var tripGearSourceIdV1 = (seedHex, playerId, trip) => "ent:" + [0, 1, 2, 3].map((i) => h322(TRIP_IMPS_V1 + "/gear/" + seedHex + "/" + playerId + "/" + trip + "/" + i).toString(16).padStart(8, "0")).join("");
+var TRIP_GEAR_KINDS = Object.freeze(["best", "any"]);
+
 // src/shared/content/world_rarity_v2.js
 var WORLD_RARITY_VERSION = "world-rarity-rewards-v2";
 var WORLD_RARITY_HASH = "4a10af2db8e7a9a8ffd8e4d7e7b7334e4b2f5dd88254e198f73024bde4edc684";
@@ -15452,6 +15496,8 @@ var UNIQUE_LINES_V3 = freezeWire({
   "briarfang-thornmantle": { always: "closeDmg", pool: ["maxHpPct", "defPct", "str", "atkPct", "lifeKill", "areaDr", "hitCdr"], leg: [] },
   "emberjaw-fang": { always: "ailingDmg", pool: ["fireDmg", "atkPct", "critChance", "lifeHit", "ailmentDur", "maxHpPct", "areaDmg"], leg: [] }
 });
+var UNIQUE_SIGNATURE_LINE = 0;
+var rerollableUniqueV3 = (g) => g?.progression?.affixes === "affixes-v3" && Boolean(UNIQUE_LINES_V3[g?.definition?.unique]);
 var uniquePoolV3 = (id, tier2) => {
   const u = UNIQUE_LINES_V3[id];
   return u ? [...u.pool, ...tier2 >= 4 ? u.leg : []] : [];
@@ -15459,9 +15505,9 @@ var uniquePoolV3 = (id, tier2) => {
 function rollUniqueLinesV3(id, tier2, random) {
   const u = UNIQUE_LINES_V3[id];
   if (!u) return null;
-  const pool = uniquePoolV3(id, tier2), out = [u.always];
-  for (let i = 1; i < tier2 && pool.length; i++) out.push(pool.splice(Math.floor(random() * pool.length), 1)[0]);
-  return out;
+  const pool = uniquePoolV3(id, tier2), out2 = [u.always];
+  for (let i = 1; i < tier2 && pool.length; i++) out2.push(pool.splice(Math.floor(random() * pool.length), 1)[0]);
+  return out2;
 }
 var SIG_DMG = Object.freeze(["perfectDmg", "exposeDmg", "blinkDmg"]);
 var CLASS_KINDS = Object.freeze(["shockDmg", "counterDmg", "bleedDmg", "poisonDmg", "fireDmg", "frostDmg", "lightningDmg"]);
@@ -15519,7 +15565,8 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth", "questGear", "mainTree"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth", "questGear", "mainTree", "tripGear"]);
+  requireContract(v.tripGear === void 0 || TRIP_GEAR_KINDS.includes(v.tripGear) && v.rarityPolicyHash !== void 0, "Trip gear policy");
   requireContract(v.mainTree === void 0 || v.gearClass !== void 0 && isClassTree(v.gearClass, v.mainTree), "Main tree policy");
   requireContract(v.questGear === void 0 || Object.hasOwn(QUEST_GEAR_GROUPS, v.questGear) && v.rarityPolicyHash !== void 0, "Quest gear policy");
   requireContract(v.lockedDepth === void 0 || v.episodeSnapshotId !== void 0 && progressionBigInt(v.lockedDepth) >= 1n, "Co-op reward depth policy");
@@ -15952,6 +15999,7 @@ var GEAR_FAMILIES = Object.freeze(["weapon", "subweapon", "helmet", "chest", "le
 var ONE_PIECE_GEAR_FAMILIES = Object.freeze(GEAR_FAMILIES.filter((f3) => f3 !== "chest" && f3 !== "leggings"));
 var GEAR_NOUNS = Object.freeze({ weapon: ["Greatsword", "Longsword", "Halberd", "Warhammer", "Battleaxe", "Broadsword", "Flanged Mace", "Claymore"], shield: ["Kite Shield", "Tower Shield", "Buckler", "Aegis", "Heater Shield"], dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"], tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"], helmet: ["Greathelm", "Armet", "Visor"], chest: ["Hauberk", "Cuirass", "Brigandine", "Plate Mail", "Chain Mail", "Doublet"], leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"], boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"], overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"], ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"] });
 var AFFIX_POOLS = Object.freeze({ weapon: ["critChance", "critDamage", "activeSpd"], chest: ["maxHp", "def", "str", "dex", "int"], overall: ["maxHp", "def", "str", "dex", "int"], helmet: ["critChance", "activeSpd", "bonusAreaRadius"], leggings: ["maxHp", "def", "str", "dex", "int"], boots: ["moveSpeed", "activeSpd"], ring: ["atk", "maxHp", "def", "str", "dex", "int", "critChance", "moveSpeed", "bonusAreaRadius"], shield: ["block", "moveSpeed", "bonusAreaRadius"], dagger: ["parry", "critChance", "moveSpeed", "bonusAreaRadius"], tome: ["critDamage", "activeSpd", "critChance", "bonusAreaRadius"], gloves: ["atk", "critChance", "activeSpd", "str", "dex", "int"], cape: ["maxHp", "def", "str", "dex", "int", "moveSpeed"] });
+var tripFloor = (p) => Math.min(Number(p.sourceDepth), Number(p.rarityHeroLevel ?? p.sourceDepth)) >= WORLD_LOOT_V4_POLICY.unlockLevels[2] ? 2 : 1;
 function gearHash(text) {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) {
@@ -15970,9 +16018,9 @@ function rewardStream(key9) {
 }
 function salvagePayload(seed, tier2) {
   safeInteger(tier2, 0, 5);
-  const r = rewardStream(`salvage-v1/${seed}`), out = { [SALVAGE_MATERIALS[tier2]]: 1 + Math.floor(r.random() * 3) };
-  for (let t = tier2 - 1; t >= 0; t--) if (r.random() < 0.6) out[SALVAGE_MATERIALS[t]] = 1 + Math.floor(r.random() * 2);
-  return freezeWire(out);
+  const r = rewardStream(`salvage-v1/${seed}`), out2 = { [SALVAGE_MATERIALS[tier2]]: 1 + Math.floor(r.random() * 3) };
+  for (let t = tier2 - 1; t >= 0; t--) if (r.random() < 0.6) out2[SALVAGE_MATERIALS[t]] = 1 + Math.floor(r.random() * 2);
+  return freezeWire(out2);
 }
 function generateGearD9(seed, input, options = {}) {
   return certifyNumeric((c) => generateAtPrecision(c, seed, input, options));
@@ -16010,7 +16058,7 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
     (progression.modifiers?.qualityHundredths ?? 0) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression) + (progression.bestiaryQuality ?? 0)
     /* Bestiary Item quality */
   ) : hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
-  const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : progression.swiftKill && rolledTier < 1 ? 1 : rolledTier;
+  const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : progression.swiftKill && rolledTier < 1 ? 1 : progression.tripGear === "best" && rolledTier < tripFloor(progression) ? tripFloor(progression) : rolledTier;
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = questGearFamiliesV1(cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES, progression.questGear);
   const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own3 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own3 ?? [], ...shared, ...uq?.trophy ? [uq.noun] : []], n = noun ?? (type === "subweapon" && cls && progression.mainTree ? smartOffhandNoun(cls, progression.mainTree, random) : shared.length && random() < 0.2 ? pick6(shared) : pick6(own3));
@@ -16564,9 +16612,9 @@ function rewardStream2(key9) {
 var round4 = (n) => Number(n.toFixed(4));
 function salvagePayload2(seed, tier2) {
   safeInteger(tier2, 0, 5);
-  const r = rewardStream2(`salvage-v1/${seed}`), out = { [SALVAGE_MATERIALS2[tier2]]: 1 + Math.floor(r.random() * 3) };
-  for (let t = tier2 - 1; t >= 0; t--) if (r.random() < 0.6) out[SALVAGE_MATERIALS2[t]] = 1 + Math.floor(r.random() * 2);
-  return freezeWire(out);
+  const r = rewardStream2(`salvage-v1/${seed}`), out2 = { [SALVAGE_MATERIALS2[tier2]]: 1 + Math.floor(r.random() * 3) };
+  for (let t = tier2 - 1; t >= 0; t--) if (r.random() < 0.6) out2[SALVAGE_MATERIALS2[t]] = 1 + Math.floor(r.random() * 2);
+  return freezeWire(out2);
 }
 function generateGear(seed, depth, { tier: tier2 = null, family: family2 = null, subType = null, noun = null } = {}) {
   safeInteger(depth, 1, 1e4);
@@ -16880,9 +16928,9 @@ function rewardStream3(key9) {
 var round42 = (n) => Number(n.toFixed(4));
 function salvagePayload3(seed, tier2) {
   safeInteger(tier2, 0, 5);
-  const r = rewardStream3(`salvage-v1/${seed}`), out = { [SALVAGE_MATERIALS3[tier2]]: 1 + Math.floor(r.random() * 3) };
-  for (let t = tier2 - 1; t >= 0; t--) if (r.random() < 0.6) out[SALVAGE_MATERIALS3[t]] = 1 + Math.floor(r.random() * 2);
-  return freezeWire(out);
+  const r = rewardStream3(`salvage-v1/${seed}`), out2 = { [SALVAGE_MATERIALS3[tier2]]: 1 + Math.floor(r.random() * 3) };
+  for (let t = tier2 - 1; t >= 0; t--) if (r.random() < 0.6) out2[SALVAGE_MATERIALS3[t]] = 1 + Math.floor(r.random() * 2);
+  return freezeWire(out2);
 }
 function generateGear2(seed, input, { tier: tier2 = null, family: family2 = null, subType = null, noun = null } = {}) {
   const progression = typeof input === "number" ? rewardProgression(input, seed) : validateRewardProgression(input), depth = progression.sourceDepth;
@@ -16996,9 +17044,9 @@ function affixRollRange(g, key9) {
 }
 function salvagePayload4(seed, tier2) {
   safeInteger(tier2, 0, 5);
-  const r = rewardStream4(`salvage-v1/${seed}`), out = { [SALVAGE_MATERIALS4[tier2]]: 1 + Math.floor(r.random() * 3) };
-  for (let t = tier2 - 1; t >= 0; t--) if (r.random() < 0.6) out[SALVAGE_MATERIALS4[t]] = 1 + Math.floor(r.random() * 2);
-  return freezeWire(out);
+  const r = rewardStream4(`salvage-v1/${seed}`), out2 = { [SALVAGE_MATERIALS4[tier2]]: 1 + Math.floor(r.random() * 3) };
+  for (let t = tier2 - 1; t >= 0; t--) if (r.random() < 0.6) out2[SALVAGE_MATERIALS4[t]] = 1 + Math.floor(r.random() * 2);
+  return freezeWire(out2);
 }
 function generateGear3(seed, input, { tier: tier2 = null, family: family2 = null, subType = null, noun = null } = {}) {
   if (input?.version === "reward-progression-d9-v1") return generateGearD9(seed, input, { tier: tier2, family: family2, subType, noun });
@@ -17112,7 +17160,9 @@ function workshopResult(item2) {
       requireContract(!enchants && Number.isInteger(step.line) && step.line >= 0 && step.line < affixes.length && (lockedLine === null || lockedLine === step.line), "Invalid locked reforge line");
       lockedLine = step.line;
       const cls = g.progression?.gearClass, v3 = g.progression?.affixes === AFFIXES_V3 && cls, v2 = (g.progression?.affixes === AFFIXES_V2 || v3) && cls, slot = g.definition.subType ?? g.definition.slot, classKey = (k) => Object.values(CLASS_DAMAGE).flat().includes(k) ? "classDmg" : v3 ? v3PoolKeyOf(k, slot) : k;
-      const uqId = v3 && UNIQUE_LINES_V3[definition.unique] ? definition.unique : null, old = affixes[step.line], pool = uqId ? step.line === 0 ? [UNIQUE_LINES_V3[uqId].always] : uniquePoolV3(uqId, tier2).filter((k) => !affixes.some((a, i) => i !== step.line && uniqueLineKeyV3(uqId, a) === k)) : (v3 ? affixPoolV3(slot, tier2, cls) : v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier2) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
+      const uqId = v3 && UNIQUE_LINES_V3[definition.unique] ? definition.unique : null;
+      requireContract(!(uqId && step.line === UNIQUE_SIGNATURE_LINE), "A unique keeps its signature line");
+      const old = affixes[step.line], pool = uqId ? uniquePoolV3(uqId, tier2).filter((k) => !affixes.some((a, i) => i !== step.line && uniqueLineKeyV3(uqId, a) === k)) : (v3 ? affixPoolV3(slot, tier2, cls) : v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier2) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
       let name = picked, skill = null, fixedSkill = null;
       if (uqId && picked.includes(":")) [name, fixedSkill] = picked.split(":");
       if (v3) {
@@ -17572,19 +17622,19 @@ var CAMP_MEMBERS = CAMP_CREW.length;
 var CACHE_MEMBERS = CACHE_CREW.length;
 var campPointV1 = (a, [x, y]) => ({ x: a.x + x, y: a.y + y });
 function campCratePointsV1(c, anchor, hull = 14) {
-  const out = [];
+  const out2 = [];
   for (const offset of CAMP_POLICY.crates) {
     const home = campPointV1(anchor, offset);
     let best = null;
     for (let r = 0; r <= 64 && !best; r += 8) for (let k = 0, n = r ? Math.max(8, Math.round(r / 4)) : 1; k < n; k++) {
       const a = k / n * Math.PI * 2, p = { x: Math.round(home.x + Math.cos(a) * r), y: Math.round(home.y + Math.sin(a) * r) };
-      if (c && collidesWithTiles(c, p.x, p.y, hull) || out.some((o) => Math.hypot(o.x - p.x, o.y - p.y) < 30)) continue;
+      if (c && collidesWithTiles(c, p.x, p.y, hull) || out2.some((o) => Math.hypot(o.x - p.x, o.y - p.y) < 30)) continue;
       best = p;
       break;
     }
-    out.push(best ?? home);
+    out2.push(best ?? home);
   }
-  return out;
+  return out2;
 }
 var campReadyV1 = (r) => Boolean(r.camp);
 function validateCampV1(r) {
@@ -18164,7 +18214,7 @@ function saleQuote(p, item2) {
 function serviceGoldAdjustment(p, gold) {
   const l = p.inventory.services;
   if (!l) return gold;
-  let income = addAmount(l.retiredSaleGold, l.questGold ?? "0"), spent = addAmount(addAmount(multiplyAmount(String(l.supplyPurchases), SETTLEMENT_LIFE_POLICY.supply.price), multiplyAmount(String(l.restCount), SETTLEMENT_LIFE_POLICY.rest.price)), potionUpgradeSpent(p));
+  let income = addAmount(addAmount(l.retiredSaleGold, l.questGold ?? "0"), l.tripGold ?? "0"), spent = addAmount(addAmount(multiplyAmount(String(l.supplyPurchases), SETTLEMENT_LIFE_POLICY.supply.price), multiplyAmount(String(l.restCount), SETTLEMENT_LIFE_POLICY.rest.price)), potionUpgradeSpent(p));
   for (const r of Object.values(l.salesByItemId)) income = addAmount(income, r.gold);
   for (const r of Object.values(l.purchasesBySourceId)) {
     if (r.offerId.startsWith(DAILY)) {
@@ -18184,8 +18234,13 @@ function validateSettlementServices(s, p, validateCommand2) {
     return;
   }
   requireContract(l, "Missing service state");
-  closedRecord(l, ["version", "purchasesBySourceId", "salesByItemId", "retiredSaleGold", "supplyPurchases", "suppliesUsed", "restCount", "lastTransaction"], ["workshop", "combatHash", "potions", "questGold"]);
+  closedRecord(l, ["version", "purchasesBySourceId", "salesByItemId", "retiredSaleGold", "supplyPurchases", "suppliesUsed", "restCount", "lastTransaction"], ["workshop", "combatHash", "potions", "questGold", "tripGold", "tripMaterials"]);
   if (Object.hasOwn(l, "questGold")) amount(l.questGold);
+  if (Object.hasOwn(l, "tripGold")) amount(l.tripGold);
+  if (Object.hasOwn(l, "tripMaterials")) {
+    closedRecord(l.tripMaterials, [], FORGE_MATERIALS);
+    for (const n of Object.values(l.tripMaterials)) safeInteger(n, 1);
+  }
   requireContract((l.combatHash ?? null) === (hasWorldCombat(s) ? WORLD_COMBAT_HASH : null), "Service combat policy drift");
   validateWorkshop(s, p, validateCommand2);
   requireContract(l.version === SETTLEMENT_LIFE_VERSION, "Unknown service version");
@@ -18248,6 +18303,7 @@ function validateServiceProgress(before, after, pid) {
   if (!x) return;
   requireContract(y.supplyPurchases >= x.supplyPurchases && y.suppliesUsed >= x.suppliesUsed && y.restCount >= x.restCount, "Service counters regressed");
   requireContract(compareAmount(y.questGold ?? "0", x.questGold ?? "0") >= 0, "Quest gold regressed");
+  requireContract(compareAmount(y.tripGold ?? "0", x.tripGold ?? "0") >= 0 && Object.entries(x.tripMaterials ?? {}).every(([k, n]) => (y.tripMaterials?.[k] ?? 0) >= n), "Trip loot regressed");
   const upgrades = validatePotionProgress(x, y);
   for (const [id, r] of Object.entries(x.purchasesBySourceId)) requireContract(same2(r, y.purchasesBySourceId[id]), "Purchase history rewritten");
   let retired = x.retiredSaleGold;
@@ -18462,7 +18518,7 @@ function workshopQuote(p, item2, op, line = 0) {
   if (!item2?.generated) return { problem: "Select ordinary generated equipment" };
   const r = workshopResult(item2), materials3 = {}, world = combatPlayer(p), repeats = (kind2) => (item2.workshop?.steps ?? []).filter((x) => x.kind === kind2).length;
   let gold = "0", problem = null;
-  if (item2.locked || item2.protected || item2.unique || item2.generated.definition.unique || item2.sourceEntityId === null || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item2.sourceEntityId) || isClassKitSource(p, item2.sourceEntityId)) problem = "Protected equipment cannot be modified or shattered";
+  if (item2.locked || item2.protected || item2.unique || item2.generated.definition.unique && !(world && op === "reforge" && rerollableUniqueV3(item2.generated)) || item2.sourceEntityId === null || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item2.sourceEntityId) || isClassKitSource(p, item2.sourceEntityId)) problem = "Protected equipment cannot be modified or shattered";
   if (op === "awaken") {
     if (r.tier >= 5) problem = "Maximum five-star rarity";
     if (r.enchants) problem = "Purge enchantments before awakening";
@@ -18474,8 +18530,10 @@ function workshopQuote(p, item2, op, line = 0) {
     if (!r.affixes.length) problem = "This item has no affix lines. Awaken it first.";
     if (r.enchants) problem = "Purge enchantments before reforging";
     if (!Number.isInteger(line) || line < 0 || line >= r.affixes.length || r.lockedLine !== null && r.lockedLine !== line) problem = "Select the unlocked reforge line";
+    if (r.definition.unique && line === UNIQUE_SIGNATURE_LINE) problem = "A unique keeps its signature line";
     gold = world ? workshopGoldV1("reforge", power(item2), r.tier, repeats("reforge")) : exponentialCost(150, item2, [2, 1]);
-    materials3["Overlord's Sigil"] = 1;
+    if (world) materials3[SALVAGE_MATERIALS4[r.tier]] = 3;
+    else materials3["Overlord's Sigil"] = 1;
   } else if (op === "rebind") {
     const cls = item2.generated.progression?.gearClass, own3 = cls && item2.generated.definition.slot === "subweapon" ? CLASS_GEAR[cls]?.subweapon : null;
     if (!own3) problem = "Only class off-hands can be rebound";
@@ -21374,13 +21432,13 @@ function nearestOpen(grid, p) {
   throw new Error("Generated cave anchor has no floor");
 }
 function decorationsFor(rooms, floorSeed, floorIndex) {
-  const kinds2 = ["cave-glow-mushrooms", "cave-stalagmites", "cave-rubble", "cave-wall-roots", "cave-remains", "cave-mineral-deposit"], out = [];
+  const kinds2 = ["cave-glow-mushrooms", "cave-stalagmites", "cave-rubble", "cave-wall-roots", "cave-remains", "cave-mineral-deposit"], out2 = [];
   for (let i = 0; i < rooms.length; i++) {
     const r = rooms[i], n = parseInt(floorSeed.slice(i * 5 % 56, i * 5 % 56 + 8), 16) >>> 0;
-    out.push({ id: `decor:${floorIndex}:${i}:primary`, kind: kinds2[n % kinds2.length], x: r.cx + (n % 5 - 2) * 0.18, y: r.cy + ((n >>> 4) % 5 - 2) * 0.15, variant: (n >>> 8) % 3 });
-    if (i % 3 === 1) out.push({ id: `decor:${floorIndex}:${i}:mushrooms`, kind: "cave-glow-mushrooms", x: r.cx - r.rx * 0.45, y: r.cy + r.ry * 0.32, variant: (n >>> 12) % 3 });
+    out2.push({ id: `decor:${floorIndex}:${i}:primary`, kind: kinds2[n % kinds2.length], x: r.cx + (n % 5 - 2) * 0.18, y: r.cy + ((n >>> 4) % 5 - 2) * 0.15, variant: (n >>> 8) % 3 });
+    if (i % 3 === 1) out2.push({ id: `decor:${floorIndex}:${i}:mushrooms`, kind: "cave-glow-mushrooms", x: r.cx - r.rx * 0.45, y: r.cy + r.ry * 0.32, variant: (n >>> 12) % 3 });
   }
-  return out;
+  return out2;
 }
 function connected2(rooms, edges) {
   if (!rooms.length) return false;
@@ -21641,12 +21699,12 @@ function floorMotifs(grid, b, floorIndex) {
   const open2 = [];
   for (let y = 1; y < H4 - 1; y++) for (let x = 1; x < W4 - 1; x++) if (grid[y][x] === "1") open2.push({ x, y });
   const kinds2 = ["earth-patch", "floor-shadow", "crack", "light-shaft", "damp-patch"];
-  const out = [];
+  const out2 = [];
   for (let i = 0; i < Math.min(18, Math.max(8, Math.floor(open2.length / 45))); i++) {
     const p = open2[pick5(b, open2.length, 10 + i * 3)];
-    out.push({ motifId: `motif:${floorIndex}:${i}`, kind: kinds2[pick5(b, kinds2.length, 11 + i * 5)], x: p.x + 0.5, y: p.y + 0.5, scale: 0.65 + pick5(b, 50, 12 + i * 7) / 100, rotation: (pick5(b, 628, 13 + i * 2) - 314) / 100 });
+    out2.push({ motifId: `motif:${floorIndex}:${i}`, kind: kinds2[pick5(b, kinds2.length, 11 + i * 5)], x: p.x + 0.5, y: p.y + 0.5, scale: 0.65 + pick5(b, 50, 12 + i * 7) / 100, rotation: (pick5(b, 628, 13 + i * 2) - 314) / 100 });
   }
-  return out;
+  return out2;
 }
 function assembleFloor2({ site, floorIndex, floorCount, roomCount, tier: tier2, b, floorSeed }) {
   const grid = Array.from({ length: H4 }, () => Array(W4).fill("0")), owners = /* @__PURE__ */ new Map(), rooms = [], modules = [], edges = [];
@@ -22058,9 +22116,9 @@ function roomCells(floor, room2) {
     const [x, y] = value.split(",").map(Number);
     return { x, y };
   });
-  const bounds = room2.bounds ?? { x: Math.floor(room2.cx - room2.rx), y: Math.floor(room2.cy - room2.ry), width: Math.ceil(room2.rx * 2 + 1), height: Math.ceil(room2.ry * 2 + 1) }, out = [];
-  for (let y = bounds.y; y < bounds.y + bounds.height; y++) for (let x = bounds.x; x < bounds.x + bounds.width; x++) if (floor.collision.tiles[y]?.[x] === "1") out.push({ x, y });
-  return out;
+  const bounds = room2.bounds ?? { x: Math.floor(room2.cx - room2.rx), y: Math.floor(room2.cy - room2.ry), width: Math.ceil(room2.rx * 2 + 1), height: Math.ceil(room2.ry * 2 + 1) }, out2 = [];
+  for (let y = bounds.y; y < bounds.y + bounds.height; y++) for (let x = bounds.x; x < bounds.x + bounds.width; x++) if (floor.collision.tiles[y]?.[x] === "1") out2.push({ x, y });
+  return out2;
 }
 function reachableWithin(cells3, start, goal) {
   const allowed = new Set(cells3.map(cellKey)), seen = /* @__PURE__ */ new Set([cellKey(start)]), queue = [start];
@@ -23405,13 +23463,13 @@ function hydrateChunkDeltaD9(delta, chunk, frames) {
   requireContract([CHUNK_DELTA_D9, CHUNK_DELTA_ELITES_V2].includes(delta.version) && delta.chunkId === chunk.identity.id && inChunk(delta, chunk), "Chunk delta identity mismatch");
   safeInteger(delta.savedTick);
   requireContract(delta.encounters.length <= chunk.anchors.length + (chunk.compound ? 1 : 0), "Chunk encounter bound");
-  const out = copyWire(delta), seen = /* @__PURE__ */ new Set(), decode = (p) => {
+  const out2 = copyWire(delta), seen = /* @__PURE__ */ new Set(), decode = (p) => {
     validateWorldPosition(p);
     const local = projectToLocalFrameD9(p, frames);
     requireContract(local, "Delta lies outside admitted local frame");
     return { x: local.x, y: local.y };
   };
-  for (const e of out.encounters) {
+  for (const e of out2.encounters) {
     if (e.eliteRecords) {
       requireContract(delta.version === CHUNK_DELTA_ELITES_V2, "Elite cold records require successor delta");
       requireContract(Array.isArray(e.eliteRecords) && e.eliteRecords.length <= 4, "Cold elite inventory");
@@ -23443,11 +23501,11 @@ function hydrateChunkDeltaD9(delta, chunk, frames) {
       for (const terminal of [...Object.values(rows3.salvaged), ...Object.values(rows3.autoSalvaged)]) if (terminal.reward) terminal.reward.position = decode(terminal.reward.position);
     }
   }
-  for (const rows3 of Object.values(out.drops)) for (const drop of Object.values(rows3)) {
+  for (const rows3 of Object.values(out2.drops)) for (const drop of Object.values(rows3)) {
     requireContract(inChunk(drop.position, chunk), "Drop stored under wrong location");
     drop.position = decode(drop.position);
   }
-  return out;
+  return out2;
 }
 function chunkPagedAccountingD9(delta) {
   const players = {};
@@ -23958,7 +24016,12 @@ function installAutoSalvageDeadlines(state) {
   return state;
 }
 function groundGear(p) {
-  return [...Object.values(p.inventory.rewardsByEntityId).filter((r) => r.definitionId && !r.claimed && r.retiredTick === void 0), ...Object.entries(p.inventory.renewal?.groundBySourceId ?? {}).map(([id, g]) => ({ sourceEntityId: id, definitionId: g.item.definitionId, ...g.item.generated ? { generated: g.item.generated } : {}, ...g.item.workshop ? { workshop: g.item.workshop } : {}, position: g.position, spaceInstanceId: g.spaceInstanceId, dropped: true }))];
+  return [
+    ...Object.values(p.inventory.rewardsByEntityId).filter((r) => r.definitionId && !r.claimed && r.retiredTick === void 0),
+    ...Object.entries(p.inventory.renewal?.groundBySourceId ?? {}).map(([id, g]) => ({ sourceEntityId: id, definitionId: g.item.definitionId, ...g.item.generated ? { generated: g.item.generated } : {}, ...g.item.workshop ? { workshop: g.item.workshop } : {}, position: g.position, spaceInstanceId: g.spaceInstanceId, dropped: true })),
+    ...Object.entries(p.inventory.renewal?.tripGround ?? {}).map(([id, g]) => ({ sourceEntityId: id, definitionId: g.item.definitionId, generated: g.item.generated, position: g.position, spaceInstanceId: g.spaceInstanceId, trip: true, droppedTick: g.droppedTick }))
+    /* loot imps' gear (trip_imps_world_v1.js) */
+  ];
 }
 function validateCombatRewardSourceV1(state, source11, spawnEntityId, live, recipient = null) {
   if (!hasWorldCombat(state)) return;
@@ -24015,7 +24078,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
   const inv = p.inventory, n = inv.renewal;
   closedRecord(inv, ["version", "economy", "revision", "gold", "goldAwardsByEntityId", "itemsById", "equipped", "rewardsByEntityId", "lastEquipmentChange", "topologyMigration", "renewal"], ["subweapons", "d7", "services", "classKit"]);
   validateSettlementServices(state, p, validateCommand2);
-  closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"], ["retiredMaterials", "arrival"]);
+  closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"], ["retiredMaterials", "arrival", "tripGround"]);
   if (n.arrival) {
     const r = n.arrival;
     closedRecord(r, ["version", "heroId", "slotLevels", "materials"]);
@@ -24059,6 +24122,12 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       requireContract(typeof o.quest === "string" && /^q[bf]:/.test(o.quest) && o.sourceEntityId === id && o.progression.sourceId === id && o.progression.questGear !== void 0 && id === questGearSourceIdV1(state.campaign.seed.seedHex, p.playerId, o.quest), "Unknown quest gear provenance");
       return;
     }
+    if (o?.trip !== void 0) {
+      closedRecord(o, ["trip", "sourceEntityId", "progression"]);
+      validateRewardProgression(o.progression);
+      requireContract(typeof o.trip === "string" && TRIP_GEAR_TRIP.test(o.trip) && o.sourceEntityId === id && o.progression.sourceId === id && TRIP_GEAR_KINDS.includes(o.progression.tripGear) && o.progression.tripGear === "best" === o.trip.endsWith("/0") && id === tripGearSourceIdV1(state.campaign.seed.seedHex, p.playerId, o.trip), "Unknown trip gear provenance");
+      return;
+    }
     const kit = classKitPiece(p, id);
     if (kit) {
       closedRecord(o, ["kit", "sourceEntityId"]);
@@ -24096,7 +24165,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       requireContract(inv.d7, "Generated gear without version");
       if (carried) requireContract(i.generated !== null && typeof i.generated === "object" && !Array.isArray(i.generated), "Carried gear record");
       else {
-        const o = n.originsByItemId[i.itemId] ?? n.groundBySourceId[i.sourceEntityId]?.origin ?? inv.d7.salvaged[i.itemId]?.origin ?? inv.d7.autoSalvaged[i.itemId]?.origin ?? inv.services?.salesByItemId[i.itemId]?.origin, group = state.groupsById[o?.groupId], progression = o?.progression ?? (group ? prototypeRewardProgression(ordinaryTier(state.entitiesById[group.entityIds[0]].contentDefinitionId) ?? "C", i.sourceEntityId) : null), depth = progression?.sourceDepth;
+        const o = n.originsByItemId[i.itemId] ?? n.groundBySourceId[i.sourceEntityId]?.origin ?? n.tripGround?.[i.sourceEntityId]?.origin ?? inv.d7.salvaged[i.itemId]?.origin ?? inv.d7.autoSalvaged[i.itemId]?.origin ?? inv.services?.salesByItemId[i.itemId]?.origin, group = state.groupsById[o?.groupId], progression = o?.progression ?? (group ? prototypeRewardProgression(ordinaryTier(state.entitiesById[group.entityIds[0]].contentDefinitionId) ?? "C", i.sourceEntityId) : null), depth = progression?.sourceDepth;
         requireContract(same20(depth, i.generated.contentDepth), "Generated content depth differs from origin");
         validateGeneratedGear(i.generated, gearSeed(state, p, i.sourceEntityId), progression);
       }
@@ -24132,6 +24201,18 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       requireContract(r.definitionId && !r.claimed && r.pickup === null, "Only unclaimed encounter gear may be retired");
     }
     safeInteger(r.ordinal, 0, n.defeats);
+  }
+  if (n.tripGround) {
+    requireContract(Object.keys(n.tripGround).length >= 1 && Object.keys(n.tripGround).length <= 64, "Trip loot bound");
+    for (const [id, g] of Object.entries(n.tripGround)) {
+      closedRecord(g, ["item", "origin", "position", "spaceInstanceId", "droppedTick"]);
+      item2(g.item);
+      requireContract(g.origin?.trip !== void 0, "Trip loot provenance");
+      origin2(g.origin, id);
+      closedRecord(g.position, ["x", "y"]);
+      safeInteger(g.droppedTick, 0, state.tick);
+      requireContract(g.item.sourceEntityId === id && !inv.itemsById[g.item.itemId] && state.trips?.hell?.spaceInstanceId === g.spaceInstanceId && state.spacesByInstanceId[g.spaceInstanceId] && !collidesWithTiles(state.spacesByInstanceId[g.spaceInstanceId].collision, g.position.x, g.position.y, 0), "Trip loot outside the hellscape");
+    }
   }
   const seen = /* @__PURE__ */ new Set();
   requireContract(inv.equipped.weapon !== null, "Main weapon required");
@@ -24556,13 +24637,13 @@ function encounterResourceLayout(s, m) {
   if (s.d9World) {
     const cached = d9Layouts.get(s);
     if (cached?.revision === s.d9World.runtime.revision) return cached.value;
-    const out = {};
+    const out2 = {};
     for (const r of [...s.d9World.origin.resources, ...s.d9World.runtime.resources]) {
       if (wildernessLeftoverV1(s, r)) continue;
-      (out[r.groupId] ??= []).push(r);
+      (out2[r.groupId] ??= []).push(r);
     }
-    d9Layouts.set(s, { revision: s.d9World.runtime.revision, value: out });
-    return out;
+    d9Layouts.set(s, { revision: s.d9World.runtime.revision, value: out2 });
+    return out2;
   }
   let result = layouts2.get(m);
   if (result) return result;
@@ -24914,6 +24995,7 @@ function validateForgeEconomy(p, state, validateCommand2) {
       addDrops(r.materials);
     }
   }
+  addDrops(inv.services?.tripMaterials);
   const cold = state.d9World?.paging.players[p.playerId];
   if (cold) {
     gold = addAmount(gold, cold.gold);
@@ -26158,6 +26240,78 @@ function underWall(x, y) {
   return false;
 }
 
+// src/shared/contracts/trip_imps_world_v1.js
+var KINDS = ["coin", "rare"];
+var ISLE_KEYS = HELL_ISLANDS.map((o) => o.key);
+var out = (s, m) => m.end === null && s.tick >= m.born + IMP_RULES.climbTicks;
+var DIRS3 = Array.from({ length: 16 }, (_, k) => ({ x: Math.cos(k * Math.PI / 8), y: Math.sin(k * Math.PI / 8) }));
+function hellImpTargetsV1(s) {
+  const h = s.trips?.hell, I = h?.imps;
+  if (!I) return [];
+  const list2 = [];
+  for (const [id, m] of Object.entries(I.list)) if (out(s, m)) list2.push({ kind: "actor", entityId: id, team: "hostile", alive: true, hp: m.hp, maxHp: m.maxHp, position: { x: m.x, y: m.y }, hullRadius: IMP_RULES.hullRadius, combatRadius: IMP_RULES.hullRadius, residency: { spaceInstanceId: h.spaceInstanceId }, podResource: { imp: id }, tripImp: { kind: m.kind, n: m.n, run: m.run, dx: m.dx, scare: m.scare, lastHit: m.lastHit, rift: m.rift ? { ...m.rift } : null, escapeTick: m.scare === null ? null : m.scare + IMP_RULES.escapeTicks[m.kind] } });
+  return list2;
+}
+var hellImpTargetV1 = (s, id) => hellImpTargetsV1(s).find((t) => t.entityId === id);
+var isAmount = (v) => {
+  amount(v);
+  return true;
+};
+function hpValue(v) {
+  requireContract(typeof v === "string" && compareCombat(v, 0) >= 0, "Imp health");
+  return v;
+}
+function validateHellImpsV1(s, h, I) {
+  closedRecord(I, ["version", "islands", "list", "gains"]);
+  requireContract(I.version === TRIP_IMPS_V1, "Unknown imps version");
+  for (const [k, v] of Object.entries(I.islands)) {
+    requireContract(ISLE_KEYS.includes(k), "Unknown imp island");
+    closedRecord(v, ["wakeTick", "level"]);
+    safeInteger(v.wakeTick, h.eatTick, s.tick);
+    safeInteger(v.level, 1, 50);
+  }
+  const ns = /* @__PURE__ */ new Set();
+  for (const [id, m] of Object.entries(I.list)) {
+    closedRecord(m, ["n", "kind", "isle", "born", "x", "y", "dx", "dy", "hp", "maxHp", "scare", "run", "lastHit", "paid", "rift", "end", "endTick"]);
+    safeInteger(m.n, 0, 159);
+    requireContract(!ns.has(m.n) && id === impIdV1(s.campaign.campaignId, h.eatTick, m.n) && KINDS.includes(m.kind) && I.islands[m.isle] && ISLE_KEYS.indexOf(m.isle) === Math.floor(m.n / 16), "Imp identity");
+    ns.add(m.n);
+    safeInteger(m.born, I.islands[m.isle].wakeTick, I.islands[m.isle].wakeTick + IMP_RULES.waveGapTicks + 60);
+    for (const v of [m.x, m.y, m.dx, m.dy]) requireContract(Number.isFinite(v), "Imp position");
+    requireContract(Math.abs(m.dx) <= 1.01 && Math.abs(m.dy) <= 1.01, "Imp heading");
+    hpValue(m.hp);
+    hpValue(m.maxHp);
+    requireContract(compareCombat(m.hp, m.maxHp) <= 0, "Imp health");
+    requireContract(typeof m.run === "boolean", "Imp running");
+    if (m.scare !== null) safeInteger(m.scare, m.born, s.tick);
+    if (m.lastHit !== null) safeInteger(m.lastHit, m.born, s.tick);
+    for (const n of Object.values(m.paid)) safeInteger(n, 1, IMP_RULES.goldQuarters[m.kind].hitsPaid);
+    if (m.rift !== null) {
+      closedRecord(m.rift, ["x", "y"]);
+      requireContract(Number.isFinite(m.rift.x) && Number.isFinite(m.rift.y) && m.scare !== null, "Imp rift");
+    }
+    requireContract(m.end === null || m.end === "dead" || m.end === "escaped", "Imp end");
+    if (m.end === null) requireContract(m.endTick === null && compareCombat(m.hp, 0) > 0, "Imp alive");
+    else {
+      safeInteger(m.endTick, m.born, s.tick);
+      requireContract(m.end === "dead" === (compareCombat(m.hp, 0) === 0), "Imp end/health");
+    }
+  }
+  for (const [pid, list2] of Object.entries(I.gains)) {
+    requireContract(Array.isArray(list2) && list2.length >= 1 && list2.length <= IMP_RULES.gainsKept, "Imp gains");
+    for (const g of list2) {
+      closedRecord(g, ["tick", "n", "x", "y", "gold"], ["materials"]);
+      safeInteger(g.tick, h.eatTick, s.tick);
+      safeInteger(g.n, 0, 159);
+      requireContract(Number.isFinite(g.x) && Number.isFinite(g.y) && isAmount(g.gold), "Imp gain");
+      if (g.materials) {
+        closedRecord(g.materials, [], FORGE_MATERIALS);
+        for (const n of Object.values(g.materials)) safeInteger(n, 1, 99);
+      }
+    }
+  }
+}
+
 // src/shared/contracts/trip_hell_world_v1.js
 var TRIP_HELL_V1 = "trip-hell-v1";
 var token6 = (campaignId, label2) => [0, 1, 2, 3].map((l) => compositionHashV1(TRIP_HELL_V1 + "/" + campaignId + "/" + label2 + "/" + l).toString(16).padStart(8, "0")).join("");
@@ -26177,7 +26331,8 @@ function validateHellSpaceV1(s) {
   }
 }
 function validateTripHellV1(s, h) {
-  closedRecord(h, ["version", "spaceInstanceId", "eaterPlayerId", "snack", "eatTick", "endTick", "portal", "heroesByPlayerId"]);
+  closedRecord(h, ["version", "spaceInstanceId", "eaterPlayerId", "snack", "eatTick", "endTick", "portal", "heroesByPlayerId"], ["imps"]);
+  if (h.imps !== void 0) validateHellImpsV1(s, h, h.imps);
   requireContract(h.version === TRIP_HELL_V1 && h.spaceInstanceId === hellSpaceInstanceIdV1(s), "Hellscape identity");
   const space = s.spacesByInstanceId[h.spaceInstanceId];
   requireContract(space && space.spaceId === hellLogicalIdV1(s) && canonicalStringify(space.collision) === hellTilesCanon(), "Hellscape space drift");
@@ -26726,26 +26881,27 @@ function withinRetainedSiteBudgetsD9(state) {
 // src/shared/contracts/spore_combat_targets_v4.js
 var prefix = "event-pod/";
 function podCombatTargetsV4(s) {
-  const out = [];
+  const out2 = [];
   for (const r of Object.values(s.d9World?.worldEvents?.records ?? {})) {
     if (r.kind === "nests") {
       if (r.status !== "active" || r.nest.waiting) continue;
       const d = s.d9World.runtime.groups.find((g) => g.groupId === r.groupId);
       if (!d) continue;
-      NEST_POLICY.nests.forEach(([x, y], n) => out.push({ kind: "actor", entityId: prefix + r.groupId + "/" + n, team: "hostile", alive: nestTargetableV1(r, n), hp: r.nest.hp[n], maxHp: r.nest.maxHp, position: { x: d.anchor.x + x, y: d.anchor.y + y }, hullRadius: NEST_POLICY.nestRadius, combatRadius: NEST_POLICY.nestRadius, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n, nest: true } }));
+      NEST_POLICY.nests.forEach(([x, y], n) => out2.push({ kind: "actor", entityId: prefix + r.groupId + "/" + n, team: "hostile", alive: nestTargetableV1(r, n), hp: r.nest.hp[n], maxHp: r.nest.maxHp, position: { x: d.anchor.x + x, y: d.anchor.y + y }, hullRadius: NEST_POLICY.nestRadius, combatRadius: NEST_POLICY.nestRadius, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n, nest: true } }));
       continue;
     }
     if (r.kind !== "spore" || !isSporePodV2(s, r.groupId, 0)) continue;
     for (let n = 0; n < 3; n++) {
       const p = r.pods[n], position2 = podPositionV2(s, r.groupId, n, null);
       if (!position2) continue;
-      out.push({ kind: "actor", entityId: prefix + r.groupId + "/" + n, team: "hostile", alive: r.status === "active" && compareCombat(p.hp, 0) > 0, hp: p.hp, maxHp: p.maxHp, position: position2, hullRadius: 20, combatRadius: 20, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n } });
+      out2.push({ kind: "actor", entityId: prefix + r.groupId + "/" + n, team: "hostile", alive: r.status === "active" && compareCombat(p.hp, 0) > 0, hp: p.hp, maxHp: p.maxHp, position: position2, hullRadius: 20, combatRadius: 20, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n } });
     }
   }
-  return out;
+  if (s.trips?.hell?.imps) out2.push(...hellImpTargetsV1(s));
+  return out2;
 }
 function combatTargetV4(s, id) {
-  return s.entitiesById[id] ?? (typeof id === "string" && id.startsWith(prefix) ? podCombatTargetsV4(s).find((p) => p.entityId === id) : void 0);
+  return s.entitiesById[id] ?? (typeof id === "string" && id.startsWith(prefix) ? podCombatTargetsV4(s).find((p) => p.entityId === id) : s.trips?.hell?.imps?.list[id] ? hellImpTargetV1(s, id) : void 0);
 }
 
 // src/shared/contracts/combat_attribution.js
@@ -31932,16 +32088,16 @@ function createPageTransaction({ root: root3 = null, readPage, sha256 }) {
     return { entries, complete, cursor: entries.at(-1)?.key ?? after };
   }
   function pages() {
-    const out = [], seen = /* @__PURE__ */ new Set();
+    const out2 = [], seen = /* @__PURE__ */ new Set();
     function visit(id) {
       if (!id || seen.has(id) || !dirty.has(id)) return;
       seen.add(id);
       const value = dirty.get(id);
-      out.push({ id, value });
+      out2.push({ id, value });
       if (value.kind === "branch") for (const child of Object.values(value.children)) visit(child);
     }
     visit(current);
-    return out;
+    return out2;
   }
   return { get, range, async set(key9, value) {
     requireContract(/^[a-f0-9]{64}$/.test(key9), "Page key requires full digest");
@@ -32478,15 +32634,15 @@ function createStore({ indexedDB, sha256, expectedContentFingerprint, expectedGe
 // src/shared/generation/planned_cartography_v1.js
 var CARTOGRAPHY_VERSION = "seed-plan-cartography-v1";
 function chartPolyline(points) {
-  const out = [];
+  const out2 = [];
   for (const p of points) {
-    const q = { x: p.x, y: p.y }, a = out.at(-2), b = out.at(-1);
+    const q = { x: p.x, y: p.y }, a = out2.at(-2), b = out2.at(-1);
     if (b && q.x === b.x && q.y === b.y) continue;
-    if (a && b && (b.x - a.x) * (q.y - b.y) === (b.y - a.y) * (q.x - b.x) && (b.x - a.x) * (q.x - b.x) + (b.y - a.y) * (q.y - b.y) >= 0) out[out.length - 1] = q;
-    else out.push(q);
+    if (a && b && (b.x - a.x) * (q.y - b.y) === (b.y - a.y) * (q.x - b.x) && (b.x - a.x) * (q.x - b.x) + (b.y - a.y) * (q.y - b.y) >= 0) out2[out2.length - 1] = q;
+    else out2.push(q);
   }
   const chunks2 = [];
-  for (let i = 0; i < out.length; i += 255) chunks2.push(out.slice(Math.max(0, i - Number(i > 0)), i + 255));
+  for (let i = 0; i < out2.length; i += 255) chunks2.push(out2.slice(Math.max(0, i - Number(i > 0)), i + 255));
   return chunks2;
 }
 var SHOP = { "Merchant / market": "merchant", Forge: "forge", "Tavern + lodging": "inn", "Enchanter tower": "enchanter", Temple: "temple", Chapel: "temple", Cathedral: "temple", "Great hall": "hall" };
@@ -32522,9 +32678,9 @@ function createPlannedCartography(asset, binding, loaded2) {
   const routeLine = (e) => {
     const c = e.centerline;
     if (!Array.isArray(c) || c.length < 4) return e.path;
-    const out = [];
-    for (let i = 0; i + 1 < c.length; i += 2) out.push({ x: c[i], y: c[i + 1] });
-    return out;
+    const out2 = [];
+    for (let i = 0; i + 1 < c.length; i += 2) out2.push({ x: c[i], y: c[i + 1] });
+    return out2;
   };
   const routes = asset.routes.edges.map((e) => {
     const line = routeLine(e);
@@ -34202,9 +34358,9 @@ function worldTransferPatchD9(before, after, { releasedGroupIds = [], placements
 
 // src/shared/contracts/world_stream_capture_d9.js
 var WORLD_STREAM_CAPTURE_D9 = "world-stream-capture-d9-v1";
-var KINDS = /* @__PURE__ */ new Set(["residency", "encounters", "deadlines", "ground"]);
+var KINDS2 = /* @__PURE__ */ new Set(["residency", "encounters", "deadlines", "ground"]);
 function captureWorldStreamStateD9(state, kind2) {
-  requireContract(KINDS.has(kind2) && state.d9World, "World stream capture kind");
+  requireContract(KINDS2.has(kind2) && state.d9World, "World stream capture kind");
   const spacesByInstanceId = {};
   for (const [id, space] of Object.entries(state.spacesByInstanceId)) {
     const next = copyWire(space);
@@ -34232,7 +34388,7 @@ function captureWorldStreamStateD9(state, kind2) {
 function checkWorldStreamCaptureShapeD9(state, kind2) {
   closedRecord(state, ["streamCapture", "campaign", "session", "tick", "overworldInstanceId", "d9World", "playersById", "entitiesById", "groupsById", "encounterEconomy", "spacesByInstanceId", "subweaponCombat"], ["hostileCombat", "eliteCombat"]);
   closedRecord(state.streamCapture, ["version", "kind"]);
-  requireContract(state.streamCapture.version === WORLD_STREAM_CAPTURE_D9 && state.streamCapture.kind === kind2 && KINDS.has(kind2), "World stream capture version/kind");
+  requireContract(state.streamCapture.version === WORLD_STREAM_CAPTURE_D9 && state.streamCapture.kind === kind2 && KINDS2.has(kind2), "World stream capture version/kind");
   closedRecord(state.campaign, ["campaignId", "seed"]);
   safeInteger(state.tick);
   requireContract(state.session.campaignId === state.campaign.campaignId && state.d9World && state.spacesByInstanceId[state.overworldInstanceId], "World stream capture identity");

@@ -5950,6 +5950,56 @@ function h32(text) {
 }
 var questGearSourceIdV1 = (seedHex, playerId, questId) => "ent:" + [0, 1, 2, 3].map((i) => h32(QUEST_GEAR_VERSION + "/" + seedHex + "/" + playerId + "/" + questId + "/" + i).toString(16).padStart(8, "0")).join("");
 
+// src/shared/content/trip_imps_v1.js
+var TRIP_IMPS_V1 = "trip-imps-v1";
+var IMP_RULES = Object.freeze({
+  coinPerIsland: Object.freeze([6, 10]),
+  treasureOneIn: 3,
+  // The second half of an island's imps (and its treasure imp) climb out this long after the first.
+  waveGapTicks: 4 * 60,
+  climbTicks: 42,
+  // A hero this close (or a hit) gives an imp a fright: "!" and a cackle, then it bolts.
+  scareRadius: Object.freeze({ coin: 120, rare: 140 }),
+  alarmTicks: 24,
+  // It keeps running while any hero is this close; farther off it stops to catch its breath.
+  calmRadius: 300,
+  speed: Object.freeze({ coin: 2.5, rare: 2.85 }),
+  hullRadius: 7,
+  // From its first fright it has this long before it tears a rift and dives in (Escaping! shows for the last 1.4 s).
+  escapeTicks: Object.freeze({ coin: 8 * 60, rare: 12 * 60 }),
+  warnTicks: 84,
+  riftTicks: 54,
+  // Health: the C-rank object curve (like Nests) times this.
+  hpTimes: Object.freeze({ coin: Object.freeze([6, 5]), rare: Object.freeze([4, 1]) }),
+  // Gold in quarters of a kill's gold at the hero's level: each of the first few hits, then the kill.
+  goldQuarters: Object.freeze({ coin: Object.freeze({ hit: 1, hitsPaid: 4, kill: 8 }), rare: Object.freeze({ hit: 2, hitsPaid: 4, kill: 16 }) }),
+  starshardPerMille: Object.freeze({ coin: 30, rare: 200 }),
+  gearPieces: Object.freeze({ coin: 0, rare: 2 }),
+  // Ended imps (killed or escaped) stay in the record this long so every screen can show the poof or rift.
+  keepTicks: 3 * 60,
+  // Recent personal gains (coins to the purse, Scrap to the Bag) kept for the screen.
+  gainTicks: 4 * 60,
+  gainsKept: 10
+});
+var IMP_SCRAP = Object.freeze([[1, "Common Scrap", "Uncommon Scrap", 350], [10, "Uncommon Scrap", "Rare Scrap", 350], [20, "Rare Scrap", "Epic Scrap", 350], [35, "Epic Scrap", "Legendary Scrap", 350], [50, "Legendary Scrap", "Mythic Scrap", 200]]);
+function impScrapBandV1(level) {
+  let band = IMP_SCRAP[0];
+  for (const b of IMP_SCRAP) if (level >= b[0]) band = b;
+  return band;
+}
+function h322(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  h = Math.imul(h ^ h >>> 16, 2246822507);
+  h = Math.imul(h ^ h >>> 13, 3266489909);
+  return (h ^ h >>> 16) >>> 0;
+}
+var impHashV1 = (text) => h322(TRIP_IMPS_V1 + "/" + text);
+var impIdV1 = (campaignId, eatTick, n) => "ent:" + [0, 1, 2, 3].map((i) => h322(TRIP_IMPS_V1 + "/imp/" + campaignId + "/" + eatTick + "/" + n + "/" + i).toString(16).padStart(8, "0")).join("");
+var TRIP_GEAR_TRIP = /^(\d{1,15})\/(\d{1,3})\/([01])$/;
+var tripGearSourceIdV1 = (seedHex, playerId, trip) => "ent:" + [0, 1, 2, 3].map((i) => h322(TRIP_IMPS_V1 + "/gear/" + seedHex + "/" + playerId + "/" + trip + "/" + i).toString(16).padStart(8, "0")).join("");
+var TRIP_GEAR_KINDS = Object.freeze(["best", "any"]);
+
 // src/shared/content/world_rarity_v2.js
 var WORLD_RARITY_VERSION = "world-rarity-rewards-v2";
 var WORLD_RARITY_HASH = "4a10af2db8e7a9a8ffd8e4d7e7b7334e4b2f5dd88254e198f73024bde4edc684";
@@ -6483,6 +6533,8 @@ var UNIQUE_LINES_V3 = freezeWire({
   "briarfang-thornmantle": { always: "closeDmg", pool: ["maxHpPct", "defPct", "str", "atkPct", "lifeKill", "areaDr", "hitCdr"], leg: [] },
   "emberjaw-fang": { always: "ailingDmg", pool: ["fireDmg", "atkPct", "critChance", "lifeHit", "ailmentDur", "maxHpPct", "areaDmg"], leg: [] }
 });
+var UNIQUE_SIGNATURE_LINE = 0;
+var rerollableUniqueV3 = (g) => g?.progression?.affixes === "affixes-v3" && Boolean(UNIQUE_LINES_V3[g?.definition?.unique]);
 var uniquePoolV3 = (id, tier) => {
   const u = UNIQUE_LINES_V3[id];
   return u ? [...u.pool, ...tier >= 4 ? u.leg : []] : [];
@@ -6594,7 +6646,8 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth", "questGear", "mainTree"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth", "questGear", "mainTree", "tripGear"]);
+  requireContract(v.tripGear === void 0 || TRIP_GEAR_KINDS.includes(v.tripGear) && v.rarityPolicyHash !== void 0, "Trip gear policy");
   requireContract(v.mainTree === void 0 || v.gearClass !== void 0 && isClassTree(v.gearClass, v.mainTree), "Main tree policy");
   requireContract(v.questGear === void 0 || Object.hasOwn(QUEST_GEAR_GROUPS, v.questGear) && v.rarityPolicyHash !== void 0, "Quest gear policy");
   requireContract(v.lockedDepth === void 0 || v.episodeSnapshotId !== void 0 && progressionBigInt(v.lockedDepth) >= 1n, "Co-op reward depth policy");
@@ -7143,6 +7196,7 @@ var GEAR_FAMILIES = Object.freeze(["weapon", "subweapon", "helmet", "chest", "le
 var ONE_PIECE_GEAR_FAMILIES = Object.freeze(GEAR_FAMILIES.filter((f3) => f3 !== "chest" && f3 !== "leggings"));
 var GEAR_NOUNS = Object.freeze({ weapon: ["Greatsword", "Longsword", "Halberd", "Warhammer", "Battleaxe", "Broadsword", "Flanged Mace", "Claymore"], shield: ["Kite Shield", "Tower Shield", "Buckler", "Aegis", "Heater Shield"], dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"], tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"], helmet: ["Greathelm", "Armet", "Visor"], chest: ["Hauberk", "Cuirass", "Brigandine", "Plate Mail", "Chain Mail", "Doublet"], leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"], boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"], overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"], ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"] });
 var AFFIX_POOLS = Object.freeze({ weapon: ["critChance", "critDamage", "activeSpd"], chest: ["maxHp", "def", "str", "dex", "int"], overall: ["maxHp", "def", "str", "dex", "int"], helmet: ["critChance", "activeSpd", "bonusAreaRadius"], leggings: ["maxHp", "def", "str", "dex", "int"], boots: ["moveSpeed", "activeSpd"], ring: ["atk", "maxHp", "def", "str", "dex", "int", "critChance", "moveSpeed", "bonusAreaRadius"], shield: ["block", "moveSpeed", "bonusAreaRadius"], dagger: ["parry", "critChance", "moveSpeed", "bonusAreaRadius"], tome: ["critDamage", "activeSpd", "critChance", "bonusAreaRadius"], gloves: ["atk", "critChance", "activeSpd", "str", "dex", "int"], cape: ["maxHp", "def", "str", "dex", "int", "moveSpeed"] });
+var tripFloor = (p) => Math.min(Number(p.sourceDepth), Number(p.rarityHeroLevel ?? p.sourceDepth)) >= WORLD_LOOT_V4_POLICY.unlockLevels[2] ? 2 : 1;
 function gearHash(text) {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) {
@@ -7201,7 +7255,7 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
     (progression.modifiers?.qualityHundredths ?? 0) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression) + (progression.bestiaryQuality ?? 0)
     /* Bestiary Item quality */
   ) : hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
-  const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : progression.swiftKill && rolledTier < 1 ? 1 : rolledTier;
+  const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : progression.swiftKill && rolledTier < 1 ? 1 : progression.tripGear === "best" && rolledTier < tripFloor(progression) ? tripFloor(progression) : rolledTier;
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = questGearFamiliesV1(cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES, progression.questGear);
   const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own3 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own3 ?? [], ...shared, ...uq?.trophy ? [uq.noun] : []], n = noun ?? (type === "subweapon" && cls && progression.mainTree ? smartOffhandNoun(cls, progression.mainTree, random) : shared.length && random() < 0.2 ? pick6(shared) : pick6(own3));
@@ -8303,7 +8357,9 @@ function workshopResult(item) {
       requireContract(!enchants && Number.isInteger(step.line) && step.line >= 0 && step.line < affixes.length && (lockedLine === null || lockedLine === step.line), "Invalid locked reforge line");
       lockedLine = step.line;
       const cls = g.progression?.gearClass, v3 = g.progression?.affixes === AFFIXES_V3 && cls, v2 = (g.progression?.affixes === AFFIXES_V2 || v3) && cls, slot = g.definition.subType ?? g.definition.slot, classKey = (k) => Object.values(CLASS_DAMAGE).flat().includes(k) ? "classDmg" : v3 ? v3PoolKeyOf(k, slot) : k;
-      const uqId = v3 && UNIQUE_LINES_V3[definition.unique] ? definition.unique : null, old = affixes[step.line], pool = uqId ? step.line === 0 ? [UNIQUE_LINES_V3[uqId].always] : uniquePoolV3(uqId, tier).filter((k) => !affixes.some((a, i) => i !== step.line && uniqueLineKeyV3(uqId, a) === k)) : (v3 ? affixPoolV3(slot, tier, cls) : v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
+      const uqId = v3 && UNIQUE_LINES_V3[definition.unique] ? definition.unique : null;
+      requireContract(!(uqId && step.line === UNIQUE_SIGNATURE_LINE), "A unique keeps its signature line");
+      const old = affixes[step.line], pool = uqId ? uniquePoolV3(uqId, tier).filter((k) => !affixes.some((a, i) => i !== step.line && uniqueLineKeyV3(uqId, a) === k)) : (v3 ? affixPoolV3(slot, tier, cls) : v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
       let name = picked, skill = null, fixedSkill = null;
       if (uqId && picked.includes(":")) [name, fixedSkill] = picked.split(":");
       if (v3) {
@@ -21845,7 +21901,7 @@ function workshopQuote(p, item, op, line = 0) {
   if (!item?.generated) return { problem: "Select ordinary generated equipment" };
   const r = workshopResult(item), materials2 = {}, world = combatPlayer(p), repeats = (kind2) => (item.workshop?.steps ?? []).filter((x) => x.kind === kind2).length;
   let gold = "0", problem = null;
-  if (item.locked || item.protected || item.unique || item.generated.definition.unique || item.sourceEntityId === null || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId)) problem = "Protected equipment cannot be modified or shattered";
+  if (item.locked || item.protected || item.unique || item.generated.definition.unique && !(world && op === "reforge" && rerollableUniqueV3(item.generated)) || item.sourceEntityId === null || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId)) problem = "Protected equipment cannot be modified or shattered";
   if (op === "awaken") {
     if (r.tier >= 5) problem = "Maximum five-star rarity";
     if (r.enchants) problem = "Purge enchantments before awakening";
@@ -21857,8 +21913,10 @@ function workshopQuote(p, item, op, line = 0) {
     if (!r.affixes.length) problem = "This item has no affix lines. Awaken it first.";
     if (r.enchants) problem = "Purge enchantments before reforging";
     if (!Number.isInteger(line) || line < 0 || line >= r.affixes.length || r.lockedLine !== null && r.lockedLine !== line) problem = "Select the unlocked reforge line";
+    if (r.definition.unique && line === UNIQUE_SIGNATURE_LINE) problem = "A unique keeps its signature line";
     gold = world ? workshopGoldV1("reforge", power(item), r.tier, repeats("reforge")) : exponentialCost(150, item, [2, 1]);
-    materials2["Overlord's Sigil"] = 1;
+    if (world) materials2[SALVAGE_MATERIALS4[r.tier]] = 3;
+    else materials2["Overlord's Sigil"] = 1;
   } else if (op === "rebind") {
     const cls = item.generated.progression?.gearClass, own3 = cls && item.generated.definition.slot === "subweapon" ? CLASS_GEAR[cls]?.subweapon : null;
     if (!own3) problem = "Only class off-hands can be rebound";
@@ -22643,7 +22701,7 @@ function applyServiceAction(s, p, c, order) {
 function serviceGoldAdjustment(p, gold) {
   const l = p.inventory.services;
   if (!l) return gold;
-  let income = addAmount(l.retiredSaleGold, l.questGold ?? "0"), spent = addAmount(addAmount(multiplyAmount(String(l.supplyPurchases), SETTLEMENT_LIFE_POLICY.supply.price), multiplyAmount(String(l.restCount), SETTLEMENT_LIFE_POLICY.rest.price)), potionUpgradeSpent(p));
+  let income = addAmount(addAmount(l.retiredSaleGold, l.questGold ?? "0"), l.tripGold ?? "0"), spent = addAmount(addAmount(multiplyAmount(String(l.supplyPurchases), SETTLEMENT_LIFE_POLICY.supply.price), multiplyAmount(String(l.restCount), SETTLEMENT_LIFE_POLICY.rest.price)), potionUpgradeSpent(p));
   for (const r of Object.values(l.salesByItemId)) income = addAmount(income, r.gold);
   for (const r of Object.values(l.purchasesBySourceId)) {
     if (r.offerId.startsWith(DAILY)) {
@@ -22663,8 +22721,13 @@ function validateSettlementServices(s, p, validateCommand2) {
     return;
   }
   requireContract(l, "Missing service state");
-  closedRecord(l, ["version", "purchasesBySourceId", "salesByItemId", "retiredSaleGold", "supplyPurchases", "suppliesUsed", "restCount", "lastTransaction"], ["workshop", "combatHash", "potions", "questGold"]);
+  closedRecord(l, ["version", "purchasesBySourceId", "salesByItemId", "retiredSaleGold", "supplyPurchases", "suppliesUsed", "restCount", "lastTransaction"], ["workshop", "combatHash", "potions", "questGold", "tripGold", "tripMaterials"]);
   if (Object.hasOwn(l, "questGold")) amount(l.questGold);
+  if (Object.hasOwn(l, "tripGold")) amount(l.tripGold);
+  if (Object.hasOwn(l, "tripMaterials")) {
+    closedRecord(l.tripMaterials, [], FORGE_MATERIALS);
+    for (const n of Object.values(l.tripMaterials)) safeInteger(n, 1);
+  }
   requireContract((l.combatHash ?? null) === (hasWorldCombat(s) ? WORLD_COMBAT_HASH : null), "Service combat policy drift");
   validateWorkshop(s, p, validateCommand2);
   requireContract(l.version === SETTLEMENT_LIFE_VERSION, "Unknown service version");
@@ -22727,6 +22790,7 @@ function validateServiceProgress(before, after, pid) {
   if (!x) return;
   requireContract(y.supplyPurchases >= x.supplyPurchases && y.suppliesUsed >= x.suppliesUsed && y.restCount >= x.restCount, "Service counters regressed");
   requireContract(compareAmount(y.questGold ?? "0", x.questGold ?? "0") >= 0, "Quest gold regressed");
+  requireContract(compareAmount(y.tripGold ?? "0", x.tripGold ?? "0") >= 0 && Object.entries(x.tripMaterials ?? {}).every(([k, n]) => (y.tripMaterials?.[k] ?? 0) >= n), "Trip loot regressed");
   const upgrades = validatePotionProgress(x, y);
   for (const [id, r] of Object.entries(x.purchasesBySourceId)) requireContract(same16(r, y.purchasesBySourceId[id]), "Purchase history rewritten");
   let retired = x.retiredSaleGold;
@@ -27490,6 +27554,7 @@ function validateForgeEconomy(p, state, validateCommand2) {
       addDrops(r.materials);
     }
   }
+  addDrops(inv.services?.tripMaterials);
   const cold = state.d9World?.paging.players[p.playerId];
   if (cold) {
     gold = addAmount(gold, cold.gold);
@@ -28013,7 +28078,12 @@ function installAutoSalvageDeadlines(state) {
   return state;
 }
 function groundGear(p) {
-  return [...Object.values(p.inventory.rewardsByEntityId).filter((r) => r.definitionId && !r.claimed && r.retiredTick === void 0), ...Object.entries(p.inventory.renewal?.groundBySourceId ?? {}).map(([id, g]) => ({ sourceEntityId: id, definitionId: g.item.definitionId, ...g.item.generated ? { generated: g.item.generated } : {}, ...g.item.workshop ? { workshop: g.item.workshop } : {}, position: g.position, spaceInstanceId: g.spaceInstanceId, dropped: true }))];
+  return [
+    ...Object.values(p.inventory.rewardsByEntityId).filter((r) => r.definitionId && !r.claimed && r.retiredTick === void 0),
+    ...Object.entries(p.inventory.renewal?.groundBySourceId ?? {}).map(([id, g]) => ({ sourceEntityId: id, definitionId: g.item.definitionId, ...g.item.generated ? { generated: g.item.generated } : {}, ...g.item.workshop ? { workshop: g.item.workshop } : {}, position: g.position, spaceInstanceId: g.spaceInstanceId, dropped: true })),
+    ...Object.entries(p.inventory.renewal?.tripGround ?? {}).map(([id, g]) => ({ sourceEntityId: id, definitionId: g.item.definitionId, generated: g.item.generated, position: g.position, spaceInstanceId: g.spaceInstanceId, trip: true, droppedTick: g.droppedTick }))
+    /* loot imps' gear (trip_imps_world_v1.js) */
+  ];
 }
 function validateCombatRewardSourceV1(state, source10, spawnEntityId, live, recipient = null) {
   if (!hasWorldCombat(state)) return;
@@ -28084,6 +28154,16 @@ function collectRenewableGear(state, p, command, authorityOrder) {
     inv.itemsById[dropped.item.itemId] = copyWire(dropped.item);
     inv.renewal.originsByItemId[dropped.item.itemId] = copyWire(dropped.origin);
     delete inv.renewal.groundBySourceId[id];
+    inv.revision++;
+    inv.renewal.lastGroundPickup = { command: copyWire(command), authorityOrder, tick: state.tick, revision: inv.revision };
+    return;
+  }
+  const trip = inv.renewal.tripGround?.[id];
+  if (trip) {
+    inv.itemsById[trip.item.itemId] = copyWire(trip.item);
+    inv.renewal.originsByItemId[trip.item.itemId] = copyWire(trip.origin);
+    delete inv.renewal.tripGround[id];
+    if (!Object.keys(inv.renewal.tripGround).length) delete inv.renewal.tripGround;
     inv.revision++;
     inv.renewal.lastGroundPickup = { command: copyWire(command), authorityOrder, tick: state.tick, revision: inv.revision };
     return;
@@ -28161,7 +28241,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
   const inv = p.inventory, n = inv.renewal;
   closedRecord(inv, ["version", "economy", "revision", "gold", "goldAwardsByEntityId", "itemsById", "equipped", "rewardsByEntityId", "lastEquipmentChange", "topologyMigration", "renewal"], ["subweapons", "d7", "services", "classKit"]);
   validateSettlementServices(state, p, validateCommand2);
-  closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"], ["retiredMaterials", "arrival"]);
+  closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"], ["retiredMaterials", "arrival", "tripGround"]);
   if (n.arrival) {
     const r = n.arrival;
     closedRecord(r, ["version", "heroId", "slotLevels", "materials"]);
@@ -28205,6 +28285,12 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       requireContract(typeof o.quest === "string" && /^q[bf]:/.test(o.quest) && o.sourceEntityId === id && o.progression.sourceId === id && o.progression.questGear !== void 0 && id === questGearSourceIdV1(state.campaign.seed.seedHex, p.playerId, o.quest), "Unknown quest gear provenance");
       return;
     }
+    if (o?.trip !== void 0) {
+      closedRecord(o, ["trip", "sourceEntityId", "progression"]);
+      validateRewardProgression(o.progression);
+      requireContract(typeof o.trip === "string" && TRIP_GEAR_TRIP.test(o.trip) && o.sourceEntityId === id && o.progression.sourceId === id && TRIP_GEAR_KINDS.includes(o.progression.tripGear) && o.progression.tripGear === "best" === o.trip.endsWith("/0") && id === tripGearSourceIdV1(state.campaign.seed.seedHex, p.playerId, o.trip), "Unknown trip gear provenance");
+      return;
+    }
     const kit = classKitPiece(p, id);
     if (kit) {
       closedRecord(o, ["kit", "sourceEntityId"]);
@@ -28242,7 +28328,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       requireContract(inv.d7, "Generated gear without version");
       if (carried) requireContract(i.generated !== null && typeof i.generated === "object" && !Array.isArray(i.generated), "Carried gear record");
       else {
-        const o = n.originsByItemId[i.itemId] ?? n.groundBySourceId[i.sourceEntityId]?.origin ?? inv.d7.salvaged[i.itemId]?.origin ?? inv.d7.autoSalvaged[i.itemId]?.origin ?? inv.services?.salesByItemId[i.itemId]?.origin, group = state.groupsById[o?.groupId], progression = o?.progression ?? (group ? prototypeRewardProgression(ordinaryTier(state.entitiesById[group.entityIds[0]].contentDefinitionId) ?? "C", i.sourceEntityId) : null), depth = progression?.sourceDepth;
+        const o = n.originsByItemId[i.itemId] ?? n.groundBySourceId[i.sourceEntityId]?.origin ?? n.tripGround?.[i.sourceEntityId]?.origin ?? inv.d7.salvaged[i.itemId]?.origin ?? inv.d7.autoSalvaged[i.itemId]?.origin ?? inv.services?.salesByItemId[i.itemId]?.origin, group = state.groupsById[o?.groupId], progression = o?.progression ?? (group ? prototypeRewardProgression(ordinaryTier(state.entitiesById[group.entityIds[0]].contentDefinitionId) ?? "C", i.sourceEntityId) : null), depth = progression?.sourceDepth;
         requireContract(same25(depth, i.generated.contentDepth), "Generated content depth differs from origin");
         validateGeneratedGear(i.generated, gearSeed(state, p, i.sourceEntityId), progression);
       }
@@ -28278,6 +28364,18 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       requireContract(r.definitionId && !r.claimed && r.pickup === null, "Only unclaimed encounter gear may be retired");
     }
     safeInteger(r.ordinal, 0, n.defeats);
+  }
+  if (n.tripGround) {
+    requireContract(Object.keys(n.tripGround).length >= 1 && Object.keys(n.tripGround).length <= 64, "Trip loot bound");
+    for (const [id, g] of Object.entries(n.tripGround)) {
+      closedRecord(g, ["item", "origin", "position", "spaceInstanceId", "droppedTick"]);
+      item(g.item);
+      requireContract(g.origin?.trip !== void 0, "Trip loot provenance");
+      origin2(g.origin, id);
+      closedRecord(g.position, ["x", "y"]);
+      safeInteger(g.droppedTick, 0, state.tick);
+      requireContract(g.item.sourceEntityId === id && !inv.itemsById[g.item.itemId] && state.trips?.hell?.spaceInstanceId === g.spaceInstanceId && state.spacesByInstanceId[g.spaceInstanceId] && !collidesWithTiles(state.spacesByInstanceId[g.spaceInstanceId].collision, g.position.x, g.position.y, 0), "Trip loot outside the hellscape");
+    }
   }
   const seen = /* @__PURE__ */ new Set();
   requireContract(inv.equipped.weapon !== null, "Main weapon required");
@@ -30994,6 +31092,12 @@ export {
   formatAmount,
   QUEST_GEAR_GROUPS,
   questGearSourceIdV1,
+  TRIP_IMPS_V1,
+  IMP_RULES,
+  impScrapBandV1,
+  impHashV1,
+  impIdV1,
+  tripGearSourceIdV1,
   BIOME_BOSSES_V1,
   BIOME_BOSS_DAMAGE_V1,
   BIOME_BOSS_REACH_V1,
@@ -31113,6 +31217,8 @@ export {
   UNIQUE_TIERS,
   UNIQUE_LINE_UNLOCKS,
   UNIQUE_LINES_V3,
+  UNIQUE_SIGNATURE_LINE,
+  rerollableUniqueV3,
   uniquePoolV3,
   uniqueLineKeyV3,
   uniqueStarValue,
@@ -31710,6 +31816,7 @@ export {
   groundGear,
   hasUnresolvedGear,
   lineToPoint,
+  freeGearPosition,
   canDropGear,
   applyDropGear,
   collectRenewableGear,
