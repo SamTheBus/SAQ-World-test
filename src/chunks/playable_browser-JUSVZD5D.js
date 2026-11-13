@@ -163020,7 +163020,7 @@ function floorMarkersV1(f, found, m) {
 }
 function createDungeonMapV1({ document: doc, environment: env, store: store2, releaseInput = () => {
 }, onClose = () => {
-} }) {
+}, drawFriend = (c, x, y, s, m, ang = Math.atan2(m.facing?.y ?? -1, m.facing?.x ?? 0)) => heroArrow(c, x, y, s, ang, { fill: "#e8dcc0", shade: "#9a8a66" }) }) {
   const el3 = (tag2, cls, text3) => {
     const e = doc.createElement(tag2);
     if (cls) e.className = cls;
@@ -163103,8 +163103,12 @@ function createDungeonMapV1({ document: doc, environment: env, store: store2, re
     dirty = true;
   }
   const friendsHere = () => {
-    const me = hero();
-    return Object.values(model?.entitiesById ?? {}).filter((a) => a && a !== me && a.alive && a.team === "party" && a.position && a.residency?.spaceInstanceId === me?.residency?.spaceInstanceId);
+    const me = hero(), here2 = me?.residency?.spaceInstanceId;
+    if (!here2) return [];
+    return (model?.navigation?.party ?? []).flatMap((p) => {
+      const a = model.entitiesById?.[model.playersById?.[p.playerId]?.entityId];
+      return a && a !== me && a.position && a.residency?.spaceInstanceId === here2 ? [{ a, m: { cls: p.cls, facing: model.primary?.actorsById?.[a.entityId]?.facing ?? null } }] : [];
+    });
   };
   function paintMini(c, cx, cy2, R11, ang, zoom = 1) {
     const d = map(), i = floorIndex(), me = hero();
@@ -163120,17 +163124,13 @@ function createDungeonMapV1({ document: doc, environment: env, store: store2, re
       const q2 = at8(m.x, m.y);
       if (Math.hypot(q2.x - cx, q2.y - cy2) < R11 - 6) medal(c, q2.x, q2.y, R11 < 60 ? 5.4 : 6.2, m.kind, { shadow: false });
     }
-    for (const a of friendsHere()) {
+    for (const { a, m } of friendsHere()) {
       const q2 = at8(a.position.x / f.tileSize, a.position.y / f.tileSize);
-      if (Math.hypot(q2.x - cx, q2.y - cy2) > R11 - 4) continue;
-      c.fillStyle = "#0b1015";
-      c.beginPath();
-      c.arc(q2.x, q2.y, 4.4, 0, 7);
-      c.fill();
-      c.fillStyle = "#67b7ff";
-      c.beginPath();
-      c.arc(q2.x, q2.y, 3.1, 0, 7);
-      c.fill();
+      if (Math.hypot(q2.x - cx, q2.y - cy2) < R11 - 7) drawFriend(c, q2.x, q2.y, 6.5, m);
+      else {
+        const t = Math.atan2(q2.y - cy2, q2.x - cx);
+        drawFriend(c, cx + Math.cos(t) * (R11 - 7), cy2 + Math.sin(t) * (R11 - 7), 6, m, t);
+      }
     }
     heroArrow(c, cx, cy2, 7.5, ang);
     return true;
@@ -163212,16 +163212,9 @@ function createDungeonMapV1({ document: doc, environment: env, store: store2, re
       medal(c, q2.x, q2.y, mr, m.kind, { shadow: false });
     }
     if (f.index === i) {
-      for (const a of friendsHere()) {
+      for (const { a, m } of friendsHere()) {
         const q2 = at8(a.position.x / f.tileSize, a.position.y / f.tileSize);
-        c.fillStyle = "#0b1015";
-        c.beginPath();
-        c.arc(q2.x, q2.y, 6, 0, 7);
-        c.fill();
-        c.fillStyle = "#67b7ff";
-        c.beginPath();
-        c.arc(q2.x, q2.y, 4.3, 0, 7);
-        c.fill();
+        drawFriend(c, q2.x, q2.y, Math.max(7.5, Math.min(10, s)), m);
       }
       const me = hero();
       if (me?.position) {
@@ -163410,7 +163403,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   let questTarget = null, tracked = store.get("saq-map-track"), miniOffset = Number(store.get("saq-minimap-zoom")) || 0, kneel = null, toastUntil = 0, seen4 = null, bannerQueue = [], bannerUntil = 0, insideTown = null, placeLineUntil = 0, lastBanner = { id: null }, placesKey = null, placesList = [], bezel = null;
   const dungeon = createDungeonMapV1({ document: doc, environment: env, store, releaseInput, onClose: () => {
     dirty = true;
-  } });
+  }, drawFriend: (...a) => friendArrow(...a) });
   let dungeonZoom = Math.max(0, Math.min(2, Number(store.get("saq-dungeon-zoom") ?? 1) || 0));
   const cache10 = /* @__PURE__ */ new Map(), miniCache = /* @__PURE__ */ new Map(), pointers = /* @__PURE__ */ new Map(), phoneQuery = env.matchMedia?.("(max-width:600px)"), shortQuery = env.matchMedia?.("(max-height:500px)");
   loadMapFonts(env, () => {
