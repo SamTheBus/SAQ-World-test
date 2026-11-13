@@ -27552,11 +27552,21 @@ function groundCoverageReadyD9(state, p) {
 function participantGroundCoverageReadyD9(state) {
   return !state.d9World || Object.values(state.playersById).every((p) => groundCoverageReadyD9(state, p));
 }
+function groundCoverageMovingInteriorD9(state, p) {
+  const actor = state.entitiesById[p.entityId], space = actor?.residency.spaceInstanceId;
+  if (!state.d9World || !space || space === state.overworldInstanceId) return false;
+  const cache6 = caches2.get(state)?.get(p.playerId);
+  return Boolean(cache6 && cache6.spaceInstanceId === space && !cache6.fullSpaceBounds);
+}
 function participantGroundCoverageRefreshDueD9(state) {
   if (!state.d9World) return false;
   return Object.values(state.playersById).some((p) => {
     const actor = state.entitiesById[p.entityId];
-    if (actor.residency.spaceInstanceId !== state.overworldInstanceId) return false;
+    if (actor.residency.spaceInstanceId !== state.overworldInstanceId) {
+      if (!groundCoverageMovingInteriorD9(state, p)) return false;
+      const cache7 = caches2.get(state).get(p.playerId), relative2 = relativeWorldPosition(legacyWorldPosition(actor.position), cache7.center, 4);
+      return !relative2 || Math.hypot(relative2.x - cache7.center.localX, relative2.y - cache7.center.localY) >= 128;
+    }
     const cache6 = caches2.get(state)?.get(p.playerId);
     if (!cache6 || cache6.spaceInstanceId !== state.overworldInstanceId) return true;
     if (cache6.fullSpaceBounds) return false;
@@ -32016,6 +32026,7 @@ export {
   nounLookType,
   groundOccupancyWindowD9,
   participantGroundCoverageReadyD9,
+  groundCoverageMovingInteriorD9,
   participantGroundCoverageRefreshDueD9,
   groundCoverageStatusD9,
   installGroundOccupancyD9,

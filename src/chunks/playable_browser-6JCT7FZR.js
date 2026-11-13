@@ -608,6 +608,7 @@ import {
   generatedTownsV1,
   goldUnit,
   grantPotions,
+  groundCoverageMovingInteriorD9,
   groundCoverageStatusD9,
   groundGear,
   groundOccupancyWindowD9,
@@ -1097,7 +1098,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-K7YCELDR.js";
+} from "./chunk-AE4E7TZE.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -199497,7 +199498,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
           if (tripLook?.on && drawn.movedLastTick) drawTripGhostsV1(ctx2, id2, heroSpecForActor(drawn), pose2.facing, time3, tripLook.big);
           if (tripPull) drawTripPulledHeroV1(ctx2, drawn, heroSpecForActor(drawn), tripPull, time3);
           else if (tripFall) drawTripFallingHeroV1(ctx2, drawn, heroSpecForActor(drawn), tripFall, time3);
-          else if (!(model.combatPresentation?.families?.[id2]?.blink && model.combatPresentation.families[id2].dash.frames > 0)) drawWorldHero(ctx2, model.combatPresentation?.families?.[id2]?.thrown && drawn.heroLook ? { ...drawn, heroLook: { ...drawn.heroLook, gear: { ...drawn.heroLook.gear, off: null } } } : drawn, pose2.facing, time3, pose2.primary, model.tick, Boolean(reaction?.flash), model.combatPresentation?.families?.[id2]?.skill);
+          else if (!(model.combatPresentation?.families?.[id2]?.blink && model.combatPresentation.families[id2].dash.frames > 0)) drawWorldHero(ctx2, model.combatPresentation?.families?.[id2]?.thrown && drawn.heroLook ? { ...drawn, heroLook: { ...drawn.heroLook, gear: { ...drawn.heroLook.gear, off: null } } } : drawn, pose2.facing, time3, pose2.primary, model.tick + (drawn.tickLead ?? 0), Boolean(reaction?.flash), drawn.skillPose ?? model.combatPresentation?.families?.[id2]?.skill);
           if (tripLook) drawTripOverHeroV1(ctx2, drawn.position.x, drawn.position.y, tripLook, time3, drawn.movedLastTick);
           if (!tripPull && !tripFall) drawTripGooFeetV1(ctx2, model, id2, drawn, time3, pose2.facing);
           if (leveling) heroLevelUp.drawFront(ctx2, { ...drawn, entityId: id2 }, time3);
@@ -201587,8 +201588,9 @@ async function readParticipantGroundWindowD9(state2, p, { readPage, sha256, radi
 // src/storage/ground_coverage_query_v1.js
 var preparedResults = /* @__PURE__ */ new WeakSet();
 function captureGroundCoverageQueryV1(state2) {
-  const players = Object.values(state2.playersById).filter((p) => state2.entitiesById[p.entityId].residency.spaceInstanceId === state2.overworldInstanceId);
+  const players = Object.values(state2.playersById).filter((p) => state2.entitiesById[p.entityId].residency.spaceInstanceId === state2.overworldInstanceId || groundCoverageMovingInteriorD9(state2, p));
   const collision = state2.spacesByInstanceId[state2.overworldInstanceId].collision;
+  const interiors = [...new Set(players.map((p) => state2.entitiesById[p.entityId].residency.spaceInstanceId).filter((id2) => id2 !== state2.overworldInstanceId))];
   return copyWire({ root: state2.d9World.groundIndex, state: {
     overworldInstanceId: state2.overworldInstanceId,
     d9World: { groundIndex: state2.d9World.groundIndex, runtime: { frames: state2.d9World.runtime.frames } },
@@ -201597,8 +201599,14 @@ function captureGroundCoverageQueryV1(state2) {
       const a = state2.entitiesById[p.entityId];
       return [p.entityId, { position: a.position, residency: { spaceInstanceId: a.residency.spaceInstanceId } }];
     })),
-    // Only outdoors are queried; no terrain or floor collision is copied.
-    spacesByInstanceId: { [state2.overworldInstanceId]: { collision: { tileSize: collision.tileSize } } }
+    // No terrain or floor collision is copied: only the sizes that choose a floor's window.
+    spacesByInstanceId: {
+      [state2.overworldInstanceId]: { collision: { tileSize: collision.tileSize } },
+      ...Object.fromEntries(interiors.map((id2) => {
+        const c = state2.spacesByInstanceId[id2].collision;
+        return [id2, { collision: Object.fromEntries(["version", "tileSize", "width", "height"].filter((k) => c[k] !== void 0).map((k) => [k, c[k]])) }];
+      }))
+    }
   } });
 }
 async function prepareGroundCoverageQueryV1(query, { readPage, sha256, stagedPages = [], yieldTask = () => new Promise((resolve) => setTimeout(resolve, 0)) }) {
@@ -201624,7 +201632,7 @@ async function prepareGroundCoverageQueryV1(query, { readPage, sha256, stagedPag
     const rows = await readParticipantGroundWindowD9(state2, p, { readPage: read2, sha256, radius: D9_RUNTIME_POLICY.occupancyRadius, center: window2.center });
     const points2 = [];
     for (let i = 0; i < rows.length; i += 128) points2.push(rows.slice(i, i + 128).map((row2) => copyWire(row2.row.location.position)));
-    coverage.push({ playerId: p.playerId, spaceInstanceId: state2.overworldInstanceId, ...window2, radius: D9_RUNTIME_POLICY.occupancyRadius, points: points2 });
+    coverage.push({ playerId: p.playerId, spaceInstanceId: state2.entitiesById[p.entityId].residency.spaceInstanceId, ...window2, radius: D9_RUNTIME_POLICY.occupancyRadius, points: points2 });
   }
   const result = freezeWire({ root: query.root, coverage, pageReads: reads.size });
   preparedResults.add(result);
@@ -203656,7 +203664,7 @@ async function createLocalEndlessSessionD9(options) {
     })();
     return servicePending;
   };
-  const coop = Object.freeze({ hostPlayerId: () => localPlayerId, seatPresence, partyFacts, waiting: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => Boolean(s.waitingRoom) && s.entitiesById[s.playersById[pid].entityId]?.residency.spaceInstanceId === s.waitingRoom.spaceInstanceId)), readModel: (pid) => seatPort(pid).getReadModel(), passport: (pid, heroId) => authority.withAuthority((a) => a.withAuthorityState((s) => s.playersById[pid] ? extractHeroPassport(s, pid, { heroId }) : null)), inventoryMark: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => {
+  const coop = Object.freeze({ hostPlayerId: () => localPlayerId, tick: () => authority.withAuthority((a) => a.withAuthorityState((s) => s.tick)), seatPresence, partyFacts, waiting: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => Boolean(s.waitingRoom) && s.entitiesById[s.playersById[pid].entityId]?.residency.spaceInstanceId === s.waitingRoom.spaceInstanceId)), readModel: (pid) => seatPort(pid).getReadModel(), passport: (pid, heroId) => authority.withAuthority((a) => a.withAuthorityState((s) => s.playersById[pid] ? extractHeroPassport(s, pid, { heroId }) : null)), inventoryMark: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => {
     const p = s.playersById[pid];
     if (!p) return null;
     const i = p.inventory;
@@ -204041,7 +204049,9 @@ function writeCoopIntentV1(environment, intent) {
     return false;
   }
 }
-var MODEL_INTERVAL_MS = 50;
+var MODEL_INTERVAL_MS = 33;
+var MODEL_TICKS = 2;
+var MODEL_MIN_GAP_MS = 24;
 var PASSPORT_INTERVAL_MS = 3e3;
 var AWAY_WAIT_MS = 5e3;
 var KEEP_PASSPORTS = 12;
@@ -204131,7 +204141,7 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
       link.close("closed");
       return;
     }
-    const g = { id: crypto.randomUUID(), link, via, hello: null, playerId: null, ready: false, parked: false, awayTimer: null, sent: [], encoder: createModelEncoderV1(), mark: null, passportAt: -Infinity, lastModel: null, lastSent: -Infinity };
+    const g = { id: crypto.randomUUID(), link, via, hello: null, playerId: null, ready: false, parked: false, awayTimer: null, sent: [], encoder: createModelEncoderV1(), mark: null, passportAt: -Infinity, lastModel: null, lastSent: -Infinity, lastTick: -Infinity };
     guests.set(g.id, g);
     link.onClose(() => drop3(g, "left"));
     link.onQuiet?.((on) => away(g, on));
@@ -204186,6 +204196,7 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
       } else if (m.t === "ready" && g.playerId) {
         g.encoder = createModelEncoderV1();
         g.lastModel = null;
+        g.lastTick = -Infinity;
         g.ready = true;
       } else if (m.t === "away" || m.t === "back") away(g, m.t === "away");
       else if (m.t === "ping" && typeof m.at === "number") link.send({ t: "pong", at: m.at });
@@ -204233,9 +204244,15 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
   function pump() {
     if (!session) return;
     const t = now3();
+    let tick = null;
+    try {
+      tick = session.coop.tick?.() ?? null;
+    } catch {
+    }
     for (const g of guests.values()) {
       if (!g.playerId || g.link.closed || g.parked) continue;
-      if (g.ready && t - g.lastSent >= MODEL_INTERVAL_MS - 6 && !g.link.busy()) {
+      const since2 = t - g.lastSent, due = tick === null ? since2 >= MODEL_INTERVAL_MS - 6 : tick !== g.lastTick && (tick - g.lastTick >= MODEL_TICKS && since2 >= MODEL_MIN_GAP_MS || since2 >= MODEL_INTERVAL_MS * 1.5);
+      if (g.ready && due && !g.link.busy()) {
         let model;
         try {
           model = session.coop.readModel(g.playerId);
@@ -204248,6 +204265,7 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
           if (text3) {
             g.link.send(text3);
             g.lastSent = t;
+            g.lastTick = Number.isFinite(model.tick) ? model.tick : tick;
           }
         }
       }
@@ -204364,16 +204382,34 @@ var LEAD_MAX_MS = 400;
 var EASE_MS = 60;
 var CORRECT_MS = 220;
 var TICK_MS3 = 1e3 / 60;
+var KEEP_FRAMES = 12;
+var DELAY_MIN_MS = 40;
+var DELAY_MAX_MS = 200;
+var BASE_STEPS = SHIELD_SWORD_PRIMARY.steps.map((s) => ({ startup: s.startup, active: s.active, recovery: s.recovery }));
+var CONTINUE_TICKS = SHIELD_SWORD_PRIMARY.continuationTicks;
 function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
-  let from = /* @__PURE__ */ new Map(), current = null, arrivedAt = 0, gap2 = 50, cache10 = null, cacheAt = -1;
+  let frames = [], current = null, arrivedAt = 0, gap2 = 50, cache10 = null, cacheAt = -1, spacing = 33, jitter = 8, delay = 60, space = null;
   let intent = { x: 0, y: 0 }, intentAt = 0, releasedAt = null, hold = null, speed = 0, own = null, ownAt = -1, ownId = null, lastOwn = null, err = { x: 0, y: 0 }, jump3 = true, mode = "";
   let tickOffset = null;
+  let learned = {}, held = false, queued2 = false, tap = null, guess = null, lastSwing = null, skillGuess = null;
   const frameAge = (model, t) => tickOffset === null || !Number.isFinite(model?.tick) ? t - arrivedAt : Math.max(0, t - (model.tick * TICK_MS3 + tickOffset));
-  function drawn(id2, e, t) {
-    const f = from.get(id2);
-    if (!f) return e.position;
-    const k = Math.max(0, Math.min(1, (t - arrivedAt) / gap2));
-    return { x: f.x + (e.position.x - f.x) * k, y: f.y + (e.position.y - f.y) * k };
+  const leadTick = (t) => tickOffset === null ? null : (t - tickOffset + rtt()) / TICK_MS3;
+  function bracket(t) {
+    if (frames.length < 2 || tickOffset === null) return null;
+    const r = (t - tickOffset - delay) / TICK_MS3, last = frames[frames.length - 1];
+    if (r >= last.tick) return null;
+    let i = frames.length - 2;
+    while (i > 0 && frames[i].tick > r) i--;
+    const a = frames[i], b = frames[i + 1];
+    return { a, b, k: Math.max(0, Math.min(1, (r - a.tick) / (b.tick - a.tick))) };
+  }
+  function placed(id2, e, br) {
+    if (!br || !e.alive || !e.position) return e.position;
+    const pa13 = br.a.entities[id2], pb = br.b.entities[id2];
+    if (!pb?.position || !pb.alive) return e.position;
+    if (!pa13?.position || !pa13.alive || pa13.position === pb.position) return pb.position;
+    if (Math.hypot(pb.position.x - pa13.position.x, pb.position.y - pa13.position.y) > GLIDE_SNAP_PX) return br.k < 0.5 ? pa13.position : pb.position;
+    return { x: pa13.position.x + (pb.position.x - pa13.position.x) * br.k, y: pa13.position.y + (pb.position.y - pa13.position.y) * br.k };
   }
   function reach(model, e, a, b) {
     if (!collides) return a;
@@ -204386,7 +204422,7 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
     }
     return p;
   }
-  function ownPosition(model, id2, e, t) {
+  function ownPosition(model, id2, e, t, br) {
     if (t === ownAt && id2 === ownId) return own;
     const dt = ownAt < 0 ? 16 : Math.max(0, Math.min(100, t - ownAt));
     ownAt = t;
@@ -204396,10 +204432,10 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       hold = null;
       return own;
     }
-    const base3 = drawn(id2, e, t), held = Math.hypot(intent.x, intent.y) > 0.1;
+    const base3 = placed(id2, e, br), isHeld = Math.hypot(intent.x, intent.y) > 0.1;
     let target = base3;
     let now_ = "base";
-    if (held && speed > 0) {
+    if (isHeld && speed > 0) {
       const k = 1 / Math.hypot(intent.x, intent.y), dx = intent.x * k, dy = intent.y * k, lead = Math.min(LEAD_MAX_MS, rtt() + frameAge(model, t));
       target = reach(model, e, e.position, { x: e.position.x + dx * speed * lead, y: e.position.y + dy * speed * lead });
       if (own && Math.hypot(own.x - target.x, own.y - target.y) <= GLIDE_SNAP_PX) {
@@ -204411,7 +204447,7 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
         return own;
       }
       now_ = "lead";
-    } else if (hold && t - releasedAt < rtt() + gap2 + 80) {
+    } else if (hold && t - releasedAt < rtt() + delay + 80) {
       target = hold;
       now_ = "hold";
     } else hold = null;
@@ -204436,9 +204472,65 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
     own = { x: target.x + err.x, y: target.y + err.y };
     return own;
   }
+  const timingFor = (step3) => {
+    const b = BASE_STEPS[(step3 - 1) % BASE_STEPS.length] ?? BASE_STEPS[0], l = learned[step3] ?? {};
+    return { startup: l.startup ?? b.startup, active: l.active ?? b.active, recovery: l.recovery ?? b.recovery };
+  };
+  const total = (T121) => T121.startup + T121.active + T121.recovery, endOf = (w) => w.startedTick + total(w.T);
+  function hostSwing(c) {
+    if (!c || !["startup", "active", "recovery"].includes(c.phase)) return null;
+    const T121 = timingFor(c.comboStep);
+    T121[c.phase] = Math.max(1, c.phaseEndsTick - c.phaseStartedTick);
+    const startedTick = c.phase === "startup" ? c.phaseStartedTick : c.phase === "active" ? c.phaseStartedTick - T121.startup : c.phaseStartedTick - T121.startup - T121.active;
+    return { comboStep: c.comboStep, startedTick, T: T121, aim: c.aim, id: c.primaryActionId };
+  }
+  function phaseAt(w, D2) {
+    if (!w) return null;
+    const { T: T121 } = w, s = w.startedTick;
+    if (D2 >= s + total(T121)) return null;
+    const [phase2, ps, pe] = D2 < s + T121.startup ? ["startup", s, s + T121.startup] : D2 < s + T121.startup + T121.active ? ["active", s + T121.startup, s + T121.startup + T121.active] : ["recovery", s + T121.startup + T121.active, s + total(T121)];
+    return { comboStep: w.comboStep, phase: phase2, phaseStartedTick: ps, phaseEndsTick: pe, aim: w.aim, primaryActionId: w.id };
+  }
+  const canSwing = (model, e) => Boolean(model.primary && model.persistence?.phase === "encounter" && e.alive && !model.siteActivationPending && !model.subweapon?.guard?.requested && !model.playersById?.[model.localPlayerId]?.d8?.attackSkill);
+  function ownSwing(model, id2, e, D2) {
+    const a = model.primary?.actorsById?.[id2];
+    if (!a || !canSwing(model, e)) {
+      guess = null;
+      tap = null;
+      return void 0;
+    }
+    const host = hostSwing(a.current);
+    if (guess && host && host.startedTick >= guess.startedTick - 8) guess = null;
+    if (guess && Number.isFinite(model.tick) && model.tick >= guess.startedTick + 8) guess = null;
+    const shown2 = phaseAt(host, D2);
+    if (host) {
+      const end = endOf(host);
+      if (!lastSwing || end >= lastSwing.end) lastSwing = { end, step: host.comboStep };
+    }
+    if (shown2) guess = null;
+    else if (guess && !phaseAt(guess, D2)) {
+      lastSwing = { end: endOf(guess), step: guess.comboStep };
+      guess = null;
+    }
+    const next = () => lastSwing && D2 < lastSwing.end + CONTINUE_TICKS ? lastSwing.step % BASE_STEPS.length + 1 : lastSwing ? 1 : a.comboDeadline !== null ? a.nextComboStep : 1;
+    const start = (step3, at8) => {
+      guess = { comboStep: step3, startedTick: at8, T: timingFor(step3), aim: a.facing, id: "guess" };
+    };
+    if (tap !== null) {
+      if (shown2 || guess) queued2 = true;
+      else start(next(), Math.min(tap, D2));
+      tap = null;
+    }
+    if (!shown2 && !guess && (held || queued2) && lastSwing && D2 >= lastSwing.end && D2 - lastSwing.end < 20) {
+      start(lastSwing.step % BASE_STEPS.length + 1, lastSwing.end);
+      queued2 = false;
+    }
+    return shown2 ?? phaseAt(guess, D2);
+  }
   return Object.freeze({
     // The guest held a direction (or let go): {x, y} as sent to the host.
     intent(next) {
+      cache10 = null;
       jump3 = true;
       const was = Math.hypot(intent.x, intent.y) > 0.1, is = Math.hypot(next.x, next.y) > 0.1;
       if (was && !is) {
@@ -204448,20 +204540,41 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       if (is && (!was || next.x !== intent.x || next.y !== intent.y)) intentAt = now3();
       intent = { x: next.x, y: next.y };
     },
+    // The guest pressed or let go of Attack (combat.primaryIntent's payload).
+    press(payload) {
+      cache10 = null;
+      if (payload?.pressed) {
+        if (!held) {
+          const D2 = leadTick(now3());
+          if (D2 !== null) tap = D2;
+        }
+        held = true;
+      } else {
+        held = false;
+        if (payload?.cancelQueued) queued2 = false;
+      }
+    },
+    // The guest used a skill (combat.skill's payload; the wheel only sends ready skills).
+    skill(payload) {
+      cache10 = null;
+      const D2 = leadTick(now3());
+      if (D2 !== null && typeof payload?.skillId === "string") skillGuess = { skillId: payload.skillId, tick: Math.round(D2), x: payload.aim?.x ?? 1, y: payload.aim?.y ?? 0 };
+    },
     arrived(before, after, model = null) {
       if (after === current) return;
-      const t = now3(), next = /* @__PURE__ */ new Map();
-      if (current && before === current) {
-        for (const [id3, e2] of Object.entries(after)) {
-          const old2 = current[id3];
-          if (!old2 || old2 === e2 || !e2.alive || !old2.alive || !e2.position || !old2.position) continue;
-          const p = drawn(id3, old2, t);
-          if (p.x === e2.position.x && p.y === e2.position.y) continue;
-          if (Math.hypot(e2.position.x - p.x, e2.position.y - p.y) > GLIDE_SNAP_PX) continue;
-          next.set(id3, { x: p.x, y: p.y });
+      const t = now3();
+      const where = model?.context?.spaceInstanceId ?? null;
+      if (!current || before !== current || where !== space || !Number.isFinite(model?.tick)) {
+        frames = [];
+        if (where !== space) {
+          guess = null;
+          lastSwing = null;
+          skillGuess = null;
+          tap = null;
         }
-        gap2 = Math.max(16, Math.min(150, gap2 * 0.8 + (t - arrivedAt) * 0.2));
       }
+      space = where;
+      if (current) gap2 = Math.max(16, Math.min(150, gap2 * 0.8 + (t - arrivedAt) * 0.2));
       const id2 = model?.playersById?.[model.localPlayerId]?.entityId, e = id2 ? after[id2] : null;
       if (e?.position && e.alive) {
         if (lastOwn && lastOwn.id === id2 && model.tick > lastOwn.tick && Math.hypot(intent.x, intent.y) > 0.1 && t - intentAt > rtt() + 150) {
@@ -204470,11 +204583,25 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
         }
         lastOwn = { id: id2, tick: model.tick, x: e.position.x, y: e.position.y };
       } else lastOwn = null;
+      const c = id2 ? model?.primary?.actorsById?.[id2]?.current : null;
+      if (c && ["startup", "active", "recovery"].includes(c.phase) && c.phaseEndsTick > c.phaseStartedTick) (learned[c.comboStep] ??= {})[c.phase] = c.phaseEndsTick - c.phaseStartedTick;
       if (model && Number.isFinite(model.tick)) {
         const o = t - model.tick * TICK_MS3;
-        tickOffset = tickOffset === null || Math.abs(o - tickOffset) > 250 ? o : tickOffset * 0.92 + o * 0.08;
+        if (tickOffset === null || Math.abs(o - tickOffset) > 250) {
+          tickOffset = o;
+          frames = [];
+        } else {
+          jitter = jitter * 0.9 + Math.abs(o - tickOffset) * 0.1;
+          tickOffset = tickOffset * 0.92 + o * 0.08;
+        }
+        const prev = frames[frames.length - 1];
+        if (prev && model.tick > prev.tick) spacing = Math.max(16, Math.min(DELAY_MAX_MS, spacing * 0.9 + (model.tick - prev.tick) * TICK_MS3 * 0.1));
+        if (prev && model.tick <= prev.tick) frames.pop();
+        frames.push({ tick: model.tick, entities: after });
+        if (frames.length > KEEP_FRAMES) frames.shift();
+        const want = Math.max(DELAY_MIN_MS, Math.min(DELAY_MAX_MS, spacing + 2 * jitter + 8));
+        delay += (want - delay) * 0.1;
       }
-      from = next;
       current = after;
       arrivedAt = t;
       cache10 = null;
@@ -204484,21 +204611,30 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
     present(model, time3) {
       if (!model) return model;
       const t = Number.isFinite(time3) ? time3 : now3();
-      const id2 = model.playersById?.[model.localPlayerId]?.entityId, e = id2 ? model.entitiesById[id2] : null, mine = e ? ownPosition(model, id2, e, t) : null;
-      const gliding = model.entitiesById === current && from.size > 0 && t - arrivedAt < gap2;
-      if (!gliding && (!mine || mine.x === e.position.x && mine.y === e.position.y)) return model;
-      if (cache10 && cacheAt === t) return cache10;
-      const entitiesById = { ...model.entitiesById };
-      if (gliding) for (const g of from.keys()) {
-        const x = current[g];
-        if (x) entitiesById[g] = { ...x, position: drawn(g, x, t) };
+      if (cache10 && cacheAt === t && cache10.model === model) return cache10.out;
+      const br = model.entitiesById === current ? bracket(t) : null;
+      const id2 = model.playersById?.[model.localPlayerId]?.entityId, e = id2 ? model.entitiesById[id2] : null, mine = e ? ownPosition(model, id2, e, t, br) : null;
+      const D0 = e && Number.isFinite(model.tick) ? leadTick(t) : null, lead = D0 === null ? 0 : Math.max(0, Math.min(LEAD_MAX_MS / TICK_MS3, D0 - model.tick)), D2 = D0 === null ? null : model.tick + lead;
+      const swing = e && D2 !== null ? ownSwing(model, id2, e, D2) : void 0;
+      if (skillGuess) {
+        const h = model.combatPresentation?.families?.[id2]?.skill;
+        if (h && h.skillId === skillGuess.skillId && h.tick >= skillGuess.tick - 20 || Number.isFinite(model.tick) && model.tick >= skillGuess.tick + 12 || !e?.alive) skillGuess = null;
       }
-      if (mine) entitiesById[id2] = { ...e, position: mine };
-      cache10 = { ...model, entitiesById };
+      const a = id2 ? model.primary?.actorsById?.[id2] : null, swingChanged = swing !== void 0 && Boolean(a) && !(swing === null && a.current === null);
+      if (!br && !lead && !skillGuess && !swingChanged && (!mine || mine.x === e.position.x && mine.y === e.position.y)) return model;
+      const entitiesById = { ...model.entitiesById };
+      if (br) for (const [k, x] of Object.entries(model.entitiesById)) {
+        if (k === id2) continue;
+        const p = placed(k, x, br);
+        if (p !== x.position && (p.x !== x.position.x || p.y !== x.position.y)) entitiesById[k] = { ...x, position: p };
+      }
+      if (e) entitiesById[id2] = { ...e, ...mine ? { position: mine } : {}, ...lead ? { tickLead: lead } : {}, ...skillGuess ? { skillPose: skillGuess } : {} };
+      const out4 = { ...model, entitiesById, ...swingChanged ? { primary: { ...model.primary, actorsById: { ...model.primary.actorsById, [id2]: { ...a, current: swing } } } } : {} };
+      cache10 = { model, out: out4 };
       cacheAt = t;
-      return cache10;
+      return out4;
     },
-    inspect: () => ({ gap: gap2, speed, rtt: rtt() })
+    inspect: () => ({ gap: gap2, delay, spacing, jitter, frames: frames.length, speed, rtt: rtt() })
   });
 }
 function createCoopGuestSessionV1({ link, playerId, early = [], release = () => {
@@ -204593,6 +204729,8 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
       lastSentAt = now3();
       const c = { ...command, clientSequence: sequence }, id2 = nextId++;
       if (c.kind === "movement.setIntent" && c.payload) smooth30.intent(c.payload);
+      else if (c.kind === "combat.primaryIntent" && c.payload) smooth30.press(c.payload);
+      else if (c.kind === "combat.skill" && c.payload) smooth30.skill(c.payload);
       if (COOP_WAITED_COMMANDS.test(c.kind)) {
         const p = new Promise((resolve, reject) => waiting.set(id2, { resolve, reject }));
         link.send({ t: "cmd", id: id2, c });
@@ -207730,7 +207868,7 @@ async function startWorldClient(environment) {
     return;
   }
   const coopBuild = environment.document.documentElement.dataset.worldRelease ?? "source";
-  let coopScreens = null, coopJoin = null, coopHost = null, coopRoom = null, coopParty = null, coopEnded = null, coopEndReason = null;
+  let coopScreens = null, coopJoin = null, coopHost = null, coopPumpQueued = false, coopRoom = null, coopParty = null, coopEnded = null, coopEndReason = null;
   const launcherKey = hasWorldReshape(plannedOpening?.binding) ? RESHAPE_DATABASE : hasRoadsideEncounters(plannedOpening?.binding) ? ROADSIDE_DATABASE : hasFirstJourney(plannedOpening?.binding) ? ACCESS_DATABASE : hasHydrologyV1(plannedOpening?.binding) ? HYDROLOGY_DATABASE : buildBalanceDatabaseV2(environment.document.body.dataset.worldBuildBalance === "v2", plannedOpening?.assetId, plannedOpening ? plannedNamespace + plannedOpening.assetId : activity ? `${FORGE_REVIEW_BUILD ? "saq-world-forge-review" : "saq-world-activity-launcher-v1"}-${proofCase}` : scenario === "procedural" ? WORLD_PROCEDURAL_LAUNCHER_KEY : WORLD_SEAMLESS_LAUNCHER_KEY);
   const policy = createLocalLaunchPolicy({ launcherStore: launcherCapability(environment, heroPrefix), url: location, launcherKey });
   const launcherDatabase = activity ? createLocalIndexedDbCampaignStore({ indexedDB: saveIndexedDb, sha256, databaseName }) : null;
@@ -208879,6 +209017,13 @@ async function startWorldClient(environment) {
     if (advanced) {
       loopHealth.advanced();
       performanceProbe?.record("authorityTick", 0);
+      if (coopHost && !coopPumpQueued) {
+        coopPumpQueued = true;
+        queueMicrotask(() => {
+          coopPumpQueued = false;
+          coopHost?.tick();
+        });
+      }
     }
   }
   const clock8 = createAuthorityClock({
