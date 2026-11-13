@@ -132885,6 +132885,10 @@ var seedOf4 = (id) => {
   return h;
 };
 var skinOf2 = (e) => DEN_SKINS_V1[e.skin] ? e.skin : "woodland";
+var labelSpotV1 = (a) => {
+  const p = creaturePresentationD11_1(a.enemyFamily), k = a.presentationScale ?? 1, l = p?.labels;
+  return l ? { barY: l.healthBarY * k, labelY: Math.min(l.levelLabelY, l.healthBarY) * k, barHalf: Math.max(18, Math.min(34, p.visualBounds.width * 0.68)) / 2 } : { barY: HEAD4[a.enemyFamily] ?? -30, labelY: (HEAD4[a.enemyFamily] ?? -30) - 10, barHalf: 12 };
+};
 var HEAD4 = { young_yeti: -60, shardling: -40, tusk_boar: -36, sprout: -30, slime: -28, antlion: -24, dust_imp: -40, bog_frog: -30, leech: -14, griffling: -44, thorn_wyrm: -34, dart_frog: -24, cinder_crab: -40, ember_newt: -18 };
 var burrows = (skin) => skin === "desert" ? [[-7, 31]] : [[-114, 26], [121, 19]];
 var ARRIVE = 50;
@@ -132905,13 +132909,13 @@ function denDepthItemsV1(e, model, t) {
   d.sleepers.forEach((sid, i) => {
     const a = model.entitiesById?.[sid];
     if (!a?.alive) return;
-    const face4 = a.presentationFacingX === -1 ? -1 : 1, x = a.position.x + (face4 > 0 ? 6 : -6), y = a.position.y + (HEAD4[a.enemyFamily] ?? -30);
+    const L = labelSpotV1(a), x = a.position.x + L.barHalf + 5, y = a.position.y + L.barY + 3;
     put3("z" + i, a.position.x, a.position.y + 1, (ctx) => drawSleepZV1(ctx, x, y, { t, i }));
   });
   for (const k of d.ambushes) {
     const a = model.entitiesById?.[k.entityId];
     if (!a) continue;
-    const pop = k.ageTicks < 6 ? 0.6 + k.ageTicks / 15 : 1, fade = k.ageTicks < 30 ? 1 : Math.max(0, 1 - (k.ageTicks - 30) / 15), x = a.position.x, y = a.position.y + (HEAD4[a.enemyFamily] ?? -30) - 10;
+    const pop = k.ageTicks < 6 ? 0.6 + k.ageTicks / 15 : 1, fade = k.ageTicks < 30 ? 1 : Math.max(0, 1 - (k.ageTicks - 30) / 15), x = a.position.x, y = a.position.y + labelSpotV1(a).labelY - 4;
     put3("ambush" + k.entityId, x, a.position.y + 2, (ctx) => {
       ctx.save();
       ctx.globalAlpha = fade;
