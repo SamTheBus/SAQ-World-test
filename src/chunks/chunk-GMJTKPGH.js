@@ -4180,9 +4180,8 @@ var FACIAL_HAIR = Object.freeze(["none", "stubble", "mustache", "handlebar", "go
 var HAIR_COLORS = Object.freeze(["black", "soft-black", "dark-brown", "brown", "light-brown", "auburn", "copper", "strawberry", "dark-blonde", "blonde", "platinum", "gray", "silver", "white", "red", "pink", "blue", "teal", "green", "violet"]);
 var SKIN_TONES = Object.freeze(["porcelain", "fair", "light", "peach", "golden", "olive", "tan", "bronze", "brown", "chestnut", "deep", "ebony"]);
 var FACES = Object.freeze(["classic", "lashes", "rosy", "freckles"]);
-var ACCESSORIES = Object.freeze(["none", "flower", "ribbon", "hairpin"]);
 var HERO_NAME_MAX = 16;
-var DEFAULT_LOOK = Object.freeze({ hair: "short", hairColor: "brown", skin: "light", facialHair: "none", helmet: true, name: "", face: "classic", accessory: "none" });
+var DEFAULT_LOOK = Object.freeze({ hair: "short", hairColor: "brown", skin: "light", facialHair: "none", helmet: true, name: "", face: "classic" });
 function validHeroName(name) {
   return typeof name === "string" && name === name.trim() && [...name].length <= HERO_NAME_MAX && /^[\p{L}\p{M}\p{N} '’.-]*$/u.test(name) && !/\s\s/.test(name);
 }
@@ -4194,7 +4193,6 @@ function validateHeroLook(look) {
   requireContract(FACIAL_HAIR.includes(look.facialHair), "Unknown facial hair");
   requireContract(typeof look.helmet === "boolean", "Invalid helmet setting");
   if (look.face !== void 0) requireContract(FACES.includes(look.face), "Unknown face");
-  if (look.accessory !== void 0) requireContract(ACCESSORIES.includes(look.accessory), "Unknown accessory");
   requireContract(validHeroName(look.name), "Names use up to 16 letters, numbers, spaces, hyphens or apostrophes");
   return look;
 }
@@ -13706,9 +13704,9 @@ var WOMENS_STYLES = ["pixie", "bangs", "waves", "sidebraid", "highpony", "twinbu
 var NEW_STYLES = WOMENS_STYLES.slice(0, 8);
 var draw = (seed, n = 1) => rng(seed)() * n;
 function asWoman(look, seed) {
-  const a = draw(seed + "|hair"), b = draw(seed + "|new"), c = draw(seed + "|acc"), d = draw(seed + "|which");
+  const a = draw(seed + "|hair"), b = draw(seed + "|new");
   const hair = MENS_CUTS.has(look.hair) ? WOMENS_STYLES[a * WOMENS_STYLES.length | 0] : b < 0.35 ? NEW_STYLES[a * NEW_STYLES.length | 0] : look.hair;
-  return { ...look, hair, face: draw(seed + "|face") < 0.7 ? "rosy" : "lashes", accessory: c < 0.3 ? ["flower", "ribbon", "hairpin"][d * 3 | 0] : "none" };
+  return { ...look, hair, face: draw(seed + "|face") < 0.7 ? "rosy" : "lashes" };
 }
 var HER_NAMES = ["Aveline", "Bettany", "Clemency", "Dorcas", "Elspeth", "Florence", "Gillian", "Honora", "Iona", "Jocasta", "Katrin", "Lettice", "Mabel", "Nora", "Ottilie", "Philippa", "Rosamund", "Sybil", "Tamar", "Una", "Viola", "Willa", "Agnes", "Beatrix", "Cora", "Eden", "Hilde", "Liesel", "Marigold", "Clover"];
 var CLOTH = ["#3f7a52", "#2f5f8a", "#8a3a3a", "#2f7a74", "#6a3a6e", "#a8742a", "#4a4f5a", "#7a4a6a", "#3a5a3a", "#8a5a2a"];
@@ -13823,9 +13821,9 @@ var BUILT_CASTS = {
   "civilian:alpha:alderwood:innkeeper": { kit: "innkeeper", look: { hair: "short", facialHair: "handlebar", hairColor: "gray", skin: "light" }, cloth: "#b8463a", skirt: "#7a3f3a" },
   "civilian:alpha:town:mara": { kit: "trader", look: { hair: "highpony", facialHair: "none", hairColor: "black", skin: "brown", face: "rosy" }, cloth: "#b8463a", skirt: "#3a5a3a" },
   "civilian:alpha:town:bren": { kit: "armorer", look: { hair: "short", facialHair: "mustache", hairColor: "brown", skin: "light" }, cloth: "#3f7a52", skirt: "#4a4f5a" },
-  "civilian:alpha:town:ada": { kit: "barmaid", look: { hair: "braid", facialHair: "none", hairColor: "auburn", skin: "tan", face: "rosy", accessory: "flower" }, cloth: "#3f6f52", skirt: "#7a3f3a" },
+  "civilian:alpha:town:ada": { kit: "barmaid", look: { hair: "braid", facialHair: "none", hairColor: "auburn", skin: "tan", face: "rosy" }, cloth: "#3f6f52", skirt: "#7a3f3a" },
   "civilian:alpha:town:selene": { kit: "mystic", look: { hair: "waves", facialHair: "none", hairColor: "silver", skin: "light", face: "rosy" }, cloth: "#7d3c98", skirt: "#5a3a8a" },
-  "civilian:alpha:village:ila": { kit: "shopkeeper", look: { hair: "bob", facialHair: "none", hairColor: "copper", skin: "fair", face: "rosy", accessory: "hairpin" }, cloth: "#2f7a74", skirt: "#8a5a2a" },
+  "civilian:alpha:village:ila": { kit: "shopkeeper", look: { hair: "bob", facialHair: "none", hairColor: "copper", skin: "fair", face: "rosy" }, cloth: "#2f7a74", skirt: "#8a5a2a" },
   "civilian:alpha:village:oren": { kit: "young", look: { hair: "short", facialHair: "stubble", hairColor: "dark-blonde", skin: "olive" }, cloth: "#3f7a52", skirt: "#4a4f5a" },
   "civilian:alpha:village:nell": { kit: "host", look: { hair: "puff", facialHair: "none", hairColor: "light-brown", skin: "peach", face: "rosy" }, cloth: "#7a2e3a", skirt: "#6a3a6e" }
 };
@@ -30234,7 +30232,6 @@ export {
   wheelEntriesFor,
   skillLoadout,
   FACES,
-  ACCESSORIES,
   HERO_NAME_MAX,
   DEFAULT_LOOK,
   validHeroName,

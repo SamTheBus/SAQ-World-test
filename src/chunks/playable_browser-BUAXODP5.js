@@ -1,5 +1,4 @@
 import {
-  ACCESSORIES,
   ACCESS_DATABASE,
   ACCESS_HASH,
   ACCESS_VERSION,
@@ -1053,7 +1052,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-IASLGWAN.js";
+} from "./chunk-GMJTKPGH.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -91857,7 +91856,6 @@ var LOOK_OPTIONS = Object.freeze({
     ["violet", "Violet", "#7a4fa8", true]
   ],
   faces: [["classic", "Classic"], ["lashes", "Lashes"], ["rosy", "Rosy"], ["freckles", "Freckles"]],
-  accessories: [["none", "None"], ["flower", "Flower"], ["ribbon", "Ribbon"], ["hairpin", "Hairpin"]],
   skins: [["porcelain", "Porcelain", "#fbe6d3"], ["fair", "Fair", "#f6d5bb"], ["light", "Light", "#f0c39b"], ["peach", "Peach", "#e9b38a"], ["golden", "Golden", "#dba676"], ["olive", "Olive", "#c4a07a"], ["tan", "Tan", "#b98055"], ["bronze", "Bronze", "#a46b45"], ["brown", "Brown", "#8c5a3a"], ["chestnut", "Chestnut", "#73462d"], ["deep", "Deep", "#5e3a26"], ["ebony", "Ebony", "#43281a"]]
 });
 function hexRgb(h) {
@@ -92126,7 +92124,6 @@ function hairBack(c, st, H7, hat) {
   }
 }
 var FACE2 = "classic";
-var TRINKET = "none";
 var fineBrows = () => FACE2 === "lashes" || FACE2 === "rosy";
 function eyes(c, blink, y = -7.2) {
   if (FACE2 === "freckles") for (const [x, dy] of [[5.4, 2.6], [6.8, 3.4], [7.4, 2.2], [1.6, 2.8], [2.8, 3.4]]) px3(c, x, y + dy, 0.7, 0.7, "#9a5a3aaa");
@@ -92194,38 +92191,6 @@ function bareHead(c, st, S9, H7, blink, hat) {
   if (st === "pigtails") R3(c, -7.8, -9.8, 3.6, 2.2, P11.tie, { flat: true, lw: 1 });
   if (!["bald", "mohawk", "buzz", "curly", "undercut"].includes(st)) px3(c, -6.4, -14.4, 7, 0.9, H7.l);
   c.restore();
-  if (!hat) trinket(c);
-}
-function trinket(c) {
-  const k = TRINKET;
-  if (k === "flower") {
-    const x = -6.6, y = -13.8;
-    for (let i = 0; i < 5; i++) {
-      const a = i * TAU132 / 5 - 1.2;
-      G2(c, oct4(x + Math.cos(a) * 1.9 - 1.4, y + Math.sin(a) * 1.9 - 1.4, 2.8, 2.8, 0.8), { b: "#f2f0ff", d: "#d6d0ee" }, { lw: 0.8, flat: true });
-    }
-    G2(c, oct4(x - 1.1, y - 1.1, 2.2, 2.2, 0.6), { b: "#f2c14e", d: "#d8a640" }, { lw: 0.7, flat: true });
-    G2(c, [x - 1, y + 2.2, x - 3.4, y + 3.6, x - 1.8, y + 1.4], { b: "#4f8a4a", d: "#3a6a36" }, { lw: 0.6, flat: true });
-  } else if (k === "ribbon") {
-    const x = -10.4, y = -13;
-    G2(c, [x, y, x - 4.4, y - 3, x - 4.6, y + 2.6], { b: "#c0392b", d: "#962d22" }, { lw: 0.9 });
-    G2(c, [x, y, x + 3.6, y - 3.2, x + 4, y + 2.4], { b: "#c0392b", d: "#962d22" }, { lw: 0.9 });
-    G2(c, oct4(x - 1.2, y - 1.2, 2.4, 2.4, 0.6), { b: "#e74c3c", d: "#c0392b" }, { lw: 0.8, flat: true });
-    G2(c, [x - 0.8, y + 1, x - 2.4, y + 6, x - 0.6, y + 5.2, x + 0.6, y + 1], { b: "#c0392b", d: "#962d22" }, { lw: 0.8, flat: true });
-  } else if (k === "hairpin") {
-    const x = -8.4, y = -14.6;
-    c.lineWidth = 2.4;
-    c.strokeStyle = K4;
-    c.beginPath();
-    c.moveTo(x - 3.6, y + 3.4);
-    c.lineTo(x + 3, y - 2.6);
-    c.stroke();
-    c.lineWidth = 1;
-    c.strokeStyle = "#e2b23c";
-    c.stroke();
-    G2(c, oct4(x + 1.6, y - 4.4, 3.2, 3.2, 0.9), { b: "#5ab0c8", d: "#3a8aa0" }, { lw: 0.8, flat: true });
-    px3(c, x + 2.2, y - 3.8, 0.9, 0.9, "#e6f6fa");
-  }
 }
 function facialHair(c, b, H7) {
   const MOUTH3 = "#3b2418", o = { bottom: true, split: 0.64, lw: 1.2 }, BEARD = [-3.6, -7.4, -2.2, -7.4, -1.4, -4.2, 1.2, -3.6, 8.2, -3.6, 8.4, 0.2, 6.8, 2.2, -0.8, 2.2, -3.4, 0.2];
@@ -94750,7 +94715,6 @@ function mainWeaponOf(spec) {
 function drawBlockyHero(c, spec, pose = {}) {
   const w = kit(spec), look = toLook(spec.look);
   FACE2 = look.face ?? "classic";
-  TRINKET = look.accessory ?? "none";
   const S9 = skinPal(look.skin), H7 = hairPal(look.hairColor), st = look.hair, t = pose.t ?? 0;
   const covered = Boolean(w.helmet) && look.helmet, hatOn = covered && HATS.has(w.helmet), red = P11.red, bob = pose.bob ?? 0, sway = pose.sway ?? 0;
   const blink = pose.still ? false : pose.blink ?? (t + 1.9) % 3.9 < 0.12, front2 = w.main || pose.active ? pose.front ?? -0.6 : 1.25, guard = Boolean(pose.guard) && w.offFamily === "shield";
@@ -95029,7 +94993,7 @@ function heroCard(spec) {
     if (!Number.isInteger(g.tier) || g.tier < 0 || g.tier > 5 || g.kind !== void 0 && !KIND2.test(g.kind)) return null;
     gear2[slot] = g.kind ? { tier: g.tier, kind: g.kind } : { tier: g.tier };
   }
-  return { cls: spec.cls ?? null, look: { hair: l.hair, hairColor: l.hairColor, skin: l.skin, facialHair: l.facialHair, helmet: l.helmet, name: "", ...FACES.includes(l.face) ? { face: l.face } : {}, ...ACCESSORIES.includes(l.accessory) ? { accessory: l.accessory } : {} }, gear: gear2, offType: spec.offType ?? null };
+  return { cls: spec.cls ?? null, look: { hair: l.hair, hairColor: l.hairColor, skin: l.skin, facialHair: l.facialHair, helmet: l.helmet, name: "", ...FACES.includes(l.face) ? { face: l.face } : {} }, gear: gear2, offType: spec.offType ?? null };
 }
 var blank = (slot) => ({ slot, name: "", level: 1, hero: null, world: null, heroId: null, plays: null });
 var HERO_ID = /^hero:[0-9a-z-]{1,64}$/;
@@ -98537,8 +98501,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   const faceTiles = tiles7(LOOK_OPTIONS.faces, "face"), faceField = field3("Face", [faceTiles.box]);
   const hairTiles = tiles7(LOOK_OPTIONS.hairStyles, "hair"), natural = swatches(LOOK_OPTIONS.hairColors.filter((x) => !x[3]), "hairColor"), bold = swatches(LOOK_OPTIONS.hairColors.filter((x) => x[3]), "hairColor"), skins = swatches(LOOK_OPTIONS.skins, "skin"), beardTiles = tiles7(LOOK_OPTIONS.facialHair, "facialHair");
   const hairField = field3("Hair", [hairTiles.box]), hairColorField = field3("Hair color", [natural.box, el3("p", "hc-sub", "Bold"), bold.box]), skinField = field3("Skin", [skins.box]), beardField = field3("Facial hair", [beardTiles.box]);
-  const accTiles = tiles7(LOOK_OPTIONS.accessories, "accessory"), accField = field3("Accessory", [accTiles.box]);
-  const lookFields = [nameField, faceField, hairField, hairColorField, skinField, beardField, accField];
+  const lookFields = [nameField, faceField, hairField, hairColorField, skinField, beardField];
   body5.append(preview, options);
   panel.append(head18, body5, foot2);
   root4.append(panel);
@@ -98585,7 +98548,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   }
   function randomLook() {
     const pick4 = (list) => list[Math.floor(Math.random() * list.length)][0];
-    look = { ...look, hair: pick4(LOOK_OPTIONS.hairStyles), hairColor: pick4(LOOK_OPTIONS.hairColors), skin: pick4(LOOK_OPTIONS.skins), face: pick4(LOOK_OPTIONS.faces), facialHair: "none", accessory: Math.random() < 0.3 ? pick4(LOOK_OPTIONS.accessories.slice(1)) : "none" };
+    look = { ...look, hair: pick4(LOOK_OPTIONS.hairStyles), hairColor: pick4(LOOK_OPTIONS.hairColors), skin: pick4(LOOK_OPTIONS.skins), face: pick4(LOOK_OPTIONS.faces), facialHair: "none" };
     if (look.face !== "lashes" && look.face !== "rosy" && Math.random() >= 0.45) look.facialHair = pick4(LOOK_OPTIONS.facialHair);
     paint3();
   }
@@ -98614,7 +98577,6 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     if (key3 === thumbsKey) return;
     thumbsKey = key3;
     for (const [value2, { canvas }] of Object.entries(faceTiles.map)) draw(canvas, { cls: null, look: { ...look, face: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
-    for (const [value2, { canvas }] of Object.entries(accTiles.map)) draw(canvas, { cls: null, look: { ...look, accessory: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
     for (const [value2, { canvas }] of Object.entries(hairTiles.map)) draw(canvas, { cls: null, look: { ...look, hair: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
     for (const [value2, { canvas }] of Object.entries(beardTiles.map)) draw(canvas, { cls: null, look: { ...look, facialHair: value2, helmet: false }, gear: {} }, headFrame(2, 0.6, 22), null);
     for (const [id, { canvas }] of Object.entries(cardButtons)) draw(canvas, specFor(id, kitGear(id)), (c, w, h) => {
@@ -98655,7 +98617,6 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     laterClass.setAttribute("aria-pressed", String(deferClass));
     laterClass.disabled = busy;
     for (const [v, { b }] of Object.entries(faceTiles.map)) b.setAttribute("aria-pressed", String(v === look.face));
-    for (const [v, { b }] of Object.entries(accTiles.map)) b.setAttribute("aria-pressed", String(v === look.accessory));
     for (const [v, { b }] of Object.entries(hairTiles.map)) b.setAttribute("aria-pressed", String(v === look.hair));
     for (const [v, { b }] of Object.entries(beardTiles.map)) b.setAttribute("aria-pressed", String(v === look.facialHair));
     for (const map of [natural.map, bold.map]) for (const [v, b] of Object.entries(map)) b.setAttribute("aria-pressed", String(v === look.hairColor));
