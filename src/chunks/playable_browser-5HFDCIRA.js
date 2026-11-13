@@ -1097,7 +1097,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-Z7NBHHW3.js";
+} from "./chunk-TMLAMTTV.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -101728,6 +101728,89 @@ var M = {
 function mailRows(c, x, y, w, h) {
   for (let r = 0, yy = y + 1.2; yy < y + h - 0.6; r++, yy += 1.6) for (let xx = x + 0.8 + r % 2 * 0.9; xx < x + w - 0.6; xx += 1.8) px3(c, xx, yy, 0.9, 0.5, M.mailDot);
 }
+var TREADS_READY = null;
+var TREAD_T = 0;
+var TB = {
+  bas: { b: "#4a4046", d: "#352e33", l: "#6a5e63" },
+  iron: { b: "#4a4f57", d: "#33373d", l: "#6b727c" },
+  wrap: { b: "#a04f35", d: "#7d3a27", l: "#bd6446" },
+  slag: { b: "#3b3439", d: "#29242a" },
+  LAVA: "#f6662c",
+  DEEP: "#c9361f",
+  GOLD: "#ffbd53",
+  COLD: "#5a3a33"
+};
+var treadHeat = () => {
+  const r = TREADS_READY ?? 1;
+  return r >= 1 ? 0.8 + 0.2 * Math.sin(TREAD_T * 3.2) : 0.25 + 0.45 * r;
+};
+var treadSeam = () => {
+  const r = TREADS_READY ?? 1;
+  return r >= 1 ? TB.LAVA : r > 0.5 ? TB.DEEP : TB.COLD;
+};
+function treadsNear(c, A2) {
+  const heat = treadHeat(), seam3 = treadSeam();
+  if ((TREADS_READY ?? 1) >= 1) glow4(c, 1.4, 19, 6, "246,102,44", 0.22 * heat);
+  G3(c, [-2, 14.2, 3.2, 14.2, 3.2, 16.6, 5.4, 17, 6.2, 18, 6.2, 18.8, -2, 18.8], TB.bas, { split: 0.7 });
+  c.save();
+  c.globalAlpha = heat;
+  c.lineCap = "round";
+  c.strokeStyle = seam3;
+  c.lineWidth = 0.55;
+  for (const [x0, y0, x1, y1, x2, y2] of [[-0.6, 18.4, -0.2, 16.8, -0.9, 15.4], [1.9, 18.4, 1.4, 17.1, 2.1, 16.1], [4.4, 18.4, 4.9, 17.6, 4.5, 17.2]]) {
+    c.beginPath();
+    c.moveTo(x0, y0);
+    c.lineTo(x1, y1);
+    c.lineTo(x2, y2);
+    c.stroke();
+  }
+  c.restore();
+  R3(c, -2.4, 13.2, 7.4, 1.6, TB.wrap, { flat: true, lw: 1 });
+  px3(c, -0.6, 13.2, 0.5, 1.6, "#00000044");
+  px3(c, 1.4, 13.2, 0.5, 1.6, "#00000044");
+  R3(c, -2.2, 15.6, 5.6, 1.2, TB.iron, { flat: true, lw: 0.9 });
+  px3(c, -1.2, 15.9, 0.8, 0.7, A2.c);
+  px3(c, 2, 15.9, 0.8, 0.7, A2.c);
+  R3(c, -2.4, 18.8, 8.8, 1.6, TB.slag, { split: 0.6, lw: 1 });
+  c.save();
+  c.globalAlpha = Math.min(1, 0.35 + heat);
+  px3(c, -2, 18.5, 8, 0.55, seam3);
+  c.restore();
+  if ((TREADS_READY ?? 1) >= 1) {
+    c.save();
+    c.globalAlpha = 0.7 * heat;
+    px3(c, -0.4, 18.55, 1.6, 0.45, TB.GOLD);
+    px3(c, 3.4, 18.55, 1.2, 0.45, TB.GOLD);
+    c.restore();
+  }
+}
+function treadsIcon(c, A2) {
+  const h = 8.2, heat = treadHeat(), seam3 = treadSeam();
+  glow4(c, 1.8, -0.2, 5, "246,102,44", 0.18 * heat);
+  G3(c, [-2.4, -h, 2, -h, 2, -3.8, 4.6, -3.6, 6.2, -2.4, 6.2, -0.9, -2.4, -0.9], TB.bas, { split: 0.62, lw: 1.2 });
+  c.save();
+  c.globalAlpha = heat;
+  c.lineCap = "round";
+  c.strokeStyle = seam3;
+  c.lineWidth = 0.6;
+  for (const [x0, y0, x1, y1, x2, y2] of [[-1.2, -1.4, -0.7, -3.6, -1.4, -5.4], [1, -1.4, 0.6, -2.8, 1.2, -4], [4.2, -1.4, 4.8, -2.2, 4.4, -2.8]]) {
+    c.beginPath();
+    c.moveTo(x0, y0);
+    c.lineTo(x1, y1);
+    c.lineTo(x2, y2);
+    c.stroke();
+  }
+  c.restore();
+  R3(c, -2.8, -h - 0.9, 5.2, 1.8, TB.wrap, { flat: true, lw: 1.1 });
+  R3(c, -2.6, -5.6, 4.8, 1.2, TB.iron, { flat: true, lw: 0.9 });
+  px3(c, -1.6, -5.3, 0.8, 0.7, A2.c);
+  px3(c, 0.8, -5.3, 0.8, 0.7, A2.c);
+  R3(c, -2.8, -0.9, 9.4, 1.9, TB.slag, { split: 0.6, lw: 1 });
+  c.save();
+  c.globalAlpha = Math.min(1, 0.35 + heat);
+  px3(c, -2.4, -1.2, 8.6, 0.6, seam3);
+  c.restore();
+}
 function legs3(c, w, S12, step2) {
   const lift = [Math.max(0, step2) * 1.4, Math.max(0, -step2) * 1.4];
   if (w.legs) {
@@ -101765,7 +101848,8 @@ function legs3(c, w, S12, step2) {
   }
 }
 function boot(c, w, A2) {
-  if (w.boots === "sabatons") {
+  if (w.boots === "brimstone-treads") treadsNear(c, A2);
+  else if (w.boots === "sabatons") {
     R3(c, -2, 16.6, 6.8, 3.4, P12.helm, { split: 0.7 });
     px3(c, 2.4, 17.2, 0.9, 2.8, A2.c);
   } else if (w.boots === "gorehide-stompers") {
@@ -102420,9 +102504,9 @@ function smithHammer(c, A2) {
 }
 function slagmaul(c, A2, t = 0) {
   const coal3 = { b: "#3a2c26", d: "#2a201b", l: "#4e3c33" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, iron = { b: "#4a4f57", d: "#33373d", l: "#6b727c" }, bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, knuck = { b: "#5f555b", d: "#463e43", l: "#7a6e70" }, slag2 = { b: "#3b3439", d: "#29242a" };
-  const heat = 0.75 + 0.25 * Math.sin(t * 3.2), LAVA3 = "#f6662c", GOLD36 = "#ffbd53";
+  const heat = 0.75 + 0.25 * Math.sin(t * 3.2), LAVA4 = "#f6662c", GOLD36 = "#ffbd53";
   G3(c, [10.2, -1.8, 11.6, -2.2, 12.6, -1.2, 12.4, 1.4, 11, 2.1, 9.8, 1], slag2, { split: 0.5, lw: 1 });
-  px3(c, 10.8, -0.4, 1, 0.8, LAVA3);
+  px3(c, 10.8, -0.4, 1, 0.8, LAVA4);
   R3(c, 12.4, -1, 12.4, 2, coal3, { flat: true, lw: 1.2 });
   R3(c, 13.2, -1.3, 4.6, 2.6, wrap3, { flat: true, lw: 1.1 });
   px3(c, 14.6, -1.3, 0.5, 2.6, "#00000044");
@@ -102436,7 +102520,7 @@ function slagmaul(c, A2, t = 0) {
   c.save();
   c.lineCap = "round";
   for (const y of [-3.6, -0.1, 3.4]) {
-    c.strokeStyle = LAVA3;
+    c.strokeStyle = LAVA4;
     c.lineWidth = 1.5;
     c.beginPath();
     c.moveTo(29.6, y);
@@ -102461,7 +102545,7 @@ function slagmaul(c, A2, t = 0) {
     c.save();
     c.lineCap = "round";
     c.lineJoin = "round";
-    for (const [col2, lw] of [[LAVA3, w], [GOLD36, w * 0.4]]) {
+    for (const [col2, lw] of [[LAVA4, w], [GOLD36, w * 0.4]]) {
       c.strokeStyle = col2;
       c.lineWidth = lw;
       if (col2 === GOLD36) c.globalAlpha = heat;
@@ -102479,9 +102563,9 @@ function slagmaul(c, A2, t = 0) {
 var VENT_CHARGE = null;
 function ventcutter(c, A2, t = 0) {
   const obs = { b: "#2f2935", d: "#211d26", l: "#5a4f66" }, bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, slag2 = { b: "#3b3439", d: "#29242a" };
-  const LAVA3 = "#f6662c", GOLD36 = "#ffbd53", WHITE4 = "#fff0b0", heat = 0.75 + 0.25 * Math.sin(t * 3.6), n = VENT_CHARGE;
+  const LAVA4 = "#f6662c", GOLD36 = "#ffbd53", WHITE4 = "#fff0b0", heat = 0.75 + 0.25 * Math.sin(t * 3.6), n = VENT_CHARGE;
   G3(c, [10.6, -1.6, 12, -2, 12.8, -1, 12.6, 1.2, 11.4, 1.8, 10.4, 0.8], slag2, { split: 0.5, lw: 1 });
-  px3(c, 11.1, -0.3, 0.9, 0.7, LAVA3);
+  px3(c, 11.1, -0.3, 0.9, 0.7, LAVA4);
   R3(c, 12.4, -1.1, 4, 2.2, wrap3, { flat: true, lw: 1.2 });
   px3(c, 13.6, -1.1, 0.5, 2.2, "#00000044");
   px3(c, 14.9, -1.1, 0.5, 2.2, "#00000044");
@@ -102490,7 +102574,7 @@ function ventcutter(c, A2, t = 0) {
   c.lineCap = "round";
   c.lineJoin = "round";
   const edge = [[18.6, 1.5], [24, 0.95], [28.8, 0.15], [31.6, -0.6], [34.2, -4.8]];
-  for (const [col2, lw, a] of [[LAVA3, 0.95, 1], [GOLD36, 0.4, heat]]) {
+  for (const [col2, lw, a] of [[LAVA4, 0.95, 1], [GOLD36, 0.4, heat]]) {
     c.strokeStyle = col2;
     c.lineWidth = lw;
     c.globalAlpha = a;
@@ -102530,7 +102614,7 @@ function ventcutter(c, A2, t = 0) {
     c.restore();
   });
   G3(c, [16, -3.2, 17.4, -3.6, 18.6, -2.6, 18.8, 0, 18.6, 2.6, 17.4, 3.6, 16, 3.2, 15.6, 0], bas, { split: 0.55, lw: 1.2 });
-  px3(c, 16.6, -0.6, 1.4, 1.2, LAVA3);
+  px3(c, 16.6, -0.6, 1.4, 1.2, LAVA4);
   px3(c, 16.2, -2.8, 0.8, 0.8, accPal(A2).b);
   px3(c, 16.2, 2, 0.8, 0.8, accPal(A2).b);
   gem(c, 17.2, 0, 1.3, A2.gem ?? "#ffbd53");
@@ -102538,7 +102622,7 @@ function ventcutter(c, A2, t = 0) {
 var CORE_PRIMED = null;
 function coreheart(c, A2, t = 0) {
   const bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, iron = { b: "#4a4f57", d: "#33373d", l: "#6b727c" }, claw4 = { b: "#7c828c", d: "#5a6068", l: "#a3a9b2" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, slag2 = { b: "#3b3439", d: "#29242a" };
-  const LAVA3 = "#f6662c", DEEP6 = "#c9361f", GOLD36 = "#ffbd53", WHITE4 = "#fff0b0", p = CORE_PRIMED ?? 0, heat = 0.7 + 0.3 * Math.sin(t * (3 + p * 5));
+  const LAVA4 = "#f6662c", DEEP7 = "#c9361f", GOLD36 = "#ffbd53", WHITE4 = "#fff0b0", p = CORE_PRIMED ?? 0, heat = 0.7 + 0.3 * Math.sin(t * (3 + p * 5));
   G3(c, [9.8, -1.3, 11, -1.6, 11.8, -0.8, 11.6, 1, 10.6, 1.5, 9.6, 0.6], slag2, { split: 0.5, lw: 0.9 });
   R3(c, 11.4, -1, 3.8, 2, wrap3, { flat: true, lw: 1.1 });
   px3(c, 12.6, -1, 0.5, 2, "#00000044");
@@ -102549,7 +102633,7 @@ function coreheart(c, A2, t = 0) {
   G3(c, [16.6, -1.15, 24.2, -0.8, 24.2, 0.8, 16.6, 1.15], bas, { split: 0.55, lw: 1 });
   c.save();
   c.lineCap = "round";
-  c.strokeStyle = LAVA3;
+  c.strokeStyle = LAVA4;
   c.lineWidth = 0.55;
   for (const [x0, y0, x1, y1] of [[17.6, -0.7, 19.4, 0.5], [20.6, 0.7, 22.2, -0.4]]) {
     c.beginPath();
@@ -102560,13 +102644,13 @@ function coreheart(c, A2, t = 0) {
   c.restore();
   const [r, g, b] = p > 0.5 ? [255, 214, 120] : [246, 102, 44];
   glow4(c, 27.6, 0, 5.5 + p * 4, `${r},${g},${b}`, (0.25 + p * 0.3) * heat);
-  G3(c, [25.4, -1.6, 27, -2.8, 29, -2.5, 30.2, -0.8, 30, 1.2, 28.4, 2.7, 26.4, 2.4, 25.2, 0.8], { b: p > 0.5 ? LAVA3 : DEEP6, d: p > 0.5 ? DEEP6 : "#8a2a1c" }, { split: 0.5, lw: 1 });
+  G3(c, [25.4, -1.6, 27, -2.8, 29, -2.5, 30.2, -0.8, 30, 1.2, 28.4, 2.7, 26.4, 2.4, 25.2, 0.8], { b: p > 0.5 ? LAVA4 : DEEP7, d: p > 0.5 ? DEEP7 : "#8a2a1c" }, { split: 0.5, lw: 1 });
   {
     const h = [26.4, -1, 27.6, -1.8, 28.9, -1.2, 29.2, 0.4, 28, 1.6, 26.6, 1.2];
     c.beginPath();
     for (let i = 0; i < h.length; i += 2) i ? c.lineTo(h[i], h[i + 1]) : c.moveTo(h[i], h[i + 1]);
     c.closePath();
-    c.fillStyle = p > 0.5 ? GOLD36 : LAVA3;
+    c.fillStyle = p > 0.5 ? GOLD36 : LAVA4;
     c.fill();
   }
   c.save();
@@ -104458,7 +104542,7 @@ var HELMET_LOOKS = {
     gem(c, 6.8, -12.1, 1.6, A2.gem);
   }
 };
-var BOOT_SHAFT = { boots: 7.4, tall: 10, sabatons: 7.4 };
+var BOOT_SHAFT = { "brimstone-treads": 8.2, boots: 7.4, tall: 10, sabatons: 7.4 };
 var BOOT_COLORS = { boots: [P12.strap, P12.leather], tall: [P12.leather, P12.leatherLight], sabatons: [P12.helm, P12.plateDark], slippers: [P12.cover, P12.purple], "apprentice-slippers": [M.blue, M.rope] };
 function bootIcon(c, kind, A2) {
   const h = BOOT_SHAFT[kind], [col2, cuff] = BOOT_COLORS[kind] ?? [P12.shoe, P12.leather];
@@ -104501,8 +104585,10 @@ function mainWeaponOf(spec) {
   return { staff: Boolean(STAVES[m]), tip: WEAPON_SPAN[m]?.[1] ?? 34 };
 }
 function drawBlockyHero(c, spec, pose = {}) {
+  TREAD_T = pose.t ?? 0;
   {
     const q2 = spec.charge;
+    TREADS_READY = q2 ? q2.treads ?? null : null;
     SILK_CHARGE = q2 ? q2.silk ?? 0 : null;
     COCOON_READY = q2 ? q2.cocoon ? 1 : 0 : null;
     VENT_CHARGE = q2 ? q2.vent ?? 0 : null;
@@ -104682,7 +104768,7 @@ var LEG_COLORS = { greaves: P12.plate, chausses: M.mail, breeches: M.breeches, t
 var WEAPON_SPAN = { coreheart: [8.2, 32], ventcutter: [7.6, 39.4], slagmaul: [7, 38.6], greatsword: [9.4, 40.6], halberd: [6, 43.4], mace: [10.6, 32.6], sword: [10.6, 34.4], saber: [12.4, 34.6], axe: [10.6, 35], warhammer: [10.6, 33.2], rapier: [10.6, 38.4], scimitar: [12.4, 34.8], wand: [11.2, 29.6], scepter: [11.2, 31.8] };
 var HERO_COLORS = Object.freeze({ P: P12, M, ACC });
 function drawItemIcon(c, item2, size = 48) {
-  SILK_CHARGE = COCOON_READY = VENT_CHARGE = CORE_PRIMED = null;
+  SILK_CHARGE = COCOON_READY = VENT_CHARGE = CORE_PRIMED = TREADS_READY = null;
   const kind = item2.kind, tier2 = item2.tier ?? 0, A2 = ACC[tier2] ?? ACC[0], red = P12.red, S12 = skinPal("light");
   c.save();
   c.lineJoin = "miter";
@@ -104750,7 +104836,8 @@ function drawItemIcon(c, item2, size = 48) {
       for (const [x, y] of [[-3.6, -1.2], [1.2, 1.4]]) {
         c.save();
         c.translate(x, y);
-        bootIcon(c, kind, A2);
+        if (kind === "brimstone-treads") treadsIcon(c, A2);
+        else bootIcon(c, kind, A2);
         c.restore();
       }
     } else if (item2.slot === "gloves") {
@@ -106925,8 +107012,8 @@ function createPlannedRuinExterior(asset, reservationId, terrain = createPlanned
   requireContract(r?.familyId === "site-family:ruin" && policy && d?.point, "Ruin requires an existing reservation");
   const xs = r.footprint.map((c) => c.x), ys = r.footprint.map((c) => c.y), minX = Math.min(...xs), minY = Math.min(...ys), maxX = Math.max(...xs), maxY = Math.max(...ys), [width2, height] = realization?.tiles ?? (policy.exteriorTiles[0] <= (maxX - minX + 1) * 32 && policy.exteriorTiles[1] <= (maxY - minY + 1) * 26 ? policy.exteriorTiles : [policy.exteriorTiles[1], policy.exteriorTiles[0]]), left = realization?.left ?? minX * 32 + Math.floor(((maxX - minX + 1) * 32 - width2) / 2), top = realization?.top ?? minY * 26;
   requireContract(r.footprint.length >= policy.minimumExteriorChunks && r.approach.length >= policy.minimumApproachChunks && (realization || r.footprint.length === (maxX - minX + 1) * (maxY - minY + 1)) && width2 <= (maxX - minX + 1) * 32 && height <= (maxY - minY + 1) * 26, "Ruin exterior capacity incompatible");
-  const footprint3 = new Set(r.footprint.map((c) => c.x + "," + c.y));
-  for (let y = top; y < top + height; y++) for (let x = left; x < left + width2; x++) requireContract(footprint3.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), "Ruin architecture escapes actual footprint shape");
+  const footprint4 = new Set(r.footprint.map((c) => c.x + "," + c.y));
+  for (let y = top; y < top + height; y++) for (let x = left; x < left + width2; x++) requireContract(footprint4.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), "Ruin architecture escapes actual footprint shape");
   const allowedSet = new Set([...r.footprint, ...r.approach].map((c) => c.x + "," + c.y)), allowed = (x, y) => allowedSet.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), inside5 = (x, y) => x >= left && x < left + width2 && y >= top && y < top + height, walk = Array.from({ length: height }, () => Array(width2).fill("1")), ground = Array.from({ length: height }, () => Array(width2).fill("g")), blockers = [], decorations = [], moduleClear = /* @__PURE__ */ new Set();
   const block2 = (kind, detail, x, y, w, h) => {
     blockers.push({ kind, detail, x, y, width: w, height: h });
@@ -107168,8 +107255,8 @@ function createPlannedFortExterior(asset, reservationId, terrain = createPlanned
   requireContract(r?.familyId === "site-family:fort" && policy && d?.point, "Fort requires an existing reservation");
   const xs = r.footprint.map((c) => c.x), ys = r.footprint.map((c) => c.y), minX = Math.min(...xs), minY = Math.min(...ys), maxX = Math.max(...xs), maxY = Math.max(...ys), [width2, height] = realization?.tiles ?? policy.exteriorTiles, left = realization?.left ?? minX * 32 + Math.floor(((maxX - minX + 1) * 32 - width2) / 2), top = realization?.top ?? minY * 26;
   requireContract(r.footprint.length >= policy.minimumExteriorChunks && r.approach.length >= policy.minimumApproachChunks && (realization || r.footprint.length === (maxX - minX + 1) * (maxY - minY + 1)) && width2 <= (maxX - minX + 1) * 32 && height <= (maxY - minY + 1) * 26, "Fort exterior capacity incompatible");
-  const footprint3 = new Set(r.footprint.map((c) => c.x + "," + c.y));
-  for (let y = top; y < top + height; y++) for (let x = left; x < left + width2; x++) requireContract(footprint3.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), "Fort architecture escapes actual footprint shape");
+  const footprint4 = new Set(r.footprint.map((c) => c.x + "," + c.y));
+  for (let y = top; y < top + height; y++) for (let x = left; x < left + width2; x++) requireContract(footprint4.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), "Fort architecture escapes actual footprint shape");
   const allowedSet = new Set([...r.footprint, ...r.approach].map((c) => c.x + "," + c.y)), allowed = (x, y) => allowedSet.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), inside5 = (x, y) => x >= left && x < left + width2 && y >= top && y < top + height, walk = Array.from({ length: height }, () => Array(width2).fill("1")), ground = Array.from({ length: height }, () => Array(width2).fill("g")), blockers = [], decorations = [];
   const block2 = (kind, detail, x, y, w, h) => {
     blockers.push({ kind, detail, x, y, width: w, height: h });
@@ -109636,6 +109723,12 @@ var CORE_TICKS = 180;
 var CORE_REACH = 150;
 var STRIP_TICKS = 120;
 var UQ_PULSE_TICKS = 30;
+var TREAD_EVERY = 240;
+var TREAD_RADIUS = 56;
+var TREAD_KNOCK = 20;
+var TREAD_ELITE_KNOCK = 8;
+var TREAD_WAIT = 40;
+var QUAKE_TICKS = 30;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var CHAIN_SLAM = 30;
 var CHAIN_EXPOSE = 15;
@@ -109677,8 +109770,8 @@ var pipCostOf = (id) => PIP_COSTS[id] ?? 0;
 var OVERLOAD_PIP = 1;
 var pipCostFor = (id, ranks) => pipCostOf(id) + (id === "cast" && ranks?.overload ? OVERLOAD_PIP : 0);
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
-var TIMED = ["sharp", "woven", "hitCd", "killCd", "perfCd", "guardUp", "mist", "veil", "gold", "surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow", "wrapCd", "core"];
-var LIVE = ["bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var TIMED = ["sharp", "woven", "hitCd", "killCd", "perfCd", "guardUp", "mist", "veil", "gold", "surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow", "wrapCd", "core", "treadCd"];
+var LIVE = ["treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function skillCooldown(combat, skillId) {
   return combat?.skills?.cooldowns?.[skillId] ?? 0;
 }
@@ -109740,7 +109833,7 @@ function advanceClassSkillTimers(tick, combat) {
     if (k[key4] <= 1) delete k[key4];
     else k[key4]--;
   }
-  for (const key4 of ["bulwark", "charge", "hide", "weave", "ice", "aegis", "shake", "duel", "shade", "spent", "barkShot"]) if (k[key4]) {
+  for (const key4 of ["bulwark", "charge", "hide", "weave", "ice", "aegis", "shake", "duel", "shade", "spent", "barkShot", "quake"]) if (k[key4]) {
     if (k[key4].ticks <= 1) delete k[key4];
     else k[key4].ticks--;
   }
@@ -110152,7 +110245,17 @@ function validateClassSkillState(s, combat, actor) {
         requireContract(pos2(p), "Invalid bark burst");
       }
     }
-    for (const [key4, max] of [["silk", SILK_EVERY - 1], ["vent", VENT_EVERY - 1], ["wrapCd", COCOON_EVERY], ["core", CORE_TICKS]]) if (k[key4] !== void 0) safeInteger(k[key4], 1, max);
+    for (const [key4, max] of [["silk", SILK_EVERY - 1], ["vent", VENT_EVERY - 1], ["wrapCd", COCOON_EVERY], ["core", CORE_TICKS], ["treadCd", TREAD_EVERY]]) if (k[key4] !== void 0) safeInteger(k[key4], 1, max);
+    if (k.tread !== void 0) {
+      closedRecord(k.tread, ["x", "y", "ticks"]);
+      requireContract(pos2(k.tread) && actor.alive, "Invalid tread");
+      safeInteger(k.tread.ticks, 1, TREAD_WAIT);
+    }
+    if (k.quake !== void 0) {
+      closedRecord(k.quake, ["x", "y", "fx", "fy", "ticks"]);
+      requireContract(pos2(k.quake) && Number.isFinite(k.quake.fx) && Number.isFinite(k.quake.fy), "Invalid quake");
+      safeInteger(k.quake.ticks, 1, QUAKE_TICKS);
+    }
     if (k.web !== void 0) {
       closedRecord(k.web, ["x", "y", "ticks", "next"]);
       requireContract(pos2(k.web) && actor.alive, "Invalid web");
@@ -119070,6 +119173,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
     if (--r.ticks > 0 && left > R11.step) return;
     clearSkillState(combat, "ram");
+    treadSlam(a, { x: a.position.x - r.dx * 48, y: a.position.y - r.dy * 48 });
     const slam = cone7(a, { x: r.dx, y: r.dy }, R11.slam, 0.9), hit2 = crowd(a, rushHit(a, breakerHit(a, stats3, R11.attack)), slam.length), rush = full(spendOf(a, "shield_charge")) ? 2 : 1;
     for (const t of slam) {
       const was = slowed(t);
@@ -119274,6 +119378,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
     if (--l.ticks > 0) return;
     clearSkillState(combat, "leap");
+    treadSlam(a, { x: l.sx, y: l.sy });
     const L = T102.skyfallLeap, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), radius = (aug(a, "skyfall_leap", 0) ? scaled(L.radius, T102.wide) : L.radius) * effects2.area(a), near5 = around3(a, a.position, radius), crash2 = crowd(a, breakerHit(a, stats3, L.attack), near5.length), hit2 = l.of ? multiplyCombat(crash2, 2, 1) : crash2;
     for (const t of near5) {
       const was = slowed(t);
@@ -119315,6 +119420,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       const frames = Math.ceil(step3 / 8);
       Object.assign(combat.dash, { frames, cooldown: Math.max(combat.dash.cooldown, frames), remaining: step3, x: toward3.x / l, y: toward3.y / l });
       sunTrail(a, combat);
+      treadStart(a, a.position, frames);
     }
     const n = paid(a, "lunge"), stab = combat.skills?.again ? multiplyCombat(multiplyCombat(stats3.attack, ...L.attack), ...T102.again) : multiplyCombat(stats3.attack, ...L.attack), each = n ? pct3(stab, 20 * n) : stab;
     if (aug(a, "lunge", 2)) {
@@ -119548,6 +119654,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     a.position = spot2;
     a.movedLastTick = true;
     expose(a, t, T102.smokeVeil.expose);
+    treadSlam(a, from);
     const k = classSkillsRecord(c.actors[a.entityId]);
     k.stepped = STEPPED_TICKS;
     if (aug(a, "shadowstep", 2)) k.cloak = CLOAK_TICKS;
@@ -119754,6 +119861,34 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     classSkillsRecord(combat).wail = worn(a, "barrowshroud") ?? WAIL_TICKS;
     if (canStun(a)) {
       for (const t of around3(a, a.position, U.wail.radius)) if (!isPodCombatTargetV4(t)) effects2.status(a, t, "slow", U.wail.slow, U.wail.ticks);
+    }
+  }
+  function treadStart(a, from, frames) {
+    const combat = c.actors[a.entityId];
+    if (!combat || combat.skills?.treadCd || combat.skills?.tread || !worn(a, "brimstone-treads")) return;
+    classSkillsRecord(combat).tread = { x: from.x, y: from.y, ticks: Math.max(1, Math.min(TREAD_WAIT, frames)) };
+  }
+  function stepTread(a, combat) {
+    const k = combat.skills?.tread;
+    if (!k) return;
+    if (!a.alive) {
+      clearSkillState(combat, "tread");
+      return;
+    }
+    if (--k.ticks > 0) return;
+    const from = { x: k.x, y: k.y };
+    clearSkillState(combat, "tread");
+    treadSlam(a, from);
+  }
+  function treadSlam(a, from) {
+    const combat = c.actors[a.entityId], share = a.alive ? worn(a, "brimstone-treads") : null;
+    if (!share || !combat || combat.skills?.treadCd) return;
+    const k = classSkillsRecord(combat), stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "offhand");
+    k.treadCd = TREAD_EVERY;
+    k.quake = { x: a.position.x, y: a.position.y, fx: from.x, fy: from.y, ticks: QUAKE_TICKS };
+    for (const t of around3(a, a.position, TREAD_RADIUS * effects2.area(a))) {
+      damage(a, t, multiplyCombat(stats3.attack, share, 100), "fire", null, { sourceItem, trigger: "proc" });
+      if (t.alive && !isPodCombatTargetV4(t) && !definition2(t).isBoss) knockback(a, t, definition2(t).isElite || definition2(t).isMiniboss ? TREAD_ELITE_KNOCK : TREAD_KNOCK);
     }
   }
   function barkBurst(a, combat) {
@@ -120447,6 +120582,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     as("thunderfall", stepThunder, a, combat);
     wail(a, combat);
     moss5(a, combat);
+    stepTread(a, combat);
     stepWeb(a, combat);
     stepCocoon(a, combat);
     stepFurrow(a, combat);
@@ -120928,6 +121064,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const combat = c.actors[a.entityId];
     if (!combat) return;
     const from = { ...a.position }, to = pathEnd(a, combat.dash);
+    treadStart(a, from, combat.dash.frames);
     if (heroOf(a) === "mage") {
       const G5 = gearOf(a);
       if (G5.blinkDmg) classSkillsRecord(combat).sharp = SHARP_TICKS;
@@ -126259,7 +126396,7 @@ function projectCombatPresentation(state2, visibleIds) {
   return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state2.subweaponCombat.effects).map((e) => e.kind === "sting" ? { ...e, kind: "poison", sting: true } : e), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).filter((e) => e.kind !== "grudge" && e.kind !== "weaken").map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: e.kind === "rime" ? "slow" : e.kind, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : e.kind === "rime" ? 180 : 90) }))]), ...Object.values(state2.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids4.has(e.targetId) && e.expiresTick > state2.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: e.sting ? 240 : ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state2.subweaponCombat.actors).filter(([id]) => ids4.has(id)).map(([id, c]) => [id, { mastery: (() => {
     const p = Object.values(state2.playersById).find((p2) => p2.entityId === id), d = p?.d8, t = d?.transient;
     return t ? { pulseBlocks: t.pulseBlocks, syphon: finiteNodeRank(d, "tome_arcane_syphon") > 0, earthBreaker: finiteNodeRank(d, "shield_earth_breaker_bash") > 0, singularity: finiteNodeRank(d, "tome_keystone_singularity") > 0, anchor: t.lastAnchor, fortitudeStacks: t.fortitudeStacks, retaliatoryReady: t.retaliatoryReady, colossus: t.colossusTicks > 0, shadowStep: t.shadowStepTicks > 0, syphonStacks: t.syphonStacks, weavingStacks: t.weavingStacks } : null;
-  })(), element: Object.values(state2.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state2.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state2.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? c.skills?.counter ?? 0, orbs: c.skills?.orbs?.map((o) => ({ x: o.x, y: o.y, dx: o.dx, dy: o.dy, ticks: o.ticks, boom: Boolean(o.boom) })) ?? null, trail: c.skills?.trail ? { x: c.skills.trail.x, y: c.skills.trail.y, x2: c.skills.trail.x2, y2: c.skills.trail.y2, ticks: c.skills.trail.ticks } : null, pool: c.skills?.pool ? { x: c.skills.pool.x, y: c.skills.pool.y, ticks: c.skills.pool.ticks } : null, thrown: c.skills?.thrown ? { x: c.skills.thrown.x, y: c.skills.thrown.y } : null, banner: c.skills?.banner ? { x: c.skills.banner.x, y: c.skills.banner.y, ticks: c.skills.banner.ticks } : null, smoke: c.skills?.smoke ? { x: c.skills.smoke.x, y: c.skills.smoke.y, ticks: c.skills.smoke.ticks } : null, flameWall: c.skills?.wall ? { x: c.skills.wall.x, y: c.skills.wall.y, dx: c.skills.wall.dx, dy: c.skills.wall.dy, ticks: c.skills.wall.ticks, ring: Boolean(c.skills.wall.ring) } : null, field: c.skills?.field ? { x: c.skills.field.x, y: c.skills.field.y, ticks: c.skills.field.ticks } : null, ice: c.skills?.ice ? { ticks: c.skills.ice.ticks } : null, aegis: c.skills?.aegis ? { ticks: c.skills.aegis.ticks, over: Boolean(c.skills.aegis.over), echo: Boolean(c.skills.aegis.echo) } : null, crack: c.skills?.crack ? { x: c.skills.crack.x, y: c.skills.crack.y, r: c.skills.crack.r, ticks: c.skills.crack.ticks } : null, flower: c.skills?.flower ? { x: c.skills.flower.x, y: c.skills.flower.y, r: c.skills.flower.r, ticks: c.skills.flower.ticks } : null, echo: c.skills?.echo ? { x: c.skills.echo.x, y: c.skills.echo.y, ticks: c.skills.echo.ticks } : null, meteors: c.skills?.meteors ? c.skills.meteors.map((m) => ({ x: m.x, y: m.y, fall: m.fall, ticks: m.ticks, r: m.r })) : null, stepped: Boolean(c.skills?.stepped), riposte: c.skills?.riposte ?? 0, keen: Boolean(c.skills?.keen), sun: c.skills?.sun ?? 0, bark: c.skills?.bark ?? 0, barkShot: c.skills?.barkShot ? { ticks: c.skills.barkShot.ticks, x: c.skills.barkShot.x, y: c.skills.barkShot.y, at: c.skills.barkShot.at.map((p) => ({ x: p.x, y: p.y })) } : null, silk: c.skills?.silk ?? 0, web: c.skills?.web ? { x: c.skills.web.x, y: c.skills.web.y, ticks: c.skills.web.ticks } : null, wrapCd: c.skills?.wrapCd ?? 0, cocoon: c.skills?.cocoon ? { target: c.skills.cocoon.target, x: c.skills.cocoon.x, y: c.skills.cocoon.y, ticks: c.skills.cocoon.ticks } : null, furrow: c.skills?.furrow ? { x: c.skills.furrow.x, y: c.skills.furrow.y, dx: c.skills.furrow.dx, dy: c.skills.furrow.dy, ticks: c.skills.furrow.ticks } : null, vent: c.skills?.vent ?? 0, vents: c.skills?.vents ? c.skills.vents.map((v) => ({ x: v.x, y: v.y, ticks: v.ticks })) : null, core: c.skills?.core ?? 0, strip: c.skills?.strip ? { x: c.skills.strip.x, y: c.skills.strip.y, x2: c.skills.strip.x2, y2: c.skills.strip.y2, ticks: c.skills.strip.ticks } : null, wail: c.skills?.wail ?? 0, shell: c.skills?.shell ?? 0, wave: c.skills?.wave ?? 0, shake: c.skills?.shake ? { x: c.skills.shake.x, y: c.skills.shake.y, dx: c.skills.shake.dx, dy: c.skills.shake.dy, r: c.skills.shake.r, ticks: c.skills.shake.ticks } : null, storm: Boolean(c.skills?.storm), duel: c.skills?.duel ? { target: c.skills.duel.target, stacks: c.skills.duel.stacks, ticks: c.skills.duel.ticks } : null, phoenix: c.skills?.phoenix ?? 0, shade: c.skills?.shade ? { x: c.skills.shade.x, y: c.skills.shade.y } : null, blooms: c.skills?.blooms ? c.skills.blooms.map((b) => ({ x: b.x, y: b.y, r: b.r, ticks: b.ticks })) : null, aftershock: c.skills?.aftershock ? { x: c.skills.aftershock.x, y: c.skills.aftershock.y, r: c.skills.aftershock.r } : null, fault: c.skills?.fault ? { x: c.skills.fault.x, y: c.skills.fault.y, r: c.skills.fault.r, ticks: c.skills.fault.ticks } : null, rime: c.skills?.rime ? { x: c.skills.rime.x, y: c.skills.rime.y, r: c.skills.rime.r, ticks: c.skills.rime.ticks } : null, seeds: c.skills?.seeds ? c.skills.seeds.map((e) => ({ x: e.x, y: e.y, r: e.r, ticks: e.ticks })) : null, thaw: c.skills?.thaw ? c.skills.thaw.map((e) => e.target) : null, spin: c.skills?.spin ? { ticks: c.skills.spin.ticks, hits: c.skills.spin.hits ?? 0 } : null, thunder: c.skills?.thunder ?? 0, leap: c.skills?.leap?.of ? c.skills.leap.ticks : 0, hymn: Boolean(c.skills?.hymn), firm: Boolean(c.skills?.firm), jugg: Boolean(c.skills?.jugg), cloak: Boolean(c.skills?.cloak), wall: ((d) => classRank(d, "bulwark_colossus") ? 10 : classRank(d, "iron_wall"))(Object.values(state2.playersById).find((p) => p.entityId === id)?.d8) }])) };
+  })(), element: Object.values(state2.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state2.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state2.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? c.skills?.counter ?? 0, orbs: c.skills?.orbs?.map((o) => ({ x: o.x, y: o.y, dx: o.dx, dy: o.dy, ticks: o.ticks, boom: Boolean(o.boom) })) ?? null, trail: c.skills?.trail ? { x: c.skills.trail.x, y: c.skills.trail.y, x2: c.skills.trail.x2, y2: c.skills.trail.y2, ticks: c.skills.trail.ticks } : null, pool: c.skills?.pool ? { x: c.skills.pool.x, y: c.skills.pool.y, ticks: c.skills.pool.ticks } : null, thrown: c.skills?.thrown ? { x: c.skills.thrown.x, y: c.skills.thrown.y } : null, banner: c.skills?.banner ? { x: c.skills.banner.x, y: c.skills.banner.y, ticks: c.skills.banner.ticks } : null, smoke: c.skills?.smoke ? { x: c.skills.smoke.x, y: c.skills.smoke.y, ticks: c.skills.smoke.ticks } : null, flameWall: c.skills?.wall ? { x: c.skills.wall.x, y: c.skills.wall.y, dx: c.skills.wall.dx, dy: c.skills.wall.dy, ticks: c.skills.wall.ticks, ring: Boolean(c.skills.wall.ring) } : null, field: c.skills?.field ? { x: c.skills.field.x, y: c.skills.field.y, ticks: c.skills.field.ticks } : null, ice: c.skills?.ice ? { ticks: c.skills.ice.ticks } : null, aegis: c.skills?.aegis ? { ticks: c.skills.aegis.ticks, over: Boolean(c.skills.aegis.over), echo: Boolean(c.skills.aegis.echo) } : null, crack: c.skills?.crack ? { x: c.skills.crack.x, y: c.skills.crack.y, r: c.skills.crack.r, ticks: c.skills.crack.ticks } : null, flower: c.skills?.flower ? { x: c.skills.flower.x, y: c.skills.flower.y, r: c.skills.flower.r, ticks: c.skills.flower.ticks } : null, echo: c.skills?.echo ? { x: c.skills.echo.x, y: c.skills.echo.y, ticks: c.skills.echo.ticks } : null, meteors: c.skills?.meteors ? c.skills.meteors.map((m) => ({ x: m.x, y: m.y, fall: m.fall, ticks: m.ticks, r: m.r })) : null, stepped: Boolean(c.skills?.stepped), riposte: c.skills?.riposte ?? 0, keen: Boolean(c.skills?.keen), sun: c.skills?.sun ?? 0, treadCd: c.skills?.treadCd ?? 0, quake: c.skills?.quake ? { x: c.skills.quake.x, y: c.skills.quake.y, fx: c.skills.quake.fx, fy: c.skills.quake.fy, ticks: c.skills.quake.ticks } : null, bark: c.skills?.bark ?? 0, barkShot: c.skills?.barkShot ? { ticks: c.skills.barkShot.ticks, x: c.skills.barkShot.x, y: c.skills.barkShot.y, at: c.skills.barkShot.at.map((p) => ({ x: p.x, y: p.y })) } : null, silk: c.skills?.silk ?? 0, web: c.skills?.web ? { x: c.skills.web.x, y: c.skills.web.y, ticks: c.skills.web.ticks } : null, wrapCd: c.skills?.wrapCd ?? 0, cocoon: c.skills?.cocoon ? { target: c.skills.cocoon.target, x: c.skills.cocoon.x, y: c.skills.cocoon.y, ticks: c.skills.cocoon.ticks } : null, furrow: c.skills?.furrow ? { x: c.skills.furrow.x, y: c.skills.furrow.y, dx: c.skills.furrow.dx, dy: c.skills.furrow.dy, ticks: c.skills.furrow.ticks } : null, vent: c.skills?.vent ?? 0, vents: c.skills?.vents ? c.skills.vents.map((v) => ({ x: v.x, y: v.y, ticks: v.ticks })) : null, core: c.skills?.core ?? 0, strip: c.skills?.strip ? { x: c.skills.strip.x, y: c.skills.strip.y, x2: c.skills.strip.x2, y2: c.skills.strip.y2, ticks: c.skills.strip.ticks } : null, wail: c.skills?.wail ?? 0, shell: c.skills?.shell ?? 0, wave: c.skills?.wave ?? 0, shake: c.skills?.shake ? { x: c.skills.shake.x, y: c.skills.shake.y, dx: c.skills.shake.dx, dy: c.skills.shake.dy, r: c.skills.shake.r, ticks: c.skills.shake.ticks } : null, storm: Boolean(c.skills?.storm), duel: c.skills?.duel ? { target: c.skills.duel.target, stacks: c.skills.duel.stacks, ticks: c.skills.duel.ticks } : null, phoenix: c.skills?.phoenix ?? 0, shade: c.skills?.shade ? { x: c.skills.shade.x, y: c.skills.shade.y } : null, blooms: c.skills?.blooms ? c.skills.blooms.map((b) => ({ x: b.x, y: b.y, r: b.r, ticks: b.ticks })) : null, aftershock: c.skills?.aftershock ? { x: c.skills.aftershock.x, y: c.skills.aftershock.y, r: c.skills.aftershock.r } : null, fault: c.skills?.fault ? { x: c.skills.fault.x, y: c.skills.fault.y, r: c.skills.fault.r, ticks: c.skills.fault.ticks } : null, rime: c.skills?.rime ? { x: c.skills.rime.x, y: c.skills.rime.y, r: c.skills.rime.r, ticks: c.skills.rime.ticks } : null, seeds: c.skills?.seeds ? c.skills.seeds.map((e) => ({ x: e.x, y: e.y, r: e.r, ticks: e.ticks })) : null, thaw: c.skills?.thaw ? c.skills.thaw.map((e) => e.target) : null, spin: c.skills?.spin ? { ticks: c.skills.spin.ticks, hits: c.skills.spin.hits ?? 0 } : null, thunder: c.skills?.thunder ?? 0, leap: c.skills?.leap?.of ? c.skills.leap.ticks : 0, hymn: Boolean(c.skills?.hymn), firm: Boolean(c.skills?.firm), jugg: Boolean(c.skills?.jugg), cloak: Boolean(c.skills?.cloak), wall: ((d) => classRank(d, "bulwark_colossus") ? 10 : classRank(d, "iron_wall"))(Object.values(state2.playersById).find((p) => p.entityId === id)?.d8) }])) };
 }
 
 // src/shared/content/creatures_d11.js
@@ -126747,7 +126884,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
             shieldRiposteTick: a.team === "party" ? engine.events().findLast((e) => e.kind === "combat.damageApplied" && e.source.entityId === a.entityId && e.payload.mechanic === "bash" && e.payload.trigger === "reactive")?.tick ?? -100 : -100,
             shieldBlockTick: a.team === "party" ? engine.events().findLast((e) => ["combat.damageApplied", "combat.defenseResolved"].includes(e.kind) && e.subject.entityId === a.entityId && e.payload.defenseKind === "block")?.tick ?? -100 : -100,
             heroLook: a.team === "party" ? heroLookView(Object.values(state2.playersById).find((p2) => p2.entityId === a.entityId)) : null,
-            uniqueCharge: a.team === "party" ? ((k) => ({ bark: k?.bark ?? 0, silk: k?.silk ?? 0, cocoon: !k?.wrapCd, vent: k?.vent ?? 0, core: Math.min(1, (k?.core ?? 0) / 30) }))(state2.subweaponCombat.actors[a.entityId]?.skills) : null,
+            uniqueCharge: a.team === "party" ? ((k) => ({ bark: k?.bark ?? 0, silk: k?.silk ?? 0, cocoon: !k?.wrapCd, vent: k?.vent ?? 0, core: Math.min(1, (k?.core ?? 0) / 30), treads: k?.treadCd ? 1 - k.treadCd / TREAD_EVERY : null }))(state2.subweaponCombat.actors[a.entityId]?.skills) : null,
             equipmentAppearance: a.team === "party" ? (() => {
               const p2 = Object.values(state2.playersById).find((p3) => p3.entityId === a.entityId);
               return Object.fromEntries(["weapon", "subweapon"].map((slot) => [slot, p2.inventory.itemsById[p2.inventory.equipped[slot]] ?? null]));
@@ -128789,6 +128926,50 @@ BOOTS["gorehide-stompers"] = (c, A2) => {
     G4(c, [x, 4, x + 0.9, 0.6 + i % 2 * 1.2, x + 1.8, 4], { b: TQ.bristle.b }, { flat: true, lw: 0.7 });
   }
   G4(c, [25.6, 22, 27.8, 18.4, 30.4, 16.8, 31, 17.8, 29, 19.6, 27.6, 22.6], TQ.tusk, { split: 0.6, lw: 0.9 });
+};
+BOOTS["brimstone-treads"] = (c, A2) => {
+  const bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, iron = { b: "#4a4f57", d: "#33373d", l: "#6b727c" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, slag2 = { b: "#3b3439", d: "#29242a" }, LAVA4 = "#f6662c", GOLD36 = "#ffbd53";
+  {
+    const g = c.createRadialGradient(18, 26, 0, 18, 26, 13);
+    g.addColorStop(0, "rgba(246,102,44,.32)");
+    g.addColorStop(1, "rgba(246,102,44,0)");
+    c.fillStyle = g;
+    c.beginPath();
+    c.arc(18, 26, 13, 0, Math.PI * 2);
+    c.fill();
+  }
+  R6(c, 9, 6, 8.6, 14, bas, { split: 0.62 });
+  G4(c, [8.8, 19.4, 17.6, 19.4, 22, 19.8, 26.4, 21, 28.6, 23.4, 28.6, 25.4, 8.8, 25.4], bas, { split: 0.62 });
+  px4(c, 21.6, 20.2, 0.8, 5, "#00000040");
+  c.save();
+  c.lineCap = "round";
+  c.lineJoin = "round";
+  c.strokeStyle = LAVA4;
+  c.lineWidth = 1;
+  for (const pts2 of [[11, 25, 11.8, 21.6, 10.6, 18.4, 11.4, 15.6], [15.4, 25, 14.6, 22.4, 15.8, 20], [24.6, 25, 25.6, 23.2, 24.8, 22.2]]) {
+    c.beginPath();
+    c.moveTo(pts2[0], pts2[1]);
+    for (let i = 2; i < pts2.length; i += 2) c.lineTo(pts2[i], pts2[i + 1]);
+    c.stroke();
+  }
+  c.strokeStyle = GOLD36;
+  c.lineWidth = 0.45;
+  c.beginPath();
+  c.moveTo(11.5, 23.4);
+  c.lineTo(11.7, 21.8);
+  c.stroke();
+  c.restore();
+  R6(c, 8, 3.4, 10.6, 4, wrap3, { split: 0.62 });
+  px4(c, 11.2, 3.4, 0.8, 4, "#00000044");
+  px4(c, 14.6, 3.4, 0.8, 4, "#00000044");
+  R6(c, 8.6, 11.6, 9.4, 2.6, iron, { split: 0.62, lw: 1 });
+  px4(c, 9.8, 12.4, 1.2, 1.1, A2.c);
+  px4(c, 15.6, 12.4, 1.2, 1.1, A2.c);
+  gem2(c, 13.3, 12.9, 2.2, A2.gem);
+  R6(c, 8.2, 25.4, 21, 3, slag2, { split: 0.6, lw: 1 });
+  px4(c, 8.8, 25, 19.8, 1, LAVA4);
+  px4(c, 12, 25.1, 3, 0.7, GOLD36);
+  px4(c, 21, 25.1, 2.4, 0.7, GOLD36);
 };
 GLOVES2["sunsting-grips"] = (c, A2) => {
   glove(c, A2, { hand: TQ.amber, cuff: TQ.chitin, joints: true });
@@ -170663,7 +170844,7 @@ var easeOut3 = (v) => {
   v = clamp62(v);
   return 1 - (1 - v) * (1 - v);
 };
-var BRIMSTONE_FX_LIFE = Object.freeze({ maul: 800, vent: 2100, core: 1700 });
+var BRIMSTONE_FX_LIFE = Object.freeze({ maul: 800, vent: 2100, core: 1700, quake: 1600 });
 var FURROW_TICKS2 = 120;
 var VENT_TICKS2 = 60;
 var STRIP_TICKS2 = 120;
@@ -170832,10 +171013,58 @@ function drawBurningStrip(c, s, time3) {
     if (d <= l) smokeAt(c, p.x + dx * d, p.y + dy * d, time3, i * 11, fade);
   });
 }
+var TREAD_S = 0.6;
+var CRACK4 = "#241b1e";
+var LAVA3 = "#f6662c";
+var DEEP5 = "#c9361f";
+var slamOf = (p) => ({ ability: "slam", resolvedTick: BASE6, targetPosition: { x: p.x, y: p.y }, hitEntityIds: [] });
+function footprint3(c, x, y, age) {
+  if (age < 0 || age > 1.1) return;
+  const cool = clamp62(age / 0.8), fade = 1 - clamp62((age - 0.8) / 0.3);
+  c.save();
+  c.globalAlpha *= fade;
+  c.beginPath();
+  c.ellipse(x, y, 3.6, 2, 0, 0, TAU189);
+  c.fillStyle = CRACK4;
+  c.fill();
+  c.strokeStyle = INK58;
+  c.lineWidth = 0.6;
+  c.stroke();
+  c.beginPath();
+  c.ellipse(x, y, 2.4, 1.2, 0, 0, TAU189);
+  c.fillStyle = cool < 0.5 ? LAVA3 : cool < 0.9 ? DEEP5 : "#4a3a36";
+  c.fill();
+  if (cool < 0.4) {
+    c.beginPath();
+    c.ellipse(x - 0.3, y - 0.2, 1.1, 0.5, 0, 0, TAU189);
+    c.fillStyle = GOLD34;
+    c.fill();
+  }
+  c.restore();
+}
+function drawTreadsQuake(c, b, age, time3) {
+  const a = age / 1e3;
+  if (a < 0 || age >= BRIMSTONE_FX_LIFE.quake) return;
+  const p = { x: b.x, y: b.y }, tick = BASE6 + a * 60, sd = slamOf(p);
+  if (groundPassV1()) {
+    const dx = p.x - b.fx, dy = p.y - b.fy, l = Math.hypot(dx, dy);
+    if (l > 14) {
+      const nx = -dy / l, ny = dx / l;
+      for (let i = 0; i < 5; i++) {
+        const f = (i + 0.5) / 5, side = i % 2 ? 1.5 : -1.5;
+        footprint3(c, b.fx + dx * f + nx * side, b.fy + dy * f + ny * side, a + (1 - f) * 0.24);
+      }
+    }
+    scaled5(c, p, TREAD_S, () => slamHitGround(c, sd, tick));
+    shockRing(c, p, a, 50, 0.34);
+    dustFront(c, p, a, 40, 0.3);
+  }
+  stand2(c, p, TREAD_S, (add2) => slamHitDepth(sd, tick, add2), { skip: ["/core"] });
+}
 
 // src/client/combat_vfx.js
-var BOSS_UQ = Object.freeze({ "uq:bark": [TREANT_FX_LIFE.bark, drawBarkBurst], "uq:silk": [TREANT_FX_LIFE.silk, drawSilkGlob], "uq:spiders": [TREANT_FX_LIFE.spiders, drawSpiderlingBurst], "uq:maul": [BRIMSTONE_FX_LIFE.maul, drawMaulBurst], "uq:vent": [BRIMSTONE_FX_LIFE.vent, drawVentEruption], "uq:core": [BRIMSTONE_FX_LIFE.core, drawCoreBlast] });
-var BOSS_UQ_LIGHT = Object.freeze({ "uq:maul": { r: 80, color: "#ff8a3d", alpha: 0.7, life: 800 }, "uq:vent": { r: 90, color: "#ff8a3d", alpha: 0.75, life: 1400 }, "uq:core": { r: 90, color: "#ffbd53", alpha: 0.8, life: 1e3 }, "uq:silk": { r: 50, color: "#e9eedb", alpha: 0.35, life: 500 }, "uq:spiders": { r: 50, color: "#c7f58f", alpha: 0.35, life: 700 }, "uq:bark": { r: 60, color: "#ffb84a", alpha: 0.35, life: 700 } });
+var BOSS_UQ = Object.freeze({ "uq:bark": [TREANT_FX_LIFE.bark, drawBarkBurst], "uq:silk": [TREANT_FX_LIFE.silk, drawSilkGlob], "uq:spiders": [TREANT_FX_LIFE.spiders, drawSpiderlingBurst], "uq:maul": [BRIMSTONE_FX_LIFE.maul, drawMaulBurst], "uq:vent": [BRIMSTONE_FX_LIFE.vent, drawVentEruption], "uq:core": [BRIMSTONE_FX_LIFE.core, drawCoreBlast], "uq:quake": [BRIMSTONE_FX_LIFE.quake, drawTreadsQuake] });
+var BOSS_UQ_LIGHT = Object.freeze({ "uq:maul": { r: 80, color: "#ff8a3d", alpha: 0.7, life: 800 }, "uq:vent": { r: 90, color: "#ff8a3d", alpha: 0.75, life: 1400 }, "uq:core": { r: 90, color: "#ffbd53", alpha: 0.8, life: 1e3 }, "uq:silk": { r: 50, color: "#e9eedb", alpha: 0.35, life: 500 }, "uq:spiders": { r: 50, color: "#c7f58f", alpha: 0.35, life: 700 }, "uq:bark": { r: 60, color: "#ffb84a", alpha: 0.35, life: 700 }, "uq:quake": { r: 80, color: "#ff8a3d", alpha: 0.7, life: 900 } });
 var offKind = (m, id) => m.entitiesById[id]?.heroLook?.gear?.off?.kind;
 var INK59 = "#190f20";
 var MECHANIC_COLORS = Object.freeze({ ...MASTERY_COLORS, lightning: "#c7b5ff", frost: "#ced8ff", shieldRiposte: "#d5b666", offhand: "#dce5ef", riposte: "#c99cff", bash: "#ffe08a", fire: "#ff962e", burn: "#ff962e", bleed: "#f34a56", block: "#ffe6a0", parry: "#e4ceff" });
@@ -171262,6 +171491,7 @@ function createCombatVfx() {
   function bossUniqueBursts(f, old2, a, time3) {
     if (!old2) return;
     const at8 = (x, y) => ({ position: { x, y } });
+    if (f.quake && f.quake.ticks > old2.quake) add2("uq:quake", at8(f.quake.x, f.quake.y), time3, 1, 0, { fx: f.quake.fx, fy: f.quake.fy });
     if (f.barkShot && f.barkShot.ticks > old2.shot) add2("uq:bark", at8(f.barkShot.x, f.barkShot.y), time3, 1, 0, { shots: f.barkShot.at });
     if (f.web && f.web.ticks > old2.web) add2("uq:silk", a, time3, 1, 0, { tx: f.web.x, ty: f.web.y });
     if (old2.cocoon && !f.cocoon) add2("uq:spiders", at8(old2.cocoon.x, old2.cocoon.y), time3);
@@ -171338,7 +171568,7 @@ function createCombatVfx() {
       if (seen4 && a) bossUniqueBursts(f, old2?.uq, a, time3);
       if (old2 && old2.parry > 1 && !f.parry) parrySpent.set(id, time3);
       facings.set(id, poses[id]?.facing ?? 1);
-      families3.set(id, { uq: { shot: f.barkShot?.ticks ?? 0, web: f.web?.ticks ?? 0, cocoon: f.cocoon ? { x: f.cocoon.x, y: f.cocoon.y } : null, furrow: f.furrow?.ticks ?? 0, vents: f.vents?.map((v) => ({ x: v.x, y: v.y, ticks: v.ticks })) ?? null, strip: f.strip?.ticks ?? 0 }, mastery: f.mastery, pressure: f.pressure, delivery: f.delivery.tick, dash: f.dash.frames, dx: f.dash.x, dy: f.dash.y, skill: f.skill?.tick, parry: f.parry ?? 0, wail: f.wail ?? 0, shell: f.shell ?? 0, meteors: f.meteors?.map((mt) => mt.fall) ?? null, echo: f.echo ? { x: f.echo.x, y: f.echo.y } : null, aegis: f.aegis ? { ticks: f.aegis.ticks, echo: f.aegis.echo } : null, wave: f.wave ?? 0, shake: f.shake?.ticks ?? 0, shade: f.shade ? { x: f.shade.x, y: f.shade.y } : null, phoenix: f.phoenix ?? 0, ice: f.ice?.ticks, aftershock: f.aftershock, seeds: f.seeds, thaw: f.thaw, spin: f.spin?.hits ?? 0, thunder: f.thunder ?? 0, leap: f.leap ?? 0, orbs: f.orbs?.map((o) => ({ x: o.x, y: o.y, ticks: o.ticks, boom: o.boom })) ?? null });
+      families3.set(id, { uq: { quake: f.quake?.ticks ?? 0, shot: f.barkShot?.ticks ?? 0, web: f.web?.ticks ?? 0, cocoon: f.cocoon ? { x: f.cocoon.x, y: f.cocoon.y } : null, furrow: f.furrow?.ticks ?? 0, vents: f.vents?.map((v) => ({ x: v.x, y: v.y, ticks: v.ticks })) ?? null, strip: f.strip?.ticks ?? 0 }, mastery: f.mastery, pressure: f.pressure, delivery: f.delivery.tick, dash: f.dash.frames, dx: f.dash.x, dy: f.dash.y, skill: f.skill?.tick, parry: f.parry ?? 0, wail: f.wail ?? 0, shell: f.shell ?? 0, meteors: f.meteors?.map((mt) => mt.fall) ?? null, echo: f.echo ? { x: f.echo.x, y: f.echo.y } : null, aegis: f.aegis ? { ticks: f.aegis.ticks, echo: f.aegis.echo } : null, wave: f.wave ?? 0, shake: f.shake?.ticks ?? 0, shade: f.shade ? { x: f.shade.x, y: f.shade.y } : null, phoenix: f.phoenix ?? 0, ice: f.ice?.ticks, aftershock: f.aftershock, seeds: f.seeds, thaw: f.thaw, spin: f.spin?.hits ?? 0, thunder: f.thunder ?? 0, leap: f.leap ?? 0, orbs: f.orbs?.map((o) => ({ x: o.x, y: o.y, ticks: o.ticks, boom: o.boom })) ?? null });
     }
     seen4 = true;
   }
@@ -173317,7 +173547,7 @@ function drawFortEquipmentRack(ctx, x, y, variant = 0) {
 // src/client/cave_art_d10.js
 var TAU192 = Math.PI * 2;
 var OUT3 = "#101816";
-var DEEP5 = "#070b0a";
+var DEEP6 = "#070b0a";
 var ROCK_DARK = "#26322f";
 var ROCK3 = "#4b5b55";
 var ROCK_LIGHT = "#78877b";
@@ -173373,7 +173603,7 @@ function drawGeneratedCaveSurfaceD12_1(ctx, space) {
   const voidFade = ctx.createRadialGradient(w * 0.5, h * 0.5, 70, w * 0.5, h * 0.5, Math.max(w, h) * 0.62);
   voidFade.addColorStop(0, "#14201c");
   voidFade.addColorStop(0.58, "#0b1411");
-  voidFade.addColorStop(1, DEEP5);
+  voidFade.addColorStop(1, DEEP6);
   ctx.fillStyle = voidFade;
   ctx.fillRect(0, 0, w, h);
   const floor = new Path2D();
@@ -173458,7 +173688,7 @@ function drawCaveSurfaceD10(ctx, space) {
   const voidFade = ctx.createRadialGradient(w * 0.49, h * 0.5, 80, w * 0.49, h * 0.5, w * 0.64);
   voidFade.addColorStop(0, "#111b18");
   voidFade.addColorStop(0.56, "#0b1311");
-  voidFade.addColorStop(1, DEEP5);
+  voidFade.addColorStop(1, DEEP6);
   ctx.fillStyle = voidFade;
   ctx.fillRect(0, 0, w, h);
   for (const [x, y, rx, ry, seed2] of [[2.2, 5.4, 75, 49, 601], [4.2, 15.8, 91, 44, 607], [10.3, 1.5, 116, 38, 613], [19.3, 2.1, 96, 42, 617], [26.5, 4.2, 74, 54, 619], [25.8, 13.3, 90, 53, 631], [20.5, 17.2, 114, 42, 641], [8.7, 18.2, 104, 38, 643]]) {

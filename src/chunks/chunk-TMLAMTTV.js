@@ -6442,6 +6442,18 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "Blink primes the wand: your next Cast within 3 s becomes a Core Blast, a lance of molten fire through every enemy in a line for {0} of your Attack. It leaves a burning strip on the ground for 2 s.",
     "A coal from its chest, still burning."
   ),
+  unique(
+    "brimstone-treads",
+    "Brimstone Treads",
+    "boots",
+    null,
+    "Treads",
+    null,
+    "overlord_iron_vault",
+    "volcanic",
+    "When a movement skill lands (Dash, Blink, Lunge, Shadowstep, Shield Charge or Skyfall Leap), the ground quakes: a ring of lava cracks bursts around you for {0} of your Attack and knocks enemies back. Once every 4 s.",
+    "Every step a small eruption."
+  ),
   // Named elites, at the end of small sites.
   unique(
     "bristleback-mantle",
@@ -6608,6 +6620,7 @@ var UNIQUE_TIERS = freezeWire({
   "slagmaul": { lines: ["mainDmg", "fireDmg", "str", "critDamage", "eliteDmg"], stars: [80, 110, 140, 180], unit: "pct" },
   "ventcutter": { lines: ["mainDmg", "critDamage", "critChance", "dex", "eliteDmg"], stars: [90, 125, 160, 210], unit: "pct" },
   "coreheart": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [100, 135, 170, 220], unit: "pct" },
+  "brimstone-treads": { lines: ["moveSpeed", "atkPct", "critDamage", "eliteDmg", "lifeKill"], stars: [50, 70, 90, 120], unit: "pct" },
   "bristleback-mantle": { lines: ["maxHpPct", "defPct", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
   "jacks-band": { lines: ["lifeHit", "atkPct", "maxHpPct", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
   "kheptra-signet": { lines: ["defPct", "maxHpPct", "cdr", "atkPct", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
@@ -6637,6 +6650,7 @@ var UNIQUE_LINES_V3 = freezeWire({
   "slagmaul": { always: "fireDmg", pool: ["mainDmg", "areaDmg", "closeDmg", "ailmentDur", "ailingDmg", "str"], leg: ["maxPip"] },
   "ventcutter": { always: "critDamage", pool: ["critChance", "fireDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
   "coreheart": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
+  "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
   "bristleback-mantle": { always: "stunDr", pool: ["maxHpPct", "defPct", "str", "lifeKill", "closeDmg", "hitCdr", "areaDr"], leg: [] },
   "jacks-band": { always: "lowDmg", pool: ["atkPct", "critChance", "areaDmg", "lifeHit", "maxHpPct", "eliteDmg"], leg: ["killCdr"] },
   "kheptra-signet": { always: "hitCdr", pool: ["defPct", "maxHpPct", "cdr", "atkPct", "fullDmg", "stunDr", "potionHeal"], leg: [] },
@@ -7378,8 +7392,8 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
   const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own3 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [
     ...own3 ?? [],
     ...shared,
-    ...uq?.trophy || uq?.family === "gloves" && uq.cls === null ? [uq.noun] : []
-    /* any-class unique gloves (Cocoonsilk Wraps) keep their own noun */
+    ...uq?.trophy || (uq?.family === "gloves" || uq?.family === "boots") && uq.cls === null ? [uq.noun] : []
+    /* any-class unique gloves and boots (Cocoonsilk Wraps, Brimstone Treads) keep their own noun */
   ], n = noun ?? (type === "subweapon" && cls && progression.mainTree ? smartOffhandNoun(cls, progression.mainTree, random) : shared.length && random() < 0.2 ? pick6(shared) : pick6(own3));
   requireContract((family2 ? cls ? classFamilies : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
   const E = c.dungeonScale(power2).E, R = c.q(100 + 7 * rarityTier, 100), P2 = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R, c.q(type === "overall" ? 18 : 10, 10));
@@ -27913,6 +27927,7 @@ var BY_NOUN = Object.freeze({
   "Backwards Cap": "backwards-cap",
   "Cloth Wraps": "wraps",
   Wraps: "wraps",
+  Treads: "boots",
   "Cloth Slippers": "apprentice-slippers",
   "Wizard Hat": "hat",
   "Silk Robe": "robe",

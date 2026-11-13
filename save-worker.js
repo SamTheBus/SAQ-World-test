@@ -15394,6 +15394,18 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "Blink primes the wand: your next Cast within 3 s becomes a Core Blast, a lance of molten fire through every enemy in a line for {0} of your Attack. It leaves a burning strip on the ground for 2 s.",
     "A coal from its chest, still burning."
   ),
+  unique(
+    "brimstone-treads",
+    "Brimstone Treads",
+    "boots",
+    null,
+    "Treads",
+    null,
+    "overlord_iron_vault",
+    "volcanic",
+    "When a movement skill lands (Dash, Blink, Lunge, Shadowstep, Shield Charge or Skyfall Leap), the ground quakes: a ring of lava cracks bursts around you for {0} of your Attack and knocks enemies back. Once every 4 s.",
+    "Every step a small eruption."
+  ),
   // Named elites, at the end of small sites.
   unique(
     "bristleback-mantle",
@@ -15560,6 +15572,7 @@ var UNIQUE_TIERS = freezeWire({
   "slagmaul": { lines: ["mainDmg", "fireDmg", "str", "critDamage", "eliteDmg"], stars: [80, 110, 140, 180], unit: "pct" },
   "ventcutter": { lines: ["mainDmg", "critDamage", "critChance", "dex", "eliteDmg"], stars: [90, 125, 160, 210], unit: "pct" },
   "coreheart": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [100, 135, 170, 220], unit: "pct" },
+  "brimstone-treads": { lines: ["moveSpeed", "atkPct", "critDamage", "eliteDmg", "lifeKill"], stars: [50, 70, 90, 120], unit: "pct" },
   "bristleback-mantle": { lines: ["maxHpPct", "defPct", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
   "jacks-band": { lines: ["lifeHit", "atkPct", "maxHpPct", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
   "kheptra-signet": { lines: ["defPct", "maxHpPct", "cdr", "atkPct", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
@@ -15589,6 +15602,7 @@ var UNIQUE_LINES_V3 = freezeWire({
   "slagmaul": { always: "fireDmg", pool: ["mainDmg", "areaDmg", "closeDmg", "ailmentDur", "ailingDmg", "str"], leg: ["maxPip"] },
   "ventcutter": { always: "critDamage", pool: ["critChance", "fireDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
   "coreheart": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
+  "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
   "bristleback-mantle": { always: "stunDr", pool: ["maxHpPct", "defPct", "str", "lifeKill", "closeDmg", "hitCdr", "areaDr"], leg: [] },
   "jacks-band": { always: "lowDmg", pool: ["atkPct", "critChance", "areaDmg", "lifeHit", "maxHpPct", "eliteDmg"], leg: ["killCdr"] },
   "kheptra-signet": { always: "hitCdr", pool: ["defPct", "maxHpPct", "cdr", "atkPct", "fullDmg", "stunDr", "potionHeal"], leg: [] },
@@ -16170,8 +16184,8 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
   const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own3 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [
     ...own3 ?? [],
     ...shared,
-    ...uq?.trophy || uq?.family === "gloves" && uq.cls === null ? [uq.noun] : []
-    /* any-class unique gloves (Cocoonsilk Wraps) keep their own noun */
+    ...uq?.trophy || (uq?.family === "gloves" || uq?.family === "boots") && uq.cls === null ? [uq.noun] : []
+    /* any-class unique gloves and boots (Cocoonsilk Wraps, Brimstone Treads) keep their own noun */
   ], n = noun ?? (type === "subweapon" && cls && progression.mainTree ? smartOffhandNoun(cls, progression.mainTree, random) : shared.length && random() < 0.2 ? pick6(shared) : pick6(own3));
   requireContract((family2 ? cls ? classFamilies : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
   const E = c.dungeonScale(power2).E, R2 = c.q(100 + 7 * rarityTier, 100), P2 = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R2, c.q(type === "overall" ? 18 : 10, 10));
@@ -24978,6 +24992,7 @@ var BY_NOUN = Object.freeze({
   "Backwards Cap": "backwards-cap",
   "Cloth Wraps": "wraps",
   Wraps: "wraps",
+  Treads: "boots",
   "Cloth Slippers": "apprentice-slippers",
   "Wizard Hat": "hat",
   "Silk Robe": "robe",
@@ -26614,6 +26629,9 @@ var MAX_VENTS = 3;
 var CORE_TICKS = 180;
 var STRIP_TICKS = 120;
 var UQ_PULSE_TICKS = 30;
+var TREAD_EVERY = 240;
+var TREAD_WAIT = 40;
+var QUAKE_TICKS = 30;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
@@ -26643,7 +26661,7 @@ var FREE_TICKS = 180;
 var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
-var LIVE = ["bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function prune(combat) {
   const k = combat.skills;
   if (k && !Object.keys(k.cooldowns).length && !LIVE.some((key9) => k[key9])) delete combat.skills;
@@ -26985,7 +27003,17 @@ function validateClassSkillState(s, combat, actor) {
         requireContract(pos2(p), "Invalid bark burst");
       }
     }
-    for (const [key9, max2] of [["silk", SILK_EVERY - 1], ["vent", VENT_EVERY - 1], ["wrapCd", COCOON_EVERY], ["core", CORE_TICKS]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
+    for (const [key9, max2] of [["silk", SILK_EVERY - 1], ["vent", VENT_EVERY - 1], ["wrapCd", COCOON_EVERY], ["core", CORE_TICKS], ["treadCd", TREAD_EVERY]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
+    if (k.tread !== void 0) {
+      closedRecord(k.tread, ["x", "y", "ticks"]);
+      requireContract(pos2(k.tread) && actor.alive, "Invalid tread");
+      safeInteger(k.tread.ticks, 1, TREAD_WAIT);
+    }
+    if (k.quake !== void 0) {
+      closedRecord(k.quake, ["x", "y", "fx", "fy", "ticks"]);
+      requireContract(pos2(k.quake) && Number.isFinite(k.quake.fx) && Number.isFinite(k.quake.fy), "Invalid quake");
+      safeInteger(k.quake.ticks, 1, QUAKE_TICKS);
+    }
     if (k.web !== void 0) {
       closedRecord(k.web, ["x", "y", "ticks", "next"]);
       requireContract(pos2(k.web) && actor.alive, "Invalid web");
