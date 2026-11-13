@@ -26231,7 +26231,8 @@ function validateCommand(command) {
     requireContract(CLASS_SKILL_IDS.includes(command.payload.skillId), "Unknown skill");
     validatePrimaryAim(command.payload.aim);
   } else if (command.kind === "player.respawn") {
-    closedRecord(command.payload, []);
+    closedRecord(command.payload, [], ["leaveTrip"]);
+    requireContract(command.payload.leaveTrip === void 0 || command.payload.leaveTrip === true, "Invalid respawn");
   } else if (command.kind === "player.revive") {
     closedRecord(command.payload, ["targetPlayerId", "holding"]);
     requireContract(typeof command.payload.targetPlayerId === "string" && command.payload.targetPlayerId.length > 0 && command.payload.targetPlayerId.length <= 120 && typeof command.payload.holding === "boolean", "Invalid revive");

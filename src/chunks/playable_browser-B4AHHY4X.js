@@ -1099,7 +1099,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-WDY5R6KC.js";
+} from "./chunk-EVTD3GMD.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -118408,7 +118408,7 @@ var pulling = (h, pid, tick) => {
 var HELL_THUD_TICKS = 60;
 function hellMoveV1(s, playerId) {
   const h = s.trips?.hell, r = h?.heroesByPlayerId[playerId];
-  if (!r) return 1;
+  if (!r || r.landTick !== null && !inHellV1(s, s.entitiesById[s.playersById[playerId]?.entityId])) return 1;
   if (pulling(h, playerId, s.tick) || r.landTick !== null && s.tick < r.landTick + HELL_THUD_TICKS) return 0;
   return r.landTick !== null && s.tick < r.landTick + TRIP_HEAVY_LEGS_TICKS || nightmareLegsV1(s, playerId) ? TRIP_HEAVY_LEGS_SPEED : 1;
 }
@@ -118433,6 +118433,14 @@ function hellRespawnV1(s, actor) {
   if (!h || !inHellV1(s, actor)) return null;
   const i = Object.values(s.playersById).findIndex((q2) => q2.entityId === actor.entityId), far = hellArenaRespawnV1(s, actor.position);
   return { kind: "hell", label: far ? "outside the arena" : "your landing spot", settlementId: null, spaceInstanceId: h.spaceInstanceId, position: spotNear(s.spacesByInstanceId[h.spaceInstanceId].collision, far ?? HELL_LANDING, Math.max(0, i), actor.hullRadius) };
+}
+function hellLeaveV1(s, actor) {
+  const h = s.trips?.hell;
+  if (!h || !inHellV1(s, actor)) return null;
+  const space = s.spacesByInstanceId[h.portal.spaceInstanceId], home = portalPositionV1(s, h.portal);
+  if (!space || !home) return null;
+  const i = Object.values(s.playersById).findIndex((q2) => q2.entityId === actor.entityId);
+  return { kind: "hell-leave", label: "where the portal was", settlementId: null, spaceInstanceId: h.portal.spaceInstanceId, position: spotNear(space.collision, home, Math.max(0, i), actor.hullRadius) };
 }
 function sendBack(s, h, p, hooks) {
   const a = s.entitiesById[p.entityId], space = s.spacesByInstanceId[h.portal.spaceInstanceId], home = portalPositionV1(s, h.portal);
@@ -118484,7 +118492,8 @@ function tickTripHellV1(s, hooks) {
     r.landTick = s.tick;
     if (pid === h.eaterPlayerId) h.portal.closeTick = s.tick + (Object.keys(s.playersById).length > 1 ? TRIP_FRIEND_WINDOW_TICKS : 30);
   }
-  if (!Object.keys(h.heroesByPlayerId).length && h.portal.closeTick !== null && s.tick >= h.portal.closeTick) {
+  const records = Object.values(h.heroesByPlayerId);
+  if (records.length ? records.every((r) => r.landTick !== null) && !Object.values(s.playersById).some((p) => inHellV1(s, s.entitiesById[p.entityId])) : h.portal.closeTick !== null && s.tick >= h.portal.closeTick) {
     closeHell(s, h, hooks);
     return;
   }
@@ -138914,7 +138923,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     if (valid) {
       if (respawning) measure2("playerRespawn", () => {
         state2.encounterEconomy.outingsByPlayer[player.playerId].earnedOutside = false;
-        const near5 = hellRespawnV1(state2, actor) ?? respawnTargetV2(state2, actor), anchor2 = near5 ?? startingSettlementRespawn(state2, manifest, actor), count = safeInteger((state2.playerRespawnsById?.[command.playerId]?.count ?? 0) + 1, 1);
+        const near5 = command.payload.leaveTrip === true && inHellV1(state2, actor) ? hellLeaveV1(state2, actor) : hellRespawnV1(state2, actor) ?? respawnTargetV2(state2, actor), anchor2 = near5 ?? startingSettlementRespawn(state2, manifest, actor), count = safeInteger((state2.playerRespawnsById?.[command.playerId]?.count ?? 0) + 1, 1);
         safeInteger(actor.residency.residencyRevision + 1, 1);
         cancelDefeatedPrimaries(state2, actor.entityId);
         clearWildernessCrowdGrace(state2, actor.entityId);
@@ -140744,7 +140753,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           revive: projectReviveV1(state2, localPlayerId),
           recovery: (() => {
             const near5 = local8.alive ? null : hellRespawnV1(state2, local8) ?? respawnDestinationV2(state2, local8);
-            return Object.freeze({ canRespawn: !local8.alive, kind: near5?.kind ?? "start", anchorLabel: near5?.label ?? plannedStartLabel(state2.d9World?.plannedWorld, m.settlements.find((s) => s.settlementId === m.start.settlementId).label) });
+            return Object.freeze({ canRespawn: !local8.alive, leaveTrip: !local8.alive && inHellV1(state2, local8), kind: near5?.kind ?? "start", anchorLabel: near5?.label ?? plannedStartLabel(state2.d9World?.plannedWorld, m.settlements.find((s) => s.settlementId === m.start.settlementId).label) });
           })(),
           space: Object.freeze({
             ...inOverworld && hasSettlementLife(state2.d9World?.plannedWorld) ? { plannedVillage: projectToLocalFrameD9({ chunkX: "1164", chunkY: "1316", localX: 0, localY: 0 }, state2.d9World.runtime.frames), plannedVillages: villagePlacements(state2.d9World.plannedWorld).flatMap((v) => {
@@ -167623,7 +167632,7 @@ function deathKillerV1(a) {
 }
 function createDeathPresentation({ document: document2, readModel, adapter, clearInput, restoreGameplayFocus = () => {
 }, camera = null, now: now3 = () => Date.now(), wakeMs = 0 }) {
-  const panel = document2.getElementById("world-death"), button3 = document2.getElementById("world-respawn");
+  const panel = document2.getElementById("world-death"), button3 = document2.getElementById("world-respawn"), leave = document2.getElementById("world-death-leave");
   if (!panel || !button3) return { refresh() {
   }, destroy() {
   } };
@@ -167652,18 +167661,19 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
     }
   }
   const awake2 = () => !wakeMs || now3() - shownAt >= wakeMs;
-  const respawn = () => {
+  const respawn = (leaveTrip2 = false) => {
     const model = readModel();
-    if (!model.recovery?.canRespawn || model.persistence.phase !== "encounter" || !awake2()) return;
+    if (!model.recovery?.canRespawn || leaveTrip2 && !model.recovery.leaveTrip || model.persistence.phase !== "encounter" || !awake2()) return;
     clearInput();
     error = "";
     try {
-      adapter.issue("player.respawn", {}, model);
+      adapter.issue("player.respawn", leaveTrip2 ? { leaveTrip: true } : {}, model);
     } catch (e) {
       error = e.message;
     }
     refresh(readModel());
   };
+  const respawnHere = () => respawn(false), leaveTrip = () => respawn(true);
   const blockBackgroundKey = (event) => {
     if (!showing) return;
     const inDialog = panel.contains(event.target);
@@ -167674,7 +167684,8 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
   };
   document2.addEventListener("keydown", blockBackgroundKey, true);
   document2.addEventListener("keyup", blockBackgroundKey, true);
-  button3.addEventListener("click", respawn);
+  button3.addEventListener("click", respawnHere);
+  leave?.addEventListener("click", leaveTrip);
   function track2(model, heroId) {
     const next = model.context ? `${model.context.campaignId}/${model.context.sessionId}` : null;
     if (next !== domain) {
@@ -167791,6 +167802,8 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
     }
     const disabled = !model.recovery.canRespawn || model.persistence.phase !== "encounter";
     if (button3.disabled !== disabled) button3.disabled = disabled;
+    show("world-death-leave", Boolean(model.recovery.leaveTrip));
+    if (leave && leave.disabled !== disabled) leave.disabled = disabled;
     set("world-death-status", error || (button3.disabled ? "Resolve the save status above to respawn." : ""));
   }
   return Object.freeze({ refresh, inspect: () => Object.freeze({ showing, killer: killer ? { name: killer.name, ring: killer.ring } : null }), destroy: () => {
@@ -167798,7 +167811,8 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
     el3("world-view")?.classList?.remove("world-down");
     document2.removeEventListener("keydown", blockBackgroundKey, true);
     document2.removeEventListener("keyup", blockBackgroundKey, true);
-    button3.removeEventListener("click", respawn);
+    button3.removeEventListener("click", respawnHere);
+    leave?.removeEventListener("click", leaveTrip);
   } });
 }
 
@@ -205926,6 +205940,7 @@ function tripBadBadgeV1(model) {
   if (!h || !me) return null;
   const r = h.heroes[me];
   if (r?.landTick != null) {
+    if (model.context?.spaceInstanceId !== h.spaceInstanceId) return null;
     const heavy2 = r.landTick + TRIP_HEAVY_LEGS_TICKS - tick;
     if (heavy2 > 0) return { snack: "heavy-legs", name: "Heavy legs", fx: "", clock: clock7(heavy2), fraction: heavy2 / TRIP_HEAVY_LEGS_TICKS, blink: false, color: "#b070e0", drawIcon: drawGooIcon };
     const goo2 = h.nightmare?.legs?.[me] ?? 0;
@@ -211906,7 +211921,7 @@ async function createLocalEndlessSessionD9(options) {
     if (command.kind === "player.respawn" && opened2.state.d9World.plannedWorld) {
       const near5 = authority.withReadyAuthority((a) => a.withAuthorityState((s) => {
         const p = s.playersById[command.playerId], actor = p && s.entitiesById[p.entityId];
-        return actor && !actor.alive ? respawnPreparationV2(s, actor) : null;
+        return actor && !actor.alive ? inHellV1(s, actor) ? { kind: "hell" } : respawnPreparationV2(s, actor) : null;
       }));
       respawnPending = executePlannedRespawnV1({ command, binding: opened2.state.d9World.plannedWorld, start: opened2.state.d9World.plannedStart, near: near5, stream, clientPort, authority, waitForPreparation: async () => {
         if (groundPreparation) await groundPreparation.promise;
