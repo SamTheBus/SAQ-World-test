@@ -167611,6 +167611,17 @@ Worst 5s: ${legacy.worstMs.toFixed(1)} ms`;
 }
 
 // src/client/death_presentation.js
+var deathTitleV1 = (model) => Object.entries(model.playersById).some(([id2, p]) => id2 !== model.localPlayerId && model.entitiesById[p.entityId]?.alive) ? "Waiting for a revive\u2026" : "Down for now\u2026";
+var titleFontRequested = false;
+function loadTitleFont(doc) {
+  if (titleFontRequested || typeof FontFace !== "function" || !doc.fonts) return;
+  titleFontRequested = true;
+  try {
+    new FontFace("Baloo 2", "url('assets/fonts-v1/baloo2-800-latin.woff2') format('woff2')", { weight: "800", display: "swap" }).load().then((face5) => doc.fonts.add(face5)).catch(() => {
+    });
+  } catch {
+  }
+}
 var xpText = (v) => formatLarge(integerWire(v));
 var DEATH_RINGS = Object.freeze({ boss: "#e8c37a", elite: "#ffa45a", other: "#b8c0c6" });
 var CLASS_NAMES4 = Object.freeze({ shield: "Knight", dagger: "Rogue", tome: "Mage" });
@@ -167639,6 +167650,7 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
   if (!panel || !button3) return { refresh() {
   }, destroy() {
   } };
+  loadTitleFont(document2);
   const el3 = (id2) => document2.getElementById(id2);
   const set = (id2, text3) => {
     const e = el3(id2);
@@ -167785,6 +167797,11 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
       return;
     }
     if (!wasShowing) button3.focus?.({ preventScroll: true });
+    const title3 = deathTitleV1(model), h = el3("world-death-title");
+    if (h && h.dataset && h.dataset.text !== title3) {
+      h.textContent = title3;
+      h.dataset.text = title3;
+    }
     const xp = participant.progression;
     set("world-death-level", `Level ${xpText(xp.level)}`);
     set("world-death-xp", xp.capped ? `XP ${xpText(xp.totalXp)} \xB7 Maximum level` : `XP ${xpText(xp.totalXp)} total \xB7 ${xpText(xp.current)}/${xpText(xp.required)} to next level`);

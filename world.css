@@ -719,9 +719,20 @@ html[data-defeated=true] [data-gameplay-hud],html[data-defeated=true] .chart-min
 body #world-death{position:absolute;inset:0;z-index:80;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 max(16px,var(--world-safe-right)) calc(44px + var(--world-safe-bottom)) max(16px,var(--world-safe-left));box-sizing:border-box;color:#eee7d9;font:13px/1.35 var(--rpg-ui,"Segoe UI"),system-ui,sans-serif;text-align:center;}
 body #world-death[hidden]{display:none;}
 #world-death .ds{display:grid;justify-items:center;gap:10px;width:min(660px,100%);}
-#world-death .ds-title{margin:0;font:400 66px/1 Georgia,"Times New Roman",serif;letter-spacing:.14em;padding-left:.14em;text-transform:uppercase;color:#d8524c;text-shadow:0 3px 0 #2a0b0a,0 0 2px #2a0b0a;}
-#world-death .ds-orn{display:flex;align-items:center;gap:10px;width:min(320px,70%);color:#c9ad7a;}
-#world-death .ds-orn i{flex:1;height:1px;background:linear-gradient(90deg,transparent,#c9ad7a);}#world-death .ds-orn i:last-child{background:linear-gradient(90deg,#c9ad7a,transparent);}#world-death .ds-orn b{font-size:11px;line-height:1;}
+/* The title in the game's own call voice (Time's up!, damage numbers; Sammy 2026-11-13, replacing the Souls-like
+   serif YOU DIED): Baloo 2, round ink outline, white-to-coral fill, a boing pop-in, three dizzy stars circling over it.
+   The words: 'Waiting for a revive…' while a friend is standing, else 'Down for now…' (death_presentation.js). */
+#world-death .ds-head{position:relative;display:grid;justify-items:center;padding-top:30px;}
+#world-death .ds-title{position:relative;margin:0;font:800 54px/1 "Baloo 2",system-ui,sans-serif;letter-spacing:0;padding:0;text-transform:none;color:#1a0f12;-webkit-text-stroke:11px #1a0f12;text-shadow:0 5px 0 #1a0f12;transform:rotate(-3deg);animation:ds-pop .55s cubic-bezier(.2,.9,.3,1.25) both;}
+#world-death .ds-title::after{content:attr(data-text);position:absolute;inset:0;-webkit-text-stroke:0;text-shadow:none;color:transparent;background:linear-gradient(#ffffff 22%,#ffb19c 50%,#ff6b5e 72%,#d9423a);-webkit-background-clip:text;background-clip:text;}
+#world-death .ds-ko{position:absolute;left:50%;top:6px;width:0;height:0;animation:ds-ko-in .3s ease-out .35s both;}
+#world-death .ds-ko i{position:absolute;left:-17px;top:-17px;width:34px;height:34px;background:#1a0f12;clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%);animation:ds-orbit 2.2s linear infinite;}
+#world-death .ds-ko i::after{content:"";position:absolute;inset:5px;background:linear-gradient(#fffbe6,#ffd257);clip-path:inherit;}
+#world-death .ds-ko i:nth-child(2){animation-delay:-.733s;}#world-death .ds-ko i:nth-child(3){animation-delay:-1.467s;}
+@keyframes ds-pop{0%{transform:rotate(-3deg) scale(.25);opacity:0}45%{opacity:1}62%{transform:rotate(-3deg) scale(1.14)}80%{transform:rotate(-3deg) scale(.95)}100%{transform:rotate(-3deg) scale(1)}}
+@keyframes ds-ko-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes ds-orbit{0.0%{transform:translate(120.0px,0.0px) scale(0.78);opacity:0.55}8.33%{transform:translate(103.9px,8.0px) scale(0.89);opacity:0.78}16.67%{transform:translate(60.0px,13.9px) scale(0.97);opacity:0.94}25.0%{transform:translate(0.0px,16.0px) scale(1.00);opacity:1.00}33.33%{transform:translate(-60.0px,13.9px) scale(0.97);opacity:0.94}41.67%{transform:translate(-103.9px,8.0px) scale(0.89);opacity:0.78}50.0%{transform:translate(-120.0px,0.0px) scale(0.78);opacity:0.55}58.33%{transform:translate(-103.9px,-8.0px) scale(0.67);opacity:0.32}66.67%{transform:translate(-60.0px,-13.9px) scale(0.59);opacity:0.16}75.0%{transform:translate(-0.0px,-16.0px) scale(0.56);opacity:0.10}83.33%{transform:translate(60.0px,-13.9px) scale(0.59);opacity:0.16}91.67%{transform:translate(103.9px,-8.0px) scale(0.67);opacity:0.32}100.0%{transform:translate(120.0px,-0.0px) scale(0.78);opacity:0.55}}
+@media (prefers-reduced-motion:reduce){#world-death .ds-title,#world-death .ds-ko,#world-death .ds-ko i{animation:none;}}
 #world-death .dcard{display:flex;align-items:center;justify-content:center;gap:16px;box-sizing:border-box;width:100%;padding:12px 14px;border:1px solid #a68e69;border-radius:8px;background:linear-gradient(155deg,#26343f,#141e29 70%);box-shadow:0 10px 30px #0008,inset 0 0 0 3px #101821,inset 0 0 0 4px #786a4b55;text-align:left;}
 #world-death .killer{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}#world-death .killer[hidden]{display:none;}
 #world-death canvas.pt{width:64px;height:64px;flex:none;border-radius:50%;box-shadow:0 0 0 2px #0a0d12,0 0 0 4px var(--ring,#b8c0c6),0 0 0 5px #0a0d12;}
@@ -746,8 +757,8 @@ body #world-death #world-death-download{min-height:28px;margin:0;padding:3px 8px
 #world-death .ds-note{margin:0;color:#d4e2cf;font:600 12.5px var(--rpg-ui,"Segoe UI"),system-ui,sans-serif;text-shadow:0 1px 0 #000,0 0 4px #000;}
 #world-death #world-death-status{margin:0;color:#ffd0a8;font-size:12px;text-shadow:0 1px 0 #000;}#world-death #world-death-status:empty{display:none;}
 @media (hover:none) and (pointer:coarse){#world-death .go kbd{display:none;}}
-@media (max-height:500px){body #world-death{padding-bottom:calc(14px + var(--world-safe-bottom));}#world-death .ds{gap:6px;width:min(610px,100%);}#world-death .ds-title{font-size:40px;}#world-death .ds-orn{width:min(220px,60%);}#world-death .dcard{padding:8px 10px;gap:12px;}#world-death canvas.pt{width:50px;height:50px;}#world-death .killer b{font-size:15.5px;}body #world-death .go{height:44px;min-height:44px;font-size:14px;}#world-death .go kbd{display:none;}#world-death .act{width:240px;}#world-death .ds-note{font-size:11px;}}
-@media (max-width:560px){#world-death .ds-title{font-size:44px;}#world-death .dcard{flex-wrap:wrap;}#world-death .act{width:100%;}}
+@media (max-height:500px){body #world-death{padding-bottom:calc(14px + var(--world-safe-bottom));}#world-death .ds{gap:6px;width:min(610px,100%);}#world-death .ds-head{padding-top:14px;}#world-death .ds-title{font-size:38px;-webkit-text-stroke:8px #1a0f12;text-shadow:0 3px 0 #1a0f12;}#world-death .ds-ko{transform:scale(.7);}#world-death .dcard{padding:8px 10px;gap:12px;}#world-death canvas.pt{width:50px;height:50px;}#world-death .killer b{font-size:15.5px;}body #world-death .go{height:44px;min-height:44px;font-size:14px;}#world-death .go kbd{display:none;}#world-death .act{width:240px;}#world-death .ds-note{font-size:11px;}}
+@media (max-width:560px){#world-death .ds-title{font-size:40px;}#world-death .dcard{flex-wrap:wrap;}#world-death .act{width:100%;}}
 
 /* Potion belt: one-tap health potion in the old rations slot. A flask sits in a dark
  socket and its liquid shows how full the belt is (--potion-fill); while the potion
