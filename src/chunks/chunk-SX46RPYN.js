@@ -4119,7 +4119,7 @@ var HERO_CLASSES = freezeWire({
 var HERO_CLASS_IDS = Object.freeze(Object.keys(HERO_CLASSES));
 var CLASS_SKILLS = freezeWire({
   shield_bash: { id: "shield_bash", name: "Shield Bash", classId: "knight", cooldownTicks: 360, description: "Shove a forward cone: Attack plus Shield damage, knockback and a short stun on ordinary enemies. Every block takes 1 second off its cooldown. A Buckler recharges it faster; a Tower Shield stuns longer and shoves harder." },
-  flurry: { id: "flurry", name: "Flurry", classId: "rogue", cooldownTicks: 300, description: "Three quick offhand cuts in front of you. Each cut can crit and Bleed. A Main-Gauche readies a parry for the next hit; a Stiletto crits more often; a Kris makes every cut Bleed." },
+  flurry: { id: "flurry", name: "Flurry", classId: "rogue", cooldownTicks: 300, description: "Costs 1 Combo, no cooldown. Three quick offhand cuts in front of you. Each cut can crit and Bleed. A Main-Gauche readies a parry for the next hit; a Stiletto crits more often; a Kris makes every cut Bleed." },
   // Class tree actives (the first row of every tree). Their full text lives in class_trees_v1.js.
   earth_breaker: { id: "earth_breaker", name: "Earth-Breaker", classId: "knight", cooldownTicks: 480, description: "Slam the ground all around you. Everything hit takes damage and is slowed for 3 seconds." },
   rallying_cry: { id: "rallying_cry", name: "Rallying Cry", classId: "knight", cooldownTicks: 900, description: "Shout to heal 15% of your max HP. Nearby enemies deal 20% less damage for 6 seconds." },
@@ -4150,7 +4150,7 @@ var CLASS_SKILLS = freezeWire({
   firebloom: { id: "firebloom", name: "Firebloom", classId: "mage", cooldownTicks: 420, description: "Fire blossoms where you aim and burns everything inside it." },
   flashfreeze: { id: "flashfreeze", name: "Flashfreeze", classId: "mage", cooldownTicks: 720, description: "Freeze everything around you in a flash. Ordinary enemies freeze, elites are chilled, and bosses slow down." },
   ball_lightning: { id: "ball_lightning", name: "Ball Lightning", classId: "mage", cooldownTicks: 480, description: "Release a slow orb of lightning that drifts forward for 4 seconds, zapping every enemy near it twice a second." },
-  cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 300, description: "A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you: Fire burns, Frost slows, Storm chains to nearby enemies." }
+  cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 300, description: "Costs 1 Arcana, no cooldown. A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you: Fire burns, Frost slows, Storm chains to nearby enemies." }
 });
 var CLASS_SKILL_IDS = Object.freeze(Object.keys(CLASS_SKILLS));
 var SKILL_SLOT_COUNT = 5;

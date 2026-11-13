@@ -1065,7 +1065,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-QVIFIQLW.js";
+} from "./chunk-SX46RPYN.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -99528,7 +99528,8 @@ var SMOKE_CAP = SMOKE_MAX + 60 * PIPS_CAP;
 var WALL_CAP = WALL_MAX + 60 * PIPS_CAP;
 var ORB_CAP = ORB_TICKS * 2 + 60 * PIPS_CAP;
 var THROW_CAP = MAX_THROW_TARGETS + PIPS_CAP;
-var PIP_COSTS = Object.freeze({ retribution: 3, skyfall_leap: 3, aegis_pulse: 4, thousand_cuts: 3, shadowstep: 2, noxious_bloom: 3, rupture: 3, meteor: 4, thunderfall: 3, glacial_burst: 3 });
+var PAID_SKILLS = Object.freeze(["cast", "flurry"]);
+var PIP_COSTS = Object.freeze({ cast: 1, flurry: 1, retribution: 3, skyfall_leap: 3, aegis_pulse: 4, thousand_cuts: 3, shadowstep: 2, noxious_bloom: 3, rupture: 3, meteor: 4, thunderfall: 3, glacial_burst: 3 });
 var FREE_TICKS = 180;
 var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
@@ -105361,6 +105362,13 @@ var OFFHAND_TOUCHES = Object.freeze({
   freezePips: 3,
   stormChain: 4
 });
+var SPELL_CHANCE_BASE = 1e3;
+var SPELL_CHANCE_STEP = 200;
+var tomeSpellChance = (d) => d?.slot === "subweapon" && d.subType === "tome" ? SPELL_CHANCE_BASE + SPELL_CHANCE_STEP * Math.max(0, Math.min(5, Number(d.rarityTier) || 0)) : 0;
+function heldSpellChance(player) {
+  const inv = player?.inventory, id = inv?.equipped?.subweapon, item2 = id && inv.itemsById?.[id];
+  return item2 ? tomeSpellChance(itemDefinition(item2)) : 0;
+}
 var cache3 = /* @__PURE__ */ new WeakMap();
 function offhandKindOfItem(item2) {
   if (!item2 || typeof item2 !== "object") return null;
@@ -107905,13 +107913,19 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
   };
   const FINISHERS = CLASS_FINISHERS, OWN_SPEND = /* @__PURE__ */ new Set(["thousand_cuts", "shadowstep", "aegis_pulse"]);
-  const heroOf = (a) => heroClassOf(owner(a)?.d8)?.id ?? null, costed = (a, id) => Boolean(FINISHERS[heroOf(a)]?.includes(id)) && pipCostOf(id) > 0, spender = (a, id) => Boolean(isPipSpender(id) && aug(a, id, PIP_SPEND_AUGMENT)), finisher = (a, id) => Boolean(FINISHERS[heroOf(a)]?.includes(id)) || spender(a, id);
+  const heroOf = (a) => heroClassOf(owner(a)?.d8)?.id ?? null, paidSkill = (id) => PAID_SKILLS.includes(id), costed = (a, id) => Boolean(FINISHERS[heroOf(a)]?.includes(id) || paidSkill(id) && heroOf(a)) && pipCostOf(id) > 0, spender = (a, id) => Boolean(isPipSpender(id) && aug(a, id, PIP_SPEND_AUGMENT)), finisher = (a, id) => Boolean(FINISHERS[heroOf(a)]?.includes(id)) || spender(a, id);
   const paid = (a, id) => current === id && spender(a, id) ? spentOn(a, id) : 0, spendOf = (a, id) => spender(a, id) ? c.actors[a.entityId]?.skills?.spends?.[id]?.n ?? 0 : 0, full = (n) => n >= PIPS_MAX;
   const SPEND_HOLD = { war_banner: BANNER_CAP, shield_charge: RAM_TICKS + 2, counter_stance: COUNTER_WINDOW_MAX, shield_throw: THROW_TICKS, riposte: RIPOSTE_MAX, whirling_blades: TORNADO_TICKS, smoke_veil: SMOKE_CAP, flame_wall: WALL_CAP, ice_barrier: ICE_TICKS + 240, ball_lightning: ORB_CAP, static_field: FIELD_MAX };
   const spentOn = (a, id) => {
     const k = c.actors[a.entityId]?.skills?.spent;
     return k?.skillId === id ? k.n : 0;
   };
+  function swung(a, target) {
+    if (heroOf(a) !== "mage" || !a.alive) return;
+    const bp = heldSpellChance(owner(a)), stats3 = bp && getStats(a.entityId);
+    if (!stats3 || stats3.subType !== "tome" || chance(a, "spell") >= bp) return;
+    cast2(a, stats3, unit5({ x: target.position.x - a.position.x, y: target.position.y - a.position.y }), null);
+  }
   function comboFinished(a) {
     if (heroOf(a)) {
       fought(a);
@@ -107935,7 +107949,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     p.idle = PIP_IDLE_TICKS;
   }
   function earnFor(a, skillId, n) {
-    if (!skillId || finisher(a, skillId)) return;
+    if (!skillId || finisher(a, skillId) || paidSkill(skillId)) return;
     const combat = c.actors[a.entityId];
     if (!combat || !a.alive) return;
     const k = classSkillsRecord(combat), had = k.earned?.[skillId]?.n ?? 0;
@@ -109280,11 +109294,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     weaving = weave && element && last && last.element !== element ? weave : 0;
     const own = c.actors[a.entityId], ends = finisher(a, skillId), cost = costed(a, skillId) ? pipCostOf(skillId) : 0, free = Boolean(cost && own?.skills?.free?.[skillId]);
     if (cost && (!free && (own?.skills?.pips?.n ?? 0) < cost || going(own, skillId))) return false;
-    const was = ends && own.skills ? { pips: own.skills.pips, spent: own.skills.spent, free: own.skills.free } : null;
+    const paid2 = Boolean(cost && paidSkill(skillId)), was = (ends || paid2) && own.skills ? { pips: own.skills.pips, spent: own.skills.spent, free: own.skills.free } : null;
     if (was) {
       const n = was.pips?.n ?? 0;
       if (cost) {
-        own.skills.spent = { skillId, n: cost, ticks: PIP_SPENT_TICKS };
+        if (!paid2) own.skills.spent = { skillId, n: cost, ticks: PIP_SPENT_TICKS };
         if (free) {
           const f = { ...was.free };
           delete f[skillId];
@@ -109317,7 +109331,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       pruneClassSkills(own);
       return false;
     }
-    pipsAfterUse(a, skillId, element ?? (skillId === "cast" ? castElement2 : null), ends);
+    pipsAfterUse(a, skillId, element ?? (skillId === "cast" ? castElement2 : null), ends || paid2);
     {
       const keep6 = gearOf(a).keepPip, paidN = was && !free ? own.skills?.spent?.skillId === skillId ? own.skills.spent.n : 0 : 0;
       if (keep6 && paidN && own.skills?.pips && chance(a, skillId) < keep6) own.skills.pips.n = Math.min(pipMax(a), own.skills.pips.n + 1);
@@ -109739,7 +109753,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const combat = c.actors[source3.entityId];
     if (!combat || trigger === "periodic") return whole(out);
     fought(source3);
-    if (critical && heroOf(source3) === "rogue" && !(current && finisher(source3, current)) && !combat.skills?.pips?.crit) {
+    if (critical && heroOf(source3) === "rogue" && !(current && (finisher(source3, current) || paidSkill(current))) && !combat.skills?.pips?.crit) {
       gainPips(source3, 1);
       combat.skills.pips.crit = Math.ceil((offhandKind(owner(source3)) === "stiletto" ? OFFHAND_TOUCHES.critPipTicks : PIP_CRIT_TICKS) * (10 - rank(source3, "blade_dance")) / 10);
     }
@@ -110078,7 +110092,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return combatInteger(subtractCombat(a.hp, 1));
   }
   const firm = (entityId2) => Boolean(c.actors[entityId2]?.skills?.firm);
-  return { use, step, incoming, outgoing, defended, critBonus, forceCrit, speed, dashed, landed, defeated, inField, spread, lethal, conductor, firm, comboFinished };
+  return { use, step, incoming, outgoing, defended, critBonus, forceCrit, speed, dashed, landed, defeated, inField, spread, lethal, conductor, firm, comboFinished, swung };
 }
 
 // src/simulation/subweapon_simulation.js
@@ -110111,7 +110125,10 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   const skills = createClassSkills(s, { damage, effects: effects2, periodic, getStats: stats3, players, identity: identity2, refreshStats, mastery });
   function hit2(source3, target, captured, commandId = s.primary.actorsById[source3.entityId].current?.commandId ?? null) {
     const result = damage(source3, target, captured.attack, "main", commandId);
-    if (!suppressed(source3.entityId)) effects2.main(source3, target, result?.critical === true);
+    if (!suppressed(source3.entityId)) {
+      effects2.main(source3, target, result?.critical === true);
+      skills.swung(source3, target);
+    }
   }
   function main(source3, target) {
     const st = stats3(source3.entityId), pct3 = players.get(source3.entityId)?.d8 ? COMBO_DAMAGE[(s.primary.actorsById[source3.entityId]?.current?.comboStep ?? 1) - 1] ?? 100 : 100;
@@ -124023,7 +124040,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   const local8 = (m) => m.playersById[m.localPlayerId];
   let arranging = false, draft = null, picked = null;
   const entries = (m) => arranging && draft ? draft : wheelEntriesV1(local8(m));
-  const costFor = (heroClass, skillId) => CLASS_FINISHERS[heroClass?.id]?.includes(skillId) ? pipCostOf(skillId) : 0, affords = (c, heroClass, skillId) => {
+  const costFor = (heroClass, skillId) => CLASS_FINISHERS[heroClass?.id]?.includes(skillId) || heroClass && PAID_SKILLS.includes(skillId) ? pipCostOf(skillId) : 0, affords = (c, heroClass, skillId) => {
     const cost = costFor(heroClass, skillId);
     return !cost || Boolean(c?.skills?.free?.[skillId]) || (c?.skills?.pips?.n ?? 0) >= cost;
   };
@@ -126440,6 +126457,7 @@ var LABELS = {
   critDamage: "Crit damage",
   block: "Block",
   parry: "Parry",
+  spellChance: "Spell chance",
   activeSpeed: "Active Speed",
   bonusAreaRadius: "Area Radius",
   atkPct: "Attack",
@@ -126498,7 +126516,7 @@ var LABELS = {
 };
 var SECONDS = /* @__PURE__ */ new Set(["hitCdr", "killCdr", "perfectWindow", "perfectCdr", "exposeTime", "exposeCdr", "shatterCdr", "blinkCdr"]);
 var branchName = (id) => id ? id[0].toUpperCase() + id.slice(1) : "";
-var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct", "mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "cdr", "eliteDmg", "lifeKill", "rangedDmg", "areaDmg", "finisherDmg", "moveCdr", "defCdr", "heldDmg", "ailingDmg", "closeDmg", "farDmg", "fullDmg", "lowDmg", "controlDur", "ailmentDur", "eliteDr", "areaDr", "stunDr", "potionHeal", "keepPip", "perfectDmg", "exposeDmg", "shatterDmg", "shatterEase", "ccDmg", "blinkDmg", "weaveDmg"]);
+var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "spellChance", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct", "mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "cdr", "eliteDmg", "lifeKill", "rangedDmg", "areaDmg", "finisherDmg", "moveCdr", "defCdr", "heldDmg", "ailingDmg", "closeDmg", "farDmg", "fullDmg", "lowDmg", "controlDur", "ailmentDur", "eliteDr", "areaDr", "stunDr", "potionHeal", "keepPip", "perfectDmg", "exposeDmg", "shatterDmg", "shatterEase", "ccDmg", "blinkDmg", "weaveDmg"]);
 var FLAT = ["attack", "defense", "maxHp", "str", "dex", "int"];
 var zero6 = (v) => statValue(v) === 0;
 var sign2 = (v) => {
@@ -126531,6 +126549,10 @@ function itemLines(d) {
   for (const [k, v] of Object.entries(d.bonuses ?? {})) add2(k, v);
   for (const [k, v] of Object.entries(d.attributes ?? {})) add2(k, v);
   for (const [k, v] of Object.entries(d.effects ?? {})) add2("fx:" + k, v);
+  {
+    const bp = tomeSpellChance(d);
+    if (bp) add2("fx:spellChance", String(bp / 1e4));
+  }
   return [...lines2].map(([key3, value2]) => ({ key: key3, value: value2, flat: FLAT.includes(key3) })).sort((a, b) => (a.flat ? FLAT.indexOf(a.key) : 99) - (b.flat ? FLAT.indexOf(b.key) : 99));
 }
 function rollOf(generated, a) {
@@ -126604,6 +126626,7 @@ var ICON_PATHS = {
   lifeKill: ["#ff9aa6", '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M9 11l2 2 4-4"/>']
 };
 var ICON_ALIAS = {
+  spellChance: "lightningDmg",
   atkPct: "attack",
   defPct: "defense",
   maxHpPct: "maxHp",
