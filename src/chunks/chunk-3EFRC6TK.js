@@ -10043,7 +10043,7 @@ function townGeometryV1(t) {
   geoCache.set(t, g);
   return g;
 }
-var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert", "frostland", "wetland", "upland", "tropical"]));
+var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert", "frostland", "wetland", "upland", "tropical", "volcanic"]));
 var townNewArtV1 = (t) => TOWN_NEW_ART.has(t?.biome);
 var LANE = 8;
 var LANE_END = 0.3;
