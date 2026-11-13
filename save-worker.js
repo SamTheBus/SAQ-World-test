@@ -18280,9 +18280,9 @@ var POTION_BELT_POLICY = Object.freeze({
   capacityMinutes: Object.freeze([20, 45, 90]),
   potencyMinutes: Object.freeze([30, 75]),
   cooldownTicks: 240,
-  dropPercent: Object.freeze({ ordinary: 10, elite: 60, boss: 100 }),
-  bossBonusPercent: 50,
-  /* Sammy 2026-11-13: drop more often (was 4 / 30, boss bonus 25) */
+  dropPercent: Object.freeze({ ordinary: 6, elite: 40, boss: 100 }),
+  bossBonusPercent: 25,
+  /* Sammy 2026-11-13: drop more often (was 4 / 30, boss bonus 25), then "way too often" at 10 / 60 / 50: now 6 / 40 / 25 */
   refillIntervalTicks: 60,
   offers: Object.freeze({ capacity: "potion-capacity", potency: "potion-potency" }),
   maximumGrants: 1e6,
