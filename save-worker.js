@@ -15406,6 +15406,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "When a movement skill lands (Dash, Blink, Lunge, Shadowstep, Shield Charge or Skyfall Leap), the ground quakes: a ring of lava cracks bursts around you for {0} of your Attack and knocks enemies back. Once every 4 s.",
     "Every step a small eruption."
   ),
+  // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
+  // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
+  unique(
+    "sporeveil-aegis",
+    "Sporeveil Aegis",
+    "subweapon",
+    "shield",
+    "Kite Shield",
+    "knight",
+    "nightmare_sporecrown",
+    null,
+    "Each hit you block with Guard bursts spores from your shield: the enemies near you get heavy legs, 40% slower for {0}. Once every 4 s.",
+    "It breathes out every time it is struck."
+  ),
+  unique(
+    "gazecap-dirk",
+    "Gazecap Dirk",
+    "subweapon",
+    "dagger",
+    "Stiletto",
+    "rogue",
+    "nightmare_sporecrown",
+    null,
+    "Critical hits with your off hand plant a Gazecap in the enemy. When that enemy dies, the Gazecap pops, hitting enemies near it for {0} of your Attack.",
+    "Something grows in every wound."
+  ),
+  unique(
+    "waking-eye-tome",
+    "Tome of the Waking Eye",
+    "subweapon",
+    "tome",
+    "Storm Tome",
+    "mage",
+    "nightmare_sporecrown",
+    null,
+    "When a Cast crits, a Waking Eye opens over the target, once every 4 s. It fires three rays, at the target and the two enemies nearest it, each for {0} of your Attack.",
+    "It never sleeps. Neither will you."
+  ),
+  unique(
+    "eyestalk-crown",
+    "Eyestalk Crown",
+    "helmet",
+    null,
+    "Backwards Cap",
+    null,
+    "nightmare_sporecrown",
+    null,
+    "Every 8 s your crown marks the nearest enemy for 4 s. A marked enemy takes {0} more damage from everyone.",
+    "It sees what you see. Then it sees more."
+  ),
   // Named elites, at the end of small sites.
   unique(
     "bristleback-mantle",
@@ -15573,6 +15623,11 @@ var UNIQUE_TIERS = freezeWire({
   "ventcutter": { lines: ["mainDmg", "critDamage", "critChance", "dex", "eliteDmg"], stars: [90, 125, 160, 210], unit: "pct" },
   "coreheart": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [100, 135, 170, 220], unit: "pct" },
   "brimstone-treads": { lines: ["moveSpeed", "atkPct", "critDamage", "eliteDmg", "lifeKill"], stars: [50, 70, 90, 120], unit: "pct" },
+  // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
+  "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
+  "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
+  "waking-eye-tome": { lines: ["offDmg", "int", "critChance", "activeSpd", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
+  "eyestalk-crown": { lines: ["maxHpPct", "atkPct", "critChance", "lifeKill", "cdr"], stars: [10, 14, 18, 25], unit: "pct" },
   "bristleback-mantle": { lines: ["maxHpPct", "defPct", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
   "jacks-band": { lines: ["lifeHit", "atkPct", "maxHpPct", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
   "kheptra-signet": { lines: ["defPct", "maxHpPct", "cdr", "atkPct", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
@@ -15603,6 +15658,11 @@ var UNIQUE_LINES_V3 = freezeWire({
   "ventcutter": { always: "critDamage", pool: ["critChance", "fireDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
   "coreheart": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
+  // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
+  "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
+  "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "classDmg", "eliteDmg"], leg: ["killCdr"] },
+  "waking-eye-tome": { always: "critChance", pool: ["offDmg", "lightningDmg", "critDamage", "rangedDmg", "weaveDmg", "eliteDmg"], leg: ["maxPip"] },
+  "eyestalk-crown": { always: "eliteDmg", pool: ["maxHpPct", "critChance", "cdr", "controlDur", "ailmentDur", "bonusAreaRadius", "startPips"], leg: [] },
   "bristleback-mantle": { always: "stunDr", pool: ["maxHpPct", "defPct", "str", "lifeKill", "closeDmg", "hitCdr", "areaDr"], leg: [] },
   "jacks-band": { always: "lowDmg", pool: ["atkPct", "critChance", "areaDmg", "lifeHit", "maxHpPct", "eliteDmg"], leg: ["killCdr"] },
   "kheptra-signet": { always: "hitCdr", pool: ["defPct", "maxHpPct", "cdr", "atkPct", "fullDmg", "stunDr", "potionHeal"], leg: [] },
@@ -26779,6 +26839,15 @@ var UQ_PULSE_TICKS = 30;
 var TREAD_EVERY = 240;
 var TREAD_WAIT = 40;
 var QUAKE_TICKS = 30;
+var SPORE_EVERY = 240;
+var SPORE_SHOW_TICKS = 36;
+var GAZECAP_MAX = 6;
+var CAP_POP_TICKS = 36;
+var EYE_EVERY = 240;
+var EYE_TICKS = 105;
+var EYE_RAYS = Object.freeze([30, 48, 66]);
+var CROWN_EVERY = 480;
+var CROWN_MARK_TICKS = 240;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
@@ -26808,7 +26877,7 @@ var FREE_TICKS = 180;
 var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
-var LIVE = ["treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function prune(combat) {
   const k = combat.skills;
   if (k && !Object.keys(k.cooldowns).length && !LIVE.some((key9) => k[key9])) delete combat.skills;
@@ -27150,7 +27219,43 @@ function validateClassSkillState(s, combat, actor) {
         requireContract(pos2(p), "Invalid bark burst");
       }
     }
-    for (const [key9, max2] of [["silk", SILK_EVERY - 1], ["vent", VENT_EVERY - 1], ["wrapCd", COCOON_EVERY], ["core", CORE_TICKS], ["treadCd", TREAD_EVERY]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
+    for (const [key9, max2] of [["silk", SILK_EVERY - 1], ["vent", VENT_EVERY - 1], ["wrapCd", COCOON_EVERY], ["core", CORE_TICKS], ["treadCd", TREAD_EVERY], ["sporeCd", SPORE_EVERY], ["eyeCd", EYE_EVERY], ["crownCd", CROWN_EVERY]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
+    const id2 = (v) => typeof v === "string" && v.length > 0 && v.length <= 200;
+    if (k.spores !== void 0) {
+      closedRecord(k.spores, ["x", "y", "ticks"]);
+      requireContract(pos2(k.spores), "Invalid spores");
+      safeInteger(k.spores.ticks, 1, SPORE_SHOW_TICKS);
+    }
+    if (k.gazecaps !== void 0) {
+      requireContract(Array.isArray(k.gazecaps) && k.gazecaps.length >= 1 && k.gazecaps.length <= GAZECAP_MAX && new Set(k.gazecaps.map((g) => g.target)).size === k.gazecaps.length, "Invalid Gazecaps");
+      for (const g of k.gazecaps) {
+        closedRecord(g, ["target", "n"]);
+        requireContract(id2(g.target), "Invalid Gazecap");
+        safeInteger(g.n, 0, 1e9);
+      }
+    }
+    if (k.capPops !== void 0) {
+      requireContract(Array.isArray(k.capPops) && k.capPops.length >= 1 && k.capPops.length <= GAZECAP_MAX * 2, "Invalid Gazecap pops");
+      for (const q of k.capPops) {
+        closedRecord(q, ["x", "y", "ticks"]);
+        requireContract(pos2(q), "Invalid Gazecap pop");
+        safeInteger(q.ticks, 1, CAP_POP_TICKS);
+      }
+    }
+    if (k.eye !== void 0) {
+      closedRecord(k.eye, ["x", "y", "targets", "rays", "ticks"]);
+      requireContract(pos2(k.eye) && Array.isArray(k.eye.targets) && k.eye.targets.length >= 1 && k.eye.targets.length <= 3 && k.eye.targets.every(id2) && Array.isArray(k.eye.rays) && k.eye.rays.length <= 3, "Invalid Waking Eye");
+      for (const r of k.eye.rays) {
+        closedRecord(r, ["x", "y"]);
+        requireContract(pos2(r), "Invalid ray");
+      }
+      safeInteger(k.eye.ticks, 1, EYE_TICKS);
+    }
+    if (k.crownMark !== void 0) {
+      closedRecord(k.crownMark, ["target", "ticks"]);
+      requireContract(id2(k.crownMark.target), "Invalid crown mark");
+      safeInteger(k.crownMark.ticks, 1, CROWN_MARK_TICKS);
+    }
     if (k.tread !== void 0) {
       closedRecord(k.tread, ["x", "y", "ticks"]);
       requireContract(pos2(k.tread) && actor.alive, "Invalid tread");

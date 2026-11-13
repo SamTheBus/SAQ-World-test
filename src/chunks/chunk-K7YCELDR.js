@@ -6453,6 +6453,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "When a movement skill lands (Dash, Blink, Lunge, Shadowstep, Shield Charge or Skyfall Leap), the ground quakes: a ring of lava cracks bursts around you for {0} of your Attack and knocks enemies back. Once every 4 s.",
     "Every step a small eruption."
   ),
+  // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
+  // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
+  unique(
+    "sporeveil-aegis",
+    "Sporeveil Aegis",
+    "subweapon",
+    "shield",
+    "Kite Shield",
+    "knight",
+    "nightmare_sporecrown",
+    null,
+    "Each hit you block with Guard bursts spores from your shield: the enemies near you get heavy legs, 40% slower for {0}. Once every 4 s.",
+    "It breathes out every time it is struck."
+  ),
+  unique(
+    "gazecap-dirk",
+    "Gazecap Dirk",
+    "subweapon",
+    "dagger",
+    "Stiletto",
+    "rogue",
+    "nightmare_sporecrown",
+    null,
+    "Critical hits with your off hand plant a Gazecap in the enemy. When that enemy dies, the Gazecap pops, hitting enemies near it for {0} of your Attack.",
+    "Something grows in every wound."
+  ),
+  unique(
+    "waking-eye-tome",
+    "Tome of the Waking Eye",
+    "subweapon",
+    "tome",
+    "Storm Tome",
+    "mage",
+    "nightmare_sporecrown",
+    null,
+    "When a Cast crits, a Waking Eye opens over the target, once every 4 s. It fires three rays, at the target and the two enemies nearest it, each for {0} of your Attack.",
+    "It never sleeps. Neither will you."
+  ),
+  unique(
+    "eyestalk-crown",
+    "Eyestalk Crown",
+    "helmet",
+    null,
+    "Backwards Cap",
+    null,
+    "nightmare_sporecrown",
+    null,
+    "Every 8 s your crown marks the nearest enemy for 4 s. A marked enemy takes {0} more damage from everyone.",
+    "It sees what you see. Then it sees more."
+  ),
   // Named elites, at the end of small sites.
   unique(
     "bristleback-mantle",
@@ -6620,6 +6670,11 @@ var UNIQUE_TIERS = freezeWire({
   "ventcutter": { lines: ["mainDmg", "critDamage", "critChance", "dex", "eliteDmg"], stars: [90, 125, 160, 210], unit: "pct" },
   "coreheart": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [100, 135, 170, 220], unit: "pct" },
   "brimstone-treads": { lines: ["moveSpeed", "atkPct", "critDamage", "eliteDmg", "lifeKill"], stars: [50, 70, 90, 120], unit: "pct" },
+  // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
+  "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
+  "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
+  "waking-eye-tome": { lines: ["offDmg", "int", "critChance", "activeSpd", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
+  "eyestalk-crown": { lines: ["maxHpPct", "atkPct", "critChance", "lifeKill", "cdr"], stars: [10, 14, 18, 25], unit: "pct" },
   "bristleback-mantle": { lines: ["maxHpPct", "defPct", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
   "jacks-band": { lines: ["lifeHit", "atkPct", "maxHpPct", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
   "kheptra-signet": { lines: ["defPct", "maxHpPct", "cdr", "atkPct", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
@@ -6650,6 +6705,11 @@ var UNIQUE_LINES_V3 = freezeWire({
   "ventcutter": { always: "critDamage", pool: ["critChance", "fireDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
   "coreheart": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
+  // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
+  "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
+  "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "classDmg", "eliteDmg"], leg: ["killCdr"] },
+  "waking-eye-tome": { always: "critChance", pool: ["offDmg", "lightningDmg", "critDamage", "rangedDmg", "weaveDmg", "eliteDmg"], leg: ["maxPip"] },
+  "eyestalk-crown": { always: "eliteDmg", pool: ["maxHpPct", "critChance", "cdr", "controlDur", "ailmentDur", "bonusAreaRadius", "startPips"], leg: [] },
   "bristleback-mantle": { always: "stunDr", pool: ["maxHpPct", "defPct", "str", "lifeKill", "closeDmg", "hitCdr", "areaDr"], leg: [] },
   "jacks-band": { always: "lowDmg", pool: ["atkPct", "critChance", "areaDmg", "lifeHit", "maxHpPct", "eliteDmg"], leg: ["killCdr"] },
   "kheptra-signet": { always: "hitCdr", pool: ["defPct", "maxHpPct", "cdr", "atkPct", "fullDmg", "stunDr", "potionHeal"], leg: [] },
@@ -6709,6 +6769,11 @@ var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
 var uniquesFrom = (source10, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source10 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
 var trophyFromV1 = (biome) => Object.values(UNIQUE_ITEMS).find((u) => u.trophy && u.biome === biome)?.from ?? null;
 var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault"]);
+function nightmareUniqueV1(cls, pick6) {
+  const own3 = cls ? uniquesFrom("nightmare_sporecrown", cls) : [], mine = own3.find((id) => UNIQUE_ITEMS[id].cls === cls), any = own3.find((id) => UNIQUE_ITEMS[id].cls === null);
+  if (!mine) return null;
+  return pick6 < 2 / 3 || !any ? mine : any;
+}
 var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.25, named: 0.1, world: 2e-3 });
 function uniqueDropV1({ from = null, biome = null, cls }, chance, pick6) {
   const own3 = from ? uniquesFrom(from, cls) : [];
@@ -31376,6 +31441,7 @@ export {
   uniqueStarValue,
   uniqueEffectText,
   uniqueOf,
+  nightmareUniqueV1,
   rewardProgressionD9,
   validateRewardProgressionD9,
   prototypeRewardProgression,
