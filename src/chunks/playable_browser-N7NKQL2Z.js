@@ -1065,7 +1065,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-SX46RPYN.js";
+} from "./chunk-EQSD2PXP.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -99534,6 +99534,8 @@ var FREE_TICKS = 180;
 var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var pipCostOf = (id) => PIP_COSTS[id] ?? 0;
+var OVERLOAD_PIP = 1;
+var pipCostFor = (id, ranks) => pipCostOf(id) + (id === "cast" && ranks?.overload ? OVERLOAD_PIP : 0);
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
 var TIMED = ["sharp", "woven", "hitCd", "killCd", "perfCd", "guardUp", "mist", "veil", "gold", "surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow"];
 var LIVE = ["sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
@@ -107815,7 +107817,7 @@ var CLASS_SKILL_TUNING_V1 = Object.freeze({
   frostStep: { boost: 2 },
   bracingBash: 3,
   fourthCut: 10,
-  bladeRush: 18,
+  bladeRush: 20,
   staticStep: { attack: [10, 100], radius: 56, targets: 2 },
   // What an augment widens: Long Lunge, Wide Arc, Wildfire and Wide Freeze.
   wider: [3, 2],
@@ -109285,14 +109287,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (!r || !k?.quick || s.tick % 25 >= r) return;
     for (const id of Object.keys(k.cooldowns)) reduceSkillCooldown(combat, id, 1);
   }
-  const SIGNATURE_CUTS = { shield_bash: ["bracing_bash", "impact_training", "spiked_shield"], flurry: ["fourth_cut", "vipers_coating"] };
+  const SIGNATURE_CUTS = { shield_bash: ["bracing_bash", "impact_training", "spiked_shield"] };
   const handlers = { shield_bash: bash, flurry, cast: cast2, earth_breaker: earthBreaker2, rallying_cry: rallyingCry2, counter_stance: counterStance2, shield_charge: shieldCharge2, shield_throw: shieldThrow2, war_banner: warBanner2, lunge: lunge2, toxic_fan: toxicFan2, whirling_blades: whirlingBlades2, riposte: riposte2, rupture: rupture2, smoke_veil: smokeVeil2, firebloom: firebloom2, flashfreeze: flashfreeze2, ball_lightning: ballLightning, flame_wall: flameWall2, ice_barrier: iceBarrier2, static_field: staticField2, aegis_pulse: aegisPulse2, skyfall_leap: skyfallLeap2, retribution: retribution2, thousand_cuts: thousandCuts2, noxious_bloom: noxiousBloom2, shadowstep: shadowstep2, meteor, glacial_burst: glacialBurst2, thunderfall: thunderfall2 };
   const ELEMENT = { firebloom: "fire", flame_wall: "fire", meteor: "fire", flashfreeze: "frost", ice_barrier: "frost", glacial_burst: "frost", ball_lightning: "lightning", static_field: "lightning", thunderfall: "lightning" };
   let weaving = 0;
   function use(a, skillId, aimInput, commandId = null) {
     const stats3 = getStats(a.entityId), aim2 = unit5(aimInput), element = ELEMENT[skillId], weave = rank(a, "spell_weaving"), last = c.actors[a.entityId]?.skills?.weave;
     weaving = weave && element && last && last.element !== element ? weave : 0;
-    const own = c.actors[a.entityId], ends = finisher(a, skillId), cost = costed(a, skillId) ? pipCostOf(skillId) : 0, free = Boolean(cost && own?.skills?.free?.[skillId]);
+    const own = c.actors[a.entityId], ends = finisher(a, skillId), cost = costed(a, skillId) ? pipCostOf(skillId) + (skillId === "cast" && rank(a, "overload") ? OVERLOAD_PIP : 0) : 0, free = Boolean(cost && own?.skills?.free?.[skillId]);
     if (cost && (!free && (own?.skills?.pips?.n ?? 0) < cost || going(own, skillId))) return false;
     const paid2 = Boolean(cost && paidSkill(skillId)), was = (ends || paid2) && own.skills ? { pips: own.skills.pips, spent: own.skills.spent, free: own.skills.free } : null;
     if (was) {
@@ -109347,7 +109349,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const kind = offhandKind(owner(a)), quick = kind === "buckler" && inGroup("move", heroOf(a), skillId) || kind === "kite" && inGroup("def", heroOf(a), skillId), own0 = quick ? Math.ceil(CLASS_SKILLS[skillId].cooldownTicks * (100 - OFFHAND_TOUCHES.recharge) / 100) : CLASS_SKILLS[skillId].cooldownTicks;
     const record3 = classSkillsRecord(c.actors[a.entityId]), styled = skillId === "shield_bash" ? Math.ceil(scaled(own0, T88.styles[offhandStyle(owner(a))]?.cooldown)) : own0;
     const sigCut = (SIGNATURE_CUTS[skillId] ?? []).reduce((n, id) => n + rank(a, id), 0), base3 = sigCut ? Math.ceil(styled * (100 - 2 * sigCut) / 100) : styled;
-    const longer = rank(a, "restless") ? [6, 5] : skillId === "cast" && rank(a, "overload") ? [13, 10] : [1, 1];
+    const longer = rank(a, "restless") ? [6, 5] : [1, 1];
     record3.cooldowns[skillId] = Math.ceil((BREAKER.includes(skillId) && rank(a, "reckless") ? Math.ceil(base3 * 3 / 4) : base3) * longer[0] / longer[1]);
     const cut2 = stats3?.cooldownCut, G4 = gearOf(a), group = (inGroup("move", heroOf(a), skillId) ? G4.moveCdr : 0) + (inGroup("def", heroOf(a), skillId) ? G4.defCdr : 0), cdr = Math.min((cut2 ? Number(BigInt(cut2.n) * 10000n / BigInt(cut2.d)) : Math.min(G4.cdr + (owner(a)?.bestiary?.stats.cdr ?? 0), Math.round(CDR_CAP * 1e4))) + group, Math.round(CDR_CAP * 1e4));
     if (cdr) record3.cooldowns[skillId] = Math.max(1, Math.ceil(record3.cooldowns[skillId] * (1e4 - cdr) / 1e4));
@@ -109966,7 +109968,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (rank(a, "hit_and_run")) classSkillsRecord(combat).rush = RUSH_TICKS;
     {
       const r = rank(a, "blade_rush");
-      if (r) reduceSkillCooldown(combat, "flurry", T88.bladeRush * r);
+      if (r && combatRoll(combat, combatAmount(T88.bladeRush * r, 100))) gainPips(a, 1);
     }
     if (rank(a, "evasive")) classSkillsRecord(combat).evade = EVADE_TICKS;
     {
@@ -124040,13 +124042,13 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   const local8 = (m) => m.playersById[m.localPlayerId];
   let arranging = false, draft = null, picked = null;
   const entries = (m) => arranging && draft ? draft : wheelEntriesV1(local8(m));
-  const costFor = (heroClass, skillId) => CLASS_FINISHERS[heroClass?.id]?.includes(skillId) || heroClass && PAID_SKILLS.includes(skillId) ? pipCostOf(skillId) : 0, affords = (c, heroClass, skillId) => {
-    const cost = costFor(heroClass, skillId);
+  const costFor = (heroClass, skillId, ranks) => CLASS_FINISHERS[heroClass?.id]?.includes(skillId) || heroClass && PAID_SKILLS.includes(skillId) ? pipCostFor(skillId, ranks) : 0, affords = (c, heroClass, skillId, ranks) => {
+    const cost = costFor(heroClass, skillId, ranks);
     return !cost || Boolean(c?.skills?.free?.[skillId]) || (c?.skills?.pips?.n ?? 0) >= cost;
   };
   function ready(m, skillId) {
     const p = local8(m), c = m.subweapon, heroClass = heroClassOf(p?.d8);
-    return Boolean(CLASS_SKILLS[skillId] && heroClass && c && !c.suppressed && m.entitiesById[p.entityId]?.alive && p.stats.subType === heroClass.offhand && !c.skills?.cooldowns?.[skillId] && affords(c, heroClass, skillId) && !c.skills?.flurry && m.persistence.phase === "encounter");
+    return Boolean(CLASS_SKILLS[skillId] && heroClass && c && !c.suppressed && m.entitiesById[p.entityId]?.alive && p.stats.subType === heroClass.offhand && !c.skills?.cooldowns?.[skillId] && affords(c, heroClass, skillId, p?.d8?.classRanks) && !c.skills?.flurry && m.persistence.phase === "encounter");
   }
   function activate(index) {
     if (isBlocked()) return;
@@ -124296,7 +124298,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     }
     const moveName = MOVE_NAMES[p.stats.subType] ?? null;
     slots2.forEach((s, i) => {
-      const entry2 = list[i], isMove = entry2 === MOVE_SLOT, left = CLASS_SKILLS[entry2] ? c?.skills?.cooldowns?.[entry2] ?? 0 : 0, total = (CLASS_SKILLS[entry2]?.cooldownTicks ?? 1) * (p?.d8?.classRanks?.restless ? 6 / 5 : entry2 === "cast" && p?.d8?.classRanks?.overload ? 13 / 10 : 1), state2 = isMove ? moveName ? "move" : "locked" : entry2 === "pick" ? "pick" : !entry2 ? arranging ? "empty" : "locked" : arranging ? "ready" : ready(m, entry2) ? "ready" : left ? "cooling" : "blocked", pickedNow = arranging && picked === i;
+      const entry2 = list[i], isMove = entry2 === MOVE_SLOT, left = CLASS_SKILLS[entry2] ? c?.skills?.cooldowns?.[entry2] ?? 0 : 0, total = (CLASS_SKILLS[entry2]?.cooldownTicks ?? 1) * (p?.d8?.classRanks?.restless ? 6 / 5 : 1), state2 = isMove ? moveName ? "move" : "locked" : entry2 === "pick" ? "pick" : !entry2 ? arranging ? "empty" : "locked" : arranging ? "ready" : ready(m, entry2) ? "ready" : left ? "cooling" : "blocked", pickedNow = arranging && picked === i;
       const key3 = `${entry2}/${state2}/${pickedNow}/${arranging}/${moveName}/${keys2[i]}`;
       if (s.paint !== key3) {
         s.paint = key3;
@@ -124345,7 +124347,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
       }
       pipCount = pipN;
     }
-    const fins = heroClass ? [...(CLASS_FINISHERS[heroClass.id] ?? []).filter((id) => (c?.skills?.pips?.n ?? 0) > 0 || c?.skills?.free?.[id]).filter((id) => affords(c, heroClass, id)), ...full ? list.filter((id) => isPipSpender(id) && p?.d8?.classAugments?.[id]?.includes(PIP_SPEND_AUGMENT)) : []] : [];
+    const fins = heroClass ? [...(CLASS_FINISHERS[heroClass.id] ?? []).filter((id) => (c?.skills?.pips?.n ?? 0) > 0 || c?.skills?.free?.[id]).filter((id) => affords(c, heroClass, id, p?.d8?.classRanks)), ...full ? list.filter((id) => isPipSpender(id) && p?.d8?.classAugments?.[id]?.includes(PIP_SPEND_AUGMENT)) : []] : [];
     slots2.forEach((s, i) => {
       const fin = String(!arranging && fins.includes(list[i]));
       if (s.b.dataset.fin !== fin) s.b.dataset.fin = fin;
