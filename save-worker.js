@@ -5377,19 +5377,19 @@ function validateHydrologyPlanV1(plan) {
 }
 function createHydrologyGeometryV1(plan, parent) {
   validateHydrologyPlanV1(plan);
-  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), cache5 = /* @__PURE__ */ new Map();
+  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), cache6 = /* @__PURE__ */ new Map();
   let decodes = 0, lastCx = NaN, lastCy = NaN, lastPage = null;
   function page(cx, cy) {
     if (cx === lastCx && cy === lastCy) return lastPage;
     const key9 = cx + "," + cy, runs = encoded.get(key9);
     let data = null;
     if (runs) {
-      data = cache5.get(key9);
+      data = cache6.get(key9);
       if (!data) {
         data = new Uint8Array(832);
         for (const [start, length, kind3] of runs) data.fill(kind3, start, start + length);
-        if (cache5.size >= 256) cache5.delete(cache5.keys().next().value);
-        cache5.set(key9, data);
+        if (cache6.size >= 256) cache6.delete(cache6.keys().next().value);
+        cache6.set(key9, data);
         decodes++;
       }
     }
@@ -5419,7 +5419,7 @@ function createHydrologyGeometryV1(plan, parent) {
     for (let y = 0; y < 52; y++) for (let x = 0; x < 64; x++) mask[y * 64 + x] = kind2(mx * 64 + x, my * 52 + y) ? 1 : 0;
     return mask;
   }
-  return Object.freeze({ ...parent, version: HYDROLOGY_VERSION, inland, maskForCell, hydrologyBasins: plan.basins, hydrologyNetwork: plan.network, hydrologyStats: () => ({ encodedPages: encoded.size, decodedPages: cache5.size, decodedPageLimit: 256, decodedBytes: cache5.size * 832, decodes }) });
+  return Object.freeze({ ...parent, version: HYDROLOGY_VERSION, inland, maskForCell, hydrologyBasins: plan.basins, hydrologyNetwork: plan.network, hydrologyStats: () => ({ encodedPages: encoded.size, decodedPages: cache6.size, decodedPageLimit: 256, decodedBytes: cache6.size * 832, decodes }) });
 }
 
 // src/shared/content/wilderness_v2.js
@@ -10132,7 +10132,7 @@ var TOWN_PROPS = propsFor(OPEN_TOWN_TEMPLATE_V1);
 // src/shared/generation/local_water_geometry_v3.js
 var LOCAL_WATER_VERSION = "local-water-geometry-v3";
 function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
-  const protectedChunks = shoreline.protectedChunks, cache5 = /* @__PURE__ */ new Map(), coastCache = /* @__PURE__ */ new Map();
+  const protectedChunks = shoreline.protectedChunks, cache6 = /* @__PURE__ */ new Map(), coastCache = /* @__PURE__ */ new Map();
   const seed = parseInt(p.seedDigest.slice(0, 8), 16) >>> 0;
   const hash22 = (x, y, d) => {
     let n = seed ^ Math.imul(x + d, 73856093) ^ Math.imul(y - d, 19349663);
@@ -10270,7 +10270,7 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
   };
   function maskForCell(mx, my) {
     const key9 = mx + "," + my;
-    if (cache5.has(key9)) return cache5.get(key9);
+    if (cache6.has(key9)) return cache6.get(key9);
     const c = macro(mx, my);
     if (!c || !c[4] && !c[5]) return null;
     const mask = new Uint8Array(64 * 52), old = new Uint8Array(64 * 52), segments = riverSegments.get(key9) ?? [];
@@ -10333,7 +10333,7 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
       }
       for (let n = 0; n < 3328; n++) if (mask[n] && !seen[n]) mask[n] = 0;
     }
-    cache5.set(key9, mask);
+    cache6.set(key9, mask);
     return mask;
   }
   function inland(x, y) {
@@ -10377,7 +10377,7 @@ function createLocalShoreline(p, macro) {
   for (const s of p.futureIslands) add([s.entrance, s.approach, s.landing, s.breathing]);
   add(p.extraProtected);
   add(p.originZone.runtimeChunks.map((c) => ({ x: c.chunkX, y: c.chunkY })));
-  const seed = Number.parseInt(p.seedDigest.slice(0, 8), 16) >>> 0, cache5 = /* @__PURE__ */ new Map();
+  const seed = Number.parseInt(p.seedDigest.slice(0, 8), 16) >>> 0, cache6 = /* @__PURE__ */ new Map();
   const hash22 = (x, y, domain) => {
     let n = seed ^ Math.imul(x + domain, 73856093) ^ Math.imul(y - domain, 19349663);
     n ^= n >>> 16;
@@ -10394,11 +10394,11 @@ function createLocalShoreline(p, macro) {
     const mx = Math.floor(x / 64), my = Math.floor(y / 52), c = macro(mx, my);
     if (!c) return null;
     const ck = mx + "," + my;
-    let ocean = cache5.get(ck);
+    let ocean = cache6.get(ck);
     if (!ocean) {
       ocean = [];
       for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (!macro(mx + dx, my + dy)) ocean.push([mx + dx, my + dy]);
-      cache5.set(ck, ocean);
+      cache6.set(ck, ocean);
     }
     if (!ocean.length) return null;
     const px = x + 0.5, py = y + 0.5;
@@ -10632,16 +10632,16 @@ function woodlandForestField(seed, x, y) {
   return (h(gx, gy) * (1 - u) + h(gx + 1, gy) * u) * (1 - v) + (h(gx, gy + 1) * (1 - u) + h(gx + 1, gy + 1) * u) * v;
 }
 function createWoodlandForestSampler(seed) {
-  const cache5 = /* @__PURE__ */ new Map();
+  const cache6 = /* @__PURE__ */ new Map();
   let samples = 0;
   const descriptor = (gx, gy) => {
     const key9 = gx + "," + gy;
-    if (cache5.has(key9)) return cache5.get(key9);
+    if (cache6.has(key9)) return cache6.get(key9);
     const n = hash4(seed + "/" + WOODLAND_FOREST_VERSION + "/" + key9), x = gx * WOODLAND_FOREST_POLICY.cellTiles + 1 + n % 2, y = gy * WOODLAND_FOREST_POLICY.cellTiles + 1 + (n >>> 7) % 2, field2 = woodlandForestField(seed, x, y), admitted = (n >>> 13) % 100 < 32 + field2 * 62;
     let role = n % 19 === 0 ? "rock" : n % 29 === 0 ? "log" : n % 31 === 0 ? "stump" : n % 9 === 0 ? "shrub" : n % 13 === 0 ? "sapling" : "tree";
     const p = { n, x, y, field: field2, admitted, role };
-    if (cache5.size === 256) cache5.delete(cache5.keys().next().value);
-    cache5.set(key9, p);
+    if (cache6.size === 256) cache6.delete(cache6.keys().next().value);
+    cache6.set(key9, p);
     return p;
   };
   function applies(x, y, biome) {
@@ -10661,7 +10661,7 @@ function createWoodlandForestSampler(seed) {
     return chosen ? { kind: chosen.role === "rock" ? "rock" : "thicket", clusterId: WOODLAND_FOREST_VERSION + "/" + chosen.role + "/" + chosen.n.toString(16), role: chosen.role } : null;
   }
   const intersectsChunk = (cx, cy) => cx * 32 < WOODLAND_FOREST_POLICY.scope.right && cx * 32 + 32 > WOODLAND_FOREST_POLICY.scope.left && cy * 26 < WOODLAND_FOREST_POLICY.scope.bottom && cy * 26 + 26 > WOODLAND_FOREST_POLICY.scope.top;
-  return Object.freeze({ applies, sample, descriptor, intersectsChunk, stats: () => ({ samples, cachedDescriptors: cache5.size, cacheLimit: 256, maxCandidates: 9 }) });
+  return Object.freeze({ applies, sample, descriptor, intersectsChunk, stats: () => ({ samples, cachedDescriptors: cache6.size, cacheLimit: 256, maxCandidates: 9 }) });
 }
 
 // src/shared/generation/world_combat_packs_v2.js
@@ -12022,11 +12022,11 @@ var hash9 = (text) => {
 var unit2 = (h, n) => (h >>> n & 255) / 255;
 function createNaturalClusterSampler(seedDigest) {
   requireContract(typeof seedDigest === "string" && seedDigest.length > 0, "Natural cluster seed required");
-  const cache5 = /* @__PURE__ */ new Map();
+  const cache6 = /* @__PURE__ */ new Map();
   let sampled = 0, created = 0, maxCandidates = 0;
   function descriptor(gx, gy) {
     const key9 = gx + "," + gy;
-    if (cache5.has(key9)) return cache5.get(key9);
+    if (cache6.has(key9)) return cache6.get(key9);
     const n = hash9(seedDigest + "/" + NATURAL_CLUSTER_VERSION + "/" + key9), a = hash9(n + "/shape"), b = hash9(n + "/lobes"), angle = unit2(a, 0) * Math.PI;
     const p = {
       id: NATURAL_CLUSTER_VERSION + ":" + n.toString(16).padStart(8, "0") + ":" + key9,
@@ -12045,8 +12045,8 @@ function createNaturalClusterSampler(seedDigest) {
       admission: (n >>> 16) % 100,
       rock: n % 13 === 0
     };
-    if (cache5.size === 256) cache5.delete(cache5.keys().next().value);
-    cache5.set(key9, p);
+    if (cache6.size === 256) cache6.delete(cache6.keys().next().value);
+    cache6.set(key9, p);
     created++;
     return p;
   }
@@ -12073,7 +12073,7 @@ function createNaturalClusterSampler(seedDigest) {
     maxCandidates = Math.max(maxCandidates, count2);
     return best ? { clusterId: best.id, kind: ["r", "d", "s", "l"].includes(biome) || best.rock ? "rock" : "thicket", seed: best.n } : null;
   }
-  return Object.freeze({ sample, stats: () => ({ sampled, created, cachedDescriptors: cache5.size, maxCandidates, cacheLimit: 256 }) });
+  return Object.freeze({ sample, stats: () => ({ sampled, created, cachedDescriptors: cache6.size, maxCandidates, cacheLimit: 256 }) });
 }
 function createNaturalProtection(asset, { ruinFootprints = [] } = {}) {
   const protectedChunks = /* @__PURE__ */ new Set(), ruinKeys = new Set(ruinFootprints.map((c) => c.x + "," + c.y));
@@ -14069,7 +14069,7 @@ function validatePopulationReservation(root3, r) {
 // src/storage/planned_world_assets_v1.js
 var plannedWorldAssetCacheKey = (binding) => binding.assetId + "/" + binding.assetHash + "/" + (binding.townPrototype ?? "terrain-only") + "/" + (binding.cavePrototype ?? "no-cave") + "/" + (binding.fortPrototype ?? "no-fort") + "/" + (binding.ruinPrototype ?? "no-ruin") + "/" + (binding.cryptPrototype ?? "no-crypt") + "/" + (binding.sitePopulationHash ?? "base-roster") + "/" + (binding.interiorGenerationHash ?? "legacy-interiors") + "/" + (binding.ferryHash ?? "no-ferry") + "/" + (binding.settlementLifeHash ?? "no-services") + "/" + (binding.settlementServicesHash ?? "no-specialists") + "/" + (binding.combatHash ?? "legacy-combat") + "/" + (binding.wildernessHash ?? "no-wilderness") + "/" + (binding.bossHostingHash ?? "legacy-boss-hosting") + (binding.startHash ? "/" + binding.startHash : "") + (binding.woodlandForestHash ? "/" + binding.woodlandForestHash : "") + (binding.forestStandsVersion ? "/" + binding.forestStandsVersion : "") + (binding.hydrologyHash ? "/" + binding.hydrologyHash : "") + (binding.accessHash ? "/" + binding.accessHash : "") + (binding.roadsideHash ? "/" + binding.roadsideHash : "") + (binding.reshapeHash ? "/" + binding.reshapeHash : "");
 function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
-  const cache5 = /* @__PURE__ */ new Map(), prepared = /* @__PURE__ */ new Map();
+  const cache6 = /* @__PURE__ */ new Map(), prepared = /* @__PURE__ */ new Map();
   const derive = async (asset, binding) => {
     const generator = createPlannedChunkGenerator(asset, binding, sha256);
     return { asset, generator, caveReservation: await generator.caveReservation(), caveReservations: await generator.caveReservations(), fortReservations: await generator.fortReservations(), ruinReservations: await generator.ruinReservations(), cryptReservations: await generator.cryptReservations() };
@@ -14088,7 +14088,7 @@ function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
     useQuestWorldV1(asset);
     freezePlan(asset);
     const loaded2 = await derive(asset, binding);
-    cache5.set(plannedWorldAssetCacheKey(binding), Promise.resolve(loaded2));
+    cache6.set(plannedWorldAssetCacheKey(binding), Promise.resolve(loaded2));
     useSeededReservationsV1([...loaded2.caveReservations, ...loaded2.fortReservations, ...loaded2.ruinReservations, ...loaded2.cryptReservations]);
     return asset;
   }
@@ -14155,8 +14155,8 @@ function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
   }
   async function load(binding) {
     const asset = await prepare(binding), key9 = plannedWorldAssetCacheKey(binding);
-    if (!cache5.has(key9)) cache5.set(key9, derive(asset, binding));
-    return cache5.get(key9);
+    if (!cache6.has(key9)) cache6.set(key9, derive(asset, binding));
+    return cache6.get(key9);
   }
   return Object.freeze({ load, prepare, sha256, async generate(request) {
     const { generator } = await load(request.plannedWorld);
@@ -14772,13 +14772,13 @@ var triangleOpen = (c, pods) => {
 };
 function sporeTriangleV2(s, id) {
   const runtime = s.d9World.runtime, frameKey = canonicalStringify(runtime.frames ?? []);
-  let cache5 = layouts.get(s);
-  if (cache5?.frameKey !== frameKey) {
-    cache5 = { frameKey, rows: /* @__PURE__ */ new Map() };
-    layouts.set(s, cache5);
+  let cache6 = layouts.get(s);
+  if (cache6?.frameKey !== frameKey) {
+    cache6 = { frameKey, rows: /* @__PURE__ */ new Map() };
+    layouts.set(s, cache6);
   }
   const d = runtime.groups.find((g) => g.groupId === id), c = s.spacesByInstanceId[s.overworldInstanceId].collision;
-  const prior = cache5.rows.get(id);
+  const prior = cache6.rows.get(id);
   if (prior?.layout && (prior.pages === c.pages && prior.tiles === c.tiles || triangleOpen(c, prior.layout.pods))) {
     prior.pages = c.pages;
     prior.tiles = c.tiles;
@@ -14817,7 +14817,7 @@ function sporeTriangleV2(s, id) {
     Object.freeze(chosen.center);
     Object.freeze(chosen);
   }
-  cache5.rows.set(id, { revision: runtime.revision, pages: c.pages, tiles: c.tiles, layout: chosen });
+  cache6.rows.set(id, { revision: runtime.revision, pages: c.pages, tiles: c.tiles, layout: chosen });
   return chosen;
 }
 function podPositionV2(s, id, n, fallback) {
@@ -17901,16 +17901,36 @@ function validateTownInteriors(s) {
   }
 }
 
+// src/shared/contracts/weapon_touches_v1.js
+var WEAPON_STYLES = Object.freeze(["quick", "balanced", "heavy"]);
+var WEAPON_TOUCHES = Object.freeze({ quick: Object.freeze({ activeSpeed: 500 }), balanced: Object.freeze({ cdr: 400 }), heavy: Object.freeze({ bonusAreaRadius: 1e3 }) });
+var WEAPON_TOUCH_TEXT = Object.freeze({ quick: "All your skills are 5% faster", balanced: "All your skills recharge 4% faster", heavy: "All your area effects are 10% bigger" });
+var KIT_NOUN = Object.freeze(Object.fromEntries(Object.entries(CLASS_KITS).map(([cls, kit]) => [kit.weapon, CLASS_GEAR[cls].weapon.find((n) => kit.weapon.endsWith("-" + n.toLowerCase())) ?? null])));
+var STYLE_OF_NOUN = Object.freeze(Object.fromEntries(Object.values(CLASS_GEAR).flatMap((g) => g.weapon.map((n, i) => [n, WEAPON_STYLES[i]]))));
+var cache3 = /* @__PURE__ */ new WeakMap();
+function weaponStyleOfItem(item2) {
+  if (!item2 || typeof item2 !== "object") return null;
+  const hit = cache3.get(item2);
+  if (hit !== void 0) return hit;
+  const d = itemDefinition(item2), kit = KIT_NOUN[item2.definitionId], style = d?.slot === "weapon" && (d.gearClass || kit) ? STYLE_OF_NOUN[kit ?? d.noun] ?? null : null;
+  cache3.set(item2, style);
+  return style;
+}
+function weaponTouch(player) {
+  const inv = player?.inventory, id = inv?.equipped?.weapon, style = id ? weaponStyleOfItem(inv.itemsById?.[id]) : null;
+  return style ? WEAPON_TOUCHES[style] : null;
+}
+
 // src/shared/contracts/gear_affix_totals_v2.js
 var V3_ZERO = { rangedDmg: 0, areaDmg: 0, finisherDmg: 0, moveCdr: 0, defCdr: 0, heldDmg: 0, ailingDmg: 0, closeDmg: 0, farDmg: 0, fullDmg: 0, lowDmg: 0, controlDur: 0, ailmentDur: 0, eliteDr: 0, areaDr: 0, stunDr: 0, potionHeal: 0, keepPip: 0, perfectDmg: 0, hitCdr: 0, killCdr: 0, perfectWindow: 0, perfectCdr: 0, startPips: 0, maxPip: 0, exposeDmg: 0, shatterDmg: 0, exposeTime: 0, exposeCdr: 0, shatterEase: 0, shatterCdr: 0, ccDmg: 0, blinkDmg: 0, blinkCdr: 0, weaveDmg: 0 };
 var EMPTY = Object.freeze({ any: false, mainDmg: 0, offDmg: 0, fireDmg: 0, frostDmg: 0, lightningDmg: 0, bleedDmg: 0, poisonDmg: 0, shockDmg: 0, counterDmg: 0, eliteDmg: 0, cdr: 0, lifeKill: 0, lifeHit: 0, ...V3_ZERO, skills: Object.freeze({}), ranks: Object.freeze({}), branches: Object.freeze({}) });
-var cache3 = /* @__PURE__ */ new WeakMap();
+var cache4 = /* @__PURE__ */ new WeakMap();
 var bp = (v) => Math.round(Number(v) * 1e4);
 var ticks = (v) => Math.round(Number(v) * 60);
 function gearAffixTotalsV2(player) {
   const inv = player?.inventory;
   if (!inv?.equipped || !inv.itemsById) return EMPTY;
-  const levels2 = inv.economy?.slotLevels ?? {}, key9 = inv.revision + "|" + Object.entries(inv.equipped).map(([slot, id]) => slot + "=" + id + "@" + (levels2[slot] ?? 0)).join(","), hit = cache3.get(inv);
+  const levels2 = inv.economy?.slotLevels ?? {}, key9 = inv.revision + "|" + Object.entries(inv.equipped).map(([slot, id]) => slot + "=" + id + "@" + (levels2[slot] ?? 0)).join(","), hit = cache4.get(inv);
   if (hit?.key === key9) return hit.totals;
   const t = { ...EMPTY, skills: {}, ranks: {}, branches: {} };
   for (const [slot, id] of Object.entries(inv.equipped)) {
@@ -17930,6 +17950,7 @@ function gearAffixTotalsV2(player) {
       else t[a.key] += grow(a.value);
     }
   }
+  t.cdr += weaponTouch(player)?.cdr ?? 0;
   t.cdr = Math.min(t.cdr, bp(CDR_CAP));
   t.stunDr = Math.min(t.stunDr, bp(STUN_DR_CAP));
   t.perfectWindow = Math.min(t.perfectWindow, ticks(PERFECT_WINDOW_CAP));
@@ -17937,7 +17958,7 @@ function gearAffixTotalsV2(player) {
   t.exposeTime = Math.min(t.exposeTime, ticks(EXPOSE_TIME_CAP));
   t.shatterEase = Math.min(t.shatterEase, bp(SHATTER_EASE_CAP));
   const totals2 = Object.freeze(t);
-  cache3.set(inv, { key: key9, totals: totals2 });
+  cache4.set(inv, { key: key9, totals: totals2 });
   return totals2;
 }
 
@@ -19248,10 +19269,10 @@ var hash13 = (s) => {
   for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
 };
-var cache4 = /* @__PURE__ */ new Map();
+var cache5 = /* @__PURE__ */ new Map();
 function populateCombatRooms(base, seed, family2, tier2, index, seeded2 = false) {
   const key9 = [seed, family2, tier2, index].join("/"), cacheKey = key9 + (seeded2 ? "/seeded" : "");
-  if (cache4.has(cacheKey)) return cache4.get(cacheKey);
+  if (cache5.has(cacheKey)) return cache5.get(cacheKey);
   const rooms = base.graph.rooms.filter((r) => r.role !== "arrival"), ranked = rooms.map((r) => ({ r, n: hash13(WORLD_COMBAT_VERSION + key9 + r.roomId) })).sort((a, b) => a.n - b.n), chosen = ranked.slice(0, Math.min(WORLD_COMBAT_POLICY.floorPacks[tier2], rooms.length)), members = [], packs = [];
   const families = family2 === "cave" ? ["slime", "rust_nibbler", "gargoyle"] : family2 === "fort" ? ["animated_armor", "gargoyle", "golem"] : ["cursed_blade", "gargoyle", "rust_nibbler"];
   for (const [i, { r, n }] of chosen.entries()) {
@@ -19274,8 +19295,8 @@ function populateCombatRooms(base, seed, family2, tier2, index, seeded2 = false)
     for (const [j, p] of used.entries()) members.push({ memberKey: family2 + ":horde:" + index + ":" + i + ":" + j, family: families[(n + j) % families.length], roomId: r.roomId, position: p, ...family2 === "fort" ? { eliteAffixId: i === 0 && j === 0 && index > 0 ? ["swift_commander", "slag_shaper", "iron_citadel"][Math.min(2, index - 1)] : null } : {} });
   }
   const result = freezeWire({ ...base, encounter: { rank: "C", combatVersion: WORLD_COMBAT_VERSION, packs, members } });
-  if (cache4.size >= 128) cache4.delete(cache4.keys().next().value);
-  cache4.set(cacheKey, result);
+  if (cache5.size >= 128) cache5.delete(cache5.keys().next().value);
+  cache5.set(cacheKey, result);
   return result;
 }
 
@@ -27071,14 +27092,14 @@ var inside3 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + 48n && 
 var fortParcelOwnsWorldPositionD10 = (parcel2, p) => Boolean(parcel2 && inside3(BigInt(p.chunkX) * CW3 + BigInt(Math.floor(p.localX / T6)), BigInt(p.chunkY) * CH3 + BigInt(Math.floor(p.localY / T6)), parcel2));
 async function planWoodlandFortParcelD10({ seed, origin: origin2, ruinSocket, maxRouteTiles = 160 }, sha256) {
   requireContract(ruinSocket?.siteId && maxRouteTiles >= 1 && maxRouteTiles <= 512, "Fort reservation input");
-  const cache5 = /* @__PURE__ */ new Map();
+  const cache6 = /* @__PURE__ */ new Map();
   async function chunk(cx, cy) {
     const id = key5(cx, cy);
-    if (!cache5.has(id)) {
-      if (cx >= 0n && cy >= 0n && cx < BigInt(origin2.originWidthChunks) && cy < BigInt(origin2.originHeightChunks)) cache5.set(id, null);
-      else cache5.set(id, await generateChunkD9({ seed, chunkX: String(cx), chunkY: String(cy), origin: origin2 }, sha256));
+    if (!cache6.has(id)) {
+      if (cx >= 0n && cy >= 0n && cx < BigInt(origin2.originWidthChunks) && cy < BigInt(origin2.originHeightChunks)) cache6.set(id, null);
+      else cache6.set(id, await generateChunkD9({ seed, chunkX: String(cx), chunkY: String(cy), origin: origin2 }, sha256));
     }
-    return cache5.get(id);
+    return cache6.get(id);
   }
   async function cell(x, y) {
     const cx = floorDiv(x, CW3), cy = floorDiv(y, CH3), page = await chunk(cx, cy);
@@ -27186,14 +27207,14 @@ var inside4 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + W6 && y
 var caveParcelOwnsWorldPositionD10 = (parcel2, p) => Boolean(parcel2 && inside4(BigInt(p.chunkX) * CW4 + BigInt(Math.floor(p.localX / T7)), BigInt(p.chunkY) * CH4 + BigInt(Math.floor(p.localY / T7)), parcel2));
 async function planWoodlandCaveParcelD10({ seed, origin: origin2, ruinSocket, fortParcel, minRouteTiles = 48, maxRouteTiles = 192, excludedParcels = [], excludedPlacementRegions = [], minimumSeparationTiles = 0 }, sha256) {
   requireContract(ruinSocket?.siteId && fortParcel?.siteId && minRouteTiles >= 48 && minRouteTiles <= maxRouteTiles && maxRouteTiles <= 512 && minimumSeparationTiles >= 0, "Cave reservation input");
-  const cache5 = /* @__PURE__ */ new Map();
+  const cache6 = /* @__PURE__ */ new Map();
   async function chunk(cx, cy) {
     const id = key6(cx, cy);
-    if (!cache5.has(id)) {
-      if (cx >= 0n && cy >= 0n && cx < BigInt(origin2.originWidthChunks) && cy < BigInt(origin2.originHeightChunks)) cache5.set(id, null);
-      else cache5.set(id, await generateChunkD9({ seed, chunkX: String(cx), chunkY: String(cy), origin: origin2 }, sha256));
+    if (!cache6.has(id)) {
+      if (cx >= 0n && cy >= 0n && cx < BigInt(origin2.originWidthChunks) && cy < BigInt(origin2.originHeightChunks)) cache6.set(id, null);
+      else cache6.set(id, await generateChunkD9({ seed, chunkX: String(cx), chunkY: String(cy), origin: origin2 }, sha256));
     }
-    return cache5.get(id);
+    return cache6.get(id);
   }
   async function cell(x, y) {
     const cx = floorDiv(x, CW4), cy = floorDiv(y, CH4), page = await chunk(cx, cy);
@@ -27353,14 +27374,14 @@ async function planWoodlandCaveRegionD12_2({ seed, origin: origin2, regionX, reg
   if (region.biome !== "woodland") return freezeWire({ version: "woodland-cave-region-plan-d12-2-v1", regionKey: woodlandCaveRegionKeyD12_2(regionX, regionY), regionName: region.name, count: 0, parcels: [] });
   const desired = await woodlandCaveRegionDensityD12_2({ seed, regionX, regionY, guarantee }, sha256);
   if (!desired) return freezeWire({ version: "woodland-cave-region-plan-d12-2-v1", regionKey: woodlandCaveRegionKeyD12_2(regionX, regionY), regionName: region.name, count: 0, parcels: [] });
-  const rx = BigInt(regionX), ry = BigInt(regionY), regionTileX = rx * R * CW5, regionTileY = ry * R * CH5, centerX = regionTileX + R * CW5 / 2n, centerY = regionTileY + R * CH5 / 2n, cache5 = /* @__PURE__ */ new Map(), candidates = [];
+  const rx = BigInt(regionX), ry = BigInt(regionY), regionTileX = rx * R * CW5, regionTileY = ry * R * CH5, centerX = regionTileX + R * CW5 / 2n, centerY = regionTileY + R * CH5 / 2n, cache6 = /* @__PURE__ */ new Map(), candidates = [];
   async function chunk(cx, cy) {
     const k = key7(cx, cy);
-    if (!cache5.has(k)) {
-      if (cx >= 0n && cy >= 0n && cx < BigInt(origin2.originWidthChunks) && cy < BigInt(origin2.originHeightChunks)) cache5.set(k, null);
-      else cache5.set(k, await generateChunkD9({ seed, chunkX: String(cx), chunkY: String(cy), origin: origin2 }, sha256));
+    if (!cache6.has(k)) {
+      if (cx >= 0n && cy >= 0n && cx < BigInt(origin2.originWidthChunks) && cy < BigInt(origin2.originHeightChunks)) cache6.set(k, null);
+      else cache6.set(k, await generateChunkD9({ seed, chunkX: String(cx), chunkY: String(cy), origin: origin2 }, sha256));
     }
-    return cache5.get(k);
+    return cache6.get(k);
   }
   for (let oy = 0n; oy < R; oy++) for (let ox = 0n; ox < R; ox++) {
     const cx = rx * R + ox, cy = ry * R + oy, page = await chunk(cx, cy);
@@ -27715,6 +27736,10 @@ function resolveD9PlayerStats(player) {
     for (const k of ["str", "dex", "int"]) attributes[k] = addCombat(attributes[k], multiplyCombat(exactDecimal(d.attributes?.[k] ?? 0), scale3, 100));
   }
   for (const [k, v] of Object.entries(classTreeEffects(player.d8))) effects[k] = addCombat(effects[k] ?? 0, v);
+  {
+    const t = weaponTouch(player);
+    for (const k of ["activeSpeed", "bonusAreaRadius"]) if (t?.[k]) effects[k] = addCombat(effects[k] ?? 0, combatAmount(t[k], 1e4));
+  }
   if (player.d8?.transient?.vigor === true) effects.maxHpPct = addCombat(effects.maxHpPct ?? 0, combatAmount(BLESSING_EFFECTS.vigor.maxHpPercent, 100));
   for (const [k, v] of Object.entries(player.bestiary?.stats ?? {})) {
     const e = BESTIARY_EFFECT_KEYS[k];
@@ -31828,16 +31853,16 @@ async function pageDigest(value, sha256) {
   return entry.promise;
 }
 function createPageTransaction({ root: root3 = null, readPage, sha256 }) {
-  const dirty = /* @__PURE__ */ new Map(), cache5 = /* @__PURE__ */ new Map();
+  const dirty = /* @__PURE__ */ new Map(), cache6 = /* @__PURE__ */ new Map();
   let current = root3;
   const load = async (id) => {
     if (!id) return null;
     if (dirty.has(id)) return dirty.get(id);
-    if (cache5.has(id)) return cache5.get(id);
+    if (cache6.has(id)) return cache6.get(id);
     const value = await readPage(id);
     requireContract(value && await pageDigest(value, sha256) === id, "Page commitment mismatch");
-    if (cache5.size >= 64) cache5.delete(cache5.keys().next().value);
-    cache5.set(id, value);
+    if (cache6.size >= 64) cache6.delete(cache6.keys().next().value);
+    cache6.set(id, value);
     return value;
   };
   const put3 = async (value) => {
@@ -33709,15 +33734,15 @@ function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.d
 
 // src/storage/world_page_diff_d9.js
 async function changedPageEntriesD9({ before, after, readPage, sha256, limit = 128 }) {
-  const cache5 = /* @__PURE__ */ new Map(), entries = [];
+  const cache6 = /* @__PURE__ */ new Map(), entries = [];
   let visits = 0;
   async function load(id) {
     if (!id) return null;
-    if (cache5.has(id)) return cache5.get(id);
+    if (cache6.has(id)) return cache6.get(id);
     const node = await readPage(id);
     requireContract(node?.version === D9_PAGE_VERSION && await pageDigest(node, sha256) === id, "Changed page commitment mismatch");
-    if (cache5.size >= 64) cache5.delete(cache5.keys().next().value);
-    cache5.set(id, node);
+    if (cache6.size >= 64) cache6.delete(cache6.keys().next().value);
+    cache6.set(id, node);
     return node;
   }
   async function visit(aId, bId, depth, aNode = null, bNode = null) {
@@ -33746,11 +33771,11 @@ async function changedPageEntriesD9({ before, after, readPage, sha256, limit = 1
 // src/storage/world_transition_pages_d9.js
 var same37 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 async function reconcileWorldComparisonPagesD9(a, b, { readPage, sha256 }) {
-  const pages = createWorldPageBufferD9({ readPage, sha256 }), cache5 = /* @__PURE__ */ new Map();
+  const pages = createWorldPageBufferD9({ readPage, sha256 }), cache6 = /* @__PURE__ */ new Map();
   const read = async (s, geo) => {
     const key9 = s.d9World.regionIndex + "/" + geo.chunkX + "," + geo.chunkY;
-    if (!cache5.has(key9)) cache5.set(key9, await pages.readChunk(s.d9World.regionIndex, geo));
-    return cache5.get(key9);
+    if (!cache6.has(key9)) cache6.set(key9, await pages.readChunk(s.d9World.regionIndex, geo));
+    return cache6.get(key9);
   };
   function inject(target, e) {
     const id = e.group.groupId;

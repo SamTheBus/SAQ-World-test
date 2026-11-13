@@ -1,7 +1,7 @@
 import {
   createLocalIndexedDbCampaignStore,
   createWorldSimulation
-} from "./chunk-UWIUEE3E.js";
+} from "./chunk-DEFPDM7J.js";
 
 // src/host/local_authority_host.js
 function createLocalAuthorityHost(initialState) {

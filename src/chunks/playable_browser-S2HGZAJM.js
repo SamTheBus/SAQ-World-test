@@ -343,6 +343,7 @@ import {
   WARDROBE_V1,
   WAYSIDE_POLICY,
   WAYSIDE_VERSION,
+  WEAPON_TOUCH_TEXT,
   WEBBED_STATUS_D12_4J_VERSION,
   WEB_WEAVER_AFFIX_ID,
   WEB_WEAVER_D12_4J,
@@ -1061,6 +1062,7 @@ import {
   verifyPersistedEnvelope,
   volcanoGeometry,
   volcanoesForBinding,
+  weaponStyleOfItem,
   wheelEntriesFor,
   wholeAmount,
   wildernessFairLevelGap,
@@ -1084,7 +1086,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-UWIUEE3E.js";
+} from "./chunk-DEFPDM7J.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -130745,10 +130747,10 @@ function createInventoryPresentation({ document: document2, environment, readMod
       scroll.append(sec);
     }
     {
-      const touch2 = OFFHAND_TOUCH_TEXT[offhandKindOfItem(item2)];
-      if (touch2) {
+      const touch2 = OFFHAND_TOUCH_TEXT[offhandKindOfItem(item2)], weapon3 = WEAPON_TOUCH_TEXT[weaponStyleOfItem(item2)], lines2 = touch2?.lines ?? (weapon3 ? [weapon3] : []);
+      if (lines2.length) {
         const sec = element("section", "", "gx-section gx-touches");
-        for (const line34 of touch2.lines) sec.append(element("p", line34, "gx-touch"));
+        for (const line34 of lines2) sec.append(element("p", line34, "gx-touch"));
         scroll.append(sec);
       }
     }
