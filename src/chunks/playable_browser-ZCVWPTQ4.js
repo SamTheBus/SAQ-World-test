@@ -119718,7 +119718,9 @@ async function createPlannedEventAnchorsV1({ asset, binding, cx, cy: cy2, seed: 
     if (!built.includes(kind) || ordinal === null) continue;
     let x, y;
     if (roadside) {
-      const road = roadTiles(asset, slot).find((p) => tile2(p.x, p.y).landmassId === slot.landmassId && safe(p.x, p.y) && open(tile2, p.x, p.y, slot.landmassId));
+      const roads = roadTiles(asset, slot);
+      if (!roads.some((p) => Math.floor(p.x / 32) === cx && Math.floor(p.y / 26) === cy2)) continue;
+      const road = roads.find((p) => tile2(p.x, p.y).landmassId === slot.landmassId && safe(p.x, p.y) && open(tile2, p.x, p.y, slot.landmassId));
       if (!road) continue;
       ({ x, y } = road);
       if (Math.floor(x / 32) !== cx || Math.floor(y / 26) !== cy2) continue;
