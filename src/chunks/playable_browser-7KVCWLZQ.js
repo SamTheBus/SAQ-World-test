@@ -105079,7 +105079,7 @@ function offhandKind(player) {
 }
 var OFFHAND_TOUCH_TEXT = Object.freeze({
   buckler: Object.freeze({ name: "Buckler", lines: Object.freeze(["Movement skills recharge 15% faster", "Perfect block window +0.1 s"]) }),
-  kite: Object.freeze({ name: "Kite Shield", lines: Object.freeze(["Guard blocks from every side; Defensive skills recharge 15% faster", "Every third block gives 1 extra Grit"]) }),
+  kite: Object.freeze({ name: "Kite Shield", lines: Object.freeze(["Defensive skills recharge 15% faster", "Every third block gives 1 extra Grit"]) }),
   tower: Object.freeze({ name: "Tower Shield", lines: Object.freeze(["All your stuns last 20% longer", "Stunning 3 or more at once gives 1 extra Grit"]) }),
   "main-gauche": Object.freeze({ name: "Main-Gauche", lines: Object.freeze(["Riposte and parries cut back 50% harder", "A parry gives 3 Combo instead of 2"]) }),
   stiletto: Object.freeze({ name: "Stiletto", lines: Object.freeze(["All your crits deal 10% more", "Crits give Combo up to 3 times a second instead of 2"]) }),
@@ -114138,7 +114138,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       const stats3 = progression.resolvedStats(target.entityId), suppressed = subweaponSuppressedD12_4I(state2, target.entityId);
       defenseStats = stats3;
       const defenseSource = attribution?.projectileDirection ? { ...source3, position: { x: target.position.x - attribution.projectileDirection.x * 32, y: target.position.y - attribution.projectileDirection.y * 32 } } : source3;
-      defense = incomingSubweaponHit({ combat: state2.subweaponCombat.actors[target.entityId], stats: stats3, raw, actor: target, source: defenseSource, knight: playerFor(target.entityId)?.d8?.heroClass === "knight", wall: classRank(playerFor(target.entityId)?.d8, "bulwark_colossus") || offhandKind(playerFor(target.entityId)) === "kite" ? 10 : heroRank(playerFor(target.entityId), "iron_wall"), steady: heroRank(playerFor(target.entityId), "unyielding"), boss: bossCombat.isBoss(source3.entityId) || Boolean(state2.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
+      defense = incomingSubweaponHit({ combat: state2.subweaponCombat.actors[target.entityId], stats: stats3, raw, actor: target, source: defenseSource, knight: playerFor(target.entityId)?.d8?.heroClass === "knight", wall: classRank(playerFor(target.entityId)?.d8, "bulwark_colossus") ? 10 : heroRank(playerFor(target.entityId), "iron_wall"), steady: heroRank(playerFor(target.entityId), "unyielding"), boss: bossCombat.isBoss(source3.entityId) || Boolean(state2.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
       raw = defense.damage;
       if (compareCombat(defense.absorbed, 0) > 0) barrierAbsorption = { absorbed: copyWire(defense.absorbed), remaining: copyWire(state2.subweaponCombat.actors[target.entityId].barrier), capacity: copyWire(stats3.maxBarrier) };
     }
