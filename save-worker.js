@@ -14950,19 +14950,23 @@ var V3_POOLS = freezeWire({
   dagger: ["parry", "critChance", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "ailmentDur", "branchRank", "maxPip"],
   tome: ["critDamage", "critChance", "bonusAreaRadius", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "branchRank", "maxPip"],
   helmet: ["critChance", "activeSpd", "bonusAreaRadius", "classDmg", "passiveRank", "cdr", "controlDur", "ailmentDur", "branchRank", "startPips"],
-  gloves: ["atkPct", "critChance", "activeSpd", "attr", "mainDmg", "offDmg", "cdr", "lifeHit", "rangeDmg", "keepPip", "perfectWindow", "perfectDmg"],
-  overall: ["maxHpPct", "defPct", "attr", "lifeKill", "eliteDr", "areaDr", "hitCdr", "lowDmg", "perfectDmg"],
-  boots: ["moveSpeed", "activeSpd", "maxHpPct", "defPct", "lifeKill", "stunDr", "potionHeal", "hitCdr", "groupCdr", "perfectWindow", "perfectCdr"],
+  gloves: ["atkPct", "critChance", "activeSpd", "attr", "mainDmg", "offDmg", "cdr", "lifeHit", "rangeDmg", "keepPip", "sigWindow", "sigDmg"],
+  overall: ["maxHpPct", "defPct", "attr", "lifeKill", "eliteDr", "areaDr", "hitCdr", "lowDmg", "sigDmg"],
+  boots: ["moveSpeed", "activeSpd", "maxHpPct", "defPct", "lifeKill", "stunDr", "potionHeal", "hitCdr", "groupCdr", "sigWindow", "sigCdr"],
   ring: ["atkPct", "critChance", "attr", "cdr", "eliteDmg", "lifeHit", "heldDmg", "ailingDmg", "healthDmg", "groupDmg", "maxPip"],
   cape: ["maxHpPct", "defPct", "attr", "moveSpeed", "lifeKill", "rangeDmg", "healthDmg", "areaDr", "groupDmg", "killCdr", "startPips", "keepPip"]
 });
+var SIGNATURE_LINES = freezeWire({
+  knight: { sigWindow: "perfectWindow", sigDmg: "perfectDmg", sigCdr: "perfectCdr" },
+  rogue: { sigWindow: "exposeTime", sigDmg: "exposeDmg", sigCdr: "exposeCdr" },
+  mage: { sigWindow: "shatterEase", sigDmg: "shatterDmg", sigCdr: "shatterCdr" }
+});
 var RARE_LINES = Object.freeze(["branchRank", "killCdr", "maxPip"]);
-var TIMING_LINES = Object.freeze(["perfectWindow", "perfectDmg", "perfectCdr"]);
 function affixPoolV3(slotKey, rarityTier, cls) {
-  return (V3_POOLS[slotKey] ?? []).filter((k) => (k !== "passiveRank" || rarityTier >= 2) && (!RARE_LINES.includes(k) || rarityTier >= 4) && (!TIMING_LINES.includes(k) || cls === "knight") && (k !== "groupCdr" || groupsFor(cls, COOLDOWN_GROUPS).length > 0));
+  return (V3_POOLS[slotKey] ?? []).filter((k) => (k !== "passiveRank" || rarityTier >= 2) && (!RARE_LINES.includes(k) || rarityTier >= 4) && (!k.startsWith("sig") || Boolean(SIGNATURE_LINES[cls])) && (k !== "groupCdr" || groupsFor(cls, COOLDOWN_GROUPS).length > 0));
 }
-var V3_RANGES = freezeWire({ rangedDmg: [50, 100], areaDmg: [50, 100], finisherDmg: [50, 100], moveCdr: [40, 80], defCdr: [40, 80], heldDmg: [60, 120], ailingDmg: [50, 110], closeDmg: [50, 100], farDmg: [50, 100], fullDmg: [60, 120], lowDmg: [80, 150], controlDur: [80, 160], ailmentDur: [80, 160], eliteDr: [30, 60], areaDr: [40, 80], stunDr: [100, 200], potionHeal: [100, 200], keepPip: [100, 200], perfectDmg: [80, 150] });
-var V3_FIXED = freezeWire({ hitCdr: { lo: 6, hi: 12, step: [1, 20] }, killCdr: { lo: 4, hi: 8, step: [1, 20] }, perfectWindow: { lo: 5, hi: 10, step: [1, 100] }, perfectCdr: { lo: 10, hi: 20, step: [1, 10] }, startPips: { lo: 1, hi: 2, step: [1, 1] }, maxPip: { lo: 1, hi: 1, step: [1, 1] }, branchRank: { lo: 1, hi: 1, step: [1, 1] } });
+var V3_RANGES = freezeWire({ rangedDmg: [50, 100], areaDmg: [50, 100], finisherDmg: [50, 100], moveCdr: [40, 80], defCdr: [40, 80], heldDmg: [60, 120], ailingDmg: [50, 110], closeDmg: [50, 100], farDmg: [50, 100], fullDmg: [60, 120], lowDmg: [80, 150], controlDur: [80, 160], ailmentDur: [80, 160], eliteDr: [30, 60], areaDr: [40, 80], stunDr: [100, 200], potionHeal: [100, 200], keepPip: [100, 200], perfectDmg: [80, 150], exposeDmg: [60, 120], shatterDmg: [150, 300] });
+var V3_FIXED = freezeWire({ hitCdr: { lo: 6, hi: 12, step: [1, 20] }, killCdr: { lo: 4, hi: 8, step: [1, 20] }, perfectWindow: { lo: 5, hi: 10, step: [1, 100] }, perfectCdr: { lo: 10, hi: 20, step: [1, 10] }, exposeTime: { lo: 5, hi: 10, step: [1, 10] }, exposeCdr: { lo: 10, hi: 20, step: [1, 10] }, shatterEase: { lo: 10, hi: 20, step: [1, 100] }, shatterCdr: { lo: 10, hi: 20, step: [1, 10] }, startPips: { lo: 1, hi: 2, step: [1, 1] }, maxPip: { lo: 1, hi: 1, step: [1, 1] }, branchRank: { lo: 1, hi: 1, step: [1, 1] } });
 var V3_KEYS = Object.freeze([...Object.keys(V3_RANGES), ...Object.keys(V3_FIXED)]);
 var isV3Affix = (key9) => V3_KEYS.includes(key9);
 var isFixedV3 = (key9) => Object.hasOwn(V3_FIXED, key9);
@@ -14970,6 +14974,8 @@ var WHOLE_V3 = Object.freeze(["startPips", "maxPip", "branchRank"]);
 var STUN_DR_CAP = 0.5;
 var PERFECT_WINDOW_CAP = 0.2;
 var MAX_PIP_GEAR = 2;
+var EXPOSE_TIME_CAP = 2;
+var SHATTER_EASE_CAP = 0.5;
 var TREES = {};
 var classTrees = (cls) => TREES[cls] ??= Object.freeze([...new Set(Object.values(CLASS_TREE_SKILLS).filter((x) => x.classId === cls).map((x) => x.tree))].sort());
 function resolveV3Affix(key9, cls, slotKey, random) {
@@ -14984,9 +14990,10 @@ function resolveV3Affix(key9, cls, slotKey, random) {
   if (key9 === "healthDmg") return [pick6(["fullDmg", "lowDmg"]), null];
   if (key9 === "branchRank") return [key9, pick6(classTrees(cls))];
   if (key9 === "startPips" || key9 === "keepPip" || key9 === "maxPip") return [key9, cls];
+  if (key9.startsWith("sig")) return [SIGNATURE_LINES[cls][key9], null];
   return [key9, null];
 }
-var POOL_KEY = { str: "attr", dex: "attr", int: "attr", rangedDmg: "groupDmg", areaDmg: "groupDmg", finisherDmg: "groupDmg", moveCdr: "groupCdr", defCdr: "groupCdr", closeDmg: "rangeDmg", farDmg: "rangeDmg", fullDmg: "healthDmg", lowDmg: "healthDmg" };
+var POOL_KEY = { str: "attr", dex: "attr", int: "attr", rangedDmg: "groupDmg", areaDmg: "groupDmg", finisherDmg: "groupDmg", moveCdr: "groupCdr", defCdr: "groupCdr", closeDmg: "rangeDmg", farDmg: "rangeDmg", fullDmg: "healthDmg", lowDmg: "healthDmg", perfectWindow: "sigWindow", exposeTime: "sigWindow", shatterEase: "sigWindow", perfectDmg: "sigDmg", exposeDmg: "sigDmg", shatterDmg: "sigDmg", perfectCdr: "sigCdr", exposeCdr: "sigCdr", shatterCdr: "sigCdr" };
 var v3PoolKeyOf = (key9, slotKey) => slotKey === "overall" && key9 === "lowDmg" ? key9 : POOL_KEY[key9] ?? key9;
 function fixedV3Value(key9, k) {
   const x = V3_FIXED[key9], n = k * x.step[0], d = x.step[1];
@@ -17651,7 +17658,7 @@ function validateTownInteriors(s) {
 }
 
 // src/shared/contracts/gear_affix_totals_v2.js
-var V3_ZERO = { rangedDmg: 0, areaDmg: 0, finisherDmg: 0, moveCdr: 0, defCdr: 0, heldDmg: 0, ailingDmg: 0, closeDmg: 0, farDmg: 0, fullDmg: 0, lowDmg: 0, controlDur: 0, ailmentDur: 0, eliteDr: 0, areaDr: 0, stunDr: 0, potionHeal: 0, keepPip: 0, perfectDmg: 0, hitCdr: 0, killCdr: 0, perfectWindow: 0, perfectCdr: 0, startPips: 0, maxPip: 0 };
+var V3_ZERO = { rangedDmg: 0, areaDmg: 0, finisherDmg: 0, moveCdr: 0, defCdr: 0, heldDmg: 0, ailingDmg: 0, closeDmg: 0, farDmg: 0, fullDmg: 0, lowDmg: 0, controlDur: 0, ailmentDur: 0, eliteDr: 0, areaDr: 0, stunDr: 0, potionHeal: 0, keepPip: 0, perfectDmg: 0, hitCdr: 0, killCdr: 0, perfectWindow: 0, perfectCdr: 0, startPips: 0, maxPip: 0, exposeDmg: 0, shatterDmg: 0, exposeTime: 0, exposeCdr: 0, shatterEase: 0, shatterCdr: 0 };
 var EMPTY = Object.freeze({ any: false, mainDmg: 0, offDmg: 0, fireDmg: 0, frostDmg: 0, lightningDmg: 0, bleedDmg: 0, poisonDmg: 0, shockDmg: 0, counterDmg: 0, eliteDmg: 0, cdr: 0, lifeKill: 0, lifeHit: 0, ...V3_ZERO, skills: Object.freeze({}), ranks: Object.freeze({}), branches: Object.freeze({}) });
 var cache3 = /* @__PURE__ */ new WeakMap();
 var bp = (v) => Math.round(Number(v) * 1e4);
@@ -17673,6 +17680,7 @@ function gearAffixTotalsV2(player) {
       else if (a.key === "passiveRank") t.ranks[a.skill] = (t.ranks[a.skill] ?? 0) + Number(a.value);
       else if (a.key === "branchRank") t.branches[a.skill] = (t.branches[a.skill] ?? 0) + Number(a.value);
       else if (a.key === "startPips" || a.key === "maxPip") t[a.key] += Number(a.value);
+      else if (a.key === "shatterEase") t.shatterEase += bp(a.value);
       else if (isFixedV3(a.key)) t[a.key] += ticks(a.value);
       else if (a.key === "lifeHit") t.lifeHit += Math.round(Number(a.value) * scale2 / 100);
       else t[a.key] += grow(a.value);
@@ -17682,6 +17690,8 @@ function gearAffixTotalsV2(player) {
   t.stunDr = Math.min(t.stunDr, bp(STUN_DR_CAP));
   t.perfectWindow = Math.min(t.perfectWindow, ticks(PERFECT_WINDOW_CAP));
   t.maxPip = Math.min(t.maxPip, MAX_PIP_GEAR);
+  t.exposeTime = Math.min(t.exposeTime, ticks(EXPOSE_TIME_CAP));
+  t.shatterEase = Math.min(t.shatterEase, bp(SHATTER_EASE_CAP));
   const totals2 = Object.freeze(t);
   cache3.set(inv, { key: key9, totals: totals2 });
   return totals2;
@@ -26357,7 +26367,7 @@ function validateMasteryCombat(s) {
             safeInteger(e.expiresTick, s.tick + 1, s.tick + tree[1]);
           } else {
             safeInteger(e.rank, 1, e.kind === "expose" ? 3 : e.kind === "grudge" || e.kind === "daze" ? 5 : e.kind === "weaken" ? 1 : 2);
-            safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "expose" ? 300 : e.kind === "slow" || e.kind === "grudge" ? 240 : e.kind === "weaken" ? 360 : 90));
+            safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "expose" ? 360 : e.kind === "slow" || e.kind === "grudge" ? 240 : e.kind === "weaken" ? 360 : 90));
           }
         } else {
           closedRecord(e, ["id", "sourceId", "spaceInstanceId", "position", "attack", "rank", "sourceItem", ...name === "hazards" ? ["radius", "expiresTick"] : ["direction", "frames", "hitIds"]]);

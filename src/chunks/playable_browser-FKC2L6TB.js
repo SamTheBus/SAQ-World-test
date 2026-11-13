@@ -1051,7 +1051,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-E7Z4O6IF.js";
+} from "./chunk-XDYZSVW6.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -101228,7 +101228,7 @@ function validateMasteryCombat(s) {
             safeInteger(e.expiresTick, s.tick + 1, s.tick + tree[1]);
           } else {
             safeInteger(e.rank, 1, e.kind === "expose" ? 3 : e.kind === "grudge" || e.kind === "daze" ? 5 : e.kind === "weaken" ? 1 : 2);
-            safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "expose" ? 300 : e.kind === "slow" || e.kind === "grudge" ? 240 : e.kind === "weaken" ? 360 : 90));
+            safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "expose" ? 360 : e.kind === "slow" || e.kind === "grudge" ? 240 : e.kind === "weaken" ? 360 : 90));
           }
         } else {
           closedRecord(e, ["id", "sourceId", "spaceInstanceId", "position", "attack", "rank", "sourceItem", ...name === "hazards" ? ["radius", "expiresTick"] : ["direction", "frames", "hitIds"]]);
@@ -107516,6 +107516,23 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       } else reduceSkillCooldown(combat, id, ticks);
     }
   };
+  const allCooldowns = (combat, ticks) => {
+    for (const id of Object.keys(combat.skills?.cooldowns ?? {})) reduceSkillCooldown(combat, id, ticks);
+    if (combat.dash.cooldown > combat.dash.frames) combat.dash.cooldown = Math.max(combat.dash.frames, combat.dash.cooldown - ticks);
+  };
+  const signatureCut = (a, cut2) => {
+    const combat = c.actors[a.entityId];
+    if (!combat || !a.alive) return;
+    const k = classSkillsRecord(combat);
+    if (k.perfCd) return;
+    cut2(combat);
+    k.perfCd = PERF_CD_TICKS;
+  };
+  const expose = (a, t, level) => {
+    const G4 = gearOf(a);
+    effects2.status(a, t, "expose", level, EXPOSE_TICKS + G4.exposeTime);
+    if (G4.exposeCdr && t.alive) signatureCut(a, (combat) => cutGroups(a, combat, ["move", "def"], G4.exposeCdr));
+  };
   const periodic = (a, t, kind, ...rest) => {
     const out = periodicHit(a, t, kind, ...rest);
     if (kind === "burn" && t.alive && !isPodCombatTargetV4(t)) mageEarns(a, 1);
@@ -108174,7 +108191,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       for (const t of around3(a, m, S9.radius)) {
         if (!isPodCombatTargetV4(t) && canStun(a)) {
           effects2.status(a, t, "slow", 2, S9.hold);
-          effects2.status(a, t, "expose", S9.expose, EXPOSE_TICKS);
+          expose(a, t, S9.expose);
         }
         if (choke) damage(a, t, multiplyCombat(stats3.attack, ...S9.choke), "offhand", null, { sourceItem, trigger: "proc" });
       }
@@ -108274,7 +108291,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (!spot2) return false;
     a.position = spot2;
     a.movedLastTick = true;
-    effects2.status(a, t, "expose", T88.smokeVeil.expose, EXPOSE_TICKS);
+    expose(a, t, T88.smokeVeil.expose);
     const k = classSkillsRecord(c.actors[a.entityId]);
     k.stepped = STEPPED_TICKS;
     if (aug(a, "shadowstep", 2)) k.cloak = CLOAK_TICKS;
@@ -109139,9 +109156,12 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
         }
       }
       const id = source3.entityId + "/" + target.entityId, hold = c.controls?.[id], stats3 = trigger !== "periodic" && hold && hold.expiresTick > s.tick ? getStats(source3.entityId) : null;
-      if (stats3 && compareCombat(multiplyCombat(raw, 2, 1), multiplyCombat(stats3.attack, 3, 1)) >= 0 && (hold.phase === "freeze" || big)) {
+      const G4 = stats3 ? gearOf(source3) : null;
+      if (stats3 && compareCombat(multiplyCombat(raw, 1e4, 1), multiplyCombat(stats3.attack, 15e3 - G4.shatterEase, 1)) >= 0 && (hold.phase === "freeze" || big)) {
         out = pct3(out, hold.phase === "freeze" && !big ? CHAIN_SHATTER : CHAIN_SHATTER / 2);
+        if (G4.shatterDmg) out = multiplyCombat(out, 1e4 + G4.shatterDmg, 1e4);
         delete c.controls[id];
+        if (G4.shatterCdr) signatureCut(source3, (combat2) => allCooldowns(combat2, G4.shatterCdr));
       }
     }
     const eye6 = marks2.ticking(target, "burn") ? worn(source3, "eye-of-the-sun") : null;
@@ -109251,6 +109271,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
         if (gear2.fullDmg && !low(source3, 90)) extra += gear2.fullDmg;
         if (gear2.lowDmg && low(source3, 50)) extra += gear2.lowDmg;
         if (gear2.perfectDmg && c.actors[source3.entityId]?.skills?.sharp) extra += gear2.perfectDmg;
+        if (gear2.exposeDmg && marks2.on(target, "expose")) extra += gear2.exposeDmg;
       }
       if (extra) out = multiplyCombat(out, 1e4 + extra, 1e4);
       if (gear2.lifeHit && trigger !== "periodic" && source3.alive) healFlat(source3, gear2.lifeHit);
@@ -109303,7 +109324,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const p = owner(target);
     if (!p?.d8?.heroClass || !source3?.alive || source3.team !== "hostile") return;
     const combat = c.actors[target.entityId], riposting = Boolean(combat?.skills?.riposte);
-    if (riposting && defense.defense === "parry" && source3.alive && !isPodCombatTargetV4(source3)) effects2.status(target, source3, "expose", T88.smokeVeil.expose, EXPOSE_TICKS);
+    if (riposting && defense.defense === "parry" && source3.alive && !isPodCombatTargetV4(source3)) expose(target, source3, T88.smokeVeil.expose);
     if (combat) {
       fought(target);
       const hero = heroOf(target);
@@ -109315,10 +109336,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       k.perfect = s.tick;
       delete k.guardUp;
       if (G4.perfectDmg) k.sharp = SHARP_TICKS;
-      if (G4.perfectCdr && !k.perfCd) {
-        cutGroups(target, combat, ["move", "def"], G4.perfectCdr);
-        k.perfCd = PERF_CD_TICKS;
-      }
+      if (G4.perfectCdr) signatureCut(target, (own) => cutGroups(target, own, ["move", "def"], G4.perfectCdr));
       if (!isPodCombatTargetV4(source3) && !definition2(source3).isBoss && !s.bossCombat?.bossesByEntityId?.[source3.entityId]) knockback(target, source3, eliteOrBoss(source3) ? T88.bash.eliteKnockback : T88.bash.knockback);
     }
     const mirrored = attribution?.projectileImpact && (defense.defense === "block" && (defense.aegis || combat?.skills?.aegis) && aug(target, "aegis_pulse", 3) || defense.defense === "parry" && riposting && aug(target, "riposte", 3));
@@ -109360,7 +109378,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       const combo = spendOf(target, "riposte"), cut2 = multiplyCombat(stats3.attack, ...aug(target, "riposte", 0) ? T88.riposte.counterCut : T88.riposte.attack);
       damage(target, source3, combo ? pct3(cut2, 30 * combo) : cut2, "riposte", null, { sourceItem: damageSourceItem(p, "offhand"), trigger: "reactive" });
       if (full(combo) && canStun(target)) {
-        for (const t of around3(target, target.position, T88.smokeVeil.radius)) if (!isPodCombatTargetV4(t)) effects2.status(target, t, "expose", T88.smokeVeil.expose, EXPOSE_TICKS);
+        for (const t of around3(target, target.position, T88.smokeVeil.radius)) if (!isPodCombatTargetV4(t)) expose(target, t, T88.smokeVeil.expose);
       }
       classSkillsRecord(combat).keen = KEEN_TICKS;
       if (aug(target, "riposte", 1)) combat.dash.cooldown = 0;
@@ -109536,8 +109554,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     {
       const cool = gearOf(a).killCdr, own = c.actors[a.entityId];
       if (cool && a.alive && own && !own.skills?.killCd) {
-        for (const id of Object.keys(own.skills?.cooldowns ?? {})) reduceSkillCooldown(own, id, cool);
-        if (own.dash.cooldown > own.dash.frames) own.dash.cooldown = Math.max(own.dash.frames, own.dash.cooldown - cool);
+        allCooldowns(own, cool);
         classSkillsRecord(own).killCd = KILL_CD_TICKS;
       }
     }
@@ -125974,11 +125991,17 @@ var LABELS = {
   hitCdr: "off Defensive cooldowns when hit",
   killCdr: "off all cooldowns per kill",
   perfectWindow: "Perfect block window",
-  perfectCdr: "off Movement and Defensive cooldowns on a perfect block"
+  perfectCdr: "off Movement and Defensive cooldowns on a perfect block",
+  exposeTime: "longer Expose",
+  exposeDmg: "Damage to enemies you Exposed",
+  exposeCdr: "off Movement and Defensive cooldowns when you Expose",
+  shatterEase: "less Attack needed to Shatter",
+  shatterDmg: "Shatter damage",
+  shatterCdr: "off all cooldowns on a Shatter"
 };
-var SECONDS = /* @__PURE__ */ new Set(["hitCdr", "killCdr", "perfectWindow", "perfectCdr"]);
+var SECONDS = /* @__PURE__ */ new Set(["hitCdr", "killCdr", "perfectWindow", "perfectCdr", "exposeTime", "exposeCdr", "shatterCdr"]);
 var branchName = (id) => id ? id[0].toUpperCase() + id.slice(1) : "";
-var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct", "mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "cdr", "eliteDmg", "lifeKill", "rangedDmg", "areaDmg", "finisherDmg", "moveCdr", "defCdr", "heldDmg", "ailingDmg", "closeDmg", "farDmg", "fullDmg", "lowDmg", "controlDur", "ailmentDur", "eliteDr", "areaDr", "stunDr", "potionHeal", "keepPip", "perfectDmg"]);
+var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct", "mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "cdr", "eliteDmg", "lifeKill", "rangedDmg", "areaDmg", "finisherDmg", "moveCdr", "defCdr", "heldDmg", "ailingDmg", "closeDmg", "farDmg", "fullDmg", "lowDmg", "controlDur", "ailmentDur", "eliteDr", "areaDr", "stunDr", "potionHeal", "keepPip", "perfectDmg", "exposeDmg", "shatterDmg", "shatterEase"]);
 var FLAT = ["attack", "defense", "maxHp", "str", "dex", "int"];
 var zero6 = (v) => statValue(v) === 0;
 var sign2 = (v) => {
@@ -126108,6 +126131,12 @@ var ICON_ALIAS = {
   hitCdr: "cdr",
   killCdr: "cdr",
   perfectCdr: "cdr",
+  exposeTime: "parry",
+  exposeDmg: "critDamage",
+  exposeCdr: "cdr",
+  shatterEase: "frostDmg",
+  shatterDmg: "frostDmg",
+  shatterCdr: "cdr",
   controlDur: "cdr",
   ailmentDur: "cdr",
   eliteDr: "defense",
