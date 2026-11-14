@@ -1099,7 +1099,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-RBTIQVZX.js";
+} from "./chunk-D3N2HDHK.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -101277,6 +101277,39 @@ function drawChampionNameD11(c, champion2, profile) {
   c.fillText(champion2.name.toUpperCase(), 0, y);
   c.restore();
 }
+var levelStamps = /* @__PURE__ */ new Map();
+function levelStampV1(c, text3, size) {
+  const key4 = size + "|" + text3;
+  let s = levelStamps.get(key4);
+  if (s !== void 0) return s;
+  s = null;
+  try {
+    const doc = c.canvas?.ownerDocument;
+    if (doc?.createElement) {
+      const S15 = 3, pad2 = 2, cv = doc.createElement("canvas"), g = cv.getContext("2d");
+      g.font = `bold ${size}px system-ui`;
+      const w = Math.ceil(g.measureText(text3).width) + pad2 * 2, h = size + pad2 * 2 + 2;
+      cv.width = w * S15;
+      cv.height = h * S15;
+      const k = cv.getContext("2d");
+      k.scale(S15, S15);
+      k.font = `bold ${size}px system-ui`;
+      k.textAlign = "center";
+      k.textBaseline = "alphabetic";
+      k.strokeStyle = "#11121a";
+      k.lineWidth = 1.6;
+      k.strokeText(text3, w / 2, pad2 + size);
+      k.fillStyle = "#e5d3a8";
+      k.fillText(text3, w / 2, pad2 + size);
+      s = { cv, w, h, base: pad2 + size };
+    }
+  } catch {
+    s = null;
+  }
+  if (levelStamps.size > 300) levelStamps.clear();
+  levelStamps.set(key4, s);
+  return s;
+}
 function drawCreatureLabelsLocalD11(c, actor, profile) {
   if (actor.champion && actor.alive) drawChampionNameD11(c, actor.champion, profile);
   if (actor.rare && actor.alive && actor.elite) drawRarePlateV1(c, actor, profile.labels.healthBarY - 13, { small: true });
@@ -101288,14 +101321,17 @@ function drawCreatureLabelsLocalD11(c, actor, profile) {
   if (actor.alive) {
     if (actor.rare && !actor.elite) drawRarePlateV1(c, actor, barY);
     else if (actor.levelLabel && !actor.elite) {
-      const labelSize = profile.visualScale < 0.72 ? 7 : 8;
-      c.font = `bold ${labelSize}px system-ui`;
-      c.textAlign = "center";
-      c.strokeStyle = "#11121a";
-      c.lineWidth = 1.6;
-      c.strokeText(actor.levelLabel, 0, profile.labels.levelLabelY);
-      c.fillStyle = "#e5d3a8";
-      c.fillText(actor.levelLabel, 0, profile.labels.levelLabelY);
+      const labelSize = profile.visualScale < 0.72 ? 7 : 8, stamp7 = levelStampV1(c, actor.levelLabel, labelSize);
+      if (stamp7) c.drawImage(stamp7.cv, -stamp7.w / 2, profile.labels.levelLabelY - stamp7.base, stamp7.w, stamp7.h);
+      else {
+        c.font = `bold ${labelSize}px system-ui`;
+        c.textAlign = "center";
+        c.strokeStyle = "#11121a";
+        c.lineWidth = 1.6;
+        c.strokeText(actor.levelLabel, 0, profile.labels.levelLabelY);
+        c.fillStyle = "#e5d3a8";
+        c.fillText(actor.levelLabel, 0, profile.labels.levelLabelY);
+      }
     }
     if (!drawVitalityWeaverBadgeD12_4(c, actor, profile, ratio) && !drawSwiftCommanderBadgeD12_4D(c, actor, profile, ratio) && !drawGlacialWardenBadgeD12_4E(c, actor, profile, ratio) && !drawToxicDecayBadgeD12_4F(c, actor, profile, ratio) && !drawIronCitadelBadgeD12_4G(c, actor, profile, ratio) && !drawBloodBerserkerBadgeD12_4H_A(c, actor, profile, ratio) && !drawNullifierBadgeD12_4I(c, actor, profile, ratio) && !drawWebWeaverBadgeD12_4J(c, actor, profile, ratio) && !drawSlagShaperBadgeD12_4K(c, actor, profile, ratio)) {
       c.fillStyle = "#16232a";
@@ -140522,6 +140558,25 @@ function rustNibblerFacingD11_2({ position: position4, previousPosition = null, 
   }
   return facing3;
 }
+var staticLayout = null;
+var staticSpots = /* @__PURE__ */ new Map();
+function staticProjectionV1(address3, frames) {
+  let layout = "";
+  for (const f of frames) layout += f.id + ":" + f.chunkX + "," + f.chunkY + ":" + f.offsetX + "," + f.offsetY + (f.originBounds ? ":" + f.originBounds.width + "x" + f.originBounds.height : "") + "|";
+  if (layout !== staticLayout) {
+    staticLayout = layout;
+    staticSpots = /* @__PURE__ */ new Map();
+  }
+  const key4 = address3.chunkX + "," + address3.chunkY + "," + address3.localX + "," + address3.localY;
+  let spot2 = staticSpots.get(key4);
+  if (spot2 === void 0) {
+    spot2 = projectToLocalFrameD9(address3, frames);
+    if (spot2) Object.freeze(spot2);
+    if (staticSpots.size > 4e3) staticSpots.clear();
+    staticSpots.set(key4, spot2);
+  }
+  return spot2;
+}
 var sharedTruth = null;
 function sharedSiteTruthV1(state2, read2, maxAge, force) {
   const d = state2.campaign.overworld.discovery, key4 = `${state2.d9World.runtime.revision}/${d.discoveredSiteIds.length}`, t = sharedTruth;
@@ -140568,7 +140623,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
         const size = 8, px7 = Math.floor(local8.position.x / c.tileSize / size) * size, py = Math.floor(local8.position.y / c.tileSize / size) * size;
         const visualWindowKey = state2.d9World && inOverworld ? (() => {
           const left = px7 - 40, top = py - 40, right = left + 88, bottom = top + 88, frames = state2.d9World.runtime.frames.map((f) => `${f.id}:${f.chunkX},${f.chunkY}:${f.offsetX},${f.offsetY}`).join("|"), chunks3 = state2.d9World.runtime.chunks.flatMap((chunk4) => {
-            const p = projectToLocalFrameD9({ chunkX: chunk4.chunkX, chunkY: chunk4.chunkY, localX: 0, localY: 0 }, state2.d9World.runtime.frames);
+            const p = staticProjectionV1({ chunkX: chunk4.chunkX, chunkY: chunk4.chunkY, localX: 0, localY: 0 }, state2.d9World.runtime.frames);
             return p && p.x / c.tileSize + 32 > left && p.y / c.tileSize + 26 > top && p.x / c.tileSize < right && p.y / c.tileSize < bottom ? [chunk4.identity.id] : [];
           }).sort().join("|");
           return `${frames}/${chunks3}`;
@@ -140627,7 +140682,16 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
             fairRatios.set(key5, r);
           }
           return r ? { view: view3, ...r } : null;
-        }, fairAmount = (v, f) => combatInteger(multiplyCombat(v, f.n, f.d)), groupOfEntity = (id2) => Object.values(state2.groupsById).find((g) => g.entityIds.includes(id2));
+        }, fairAmount = (v, f) => combatInteger(multiplyCombat(v, f.n, f.d)), groupOfEntity = /* @__PURE__ */ (() => {
+          let byEntity = null;
+          return (id2) => {
+            if (!byEntity) {
+              byEntity = /* @__PURE__ */ new Map();
+              for (const g of Object.values(state2.groupsById)) for (const member of g.entityIds) if (!byEntity.has(member)) byEntity.set(member, g);
+            }
+            return byEntity.get(id2);
+          };
+        })();
         const brood = nestBroodViewsV1(state2), hunts = huntChampionViewsV1(state2), dens = denActorViewsV1(state2), visible3 = engine.nearby(local8, 900).filter((a) => !eventActorDormant(state2, a.entityId) && bossActorTargetableD12_5A(state2, a.entityId));
         for (const defeated of Object.values(state2.entitiesById)) if (!defeated.alive && defeated.ai?.defeatedTick !== void 0 && state2.tick - defeated.ai.defeatedTick <= 36 && defeated.residency.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(defeated.position.x - local8.position.x, defeated.position.y - local8.position.y) <= 900 && !visible3.some((a) => a.entityId === defeated.entityId)) visible3.push(defeated);
         if (!visible3.some((a) => a.entityId === local8.entityId)) visible3.push(local8);
@@ -140636,7 +140700,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           if (e && !e.alive && e.residency?.spaceInstanceId === ctx.spaceInstanceId && !visible3.some((a) => a.entityId === e.entityId)) visible3.push(e);
         }
         for (const a of visible3) {
-          const creature = creatureDefinitionForProfile(a.contentDefinitionId), family = creature?.family ?? ordinaryEnemyForProfile(a.contentDefinitionId)?.family ?? null, group = Object.values(state2.groupsById).find((g) => g.entityIds.includes(a.entityId)), prior = creatureFacingViews.get(a.entityId), attackTarget = a.ai?.melee?.targetEntityId ? state2.entitiesById[a.ai.melee.targetEntityId] : null, presentationFacingX = a.team === "hostile" && family ? rustNibblerFacingD11_2({ position: a.position, previousPosition: prior?.position ?? null, movementIntentX: a.movementIntent?.x ?? 0, attackTargetPosition: attackTarget?.position ?? null, meleePhase: a.ai?.melee?.phase ?? "idle", lastFacing: prior?.facingX ?? 1, alive: a.alive }) : 1;
+          const creature = creatureDefinitionForProfile(a.contentDefinitionId), family = creature?.family ?? ordinaryEnemyForProfile(a.contentDefinitionId)?.family ?? null, group = groupOfEntity(a.entityId), prior = creatureFacingViews.get(a.entityId), attackTarget = a.ai?.melee?.targetEntityId ? state2.entitiesById[a.ai.melee.targetEntityId] : null, presentationFacingX = a.team === "hostile" && family ? rustNibblerFacingD11_2({ position: a.position, previousPosition: prior?.position ?? null, movementIntentX: a.movementIntent?.x ?? 0, attackTargetPosition: attackTarget?.position ?? null, meleePhase: a.ai?.melee?.phase ?? "idle", lastFacing: prior?.facingX ?? 1, alive: a.alive }) : 1;
           creatureFacingViews.set(a.entityId, { position: { ...a.position }, facingX: presentationFacingX });
           entitiesById[a.entityId] = {
             position: { ...a.position },
@@ -140837,20 +140901,20 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
             return Object.freeze({ canRespawn: !local8.alive, leaveTrip: !local8.alive && inHellV1(state2, local8), kind: near5?.kind ?? "start", anchorLabel: near5?.label ?? plannedStartLabel(state2.d9World?.plannedWorld, m.settlements.find((s) => s.settlementId === m.start.settlementId).label) });
           })(),
           space: Object.freeze({
-            ...inOverworld && hasSettlementLife(state2.d9World?.plannedWorld) ? { plannedVillage: projectToLocalFrameD9({ chunkX: "1164", chunkY: "1316", localX: 0, localY: 0 }, state2.d9World.runtime.frames), plannedVillages: villagePlacements(state2.d9World.plannedWorld).flatMap((v) => {
-              const p = projectToLocalFrameD9(tileAddress(v.origin.x, v.origin.y), state2.d9World.runtime.frames);
+            ...inOverworld && hasSettlementLife(state2.d9World?.plannedWorld) ? { plannedVillage: staticProjectionV1({ chunkX: "1164", chunkY: "1316", localX: 0, localY: 0 }, state2.d9World.runtime.frames), plannedVillages: villagePlacements(state2.d9World.plannedWorld).flatMap((v) => {
+              const p = staticProjectionV1(tileAddress(v.origin.x, v.origin.y), state2.d9World.runtime.frames);
               return p ? [{ id: v.id, label: v.name, band: v.band, x: p.x - 16, y: p.y - 16 }] : [];
             }) } : {},
             ...inOverworld && hasFerries(state2.d9World?.plannedWorld) && harborTownV1() ? (() => {
-              const h = harborTownV1(), p = projectToLocalFrameD9(tileAddress(h.origin.x, h.origin.y), state2.d9World.runtime.frames);
+              const h = harborTownV1(), p = staticProjectionV1(tileAddress(h.origin.x, h.origin.y), state2.d9World.runtime.frames);
               return p ? { harborTown: { id: h.id, label: h.name, x: p.x - 16, y: p.y - 16 } } : {};
             })() : {},
             ...inOverworld && state2.d9World?.runtime?.frames && generatedTownsV1().length ? { generatedTowns: generatedTownsV1().flatMap((t) => {
-              const p = projectToLocalFrameD9(tileAddress(t.origin.x, t.origin.y), state2.d9World.runtime.frames);
+              const p = staticProjectionV1(tileAddress(t.origin.x, t.origin.y), state2.d9World.runtime.frames);
               return p ? [{ id: t.id, label: t.name, x: p.x - 16, y: p.y - 16 }] : [];
             }) } : {},
             ...tavernFloor ? { settlementInterior: { recipeVersion: tavernBinding.recipeVersion, floorId: tavernFloor, bindingId: tavernBinding.identity } } : townHere ? { settlementInterior: { recipeVersion: townBinding.recipeVersion, floorId: townHere.floor, bindingId: townBinding.identity } } : {},
-            ...inOverworld && tavernBinding ? { plannedTown: projectToLocalFrameD9({ chunkX: "1206", chunkY: "1244", localX: 0, localY: 0 }, state2.d9World.runtime.frames) } : {},
+            ...inOverworld && tavernBinding ? { plannedTown: staticProjectionV1({ chunkX: "1206", chunkY: "1244", localX: 0, localY: 0 }, state2.d9World.runtime.frames) } : {},
             forgeStations: inOverworld ? state2.campaign.forgeStations?.stations ?? [] : [],
             ...state2.trips?.hell?.spaceInstanceId === ctx.spaceInstanceId ? { tripHell: true } : {},
             spaceId: space.spaceId,
@@ -187560,6 +187624,7 @@ function drawMasteryBadges(ctx, m) {
     if (t.syphonStacks) badges.push(["#77def0", t.syphonStacks]);
     if (t.singularity) badges.push(["#bcc9ff", "\u25C9"]);
     if (t.weavingStacks) badges.push(["#ef9cff", t.weavingStacks]);
+    if (!badges.length) continue;
     ctx.save();
     ctx.font = "bold 8px system-ui";
     ctx.textAlign = "center";
@@ -199652,6 +199717,41 @@ function chooseTextPath(anchor2, size, occupied, reserved, view3, sequence, scal
 var HIT_FEEDBACK = Object.freeze({ flashMs: 100, recoilMs: 180, sparksMs: 170, placementMs: 120, numberMs: 750, maxNumbers: 128, maxPerTarget: 128, maxReactions: 32 });
 var IMPACT_LIGHT = Object.freeze({ fire: ["#ff8a3d", 46, 520, 0.6], lightning: ["#ffe45c", 44, 420, 0.6], frost: ["#8fd8ff", 40, 480, 0.45], quake: ["#ff9d5c", 38, 500, 0.35], bash: ["#73bedc", 36, 300, 0.4] });
 var numberFont = (px7) => `800 ${px7}px "Baloo 2", system-ui, sans-serif`;
+function numberStampV1(ctx, n, px7, scale, fill9) {
+  const key4 = n.text + "|" + px7 + "|" + fill9;
+  if (n.stampKey === key4) return n.stamp;
+  let s = null;
+  try {
+    const doc = ctx.canvas?.ownerDocument;
+    if (doc?.createElement) {
+      const S15 = 1.5, pad2 = Math.ceil(4 * scale) + 2, cv = doc.createElement("canvas"), g = cv.getContext("2d");
+      g.font = numberFont(px7);
+      const textWidth = g.measureText(n.text).width, w = Math.ceil(textWidth) + pad2 * 2, h = Math.ceil(px7 * 1.5 + 3 * scale) + pad2 * 2;
+      cv.width = Math.ceil(w * S15);
+      cv.height = Math.ceil(h * S15);
+      const k = cv.getContext("2d");
+      k.scale(S15, S15);
+      k.font = numberFont(px7);
+      k.textAlign = "left";
+      k.textBaseline = "middle";
+      k.lineJoin = "round";
+      k.lineWidth = 5 * scale;
+      k.strokeStyle = k.fillStyle = "rgba(10,6,18,.5)";
+      k.strokeText(n.text, pad2, h / 2 + 2.5 * scale);
+      k.fillText(n.text, pad2, h / 2 + 2.5 * scale);
+      k.strokeStyle = "#150d1f";
+      k.strokeText(n.text, pad2, h / 2);
+      k.fillStyle = fill9;
+      k.fillText(n.text, pad2, h / 2);
+      s = { cv, textWidth, pad: pad2, w, h };
+    }
+  } catch {
+    s = null;
+  }
+  n.stampKey = key4;
+  n.stamp = s;
+  return s;
+}
 var fontRequested = false;
 function loadNumberFont() {
   if (fontRequested || typeof FontFace !== "function" || typeof document === "undefined" || !document.fonts) return;
@@ -199857,9 +199957,12 @@ function createCombatFeedback() {
     }
     return out4;
   }
+  let screenScale = null;
   function draw(ctx, time3, art = () => null, viewport = null) {
     ctx.save();
-    const transform = ctx.getTransform(), point14 = (p) => ({ x: p.x * transform.a + transform.e, y: p.y * transform.d + transform.f }), scale = ctx.canvas.width / (ctx.canvas.clientWidth || ctx.canvas.width), view3 = { x: 4 * scale, y: 4 * scale, width: ctx.canvas.width - 8 * scale, height: ctx.canvas.height - 8 * scale };
+    const cv = ctx.canvas;
+    if (!screenScale || screenScale.canvas !== cv || screenScale.width !== cv.width || !(time3 - screenScale.at >= 0 && time3 - screenScale.at <= 1e3)) screenScale = { canvas: cv, width: cv.width, at: time3, scale: cv.width / (cv.clientWidth || cv.width) };
+    const transform = ctx.getTransform(), point14 = (p) => ({ x: p.x * transform.a + transform.e, y: p.y * transform.d + transform.f }), scale = screenScale.scale, view3 = { x: 4 * scale, y: 4 * scale, width: ctx.canvas.width - 8 * scale, height: ctx.canvas.height - 8 * scale };
     const reserved = [], occupied = [];
     lastLayout = [];
     for (const n of numbers) {
@@ -199867,18 +199970,23 @@ function createCombatFeedback() {
       const p = point14(n.position), b = n.path.box;
       occupied.push({ x: p.x + b.x, y: p.y + b.y, width: b.width, height: b.height });
     }
-    for (const a of Object.values(lastModel?.entitiesById ?? {})) {
-      if (!a.alive) continue;
-      const p = point14(a.position);
-      if (p.x < -60 || p.y < -100 || p.x > ctx.canvas.width + 60 || p.y > ctx.canvas.height + 100) continue;
-      reserved.push({ x: p.x - 21 * transform.a, y: p.y - 36 * transform.d, width: 42 * transform.a, height: 10 * transform.d });
-    }
-    for (const e of lastModel?.combatPresentation?.statuses ?? []) {
-      const a = lastModel.entitiesById[e.targetId];
-      if (!a?.alive) continue;
-      const p = point14(a.position), top = p.y - (49 + (e.lane ?? 0) * 18) * transform.d;
-      reserved.push({ x: p.x - 34 * transform.a, y: top - 19 * transform.d, width: 68 * transform.a, height: 29 * transform.d });
-    }
+    let reservedBuilt = false;
+    const buildReserved = () => {
+      if (reservedBuilt) return;
+      reservedBuilt = true;
+      for (const a of Object.values(lastModel?.entitiesById ?? {})) {
+        if (!a.alive) continue;
+        const p = point14(a.position);
+        if (p.x < -60 || p.y < -100 || p.x > ctx.canvas.width + 60 || p.y > ctx.canvas.height + 100) continue;
+        reserved.push({ x: p.x - 21 * transform.a, y: p.y - 36 * transform.d, width: 42 * transform.a, height: 10 * transform.d });
+      }
+      for (const e of lastModel?.combatPresentation?.statuses ?? []) {
+        const a = lastModel.entitiesById[e.targetId];
+        if (!a?.alive) continue;
+        const p = point14(a.position), top = p.y - (49 + (e.lane ?? 0) * 18) * transform.d;
+        reserved.push({ x: p.x - 34 * transform.a, y: top - 19 * transform.d, width: 68 * transform.a, height: 29 * transform.d });
+      }
+    };
     lastReserved = reserved;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.textAlign = "left";
@@ -199891,11 +199999,11 @@ function createCombatFeedback() {
       const p = point14(n.position);
       if (p.x < 0 || p.x > ctx.canvas.width || p.y < 0 || p.y > ctx.canvas.height) continue;
       const style = combatTextStyle(n), icon2 = hitIcon(n), iconSize = Math.max(13, Math.min(20, style.size * 1.05)), mechanicWidth = icon2 ? (iconSize + 3) * scale : 0, critWidth = n.critical ? 17 * scale : 0, iconWidth = mechanicWidth + critWidth;
-      ctx.font = numberFont(style.maxSize * scale);
-      const measure2 = ctx.measureText(n.text), textWidth = Math.max(measure2.width, (measure2.actualBoundingBoxLeft || 0) + (measure2.actualBoundingBoxRight || 0)), height = Math.max(style.maxSize, (measure2.actualBoundingBoxAscent || 0) / scale + (measure2.actualBoundingBoxDescent || 0) / scale, icon2 ? iconSize : 0) * scale + 6 * scale, size = { width: textWidth + iconWidth + 6 * scale, height };
+      if (!n.path) ctx.font = numberFont(style.maxSize * scale);
+      const measure2 = n.path ? { width: 0 } : ctx.measureText(n.text), textWidth = Math.max(measure2.width, (measure2.actualBoundingBoxLeft || 0) + (measure2.actualBoundingBoxRight || 0)), height = Math.max(style.maxSize, (measure2.actualBoundingBoxAscent || 0) / scale + (measure2.actualBoundingBoxDescent || 0) / scale, icon2 ? iconSize : 0) * scale + 6 * scale, size = { width: textWidth + iconWidth + 6 * scale, height };
       const old2 = n.path ? { x: p.x + n.path.x, y: p.y + n.path.y, direction: n.path.direction } : null;
       const localTop = Math.min(p.y - 36 * transform.d, ...(lastModel?.combatPresentation?.statuses ?? []).filter((e) => e.targetId === n.targetId).map((e) => p.y - (68 + (e.lane ?? 0) * 18) * transform.d));
-      const chosen = old2 ? { ...old2, box: { x: p.x + n.path.box.x, y: p.y + n.path.box.y, width: n.path.box.width, height: n.path.box.height } } : chooseTextPath({ x: p.x, y: localTop - size.height / 2 - 6 * scale }, size, occupied, reserved, view3, n.eventSequence, scale);
+      const chosen = old2 ? { ...old2, box: { x: p.x + n.path.box.x, y: p.y + n.path.box.y, width: n.path.box.width, height: n.path.box.height } } : (buildReserved(), chooseTextPath({ x: p.x, y: localTop - size.height / 2 - 6 * scale }, size, occupied, reserved, view3, n.eventSequence, scale));
       if (!chosen) continue;
       if (!n.path) {
         occupied.push(chosen.box);
@@ -199909,21 +200017,25 @@ function createCombatFeedback() {
       if (taken && age < 110) x += Math.sin(age * 0.5) * 1.6 * scale;
       const pop = n.critical ? 1 + 0.9 * (1 - backOut(Math.min(1, age / 150))) : 1 + 0.35 * (1 - easeOut5(Math.min(1, age / 90))), bump = n.bump != null ? 1 + 0.25 * (1 - Math.min(1, Math.max(0, time3 - n.bump) / 120)) : 1, zoom = pop * bump, font2 = style.size * zoom;
       ctx.globalAlpha = t < 0.72 ? 1 : 1 - (t - 0.72) / 0.28;
+      const fill9 = n.rainbow ? null : n.labelKind === "absorption" ? "#d49afa" : n.defended ? "#67e8f9" : n.player ? "#ff6a66" : n.critical ? "#ffe6a0" : MECHANIC_COLORS[n.mechanic] ?? (n.heavy ? "#ffe16b" : "#fff7db"), stamp7 = fill9 ? numberStampV1(ctx, n, style.size * scale, scale, fill9) : null;
       ctx.save();
       ctx.translate(x, y);
       ctx.scale(zoom, zoom);
-      ctx.font = numberFont(style.size * scale);
-      const width2 = ctx.measureText(n.text).width + iconWidth, left = -width2 / 2, tx = left + iconWidth;
+      if (!stamp7) ctx.font = numberFont(style.size * scale);
+      const width2 = (stamp7 ? stamp7.textWidth : ctx.measureText(n.text).width) + iconWidth, left = -width2 / 2, tx = left + iconWidth;
       if (icon2) drawHitIconV2(ctx, icon2, left + mechanicWidth / 2 - 1.5 * scale, 0, iconSize * scale);
       if (n.critical) drawHitIconV2(ctx, "crit", left + mechanicWidth + critWidth / 2 - scale, 0, 15 * scale);
-      ctx.lineWidth = 5 * scale;
-      ctx.strokeStyle = ctx.fillStyle = "rgba(10,6,18,.5)";
-      ctx.strokeText(n.text, tx, 2.5 * scale);
-      ctx.fillText(n.text, tx, 2.5 * scale);
-      ctx.strokeStyle = "#150d1f";
-      ctx.strokeText(n.text, tx, 0);
-      ctx.fillStyle = n.rainbow ? rainbowFill(ctx, tx, width2 - iconWidth, (n.eventSequence ?? 0) % 97, t) : n.labelKind === "absorption" ? "#d49afa" : n.defended ? "#67e8f9" : n.player ? "#ff6a66" : n.critical ? "#ffe6a0" : MECHANIC_COLORS[n.mechanic] ?? (n.heavy ? "#ffe16b" : "#fff7db");
-      ctx.fillText(n.text, tx, 0);
+      if (stamp7) ctx.drawImage(stamp7.cv, tx - stamp7.pad, -stamp7.h / 2, stamp7.w, stamp7.h);
+      else {
+        ctx.lineWidth = 5 * scale;
+        ctx.strokeStyle = ctx.fillStyle = "rgba(10,6,18,.5)";
+        ctx.strokeText(n.text, tx, 2.5 * scale);
+        ctx.fillText(n.text, tx, 2.5 * scale);
+        ctx.strokeStyle = "#150d1f";
+        ctx.strokeText(n.text, tx, 0);
+        ctx.fillStyle = n.rainbow ? rainbowFill(ctx, tx, width2 - iconWidth, (n.eventSequence ?? 0) % 97, t) : fill9;
+        ctx.fillText(n.text, tx, 0);
+      }
       ctx.restore();
       lastLayout.push({ eventSequence: n.eventSequence, targetId: n.targetId, box: chosen.box, text: n.text, mechanic: n.mechanic, critical: n.critical, life: style.life, font: font2, position: { x, y } });
     }

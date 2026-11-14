@@ -25951,6 +25951,14 @@ var SLIME_CLEARING = freezeWire({
 var PRIMARY_RECENT_WINDOW = 16;
 var COMPLETED_COMBAT_WINDOW = 16;
 var same24 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var deepFrozen = (v) => v === null || typeof v !== "object" || Object.isFrozen(v) && Object.values(v).every(deepFrozen);
+var checkedProfiles = /* @__PURE__ */ new WeakSet();
+var supportedProfile = (profile2) => {
+  if (checkedProfiles.has(profile2)) return true;
+  if (!same24(profile2, SHIELD_SWORD_PRIMARY)) return false;
+  if (deepFrozen(profile2)) checkedProfiles.add(profile2);
+  return true;
+};
 function validatePrimaryAim(aim) {
   closedRecord(aim, ["x", "y"]);
   requireContract(
@@ -25961,7 +25969,7 @@ function validatePrimaryAim(aim) {
 function primaryProfile(state, entityId2) {
   const id2 = state.primary?.actorsById[entityId2]?.profileId;
   const profile2 = state.content?.definitionsById[id2];
-  requireContract(profile2?.kind === "primaryProfile" && same24(profile2, SHIELD_SWORD_PRIMARY), "Unsupported equipped primary profile");
+  requireContract(profile2?.kind === "primaryProfile" && supportedProfile(profile2), "Unsupported equipped primary profile");
   return hasWorldCombat(state) ? { ...profile2, forwardDotMinimum: 0.1 } : profile2;
 }
 function primaryRecords(state) {
