@@ -1,6 +1,6 @@
 {
-  "runtimeId": "ea9df5e4f0e11dab",
-  "runtimeSha256": "ea9df5e4f0e11dabb4e811f0d9fe0828a613c3c668e6cb10ef3ad6a8ed06b5fd",
+  "runtimeId": "54ce5e69189dfb2d",
+  "runtimeSha256": "54ce5e69189dfb2d9c257e14fe0708e1a8bf512b37fb15848bb25fa8b4d6013e",
   "files": [
     {
       "path": ".nojekyll",
@@ -565,7 +565,7 @@
     {
       "path": "index.html",
       "bytes": 14330,
-      "sha256": "bf2e9f1e905c225440b872f8eb221e747a2c62123f4a8eeeff876e622bf0bb1d"
+      "sha256": "4f64d5b0eb46c464bd504f605018fc29d88cf47f561d0b3a1f8e7f4971005d74"
     },
     {
       "path": "manifest.webmanifest",
@@ -574,8 +574,8 @@
     },
     {
       "path": "save-worker.js",
-      "bytes": 3249673,
-      "sha256": "75954349c5116886b236d4fc4099e69725a1063aa2f3d613d6e4c6f4e1b50722"
+      "bytes": 3249721,
+      "sha256": "6688bdb173529de351e36511b755a2e5e42433f39bbef4537f456029d3231630"
     },
     {
       "path": "src/chunks/chunk-RBTIQVZX.js",
@@ -588,9 +588,9 @@
       "sha256": "7db8c23d3d071f10af27f69428fb3f40deb5eeb8a332946192a66dc1e22e73e4"
     },
     {
-      "path": "src/chunks/playable_browser-PR54OB75.js",
-      "bytes": 11017229,
-      "sha256": "351e5d0fa857317092912f4ca567d5718e1f5d6cfe15e2584b9739fa17529308"
+      "path": "src/chunks/playable_browser-MPNVNCDU.js",
+      "bytes": 11017349,
+      "sha256": "67ca80a561df8a5a4cb1ea75d35743e3fc450ebe171a05d103da55ac28df45f8"
     },
     {
       "path": "src/chunks/world_browser-AK5QGGUX.js",
@@ -610,7 +610,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "23a4b355aa4be64cd62761e497b37434cbb8efc797b093377b73f6f6fdd4a1bb"
+      "sha256": "e19ca701f3224d6d15e5412f23cb1e7cd59d3262704a7ac271d9834bcdec8345"
     },
     {
       "path": "world-maker-worker.js",

@@ -139026,6 +139026,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       } else if (target) {
         const functional = state2.d9World?.functionalSitesById?.[command.payload.siteId];
         if (command.payload.direction === "enter" && isGeneratedInteriorFamily(functional) && !functional.discoveredByPlayerIds.includes(command.playerId)) {
+          functional.discoveredByPlayerIds = functional.discoveredByPlayerIds.filter((pid) => state2.playersById[pid]);
           functional.discoveredByPlayerIds.push(command.playerId);
           functional.discoveredByPlayerIds.sort();
         }
