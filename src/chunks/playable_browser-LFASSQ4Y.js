@@ -163147,7 +163147,8 @@ function createFerryMenu({ document: doc, adapter, clearInput, restoreFocus, rep
 
 // src/client/settings_page_v1.js
 var SETTINGS_V1_KEY = "saq-world-settings-v1";
-var DEFAULTS = Object.freeze({ music: 70, effects: 85, mute: false, leftHanded: false, damageNumbers: true });
+var SHADOW_SETTINGS_V1 = Object.freeze(["full", "simple", "off"]);
+var DEFAULTS = Object.freeze({ music: 70, effects: 85, mute: false, leftHanded: false, damageNumbers: true, shadows: "full" });
 function readSettingsV1(storage) {
   let saved = null;
   try {
@@ -163158,6 +163159,7 @@ function readSettingsV1(storage) {
   if (saved && typeof saved === "object") {
     for (const k of Object.keys(DEFAULTS)) if (typeof saved[k] === typeof DEFAULTS[k]) s[k] = saved[k];
   }
+  if (!SHADOW_SETTINGS_V1.includes(s.shadows)) s.shadows = DEFAULTS.shadows;
   s.music = Math.max(0, Math.min(100, Math.round(s.music)));
   s.effects = Math.max(0, Math.min(100, Math.round(s.effects)));
   return s;
@@ -163205,6 +163207,7 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   const apply3 = () => {
     html.dataset.hand = s.leftHanded ? "left" : "right";
     html.dataset.damageNumbers = s.damageNumbers ? "on" : "off";
+    html.dataset.shadows = s.shadows;
     for (const f of listeners) f(s);
   };
   const save = () => {
@@ -163297,6 +163300,13 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   joystick.addEventListener("click", () => pickMode("joystick"));
   cursor.addEventListener("click", () => pickMode("cursor"));
   const left = toggle("Left-handed", "leftHanded"), numbers = toggle("Damage numbers", "damageNumbers");
+  const shadowSeg = el3("div", "st-seg"), shadowButtons = SHADOW_SETTINGS_V1.map((v) => {
+    const b = el3("button", null, v === "full" ? "Full" : v === "simple" ? "Simple" : "Off");
+    b.type = "button";
+    b.addEventListener("click", () => set("shadows", v));
+    shadowSeg.append(b);
+    return [b, v];
+  });
   const byId = (id2) => doc.getElementById(id2);
   const saveNote = el3("small", null, "Your game saves on its own too");
   const saveBtn = btn("Save now", "", async () => {
@@ -163346,11 +163356,12 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   root6.append(
     section("Sound", line39(name("Music", null, true), music.r, music.v), line39(name("Sound effects", null, true), effects2.r, effects2.v), line39(name("Mute all"), mute)),
     section("Controls", line39(name("Movement"), seg7), line39(name("Left-handed", "Attack, skills and Potion swap to the left"), left)),
-    section("Screen", line39(name("Damage numbers", "Numbers that pop off hits"), numbers)),
+    section("Screen", line39(name("Damage numbers", "Numbers that pop off hits"), numbers), line39(name("Shadows", "Simple or Off can help a slow phone"), shadowSeg)),
     gameSec
   );
   function paint3() {
     for (const [b, k] of [[mute, "mute"], [left, "leftHanded"], [numbers, "damageNumbers"]]) b.setAttribute("aria-checked", String(Boolean(s[k])));
+    for (const [b, v] of shadowButtons) b.setAttribute("aria-pressed", String(s.shadows === v));
     for (const [o, k] of [[music, "music"], [effects2, "effects"]]) {
       o.r.value = String(s[k]);
       o.r.style.setProperty("--v", s[k] + "%");
@@ -168651,7 +168662,7 @@ function createDayNightLightingV1({ review = null } = {}) {
 
 // src/client/silhouette_shadows_v1.js
 var SILHOUETTE_SHADOWS_VERSION = "silhouette-shadows-v1";
-var SILHOUETTE_LIMITS = Object.freeze({ layerScale: 0.5, silhouetteMaxSide: 160, recordedCasters: 768, actorCasters: 40, actorRefreshPerFrame: 8, actorRefreshFrames: 3, actorStaleFrames: 120, actorScale: 0.5, maximumFootLift: 18, verticalScale: 0.6, actorSweep: [1 / 3, 2 / 3, 1], maximumLength: 160, referenceHeight: 96, indoorDepth: 0.24, indoorAlpha: 0.2, outdoorGain: 1.9, outdoorMaximumAlpha: 0.3 });
+var SILHOUETTE_LIMITS = Object.freeze({ layerScale: 0.5, silhouetteMaxSide: 160, recordedCasters: 768, actorCasters: 40, actorRefreshPerFrame: 8, actorRefreshFrames: 6, staticMargin: 48, staticSunStep: 0.75, staticMaximumFrames: 600, actorStaleFrames: 120, actorScale: 0.5, maximumFootLift: 18, verticalScale: 0.6, actorSweep: [1 / 3, 2 / 3, 1], maximumLength: 160, referenceHeight: 96, indoorDepth: 0.24, indoorAlpha: 0.2, outdoorGain: 1.9, outdoorMaximumAlpha: 0.3 });
 var SHADOW3 = "#16202d";
 var noop = () => {
 };
@@ -168750,8 +168761,8 @@ function shadowProjectionV1(vector2, baseY, height, limits = SILHOUETTE_LIMITS) 
   return [1, 0, -kx, -ky, kx * baseY, baseY * (1 + ky)];
 }
 function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
-  const silhouettes = /* @__PURE__ */ new WeakMap(), recorded = /* @__PURE__ */ new Map(), actors2 = /* @__PURE__ */ new Map(), layers = /* @__PURE__ */ new WeakMap(), feet = /* @__PURE__ */ new Map();
-  let frameNo = 0, maxGroundGap = 0, stats3 = { scenery: 0, procedural: 0, polygons: 0, actors: 0, actorRenders: 0, recordings: 0 };
+  const silhouettes = /* @__PURE__ */ new WeakMap(), recorded = /* @__PURE__ */ new Map(), actors2 = /* @__PURE__ */ new Map(), layers = /* @__PURE__ */ new WeakMap(), statics = /* @__PURE__ */ new WeakMap(), feet = /* @__PURE__ */ new Map();
+  let frameNo = 0, maxGroundGap = 0, staticRedraws = 0, staticReuses = 0, stats3 = { scenery: 0, procedural: 0, polygons: 0, actors: 0, actorRenders: 0, recordings: 0 };
   function silhouetteFor(image) {
     let s = silhouettes.get(image);
     if (s) return s;
@@ -168835,6 +168846,8 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
   function draw(ctx, { frame: frame3, scenery = [], polygons = () => [], actors: actorCasters = [] }) {
     frameNo++;
     stats3 = { scenery: 0, procedural: 0, polygons: 0, actors: 0, actorRenders: 0, recordings: stats3.recordings };
+    const mode = doc?.documentElement?.dataset?.shadows;
+    if (mode === "off") return true;
     const target = ctx.canvas;
     if (typeof ctx.getTransform !== "function" || !target?.ownerDocument?.createElement || !(target.width > 0 && target.height > 0) || !frame3?.enabled) return false;
     const indoor = frame3.profile === "interior", alpha = indoor ? limits.indoorAlpha : Math.min(limits.outdoorMaximumAlpha, frame3.shadowAlpha * limits.outdoorGain);
@@ -168855,7 +168868,8 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
     lc.globalCompositeOperation = "source-over";
     lc.globalAlpha = 1;
     lc.clearRect(0, 0, w, h);
-    const covered = /* @__PURE__ */ new Set(), tile2 = 32;
+    const covered = /* @__PURE__ */ new Set(), tile2 = 32, sprites7 = [];
+    let sig = indoor ? 1 : 2;
     if (!indoor) for (const caster2 of scenery) {
       const r = recordingFor(caster2);
       if (!r.handled || r.procedural) {
@@ -168863,39 +168877,83 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
         continue;
       }
       covered.add(Math.floor(caster2.x / tile2) + "," + Math.floor(caster2.y / tile2));
-      const p = shadowProjectionV1(vector2, groundOf(r), r.groundHeight, limits);
-      for (const d of r.draws) {
-        const s = silhouetteFor(d.image);
-        lc.setTransform(...multiply(multiply(world, p), d.m));
-        lc.globalAlpha = Math.min(1, d.alpha);
-        lc.drawImage(s.canvas, d.sx * s.fx, d.sy * s.fy, d.sw * s.fx, d.sh * s.fy, d.dx, d.dy, d.dw, d.dh);
-      }
+      sprites7.push(r);
+      sig = Math.imul(sig, 33) + Math.round(caster2.x * 7 + caster2.y * 13) + r.draws.length | 0;
       stats3.scenery++;
     }
-    lc.globalAlpha = 1;
+    let boxes2 = [];
     if (!indoor) {
-      const boxes2 = polygons((c) => {
+      boxes2 = polygons((c) => {
         if (!NATURAL_CASTERS.includes(c.kind)) return false;
         const x0 = Math.floor(c.x / tile2) - 1, y0 = Math.floor(c.y / tile2) - 1, x1 = Math.floor((c.x + c.w) / tile2) + 1, y1 = Math.floor((c.y + c.h) / tile2) + 1;
         for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (covered.has(x + "," + y)) return true;
         return false;
       });
-      lc.setTransform(...world);
-      lc.fillStyle = SHADOW3;
-      lc.beginPath();
-      for (const c of boxes2) {
-        const poly29 = shadowPolygonV1(c, flatFrame);
-        if (poly29.length < 3) continue;
-        lc.moveTo(poly29[0].x, poly29[0].y);
-        for (let i = 1; i < poly29.length; i++) lc.lineTo(poly29[i].x, poly29[i].y);
-        lc.closePath();
-        stats3.polygons++;
+      for (const c of boxes2) sig = Math.imul(sig, 33) + Math.round(c.x * 7 + c.y * 13 + c.w * 3 + c.h) | 0;
+      stats3.polygons = boxes2.length;
+    }
+    if (sprites7.length || boxes2.length) {
+      const M4 = limits.staticMargin, cw = w + 2 * M4, ch = h + 2 * M4;
+      let st = statics.get(target);
+      if (!st) {
+        st = { canvas: doc.createElement("canvas"), sig: null };
+        statics.set(target, st);
       }
-      lc.fill();
+      const keep8 = st.sig === sig && st.canvas.width === cw && st.canvas.height === ch && st.a === world[0] && st.b === world[1] && st.c === world[2] && st.d === world[3] && Math.abs(world[4] - st.e) <= M4 - 1 && Math.abs(world[5] - st.f) <= M4 - 1 && Math.abs(vector2.x - st.vx) + Math.abs(vector2.y - st.vy) <= limits.staticSunStep && frameNo - st.at < limits.staticMaximumFrames;
+      if (!keep8) {
+        if (st.canvas.width !== cw || st.canvas.height !== ch) {
+          st.canvas.width = cw;
+          st.canvas.height = ch;
+        }
+        const sc2 = st.canvas.getContext("2d"), base3 = [world[0], world[1], world[2], world[3], world[4] + M4, world[5] + M4];
+        sc2.setTransform(1, 0, 0, 1, 0, 0);
+        sc2.globalCompositeOperation = "source-over";
+        sc2.globalAlpha = 1;
+        sc2.clearRect(0, 0, cw, ch);
+        for (const r of sprites7) {
+          const p = shadowProjectionV1(vector2, groundOf(r), r.groundHeight, limits);
+          for (const d of r.draws) {
+            const s = silhouetteFor(d.image);
+            sc2.setTransform(...multiply(multiply(base3, p), d.m));
+            sc2.globalAlpha = Math.min(1, d.alpha);
+            sc2.drawImage(s.canvas, d.sx * s.fx, d.sy * s.fy, d.sw * s.fx, d.sh * s.fy, d.dx, d.dy, d.dw, d.dh);
+          }
+        }
+        sc2.globalAlpha = 1;
+        if (boxes2.length) {
+          sc2.setTransform(...base3);
+          sc2.fillStyle = SHADOW3;
+          sc2.beginPath();
+          for (const c of boxes2) {
+            const poly29 = shadowPolygonV1(c, flatFrame);
+            if (poly29.length < 3) continue;
+            sc2.moveTo(poly29[0].x, poly29[0].y);
+            for (let i = 1; i < poly29.length; i++) sc2.lineTo(poly29[i].x, poly29[i].y);
+            sc2.closePath();
+          }
+          sc2.fill();
+        }
+        sc2.setTransform(1, 0, 0, 1, 0, 0);
+        Object.assign(st, { sig, a: world[0], b: world[1], c: world[2], d: world[3], e: world[4], f: world[5], vx: vector2.x, vy: vector2.y, at: frameNo });
+        staticRedraws++;
+      } else staticReuses++;
+      lc.setTransform(1, 0, 0, 1, 0, 0);
+      lc.globalAlpha = 1;
+      lc.drawImage(st.canvas, world[4] - st.e - M4, world[5] - st.f - M4);
     }
     let budget = limits.actorRefreshPerFrame;
     for (const caster2 of actorCasters.slice(0, limits.actorCasters)) {
       const { a, fresh } = actorCanvas(caster2), phase2 = [...caster2.key].reduce((n, ch) => n + ch.charCodeAt(0), 0);
+      if (mode === "simple") {
+        const r = Math.max(8, caster2.radius ?? 10), foot3 = caster2.anchorY + (feet.get(caster2.kind) ?? 0);
+        lc.setTransform(...world);
+        lc.fillStyle = SHADOW3;
+        lc.beginPath();
+        lc.ellipse(caster2.anchorX + vector2.x * 0.06, foot3 + 2 + vector2.y * 0.04, r * 1.15, r * 0.5, 0, 0, Math.PI * 2);
+        lc.fill();
+        stats3.actors++;
+        continue;
+      }
       if (fresh || a.rendered === -Infinity) renderActor(a, caster2);
       else if (budget > 0 && (frameNo + phase2) % limits.actorRefreshFrames === 0) {
         renderActor(a, caster2);
@@ -168922,8 +168980,9 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
   function clear2() {
     recorded.clear();
     actors2.clear();
+    staticRedraws = staticReuses = 0;
   }
-  return Object.freeze({ draw, clear: clear2, resources: () => ({ silhouetteShadows: { version: SILHOUETTE_SHADOWS_VERSION, ...stats3, recordedCasters: recorded.size, actorCanvases: actors2.size, maxGroundGap: Math.round(maxGroundGap * 10) / 10, feet: Object.fromEntries([...feet].map(([k, v]) => [k, Math.round(v * 10) / 10])), limits } }) });
+  return Object.freeze({ draw, clear: clear2, resources: () => ({ silhouetteShadows: { version: SILHOUETTE_SHADOWS_VERSION, ...stats3, staticRedraws, staticReuses, recordedCasters: recorded.size, actorCanvases: actors2.size, maxGroundGap: Math.round(maxGroundGap * 10) / 10, feet: Object.fromEntries([...feet].map(([k, v]) => [k, Math.round(v * 10) / 10])), limits } }) });
 }
 
 // src/client/hero_level_up_v3.js
