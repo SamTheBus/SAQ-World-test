@@ -35678,7 +35678,7 @@ function createWorldWorkerTaskD9({ store, sha256, plannedAssets = null }) {
     return plannedAssets.generate(request);
   } });
   return async function run(kind2, request) {
-    if (kind2 === "world.commit" && typeof request?.stateText === "string" && !Object.hasOwn(request, "state")) {
+    if (["world.commit", "world.prepareResidency", "world.prepareEncounters", "world.prepareDeadlines", "world.prepareGround"].includes(kind2) && typeof request?.stateText === "string" && !Object.hasOwn(request, "state")) {
       const { stateText, ...rest } = request;
       request = { ...rest, state: JSON.parse(stateText) };
     }

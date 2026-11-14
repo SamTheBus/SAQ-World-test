@@ -129065,6 +129065,30 @@ function captureOwnedWorldStreamStateV1(state2, kind) {
     ...state2.hostileCombat ? { hostileCombat: structuredClone(state2.hostileCombat) } : {}
   };
 }
+function captureOwnedWorldStreamTextV1(state2, kind) {
+  requireContract(KINDS6.has(kind) && state2.d9World, "World stream capture kind");
+  const spacesByInstanceId = {};
+  for (const [id2, space] of Object.entries(state2.spacesByInstanceId)) {
+    const collision = space.collision, strip = kind !== "ground" && id2 === state2.overworldInstanceId && collision?.origin;
+    spacesByInstanceId[id2] = strip ? { ...space, collision: { ...collision, origin: { width: 0, height: 0, tiles: [] } } } : space;
+  }
+  return JSON.stringify({
+    streamCapture: { version: WORLD_STREAM_CAPTURE_D9, kind },
+    campaign: { campaignId: state2.campaign.campaignId, seed: state2.campaign.seed },
+    session: state2.session,
+    tick: state2.tick,
+    overworldInstanceId: state2.overworldInstanceId,
+    d9World: state2.d9World,
+    playersById: state2.playersById,
+    entitiesById: state2.entitiesById,
+    groupsById: state2.groupsById,
+    encounterEconomy: state2.encounterEconomy,
+    spacesByInstanceId,
+    subweaponCombat: state2.subweaponCombat,
+    ...state2.eliteCombat ? { eliteCombat: state2.eliteCombat } : {},
+    ...state2.hostileCombat ? { hostileCombat: state2.hostileCombat } : {}
+  });
+}
 
 // src/simulation/hostile_projectiles_v1.js
 var GLOBAL_LIMIT = 128;
@@ -139403,6 +139427,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     version: () => version,
     events: () => events,
     captureStreamState: (kind) => captureOwnedWorldStreamStateV1(state2, kind),
+    captureStreamTextV1: (kind) => captureOwnedWorldStreamTextV1(state2, kind),
     captureForDurability: ({ saveRevision, checkpointId }) => {
       safeInteger(saveRevision, 0);
       validateId("checkpointId", checkpointId);
@@ -210717,6 +210742,7 @@ function createPagedWorldAuthorityD9({ initialState, publication, task, measure:
     },
     readState: () => authority.readState(),
     captureStreamState: (kind) => measure2("streamCapture", () => authority.captureStreamState(kind)),
+    captureStreamTextV1: (kind) => measure2("streamCapture", () => authority.captureStreamTextV1(kind)),
     readGateway: () => authority.readGateway(),
     withAuthority: (fn) => fn(authority),
     withReadyAuthority: (fn) => {
@@ -210859,6 +210885,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requ
     return true;
   };
   const capture = (kind) => authority.captureStreamState ? authority.captureStreamState(kind) : measure2("streamCapture", () => borrow((s) => captureWorldStreamStateD9(s, kind)));
+  const captured = (kind) => authority.captureStreamTextV1 ? { stateText: authority.captureStreamTextV1(kind) } : { state: capture(kind) };
   function view3() {
     return borrow((s) => {
       const w = s.d9World, origin = { originWidthChunks: w.origin.width / D9_PROFILE.chunkWidth, originHeightChunks: w.origin.height / D9_PROFILE.chunkHeight, egress: copyWire(w.origin.egress) }, players = Object.values(s.playersById).map((p) => ({ playerId: p.playerId, actor: s.entitiesById[p.entityId] })).flatMap((p) => {
@@ -210882,7 +210909,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requ
           return a.alive && a.residency.spaceInstanceId === s.overworldInstanceId && Math.hypot(a.position.x - q2.x, a.position.y - q2.y) <= D9_PROFILE.prepareRadius;
         });
       }));
-      const encounterKey = w.runtime.revision + "/" + players.filter((p) => s.playersById[p.playerId]).map((p) => p.playerId + ":" + p.position.chunkX + "," + p.position.chunkY + "," + Math.floor(p.position.localX / 64) + "," + Math.floor(p.position.localY / 64) + "," + s.playersById[p.playerId].inventory.revision).join("|");
+      const encounterKey = w.runtime.revision + "/" + players.filter((p) => s.playersById[p.playerId]).map((p) => p.playerId + ":" + p.position.chunkX + "," + p.position.chunkY + "," + Math.floor(p.position.localX / 128) + "," + Math.floor(p.position.localY / 128) + "," + s.playersById[p.playerId].inventory.revision).join("|");
       const ground = Boolean(w.groundIndex) || Object.values(s.playersById).some((p) => Object.keys(p.inventory.renewal.groundBySourceId).length), groundKey = w.groundIndex + "/" + Object.values(s.playersById).map((p) => {
         const a = s.entitiesById[p.entityId];
         return p.playerId + "/" + a.residency.spaceInstanceId + "/" + Math.floor(a.position.x / 128) + "," + Math.floor(a.position.y / 128) + "/" + p.inventory.revision;
@@ -210953,7 +210980,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requ
       encounterPendingSinceTick = v.tick;
     }
     encounterOffers++;
-    const result = await worker.prepareEncounters({ state: capture("encounters") });
+    const result = await worker.prepareEncounters(captured("encounters"));
     if (closed2) return false;
     try {
       authority.withReadyAuthority((a) => {
@@ -211087,7 +211114,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requ
         if (pageBuffer.resources().dirtyPages > D9_RUNTIME_POLICY.flushPages) return false;
       }
       if (!urgentWanted && v.deadlines && v.tick - lastDeadlineTick >= 60 && worker.prepareDeadlines) {
-        const stagedPages = pageBuffer.capture(), result = await worker.prepareDeadlines({ state: capture("deadlines"), stagedPages });
+        const stagedPages = pageBuffer.capture(), result = await worker.prepareDeadlines({ ...captured("deadlines"), stagedPages });
         if (closed2) return false;
         const installPages = pageBuffer.prepareStageDelta(result.pages, stagedPages);
         try {
@@ -211136,7 +211163,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requ
           progressDetail = "eviction-requires-durable-cut";
           return false;
         }
-        const snapshot = capture("residency"), stagedPages = pageBuffer.capture(), result = await worker.prepareResidency({ state: snapshot, release, admit, stagedPages });
+        const stagedPages = pageBuffer.capture(), result = await worker.prepareResidency({ ...captured("residency"), release, admit, stagedPages });
         if (closed2) return false;
         const current = observedView();
         if (release.some((id2) => [...current.resident].some(([key4, c]) => c.id === id2 && (current.wanted.has(key4) || current.pinned.has(key4)))) || admit.some((c) => !current.wanted.has(chunkAddressKey(c.chunkX, c.chunkY)))) {
@@ -211173,7 +211200,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requ
         }
         record2("world.residencyApplied", { admitted: admit.length, released: release.length });
       } else if (v.ground && v.groundKey !== lastGroundKey && worker.prepareGround && pageBuffer.resources().dirtyPages <= D9_RUNTIME_POLICY.flushPages) {
-        const stagedPages = pageBuffer.capture(), result = await worker.prepareGround({ state: capture("ground"), stagedPages });
+        const stagedPages = pageBuffer.capture(), result = await worker.prepareGround({ ...captured("ground"), stagedPages });
         if (closed2) return false;
         const installPages = pageBuffer.prepareStageDelta(result.pages, stagedPages);
         try {
@@ -211269,7 +211296,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requ
   }
   async function warmGround() {
     if (!worker.prepareGround) return;
-    const stagedPages = pageBuffer.capture(), result = await worker.prepareGround({ state: capture("ground"), stagedPages }), install2 = pageBuffer.prepareStageDelta(result.pages, stagedPages);
+    const stagedPages = pageBuffer.capture(), result = await worker.prepareGround({ ...captured("ground"), stagedPages }), install2 = pageBuffer.prepareStageDelta(result.pages, stagedPages);
     authority.withReadyAuthority((a) => {
       a.withAuthorityState((s) => {
         applyWorldTransferPatchD9(s, result.patch);
@@ -211287,7 +211314,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requ
       if (worker.prepareNavigation && view3().navigation && pageBuffer.resources().dirtyPages <= D9_RUNTIME_POLICY.flushPages && !await syncNavigation()) return false;
       const flushFirst = pageBuffer.resources().dirtyPages > D9_RUNTIME_POLICY.flushPages && borrow((s) => Object.values(s.playersById).every((p) => s.d9World.paging.indexedRevisions[p.playerId] === p.inventory.revision));
       if (flushFirst) return true;
-      const stagedPages = pageBuffer.capture(), result = await worker.prepareResidency({ state: capture("residency"), stagedPages }), installPages = pageBuffer.prepareStageDelta(result.pages, stagedPages);
+      const stagedPages = pageBuffer.capture(), result = await worker.prepareResidency({ ...captured("residency"), stagedPages }), installPages = pageBuffer.prepareStageDelta(result.pages, stagedPages);
       try {
         authority.withReadyAuthority((a) => {
           a.withAuthorityState((s) => {
