@@ -215574,7 +215574,7 @@ function unbase64url(text3) {
 var LINK_BACKLOG_BYTES = 64 * 1024;
 var COOP_ICE_SERVERS = Object.freeze([{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun.cloudflare.com:3478" }]);
 var CHUNK = 15e3;
-var DIRECT_WAIT_MS = 1e4;
+var DIRECT_WAIT_MS = 25e3;
 var GATHER_WAIT_MS = 3e3;
 function createLink(kind, sendText, closeTransport, busy = () => false) {
   const onMessage = /* @__PURE__ */ new Set(), onClose = /* @__PURE__ */ new Set(), onQuiet = /* @__PURE__ */ new Set(), parts = /* @__PURE__ */ new Map();
@@ -215905,7 +215905,7 @@ async function joinRoomV1({ server, code: code2, WebSocket = globalThis.WebSocke
       reject(Error(e.reason || "The join server closed the room"));
       relay?.close("join server closed");
     };
-  }), 3e4, "Could not reach the host. Check the code.");
+  }), 5e4, "Could not reach the host. Check the code.");
 }
 function withTimeout(promise, ms, message) {
   let t;
@@ -217511,8 +217511,16 @@ async function startWorldClient(environment) {
       session.away?.(hidden);
       writeCoopIntentV1(environment, hidden ? comeBack : null);
     });
+    const linkWords = () => {
+      try {
+        const r = session.resources(), ping = Math.round(r.smoothing?.rtt ?? 0);
+        return r.link === "relay" ? ` \xB7 relayed \xB7 ${ping} ms` : ping >= 120 ? ` \xB7 ${ping} ms` : "";
+      } catch {
+        return "";
+      }
+    };
     environment.setInterval(() => {
-      if (!coopEndReason) coopBar.say(session.quietMs() > 3e3 && !environment.document.hidden ? `Waiting for ${hostName}\u2026` : inWorld);
+      if (!coopEndReason) coopBar.say(session.quietMs() > 3e3 && !environment.document.hidden ? `Waiting for ${hostName}\u2026` : inWorld + linkWords());
     }, 1e3);
     coopEnded = ({ reason, lost, moved }) => {
       try {
