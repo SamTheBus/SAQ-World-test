@@ -165443,6 +165443,16 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   campName.append(campNote);
   const campActs = el3("div", "st-acts");
   campActs.append(newBtn, resetBtn);
+  const updateNote = el3("small", null, "A new version is ready");
+  const updateName = name("Update");
+  updateName.append(updateNote);
+  const updateBtn = btn("Update", "", () => {
+    const b = byId("world-update-now");
+    if (!b) return;
+    updateBtn.disabled = true;
+    updateNote.textContent = "Saving, then updating\u2026";
+    b.click();
+  }), updateLine = line39(updateName, updateBtn);
   const perfNote = el3("small", null, "");
   const perfName = name("Performance sample");
   perfName.append(perfNote);
@@ -165453,7 +165463,7 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   const perfActs = el3("div", "st-acts");
   perfActs.append(perfToggle, perfDownload);
   const perfLine = line39(perfName, perfActs);
-  const gameSec = section("Game", line39(saveName, saveBtn), line39(campName, campActs), perfLine);
+  const gameSec = section("Game", updateLine, line39(saveName, saveBtn), line39(campName, campActs), perfLine);
   root6.append(
     section("Sound", line39(name("Music", null, true), music.r, music.v), line39(name("Sound effects", null, true), effects2.r, effects2.v), line39(name("Mute all"), mute)),
     section("Controls", line39(name("Movement"), seg7), line39(name("Left-handed", "Attack, skills and Potion swap to the left"), left)),
@@ -165479,6 +165489,7 @@ function createSettingsPageV1({ document: doc, environment: env }) {
       perfToggle.textContent = rec ? "Stop" : "Start";
       perfNote.textContent = rec ? "Recording now" : "Paused";
     }
+    updateLine.hidden = !byId("world-update-now");
     saveBtn.hidden = !byId("world-save-campaign");
     newBtn.hidden = !byId("start-new-campaign");
     resetBtn.hidden = !byId("reset-local-world-data");
@@ -213616,6 +213627,7 @@ function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstC
         const release = releaseOfHtmlV1(await response.text());
         if (release && release !== current) {
           found = release;
+          offer(release);
           show(release);
         }
       }
@@ -213624,6 +213636,32 @@ function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstC
       checking = false;
     }
     return found;
+  }
+  let updating = false, trigger = null;
+  async function update(release, note2 = () => {
+  }) {
+    if (updating) return;
+    updating = true;
+    note2("Saving\u2026");
+    try {
+      await Promise.race([Promise.resolve(save?.()), new Promise((resolve) => environment.setTimeout(resolve, 4e3))]);
+    } catch {
+    }
+    note2("Updating\u2026");
+    const url = new URL(environment.location.href);
+    url.searchParams.set("build", release.replace(/^.*-/, ""));
+    environment.location.replace(url.href);
+  }
+  function offer(release) {
+    if (trigger) return;
+    trigger = doc.createElement("button");
+    trigger.type = "button";
+    trigger.id = "world-update-now";
+    trigger.hidden = true;
+    trigger.addEventListener("click", () => update(release, (text3) => {
+      trigger.dataset.note = text3;
+    }));
+    doc.body.append(trigger);
   }
   function show(release) {
     if (banner8) return;
@@ -213651,19 +213689,13 @@ function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstC
       banner8 = null;
       dismissedAt = now3();
     });
-    go.addEventListener("click", async () => {
+    go.addEventListener("click", () => {
       if (go.disabled) return;
       go.disabled = true;
       close.disabled = true;
-      sub.textContent = "Saving\u2026";
-      try {
-        await Promise.race([Promise.resolve(save?.()), new Promise((resolve) => environment.setTimeout(resolve, 4e3))]);
-      } catch {
-      }
-      sub.textContent = "Updating\u2026";
-      const url = new URL(environment.location.href);
-      url.searchParams.set("build", release.replace(/^.*-/, ""));
-      environment.location.replace(url.href);
+      update(release, (text3) => {
+        sub.textContent = text3;
+      });
     });
     doc.body.append(banner8);
   }
@@ -213685,6 +213717,7 @@ function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstC
     doc.removeEventListener("visibilitychange", onVisible);
     environment.removeEventListener("pageshow", onVisible);
     banner8?.remove();
+    trigger?.remove();
   } });
 }
 
