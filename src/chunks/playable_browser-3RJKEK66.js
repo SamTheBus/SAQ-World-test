@@ -213366,6 +213366,9 @@ var CORRECT_MS = 220;
 var BLOCKED_MS = 60;
 var TICK_MS3 = 1e3 / 60;
 var KEEP_FRAMES = 12;
+var HOLD_FRAMES = 45;
+var OFFSET_KEEP = 90;
+var CATCH_UP_SNAP_MS = 1e3;
 var DELAY_MIN_MS = 40;
 var DELAY_MAX_MS = 250;
 var PACE_MAX_MS = 120;
@@ -213373,17 +213376,29 @@ var BASE_STEPS = SHIELD_SWORD_PRIMARY.steps.map((s) => ({ startup: s.startup, ac
 var CONTINUE_TICKS = SHIELD_SWORD_PRIMARY.continuationTicks;
 function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
   let frames = [], current = null, arrivedAt = 0, gap2 = 50, cache10 = null, cacheAt = -1, spacing = 33, jitter = 8, delay = 60, space = null;
-  let pace = TICK_MS3, newest = null, gaps = [];
+  let pace = TICK_MS3, newest = null, gaps = [], shownAt = null, shownT = 0;
+  let turns = [];
   let intent = { x: 0, y: 0 }, intentAt = 0, releasedAt = null, hold = null, speed = 0, own = null, ownAt = -1, ownId = null, lastOwn = null, err = { x: 0, y: 0 }, jump3 = true, mode = "";
   let vel = null;
-  let tickOffset = null;
+  let tickOffset = null, offsets = [];
   let learned = {}, held = false, queued2 = false, tap = null, guess = null, lastSwing = null, skillGuess = null;
   let pressAim = null, contactUntil = -Infinity, contactKey = 0;
   const frameAge = (model, t) => tickOffset === null || !newest || model?.tick !== newest.tick ? t - arrivedAt : Math.max(0, t - (newest.at + tickOffset));
   const leadTick = (t) => tickOffset === null || !newest ? null : newest.tick + (t - tickOffset + rtt() - newest.at) / pace;
   function bracket(t) {
-    if (frames.length < 2 || tickOffset === null) return null;
-    const r = t - tickOffset - delay, last = frames[frames.length - 1];
+    if (frames.length < 2 || tickOffset === null) {
+      shownAt = null;
+      return null;
+    }
+    const want = t - tickOffset - delay, last = frames[frames.length - 1];
+    if (shownAt === null || Math.abs(want - shownAt) > CATCH_UP_SNAP_MS) shownAt = want;
+    else {
+      const dt = Math.max(0, t - shownT);
+      shownAt = want < shownAt ? shownAt + dt * 0.5 : Math.min(want, shownAt + dt * 3);
+    }
+    shownT = t;
+    if (shownAt > last.at) shownAt = last.at;
+    const r = shownAt;
     if (r >= last.at) return null;
     let i = frames.length - 2;
     while (i > 0 && frames[i].at > r) i--;
@@ -213410,6 +213425,18 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
     }
     return p;
   }
+  function heldOver(from, to) {
+    let x = 0, y = 0;
+    for (let i = turns.length - 1, end = to; i >= 0 && end > from; i--) {
+      const s = turns[i], start = Math.max(from, s.at);
+      if (end > start) {
+        x += s.x * speed * (end - start);
+        y += s.y * speed * (end - start);
+      }
+      end = Math.min(end, s.at);
+    }
+    return { x, y };
+  }
   function ownPosition(model, id2, e, t, br) {
     if (t === ownAt && id2 === ownId) return own;
     const dt = ownAt < 0 ? 16 : Math.max(0, Math.min(100, t - ownAt));
@@ -213426,7 +213453,8 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
     if (isHeld && speed > 0) {
       const k = 1 / Math.hypot(intent.x, intent.y), lead = Math.min(LEAD_MAX_MS, rtt() + frameAge(model, t));
       const settled = vel && t - intentAt > rtt() + 150 && t - vel.at < 300, dx = settled ? vel.x : intent.x * k * speed, dy = settled ? vel.y : intent.y * k * speed;
-      target = reach(model, e, e.position, { x: e.position.x + dx * lead, y: e.position.y + dy * lead });
+      const ahead = settled ? { x: dx * lead, y: dy * lead } : heldOver(t - lead, t);
+      target = reach(model, e, e.position, { x: e.position.x + ahead.x, y: e.position.y + ahead.y });
       if (own && Math.hypot(own.x - target.x, own.y - target.y) <= GLIDE_SNAP_PX) {
         if (mode !== "lead") mode = "lead";
         jump3 = false;
@@ -213546,6 +213574,9 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       }
       if (is && (!was || next.x !== intent.x || next.y !== intent.y)) intentAt = now3();
       intent = { x: next.x, y: next.y };
+      const n = Math.hypot(next.x, next.y);
+      turns.push({ at: now3(), x: is ? next.x / n : 0, y: is ? next.y / n : 0 });
+      while (turns.length > 1 && turns[1].at < now3() - 2 * LEAD_MAX_MS) turns.shift();
     },
     // The guest pressed or let go of Attack (combat.primaryIntent's payload).
     press(payload) {
@@ -213600,12 +213631,16 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       if (c && ["startup", "active", "recovery"].includes(c.phase) && c.phaseEndsTick > c.phaseStartedTick) (learned[c.comboStep] ??= {})[c.phase] = c.phaseEndsTick - c.phaseStartedTick;
       if (model && Number.isFinite(model.tick) && at8 !== null) {
         const o = t - at8;
-        if (tickOffset === null || Math.abs(o - tickOffset) > 400) {
+        if (tickOffset === null || o < tickOffset - 400) {
           tickOffset = o;
+          offsets = [o];
           frames = [];
         } else {
-          jitter = jitter * 0.9 + Math.abs(o - tickOffset) * 0.1;
-          tickOffset = tickOffset * 0.92 + o * 0.08;
+          offsets.push(o);
+          if (offsets.length > OFFSET_KEEP) offsets.shift();
+          const least = Math.min(...offsets);
+          jitter = jitter * 0.9 + Math.min(100, Math.max(0, o - tickOffset)) * 0.1;
+          tickOffset += (least - tickOffset) * (least < tickOffset ? 0.5 : 0.1);
         }
         const prev = frames[frames.length - 1];
         if (prev && model.tick > prev.tick && at8 > prev.at) {
@@ -213617,7 +213652,7 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
         }
         if (prev && (model.tick <= prev.tick || at8 <= prev.at)) frames.pop();
         frames.push({ tick: model.tick, at: at8, entities: after });
-        if (frames.length > KEEP_FRAMES) frames.shift();
+        if (frames.length > HOLD_FRAMES) frames.shift();
         newest = { tick: model.tick, at: at8 };
         const want = Math.max(DELAY_MIN_MS, Math.min(DELAY_MAX_MS, spacing + 2 * jitter + 8));
         delay += (want - delay) * (want > delay ? 0.3 : 0.04);
@@ -213694,11 +213729,16 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
   const ready = new Promise((resolve) => {
     firstModel = resolve;
   });
-  let rtt = 120;
-  const pings = [];
+  let rtt = 120, refused = 0, lastMove = null;
+  const pings = [], pingLog = [], stalls = [];
   const smooth30 = createGuestSmoothingV1(now3, { rtt: () => rtt, collides: guestCollidesV1 });
   const handle = (m) => {
     if (m.t === "m") {
+      const gapMs = now3() - lastFrameAt;
+      if (gapMs > 150 && decoder.frames() > 0) {
+        stalls.push({ at: now3(), ms: gapMs });
+        if (stalls.length > 200) stalls.shift();
+      }
       lastFrameAt = now3();
       try {
         const before = decoder.model()?.entitiesById ?? null;
@@ -213717,7 +213757,17 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
       }
       if (leaving) leaving();
     } else if (m.t === "ack") {
-      if (m.status === "failed") lastSequence = 0;
+      if (m.status === "failed") {
+        lastSequence = 0;
+        refused++;
+        if (lastMove && lastMove.id === m.id && !lastMove.again) {
+          lastMove.again = true;
+          const c = lastMove.command;
+          setTimeout2(() => {
+            if (!ended && lastMove?.command === c) clientPort.send(c);
+          }, 0);
+        }
+      }
       const w = waiting.get(m.id);
       if (w) {
         waiting.delete(m.id);
@@ -213729,6 +213779,8 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
       if (r >= 0 && r < 5e3) {
         pings.push(r);
         if (pings.length > 5) pings.shift();
+        pingLog.push(r);
+        if (pingLog.length > 60) pingLog.shift();
         const mid = [...pings].sort((a, b) => a - b)[pings.length >> 1];
         rtt = rtt * 0.5 + mid * 0.5;
       }
@@ -213771,12 +213823,15 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
     presentModel: (time3) => smooth30.present(decoder.model(), Number.isFinite(time3) ? time3 : void 0),
     send(command) {
       if (ended) return { status: "busy" };
-      const model = decoder.model(), base3 = model?.context?.nextClientSequence ?? 1, sequence = now3() - lastSentAt < 500 ? Math.max(base3, lastSequence + 1) : base3;
+      const model = decoder.model(), base3 = model?.context?.nextClientSequence ?? 1, sequence = now3() - lastSentAt < 500 + rtt + (now3() - lastFrameAt) ? Math.max(base3, lastSequence + 1) : base3;
       lastSequence = sequence;
       lastSentAt = now3();
       const c = { ...command, clientSequence: sequence }, id2 = nextId++;
-      if (c.kind === "movement.setIntent" && c.payload) smooth30.intent(c.payload);
-      else if (c.kind === "combat.primaryIntent" && c.payload) smooth30.press(c.payload);
+      if (c.kind === "movement.setIntent" && c.payload) {
+        smooth30.intent(c.payload);
+        if (lastMove?.command !== command) lastMove = { id: id2, command, again: false };
+        else lastMove.id = id2;
+      } else if (c.kind === "combat.primaryIntent" && c.payload) smooth30.press(c.payload);
       else if (c.kind === "combat.skill" && c.payload) smooth30.skill(c.payload);
       if (COOP_WAITED_COMMANDS.test(c.kind)) {
         const p = new Promise((resolve, reject) => waiting.set(id2, { resolve, reject }));
@@ -213789,7 +213844,19 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
     reconcile: () => ({ status: "committed" }),
     // The map is drawn from the world file alone, so the guest's own device charts it.
     cartographyWindow,
-    resources: () => ({ coopFrames: decoder.frames(), link: link.kind, smoothing: smooth30.inspect() })
+    resources: () => {
+      const t = now3(), recent = stalls.filter((s) => t - s.at < 6e4);
+      return {
+        coopFrames: decoder.frames(),
+        link: link.kind,
+        path: link.path ?? null,
+        smoothing: smooth30.inspect(),
+        // The last minute: waits between host frames (over 150 ms / over 400 ms / the longest), and the pings.
+        stalls: { over150: recent.length, over400: recent.filter((s) => s.ms > 400).length, longestMs: Math.round(Math.max(0, ...recent.map((s) => s.ms))) },
+        pings: pingLog.length ? { least: Math.round(Math.min(...pingLog)), most: Math.round(Math.max(...pingLog)), count: pingLog.length } : null,
+        refused
+      };
+    }
   });
   return Object.freeze({
     ready,
@@ -215683,6 +215750,21 @@ function channelLink(pc2, channel2) {
   }, () => channel2.bufferedAmount > LINK_BACKLOG_BYTES);
   channel2.onmessage = (e) => link.receive(e.data);
   channel2.onclose = () => link.close("direct channel closed");
+  const readPath = async () => {
+    if (link.closed) return;
+    try {
+      const p = await linkPathV1(pc2);
+      if (p) link.path = p;
+    } catch {
+    }
+  };
+  if (typeof pc2.getStats === "function") {
+    setTimeout(readPath, 1500);
+    const timer = setInterval(() => {
+      if (link.closed) clearInterval(timer);
+      else readPath();
+    }, 15e3);
+  }
   pc2.addEventListener("connectionstatechange", () => {
     const st = pc2.connectionState;
     if (st === "failed" || st === "closed") link.close("connection lost");
@@ -215690,6 +215772,18 @@ function channelLink(pc2, channel2) {
     else if (st === "connected") link.quiet(false);
   });
   return link;
+}
+async function linkPathV1(pc2) {
+  const stats3 = await pc2.getStats(), all = [];
+  stats3.forEach((r) => all.push(r));
+  const by = (id2) => all.find((r) => r.id === id2);
+  const transport = all.find((r) => r.type === "transport" && r.selectedCandidatePairId);
+  const pair = (transport && by(transport.selectedCandidatePairId)) ?? all.find((r) => r.type === "candidate-pair" && (r.selected || r.nominated && r.state === "succeeded"));
+  if (!pair) return null;
+  const local8 = by(pair.localCandidateId), remote = by(pair.remoteCandidateId);
+  if (!local8 && !remote) return null;
+  const relayed = local8?.candidateType === "relay" || remote?.candidateType === "relay";
+  return { relayed, protocol: String(local8?.candidateType === "relay" && local8.relayProtocol || local8?.protocol || remote?.protocol || "").toLowerCase(), local: local8?.candidateType ?? null, remote: remote?.candidateType ?? null };
 }
 var opened = (channel2) => new Promise((resolve, reject) => {
   if (channel2.readyState === "open") {
@@ -217548,7 +217642,8 @@ async function startWorldClient(environment) {
     const linkWords = () => {
       try {
         const r = session.resources(), ping = Math.round(r.smoothing?.rtt ?? 0);
-        return r.link === "relay" ? ` \xB7 relayed \xB7 ${ping} ms` : ping >= 120 ? ` \xB7 ${ping} ms` : "";
+        const p = r.path, way = p ? p.relayed ? ` \xB7 relay ${p.protocol || ""}`.trimEnd() : " \xB7 phone to phone" : "";
+        return r.link === "relay" ? ` \xB7 relayed \xB7 ${ping} ms` : ping >= 120 ? ` \xB7 ${ping} ms${way}` : "";
       } catch {
         return "";
       }
