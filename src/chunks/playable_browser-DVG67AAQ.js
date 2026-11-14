@@ -215750,6 +215750,18 @@ async function guestAnswerByCodeV1(offerCode, { RTCPeerConnection = globalThis.R
     close: () => pc2.close()
   };
 }
+async function roomIceServersV1(server, code2, { fetch = globalThis.fetch, fallback = COOP_ICE_SERVERS } = {}) {
+  try {
+    const r = await withTimeout(fetch(server.replace(/\/$/, "") + "/rooms/" + String(code2).toUpperCase() + "/ice", { method: "POST" }), 4e3, "");
+    if (!r.ok) return fallback;
+    const list = (await r.json())?.iceServers;
+    if (!Array.isArray(list)) return fallback;
+    const clean = list.filter((s) => s && Array.isArray(s.urls) && s.urls.length && s.urls.every((u) => typeof u === "string" && /^(stun|turns?):/.test(u)));
+    return clean.length ? clean : fallback;
+  } catch {
+    return fallback;
+  }
+}
 var wsUrl = (server, path15) => server.replace(/^http/, "ws").replace(/\/$/, "") + path15;
 async function createRoomV1(server, { fetch = globalThis.fetch } = {}) {
   const r = await fetch(server.replace(/\/$/, "") + "/rooms", { method: "POST" });
@@ -215767,9 +215779,17 @@ function socket(url, WebSocket) {
   });
 }
 async function hostRoomV1({ server, code: code2, onGuest, onLeft = () => {
-}, WebSocket = globalThis.WebSocket, RTCPeerConnection = globalThis.RTCPeerConnection, iceServers = COOP_ICE_SERVERS, setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis) }) {
+}, WebSocket = globalThis.WebSocket, RTCPeerConnection = globalThis.RTCPeerConnection, iceServers = null, fetch = globalThis.fetch, setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis) }) {
   const guests = /* @__PURE__ */ new Map(), url = wsUrl(server, "/rooms/" + code2 + "/host");
   let ws = null, closed2 = false;
+  let ice = iceServers, iceAt = iceServers ? Infinity : -Infinity;
+  const iceNow = async () => {
+    if (Date.now() - iceAt > 36e5 || !ice) {
+      ice = await roomIceServersV1(server, code2, { fetch });
+      iceAt = Date.now();
+    }
+    return ice;
+  };
   const to = (id2, data) => {
     if (ws?.readyState === 1) ws.send(JSON.stringify({ type: "to", id: id2, data }));
   };
@@ -215781,7 +215801,7 @@ async function hostRoomV1({ server, code: code2, onGuest, onLeft = () => {
       return;
     }
     if (m.type === "guest") {
-      const pc2 = new RTCPeerConnection({ iceServers }), channel2 = pc2.createDataChannel("saq", { ordered: true }), g = { pc: pc2, relay: null, link: null };
+      const pc2 = new RTCPeerConnection({ iceServers: await iceNow() }), channel2 = pc2.createDataChannel("saq", { ordered: true }), g = { pc: pc2, relay: null, link: null };
       guests.set(m.id, g);
       pc2.onicecandidate = (x) => {
         if (x.candidate) to(m.id, { sig: { candidate: x.candidate.toJSON() } });
@@ -215856,7 +215876,8 @@ async function hostRoomV1({ server, code: code2, onGuest, onLeft = () => {
     }
   }, guests: () => guests.size };
 }
-async function joinRoomV1({ server, code: code2, WebSocket = globalThis.WebSocket, RTCPeerConnection = globalThis.RTCPeerConnection, iceServers = COOP_ICE_SERVERS }) {
+async function joinRoomV1({ server, code: code2, WebSocket = globalThis.WebSocket, RTCPeerConnection = globalThis.RTCPeerConnection, iceServers = null, fetch = globalThis.fetch }) {
+  iceServers ??= await roomIceServersV1(server, code2, { fetch });
   const ws = await socket(wsUrl(server, "/rooms/" + code2.toUpperCase() + "/guest"), WebSocket);
   const up2 = (data) => {
     if (ws.readyState === 1) ws.send(JSON.stringify({ type: "up", data }));
