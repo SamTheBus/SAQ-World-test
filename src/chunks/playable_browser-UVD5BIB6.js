@@ -1487,6 +1487,27 @@ function createActorMotionPresentationV1({ collisionProbe = null, now: now3 = ()
       if (discontinuity) snaps++;
     }
   }
+  function observeLight(tick, time3, read2) {
+    if (scope === null || !Number.isFinite(time3) || !Number.isFinite(tick) || time3 < lastCallAt || time3 - lastCallAt >= P.stallResetMs || tick < lastTick) return false;
+    lastCallAt = time3;
+    observations2++;
+    if (lastTick !== tick) {
+      lastAdvanceAt = time3;
+      stalled = false;
+    }
+    lastTick = tick;
+    for (const [id2, r] of records) {
+      const a = read2(id2);
+      if (!a || !Number.isFinite(a.x) || !Number.isFinite(a.y)) continue;
+      const sample2 = { tick, x: a.x, y: a.y };
+      if (r.current.tick === tick && same(r.current, sample2) && r.alive === a.alive) continue;
+      const dx = sample2.x - r.current.x, dy = sample2.y - r.current.y;
+      const discontinuity = r.alive !== a.alive || !a.alive || sample2.tick !== r.current.tick + 1 || Math.hypot(dx, dy) > P.maximumStepPixels;
+      records.set(id2, { before: discontinuity ? null : r.current, current: sample2, alive: a.alive, dx, dy });
+      if (discontinuity) snaps++;
+    }
+    return true;
+  }
   function safe(model, id2, actor, points2) {
     if (!collisionProbe || !points2 || points2.length > P.maximumProbePoints) return false;
     const at8 = now3();
@@ -1531,7 +1552,7 @@ function createActorMotionPresentationV1({ collisionProbe = null, now: now3 = ()
     lastDisplay = q2 ? { tick: model.tick, displayTick, x: q2.x, y: q2.y, authorityX: model.entitiesById[local8].position.x, authorityY: model.entitiesById[local8].position.y } : null;
     return positions;
   }
-  return Object.freeze({ observe, sample, clear: clear2, inspect: () => ({ version: P.version, actors: records.size, samples: [...records.values()].reduce((n, r) => n + 1 + Number(Boolean(r.before)), 0), maximumActors: P.maximumActors, samplesPerActor: P.samplesPerActor, bufferTicks: P.bufferTicks, displayTick, latestTick: lastTick, lastDisplay, observations: observations2, resets, lastReset, snaps, interpolated, blocked: blocked3, axisFallbacks, probeCalls, probePoints, probeTotalMs, probeMaxMs }) });
+  return Object.freeze({ observe, observeLight, sample, clear: clear2, inspect: () => ({ version: P.version, actors: records.size, samples: [...records.values()].reduce((n, r) => n + 1 + Number(Boolean(r.before)), 0), maximumActors: P.maximumActors, samplesPerActor: P.samplesPerActor, bufferTicks: P.bufferTicks, displayTick, latestTick: lastTick, lastDisplay, observations: observations2, resets, lastReset, snaps, interpolated, blocked: blocked3, axisFallbacks, probeCalls, probePoints, probeTotalMs, probeMaxMs }) });
 }
 function createActorPresentationCollisionProbeV1(authority) {
   return (request) => {
@@ -208655,6 +208676,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     observeBossEffects,
     previewLevelUp: (entityId2) => heroLevelUp.trigger(entityId2),
     observeActors: actorMotion.observe,
+    observeActorsLight: actorMotion.observeLight,
     resetActors: actorMotion.clear,
     camera,
     prompt,
@@ -209754,6 +209776,8 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     invalidateArt: () => renderer.invalidate("review-art-mode-change"),
     prepare: () => renderer.prepare(port.getReadModel(), environment.performance.now(), input),
     resetActorPresentation: renderer.resetActors,
+    /* a tick inside a drawn frame's batch: only the heroes' positions, no screen view */
+    observeHeroes: (tick, read2) => renderer.observeActorsLight(tick, environment.performance.now(), read2),
     pollInput: () => {
       const model = port.getReadModel();
       renderer.observeActors(model, environment.performance.now());
@@ -218332,6 +218356,7 @@ async function startWorldClient(environment) {
         lastClockPaint = time3;
       }
       lastPresentedFrame = time3;
+      inputReadSincePaint = false;
       performanceProbe?.frame(time3);
       const authorityDeadline = clock8.inspect().deadline;
       if (performanceProbe) performanceProbe.measure("clientFrameTotal", () => client.render(time3, authorityDeadline));
@@ -218372,7 +218397,7 @@ async function startWorldClient(environment) {
     startClockTimer();
   }
   const period = 1e3 / 60;
-  let goSignature = null;
+  let goSignature = null, inputReadSincePaint = false, ticksSinceInput = 0;
   const heroSignature = session.authority && !coopGuest ? () => {
     try {
       return session.authority.withAuthority((a) => a.withAuthorityState((s) => {
@@ -218383,6 +218408,16 @@ async function startWorldClient(environment) {
       return null;
     }
   } : () => null;
+  const observeHeroesLight = () => {
+    try {
+      return session.authority.withAuthority((a) => a.withAuthorityState((s) => client.observeHeroes(s.tick, (id2) => {
+        const e = s.entitiesById[id2];
+        return e?.position ? { x: e.position.x, y: e.position.y, alive: e.alive } : null;
+      }))) === true;
+    } catch {
+      return false;
+    }
+  };
   function tick(index = 0, go = 1) {
     if (session.groundPreparationRequired?.()) {
       client.releaseInput();
@@ -218395,16 +218430,19 @@ async function startWorldClient(environment) {
       });
       return;
     }
-    const skip = go >= 3 && index > 0;
+    const skip = inputReadSincePaint && ticksSinceInput < 4;
     let signature = null;
-    if (!skip || (signature = heroSignature()) === null || signature !== goSignature) {
+    if (!skip || (signature = heroSignature()) === null || signature !== goSignature || !observeHeroesLight()) {
       if (client.pollInput() === false) {
         loopHealth.gate("space-preparation");
         session.servicePreparation?.();
         return;
       }
-      if (go >= 3) goSignature = signature ?? heroSignature();
+      goSignature = signature ?? heroSignature();
+      inputReadSincePaint = true;
+      ticksSinceInput = 0;
     }
+    ticksSinceInput++;
     const advanced = performanceProbe ? performanceProbe.measure("authorityStep", session.step) : session.step();
     loopHealth.gate(advanced ? "play" : "authority-gated");
     if (advanced) {
