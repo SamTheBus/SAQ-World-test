@@ -34817,7 +34817,9 @@ async function reconcileWorldComparisonPagesD9(a, b, { readPage, sha256 }) {
       Object.assign(target.hostileCombat.actionsByEntityId, copyWire(e.hostileActions));
     }
     for (const [pid, rows3] of Object.entries(e.players)) {
-      const p = target.playersById[pid], i = p?.inventory;
+      const p = target.playersById[pid];
+      if (!p && !target.session.playerIds.includes(pid)) continue;
+      const i = p?.inventory;
       requireContract(i, "Cold participant mismatch");
       const merge = (to, from) => {
         for (const [id3, v] of Object.entries(from)) {
