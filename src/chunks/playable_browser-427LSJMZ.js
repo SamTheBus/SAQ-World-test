@@ -212795,10 +212795,12 @@ var COOP_PROTOCOL = "saq-coop-v1";
 var COOP_PARTY_LIMIT = 4;
 var COOP_WAITED_COMMANDS = /^(service\.|forge\.attune$|discovery\.readNote$|quest\.act$|ferry\.travel$|map\.travel$|player\.respawn$|site\.transition$)/;
 var COOP_TRADE_COMMANDS = /^(service\.|forge\.)/;
+var COOP_SLOW_PARTS = Object.freeze({ worldTime: 250, stirring: 1e3, serviceNpcs: 1e3, navigation: 200 });
 var json = (v) => v === void 0 ? "null" : JSON.stringify(v);
 var key3 = (k) => JSON.stringify(k);
 function createModelEncoderV1() {
   let refs = /* @__PURE__ */ new Map(), texts = /* @__PURE__ */ new Map(), subs = /* @__PURE__ */ new Map(), entRefs = /* @__PURE__ */ new Map(), entTexts = /* @__PURE__ */ new Map(), sent = 0;
+  const slowAt = /* @__PURE__ */ new Map();
   return Object.freeze({
     reset() {
       refs = /* @__PURE__ */ new Map();
@@ -212817,10 +212819,36 @@ function createModelEncoderV1() {
             seen5.add(id2);
             if (entRefs.get(id2) === e && entTexts.has(id2)) continue;
             entRefs.set(id2, e);
-            const s2 = json(e);
-            if (entTexts.get(id2) === s2) continue;
-            entTexts.set(id2, s2);
-            es.push(key3(id2) + ":" + s2);
+            if (e === null || typeof e !== "object" || Array.isArray(e)) {
+              const s2 = json(e);
+              if (entTexts.get(id2) === s2) continue;
+              entTexts.set(id2, s2);
+              es.push(key3(id2) + ':{"w":' + s2 + "}");
+              continue;
+            }
+            let st = entTexts.get(id2), fresh = false;
+            if (!st || typeof st === "string") {
+              st = { refs: /* @__PURE__ */ new Map(), texts: /* @__PURE__ */ new Map() };
+              entTexts.set(id2, st);
+              fresh = true;
+            }
+            const fs = [], fd = [], fseen = /* @__PURE__ */ new Set();
+            for (const [f, y] of Object.entries(e)) {
+              if (y === void 0 || typeof y === "function") continue;
+              fseen.add(f);
+              if (st.refs.get(f) === y && st.texts.has(f)) continue;
+              st.refs.set(f, y);
+              const s2 = json(y);
+              if (st.texts.get(f) === s2) continue;
+              st.texts.set(f, s2);
+              fs.push(key3(f) + ":" + s2);
+            }
+            for (const f of [...st.texts.keys()]) if (!fseen.has(f)) {
+              st.texts.delete(f);
+              st.refs.delete(f);
+              fd.push(key3(f));
+            }
+            if (fs.length || fd.length || fresh) es.push(key3(id2) + ":{" + (fresh ? '"f":1,' : "") + '"s":{' + fs.join(",") + '},"d":[' + fd.join(",") + "]}");
           }
           for (const id2 of [...entTexts.keys()]) if (!seen5.has(id2)) {
             entTexts.delete(id2);
@@ -212830,6 +212858,10 @@ function createModelEncoderV1() {
           continue;
         }
         if (refs.get(k) === v && (texts.has(k) || subs.has(k))) continue;
+        if (Number.isFinite(at8) && Object.hasOwn(COOP_SLOW_PARTS, k) && refs.has(k)) {
+          if (at8 - (slowAt.get(k) ?? -Infinity) < COOP_SLOW_PARTS[k] && at8 >= (slowAt.get(k) ?? -Infinity)) continue;
+          slowAt.set(k, at8);
+        }
         refs.set(k, v);
         if (v !== null && typeof v === "object") {
           const list = Array.isArray(v);
@@ -212939,9 +212971,16 @@ function createModelDecoderV1() {
         parts[k] = next;
       }
       let changed = message.n === 1;
-      for (const [id2, e] of Object.entries(message.es)) {
-        ents[id2] = e;
+      for (const [id2, o] of Object.entries(message.es)) {
         changed = true;
+        if (Object.hasOwn(o, "w")) {
+          ents[id2] = o.w;
+          continue;
+        }
+        const old2 = ents[id2], e = !o.f && old2 !== null && typeof old2 === "object" ? { ...old2 } : {};
+        for (const [f, y] of Object.entries(o.s)) e[f] = y;
+        for (const f of o.d) delete e[f];
+        ents[id2] = e;
       }
       for (const id2 of message.ed) {
         delete ents[id2];
@@ -213729,7 +213768,7 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
   const ready = new Promise((resolve) => {
     firstModel = resolve;
   });
-  let rtt = 120, refused = 0, lastMove = null;
+  let rtt = 120, refused = 0, lastMove = null, rateAt = null, rateBytes = 0, lastRate = null;
   const pings = [], pingLog = [], stalls = [];
   const smooth30 = createGuestSmoothingV1(now3, { rtt: () => rtt, collides: guestCollidesV1 });
   const handle = (m) => {
@@ -213846,10 +213885,16 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
     cartographyWindow,
     resources: () => {
       const t = now3(), recent = stalls.filter((s) => t - s.at < 6e4);
+      const got = link.received ?? 0, kbPerSecond = rateAt === null || t - rateAt < 500 ? lastRate : lastRate = Math.round((got - rateBytes) / 1024 / ((t - rateAt) / 1e3) * 10) / 10;
+      if (rateAt === null || t - rateAt >= 500) {
+        rateAt = t;
+        rateBytes = got;
+      }
       return {
         coopFrames: decoder.frames(),
         link: link.kind,
         path: link.path ?? null,
+        kbPerSecond,
         smoothing: smooth30.inspect(),
         // The last minute: waits between host frames (over 150 ms / over 400 ms / the longest), and the pings.
         stalls: { over150: recent.length, over400: recent.filter((s) => s.ms > 400).length, longestMs: Math.round(Math.max(0, ...recent.map((s) => s.ms))) },
@@ -215643,7 +215688,7 @@ function unbase64url(text3) {
 }
 
 // src/client/coop_link_v1.js
-var LINK_BACKLOG_BYTES = 64 * 1024;
+var LINK_BACKLOG_BYTES = 12 * 1024;
 var COOP_ICE_SERVERS = Object.freeze([{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun.cloudflare.com:3478" }]);
 var CHUNK = 15e3;
 var DIRECT_WAIT_MS = 25e3;
@@ -215666,6 +215711,8 @@ function createLink(kind, sendText, closeTransport, busy = () => false) {
   };
   const link = {
     kind,
+    // Characters received so far (for the performance capture).
+    received: 0,
     send(message) {
       if (closed2) return false;
       const text3 = typeof message === "string" ? message : JSON.stringify(message);
@@ -215683,6 +215730,7 @@ function createLink(kind, sendText, closeTransport, busy = () => false) {
     },
     receive(text3) {
       if (typeof text3 !== "string") return;
+      link.received += text3.length;
       if (text3[0] !== "") {
         deliver(text3);
         return;
