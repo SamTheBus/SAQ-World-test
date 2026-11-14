@@ -139501,7 +139501,7 @@ function createActivityAuthority({ initialState, measure: measure2, schedulerOpt
       gateway = simulation.withAuthorityState((s) => contracts.retireAppliedAdmissions(gateway, s));
     }
   }
-  let undoJoin = null;
+  let undoJoin = null, seatCut = null;
   function seatJoinV1(guest, seats, hostPlayerId, heroIds) {
     const before = simulation.readState();
     requireContract(before.playersById[hostPlayerId] && !isWaiting(before, hostPlayerId), "Unknown seat");
@@ -139511,13 +139511,6 @@ function createActivityAuthority({ initialState, measure: measure2, schedulerOpt
       validateActivityState(draft);
       validateSeatChangeV1(before, draft);
       next = createActivitySimulation(draft, { measure: measure2, schedulerOptions, developerCapabilities, startVersion: simulation.version() + 1 });
-      next.withAuthorityState((s) => {
-        for (const [id2, g] of Object.entries(s.groupsById)) {
-          const was = draft.groupsById[id2];
-          if (was && g.lastRequiredTick !== was.lastRequiredTick) g.lastRequiredTick = was.lastRequiredTick;
-        }
-      });
-      validateSeatChangeV1(before, next.readState());
     } catch (error) {
       error.seatJoinRetry = true;
       throw error;
@@ -139535,15 +139528,26 @@ function createActivityAuthority({ initialState, measure: measure2, schedulerOpt
       throw error;
     }
     undoJoin = { simulation: previous, gateway: old2 };
+    seatCut = draft;
     return freezeWire({ status: "changed", playerId: seated.playerId, seats: copyWire(seated.seats) });
   }
   function seatJoinUndoV1() {
     requireContract(undoJoin, "No join to take back");
     ({ simulation, gateway } = undoJoin);
     undoJoin = null;
+    seatCut = null;
     return freezeWire({ status: "undone" });
   }
-  return Object.freeze({ ...api, seatJoinV1, seatJoinUndoV1, createControllerPort, drainCommands, readGateway: () => freezeWire(gateway), nextClientSequence: (playerId) => gateway.playersById[playerId].nextClientSequence, getExactSnapshotForProof: () => ({ snapshot: simulation.getSnapshot(), gateway: freezeWire(gateway) }) });
+  function captureDurableTextV1(cursor) {
+    const cut = seatCut;
+    seatCut = null;
+    if (!cut || simulation.withAuthorityState((s) => s.tick !== cut.tick || s.lastAppliedAuthorityOrder !== cut.lastAppliedAuthorityOrder)) return simulation.captureDurableTextV1(cursor);
+    return { tick: cut.tick, text: JSON.stringify({ ...cut, campaign: { ...cut.campaign, saveRevision: cursor.saveRevision, checkpointId: cursor.checkpointId } }) };
+  }
+  return Object.freeze({ ...api, advanceOneTick: (...args) => {
+    seatCut = null;
+    return simulation.advanceOneTick(...args);
+  }, captureDurableTextV1, seatJoinV1, seatJoinUndoV1, createControllerPort, drainCommands, readGateway: () => freezeWire(gateway), nextClientSequence: (playerId) => gateway.playersById[playerId].nextClientSequence, getExactSnapshotForProof: () => ({ snapshot: simulation.getSnapshot(), gateway: freezeWire(gateway) }) });
 }
 
 // src/host/exact_cut_authority_core.js
@@ -213106,14 +213110,16 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
     tellLobby();
     const here2 = () => !closed2 && guests.get(g.id) === g;
     const run3 = async () => {
+      let refused = 0;
       for (let i = 0; i < 240 && here2(); i++) {
         if (session?.coop?.seatJoin) {
           let r;
           try {
             r = await session.coop.seatJoin({ heroId: m.heroId, passport: m.passport });
           } catch (error) {
-            if (error?.seatJoinRetry) {
-              await wait2(500);
+            if (error?.seatJoinRetry && ++refused < 4) {
+              console.warn("Co-op join refused, trying again", error);
+              await wait2(1500);
               continue;
             }
             console.warn("Co-op join failed", error);
