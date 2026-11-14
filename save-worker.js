@@ -25182,8 +25182,8 @@ var BY_NOUN = Object.freeze({
   Scepter: "scepter",
   Staff: "staff",
   "Chain Coif": "coif",
-  "Chain Gloves": "gauntlets",
-  "Chain Boots": "boots",
+  "Chain Gloves": "mail-gloves",
+  "Chain Boots": "knight-boots",
   "Great Helm": "helm",
   "Plate Armor": "plate",
   Gauntlets: "gauntlets",
@@ -25212,7 +25212,7 @@ var BY_NOUN = Object.freeze({
   "Silk Wraps": "wraps",
   "Silk Slippers": "slippers"
 });
-var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers", "mossback-pelt": "pelt", wardenplate: "warden-greaves" });
+var OVERALL_LEGS = Object.freeze({ plate: "greaves", breastplate: "greaves", "fluted-plate": "greaves", hauberk: "chausses", "surcoat-mail": "chausses", "banded-mail": "chausses", doublet: "breeches", leather: "trousers", "mossback-pelt": "pelt", wardenplate: "warden-greaves" });
 var TOME_LOOKS = Object.freeze({ fire: "tome-fire", lightning: "tome-storm", frost: "tome-frost" });
 var LOOK_POOLS = Object.freeze({
   sword: Object.freeze(["sword", "broadsword", "leaf-sword"]),
@@ -25224,9 +25224,16 @@ var LOOK_POOLS = Object.freeze({
   wand: Object.freeze(["wand", "branch-wand", "rune-rod"]),
   scepter: Object.freeze(["scepter", "orb-scepter", "crescent-scepter"]),
   staff: Object.freeze(["staff", "crook-staff", "gnarled-staff"]),
-  helm: Object.freeze(["helm", "barbute", "sallet"]),
+  helm: Object.freeze(["helm", "barbute", "burgonet"]),
   coif: Object.freeze(["coif", "kettle-hat", "nasal-helm"]),
   bandana: Object.freeze(["bandana", "leather-cap", "feathered-cap"]),
+  // Knight armor (class gear looks v1). Chain Gloves and Chain Boots have types of their own, so the Gauntlets and the Rogue's boots keep theirs.
+  hauberk: Object.freeze(["hauberk", "surcoat-mail", "banded-mail"]),
+  plate: Object.freeze(["plate", "breastplate", "fluted-plate"]),
+  "mail-gloves": Object.freeze(["mail-gloves", "gauntlets", "riveted-gloves"]),
+  gauntlets: Object.freeze(["gauntlets", "lobster-gauntlets", "spiked-gauntlets"]),
+  "knight-boots": Object.freeze(["knight-boots", "mail-boots", "shin-boots"]),
+  sabatons: Object.freeze(["sabatons", "pointed-sabatons", "spurred-sabatons"]),
   cape: Object.freeze(["traveler-cape", "ragged-cape", "magic-cape"]),
   cloak: Object.freeze(["hooded-cloak", "fur-cloak", "scalloped-cloak"]),
   mantle: Object.freeze(["royal-mantle", "capelet", "banner-cape"]),
@@ -25243,6 +25250,7 @@ var LOOK_POOLS = Object.freeze({
   "tome-frost": Object.freeze(["tome-rime", "tome-winter", "tome-tundra"]),
   "tome-storm": Object.freeze(["tome-spark", "tome-thunder", "tome-gale"])
 });
+var ARMOR_TYPE_WAS = Object.freeze({ "mail-gloves": "gauntlets", "knight-boots": "boots" });
 var nounLookType = (noun) => BY_NOUN[noun] ?? null;
 
 // src/shared/contracts/forge_stations.js
@@ -25557,7 +25565,7 @@ var KIT_CLASS = Object.fromEntries(Object.entries(CLASS_KITS).flatMap(([cls, kit
 var ARMOR_CLASSES = {};
 for (const cls of Object.keys(CLASS_GEAR)) for (const family2 of ["helmet", "overall", "gloves", "boots"]) for (const noun of classGearNouns(cls, family2)) {
   const type = nounLookType(noun);
-  if (type && !ARMOR_CLASSES[type]?.includes(cls)) (ARMOR_CLASSES[type] ??= []).push(cls);
+  for (const t of [type, ARMOR_TYPE_WAS[type]]) if (t && !ARMOR_CLASSES[t]?.includes(cls)) (ARMOR_CLASSES[t] ??= []).push(cls);
 }
 function validatePlayerInventory2(p, state, validateCommand2) {
   const inv = p.inventory;

@@ -1101,7 +1101,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-D3UMP4KC.js";
+} from "./chunk-52KACC3P.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -112889,7 +112889,7 @@ var OFF_FAMILY = {
 var ROBES = /* @__PURE__ */ new Set(["robe", "apprentice-robe"]);
 var HATS = /* @__PURE__ */ new Set(["hat", "cowl", "bandana", "leather-cap", "feathered-cap", "wide-brim-hat", "circlet", "moon-hat", "backwards-cap", "eyestalk-crown"]);
 var HOOD_FACE = /* @__PURE__ */ new Set(["hood", "bandit-hood"]);
-var COIF_FACE = /* @__PURE__ */ new Set(["coif", "kettle-hat", "nasal-helm", "barbute"]);
+var COIF_FACE = /* @__PURE__ */ new Set(["coif", "kettle-hat", "nasal-helm", "barbute", "burgonet"]);
 var OPEN_HOOD_FACE = /* @__PURE__ */ new Set(["scout-hood", "mage-hood", "rimecoil-hood"]);
 var HAIR_SHOWS = /* @__PURE__ */ new Set(["circlet", "eyestalk-crown"]);
 function kit(spec) {
@@ -113031,7 +113031,7 @@ function legs3(c, w, S15, step3) {
   }
   if (w.boots === "none") return;
   const A2 = accOf(w.g.boots);
-  for (const [k, dx] of [[0, -5.2], [1, 0]]) {
+  for (const [k, dx] of [[1, 0], [0, -5.2]]) {
     c.save();
     c.translate(dx, -lift[k]);
     boot(c, w, A2);
@@ -113039,7 +113039,8 @@ function legs3(c, w, S15, step3) {
   }
 }
 function boot(c, w, A2) {
-  if (w.boots === "brimstone-treads") treadsNear(c, A2);
+  if (KG_BOOT[w.boots]) KG_BOOT[w.boots](c, A2);
+  else if (w.boots === "brimstone-treads") treadsNear(c, A2);
   else if (w.boots === "sabatons") {
     R3(c, -2, 16.6, 6.8, 3.4, P14.helm, { split: 0.7 });
     px3(c, 2.4, 17.2, 0.9, 2.8, A2.c);
@@ -113141,7 +113142,8 @@ function wardenplatePauldron(c, A2, far) {
 }
 function body4(c, w, red) {
   const A2 = accOf(w.g.body), acc2 = accPal(A2);
-  if (w.body === "plate") {
+  if (KG_BODY[w.body]) KG_BODY[w.body](c, A2, acc2, red);
+  else if (w.body === "plate") {
     R3(c, -8, 0, 14, 12.6, P14.plate);
     R3(c, -2.4, 1.6, 3.4, 11, red, { flat: true, lw: 1 });
     gem2(c, -0.7, 4.4, 1.8, A2.gem);
@@ -116636,7 +116638,8 @@ function tomeFrame(kind) {
   return { x: (x0 + x1) / 2 - W21 / 2, y: (y0 + y1) / 2 - 3 - H8 / 2, span: Math.max(x1 - x0, y1 - y0) * 1.1 };
 }
 function sleeve3(c, w, S15) {
-  if (w.body === "plate") R3(c, 0, -2.4, 8.6, 4.8, P14.plate, { split: 0.7 });
+  if (KG_SLEEVE[w.body]) KG_SLEEVE[w.body](c);
+  else if (w.body === "plate") R3(c, 0, -2.4, 8.6, 4.8, P14.plate, { split: 0.7 });
   else if (w.body === "hauberk") {
     R3(c, 0, -2.4, 8.4, 4.8, M.mail, { split: 0.7 });
     mailRows(c, 0, -2.4, 8.4, 4.8);
@@ -116710,7 +116713,8 @@ function cocoonsilkIcon(c, A2) {
 var GLOVES = { cocoonsilk: CS.silk, gauntlets: P14.plateDark, gloves: P14.strap, wraps: M.blueDark, "sunsting-grips": TROPHY.amber };
 function hand3(c, w, S15) {
   const g = w.gloves;
-  if (g === "cocoonsilk") cocoonHand(c, w, S15, 0);
+  if (KG_HAND[g]) KG_HAND[g](c, w);
+  else if (g === "cocoonsilk") cocoonHand(c, w, S15, 0);
   else if (g === "gauntlets" || !g && w.body === "plate") R3(c, 8.2, -2.8, 4.4, 5.6, P14.plateDark, { split: 0.6 });
   else if (g === "gloves") R3(c, 8, -2.6, 4.2, 5.2, P14.strap, { split: 0.6, lw: 1.2 });
   else if (g === "wraps") {
@@ -116728,7 +116732,8 @@ function hand3(c, w, S15) {
 var palm3 = (c, w, S15, x, y, wd) => GLOVES[w.gloves] ? R3(c, x, y, wd, 4.6, GLOVES[w.gloves], { split: 0.6, lw: 1.2 }) : R3(c, x, y, wd, 4.6, S15, { lw: 1.2, nohi: true });
 function pauldron2(c, w, far) {
   const A2 = accOf(w.g.body);
-  if (w.body === "plate") {
+  if (KG_PAUL[w.body]) KG_PAUL[w.body](c, A2, far);
+  else if (w.body === "plate") {
     if (far) {
       R3(c, -9.6, -0.8, 6.2, 4.4, P14.plate, { split: 0.6, lw: 1.3 });
       px3(c, -9.6, 2.6, 6.2, 1, A2.c);
@@ -116756,6 +116761,10 @@ function pauldron2(c, w, far) {
 }
 var OPENING = "#1d232b";
 function helmetPiece(c, kind, A2, red, sway, face5) {
+  if (KG_HELM[kind]) {
+    KG_HELM[kind](c, A2, face5, sway, red);
+    return;
+  }
   if (kind === "helm") {
     R3(c, -12.6 + sway, -17.2, 4.6, 3.2, red, { lw: 1.3 });
     R3(c, -8.6 + sway * 0.5, -19.2, 5, 5, red, { lw: 1.3 });
@@ -117108,7 +117117,1048 @@ var HELMET_LOOKS = {
 };
 var BOOT_SHAFT = { "brimstone-treads": 8.2, boots: 7.4, tall: 10, sabatons: 7.4 };
 var BOOT_COLORS = { boots: [P14.strap, P14.leather], tall: [P14.leather, P14.leatherLight], sabatons: [P14.helm, P14.plateDark], slippers: [P14.cover, P14.purple], "apprentice-slippers": [M.blue, M.rope] };
+var KG_DARK = { b: "#6c7a7b", d: "#566263", l: "#9aa6a7" };
+function kgRivets(c, x0, x1, y) {
+  for (let x = x0; x <= x1; x += 2.4) px3(c, x, y, 0.6, 0.6, "#3b4446");
+}
+function kgFlutes(c, x0, x1, top, bot, col2) {
+  c.save();
+  c.strokeStyle = tint(col2);
+  c.lineWidth = 0.5;
+  c.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const u = i / 4, xt = x0 + (x1 - x0) * u, xb = x0 + 1.8 + (x1 - x0 - 3.6) * u;
+    c.moveTo(xb, bot);
+    c.lineTo(xt, top);
+  }
+  c.stroke();
+  c.restore();
+}
+var KG_BODY = {
+  "surcoat-mail"(c, A2, acc2, red) {
+    R3(c, -8.2, 0, 14.4, 14, M.mail);
+    mailRows(c, -8.2, 0, 14.4, 14);
+    G3(c, [-4.6, 0.4, 2.8, 0.4, 3.4, 15.8, -0.6, 14.4, -5.2, 15.8], red, { split: 0.6, lw: 1.1 });
+    px3(c, -4.6, 13, 7.2, 0.8, A2.c);
+    px3(c, -1.4, 2.2, 1.4, 4.6, P14.linen.b);
+    px3(c, -2.8, 3.6, 4.2, 1.4, P14.linen.b);
+    R3(c, -8.6, 8.6, 15.2, 2.2, P14.leather, { flat: true, lw: 1.2 });
+    R3(c, -1.6, 8.2, 3, 3, acc2, { flat: true, lw: 1.1 });
+    R3(c, -7, -1, 11.6, 2.2, M.darkSteel, { flat: true, lw: 1.1 });
+    gem2(c, -0.1, 9.7, 1.3, A2.gem);
+  },
+  "banded-mail"(c, A2, acc2) {
+    R3(c, -8.2, 0, 14.4, 14, M.mail);
+    mailRows(c, -8.2, 0, 14.4, 14);
+    for (const y of [2.2, 5.2]) {
+      R3(c, -8.5, y, 15, 1.9, P14.helm, { flat: true, lw: 1 });
+      kgRivets(c, -7.4, 5, y + 0.7);
+    }
+    px3(c, -8.1, 6.7, 14.2, 0.5, A2.c);
+    R3(c, -8.6, 8.8, 15.2, 2.2, P14.leather, { flat: true, lw: 1.2 });
+    R3(c, -1.4, 8.4, 3, 3, acc2, { flat: true, lw: 1.1 });
+    R3(c, -7.4, -1.4, 12.4, 2.6, P14.helm, { flat: true, lw: 1.1 });
+    px3(c, -7, -1, 11.6, 0.6, P14.helm.l);
+    gem2(c, 0.1, 9.9, 1.3, A2.gem);
+  },
+  breastplate(c, A2, acc2) {
+    R3(c, -7.6, 11, 5.8, 3.8, P14.plate, { split: 0.6, lw: 1.1 });
+    R3(c, -0.4, 11, 5.8, 3.8, P14.plate, { split: 0.6, lw: 1.1 });
+    px3(c, -7.4, 13.8, 5.4, 0.7, A2.c);
+    px3(c, -0.2, 13.8, 5.4, 0.7, A2.c);
+    G3(c, [-8, 0, 6, 0, 6.6, 5.4, 5, 9.8, -7, 9.8, -8.6, 5.4], P14.plate, { split: 0.66 });
+    px3(c, -1.4, 0.8, 0.8, 8.4, P14.helm.l);
+    px3(c, -0.6, 0.8, 0.5, 8.4, P14.plate.d);
+    R3(c, -8.4, 9.2, 14.8, 2.2, P14.leather, { flat: true, lw: 1.3 });
+    R3(c, -1.2, 8.8, 3, 3, acc2, { flat: true, lw: 1.2 });
+    R3(c, -6.6, -1, 10.6, 1.8, P14.helm, { flat: true, lw: 1 });
+    gem2(c, -3.6, 3.6, 1.5, A2.gem);
+  },
+  "fluted-plate"(c, A2, acc2) {
+    R3(c, -7.4, 11.2, 12.6, 1.5, KG_DARK, { flat: true, lw: 1 });
+    R3(c, -7.8, 12.6, 13.4, 1.5, KG_DARK, { flat: true, lw: 1 });
+    px3(c, -7.6, 13.6, 13, 0.5, A2.c);
+    G3(c, [-8, 0, 6, 0, 5, 10, -7, 10], KG_DARK, { split: 0.64 });
+    kgFlutes(c, -6.6, 4.6, 0.8, 9.4, KG_DARK.l);
+    px3(c, -7.4, 0.3, 12.8, 0.6, A2.c);
+    R3(c, -7.6, 9.6, 13.2, 1.8, P14.leather, { flat: true, lw: 1.2 });
+    R3(c, -1.2, 9.2, 2.6, 2.6, acc2, { flat: true, lw: 1.1 });
+    R3(c, -6.8, -1.2, 11.2, 2, KG_DARK, { flat: true, lw: 1 });
+    gem2(c, 0.1, 10.5, 1.2, A2.gem);
+  }
+};
+var KG_SLEEVE = {
+  "surcoat-mail": (c) => {
+    R3(c, 0, -2.4, 8.4, 4.8, M.mail, { split: 0.7 });
+    mailRows(c, 0, -2.4, 8.4, 4.8);
+  },
+  "banded-mail": (c) => {
+    R3(c, 0, -2.4, 8.4, 4.8, M.mail, { split: 0.7 });
+    mailRows(c, 0, -2.4, 8.4, 4.8);
+    R3(c, 5.6, -2.6, 1.6, 5.2, P14.helm, { flat: true, lw: 0.9 });
+  },
+  breastplate: (c) => {
+    R3(c, 0, -2.4, 8.6, 4.8, P14.plate, { split: 0.7 });
+    px3(c, 4.2, -2.4, 0.6, 4.8, "#00000030");
+  },
+  "fluted-plate": (c) => {
+    R3(c, 0, -2.4, 8.6, 4.8, KG_DARK, { split: 0.7 });
+    px3(c, 2.8, -2.4, 0.5, 4.8, KG_DARK.l);
+    px3(c, 5.6, -2.4, 0.5, 4.8, KG_DARK.l);
+  }
+};
+var KG_PAUL = {
+  "surcoat-mail"(c, A2, far) {
+    if (far) R3(c, -9.4, -0.6, 5.6, 3.8, M.mail, { split: 0.6, lw: 1.2 });
+    else R3(c, 2.4, -1.2, 6, 4, M.mail, { split: 0.6, lw: 1.2 });
+  },
+  "banded-mail"(c, A2, far) {
+    const x = far ? -9.6 : 2.2, y = far ? -0.8 : -1.4;
+    R3(c, x, y, 6.2, 4.2, P14.helm, { split: 0.6, lw: 1.3 });
+    px3(c, x, y + 1.8, 6.2, 0.6, "#00000040");
+    px3(c, x, y + 3.2, 6.2, 0.8, A2.c);
+  },
+  breastplate(c, A2, far) {
+    const x = far ? -10 : 1.8, y = far ? -1.4 : -2;
+    R3(c, x, y + 2.6, 7, 3, P14.plate, { split: 0.6, lw: 1.2 });
+    R3(c, x + 0.2, y, 6.6, 3.4, P14.plate, { split: 0.6, lw: 1.3 });
+    px3(c, x + 0.2, y + 2.6, 6.6, 0.8, A2.c);
+  },
+  "fluted-plate"(c, A2, far) {
+    const x = far ? -9.8 : 2, y = far ? -0.8 : -1.4;
+    G3(c, [x, y, x + 6.6, y, x + 7, y + 4.4, x, y + 4.4], KG_DARK, { split: 0.6, lw: 1.3 });
+    G3(c, [x + 2, y, x + 3.4, y - 2.8, x + 4.8, y], KG_DARK, { flat: true, lw: 1 });
+    px3(c, x, y + 3.4, 7, 0.8, A2.c);
+  }
+};
+Object.assign(GLOVES, { "lobster-gauntlets": P14.plateDark, "spiked-gauntlets": P14.plateDark, "mail-gloves": M.mail, "riveted-gloves": P14.strap });
+var KG_HAND = {
+  "lobster-gauntlets"(c) {
+    R3(c, 8.2, -2.8, 4.4, 5.6, P14.plateDark, { split: 0.6 });
+    for (const y of [-1.5, 0, 1.5]) px3(c, 8.5, y, 3.8, 0.5, P14.helm.l);
+  },
+  "spiked-gauntlets"(c) {
+    R3(c, 7, -3.2, 1.8, 6.4, P14.helm, { flat: true, lw: 1 });
+    R3(c, 8.2, -2.8, 4.4, 5.6, P14.plateDark, { split: 0.6 });
+    for (const x of [9, 10.9]) G3(c, [x, -2.8, x + 0.6, -4.4, x + 1.2, -2.8], P14.helm, { flat: true, lw: 0.8 });
+  },
+  "mail-gloves"(c) {
+    R3(c, 7, -2.9, 1.6, 6, P14.leather, { flat: true, lw: 1 });
+    R3(c, 8.2, -2.6, 4.2, 5.2, M.mail, { split: 0.6, lw: 1.2 });
+    mailRows(c, 8.2, -2.6, 4.2, 5.2);
+  },
+  "riveted-gloves"(c) {
+    R3(c, 8, -2.6, 4.2, 5.2, P14.strap, { split: 0.6, lw: 1.2 });
+    R3(c, 9, -1.8, 2.4, 3.6, P14.helm, { flat: true, lw: 0.8 });
+    px3(c, 9.5, -1.2, 0.6, 0.6, "#3b4446");
+    px3(c, 10.5, 0.6, 0.6, 0.6, "#3b4446");
+  }
+};
+var KG_BOOT = {
+  "pointed-sabatons"(c, A2) {
+    G3(c, [-2, 16.4, 4.4, 16.4, 5.4, 18, 8.8, 19.4, 8.8, 20, -2, 20], P14.helm, { split: 0.7 });
+    px3(c, -1.6, 17.8, 5.6, 0.5, "#00000040");
+    px3(c, 2.2, 16.8, 0.9, 2.6, A2.c);
+  },
+  "spurred-sabatons"(c, A2) {
+    R3(c, -2, 16.6, 6.8, 3.4, P14.helm, { split: 0.7 });
+    R3(c, -2.3, 16, 7.4, 1.2, P14.plateDark, { flat: true, lw: 0.9 });
+    px3(c, 2.4, 17.4, 0.9, 2.4, A2.c);
+    px3(c, -4, 18.4, 2, 0.6, P14.helm.d);
+    c.save();
+    c.fillStyle = tint(P14.helm.l);
+    c.strokeStyle = K6;
+    c.lineWidth = 0.5;
+    c.beginPath();
+    c.arc(-4.3, 18.7, 0.9, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+    c.restore();
+  },
+  "mail-boots"(c, A2) {
+    R3(c, -2, 15.8, 6.8, 4.2, P14.strap, { split: 0.72 });
+    R3(c, -2.3, 14.6, 5.2, 3, M.mail, { flat: true, lw: 1 });
+    mailRows(c, -2.3, 14.6, 5.2, 3);
+    px3(c, 3.4, 17.6, 1.2, 1.2, A2.c);
+  },
+  "shin-boots"(c, A2) {
+    R3(c, -2, 15.8, 6.8, 4.2, P14.strap, { split: 0.72 });
+    R3(c, -2.3, 15.2, 7.4, 1.6, P14.leather, { flat: true, lw: 1.1 });
+    R3(c, 1.8, 14.4, 2.8, 3.6, P14.helm, { flat: true, lw: 0.9 });
+    px3(c, 2.6, 15, 1.2, 0.6, A2.c);
+  }
+};
+Object.assign(BOOT_SHAFT, { "pointed-sabatons": 7.4, "spurred-sabatons": 7.4, "mail-boots": 7.4, "shin-boots": 7.4 });
+var kgShaft = (c, h, col2, cuff, toe = 6) => {
+  G3(c, [-2.4, -h, 2, -h, 2, -3.6, toe - 1.2, -3.4, toe, -2.2, toe, 0, -2.4, 0], col2, { split: 0.62, lw: 1.2 });
+  R3(c, -2.8, -h - 0.8, 5.2, 1.8, cuff, { flat: true, lw: 1.1 });
+};
+var kgSole = (c, w = 8.8) => R3(c, -2.6, 0, w, 1.2, { b: "#2a1f17" }, { flat: true, lw: 1 });
+var KG_BOOT_ICON = {
+  "pointed-sabatons"(c, A2) {
+    G3(c, [-2.4, -7.4, 2, -7.4, 2, -3.6, 4.6, -3, 8.6, -0.6, 8.6, 0, -2.4, 0], P14.helm, { split: 0.62, lw: 1.2 });
+    R3(c, -2.8, -8.2, 5.2, 1.8, P14.plateDark, { flat: true, lw: 1.1 });
+    px3(c, -1.8, -5.6, 3.2, 0.6, "#00000040");
+    px3(c, 2.6, -2.6, 3.6, 0.5, "#00000040");
+    px3(c, -0.4, -5, 1.4, 1.2, A2.c);
+    kgSole(c, 11.2);
+  },
+  "spurred-sabatons"(c, A2) {
+    kgShaft(c, 7.4, P14.helm, P14.plateDark);
+    px3(c, 2.6, -2.8, 0.6, 2.6, "#00000040");
+    px3(c, -0.4, -5, 1.4, 1.2, A2.c);
+    px3(c, -3.6, -2, 1.4, 0.7, P14.helm.d);
+    c.save();
+    c.fillStyle = tint(P14.helm.l);
+    c.strokeStyle = K6;
+    c.lineWidth = 0.5;
+    c.beginPath();
+    c.arc(-3.7, -1.7, 1, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+    c.restore();
+    kgSole(c);
+  },
+  "mail-boots"(c, A2) {
+    kgShaft(c, 7.4, P14.strap, P14.leather);
+    R3(c, -2.4, -7.4, 4.4, 4.2, M.mail, { flat: true, lw: 1 });
+    mailRows(c, -2.4, -7.4, 4.4, 4.2);
+    px3(c, 3, -2.6, 1.2, 1.2, A2.c);
+    kgSole(c);
+  },
+  "shin-boots"(c, A2) {
+    kgShaft(c, 7.4, P14.strap, P14.leather);
+    R3(c, 0.6, -7, 2.4, 4.6, P14.helm, { flat: true, lw: 0.9 });
+    px3(c, 1.2, -6.2, 1.2, 0.7, A2.c);
+    kgSole(c);
+  }
+};
+var kgGlove = (c, col2, cuff) => {
+  G3(c, [-2.8, 1.8, -2.8, -4, -2.2, -4.8, 2, -4.8, 2.6, -4, 2.6, -0.8, 4.2, -2.4, 5, -1.6, 2.6, 1.8], col2, { split: 0.6, lw: 1.2 });
+  for (const fx of [-1.4, 0, 1.3]) px3(c, fx, -4.8, 0.5, 2.2, "#00000059");
+  R3(c, -3.2, 1.8, 6.2, 2.4, cuff, { flat: true, lw: 1.1 });
+};
+var KG_GLOVE_ICON = {
+  "lobster-gauntlets"(c, A2) {
+    kgGlove(c, P14.plateDark, M.steel);
+    for (const y of [-3, -1.6, -0.2]) px3(c, -2.4, y, 4.6, 0.5, M.steel.l);
+    px3(c, -0.8, 2.5, 1.6, 1, A2.c);
+  },
+  "spiked-gauntlets"(c, A2) {
+    kgGlove(c, P14.plateDark, M.steel);
+    for (const x of [-2, -0.4, 1.2]) G3(c, [x, -4.8, x + 0.5, -6.6, x + 1, -4.8], P14.helm, { flat: true, lw: 0.7 });
+    R3(c, -3.8, 1.4, 7.4, 3, P14.helm, { flat: true, lw: 1.1 });
+    px3(c, -0.8, 2.5, 1.6, 1, A2.c);
+  },
+  "mail-gloves"(c, A2) {
+    kgGlove(c, M.mail, P14.leather);
+    c.save();
+    c.beginPath();
+    c.rect(-2.8, -4.8, 5.4, 6.6);
+    c.clip();
+    mailRows(c, -2.8, -4.8, 5.4, 6.6);
+    c.restore();
+    px3(c, -0.8, 2.5, 1.6, 1, A2.c);
+  },
+  "riveted-gloves"(c, A2) {
+    kgGlove(c, P14.strap, P14.leather);
+    R3(c, -2, -3.4, 3.6, 3.8, P14.helm, { flat: true, lw: 0.8 });
+    px3(c, -1.3, -2.8, 0.6, 0.6, "#3b4446");
+    px3(c, 0.3, -1, 0.6, 0.6, "#3b4446");
+    px3(c, -0.8, 2.5, 1.6, 1, A2.c);
+  }
+};
+function kgMail(c, x, y, w, h) {
+  mailRows(c, x, y, w, h);
+  for (let r = 0, yy = y + 1.2; yy < y + h - 0.6; r++, yy += 1.6) for (let xx = x + 0.8 + r % 2 * 0.9; xx < x + w - 0.6; xx += 1.8) px3(c, xx, yy - 0.4, 0.9, 0.35, M.mail.l);
+}
+function kgHem(c, x0, x1, y, pal2, r = 0.9) {
+  c.save();
+  c.fillStyle = tint(pal2.b);
+  c.strokeStyle = K6;
+  c.lineWidth = 0.7;
+  c.beginPath();
+  for (let x = x0 + r; x <= x1 - r + 0.01; x += r * 2) {
+    c.moveTo(x + r, y);
+    c.arc(x, y, r, 0, Math.PI);
+  }
+  c.fill();
+  c.stroke();
+  c.restore();
+}
+function kgCuff(c, x, y0, y1, pal2, r = 0.8) {
+  c.save();
+  c.fillStyle = tint(pal2.b);
+  c.strokeStyle = K6;
+  c.lineWidth = 0.6;
+  c.beginPath();
+  for (let y = y0 + r; y <= y1 - r + 0.01; y += r * 2) {
+    c.moveTo(x, y - r);
+    c.arc(x, y, r, -Math.PI / 2, Math.PI / 2);
+  }
+  c.fill();
+  c.stroke();
+  c.restore();
+}
+var kgStud = (c, x, y) => {
+  px3(c, x - 0.45, y - 0.45, 0.9, 0.9, "#3b4446");
+  px3(c, x - 0.35, y - 0.35, 0.4, 0.4, P14.helm.l);
+};
+var kgMailSleeve = (c) => {
+  R3(c, 0, -2.4, 8.4, 4.8, M.mail, { split: 0.7 });
+  kgMail(c, 0, -2.4, 8.4, 4.8);
+  kgCuff(c, 8.4, -2.4, 2.4, M.mail);
+};
+Object.assign(KG_BODY, {
+  hauberk(c, A2, acc2) {
+    R3(c, -8, 12.8, 14, 1.9, P14.linen, { flat: true, lw: 0.9 });
+    R3(c, -8.2, 0, 14.4, 14, M.mail);
+    kgMail(c, -8.2, 0, 14.4, 14);
+    px3(c, 4.4, 0.6, 1.4, 13, "#0000001c");
+    kgHem(c, -8.2, 6.2, 14, M.mail);
+    R3(c, -8.6, 8.6, 15.2, 2.4, P14.leather, { flat: true, lw: 1.3 });
+    px3(c, -8.2, 9, 14.4, 0.5, P14.leather.l);
+    px3(c, 3.6, 9.6, 0.6, 0.6, P14.strap.d);
+    px3(c, 4.9, 9.6, 0.6, 0.6, P14.strap.d);
+    R3(c, 1.7, 10.4, 1.5, 3.8, P14.leather, { flat: true, lw: 0.9 });
+    px3(c, 1.7, 13.4, 1.5, 0.8, A2.c);
+    R3(c, -1.4, 8.2, 3, 3.2, acc2, { flat: true, lw: 1.2 });
+    px3(c, -6.6, 1, 10.8, 0.8, P14.linen.b);
+    R3(c, -7, -1, 11.6, 2.2, M.darkSteel, { flat: true, lw: 1.1 });
+    px3(c, -6.6, -0.6, 10.8, 0.5, "#8a959c");
+    gem2(c, 0.1, 9.8, 1.4, A2.gem);
+  },
+  "surcoat-mail"(c, A2, acc2, red) {
+    R3(c, -8.2, 0, 14.4, 14, M.mail);
+    kgMail(c, -8.2, 0, 14.4, 14);
+    kgHem(c, -8.2, 6.2, 14, M.mail);
+    G3(c, [-5, 0, 3.2, 0, 3.6, 15.8, -0.7, 14.2, -5.4, 15.8], red, { split: 0.6, lw: 1.1 });
+    c.save();
+    c.strokeStyle = tint(A2.c);
+    c.lineWidth = 0.7;
+    c.beginPath();
+    c.moveTo(-4.4, 0.6);
+    c.lineTo(-4.75, 15);
+    c.moveTo(2.6, 0.6);
+    c.lineTo(2.95, 15);
+    c.stroke();
+    c.restore();
+    px3(c, -3.2, 10.8, 0.5, 3.6, red.d);
+    px3(c, 1.2, 10.8, 0.5, 3.2, red.d);
+    px3(c, -1, 11.4, 0.5, 2.6, red.d);
+    G3(c, [-1.9, 1.5, 0.3, 1.5, 0.3, 3.2, 2.1, 3.2, 2.1, 5.2, 0.3, 5.2, 0.3, 8, -1.9, 8, -1.9, 5.2, -3.7, 5.2, -3.7, 3.2, -1.9, 3.2], P14.linen, { flat: true, lw: 0.6 });
+    px3(c, -1.5, 1.9, 0.5, 5.7, P14.linen.l);
+    R3(c, -8.6, 8.9, 15.2, 1.6, M.rope, { flat: true, lw: 1 });
+    for (let x = -7.8; x < 6.2; x += 1.3) px3(c, x, 9.1, 0.5, 1.2, M.rope.d);
+    px3(c, -4.1, 10.4, 0.7, 3, M.rope.b);
+    px3(c, -2.9, 10.4, 0.7, 2.4, M.rope.b);
+    px3(c, -4.2, 13.2, 0.9, 0.8, A2.c);
+    px3(c, -3, 12.6, 0.9, 0.8, A2.c);
+    R3(c, -4.6, 8.4, 2.6, 2.6, M.rope, { flat: true, lw: 1 });
+    R3(c, -7, -1, 11.6, 2.2, M.darkSteel, { flat: true, lw: 1.1 });
+    px3(c, -6.6, -0.6, 10.8, 0.5, "#8a959c");
+    gem2(c, -3.3, 9.7, 1.3, A2.gem);
+  },
+  "banded-mail"(c, A2, acc2) {
+    R3(c, -8.2, 0, 14.4, 14, M.mail);
+    kgMail(c, -8.2, 0, 14.4, 14);
+    kgHem(c, -8.2, 6.2, 14, M.mail);
+    for (const y of [2.4, 5.4]) {
+      R3(c, -8.5, y, 15, 2, P14.helm, { flat: true, lw: 1 });
+      px3(c, -8.1, y + 0.3, 14.2, 0.45, P14.helm.l);
+      px3(c, -8.1, y + 1.35, 14.2, 0.4, P14.helm.d);
+      for (let x = -7; x <= 5.2; x += 2.4) kgStud(c, x, y + 1);
+    }
+    px3(c, -8.1, 7, 14.2, 0.5, A2.c);
+    R3(c, -8.6, 9, 15.2, 2.2, P14.leather, { flat: true, lw: 1.2 });
+    for (const x of [-7.2, -4.6, 3, 5.4]) R3(c, x - 0.7, 9.4, 1.4, 1.4, P14.helm, { flat: true, lw: 0.6 });
+    R3(c, -1.4, 8.6, 3, 3, acc2, { flat: true, lw: 1.1 });
+    R3(c, -7.8, -0.4, 13.2, 1.8, P14.helm, { flat: true, lw: 1 });
+    px3(c, -7.4, -0.1, 12.4, 0.45, P14.helm.l);
+    R3(c, -7, -1.9, 11.6, 1.8, P14.helm, { flat: true, lw: 1 });
+    px3(c, -6.6, -1.6, 10.8, 0.45, P14.helm.l);
+    kgStud(c, -6.2, -1);
+    kgStud(c, 3.8, -1);
+    gem2(c, 0.1, 10.1, 1.3, A2.gem);
+  }
+});
+Object.assign(KG_SLEEVE, {
+  hauberk: kgMailSleeve,
+  "surcoat-mail": kgMailSleeve,
+  "banded-mail": (c) => {
+    kgMailSleeve(c);
+    R3(c, 5, -2.7, 1.8, 5.4, P14.helm, { flat: true, lw: 0.9 });
+    px3(c, 5.2, -2.5, 0.45, 5, P14.helm.l);
+    kgStud(c, 5.9, 0);
+  }
+});
+Object.assign(KG_PAUL, {
+  hauberk(c, A2, far) {
+    const x = far ? -9.4 : 2.4, y = far ? -0.6 : -1.2, w = far ? 5.6 : 6, h = far ? 3.8 : 4;
+    R3(c, x, y, w, h, M.mail, { split: 0.6, lw: 1.2 });
+    kgMail(c, x, y, w, h);
+    kgHem(c, x, x + w, y + h, M.mail, 0.75);
+  },
+  "surcoat-mail"(c, A2, far) {
+    const x = far ? -9.4 : 2.4, y = far ? -0.6 : -1.2, w = far ? 5.6 : 6, h = far ? 3.8 : 4;
+    R3(c, x, y, w, h, M.mail, { split: 0.6, lw: 1.2 });
+    kgMail(c, x, y, w, h);
+    kgHem(c, x, x + w, y + h, M.mail, 0.75);
+  },
+  "banded-mail"(c, A2, far) {
+    const x = far ? -9.6 : 2.2, y = far ? -0.8 : -1.4;
+    R3(c, x, y + 2, 6.4, 2.6, P14.helm, { flat: true, lw: 1.1 });
+    px3(c, x + 0.3, y + 2.3, 5.8, 0.45, P14.helm.l);
+    px3(c, x, y + 3.9, 6.4, 0.7, A2.c);
+    R3(c, x + 0.2, y, 6, 2.6, P14.helm, { split: 0.6, lw: 1.2 });
+    px3(c, x + 0.5, y + 0.3, 5.4, 0.45, P14.helm.l);
+    kgStud(c, x + 1.1, y + 1.3);
+    kgStud(c, x + 5.1, y + 1.3);
+  }
+});
+function kgFlutes2(c, x0, x1, top, bot) {
+  c.save();
+  c.lineWidth = 0.55;
+  for (const [dx, col2] of [[0.5, KG_DARK.d], [0, KG_DARK.l]]) {
+    c.strokeStyle = tint(col2);
+    c.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const u = i / 4, xt = x0 + (x1 - x0) * u, xb = x0 + 1.8 + (x1 - x0 - 3.6) * u;
+      c.moveTo(xb + dx, bot);
+      c.lineTo(xt + dx, top);
+    }
+    c.stroke();
+  }
+  c.restore();
+}
+var kgCollar = (c, pal2) => {
+  R3(c, -7.4, -0.5, 12.4, 1.8, pal2, { flat: true, lw: 1 });
+  px3(c, -7, -0.2, 11.6, 0.45, pal2.l || P14.helm.l);
+  R3(c, -6.6, -1.9, 10.8, 1.8, pal2, { flat: true, lw: 1 });
+  px3(c, -6.2, -1.6, 10, 0.45, pal2.l || P14.helm.l);
+  kgStud(c, -5.8, -1);
+  kgStud(c, 3.4, -1);
+};
+var kgLames = (c, A2, x, y, w, pal2) => {
+  R3(c, x, y + 2.2, w, 2.6, pal2, { split: 0.6, lw: 1.1 });
+  px3(c, x + 0.3, y + 2.5, w * 0.6 - 0.4, 0.45, pal2.l || P14.helm.l);
+  px3(c, x, y + 4, w, 0.7, A2.c);
+  R3(c, x + 0.2, y, w - 0.4, 2.8, pal2, { split: 0.6, lw: 1.2 });
+  kgStud(c, x + 1.1, y + 1.4);
+  kgStud(c, x + w - 1.3, y + 1.4);
+};
+var kgCouter = (c, pal2) => {
+  R3(c, 3.4, -2.8, 2.2, 5.6, pal2, { flat: true, lw: 0.9 });
+  px3(c, 3.6, -2.6, 0.45, 5.2, pal2.l || P14.helm.l);
+  kgStud(c, 4.6, 0);
+};
+Object.assign(KG_BODY, {
+  plate(c, A2, acc2, red) {
+    R3(c, -7.8, 12.8, 13.6, 2, P14.plate, { lw: 1 });
+    px3(c, -7.8, 14.1, 13.6, 0.6, A2.c);
+    R3(c, -7.6, 11.4, 13.2, 2, P14.plate, { lw: 1 });
+    R3(c, -8, 0, 14, 12.6, P14.plate);
+    px3(c, -7.3, 1.9, 0.7, 4, P14.plate.l);
+    G3(c, [-8, 9.6, -8, 6.6, -1, 4.8, 6, 6.6, 6, 9.6], P14.helm, { split: 0.66, lw: 0.9 });
+    c.save();
+    c.strokeStyle = tint(P14.helm.l);
+    c.lineWidth = 0.45;
+    c.beginPath();
+    c.moveTo(-7.4, 6.9);
+    c.lineTo(-1, 5.4);
+    c.stroke();
+    c.restore();
+    kgStud(c, -6.6, 8.2);
+    kgStud(c, 4.6, 8.2);
+    R3(c, -2.4, 1.6, 3.4, 11, red, { flat: true, lw: 1 });
+    px3(c, -2, 2, 0.6, 7.2, red.l);
+    gem2(c, -0.7, 4.4, 1.8, A2.gem);
+    R3(c, -8.4, 9.4, 14.8, 2.4, P14.leather, { flat: true, lw: 1.3 });
+    px3(c, -8, 9.8, 14, 0.45, P14.leather.l);
+    px3(c, 3.2, 10.3, 0.6, 0.6, P14.strap.d);
+    px3(c, 4.5, 10.3, 0.6, 0.6, P14.strap.d);
+    R3(c, -1.2, 9, 3, 3.2, acc2, { flat: true, lw: 1.2 });
+    kgCollar(c, P14.helm);
+  },
+  breastplate(c, A2, acc2) {
+    R3(c, -8, 9.6, 14, 4.4, M.mail, { flat: true, lw: 1 });
+    kgMail(c, -8, 9.6, 14, 4.4);
+    kgHem(c, -8, 6, 14, M.mail);
+    for (const x of [-7.6, -0.4]) {
+      R3(c, x, 11, 5.8, 3.8, P14.plate, { split: 0.6, lw: 1.1 });
+      px3(c, x + 0.4, 11.4, 3, 0.45, P14.plate.l);
+      px3(c, x + 0.2, 13.8, 5.4, 0.7, A2.c);
+      kgStud(c, x + 1, 12.5);
+      kgStud(c, x + 4.6, 12.5);
+    }
+    G3(c, [-8, 0, 6, 0, 6.6, 5.4, 5, 9.8, -7, 9.8, -8.6, 5.4], P14.plate, { split: 0.66 });
+    px3(c, -7.6, 1.4, 0.7, 4, P14.plate.l);
+    c.save();
+    c.strokeStyle = tint(P14.plate.d);
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.moveTo(-8.2, 6.6);
+    c.quadraticCurveTo(-1, 4.4, 6.2, 6.6);
+    c.stroke();
+    c.restore();
+    px3(c, -1.4, 0.8, 0.8, 8.4, P14.helm.l);
+    px3(c, -0.6, 0.8, 0.5, 8.4, P14.plate.d);
+    R3(c, -8.4, 9.2, 14.8, 2.2, P14.leather, { flat: true, lw: 1.3 });
+    px3(c, -8, 9.6, 14, 0.45, P14.leather.l);
+    R3(c, -1.2, 8.8, 3, 3, acc2, { flat: true, lw: 1.2 });
+    kgCollar(c, P14.helm);
+    gem2(c, 0.45, 4.4, 1.5, A2.gem);
+  },
+  "fluted-plate"(c, A2, acc2) {
+    for (const [y, x, w] of [[11.2, -7.4, 12.6], [12.6, -7.8, 13.4]]) {
+      R3(c, x, y, w, 1.6, KG_DARK, { flat: true, lw: 1 });
+      px3(c, x + 0.4, y + 0.3, w - 0.8, 0.4, KG_DARK.l);
+      kgStud(c, x + 1, y + 0.9);
+      kgStud(c, x + w - 1, y + 0.9);
+    }
+    px3(c, -7.6, 13.7, 13, 0.5, A2.c);
+    G3(c, [-8, 0, 6, 0, 5, 10, -7, 10], KG_DARK, { split: 0.64 });
+    kgFlutes2(c, -6.6, 4.6, 0.8, 9.4);
+    px3(c, -7.4, 1.4, 0.7, 6.4, KG_DARK.l);
+    px3(c, -7.4, 0.3, 12.8, 0.6, A2.c);
+    R3(c, -7.6, 9.6, 13.2, 1.8, P14.leather, { flat: true, lw: 1.2 });
+    px3(c, -7.2, 9.9, 12.4, 0.4, P14.leather.l);
+    R3(c, -1.2, 9.2, 2.6, 2.6, acc2, { flat: true, lw: 1.1 });
+    kgCollar(c, KG_DARK);
+    gem2(c, 0.1, 10.5, 1.2, A2.gem);
+  }
+});
+Object.assign(KG_SLEEVE, {
+  plate: (c) => {
+    R3(c, 0, -2.4, 8.6, 4.8, P14.plate, { split: 0.7 });
+    kgCouter(c, P14.helm);
+  },
+  breastplate: (c) => {
+    R3(c, 0, -2.4, 8.6, 4.8, P14.plate, { split: 0.7 });
+    kgCouter(c, P14.helm);
+  },
+  "fluted-plate": (c) => {
+    R3(c, 0, -2.4, 8.6, 4.8, KG_DARK, { split: 0.7 });
+    px3(c, 1.6, -2.4, 0.5, 4.8, KG_DARK.l);
+    px3(c, 6.8, -2.4, 0.5, 4.8, KG_DARK.l);
+    kgCouter(c, KG_DARK);
+  }
+});
+Object.assign(KG_PAUL, {
+  plate(c, A2, far) {
+    kgLames(c, A2, far ? -9.6 : 2.2, far ? -0.8 : -1.4, far ? 6.2 : 6.4, P14.plate);
+  },
+  breastplate(c, A2, far) {
+    const x = far ? -10 : 1.8, y = far ? -1.4 : -2;
+    kgLames(c, A2, x, y, 7, P14.plate);
+  },
+  "fluted-plate"(c, A2, far) {
+    const x = far ? -9.8 : 2, y = far ? -0.8 : -1.4;
+    G3(c, [x, y, x + 6.6, y, x + 7, y + 4.4, x, y + 4.4], KG_DARK, { split: 0.6, lw: 1.3 });
+    G3(c, [x + 2, y, x + 3.4, y - 2.8, x + 4.8, y], KG_DARK, { flat: true, lw: 1 });
+    px3(c, x + 3.2, y - 1.6, 0.45, 1.4, KG_DARK.l);
+    c.save();
+    c.strokeStyle = tint(KG_DARK.l);
+    c.lineWidth = 0.5;
+    c.beginPath();
+    c.moveTo(x + 1.4, y + 3.2);
+    c.lineTo(x + 2.6, y + 0.5);
+    c.moveTo(x + 5.4, y + 3.2);
+    c.lineTo(x + 4.2, y + 0.5);
+    c.stroke();
+    c.restore();
+    px3(c, x, y + 3.4, 7, 0.8, A2.c);
+    kgStud(c, x + 3.4, y + 2);
+  }
+});
+var KG_GDARK_L = "#9aa6a7";
+Object.assign(GLOVES, { gauntlets: P14.plateDark });
+Object.assign(KG_HAND, {
+  gauntlets(c, w) {
+    const A2 = accOf(w.g.gloves);
+    G3(c, [6.4, -3.7, 8.6, -3, 8.6, 3, 6.4, 3.7], M.steel, { flat: true, lw: 0.9 });
+    px3(c, 6.7, -3, 0.5, 6, M.steel.l);
+    px3(c, 7.4, -0.5, 0.9, 1, A2.c);
+    R3(c, 8.2, -2.8, 4.4, 5.6, P14.plateDark, { split: 0.6 });
+    R3(c, 9.8, -3, 1.4, 6, M.steel, { flat: true, lw: 0.8 });
+    px3(c, 10, -2.8, 0.45, 5.6, M.steel.l);
+    px3(c, 11.4, -1, 1.1, 0.45, "#00000059");
+    px3(c, 11.4, 0.8, 1.1, 0.45, "#00000059");
+  },
+  "mail-gloves"(c, w) {
+    const A2 = accOf(w.g.gloves);
+    R3(c, 8.2, -2.6, 4.2, 5.2, M.mail, { split: 0.6, lw: 1.2 });
+    kgMail(c, 8.2, -2.6, 4.2, 5.2);
+    R3(c, 11.3, -2.6, 1.1, 5.2, P14.leather, { flat: true, lw: 0.8 });
+    R3(c, 6.8, -3, 1.8, 6, P14.leather, { flat: true, lw: 1 });
+    px3(c, 7.6, -3, 0.4, 6, A2.c);
+  },
+  "riveted-gloves"(c, w) {
+    const A2 = accOf(w.g.gloves);
+    R3(c, 8, -2.6, 4.2, 5.2, P14.strap, { split: 0.6, lw: 1.2 });
+    R3(c, 8.7, -1.9, 2.6, 3.8, P14.helm, { flat: true, lw: 0.8 });
+    px3(c, 8.9, -1.7, 0.45, 3.4, P14.helm.l);
+    kgStud(c, 9.5, -1.1);
+    kgStud(c, 10.6, 1.1);
+    kgStud(c, 11.8, -1.2);
+    kgStud(c, 11.8, 1.2);
+    R3(c, 6.8, -3, 1.6, 6, P14.leather, { flat: true, lw: 1 });
+    px3(c, 7.5, -3, 0.4, 6, A2.c);
+  }
+});
+Object.assign(KG_GLOVE_ICON, {
+  gauntlets(c, A2) {
+    kgGlove(c, P14.plateDark, M.steel);
+    for (const y of [-4.2, -3.2]) px3(c, -2.4, y, 4.6, 0.45, KG_GDARK_L);
+    R3(c, -2.8, -2.6, 5.2, 1.6, M.steel, { flat: true, lw: 0.9 });
+    px3(c, -2.5, -2.3, 4.6, 0.45, M.steel.l);
+    px3(c, -2.2, -0.6, 0.5, 2, KG_GDARK_L);
+    G3(c, [-4, 4.6, 3.8, 4.6, 3, 1.6, -3.2, 1.6], M.steel, { flat: true, lw: 1.1 });
+    px3(c, -3.4, 2, 0.5, 2.4, M.steel.l);
+    px3(c, -0.8, 2.6, 1.6, 1.2, A2.c);
+  },
+  "mail-gloves"(c, A2) {
+    kgGlove(c, M.mail, P14.leather);
+    c.save();
+    c.beginPath();
+    c.rect(-2.8, -4.8, 5.4, 6.6);
+    c.clip();
+    kgMail(c, -2.8, -4.8, 5.4, 6.6);
+    c.restore();
+    R3(c, -2.8, -4.8, 5.4, 1.3, P14.leather, { flat: true, lw: 0.8 });
+    for (const fx of [-1.4, 0, 1.3]) px3(c, fx, -4.8, 0.5, 1.3, "#00000059");
+    px3(c, -3.2, 2.6, 6.2, 0.55, A2.c);
+    px3(c, -2.2, 3.4, 0.5, 0.5, P14.strap.d);
+    px3(c, 1.4, 3.4, 0.5, 0.5, P14.strap.d);
+  },
+  "riveted-gloves"(c, A2) {
+    kgGlove(c, P14.strap, P14.leather);
+    R3(c, -2.2, -3.2, 4, 3.8, P14.helm, { flat: true, lw: 0.8 });
+    px3(c, -1.9, -2.9, 3.4, 0.45, P14.helm.l);
+    for (const [x, y] of [[-1.4, -2.3], [1, -2.3], [-1.4, -0.3], [1, -0.3]]) kgStud(c, x, y);
+    for (const x of [-1.8, -0.4, 1]) kgStud(c, x, -4);
+    px3(c, -3.2, 2.6, 6.2, 0.55, A2.c);
+    px3(c, -1.6, 3.4, 0.5, 0.5, P14.strap.d);
+    px3(c, 0.8, 3.4, 0.5, 0.5, P14.strap.d);
+  }
+});
+Object.assign(KG_HAND, {
+  "lobster-gauntlets"(c, w) {
+    const A2 = accOf(w.g.gloves);
+    R3(c, 6.6, -3.4, 2, 6.8, M.steel, { flat: true, lw: 0.9 });
+    px3(c, 6.8, -3.2, 0.45, 6.4, M.steel.l);
+    px3(c, 7.3, -0.5, 0.8, 1, A2.c);
+    R3(c, 8.2, -2.8, 4.4, 5.6, P14.plateDark, { split: 0.6 });
+    for (const x of [9.2, 10.3, 11.4]) {
+      px3(c, x, -2.6, 0.45, 5.2, KG_GDARK_L);
+      px3(c, x + 0.45, -2.6, 0.4, 5.2, "#00000066");
+    }
+  },
+  "spiked-gauntlets"(c, w) {
+    const A2 = accOf(w.g.gloves);
+    G3(c, [6.4, -3.9, 8.6, -3.1, 8.6, 3.1, 6.4, 3.9], P14.helm, { flat: true, lw: 1 });
+    px3(c, 6.7, -3.3, 0.45, 6.6, P14.helm.l);
+    kgStud(c, 7.6, -2.2);
+    kgStud(c, 7.6, 2.2);
+    px3(c, 7.2, -0.5, 0.9, 1, A2.c);
+    R3(c, 8.2, -2.8, 4.4, 5.6, P14.plateDark, { split: 0.6 });
+    for (const y of [-2, 0, 2]) {
+      G3(c, [12.8, y - 0.65, 14.9, y, 12.8, y + 0.65], P14.helm, { flat: true, lw: 0.7 });
+      px3(c, 13, y - 0.4, 1.1, 0.3, P14.helm.l);
+    }
+    R3(c, 11.5, -3.1, 1.5, 6.2, P14.helm, { flat: true, lw: 0.8 });
+    px3(c, 11.7, -2.9, 0.4, 5.8, P14.helm.l);
+  }
+});
+Object.assign(KG_GLOVE_ICON, {
+  "lobster-gauntlets"(c, A2) {
+    kgGlove(c, P14.plateDark, M.steel);
+    for (const y of [-3.8, -2.4, -1]) {
+      px3(c, -2.6, y, 5, 0.45, KG_GDARK_L);
+      px3(c, -2.6, y + 0.45, 5, 0.4, "#00000066");
+    }
+    px3(c, 3, -1.6, 0.4, 1.6, KG_GDARK_L);
+    px3(c, 3.8, -2, 0.4, 1.4, KG_GDARK_L);
+    R3(c, -3.6, 2.8, 7, 1.6, M.steel, { flat: true, lw: 0.9 });
+    px3(c, -3.3, 3.1, 6.4, 0.4, M.steel.l);
+    R3(c, -3.3, 1.5, 6.4, 1.5, M.steel, { flat: true, lw: 0.9 });
+    px3(c, -3, 1.8, 5.8, 0.4, M.steel.l);
+    px3(c, -0.8, 3.3, 1.6, 0.9, A2.c);
+  },
+  "spiked-gauntlets"(c, A2) {
+    kgGlove(c, P14.plateDark, M.steel);
+    px3(c, -2.4, -2.4, 4.6, 0.45, KG_GDARK_L);
+    for (const x of [-2.4, -0.7, 1]) G3(c, [x, -5, x + 0.7, -7.2, x + 1.4, -5], P14.helm, { flat: true, lw: 0.7 });
+    for (const x of [-2.4, -0.7, 1]) px3(c, x + 0.4, -6.2, 0.3, 1.1, P14.helm.l);
+    R3(c, -3, -5.6, 5.8, 1.4, P14.helm, { flat: true, lw: 0.8 });
+    px3(c, -2.7, -5.3, 5.2, 0.4, P14.helm.l);
+    G3(c, [-4.2, 4.6, 4, 4.6, 3, 1.4, -3.2, 1.4], P14.helm, { flat: true, lw: 1.1 });
+    px3(c, -3.6, 1.9, 0.45, 2.4, P14.helm.l);
+    kgStud(c, -2.6, 3.2);
+    kgStud(c, 2.4, 3.2);
+    px3(c, -0.8, 2.6, 1.6, 1.2, A2.c);
+  }
+});
+var kgFoot = (c) => {
+  R3(c, -2, 15.8, 6.8, 4.2, P14.strap, { split: 0.72 });
+  px3(c, 2.6, 17, 1.8, 0.4, P14.leather.b);
+  px3(c, -1.6, 19.2, 6, 0.7, "#2a1f17");
+};
+var kgBootCuff = (c) => {
+  R3(c, -2.3, 15.2, 7.4, 1.6, P14.leather, { flat: true, lw: 1.1 });
+  px3(c, -2, 15.45, 6.8, 0.4, P14.leather.l);
+};
+Object.assign(KG_BOOT, {
+  "knight-boots"(c, A2) {
+    kgFoot(c);
+    px3(c, -1.8, 17.7, 5.6, 0.7, P14.strap.d);
+    R3(c, 1.5, 17.4, 1.4, 1.3, M.steel, { flat: true, lw: 0.6 });
+    kgBootCuff(c);
+    px3(c, 3.3, 15.6, 1.1, 0.8, A2.c);
+  },
+  "mail-boots"(c, A2) {
+    kgFoot(c);
+    R3(c, -2.3, 14.6, 5.2, 3, M.mail, { flat: true, lw: 1 });
+    kgMail(c, -2.3, 14.6, 5.2, 3);
+    kgHem(c, -2.3, 2.9, 17.6, M.mail, 0.65);
+    px3(c, 3.4, 17.6, 1.2, 1.2, A2.c);
+  },
+  "shin-boots"(c, A2) {
+    kgFoot(c);
+    kgBootCuff(c);
+    R3(c, 1.8, 14.4, 2.8, 3.6, P14.helm, { flat: true, lw: 0.9 });
+    px3(c, 2, 14.6, 0.45, 3.2, P14.helm.l);
+    px3(c, 3.3, 14.6, 0.4, 3.2, P14.helm.d);
+    px3(c, 1.6, 16.9, 3.2, 0.5, P14.strap.d);
+    px3(c, 2.6, 15, 1.2, 0.6, A2.c);
+  }
+});
+Object.assign(BOOT_SHAFT, { "knight-boots": 7.4 });
+var kgHeel = (c) => {
+  kgSole(c);
+  R3(c, -2.6, -0.4, 2.8, 1.6, { b: "#2a1f17" }, { flat: true, lw: 0.9 });
+};
+var kgShaftLit = (c) => {
+  kgShaft(c, 7.4, P14.strap, P14.leather);
+  px3(c, -2.5, -7.9, 4.6, 0.4, P14.leather.l);
+  px3(c, 2.6, -3, 2.4, 0.4, P14.leather.b);
+};
+var kgBuckleStrap = (c, y) => {
+  px3(c, -2.4, y, 4.4, 0.7, P14.strap.d);
+  R3(c, -1.6, y - 0.35, 1.4, 1.4, M.steel, { flat: true, lw: 0.6 });
+};
+Object.assign(KG_BOOT_ICON, {
+  "knight-boots"(c, A2) {
+    kgShaftLit(c);
+    kgBuckleStrap(c, -4.2);
+    px3(c, -0.4, -7.9, 1.2, 1, A2.c);
+    kgHeel(c);
+  },
+  "mail-boots"(c, A2) {
+    kgShaftLit(c);
+    R3(c, -2.4, -7.4, 4.4, 4.2, M.mail, { flat: true, lw: 1 });
+    kgMail(c, -2.4, -7.4, 4.4, 4.2);
+    kgHem(c, -2.4, 2, -3.2, M.mail, 0.55);
+    px3(c, 3, -2.6, 1.2, 1.2, A2.c);
+    kgHeel(c);
+  },
+  "shin-boots"(c, A2) {
+    kgShaftLit(c);
+    R3(c, 0.4, -7.4, 2.8, 5, P14.helm, { flat: true, lw: 0.9 });
+    px3(c, 0.6, -7.2, 0.45, 4.6, P14.helm.l);
+    px3(c, 1.9, -7.2, 0.4, 4.6, P14.helm.d);
+    kgBuckleStrap(c, -6.2);
+    kgBuckleStrap(c, -3.9);
+    px3(c, 1.2, -7.1, 1.4, 0.6, A2.c);
+    kgHeel(c);
+  }
+});
+function kgRowel(c, x, y, r) {
+  c.save();
+  c.fillStyle = tint(P14.helm.l);
+  c.strokeStyle = K6;
+  c.lineWidth = 0.45;
+  c.beginPath();
+  for (let i = 0; i < 12; i++) {
+    const a = i * Math.PI / 6, rr3 = i % 2 ? r * 0.45 : r;
+    c.lineTo(x + Math.cos(a) * rr3, y + Math.sin(a) * rr3);
+  }
+  c.closePath();
+  c.fill();
+  c.stroke();
+  c.restore();
+}
+var kgAnkle = (c) => {
+  R3(c, -2.3, 15.8, 5.2, 1.3, P14.helm, { flat: true, lw: 0.8 });
+  px3(c, -2, 16, 4.6, 0.35, P14.helm.l);
+  kgStud(c, -1.2, 16.5);
+};
+var kgSabFoot = (c) => {
+  R3(c, -2, 16.6, 6.8, 3.4, P14.helm, { split: 0.7 });
+  px3(c, -1.6, 17, 4, 0.4, P14.helm.l);
+  for (const x of [0.4, 3.9]) {
+    px3(c, x, 17.2, 0.4, 2.2, P14.helm.d);
+    px3(c, x - 0.4, 17.2, 0.4, 2.2, P14.helm.l);
+  }
+  px3(c, -1.8, 19.4, 6.4, 0.6, "#2a1f17");
+};
+Object.assign(KG_BOOT, {
+  sabatons(c, A2) {
+    kgSabFoot(c);
+    px3(c, 2.1, 17.2, 0.9, 2.4, A2.c);
+    kgAnkle(c);
+  },
+  "pointed-sabatons"(c, A2) {
+    G3(c, [-2, 16.4, 4.4, 16.4, 5.4, 18, 8.8, 19.4, 8.8, 20, -2, 20], P14.helm, { split: 0.7 });
+    px3(c, -1.6, 16.8, 5.6, 0.4, P14.helm.l);
+    c.save();
+    c.strokeStyle = tint(P14.helm.l);
+    c.lineWidth = 0.4;
+    c.beginPath();
+    c.moveTo(5.4, 18.3);
+    c.lineTo(8.4, 19.5);
+    c.stroke();
+    c.restore();
+    for (const [x, y] of [[0.4, 17.2], [3.6, 17.2], [5.9, 18.5]]) {
+      px3(c, x, y, 0.4, 19.4 - y, P14.helm.d);
+    }
+    px3(c, -1.8, 19.5, 10.4, 0.5, "#2a1f17");
+    px3(c, 1.9, 16.8, 0.9, 2.6, A2.c);
+    kgAnkle(c);
+  },
+  "spurred-sabatons"(c, A2) {
+    kgSabFoot(c);
+    px3(c, -2, 18.3, 3.6, 0.5, P14.strap.d);
+    px3(c, 2.1, 17.4, 0.9, 2.2, A2.c);
+    R3(c, -2.3, 15.8, 7.4, 1.3, P14.plateDark, { flat: true, lw: 0.9 });
+    px3(c, -2, 16, 6.8, 0.35, KG_GDARK_L);
+    px3(c, -3.6, 18.4, 1.8, 0.6, P14.helm.d);
+    kgRowel(c, -4.4, 18.7, 1.3);
+  }
+});
+var kgSabLames = (c, toe) => {
+  px3(c, -2.2, -5.6, 4, 0.4, P14.helm.l);
+  px3(c, -2.2, -5.2, 4, 0.4, P14.helm.d);
+  for (const x of toe) {
+    px3(c, x - 0.4, -3.3, 0.4, 3, P14.helm.l);
+    px3(c, x, -3.3, 0.4, 3, P14.helm.d);
+  }
+};
+var kgSabCuff = (c) => {
+  kgStud(c, -1.8, -7.3);
+  kgStud(c, 1.2, -7.3);
+};
+Object.assign(KG_BOOT_ICON, {
+  sabatons(c, A2) {
+    kgShaft(c, 7.4, P14.helm, P14.plateDark);
+    kgSabLames(c, [2.8, 4.6]);
+    px3(c, -0.4, -4.6, 1.4, 1.2, A2.c);
+    kgSabCuff(c);
+    kgHeel(c);
+  },
+  "pointed-sabatons"(c, A2) {
+    G3(c, [-2.4, -7.4, 2, -7.4, 2, -3.6, 4.6, -3, 8.6, -0.6, 8.6, 0, -2.4, 0], P14.helm, { split: 0.62, lw: 1.2 });
+    R3(c, -2.8, -8.2, 5.2, 1.8, P14.plateDark, { flat: true, lw: 1.1 });
+    c.save();
+    c.strokeStyle = tint(P14.helm.l);
+    c.lineWidth = 0.4;
+    c.beginPath();
+    c.moveTo(2.2, -3.2);
+    c.lineTo(8, -0.7);
+    c.stroke();
+    c.restore();
+    kgSabLames(c, [2.8]);
+    for (const [x, y] of [[5, -2.5], [6.8, -1.4]]) {
+      px3(c, x - 0.4, y, 0.4, -0.3 - y, P14.helm.l);
+      px3(c, x, y, 0.4, -0.3 - y, P14.helm.d);
+    }
+    px3(c, -0.4, -4.6, 1.4, 1.2, A2.c);
+    kgSabCuff(c);
+    kgSole(c, 11.2);
+    R3(c, -2.6, -0.4, 2.8, 1.6, { b: "#2a1f17" }, { flat: true, lw: 0.9 });
+  },
+  "spurred-sabatons"(c, A2) {
+    kgShaft(c, 7.4, P14.helm, P14.plateDark);
+    px3(c, -2.6, -7.9, 4.8, 0.4, KG_GDARK_L);
+    kgSabLames(c, [2.8, 4.6]);
+    px3(c, -2.4, -2.6, 3.4, 0.5, P14.strap.d);
+    px3(c, -0.4, -4.6, 1.4, 1.2, A2.c);
+    kgSabCuff(c);
+    px3(c, -3.6, -2, 1.4, 0.7, P14.helm.d);
+    kgRowel(c, -4, -1.7, 1.4);
+    kgHeel(c);
+  }
+});
+var KG_HELM = {};
+function kgHood(c, A2, face5, trim3) {
+  R3(c, -10.4, -14.8, 18.8, 16.6, M.mail, { split: 0.74 });
+  kgMail(c, -10.4, -14.8, 18.8, 16.6);
+  if (face5) face5(c);
+  else R3(c, -1.4, -10.6, 8.8, 10.2, { b: OPENING }, { lw: 1.2, flat: true });
+  c.save();
+  c.lineWidth = 0.55;
+  c.strokeStyle = tint(M.mail.l);
+  c.strokeRect(-1.85, -11.05, 9.7, 11.1);
+  c.restore();
+  kgHem(c, -10.4, 8.4, 1.8, M.mail);
+  px3(c, -10.4, -2.4, 9, 1, A2.c);
+  if (trim3) {
+    px3(c, -3.6, -2.8, 1.6, 1.8, P14.helm.d);
+    px3(c, -3.3, -2.5, 1, 1.2, P14.helm.l);
+    gem2(c, -6, -8, 1.4, A2.gem);
+  }
+}
+KG_HELM.coif = (c, A2, face5) => kgHood(c, A2, face5, true);
+KG_HELM["kettle-hat"] = (c, A2, face5) => {
+  kgHood(c, A2, face5, false);
+  R3(c, -8.4, -18.6, 14.4, 5.4, P14.helm, { split: 0.7 });
+  px3(c, -7.8, -18, 0.6, 2.4, P14.helm.l);
+  px3(c, -2, -18.6, 0.7, 3.2, P14.helm.l);
+  px3(c, -1.3, -18.6, 0.5, 3.2, P14.helm.d);
+  R3(c, -8.4, -15.4, 14.4, 1.6, accPal(A2), { flat: true, lw: 1.1 });
+  kgStud(c, -6.4, -14.6);
+  kgStud(c, 4, -14.6);
+  px3(c, -10.4, -11.6, 18.8, 1.6, "#0000003a");
+  G3(c, [-14.4, -13.6, 12, -13.6, 10.2, -11.6, -12.6, -11.6], P14.helm, { split: 0.7, lw: 1.3 });
+  px3(c, -13.6, -13.3, 24.8, 0.45, P14.helm.l);
+  kgStud(c, -11.2, -12.6);
+  kgStud(c, 8.8, -12.6);
+  gem2(c, -1.2, -14.6, 1.6, A2.gem);
+};
+KG_HELM["nasal-helm"] = (c, A2, face5) => {
+  kgHood(c, A2, face5, false);
+  G3(c, [-10.8, -10.8, -10.8, -14.6, -1.4, -19.6, 8.6, -14.6, 8.6, -10.8], P14.helm, { split: 0.62, lw: 1.3 });
+  c.save();
+  c.strokeStyle = tint(P14.helm.l);
+  c.lineWidth = 0.5;
+  c.beginPath();
+  c.moveTo(-10.2, -11.6);
+  c.lineTo(-10.2, -14.4);
+  c.lineTo(-1.8, -18.9);
+  c.stroke();
+  c.restore();
+  px3(c, 4.55, -10.4, 0.7, 6.6, "#00000030");
+  G3(c, [2.2, -11, 5.6, -11, 4.55, -8.8, 4.55, -4.4, 4.85, -3.6, 2.95, -3.6, 3.25, -4.4, 3.25, -8.8], P14.helm, { split: 0.62, lw: 0.9 });
+  px3(c, 3.45, -9.4, 0.35, 5.2, P14.helm.l);
+  R3(c, -10.8, -12.2, 19.4, 1.8, accPal(A2), { flat: true, lw: 1.1 });
+  kgStud(c, -8.4, -11.3);
+  kgStud(c, -2.4, -11.3);
+  gem2(c, 3.9, -11.3, 1.6, A2.gem);
+};
+KG_HELM.helm = (c, A2, face5, sway, red) => {
+  R3(c, -12.6 + sway, -17.2, 4.6, 3.2, red, { lw: 1.3 });
+  R3(c, -8.6 + sway * 0.5, -19.2, 5, 5, red, { lw: 1.3 });
+  R3(c, -4.4, -21, 4.2, 7, red, { lw: 1.3 });
+  px3(c, -11.8 + sway, -16.4, 3, 0.4, red.l);
+  px3(c, -7.8 + sway * 0.5, -18.2, 3.2, 0.4, red.l);
+  px3(c, -7.8 + sway * 0.5, -16.6, 2.4, 0.4, red.d);
+  px3(c, -3.6, -20, 0.45, 4.6, red.l);
+  px3(c, -2, -19.4, 0.45, 4, red.d);
+  R3(c, -10, -14, 18, 15, P14.helm, { split: 0.7 });
+  px3(c, -9.4, -13.2, 0.6, 13, P14.helm.l);
+  R3(c, -10.3, -0.6, 18.6, 1.8, P14.helm, { flat: true, lw: 1 });
+  px3(c, -10, -0.3, 18, 0.4, P14.helm.l);
+  kgStud(c, -5, 0.3);
+  kgStud(c, 2.6, 0.3);
+  R3(c, -10, -10.8, 18, 1.8, accPal(A2), { flat: true, lw: 1.1 });
+  kgStud(c, -7.8, -9.9);
+  kgStud(c, 5.4, -9.9);
+  R3(c, 0.4, -8.4, 6.6, 3.6, P14.visor, { lw: 1.3 });
+  px3(c, 0.4, -4.6, 6.6, 0.5, P14.helm.l);
+  for (const x of [1.6, 3.6, 5.6]) {
+    px3(c, x, -3.4, 1, 1.6, "#2c3e50");
+    px3(c, x, -1.8, 1, 0.4, P14.helm.l);
+  }
+  px3(c, -7.6, -2.6, 1.4, 1.4, A2.c);
+  gem2(c, -1.4, -9.9, 1.6, A2.gem);
+};
+KG_HELM.barbute = (c, A2, face5) => {
+  G3(c, [-10, 1, -10, -11.4, -7.4, -14.8, 4.4, -14.8, 7.8, -11.8, 8, 1], P14.helm, { split: 0.7 });
+  c.save();
+  c.strokeStyle = tint(P14.helm.l);
+  c.lineWidth = 0.5;
+  c.beginPath();
+  c.moveTo(-9.4, 0);
+  c.lineTo(-9.4, -11.2);
+  c.lineTo(-7.1, -14.2);
+  c.stroke();
+  c.restore();
+  R3(c, -6.4, -16.2, 9.6, 1.8, accPal(A2), { flat: true, lw: 1.1 });
+  kgStud(c, -4.8, -15.3);
+  kgStud(c, 1.6, -15.3);
+  if (face5) face5(c);
+  else R3(c, -1.4, -10.6, 8.8, 10.2, { b: OPENING }, { lw: 1.2, flat: true });
+  c.save();
+  c.lineWidth = 0.55;
+  c.strokeStyle = tint(P14.helm.l);
+  c.beginPath();
+  c.moveTo(-1.85, -0.4);
+  c.lineTo(-1.85, -11.05);
+  c.lineTo(7.85, -11.05);
+  c.lineTo(7.85, -0.4);
+  c.stroke();
+  c.restore();
+  for (const [x, w] of [[-1.6, 4.4], [4.8, 3.2]]) {
+    R3(c, x, -4.6, w, 5.6, P14.helm, { flat: true, lw: 1.2 });
+    px3(c, x + 0.3, -4.3, w - 0.6, 0.45, P14.helm.l);
+    kgStud(c, x + w / 2, -1.6);
+  }
+  px3(c, -8.4, -3, 1.4, 1.4, A2.c);
+  gem2(c, -4.6, -8.4, 1.6, A2.gem);
+};
+KG_HELM.burgonet = (c, A2, face5) => {
+  for (const [y, x0, w] of [[-1.4, -11.6, 10.6], [-3.4, -11, 10]]) {
+    G3(c, [x0 + 1, y, x0 + w, y, x0 + w, y + 2.2, x0, y + 2.2], P14.helm, { split: 0.6, lw: 1 });
+    px3(c, x0 + 1.2, y + 0.3, w - 1.4, 0.4, P14.helm.l);
+  }
+  px3(c, -11.6, 0.4, 10.6, 0.5, A2.c);
+  G3(c, [-6, -14.4, -5.4, -17.2, -2.6, -20.6, 1, -21.4, 3.6, -19.6, 4.6, -16.6, 4.8, -14.4], P14.helm, { split: 0.6, lw: 1.2 });
+  c.save();
+  c.strokeStyle = tint(P14.helm.l);
+  c.lineWidth = 0.5;
+  c.beginPath();
+  c.moveTo(-5, -17);
+  c.lineTo(-2.4, -20);
+  c.lineTo(0.9, -20.7);
+  c.stroke();
+  c.strokeStyle = K6;
+  c.lineWidth = 0.4;
+  for (const [x, y] of [[-4.6, -18], [-3.4, -19.5], [-1.9, -20.6], [-0.4, -21.1], [1.2, -21.1], [2.5, -20.4], [3.6, -19.2], [4.3, -17.8]]) {
+    c.beginPath();
+    c.moveTo(x - 0.4, y + 0.5);
+    c.lineTo(x + 0.4, y - 0.4);
+    c.stroke();
+  }
+  c.restore();
+  G3(c, [-10, -3, -10, -10.8, -8, -14, -3, -15.2, 3, -15, 6.6, -13, 8, -10.6, 8, -3], P14.helm, { split: 0.7 });
+  c.save();
+  c.strokeStyle = tint(P14.helm.l);
+  c.lineWidth = 0.5;
+  c.beginPath();
+  c.moveTo(-9.4, -3.6);
+  c.lineTo(-9.4, -10.6);
+  c.lineTo(-7.7, -13.4);
+  c.stroke();
+  c.restore();
+  if (face5) face5(c);
+  else R3(c, -1.4, -10.6, 8.8, 10.2, { b: OPENING }, { lw: 1.2, flat: true });
+  G3(c, [-1.6, -12.2, 6.6, -12.2, 9.4, -10.9, 9, -10.1, -1.6, -10.4], P14.helm, { split: 0.66, lw: 1.1 });
+  px3(c, -1.2, -11.9, 7.6, 0.4, P14.helm.l);
+  px3(c, -1.6, -10.85, 8, 0.45, A2.c);
+  G3(c, [-2.6, -9.6, 0.6, -9.6, 0.8, -3.6, -0.2, 0.6, -2.6, 0.8], P14.helm, { split: 0.6, lw: 1.1 });
+  px3(c, -2.2, -9.2, 0.4, 9.4, P14.helm.l);
+  kgStud(c, -1, -7.8);
+  kgStud(c, -1, -2.4);
+  R3(c, -10.2, -12.2, 8.6, 1.6, accPal(A2), { flat: true, lw: 1.1 });
+  kgStud(c, -8.2, -11.4);
+  kgStud(c, -4.4, -11.4);
+  gem2(c, -5.6, -7.6, 1.6, A2.gem);
+};
 function bootIcon(c, kind, A2) {
+  if (KG_BOOT_ICON[kind]) {
+    KG_BOOT_ICON[kind](c, A2);
+    return;
+  }
   const h = BOOT_SHAFT[kind], [col2, cuff] = BOOT_COLORS[kind] ?? [P14.shoe, P14.leather];
   if (h) {
     G3(c, [-2.4, -h, 2, -h, 2, -3.6, 4.8, -3.4, 6, -2.2, 6, 0, -2.4, 0], col2, { split: 0.62, lw: 1.2 });
@@ -117126,6 +118176,10 @@ function bootIcon(c, kind, A2) {
   R3(c, -2.6, 0, 8.8, 1.2, { b: "#2a1f17" }, { flat: true, lw: 1 });
 }
 function gloveIcon(c, kind, A2) {
+  if (KG_GLOVE_ICON[kind]) {
+    KG_GLOVE_ICON[kind](c, A2);
+    return;
+  }
   const col2 = GLOVES[kind] ?? P14.strap, cuff = kind === "wraps" ? P14.linen : kind === "gauntlets" ? M.steel : P14.leather;
   G3(c, [-2.8, 1.8, -2.8, -4, -2.2, -4.8, 2, -4.8, 2.6, -4, 2.6, -0.8, 4.2, -2.4, 5, -1.6, 2.6, 1.8], col2, { split: 0.6, lw: 1.2 });
   for (const fx of [-1.4, 0, 1.3]) px3(c, fx, -4.8, 0.5, 2.2, "#00000059");
@@ -143620,7 +144674,13 @@ function boilbackIcon(c, A2) {
 }
 CAPE_ICONS["boilback-cloak"] = boilbackIcon;
 var ART3 = { main: WEAPONS2, gloves: GLOVES2, boots: BOOTS, helmet: HELMETS, body: BODIES, ring: RINGS, cape: CAPE_ICONS };
-var HERO_DRAWN = Object.freeze({ main: /* @__PURE__ */ new Set(["gravecleaver", "crownflame-scepter", "silkspinner", "slagmaul", "ventcutter", "coreheart", "wardlight-scepter", "croakhammer", "lashtongue-saber", "frogspawn-wand"]), gloves: /* @__PURE__ */ new Set(["cocoonsilk"]), helmet: /* @__PURE__ */ new Set(["eyestalk-crown"]) });
+var HERO_DRAWN = Object.freeze({
+  main: /* @__PURE__ */ new Set(["gravecleaver", "crownflame-scepter", "silkspinner", "slagmaul", "ventcutter", "coreheart", "wardlight-scepter", "croakhammer", "lashtongue-saber", "frogspawn-wand"]),
+  gloves: /* @__PURE__ */ new Set(["cocoonsilk", "gauntlets", "mail-gloves", "riveted-gloves", "lobster-gauntlets", "spiked-gauntlets"]),
+  helmet: /* @__PURE__ */ new Set(["eyestalk-crown", "coif", "kettle-hat", "nasal-helm", "helm", "barbute", "burgonet"]),
+  body: /* @__PURE__ */ new Set(["hauberk", "surcoat-mail", "banded-mail", "plate", "breastplate", "fluted-plate"]),
+  boots: /* @__PURE__ */ new Set(["knight-boots", "mail-boots", "shin-boots", "sabatons", "pointed-sabatons", "spurred-sabatons"])
+});
 var hasObjectIcon = (item2) => Boolean(ART3[item2?.slot]?.[item2.kind] || HERO_DRAWN[item2?.slot]?.has(item2?.kind));
 function drawObjectIcon(c, item2, size = 48) {
   if (HERO_DRAWN[item2.slot]?.has(item2.kind)) {
