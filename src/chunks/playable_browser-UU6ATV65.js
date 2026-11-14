@@ -212493,7 +212493,12 @@ async function createLocalEndlessSessionD9(options) {
         await stream.settled();
         const result = authority.withReadyAuthority((a) => a.seatPresenceV1(pid, away, localPlayerId));
         if (result.status === "changed") {
-          durable = await save();
+          seatCut = true;
+          try {
+            durable = await save();
+          } finally {
+            seatCut = false;
+          }
           requireContract(durable.status === "committed", durable.reason ?? "Seat change save failed");
         }
         return result;
@@ -217477,9 +217482,17 @@ async function startWorldClient(environment) {
       }
     };
     environment.addEventListener("pagehide", () => endCoop("The host closed the game"));
+    const saveTrouble = () => {
+      try {
+        const sv = session.saveStatus?.();
+        return sv?.durabilityFailed && sv.error ? ` \xB7 Not saving: ${String(sv.error).slice(0, 90)}` : "";
+      } catch {
+        return "";
+      }
+    };
     const sayParty = () => {
       const st = hosting.status(), n = st.playing.length, out4 = [...st.away, ...st.held.filter((h) => !h.left).map((h) => h.name)], back = st.held.filter((h) => !h.left && h.via === "qr").map((h) => h.name);
-      coopBar?.say([n ? `Playing together \xB7 ${n} ${n === 1 ? "friend" : "friends"}` : "", out4.length ? `${out4.join(", ")} away` : ""].filter(Boolean).join(" \xB7 ") || "Your friends have left");
+      coopBar?.say(([n ? `Playing together \xB7 ${n} ${n === 1 ? "friend" : "friends"}` : "", out4.length ? `${out4.join(", ")} away` : ""].filter(Boolean).join(" \xB7 ") || "Your friends have left") + saveTrouble());
       coopBar?.setExtra(back.length ? "Invite back" : null, () => coopScreens.showInviteBackV1({ environment, coopHost: hosting, names: back.join(" and ") }));
     };
     coopBar = coopScreens.mountCoopBarV1({ environment, label: "", action: "End game", onAction: () => {
