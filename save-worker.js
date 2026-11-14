@@ -1811,6 +1811,10 @@ function siteLevelV1(state, socket) {
 var siteMinimumLevelV1 = (state, socket) => usesSpawnLevelsV1(state) ? siteLevelV1(state, socket) : socket.minimumLevel;
 var siteScalesV1 = (state, socket) => !usesSpawnLevelsV1(state) || areaScalesV1(state, socket.region?.biome);
 var PACK_SIZES_V1 = Object.freeze([[1, 3, 5], [5, 4, 6], [10, 5, 8], [20, 6, 10], [30, 6, 12]]);
+var packSizesForBindingV1 = (b) => {
+  const m = /^world-maker-v1\.(\d+)$/.exec(b?.worldMaker ?? "");
+  return Boolean(m) && Number(m[1]) >= 22;
+};
 function packSizeRangeV1(level) {
   let range = PACK_SIZES_V1[0];
   for (const row2 of PACK_SIZES_V1) if (level >= row2[0]) range = row2;
@@ -13796,7 +13800,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     for (const c of [...s.footprint, ...s.approach]) add(c.x, c.y, 2);
     for (const p of asset.firstJourney.trail.path) add(Math.floor(p.x / 32), Math.floor(p.y / 26), 1);
   }
-  const packAnchors = createWorldPackSampler(asset, binding, tile, (cx, cy) => cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy / 2)));
+  const packAnchors = createWorldPackSampler(asset, binding, tile, packSizesForBindingV1(binding) ? (cx, cy) => cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy / 2)) : null);
   async function generateBase({ seed, chunkX, chunkY }) {
     requirePlan(seed === asset.campaignSeedHex, "Planned campaign seed mismatch");
     const cx = Number(BigInt(chunkX)) - PLANNED_ADDRESS_OFFSET.chunkX, cy = Number(BigInt(chunkY)) - PLANNED_ADDRESS_OFFSET.chunkY;
@@ -24816,7 +24820,7 @@ var entityId = (s, g, n) => "ent:" + token5(`${s.campaign.seed.seedHex}/${g.grou
 var collisionFor = (s) => s.spacesByInstanceId[s.overworldInstanceId].collision.origin ?? s.spacesByInstanceId[s.overworldInstanceId].collision;
 function originHordeDefinition(s, origin2, collision2, g) {
   const site = siteFor(origin2, g.groupId), room2 = site?.rooms.find((r) => r.roomId === g.roomId), anchor = g.anchor ?? g.members[0].position, spaceInstanceId = site ? s.campaign.sitesById[site.siteId].spaceInstanceId : s.overworldInstanceId;
-  const sized = !site && usesSpawnLevelsV1(s) ? packSizeRangeV1(1) : null, roll = hashReward(`${s.campaign.seed.seedHex}/${g.groupId}/horde-size`), count2 = sized ? sized[0] + roll % (sized[1] - sized[0] + 1) : 6 + roll % (site ? 3 : 7), members = copyWire(g.members), rank = tier(g.members[0].profileId), first = ORDINARY_ENEMIES.findIndex((e) => e.enemyDefinitionId === g.members[0].enemyDefinitionId);
+  const sized = !site && packSizesForBindingV1(s.d9World?.plannedWorld) ? packSizeRangeV1(1) : null, roll = hashReward(`${s.campaign.seed.seedHex}/${g.groupId}/horde-size`), count2 = sized ? sized[0] + roll % (sized[1] - sized[0] + 1) : 6 + roll % (site ? 3 : 7), members = copyWire(g.members), rank = tier(g.members[0].profileId), first = ORDINARY_ENEMIES.findIndex((e) => e.enemyDefinitionId === g.members[0].enemyDefinitionId);
   if (site) collision2 = site.collision;
   const offsets = [[0, -32], [32, 0], [0, 32], [-32, 0]], turn = hashReward(g.groupId + "/directions") % 4, queue = [copyWire(anchor)], seen = /* @__PURE__ */ new Set([anchor.x + "," + anchor.y]), resources = (s.d9World.origin.resources ?? []).filter((r) => r.spaceInstanceId === spaceInstanceId);
   for (let i = 0; i < queue.length && members.length < count2; i++) {

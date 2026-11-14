@@ -16404,6 +16404,10 @@ function siteLevelV1(state, socket) {
 var siteMinimumLevelV1 = (state, socket) => usesSpawnLevelsV1(state) ? siteLevelV1(state, socket) : socket.minimumLevel;
 var siteScalesV1 = (state, socket) => !usesSpawnLevelsV1(state) || areaScalesV1(state, socket.region?.biome);
 var PACK_SIZES_V1 = Object.freeze([[1, 3, 5], [5, 4, 6], [10, 5, 8], [20, 6, 10], [30, 6, 12]]);
+var packSizesForBindingV1 = (b) => {
+  const m = /^world-maker-v1\.(\d+)$/.exec(b?.worldMaker ?? "");
+  return Boolean(m) && Number(m[1]) >= 22;
+};
 function packSizeRangeV1(level) {
   let range = PACK_SIZES_V1[0];
   for (const row2 of PACK_SIZES_V1) if (level >= row2[0]) range = row2;
@@ -31877,6 +31881,7 @@ export {
   usesSpawnLevelsV1,
   chunkScalesV1,
   isLairSiteV1,
+  packSizesForBindingV1,
   packSizeRangeV1,
   memberLevelV1,
   memberLevelFitsV1,
