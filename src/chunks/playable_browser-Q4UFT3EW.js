@@ -213153,7 +213153,7 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
               continue;
             }
             console.warn("Co-op join failed", error);
-            if (here2()) drop3(g, /free seat/.test(error?.message ?? "") ? "That world has no free seat." : "The host\u2019s world could not seat your hero. Try again.");
+            if (here2()) drop3(g, /free seat/.test(error?.message ?? "") ? "That world has no free seat." : "The host\u2019s world could not seat your hero. Try again. (" + String(error?.message ?? error).slice(0, 140) + ")");
             return;
           }
           if (r?.status === "changed") {
