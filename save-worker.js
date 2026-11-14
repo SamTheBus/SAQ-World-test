@@ -1810,6 +1810,12 @@ function siteLevelV1(state, socket) {
 }
 var siteMinimumLevelV1 = (state, socket) => usesSpawnLevelsV1(state) ? siteLevelV1(state, socket) : socket.minimumLevel;
 var siteScalesV1 = (state, socket) => !usesSpawnLevelsV1(state) || areaScalesV1(state, socket.region?.biome);
+var PACK_SIZES_V1 = Object.freeze([[1, 3, 5], [5, 4, 6], [10, 5, 8], [20, 6, 10], [30, 6, 12]]);
+function packSizeRangeV1(level) {
+  let range = PACK_SIZES_V1[0];
+  for (const row2 of PACK_SIZES_V1) if (level >= row2[0]) range = row2;
+  return [range[1], range[2]];
+}
 var packLevelOffsetV1 = (entityId2) => SPAWN_LEVELS_V1.packOffsets[hash("spawn-levels-v1/pack/" + entityId2) % SPAWN_LEVELS_V1.packOffsets.length];
 var memberLevelOffsetV1 = (state, entityId2) => !usesSpawnLevelsV1(state) || state.bossCombat?.bossesByEntityId?.[entityId2] || state.bossCombat?.summonsByEntityId?.[entityId2] || state.eliteCombat?.elitesByEntityId?.[entityId2] ? 0 : packLevelOffsetV1(entityId2);
 var memberLevelV1 = (state, level, entityId2) => cap(Number(level) + memberLevelOffsetV1(state, entityId2));
@@ -2517,7 +2523,7 @@ function prepareEpisodeSnapshotD9(episode, { tick, minimumLevel, participants, a
 function chooseEpisodePlacementD9({ candidates, participants, spaceInstanceId, isLegal, combat = false, hollow = false, planned = false }) {
   requireContract(candidates.length <= D9_PROFILE.placementCandidates, "Placement work bound");
   for (const pair of candidates) {
-    requireContract(combat ? pair.length >= 6 && pair.length <= (planned ? PLANNED_EVENT_MEMBERS : hollow ? 13 : 12) : pair.length === 2, "D9 encounter member capacity");
+    requireContract(combat ? pair.length >= 3 && pair.length <= (planned ? PLANNED_EVENT_MEMBERS : hollow ? 13 : 12) : pair.length === 2, "D9 encounter member capacity");
     if (pair.every((p) => isLegal(p) && participants.every((a) => a.spaceInstanceId !== spaceInstanceId || pointDistance(p, a.position) >= D9_PROFILE.placementSafetyRadius))) return freezeWire(pair);
   }
   return null;
@@ -10674,7 +10680,7 @@ var hash5 = (s) => {
   for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
 };
-function createRoadsidePackSampler(asset, binding, tile) {
+function createRoadsidePackSampler(asset, binding, tile, levelAt = null) {
   const protectedChunks = /* @__PURE__ */ new Set(), protect = (c) => {
     if (c && Number.isFinite(c.x) && Number.isFinite(c.y)) protectedChunks.add(c.x + "," + c.y);
   };
@@ -10714,7 +10720,7 @@ function createRoadsidePackSampler(asset, binding, tile) {
       counts.status = "quiet-chunk";
       return done3([]);
     }
-    const count2 = 6 + (h >>> 8) % 7;
+    const level = levelAt?.(cx, cy) ?? null, [least, most] = Number.isInteger(level) ? packSizeRangeV1(level) : [6, 12], count2 = least + (h >>> 8) % (most - least + 1);
     for (let a = 0; a < 24; a++) {
       counts.centers++;
       const x = cx * 32 + 7 + hash5(h + "/x/" + a) % 18, y = cy * 26 + 6 + hash5(h + "/y/" + a) % 14, b = tile(x, y);
@@ -10765,8 +10771,8 @@ var hash6 = (s) => {
   for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
 };
-function createWorldPackSampler(asset, binding, tile) {
-  if (hasRoadsideEncounters(binding) && hasWorldCombat(binding)) return createRoadsidePackSampler(asset, binding, tile);
+function createWorldPackSampler(asset, binding, tile, levelAt = null) {
+  if (hasRoadsideEncounters(binding) && hasWorldCombat(binding)) return createRoadsidePackSampler(asset, binding, tile, levelAt);
   const protectedChunks = /* @__PURE__ */ new Set();
   const protect = (c) => {
     if (c && Number.isFinite(c.x)) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) protectedChunks.add(c.x + dx + "," + (c.y + dy));
@@ -13790,7 +13796,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     for (const c of [...s.footprint, ...s.approach]) add(c.x, c.y, 2);
     for (const p of asset.firstJourney.trail.path) add(Math.floor(p.x / 32), Math.floor(p.y / 26), 1);
   }
-  const packAnchors = createWorldPackSampler(asset, binding, tile);
+  const packAnchors = createWorldPackSampler(asset, binding, tile, (cx, cy) => cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy / 2)));
   async function generateBase({ seed, chunkX, chunkY }) {
     requirePlan(seed === asset.campaignSeedHex, "Planned campaign seed mismatch");
     const cx = Number(BigInt(chunkX)) - PLANNED_ADDRESS_OFFSET.chunkX, cy = Number(BigInt(chunkY)) - PLANNED_ADDRESS_OFFSET.chunkY;
@@ -24804,7 +24810,7 @@ var entityId = (s, g, n) => "ent:" + token5(`${s.campaign.seed.seedHex}/${g.grou
 var collisionFor = (s) => s.spacesByInstanceId[s.overworldInstanceId].collision.origin ?? s.spacesByInstanceId[s.overworldInstanceId].collision;
 function originHordeDefinition(s, origin2, collision2, g) {
   const site = siteFor(origin2, g.groupId), room2 = site?.rooms.find((r) => r.roomId === g.roomId), anchor = g.anchor ?? g.members[0].position, spaceInstanceId = site ? s.campaign.sitesById[site.siteId].spaceInstanceId : s.overworldInstanceId;
-  const count2 = 6 + hashReward(`${s.campaign.seed.seedHex}/${g.groupId}/horde-size`) % (site ? 3 : 7), members = copyWire(g.members), rank = tier(g.members[0].profileId), first = ORDINARY_ENEMIES.findIndex((e) => e.enemyDefinitionId === g.members[0].enemyDefinitionId);
+  const sized = !site && usesSpawnLevelsV1(s) ? packSizeRangeV1(1) : null, roll = hashReward(`${s.campaign.seed.seedHex}/${g.groupId}/horde-size`), count2 = sized ? sized[0] + roll % (sized[1] - sized[0] + 1) : 6 + roll % (site ? 3 : 7), members = copyWire(g.members), rank = tier(g.members[0].profileId), first = ORDINARY_ENEMIES.findIndex((e) => e.enemyDefinitionId === g.members[0].enemyDefinitionId);
   if (site) collision2 = site.collision;
   const offsets = [[0, -32], [32, 0], [0, 32], [-32, 0]], turn = hashReward(g.groupId + "/directions") % 4, queue = [copyWire(anchor)], seen = /* @__PURE__ */ new Set([anchor.x + "," + anchor.y]), resources = (s.d9World.origin.resources ?? []).filter((r) => r.spaceInstanceId === spaceInstanceId);
   for (let i = 0; i < queue.length && members.length < count2; i++) {
@@ -24822,7 +24828,7 @@ function originHordeDefinition(s, origin2, collision2, g) {
       queue.push(p2);
     }
   }
-  if (members.length < 6) return null;
+  if (members.length < (sized ? sized[0] : 6)) return null;
   return { ...copyWire(g), members };
 }
 function hasHistory(s, id2) {
@@ -28441,7 +28447,7 @@ function validateOriginHordeShape(root3) {
     requireContract((siteGroup || /^ordinary:[a-f0-9]{32}$/.test(id2)) && row2.groupId === id2 && ["expanded", "retained"].includes(row2.status) && typeof row2.protectedEpisode === "boolean", "Origin horde record identity");
     const g = row2.definition;
     closedRecord(g, siteGroup ? ["groupId", "roomId", "required", "members"] : ["groupId", "regionId", "anchor", "members"]);
-    requireContract(g.groupId === id2 && Array.isArray(g.members) && (row2.status === "expanded" ? g.members.length >= 6 && g.members.length <= (siteGroup ? 8 : 12) : g.members.length === 2), "Origin horde definition shape");
+    requireContract(g.groupId === id2 && Array.isArray(g.members) && (row2.status === "expanded" ? g.members.length >= (siteGroup ? 6 : 3) && g.members.length <= (siteGroup ? 8 : 12) : g.members.length === 2), "Origin horde definition shape");
     if (siteGroup) requireContract(/^room:[1-3]$/.test(g.roomId) && g.required === true, "Origin site horde room shape");
     else {
       requireContract(typeof g.regionId === "string" && g.regionId.length > 0 && g.regionId.length <= 128, "Origin horde region shape");

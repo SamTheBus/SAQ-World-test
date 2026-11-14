@@ -759,6 +759,7 @@ import {
   originManifestForState,
   outgoingCombat,
   ownedItem,
+  packSizeRangeV1,
   packageEligibleD9,
   pageDigest,
   parseCampaignEnvelope,
@@ -1099,7 +1100,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-D3N2HDHK.js";
+} from "./chunk-4XFFBWKS.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -119550,7 +119551,7 @@ var hash37 = (s) => {
   for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
 };
-function createRoadsidePackSampler(asset, binding, tile2) {
+function createRoadsidePackSampler(asset, binding, tile2, levelAt = null) {
   const protectedChunks = /* @__PURE__ */ new Set(), protect = (c) => {
     if (c && Number.isFinite(c.x) && Number.isFinite(c.y)) protectedChunks.add(c.x + "," + c.y);
   };
@@ -119590,7 +119591,7 @@ function createRoadsidePackSampler(asset, binding, tile2) {
       counts.status = "quiet-chunk";
       return done3([]);
     }
-    const count = 6 + (h >>> 8) % 7;
+    const level = levelAt?.(cx, cy2) ?? null, [least, most] = Number.isInteger(level) ? packSizeRangeV1(level) : [6, 12], count = least + (h >>> 8) % (most - least + 1);
     for (let a = 0; a < 24; a++) {
       counts.centers++;
       const x = cx * 32 + 7 + hash37(h + "/x/" + a) % 18, y = cy2 * 26 + 6 + hash37(h + "/y/" + a) % 14, b = tile2(x, y);
@@ -119641,8 +119642,8 @@ var hash38 = (s) => {
   for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
 };
-function createWorldPackSampler(asset, binding, tile2) {
-  if (hasRoadsideEncounters(binding) && hasWorldCombat(binding)) return createRoadsidePackSampler(asset, binding, tile2);
+function createWorldPackSampler(asset, binding, tile2, levelAt = null) {
+  if (hasRoadsideEncounters(binding) && hasWorldCombat(binding)) return createRoadsidePackSampler(asset, binding, tile2, levelAt);
   const protectedChunks = /* @__PURE__ */ new Set();
   const protect = (c) => {
     if (c && Number.isFinite(c.x)) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) protectedChunks.add(c.x + dx + "," + (c.y + dy));
@@ -120857,7 +120858,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     for (const c of [...s.footprint, ...s.approach]) add2(c.x, c.y, 2);
     for (const p of asset.firstJourney.trail.path) add2(Math.floor(p.x / 32), Math.floor(p.y / 26), 1);
   }
-  const packAnchors = createWorldPackSampler(asset, binding, tile2);
+  const packAnchors = createWorldPackSampler(asset, binding, tile2, (cx, cy2) => cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy2 / 2)));
   async function generateBase({ seed: seed2, chunkX, chunkY }) {
     requirePlan(seed2 === asset.campaignSeedHex, "Planned campaign seed mismatch");
     const cx = Number(BigInt(chunkX)) - PLANNED_ADDRESS_OFFSET.chunkX, cy2 = Number(BigInt(chunkY)) - PLANNED_ADDRESS_OFFSET.chunkY;
@@ -125861,7 +125862,7 @@ function validateOriginHordeShape(root6) {
     requireContract((siteGroup || /^ordinary:[a-f0-9]{32}$/.test(id2)) && row2.groupId === id2 && ["expanded", "retained"].includes(row2.status) && typeof row2.protectedEpisode === "boolean", "Origin horde record identity");
     const g = row2.definition;
     closedRecord(g, siteGroup ? ["groupId", "roomId", "required", "members"] : ["groupId", "regionId", "anchor", "members"]);
-    requireContract(g.groupId === id2 && Array.isArray(g.members) && (row2.status === "expanded" ? g.members.length >= 6 && g.members.length <= (siteGroup ? 8 : 12) : g.members.length === 2), "Origin horde definition shape");
+    requireContract(g.groupId === id2 && Array.isArray(g.members) && (row2.status === "expanded" ? g.members.length >= (siteGroup ? 6 : 3) && g.members.length <= (siteGroup ? 8 : 12) : g.members.length === 2), "Origin horde definition shape");
     if (siteGroup) requireContract(/^room:[1-3]$/.test(g.roomId) && g.required === true, "Origin site horde room shape");
     else {
       requireContract(typeof g.regionId === "string" && g.regionId.length > 0 && g.regionId.length <= 128, "Origin horde region shape");
@@ -126563,7 +126564,7 @@ var entityId = (s, g, n) => "ent:" + token2(`${s.campaign.seed.seedHex}/${g.grou
 var collisionFor = (s) => s.spacesByInstanceId[s.overworldInstanceId].collision.origin ?? s.spacesByInstanceId[s.overworldInstanceId].collision;
 function originHordeDefinition(s, origin, collision, g) {
   const site = siteFor(origin, g.groupId), room = site?.rooms.find((r) => r.roomId === g.roomId), anchor2 = g.anchor ?? g.members[0].position, spaceInstanceId = site ? s.campaign.sitesById[site.siteId].spaceInstanceId : s.overworldInstanceId;
-  const count = 6 + hashReward(`${s.campaign.seed.seedHex}/${g.groupId}/horde-size`) % (site ? 3 : 7), members = copyWire(g.members), rank = tier(g.members[0].profileId), first = ORDINARY_ENEMIES.findIndex((e) => e.enemyDefinitionId === g.members[0].enemyDefinitionId);
+  const sized = !site && usesSpawnLevelsV1(s) ? packSizeRangeV1(1) : null, roll9 = hashReward(`${s.campaign.seed.seedHex}/${g.groupId}/horde-size`), count = sized ? sized[0] + roll9 % (sized[1] - sized[0] + 1) : 6 + roll9 % (site ? 3 : 7), members = copyWire(g.members), rank = tier(g.members[0].profileId), first = ORDINARY_ENEMIES.findIndex((e) => e.enemyDefinitionId === g.members[0].enemyDefinitionId);
   if (site) collision = site.collision;
   const offsets = [[0, -32], [32, 0], [0, 32], [-32, 0]], turn7 = hashReward(g.groupId + "/directions") % 4, queue = [copyWire(anchor2)], seen5 = /* @__PURE__ */ new Set([anchor2.x + "," + anchor2.y]), resources = (s.d9World.origin.resources ?? []).filter((r) => r.spaceInstanceId === spaceInstanceId);
   for (let i = 0; i < queue.length && members.length < count; i++) {
@@ -126581,7 +126582,7 @@ function originHordeDefinition(s, origin, collision, g) {
       queue.push(p2);
     }
   }
-  if (members.length < 6) return null;
+  if (members.length < (sized ? sized[0] : 6)) return null;
   return { ...copyWire(g), members };
 }
 function hasHistory(s, id2) {
@@ -130576,73 +130577,6 @@ function separateLiveOrdinary(state2, activeIds, spatial, manifest, measure2) {
   return stats3;
 }
 
-// src/shared/content/wilderness_pack_pacing_v3_4.js
-var WILDERNESS_PACK_PACING_V3_4 = Object.freeze({
-  version: "wilderness-v3-4-starter-pack-pacing-1",
-  maxUnprovokedPursuersPerPack: 3,
-  starterHeroBelowLevel: 6,
-  scope: "Wilderness overworld ordinary packs only",
-  fullRetaliation: "any damaged pack member wakes everyone"
-});
-var hurt2 = (a) => !(typeof a.hp === "string" && a.hp === a.maxHp) && compareCombat(a.hp, a.maxHp) < 0;
-function wildernessPackPursuitAllowed(state2, group, source3, target, eligible2 = () => true) {
-  const count = WILDERNESS_PACK_PACING_V3_4.maxUnprovokedPursuersPerPack;
-  if (!usesWildernessFairnessV3_2(state2) || !group?.containment || group.siteId !== null || !Array.isArray(group.entityIds) || group.entityIds.length <= count || source3?.team !== "hostile" || target?.team !== "party" || source3?.boss || state2.bossCombat?.bossesByEntityId?.[source3.entityId] || state2.eliteCombat?.elitesByEntityId?.[source3.entityId]) return true;
-  const player = Object.values(state2.playersById).find((p) => p.entityId === target.entityId);
-  if (!player || BigInt(player.progression.level) >= BigInt(WILDERNESS_PACK_PACING_V3_4.starterHeroBelowLevel)) return true;
-  if (group.entityIds.some((id2) => {
-    const member = state2.entitiesById[id2];
-    return member && !member.alive || member?.alive && hurt2(member);
-  })) return true;
-  const d = Math.hypot(source3.position.x - target.position.x, source3.position.y - target.position.y);
-  if (d <= source3.attackReach + source3.combatRadius + target.combatRadius + 4 || source3.ai?.melee?.phase && source3.ai.melee.phase !== "idle") return true;
-  const members = group.entityIds.map((id2) => state2.entitiesById[id2]).filter((a) => a?.alive && a.team === "hostile" && a.residency.spaceInstanceId === target.residency.spaceInstanceId && !a.boss && !state2.bossCombat?.bossesByEntityId?.[a.entityId] && !state2.eliteCombat?.elitesByEntityId?.[a.entityId]);
-  members.sort((a, b) => {
-    const x = Math.hypot(a.position.x - target.position.x, a.position.y - target.position.y);
-    const y = Math.hypot(b.position.x - target.position.x, b.position.y - target.position.y);
-    return x - y || a.entityId.localeCompare(b.entityId);
-  });
-  let picked = 0;
-  for (const member of members) {
-    if (!eligible2(member, target)) continue;
-    if (member.entityId === source3.entityId) return picked < count;
-    if (++picked >= count) break;
-  }
-  return false;
-}
-var WILDERNESS_GLOBAL_PACK_PACING_V3_4_2 = Object.freeze({
-  version: "wilderness-v3-4-2-global-frontier-1",
-  maximumUnprovokedPursuers: 3,
-  noviceLevelMaximum: 5,
-  lowRegionLevelMaximum: 5,
-  starterRadiusPixels: 1536
-});
-function wildernessGlobalPursuerCap(state2, group, target, startLocal = null) {
-  if (!usesWildernessFairnessV3_2(state2) || group?.siteId !== null || !group?.containment || group.spaceInstanceId !== state2.overworldInstanceId || !target?.alive) return null;
-  const player = Object.values(state2.playersById).find((p) => p.entityId === target.entityId);
-  const level = Number(player?.progression?.level);
-  if (!Number.isFinite(level) || level < 1 || level > WILDERNESS_GLOBAL_PACK_PACING_V3_4_2.noviceLevelMaximum) return null;
-  if (group.entityIds.some((id2) => {
-    const a = state2.entitiesById[id2];
-    return a && (!a.alive || hurt2(a));
-  })) return null;
-  const floor = Number(state2.d9World?.episodes?.[group.groupId]?.geography?.minimumLevel);
-  const low = Number.isFinite(floor) && floor >= 1 && floor <= WILDERNESS_GLOBAL_PACK_PACING_V3_4_2.lowRegionLevelMaximum;
-  const near5 = Boolean(startLocal && Math.hypot(target.position.x - startLocal.x, target.position.y - startLocal.y) <= WILDERNESS_GLOBAL_PACK_PACING_V3_4_2.starterRadiusPixels);
-  return low || near5 ? WILDERNESS_GLOBAL_PACK_PACING_V3_4_2.maximumUnprovokedPursuers : null;
-}
-function selectWildernessGlobalPursuers(candidates, limit = WILDERNESS_GLOBAL_PACK_PACING_V3_4_2.maximumUnprovokedPursuers) {
-  if (!Number.isInteger(limit) || limit < 1) throw Error("Invalid global pursuit limit");
-  const selected = [], seen5 = /* @__PURE__ */ new Set();
-  for (const row2 of [...candidates].sort((a, b) => a.distance - b.distance || a.entityId.localeCompare(b.entityId))) {
-    if (!Number.isFinite(row2.distance) || row2.distance < 0 || seen5.has(row2.entityId)) continue;
-    seen5.add(row2.entityId);
-    selected.push(row2.entityId);
-    if (selected.length >= limit) break;
-  }
-  return selected;
-}
-
 // src/simulation/encounter_containment_d11_2.js
 var distance5 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 var toward2 = (from, to, speed) => {
@@ -130656,14 +130590,18 @@ var angleSeed = (value2) => {
   for (let i = 0; i < value2.length; i++) h = Math.imul(h ^ value2.charCodeAt(i), 16777619);
   return (h >>> 0) / 4294967296 * Math.PI * 2;
 };
+var WORLD_PACK_LEASH_PIXELS = 1280;
+var WORLD_PACK_PATIENCE_TICKS = 240;
 function createEncounterContainmentD11_2(state2, { participantPolicy = () => null, targetPolicy = () => null, canReach = meleeLineClear } = {}) {
   const groupsByActor = /* @__PURE__ */ new Map(), participantsByGroup = /* @__PURE__ */ new Map(), globalSlotsByPlayer = /* @__PURE__ */ new Map();
   let transitions = 0, returns = 0, reengagements = 0, alerts = 0, globalStarterCandidates = 0, globalStartLocal = null;
+  const lastChaseByGroup = /* @__PURE__ */ new Map(), chased = (group) => lastChaseByGroup.set(group.groupId, state2.tick);
   function refreshGroups() {
     groupsByActor.clear();
     for (const group of Object.values(state2.groupsById)) if (group.containment) for (const id2 of group.entityIds) groupsByActor.set(id2, group);
   }
-  const nearby = (group, target, radius, phase2 = null) => hasWorldCombat(state2) ? group.entityIds.some((id2) => {
+  const leashed = (group, target) => group.siteId !== null || distance5(target.position, group.containment.homeAnchor) <= WORLD_PACK_LEASH_PIXELS;
+  const nearby = (group, target, radius, phase2 = null) => hasWorldCombat(state2) ? leashed(group, target) && group.entityIds.some((id2) => {
     const actor = state2.entitiesById[id2];
     return actor?.alive && actor.residency.spaceInstanceId === target.residency.spaceInstanceId && distance5(actor.position, target.position) <= radius && (phase2 !== "acquire" || meleeLineClear(state2.spacesByInstanceId[actor.residency.spaceInstanceId].collision, actor, target));
   }) : distance5(target.position, group.containment.homeAnchor) <= radius;
@@ -130694,47 +130632,6 @@ function createEncounterContainmentD11_2(state2, { participantPolicy = () => nul
     }
     if (mode === "engaged" && state2.tick > 0) reengagements++;
   };
-  function prepareGlobalPursuitSlots(active2) {
-    globalSlotsByPlayer.clear();
-    globalStarterCandidates = 0;
-    globalStartLocal = null;
-    const w = state2.d9World;
-    if (!w?.plannedWorld) return;
-    globalStartLocal = w.plannedStart ? projectToLocalFrameD9(w.plannedStart, w.runtime.frames) : null;
-    const byHero = /* @__PURE__ */ new Map();
-    for (const group of tickGroups) {
-      const c = group.containment;
-      if (!c || c.mode !== "engaged" || group.siteId !== null) continue;
-      const collision = state2.spacesByInstanceId[group.spaceInstanceId]?.collision;
-      if (!collision) continue;
-      for (const target of participantsByGroup.get(group.groupId) ?? []) {
-        const cap9 = wildernessGlobalPursuerCap(state2, group, target, globalStartLocal);
-        if (cap9 === null) continue;
-        let row2 = byHero.get(target.entityId);
-        if (!row2) {
-          row2 = { cap: cap9, candidates: [] };
-          byHero.set(target.entityId, row2);
-        }
-        for (const id2 of group.entityIds) {
-          if (active2 && !active2.has(id2)) continue;
-          const actor = state2.entitiesById[id2];
-          if (!actor?.alive || actor.boss || state2.bossCombat?.bossesByEntityId?.[id2] || state2.eliteCombat?.elitesByEntityId?.[id2] || actor.residency.spaceInstanceId !== target.residency.spaceInstanceId) continue;
-          const d = distance5(actor.position, target.position);
-          if (d > c.pursuitRadius || targetPolicy(actor, target) === false || !canReach(collision, actor, target)) continue;
-          row2.candidates.push({ entityId: id2, distance: d });
-          globalStarterCandidates++;
-        }
-      }
-    }
-    for (const [id2, row2] of byHero) globalSlotsByPlayer.set(id2, new Set(selectWildernessGlobalPursuers(row2.candidates, row2.cap)));
-  }
-  function globalPursuitAllowed(group, actor, target) {
-    const cap9 = wildernessGlobalPursuerCap(state2, group, target, globalStartLocal);
-    if (cap9 === null || actor.boss || state2.bossCombat?.bossesByEntityId?.[actor.entityId] || state2.eliteCombat?.elitesByEntityId?.[actor.entityId]) return true;
-    const close = actor.attackReach + actor.combatRadius + target.combatRadius + 4;
-    if (distance5(actor.position, target.position) <= close || actor.ai?.melee?.phase && actor.ai.melee.phase !== "idle") return true;
-    return globalSlotsByPlayer.get(target.entityId)?.has(actor.entityId) === true;
-  }
   let tickGroups = [];
   function beginTick(activeIds = null) {
     const active2 = activeIds ? new Set(activeIds) : null;
@@ -130748,17 +130645,29 @@ function createEncounterContainmentD11_2(state2, { participantPolicy = () => nul
       if (c.mode === "guard") {
         if (acquire.length) setMode(group, "engaged");
       } else if (c.mode === "engaged") {
-        if (pursuit.length) c.outsideTicks = 0;
-        else if (++c.outsideTicks >= c.disengageTicks) setMode(group, "returning");
+        if (pursuit.length) {
+          c.outsideTicks = 0;
+          if (group.siteId === null && hasWorldCombat(state2)) {
+            if (!lastChaseByGroup.has(group.groupId)) chased(group);
+            if (state2.tick - Math.max(lastChaseByGroup.get(group.groupId), c.modeStartedTick) >= WORLD_PACK_PATIENCE_TICKS && !group.entityIds.some((id2) => {
+              const m = state2.entitiesById[id2]?.ai?.melee;
+              return m?.phase && m.phase !== "idle";
+            })) {
+              setMode(group, "returning");
+              lastChaseByGroup.delete(group.groupId);
+            }
+          }
+        } else if (++c.outsideTicks >= c.disengageTicks) setMode(group, "returning");
       } else if (c.mode === "returning" && acquire.length) setMode(group, "engaged");
       participantsByGroup.set(group.groupId, c.mode === "engaged" ? modeAtStart === "engaged" ? pursuit : participants(group, c.pursuitRadius, "pursuit") : []);
     }
-    prepareGlobalPursuitSlots(active2);
   }
   function targetFor(actor, eligible2) {
     const group = groupsByActor.get(actor.entityId);
     if (!group || group.containment.mode !== "engaged") return null;
-    return (participantsByGroup.get(group.groupId) ?? []).filter((target) => eligible2(actor, target) && wildernessPackPursuitAllowed(state2, group, actor, target, eligible2) && globalPursuitAllowed(group, actor, target)).map((target) => ({ target, d: distance5(actor.position, target.position) })).sort((a, b) => a.d - b.d || a.target.entityId.localeCompare(b.target.entityId))[0]?.target ?? null;
+    const found = (participantsByGroup.get(group.groupId) ?? []).filter((target) => eligible2(actor, target)).map((target) => ({ target, d: distance5(actor.position, target.position) })).sort((a, b) => a.d - b.d || a.target.entityId.localeCompare(b.target.entityId))[0]?.target ?? null;
+    if (found) chased(group);
+    return found;
   }
   function approach(actor, target, collision) {
     const group = groupsByActor.get(actor.entityId), c = group?.containment;
@@ -130805,6 +130714,7 @@ function createEncounterContainmentD11_2(state2, { participantPolicy = () => nul
     if (!group?.containment || group.cleared) return false;
     setMode(group, "engaged");
     group.containment.outsideTicks = 0;
+    chased(group);
     alerts++;
     return true;
   }
@@ -210581,7 +210491,7 @@ function applyWorldTransferPatchD9(state2, patch) {
     };
     const pendingSpore = state2.d9World.runtime.chunks.some((c) => c.anchors.some((a) => (sporeOrdinal(a.ordinal) || hollowOrdinal(a.ordinal) || plannedEventOrdinal(a.ordinal)) && "ordinary:" + a.id.split(":").at(-1) === placement.groupId && c.chunkX === placement.anchor.chunkX && c.chunkY === placement.anchor.chunkY && a.position.x === placement.anchor.localX && a.position.y === placement.anchor.localY && a.members.length === placement.positions.length && a.members.every((m, n) => placement.positions[n].chunkX === c.chunkX && placement.positions[n].chunkY === c.chunkY && placement.positions[n].localX === m.position.x && placement.positions[n].localY === m.position.y)));
     const pendingHollow = pendingSpore && state2.d9World.runtime.chunks.some((c) => c.anchors.some((a) => (hollowOrdinal(a.ordinal) || plannedEventOrdinal(a.ordinal)) && "ordinary:" + a.id.split(":").at(-1) === placement.groupId)), pendingPlanned = pendingHollow && state2.d9World.runtime.chunks.some((c) => c.anchors.some((a) => plannedEventOrdinal(a.ordinal) && "ordinary:" + a.id.split(":").at(-1) === placement.groupId));
-    requireContract(placement.positions.length === 2 || hasWorldCombat(state2) && placement.positions.length >= 6 && placement.positions.length <= (pendingPlanned ? PLANNED_EVENT_MEMBERS : pendingHollow ? 13 : 12), "Prepared placement composition changed");
+    requireContract(placement.positions.length === 2 || hasWorldCombat(state2) && placement.positions.length >= 3 && placement.positions.length <= (pendingPlanned ? PLANNED_EVENT_MEMBERS : pendingHollow ? 13 : 12), "Prepared placement composition changed");
     requireContract(participants.some((p) => p.alive && distance12(p.position, placement.anchor) <= D9_PROFILE.prepareRadius) && (pendingSpore || placement.positions.every((q2) => participants.every((p) => distance12(q2, p.position) >= D9_PROFILE.placementSafetyRadius))), "Participant approach/safe placement changed");
   }
   const targets = [];

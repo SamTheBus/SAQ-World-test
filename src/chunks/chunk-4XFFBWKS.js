@@ -16397,6 +16397,12 @@ function siteLevelV1(state, socket) {
 }
 var siteMinimumLevelV1 = (state, socket) => usesSpawnLevelsV1(state) ? siteLevelV1(state, socket) : socket.minimumLevel;
 var siteScalesV1 = (state, socket) => !usesSpawnLevelsV1(state) || areaScalesV1(state, socket.region?.biome);
+var PACK_SIZES_V1 = Object.freeze([[1, 3, 5], [5, 4, 6], [10, 5, 8], [20, 6, 10], [30, 6, 12]]);
+function packSizeRangeV1(level) {
+  let range = PACK_SIZES_V1[0];
+  for (const row2 of PACK_SIZES_V1) if (level >= row2[0]) range = row2;
+  return [range[1], range[2]];
+}
 var packLevelOffsetV1 = (entityId) => SPAWN_LEVELS_V1.packOffsets[hash2("spawn-levels-v1/pack/" + entityId) % SPAWN_LEVELS_V1.packOffsets.length];
 var memberLevelOffsetV1 = (state, entityId) => !usesSpawnLevelsV1(state) || state.bossCombat?.bossesByEntityId?.[entityId] || state.bossCombat?.summonsByEntityId?.[entityId] || state.eliteCombat?.elitesByEntityId?.[entityId] ? 0 : packLevelOffsetV1(entityId);
 var memberLevelV1 = (state, level, entityId) => cap(Number(level) + memberLevelOffsetV1(state, entityId));
@@ -31865,6 +31871,7 @@ export {
   usesSpawnLevelsV1,
   chunkScalesV1,
   isLairSiteV1,
+  packSizeRangeV1,
   memberLevelV1,
   memberLevelFitsV1,
   groupBaseLevelV1,
