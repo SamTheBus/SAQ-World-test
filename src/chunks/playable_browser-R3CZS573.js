@@ -131291,7 +131291,7 @@ function seatPartyV1(state2, { host, guests = [], seats, lastPlayerId, heroIds =
   return { state: state2, playerId: first.playerId, seats: next, party: party4, changed };
 }
 var playerSet = (s) => new Set(s.session.playerIds);
-function seatComparable(s, kept, party4, room) {
+function seatComparable(s, kept, party4, room, arrived = false) {
   const c = copyWire(s), keep8 = (pid) => kept.has(pid), only = (rows) => {
     if (rows) {
       for (const pid of Object.keys(rows)) if (!keep8(pid)) delete rows[pid];
@@ -131300,6 +131300,10 @@ function seatComparable(s, kept, party4, room) {
   delete c.session.playerIds;
   delete c.waitingRoom;
   delete c.identitySequence;
+  if (arrived && c.d9World) {
+    c.d9World.ownershipIndex = null;
+    c.d9World.groundIndex = null;
+  }
   for (const pid of Object.keys(c.playersById)) {
     if (!keep8(pid)) {
       delete c.playersById[pid];
@@ -131385,7 +131389,8 @@ function validateSeatChangeV1(a, b) {
   }
   const party4 = { entities, characters, kept: new Set([...kept].map((pid) => b.playersById[pid].entityId)) };
   const room = a.waitingRoom ? null : b.waitingRoom?.spaceInstanceId ?? null;
-  requireContract(seatComparable(a, kept, party4, null) === seatComparable(b, kept, party4, room), "Seat change touched more than seats");
+  const arrived = [...B7].some((pid) => !A2.has(pid));
+  requireContract(seatComparable(a, kept, party4, null, arrived) === seatComparable(b, kept, party4, room, arrived), "Seat change touched more than seats");
 }
 
 // src/shared/contracts/party_world_v1.js
@@ -138481,7 +138486,7 @@ function createEliteMovesV2(state2, { applyDirectDamage, chill = () => null, eli
 }
 
 // src/simulation/activity_simulation.js
-function createActivitySimulation(initialState, { measure: measure2 = (_name, fn) => fn(), schedulerOptions = {}, developerCapabilities = {} } = {}) {
+function createActivitySimulation(initialState, { measure: measure2 = (_name, fn) => fn(), schedulerOptions = {}, developerCapabilities = {}, startVersion = 0 } = {}) {
   const state2 = installWorldEvents(copyWire(upgradeActivityState(initialState)));
   installWorldHostileMelee(state2);
   installHostileProjectiles(state2);
@@ -138506,7 +138511,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     requireContract(result, "Invalid elite periodic target");
     return result;
   } }), bossCombat = createBossCombatD12_5A(state2, { eligible: (source3, target) => canActivityApplyDamage(state2, manifest, source3, target), applyDirectDamage: (source3, target, amount2, mechanic, packet = {}) => damage(source3, target, amount2, mechanic, null, { scripted: true, directEnemyAttack: "melee", trigger: null, ...packet }) }), namedElites = createNamedEliteCombatV1(state2, { active: (id2) => activeIds.includes(id2) && !denHeldV1(state2, id2), chill: (e, target) => eliteCombat.chill(e, target), eligible: (source3, target) => canActivityApplyDamage(state2, manifest, source3, target), lineClear: (source3, target) => meleeLineClear(state2.spacesByInstanceId[source3.residency.spaceInstanceId].collision, source3, target), applyDirectDamage: (source3, target, amount2, mechanic) => damage(source3, target, amount2, mechanic, null, { scripted: true, directEnemyAttack: "melee", trigger: null }) }), eliteMoves = createEliteMovesV2(state2, { active: (id2) => activeIds.includes(id2) && !denHeldV1(state2, id2), eligible: (source3, target) => canActivityApplyDamage(state2, manifest, source3, target), lineClear: (source3, target) => meleeLineClear(state2.spacesByInstanceId[source3.residency.spaceInstanceId].collision, source3, target), chill: (e, target) => eliteCombat.chill(e, target), applyDirectDamage: (source3, target, amount2, mechanic) => damage(source3, target, amount2, mechanic, null, { scripted: true, directEnemyAttack: "melee", trigger: null }) });
-  let activeIds = [], events = [], version = 0, lastUpdated = [], clearedGroups = Object.values(state2.groupsById).filter((g) => g.cleared).length;
+  let activeIds = [], events = [], version = startVersion, lastUpdated = [], clearedGroups = Object.values(state2.groupsById).filter((g) => g.cleared).length;
   let renewal = createEncounterRenewal(state2, manifest, (g) => scheduler.renewGroup(g));
   const identity2 = (prefix2) => `${prefix2}:${safeInteger(++state2.identitySequence, 1).toString(16).padStart(32, "0")}`;
   function emit(event) {
@@ -139480,7 +139485,8 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
 
 // src/host/activity_authority.js
 function createActivityAuthority({ initialState, measure: measure2, schedulerOptions, developerCapabilities }) {
-  const simulation = createActivitySimulation(initialState, { measure: measure2, schedulerOptions, developerCapabilities });
+  let simulation = createActivitySimulation(initialState, { measure: measure2, schedulerOptions, developerCapabilities });
+  const api = Object.fromEntries(Object.keys(simulation).map((key4) => [key4, (...args) => simulation[key4](...args)]));
   const contracts = createCommandGatewayContracts({
     validateWorldState: (s) => simulation.withAuthorityState((owned2) => requireContract(s === owned2, "Untrusted internal state")),
     validateCommand: validateActivityCommand,
@@ -139500,7 +139506,49 @@ function createActivityAuthority({ initialState, measure: measure2, schedulerOpt
       gateway = simulation.withAuthorityState((s) => contracts.retireAppliedAdmissions(gateway, s));
     }
   }
-  return Object.freeze({ ...simulation, createControllerPort, drainCommands, readGateway: () => freezeWire(gateway), nextClientSequence: (playerId) => gateway.playersById[playerId].nextClientSequence, getExactSnapshotForProof: () => ({ snapshot: simulation.getSnapshot(), gateway: freezeWire(gateway) }) });
+  let undoJoin = null;
+  function seatJoinV1(guest, seats, hostPlayerId, heroIds) {
+    const before = simulation.readState();
+    requireContract(before.playersById[hostPlayerId] && !isWaiting(before, hostPlayerId), "Unknown seat");
+    const draft = copyWire(before), seated = seatHeroV1(draft, { passport: guest.passport, heroId: guest.heroId, seats, lastPlayerId: hostPlayerId, heroIds, stand: draft.session.playerIds.filter((id2) => !isWaiting(draft, id2)) });
+    let next;
+    try {
+      validateActivityState(draft);
+      validateSeatChangeV1(before, draft);
+      next = createActivitySimulation(draft, { measure: measure2, schedulerOptions, developerCapabilities, startVersion: simulation.version() + 1 });
+      next.withAuthorityState((s) => {
+        for (const [id2, g] of Object.entries(s.groupsById)) {
+          const was = draft.groupsById[id2];
+          if (was && g.lastRequiredTick !== was.lastRequiredTick) g.lastRequiredTick = was.lastRequiredTick;
+        }
+      });
+      validateSeatChangeV1(before, next.readState());
+    } catch (error) {
+      error.seatJoinRetry = true;
+      throw error;
+    }
+    const old2 = gateway, previous = simulation;
+    simulation = next;
+    try {
+      const fresh = simulation.withAuthorityState(contracts.createGatewayState), players = {};
+      for (const [pid, row2] of Object.entries(fresh.playersById)) players[pid] = old2.playersById[pid] ?? row2;
+      const admitted2 = Object.fromEntries(Object.entries(old2.admittedCommandsById).filter(([, e]) => players[e.command.playerId]));
+      gateway = contracts.validateGatewayState({ ...copyWire(old2), playersById: copyWire(players), admittedCommandsById: copyWire(admitted2) });
+    } catch (error) {
+      simulation = previous;
+      gateway = old2;
+      throw error;
+    }
+    undoJoin = { simulation: previous, gateway: old2 };
+    return freezeWire({ status: "changed", playerId: seated.playerId, seats: copyWire(seated.seats) });
+  }
+  function seatJoinUndoV1() {
+    requireContract(undoJoin, "No join to take back");
+    ({ simulation, gateway } = undoJoin);
+    undoJoin = null;
+    return freezeWire({ status: "undone" });
+  }
+  return Object.freeze({ ...api, seatJoinV1, seatJoinUndoV1, createControllerPort, drainCommands, readGateway: () => freezeWire(gateway), nextClientSequence: (playerId) => gateway.playersById[playerId].nextClientSequence, getExactSnapshotForProof: () => ({ snapshot: simulation.getSnapshot(), gateway: freezeWire(gateway) }) });
 }
 
 // src/host/exact_cut_authority_core.js
@@ -211770,6 +211818,7 @@ async function createLocalEndlessSessionD9(options) {
     }
   }
   const savedPlayerId = localPlayerId;
+  let seatBook = null;
   if (options.heroSeat) {
     const seat = options.heroSeat, draft = copyWire(opened2.state), seated = seat.party?.length ? seatPartyV1(draft, { host: { passport: seat.passport ?? null, heroId: seat.heroId, seatWins: seat.seatWins === true }, guests: seat.party, seats: seat.seats ?? {}, lastPlayerId: localPlayerId ?? null, heroIds: seat.heroIds ?? null }) : seatHeroV1(draft, { passport: seat.passport ?? null, heroId: seat.heroId, seats: seat.seats ?? {}, lastPlayerId: localPlayerId ?? null, heroIds: seat.heroIds ?? null, seatWins: seat.seatWins === true });
     if (seated.changed) {
@@ -211780,6 +211829,7 @@ async function createLocalEndlessSessionD9(options) {
     }
     localPlayerId = seated.playerId;
     seat.onSeated?.({ playerId: localPlayerId, seats: seated.seats, party: seated.party ?? null });
+    seatBook = { seats: seated.seats, heroIds: seat.heroIds ?? null, party: { ...seated.party ?? { [seat.heroId]: seated.playerId } }, onSeated: seat.onSeated ?? null };
   }
   if (options.bestiaryAlbum && opened2.state.d9World) {
     const draft = copyWire(opened2.state);
@@ -212405,6 +212455,50 @@ async function createLocalEndlessSessionD9(options) {
     })();
     return servicePending;
   };
+  const seatJoin = (guest) => {
+    if (!seatBook) return Promise.reject(Error("This world keeps no seats"));
+    if (servicePending || ferryPending || respawnPending || functionalCommands.busy() || fatalInvariant || authority.getStatus().phase !== "ready") return Promise.resolve({ status: "busy" });
+    servicePending = (async () => {
+      reviewTravelPending = true;
+      try {
+        if (groundPreparation) await groundPreparation.promise;
+        if (saving) await saving;
+        await stream.settled();
+        authority.drainCommands();
+        let durable = await save();
+        requireContract(durable.status === "committed", durable.reason ?? "Seat change save failed");
+        if (saving) await saving;
+        await stream.settled();
+        const ids4 = seatBook.heroIds ? [.../* @__PURE__ */ new Set([...seatBook.heroIds, ...Object.keys(seatBook.party), guest.heroId])] : null;
+        const result = authority.withReadyAuthority((a) => a.seatJoinV1({ heroId: guest.heroId, passport: guest.passport }, seatBook.seats, localPlayerId, ids4));
+        durable = await save();
+        if (durable.status !== "committed") {
+          try {
+            authority.withReadyAuthority((a) => a.seatJoinUndoV1());
+          } catch (error) {
+            console.warn("Join not taken back", error);
+          }
+          requireContract(false, durable.reason ?? "Seat change save failed");
+        }
+        seatBook.seats = result.seats;
+        seatBook.party[guest.heroId] = result.playerId;
+        try {
+          seatBook.onSeated?.({ playerId: localPlayerId, seats: result.seats, party: { ...seatBook.party } });
+        } catch (error) {
+          console.warn("Seat list not kept", error);
+        }
+        return result;
+      } catch (error) {
+        lastError = error.message;
+        throw error;
+      } finally {
+        reviewTravelPending = false;
+        servicePending = null;
+        void stream.pump();
+      }
+    })();
+    return servicePending;
+  };
   const partyFacts = (change) => {
     if (servicePending || ferryPending || respawnPending || functionalCommands.busy() || fatalInvariant || authority.getStatus().phase !== "ready") return Promise.resolve({ status: "busy" });
     servicePending = (async () => {
@@ -212435,7 +212529,7 @@ async function createLocalEndlessSessionD9(options) {
     })();
     return servicePending;
   };
-  const coop = Object.freeze({ hostPlayerId: () => localPlayerId, tick: () => authority.withAuthority((a) => a.withAuthorityState((s) => s.tick)), seatPresence, partyFacts, waiting: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => Boolean(s.waitingRoom) && s.entitiesById[s.playersById[pid].entityId]?.residency.spaceInstanceId === s.waitingRoom.spaceInstanceId)), readModel: (pid) => seatPort(pid).getReadModel(), passport: (pid, heroId) => authority.withAuthority((a) => a.withAuthorityState((s) => s.playersById[pid] ? extractHeroPassport(s, pid, { heroId }) : null)), inventoryMark: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => {
+  const coop = Object.freeze({ hostPlayerId: () => localPlayerId, tick: () => authority.withAuthority((a) => a.withAuthorityState((s) => s.tick)), seatPresence, seatJoin, partyFacts, waiting: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => Boolean(s.waitingRoom) && s.entitiesById[s.playersById[pid].entityId]?.residency.spaceInstanceId === s.waitingRoom.spaceInstanceId)), readModel: (pid) => seatPort(pid).getReadModel(), passport: (pid, heroId) => authority.withAuthority((a) => a.withAuthorityState((s) => s.playersById[pid] ? extractHeroPassport(s, pid, { heroId }) : null)), inventoryMark: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => {
     const p = s.playersById[pid];
     if (!p) return null;
     const i = p.inventory;
@@ -212829,6 +212923,7 @@ var AWAY_WAIT_MS = 5e3;
 var KEEP_PASSPORTS = 12;
 function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, readWorldFile = null, onFacts = () => {
 }, now: now3 = () => performance.now(), setInterval: setInterval2 = globalThis.setInterval.bind(globalThis), clearInterval: clearInterval2 = globalThis.clearInterval.bind(globalThis), setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis), clearTimeout: clearTimeout2 = globalThis.clearTimeout.bind(globalThis), nextToken, onChange = () => {
+}, onJoin = () => {
 }, validatePassport = validateHeroPassport }) {
   const guests = /* @__PURE__ */ new Map(), held = /* @__PURE__ */ new Map();
   let session = null, started = false, timer = null, closed2 = false, shared = null;
@@ -212937,12 +213032,8 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
         }
         if (started) {
           const seat = held.get(m.heroId);
-          if (!seat) {
-            drop3(g, "This game has already started. Ask the host to open a new game.");
-            return;
-          }
-          if (!seat.sent.some((p) => samePassport(p, m.passport))) {
-            drop3(g, `${m.name} played somewhere else since leaving this game, so they can\u2019t come back into it.`);
+          if (!seat || !seat.sent.some((p) => samePassport(p, m.passport))) {
+            lateJoin(g, m);
             return;
           }
           held.delete(m.heroId);
@@ -212980,6 +213071,53 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
         drop3(g, "left");
       }
     });
+  }
+  function lateJoin(g, m) {
+    if ([...guests.values()].some((o) => o !== g && o.hello?.heroId === m.heroId) || [...guests.values()].filter((o) => o !== g && o.hello).length >= COOP_PARTY_LIMIT - 1) {
+      drop3(g, "This game is full.");
+      return;
+    }
+    held.delete(m.heroId);
+    Object.assign(g, { hello: m, sent: [m.passport], late: true });
+    g.link.send({ t: "welcome", protocol: COOP_PROTOCOL, build: build2, hostName, world });
+    tellLobby();
+    const here2 = () => !closed2 && guests.get(g.id) === g;
+    const run3 = async () => {
+      for (let i = 0; i < 240 && here2(); i++) {
+        if (session?.coop?.seatJoin) {
+          let r;
+          try {
+            r = await session.coop.seatJoin({ heroId: m.heroId, passport: m.passport });
+          } catch (error) {
+            if (error?.seatJoinRetry) {
+              await wait2(500);
+              continue;
+            }
+            console.warn("Co-op join failed", error);
+            if (here2()) drop3(g, /free seat/.test(error?.message ?? "") ? "That world has no free seat." : "The host\u2019s world could not seat your hero. Try again.");
+            return;
+          }
+          if (r?.status === "changed") {
+            if (!here2()) {
+              presence(r.playerId, true);
+              return;
+            }
+            g.playerId = r.playerId;
+            g.late = false;
+            g.link.send({ t: "start", playerId: r.playerId, ...shared ? { party: shared } : {} });
+            tellLobby();
+            try {
+              onJoin({ name: m.name, heroId: m.heroId });
+            } catch {
+            }
+            return;
+          }
+        }
+        await wait2(500);
+      }
+      if (here2()) drop3(g, "The host\u2019s game was busy. Try again.");
+    };
+    presenceQueue = presenceQueue.then(run3, run3);
   }
   async function run2(g, m) {
     const c = m.c, waited = c && typeof c.kind === "string" && COOP_WAITED_COMMANDS.test(c.kind);
@@ -213068,9 +213206,11 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
       started = true;
       for (const g of [...guests.values()]) if (!g.hello) drop3(g, "The game started without you.");
     },
+    closed: () => closed2,
     attach(s, party4) {
       session = s;
       for (const g of [...guests.values()]) {
+        if (g.late) continue;
         const pid = party4?.[g.hello.heroId];
         if (!pid) {
           drop3(g, "There was no seat for your hero.");
@@ -215621,7 +215761,7 @@ async function hostRoomV1({ server, code: code2, onGuest, onLeft = () => {
     }, () => retry(Math.min(ms * 2, 1e4)));
   }, ms);
   attach(await socket(url, WebSocket));
-  return { close() {
+  return { code: code2, open: () => !closed2 && ws?.readyState === 1, close() {
     closed2 = true;
     try {
       ws.close();
@@ -215938,9 +216078,11 @@ function showInviteBackV1({ environment, coopHost, names: names2 }) {
   invite.nextInvite();
   return ui;
 }
-function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile, autoCode = null, onPlayers = () => {
+function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile, autoCode = null, hostName = null, onPlayers = () => {
 } }) {
-  const ui = shell2(environment, autoCode ? "Coming back" : "Join a game", autoCode ? `${hero.name} is going back into the game.` : `${hero.name} joins a friend\u2019s world. Everything ${hero.name} earns comes home.`), { document: document2, card } = ui;
+  const ui = shell2(environment, autoCode ? hostName ? `Joining ${hostName}\u2019s world\u2026` : "Joining the game\u2026" : "Join a game", autoCode ? `${hero.name} is on the way. Everything ${hero.name} earns comes home.` : `${hero.name} joins a friend\u2019s world. Everything ${hero.name} earns comes home.`), { document: document2, card } = ui;
+  const quiet = Boolean(autoCode && server);
+  if (quiet) ui.root.classList.add("coop-joining");
   const players = playerList(document2), codeBox = el(document2, "div", "coop-section"), qrBox = el(document2, "div", "coop-section"), actions = el(document2, "div", "coop-actions");
   let finish4 = null, busy = false;
   const result = new Promise((resolve) => {
@@ -215951,7 +216093,7 @@ function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile, 
     codeBox.hidden = true;
     qrBox.hidden = true;
     ui.say(autoCode ? "Connected. Taking your seat\u2026" : "Connected. Waiting for the host to start\u2026");
-    card.insertBefore(players.list, ui.status);
+    if (!quiet) card.insertBefore(players.list, ui.status);
     try {
       const start = await beginCoopGuestV1({ link, build: build2, hero, onLobby: (p) => {
         players.show(p);
@@ -215995,9 +216137,13 @@ function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile, 
       } catch (e) {
         busy = false;
         if (autoCode && code2 === autoCode && ++tries < 20) {
-          ui.say("Waiting for the host\u2019s game\u2026 (" + e.message + ")");
+          ui.say(quiet ? "Waiting for the host\u2019s game\u2026" : "Waiting for the host\u2019s game\u2026 (" + e.message + ")");
           environment.setTimeout(() => go.click(), 3e3);
-        } else ui.say(e.message);
+        } else {
+          ui.say(e.message);
+          codeBox.hidden = false;
+          qrBox.hidden = false;
+        }
       }
     });
     input.addEventListener("keydown", (e) => {
@@ -216037,6 +216183,10 @@ function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile, 
     finish4(null);
   }));
   card.append(codeBox, qrBox, ui.status, actions);
+  if (quiet) {
+    codeBox.hidden = true;
+    qrBox.hidden = true;
+  }
   if (autoCode && server) {
     codeBox.querySelector(".coop-code-input").value = autoCode;
     codeBox.querySelector(".coop-primary").click();
@@ -216083,7 +216233,7 @@ function showCoopEndedV1({ environment, title: title3 = "Back home", reason, onH
 var ASK_MS = 3e4;
 var WAIT_MS = 9e4;
 var INVITE_MS = 18e4;
-var GATHER_MS = 1500;
+var GATHER_MS = 150;
 var CSS7 = `.fr-toast{position:fixed;left:50%;top:calc(12px + var(--world-safe-top,0px));z-index:60;transform:translateX(-50%);display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;width:min(420px,calc(100vw - 32px));padding:12px 14px;border:1px solid #6d5a3c;border-radius:14px;background:linear-gradient(#1f2a33,#151d25);box-shadow:0 8px 28px #0008;color:#f4e7c4;font:13px/1.4 var(--rpg-ui,system-ui)}
 .fr-toast-av{grid-row:span 2;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#2c3b47;font:700 16px var(--rpg-title,serif)}
 .fr-toast p{margin:0;font-weight:600}.fr-toast small{color:#93a0a6}
@@ -216170,7 +216320,7 @@ function createFriendsFlowV1({ environment, friends, game, now: now3 = () => Dat
   function letIn(id2) {
     if (!letting) {
       letting = { ids: /* @__PURE__ */ new Set(), timer: null };
-      card({ who: friends.friend(id2)?.code, title: "Letting your friend in\u2026", sub: "Your game saves and opens again with them in it.", id: "letting" });
+      card({ who: friends.friend(id2)?.code, title: `${nameOf2(friends.friend(id2)?.code)} is joining your game`, sub: "They\u2019ll appear next to you in a moment.", id: "letting", ms: 5e3 });
       letting.timer = environment.setTimeout(async () => {
         const ids4 = [...letting.ids];
         try {
@@ -216249,7 +216399,7 @@ function createFriendsFlowV1({ environment, friends, game, now: now3 = () => Dat
     if (n.accept && n.room) {
       leaving = true;
       card({ who: w.code, title: `Joining ${nameOf2(w.code)}\u2019s game\u2026`, sub: "Saving your hero first.", id: "joining" });
-      Promise.resolve(game.joinWith(n.room)).catch((e) => {
+      Promise.resolve(game.joinWith(n.room, nameOf2(w.code))).catch((e) => {
         leaving = false;
         closeId("joining");
         card({ who: w.code, title: "Couldn\u2019t join", sub: e?.message ?? "Try again.", ms: 6e3 });
@@ -216760,7 +216910,7 @@ async function startWorldClient(environment) {
     }
     try {
       builtWorlds = createBuiltWorldStoreV1({ indexedDB: saveIndexedDb, sha256 });
-      coopJoin = await coopScreens.runCoopJoinV1({ environment, server: coopJoinServerV1(environment), build: coopBuild, hero: { heroId, name: heroName, passport, friend: friends.me()?.code ?? null }, autoCode: coopIntent?.code ?? null, onPlayers: (p) => friends.remember(p), onWorldFile: async (w) => Boolean(await builtWorlds.info(w.hash)) });
+      coopJoin = await coopScreens.runCoopJoinV1({ environment, server: coopJoinServerV1(environment), build: coopBuild, hero: { heroId, name: heroName, passport, friend: friends.me()?.code ?? null }, autoCode: coopIntent?.code ?? null, hostName: typeof coopIntent?.host === "string" ? coopIntent.host : null, onPlayers: (p) => friends.remember(p), onWorldFile: async (w) => Boolean(await builtWorlds.info(w.hash)) });
       if (!coopJoin) {
         home();
         return null;
@@ -217227,25 +217377,38 @@ async function startWorldClient(environment) {
     environment.setInterval(() => notes.observe(), 3e3);
   }
   let coopBar = null;
-  if (coopHost) {
-    coopHost.attach(session, coopParty);
+  let coopSayTimer = null;
+  const beginHosting = () => {
+    coopScreens ??= coop_screen_v1_exports;
+    const hosting = coopHost;
+    hosting.attach(session, coopParty);
     const endCoop = (reason) => {
-      coopHost.close(reason);
-      coopRoom?.close();
+      hosting.close(reason);
+      if (coopHost === hosting) {
+        coopRoom?.close();
+        coopRoom = null;
+        coopHost = null;
+      }
+      if (coopSayTimer !== null) {
+        environment.clearInterval(coopSayTimer);
+        coopSayTimer = null;
+      }
     };
     environment.addEventListener("pagehide", () => endCoop("The host closed the game"));
     const sayParty = () => {
-      const st = coopHost.status(), n = st.playing.length, out4 = [...st.away, ...st.held.filter((h) => !h.left).map((h) => h.name)], back = st.held.filter((h) => !h.left && h.via === "qr").map((h) => h.name);
+      const st = hosting.status(), n = st.playing.length, out4 = [...st.away, ...st.held.filter((h) => !h.left).map((h) => h.name)], back = st.held.filter((h) => !h.left && h.via === "qr").map((h) => h.name);
       coopBar?.say([n ? `Playing together \xB7 ${n} ${n === 1 ? "friend" : "friends"}` : "", out4.length ? `${out4.join(", ")} away` : ""].filter(Boolean).join(" \xB7 ") || "Your friends have left");
-      coopBar?.setExtra(back.length ? "Invite back" : null, () => coopScreens.showInviteBackV1({ environment, coopHost, names: back.join(" and ") }));
+      coopBar?.setExtra(back.length ? "Invite back" : null, () => coopScreens.showInviteBackV1({ environment, coopHost: hosting, names: back.join(" and ") }));
     };
     coopBar = coopScreens.mountCoopBarV1({ environment, label: "", action: "End game", onAction: () => {
       endCoop("The host ended the game");
       coopBar.remove();
+      coopBar = null;
     } });
     sayParty();
-    environment.setInterval(sayParty, 2e3);
-  }
+    coopSayTimer = environment.setInterval(sayParty, 2e3);
+  };
+  if (coopHost) beginHosting();
   if (coopGuest) {
     const heroName = heroEntry?.name || "Your hero", hostName = coopJoin.start.welcome.hostName, inWorld = `In ${hostName}\u2019s world`;
     const comeBack = coopJoin.via === "code" && coopJoin.code ? { role: "guest", code: coopJoin.code } : { role: "guest" }, rejoin = () => {
@@ -217330,7 +217493,9 @@ async function startWorldClient(environment) {
         return null;
       }
     },
-    role: coopGuest ? "guest" : coopHost ? "host" : null,
+    get role() {
+      return coopGuest ? "guest" : coopHost ? "host" : null;
+    },
     canHost: friendsCanHost,
     guests: () => coopHost?.guests() ?? 0,
     full: () => Boolean(coopHost && coopHost.guests() >= 3),
@@ -217339,20 +217504,47 @@ async function startWorldClient(environment) {
     async letIn(ids4) {
       const server = coopJoinServerV1(environment);
       if (!server) throw Error("Letting friends in needs the join server.");
-      const code2 = await createRoomV1(server);
-      const expect = (coopHost ? coopHost.guests() : 0) + ids4.length;
-      coopHost?.move(code2);
+      if (!coopHost || coopHost.closed()) {
+        const host = createCoopHostV1({
+          build: coopBuild,
+          hostName: heroEntry?.name || "Host",
+          hostFriend: friends.me()?.code ?? null,
+          world: builtWorld ? { kind: "seeded", hash: builtWorld.hash } : { kind: "classic" },
+          nextToken,
+          onChange: (p) => {
+            try {
+              friends.remember(p);
+            } catch {
+            }
+          },
+          onFacts: (f) => {
+            if (partyCtl) partyCtl.offer(f);
+            else partyOffers.push(f);
+          },
+          readWorldFile: builtWorld ? async () => {
+            const text3 = await builtWorlds.read(builtWorld.hash);
+            if (!text3) throw Error("World missing");
+            return text3;
+          } : null
+        });
+        host.setParty(partyWorld);
+        host.start();
+        coopHost = host;
+        beginHosting();
+      }
+      if (!coopRoom?.open?.()) {
+        coopRoom?.close();
+        coopRoom = null;
+        const fresh = await createRoomV1(server), hosting = coopHost;
+        coopRoom = await hostRoomV1({ server, code: fresh, onGuest: (link) => hosting.add(link, { via: "code" }) });
+      }
+      const code2 = coopRoom.code;
       await Promise.all(ids4.map((id2) => friends.note(id2, "answer", { accept: true, room: code2 }).catch(() => {
       })));
-      await saveNow();
-      writeCoopIntentV1(environment, { role: "host", room: code2, expect });
-      environment.location.reload();
-      await new Promise(() => {
-      });
     },
-    async joinWith(code2) {
+    async joinWith(code2, hostName = null) {
       await saveNow();
-      writeCoopIntentV1(environment, { role: "guest", code: code2 });
+      writeCoopIntentV1(environment, { role: "guest", code: code2, ...hostName ? { host: String(hostName).slice(0, 32) } : {} });
       environment.location.reload();
       await new Promise(() => {
       });
@@ -217389,7 +217581,9 @@ async function startWorldClient(environment) {
     },
     // Co-op step 2: the next start opens the host's lobby or the join screen for the hero being played.
     coop: Object.freeze({
-      role: coopGuest ? "guest" : coopHost ? "host" : null,
+      get role() {
+        return coopGuest ? "guest" : coopHost ? "host" : null;
+      },
       available: coopReady && Boolean(heroId) && (coopGuest || Boolean(worldBridge)),
       async host() {
         await saveNow();

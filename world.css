@@ -1978,3 +1978,5 @@ body #primary-attack[data-class]::before{background-image:var(--attack-icon)!imp
 @keyframes slot-deny-time{30%{color:#ffc2b0;scale:1.25}}
 html[data-hand=left] #primary-attack .attack-notches{transform:scaleX(-1)}
 .skill-wheel-v1 .skill-wheel-pip[data-wait=true]{opacity:.35}
+.coop-joining .coop-card{width:min(380px,100%);text-align:center}
+.coop-joining .coop-actions{justify-content:center}

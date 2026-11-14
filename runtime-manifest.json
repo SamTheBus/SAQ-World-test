@@ -1,6 +1,6 @@
 {
-  "runtimeId": "3e1945cc010bea0c",
-  "runtimeSha256": "3e1945cc010bea0cb7261a65440dbd4cf6d2faf3603ee79fe449fe5b5fce0230",
+  "runtimeId": "fe0903714870af58",
+  "runtimeSha256": "fe0903714870af580619bf93fb68f68b2b80655a1da21338961c43ca6d78c915",
   "files": [
     {
       "path": ".nojekyll",
@@ -565,7 +565,7 @@
     {
       "path": "index.html",
       "bytes": 14330,
-      "sha256": "ee7c6ac21e2b21cd368bcb4929878707858c9383f1e198356ec25a03c21c7e83"
+      "sha256": "cdebbcc40e8e7bba2859ea88beaa0d6b7d5c7de487a7a9b483bf3f8caf41aff9"
     },
     {
       "path": "manifest.webmanifest",
@@ -574,8 +574,8 @@
     },
     {
       "path": "save-worker.js",
-      "bytes": 3249594,
-      "sha256": "d914e6cd59280ca8bfc74a6d9b566111399006a58c8933d51accd9a77033e362"
+      "bytes": 3249788,
+      "sha256": "75a604c24b7e626003b1616f4b26b5fe07b562f9b5d290f05ed0f62f22193dac"
     },
     {
       "path": "src/chunks/chunk-RBTIQVZX.js",
@@ -588,9 +588,9 @@
       "sha256": "7db8c23d3d071f10af27f69428fb3f40deb5eeb8a332946192a66dc1e22e73e4"
     },
     {
-      "path": "src/chunks/playable_browser-BVMBIW27.js",
-      "bytes": 11006017,
-      "sha256": "84310ff94b0deac6a634ead6844372c49258420629b376da1dcb6fc8de69e989"
+      "path": "src/chunks/playable_browser-R3CZS573.js",
+      "bytes": 11014464,
+      "sha256": "1443e7674d5e91a43b0c410effb7f4adf201bbc56719d26b198a4cf283de19ab"
     },
     {
       "path": "src/chunks/world_browser-AK5QGGUX.js",
@@ -610,7 +610,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "b50780dad515a46d1f5fa9b629fd743845d1d21cac12ed909ba61ed710e97d34"
+      "sha256": "6ced7c5e772867fb77c3a2c6bc556474480c3f485f08f1b8da494957a4615d3a"
     },
     {
       "path": "world-maker-worker.js",
@@ -619,8 +619,8 @@
     },
     {
       "path": "world.css",
-      "bytes": 254680,
-      "sha256": "4fe6de91068f7d724d25be16f1d88b85402f8be44304073337de85691e5de5e9"
+      "bytes": 254798,
+      "sha256": "0c7909add884c5948a052e5d47e63850b8c0b626d5b98a4db165407094f2f780"
     }
   ]
 }
