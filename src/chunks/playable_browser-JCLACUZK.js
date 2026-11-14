@@ -212185,7 +212185,7 @@ async function createLocalEndlessSessionD9(options) {
   const functionalCommands = createFunctionalSiteCommandPortD9({ clientPort: saveAwarePort, activate: async (command) => {
     try {
       await stream.settled();
-      const result = await activateFunctionalSiteD9({ authority, pageBuffer: pages2, playerId: localPlayerId, siteId: command.payload.siteId, sha256, entryCommand: command, returnSite: false });
+      const result = await activateFunctionalSiteD9({ authority, pageBuffer: pages2, playerId: command.playerId ?? localPlayerId, siteId: command.payload.siteId, sha256, entryCommand: command, returnSite: false });
       void save();
       return result;
     } catch (error) {
