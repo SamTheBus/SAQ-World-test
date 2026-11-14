@@ -6270,8 +6270,7 @@ function fixedV3Value(key5, k) {
 var unique = (id, name, family2, subType, noun, cls, from, biome, effect, flavor) => ({ id, name, family: family2, subType, noun, cls, look: id, from, biome, effect, flavor });
 var trophy = (...args) => ({ ...unique(...args), trophy: true });
 var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
-  // Barrow King: ghostfire, graves and risen wights (refreshed 2026-11-14: the set page and all four passes approved;
-  // his Grave Cleave, his guard's grave and hands, his Crown Flame, and a grave of your own).
+  // Barrow King: ghostfire, graves and risen wights.
   unique(
     "gravecleaver",
     "Gravecleaver",
@@ -6281,7 +6280,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "barrow_king",
     "grassland",
-    "Once every 4 s, the third hit of your combo is a Grave Cleave: the ground splits all around you and earth slabs heave up, hitting every enemy near you for {0} of your Attack and setting them burning with ghostfire.",
+    "Shield Bash also cleaves a ring of ghostfire around you. Enemies caught in it burn ({0} of a normal burn).",
     "Kneel. The barrow is patient."
   ),
   unique(
@@ -6293,7 +6292,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "barrow_king",
     "grassland",
-    "When an enemy dies while Bleeding, a grave opens where it fell. The dead claw up and hold every enemy near it for {0}, hitting them for 60% of your Attack. Bosses are slowed instead. One grave at a time.",
+    "Enemies that die while bleeding burst into ghostfire, setting the enemies near them burning ({0} of a normal burn).",
     "It remembers every throat it opened."
   ),
   unique(
@@ -6305,7 +6304,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "barrow_king",
     "grassland",
-    "Once every 4 s, Cast also throws the Crown Flame: the King's fire skull arcs onto the nearest enemy ahead and bursts for {0} of your Attack, leaving the grave earth there burning for 3 s.",
+    "Cast leaves a pool of ghostfire where it lands for {0}. Enemies standing in it burn.",
     "The crown burns colder than gold."
   ),
   unique(
@@ -6317,7 +6316,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     null,
     "barrow_king",
     "grassland",
-    "When a hit would kill you, you sink into a grave instead, where nothing can hit you. A moment later you climb back out with 30% Health, and ghostfire bursts around you, hitting the enemies near you for 175% of your Attack and setting them burning. Once every {0}.",
+    "When a hit drops you below 30% Health, a wail slows enemies near you for 3 s. Once every {0}.",
     "Worn by a king who would not stay buried."
   ),
   // Sun Pharaoh: sunlight and burning.
@@ -6767,10 +6766,10 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
 var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
 var UNIQUE_MIN_RARITY = 2;
 var UNIQUE_TIERS = freezeWire({
-  "gravecleaver": { lines: ["mainDmg", "fireDmg", "critDamage", "critChance", "eliteDmg"], stars: [80, 100, 120, 150], unit: "pct" },
-  "wightfang": { lines: ["offDmg", "critChance", "parry", "controlDur", "eliteDmg"], stars: [60, 75, 90, 120], unit: "ticks" },
-  "crownflame-scepter": { lines: ["mainDmg", "fireDmg", "bonusAreaRadius", "critChance", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
-  "barrowshroud": { lines: ["maxHpPct", "defPct", "lifeKill", "atkPct", "cdr"], stars: [18e3, 14400, 10800, 7200], unit: "mins" },
+  "gravecleaver": { lines: ["mainDmg", "shockDmg", "counterDmg", "critDamage", "eliteDmg"], stars: [60, 80, 100, 125], unit: "pct" },
+  "wightfang": { lines: ["offDmg", "bleedDmg", "parry", "critChance", "cdr"], stars: [60, 80, 100, 125], unit: "pct" },
+  "crownflame-scepter": { lines: ["mainDmg", "fireDmg", "bonusAreaRadius", "critChance", "eliteDmg"], stars: [120, 150, 180, 240], unit: "ticks" },
+  "barrowshroud": { lines: ["maxHpPct", "defPct", "lifeKill", "atkPct", "cdr"], stars: [2400, 2100, 1800, 1500], unit: "ticks" },
   "sunshield": { lines: ["block", "offDmg", "cdr", "passiveRank", "counterDmg"], stars: [2, 3, 3, 4], unit: "count" },
   "pharaoh-khopesh": { lines: ["mainDmg", "skillDmg:lunge", "critDamage", "activeSpd", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "undying-sun-staff": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [5, 4, 3, 2], unit: "nth" },
@@ -6828,11 +6827,6 @@ var UNIQUE_LINES_V3 = freezeWire({
   "ventcutter": { always: "critDamage", pool: ["critChance", "fireDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
   "coreheart": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
-  // Barrow King set (set page AJnYRRRF..., Sammy 2026-11-14).
-  "gravecleaver": { always: "areaDmg", pool: ["mainDmg", "fireDmg", "critDamage", "ailingDmg", "eliteDmg", "maxHpPct"], leg: ["branchRank:breaker"] },
-  "wightfang": { always: "controlDur", pool: ["offDmg", "critChance", "ailmentDur", "ailingDmg", "parry", "eliteDmg"], leg: ["killCdr"] },
-  "crownflame-scepter": { always: "fireDmg", pool: ["mainDmg", "bonusAreaRadius", "critChance", "activeSpd", "areaDmg", "eliteDmg"], leg: ["maxPip"] },
-  "barrowshroud": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
   "lodestone-aegis": { always: "areaDmg", pool: ["block", "offDmg", "controlDur", "cdr", "eliteDr", "perfectCdr"], leg: ["branchRank:bastion"] },
   "oathcutter": { always: "rangedDmg", pool: ["offDmg", "critChance", "parry", "classDmg", "ailmentDur", "eliteDmg"], leg: ["killCdr"] },
   "wardlight-scepter": { always: "mainDmg", pool: ["critChance", "activeSpd", "areaDmg", "maxHpPct", "eliteDr", "eliteDmg"], leg: ["maxPip"] },
@@ -6900,7 +6894,7 @@ function uniqueEffectText(unique2, tier) {
   const t = UNIQUE_TIERS[unique2?.id];
   if (!t) return unique2?.effect ?? "";
   const v = uniqueStarValue(unique2.id, tier);
-  const shown = t.unit === "pct" ? [v + "%"] : t.unit === "permille" ? [v / 10 + "%"] : t.unit === "ticks" ? [seconds(v)] : t.unit === "mins" ? [Math.round(v / 360) / 10 + " min"] : t.unit === "nth" ? [NTH[v] ?? v + "th"] : t.unit === "eye" ? [v[0] + "%", v[1] + "%"] : [String(v)];
+  const shown = t.unit === "pct" ? [v + "%"] : t.unit === "permille" ? [v / 10 + "%"] : t.unit === "ticks" ? [seconds(v)] : t.unit === "nth" ? [NTH[v] ?? v + "th"] : t.unit === "eye" ? [v[0] + "%", v[1] + "%"] : [String(v)];
   return unique2.effect.replace(/\{(\d)\}/g, (_, i) => shown[Number(i)] ?? "");
 }
 var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
