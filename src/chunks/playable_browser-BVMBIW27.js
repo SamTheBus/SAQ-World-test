@@ -1099,7 +1099,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-EVTD3GMD.js";
+} from "./chunk-RBTIQVZX.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -1146,6 +1146,7 @@ function channelIndexedDb(indexedDB, prefix2) {
 // src/client/authority_clock.js
 var AUTHORITY_CLOCK_PERIOD_MS = 1e3 / 60;
 var AUTHORITY_CLOCK_MAX_STEPS_PER_CALLBACK = 4;
+var AUTHORITY_CLOCK_GAME_STEPS_PER_CALLBACK = 8;
 var AUTHORITY_CLOCK_STALL_RESET_MS = 250;
 function createAuthorityClock({ now: now3, step: step3, ready, observe = null, maxStepsPerCallback = AUTHORITY_CLOCK_MAX_STEPS_PER_CALLBACK, stallResetMs = AUTHORITY_CLOCK_STALL_RESET_MS }) {
   const period = AUTHORITY_CLOCK_PERIOD_MS, epsilon = period * 1e-7;
@@ -212649,7 +212650,8 @@ function createModelEncoderV1() {
       entRefs = /* @__PURE__ */ new Map();
       entTexts = /* @__PURE__ */ new Map();
     },
-    encode(model) {
+    // at: the host's clock when this goes out (ms); the guest places what it draws by it.
+    encode(model, at8 = null) {
       const set = [], del = [], sub = [], es = [], ed = [];
       for (const [k, v] of Object.entries(model)) {
         if (k === "entitiesById") {
@@ -212749,7 +212751,7 @@ function createModelEncoderV1() {
       }
       if (!set.length && !del.length && !sub.length && !es.length && !ed.length) return null;
       sent++;
-      return '{"t":"m","n":' + sent + ',"set":{' + set.join(",") + '},"del":[' + del.join(",") + '],"sub":{' + sub.join(",") + '},"es":{' + es.join(",") + '},"ed":[' + ed.join(",") + "]}";
+      return '{"t":"m","n":' + sent + (Number.isFinite(at8) ? ',"at":' + Math.round(at8 * 10) / 10 : "") + ',"set":{' + set.join(",") + '},"del":[' + del.join(",") + '],"sub":{' + sub.join(",") + '},"es":{' + es.join(",") + '},"ed":[' + ed.join(",") + "]}";
     }
   });
 }
@@ -212992,6 +212994,8 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
   }
   function sendPassport(g, force) {
     const t = now3();
+    if (!force && t - (g.markAt ?? -Infinity) < 500) return;
+    g.markAt = t;
     let mark = null;
     try {
       mark = session.coop.inventoryMark(g.playerId);
@@ -213011,9 +213015,12 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
     } catch {
     }
   }
-  function pump() {
+  let skew3 = 0;
+  function pump(worldAt) {
     if (!session) return;
     const t = now3();
+    if (Number.isFinite(worldAt)) skew3 = worldAt - t;
+    const stamp7 = t + skew3;
     let tick = null;
     try {
       tick = session.coop.tick?.() ?? null;
@@ -213031,7 +213038,7 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
         }
         if (model !== g.lastModel) {
           g.lastModel = model;
-          const text3 = g.encoder.encode(model);
+          const text3 = g.encoder.encode(model, stamp7);
           if (text3) {
             g.link.send(text3);
             g.lastSent = t;
@@ -213073,9 +213080,9 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
         g.link.send({ t: "start", playerId: pid, ...shared ? { party: shared } : {} });
       }
       tellLobby();
-      timer = setInterval2(pump, MODEL_INTERVAL_MS / 2);
+      timer = setInterval2(() => pump(), MODEL_INTERVAL_MS / 2);
     },
-    tick: pump,
+    tick: (worldAt) => pump(worldAt),
     guests: () => guests.size,
     // For the host's bar: who is playing, who stepped away, and whose seat waits for them.
     status: () => ({ playing: [...guests.values()].filter((g) => g.playerId && !g.parked && g.awayTimer === null).map((g) => g.hello.name), away: [...guests.values()].filter((g) => g.playerId && (g.parked || g.awayTimer !== null)).map((g) => g.hello.name), held: [...held.values()].map((h) => ({ name: h.hello.name, via: h.via, left: h.left })) }),
@@ -213154,26 +213161,28 @@ var CORRECT_MS = 220;
 var TICK_MS3 = 1e3 / 60;
 var KEEP_FRAMES = 12;
 var DELAY_MIN_MS = 40;
-var DELAY_MAX_MS = 200;
+var DELAY_MAX_MS = 250;
+var PACE_MAX_MS = 120;
 var BASE_STEPS = SHIELD_SWORD_PRIMARY.steps.map((s) => ({ startup: s.startup, active: s.active, recovery: s.recovery }));
 var CONTINUE_TICKS = SHIELD_SWORD_PRIMARY.continuationTicks;
 function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
   let frames = [], current = null, arrivedAt = 0, gap2 = 50, cache10 = null, cacheAt = -1, spacing = 33, jitter = 8, delay = 60, space = null;
+  let pace = TICK_MS3, newest = null, gaps = [];
   let intent = { x: 0, y: 0 }, intentAt = 0, releasedAt = null, hold = null, speed = 0, own = null, ownAt = -1, ownId = null, lastOwn = null, err = { x: 0, y: 0 }, jump3 = true, mode = "";
   let vel = null;
   let tickOffset = null;
   let learned = {}, held = false, queued2 = false, tap = null, guess = null, lastSwing = null, skillGuess = null;
   let pressAim = null, contactUntil = -Infinity, contactKey = 0;
-  const frameAge = (model, t) => tickOffset === null || !Number.isFinite(model?.tick) ? t - arrivedAt : Math.max(0, t - (model.tick * TICK_MS3 + tickOffset));
-  const leadTick = (t) => tickOffset === null ? null : (t - tickOffset + rtt()) / TICK_MS3;
+  const frameAge = (model, t) => tickOffset === null || !newest || model?.tick !== newest.tick ? t - arrivedAt : Math.max(0, t - (newest.at + tickOffset));
+  const leadTick = (t) => tickOffset === null || !newest ? null : newest.tick + (t - tickOffset + rtt() - newest.at) / pace;
   function bracket(t) {
     if (frames.length < 2 || tickOffset === null) return null;
-    const r = (t - tickOffset - delay) / TICK_MS3, last = frames[frames.length - 1];
-    if (r >= last.tick) return null;
+    const r = t - tickOffset - delay, last = frames[frames.length - 1];
+    if (r >= last.at) return null;
     let i = frames.length - 2;
-    while (i > 0 && frames[i].tick > r) i--;
+    while (i > 0 && frames[i].at > r) i--;
     const a = frames[i], b = frames[i + 1];
-    return { a, b, k: Math.max(0, Math.min(1, (r - a.tick) / (b.tick - a.tick))) };
+    return { a, b, k: Math.max(0, Math.min(1, (r - a.at) / (b.at - a.at))) };
   }
   function placed(id2, e, br) {
     if (!br || !e.alive || !e.position) return e.position;
@@ -213351,19 +213360,20 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       const D2 = leadTick(now3());
       if (D2 !== null && typeof payload?.skillId === "string") skillGuess = { skillId: payload.skillId, tick: Math.round(D2), x: payload.aim?.x ?? 1, y: payload.aim?.y ?? 0 };
     },
-    arrived(before, after, model = null) {
-      const t = now3();
+    // hostAt: when the host sent this frame, on the host's clock (ms). Without one, ticks are taken as 60 a second.
+    arrived(before, after, model = null, hostAt = null) {
+      const t = now3(), at8 = Number.isFinite(hostAt) ? hostAt : Number.isFinite(model?.tick) ? model.tick * TICK_MS3 : null;
       const id2 = model?.playersById?.[model.localPlayerId]?.entityId, e = id2 ? after[id2] : null;
       if (e?.position && e.alive) {
-        if (lastOwn && lastOwn.id === id2 && model.tick > lastOwn.tick) {
-          const ms = (model.tick - lastOwn.tick) * TICK_MS3, vx = (e.position.x - lastOwn.x) / ms, vy = (e.position.y - lastOwn.y) / ms;
+        if (lastOwn && lastOwn.id === id2 && model.tick > lastOwn.tick && at8 > lastOwn.at) {
+          const ms = at8 - lastOwn.at, vx = (e.position.x - lastOwn.x) / ms, vy = (e.position.y - lastOwn.y) / ms;
           vel = Math.hypot(vx, vy) < 2 ? { x: vx, y: vy, at: t } : null;
         }
-        if (lastOwn && lastOwn.id === id2 && model.tick > lastOwn.tick && Math.hypot(intent.x, intent.y) > 0.1 && t - intentAt > rtt() + 150) {
-          const v = Math.hypot(e.position.x - lastOwn.x, e.position.y - lastOwn.y) / ((model.tick - lastOwn.tick) * 1e3 / 60);
+        if (lastOwn && lastOwn.id === id2 && model.tick > lastOwn.tick && at8 > lastOwn.at && Math.hypot(intent.x, intent.y) > 0.1 && t - intentAt > rtt() + 150) {
+          const v = Math.hypot(e.position.x - lastOwn.x, e.position.y - lastOwn.y) / (at8 - lastOwn.at);
           if (v > 0.01 && v < 2) speed = speed ? speed * 0.7 + v * 0.3 : v;
         }
-        lastOwn = { id: id2, tick: model.tick, x: e.position.x, y: e.position.y };
+        lastOwn = { id: id2, tick: model.tick, at: at8, x: e.position.x, y: e.position.y };
       } else lastOwn = null;
       if (after === current) return;
       const where = model?.context?.spaceInstanceId ?? null;
@@ -213380,9 +213390,9 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       if (current) gap2 = Math.max(16, Math.min(150, gap2 * 0.8 + (t - arrivedAt) * 0.2));
       const c = id2 ? model?.primary?.actorsById?.[id2]?.current : null;
       if (c && ["startup", "active", "recovery"].includes(c.phase) && c.phaseEndsTick > c.phaseStartedTick) (learned[c.comboStep] ??= {})[c.phase] = c.phaseEndsTick - c.phaseStartedTick;
-      if (model && Number.isFinite(model.tick)) {
-        const o = t - model.tick * TICK_MS3;
-        if (tickOffset === null || Math.abs(o - tickOffset) > 250) {
+      if (model && Number.isFinite(model.tick) && at8 !== null) {
+        const o = t - at8;
+        if (tickOffset === null || Math.abs(o - tickOffset) > 400) {
           tickOffset = o;
           frames = [];
         } else {
@@ -213390,12 +213400,19 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
           tickOffset = tickOffset * 0.92 + o * 0.08;
         }
         const prev = frames[frames.length - 1];
-        if (prev && model.tick > prev.tick) spacing = Math.max(16, Math.min(DELAY_MAX_MS, spacing * 0.9 + (model.tick - prev.tick) * TICK_MS3 * 0.1));
-        if (prev && model.tick <= prev.tick) frames.pop();
-        frames.push({ tick: model.tick, entities: after });
+        if (prev && model.tick > prev.tick && at8 > prev.at) {
+          gaps.push(Math.min(DELAY_MAX_MS, at8 - prev.at));
+          if (gaps.length > KEEP_FRAMES) gaps.shift();
+          const sorted = [...gaps].sort((a, b) => b - a);
+          spacing = Math.max(16, sorted[Math.min(1, sorted.length - 1)]);
+          pace = Math.max(TICK_MS3 * 0.9, Math.min(PACE_MAX_MS, pace * 0.8 + (at8 - prev.at) / (model.tick - prev.tick) * 0.2));
+        }
+        if (prev && (model.tick <= prev.tick || at8 <= prev.at)) frames.pop();
+        frames.push({ tick: model.tick, at: at8, entities: after });
         if (frames.length > KEEP_FRAMES) frames.shift();
+        newest = { tick: model.tick, at: at8 };
         const want = Math.max(DELAY_MIN_MS, Math.min(DELAY_MAX_MS, spacing + 2 * jitter + 8));
-        delay += (want - delay) * 0.1;
+        delay += (want - delay) * (want > delay ? 0.3 : 0.04);
       }
       current = after;
       arrivedAt = t;
@@ -213409,7 +213426,7 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       if (cache10 && cacheAt === t && cache10.model === model) return cache10.out;
       const br = model.entitiesById === current ? bracket(t) : null;
       const id2 = model.playersById?.[model.localPlayerId]?.entityId, e = id2 ? model.entitiesById[id2] : null, mine = e ? ownPosition(model, id2, e, t, br) : null;
-      const D0 = e && Number.isFinite(model.tick) ? leadTick(t) : null, lead = D0 === null ? 0 : Math.max(0, Math.min(LEAD_MAX_MS / TICK_MS3, D0 - model.tick)), D2 = D0 === null ? null : model.tick + lead;
+      const D0 = e && Number.isFinite(model.tick) ? leadTick(t) : null, lead = D0 === null ? 0 : Math.max(0, Math.min(LEAD_MAX_MS / pace, D0 - model.tick)), D2 = D0 === null ? null : model.tick + lead;
       const swing = e && D2 !== null ? ownSwing(model, id2, e, D2) : void 0;
       if (skillGuess) {
         const h = model.combatPresentation?.families?.[id2]?.skill;
@@ -213430,7 +213447,7 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       cacheAt = t;
       return out4;
     },
-    inspect: () => ({ gap: gap2, delay, spacing, jitter, frames: frames.length, speed, rtt: rtt() })
+    inspect: () => ({ gap: gap2, delay, spacing, jitter, frames: frames.length, speed, rtt: rtt(), pace, hostTicksPerSecond: 1e3 / pace })
   });
 }
 function guestCollidesV1(model, e, p) {
@@ -213451,6 +213468,7 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
     firstModel = resolve;
   });
   let rtt = 120;
+  const pings = [];
   const smooth30 = createGuestSmoothingV1(now3, { rtt: () => rtt, collides: guestCollidesV1 });
   const handle = (m) => {
     if (m.t === "m") {
@@ -213458,7 +213476,7 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
       try {
         const before = decoder.model()?.entitiesById ?? null;
         decoder.apply(m);
-        smooth30.arrived(before, decoder.model().entitiesById, decoder.model());
+        smooth30.arrived(before, decoder.model().entitiesById, decoder.model(), m.at);
         firstModel?.();
         firstModel = null;
       } catch (error) {
@@ -213481,7 +213499,12 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
       }
     } else if (m.t === "pong" && typeof m.at === "number") {
       const r = now3() - m.at;
-      if (r >= 0 && r < 5e3) rtt = rtt * 0.7 + r * 0.3;
+      if (r >= 0 && r < 5e3) {
+        pings.push(r);
+        if (pings.length > 5) pings.shift();
+        const mid = [...pings].sort((a, b) => a - b)[pings.length >> 1];
+        rtt = rtt * 0.5 + mid * 0.5;
+      }
     } else if (m.t === "bye") end(m.reason || "The host closed the game");
     else if (m.t === "move" && typeof m.code === "string" && /^[A-HJ-NP-Z2-9]{5}$/.test(m.code)) moved = m.code;
     else if (m.t === "lobby" && Array.isArray(m.players)) try {
@@ -217818,7 +217841,7 @@ async function startWorldClient(environment) {
         coopPumpQueued = true;
         queueMicrotask(() => {
           coopPumpQueued = false;
-          coopHost?.tick();
+          coopHost?.tick(clock8.inspect().deadline - AUTHORITY_CLOCK_PERIOD_MS);
         });
       }
     }
@@ -217826,6 +217849,7 @@ async function startWorldClient(environment) {
   const clock8 = createAuthorityClock({
     now: () => environment.performance.now(),
     step: tick,
+    maxStepsPerCallback: AUTHORITY_CLOCK_GAME_STEPS_PER_CALLBACK,
     // The callback services durability and residency even when gameplay
     // authority is gated. session.step() decides whether a tick may advance.
     ready: () => active2,

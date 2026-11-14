@@ -2446,13 +2446,16 @@ var D9_PROFILE = freezeWire({
 });
 
 // src/shared/contracts/world_address.js
+var CHECKED_ADDRESSES = /* @__PURE__ */ new Set();
 function signedAddress(value) {
+  if (CHECKED_ADDRESSES.has(value)) return value;
   requireContract(typeof value === "string" && /^(0|[1-9][0-9]*|-[1-9][0-9]*)$/.test(value), "Noncanonical world address");
   if (value.replace("-", "").length > D9_PROFILE.coordinateDigits) {
     const e = new RangeError("World-address extension required");
     e.code = "WORLD_ADDRESS_EXTENSION_REQUIRED";
     throw e;
   }
+  if (CHECKED_ADDRESSES.size < 8192) CHECKED_ADDRESSES.add(value);
   return value;
 }
 var addressWire = (value) => signedAddress(String(value));
