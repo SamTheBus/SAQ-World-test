@@ -104492,7 +104492,7 @@ function* prepareEnvironmentLayout(space) {
   const blocks2 = v.blockers.map((b) => ({ ...b, source: b, id: b.id ?? `legacy-obstacle:${b.kind}:${b.x}:${b.y}:${b.width}:${b.height}`, x: b.x * t, y: b.y * t, w: b.width * t, h: b.height * t })), major = blocks2.filter((b) => b.kind === "building" || b.kind === "fence");
   const occupied = /* @__PURE__ */ new Set();
   for (const b of blocks2) for (let y = Math.floor(b.y / t); y < Math.ceil((b.y + b.h) / t); y++) for (let x = Math.floor(b.x / t); x < Math.ceil((b.x + b.w) / t); x++) occupied.add(x + "," + y);
-  const exits = space.exits ?? [], treeBases = [], trees2 = [], rocks3 = [], props2 = [], landmarks = [], obstacleTiles = /* @__PURE__ */ new Set();
+  const exits = space.exits ?? [], treeBases = [], trees2 = [], rocks3 = [], props2 = [], landmarks = [], obstacleTiles2 = /* @__PURE__ */ new Set();
   const clearGround = (x, y, r) => {
     for (const [dx, dy] of [[0, 0], [-r, -r], [r, -r], [-r, r], [r, r]]) {
       const type = terrain(x + dx, y + dy);
@@ -104510,12 +104510,12 @@ function* prepareEnvironmentLayout(space) {
         props2.push({ x, y, building: b, type: (terrainHash(b.x + offset2.x, b.y + offset2.y, seed2) + props2.filter((p) => p.building === b).length) % 2 ? "clay_pot" : b.detail === "Vault" ? "ancient_urn" : "wooden_barrel" });
       }
     } else if ((b.kind === "thicket" || b.kind === "rock") && standsPiece(b.naturalClusterId)) {
-      for (let ty = Math.floor(b.y / t); ty < Math.ceil((b.y + b.h) / t); ty++) for (let tx = Math.floor(b.x / t); tx < Math.ceil((b.x + b.w) / t); tx++) obstacleTiles.add(tx + "," + ty);
+      for (let ty = Math.floor(b.y / t); ty < Math.ceil((b.y + b.h) / t); ty++) for (let tx = Math.floor(b.x / t); tx < Math.ceil((b.x + b.w) / t); tx++) obstacleTiles2.add(tx + "," + ty);
     } else if (b.kind === "thicket" || b.kind === "trees" || b.kind === "rock") {
       const landmark = woodlandLandmarkForBlocker(space, b.source), left = Math.floor(b.x / t), top = Math.floor(b.y / t), right = Math.ceil((b.x + b.w) / t), bottom = Math.ceil((b.y + b.h) / t);
       for (let ty = top; ty < bottom; ty++) for (let tx = left; tx < right; tx++) {
         const key4 = tx + "," + ty, forestRole = woodlandForestRole(b.naturalClusterId), n = forestRole ? woodlandForestVisualHash(b.naturalClusterId, tx + offset2.x / t, ty + offset2.y / t) : terrainHash(tx + offset2.x / t, ty + offset2.y / t, seed2 + 113), code2 = biome(tx, ty) ?? (b.kind === "rock" ? "r" : "w");
-        obstacleTiles.add(key4);
+        obstacleTiles2.add(key4);
         if (naturalVisualKind(code2, b.kind) === "rock") {
           const id2 = obstacleTileVisualId(b, tx, ty, "rock"), canopy3 = Boolean(b.naturalClusterId) && natureCanopyAt(code2, n, tx + offset2.x / t, ty + offset2.y / t, seed2);
           rocks3.push({ id: id2, obstacleId: b.id, ...b.naturalClusterId ? naturalRockPose(n, tx, ty, t) : { x: tx * t - 2, y: ty * t + 2, size: t + 4 }, n, forestRole, biome: code2, organic: Boolean(b.naturalClusterId), canopy: canopy3, tileX: tx, tileY: ty });
@@ -104537,7 +104537,7 @@ function* prepareEnvironmentLayout(space) {
   rocks3.sort((a, b) => a.y + a.size - (b.y + b.size) || a.x - b.x);
   landmarks.sort((a, b) => a.y - b.y || a.x - b.x);
   const obstacles = [...treeBases, ...trees2.filter((p) => p.biome === "marsh").map((p) => ({ ...p, w: p.size, h: p.size })), ...rocks3.map((p) => ({ ...p, w: p.size, h: p.size }))];
-  return { treeBases, trees: trees2, rocks: rocks3, props: props2, landmarks, obstacleTiles, occupiedTiles: occupied, clearGround, allowsSmall: (x, y) => clearGround(x, y, 9) && !obstacles.some((p) => intersects({ x: x - 3, y: y - 3, w: 6, h: 6 }, { x: p.x, y: p.y, w: p.w, h: p.h }, 2)) && !props2.some((p) => Math.hypot(x - p.x, y - p.y) < 19) };
+  return { treeBases, trees: trees2, rocks: rocks3, props: props2, landmarks, obstacleTiles: obstacleTiles2, occupiedTiles: occupied, clearGround, allowsSmall: (x, y) => clearGround(x, y, 9) && !obstacles.some((p) => intersects({ x: x - 3, y: y - 3, w: 6, h: 6 }, { x: p.x, y: p.y, w: p.w, h: p.h }, 2)) && !props2.some((p) => Math.hypot(x - p.x, y - p.y) < 19) };
 }
 
 // src/client/wetland_swamp_trees_v1.js
@@ -211334,13 +211334,15 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requ
     requireContract(!closed2 && !destinationTarget && requiredChunks2.length > 0, "Destination residency preparation already active");
     requireContract(departingPlayerId === null || borrow((s) => hasFerries(s.d9World.plannedWorld) && s.playersById[departingPlayerId]), "Unknown departing participant");
     destinationTarget = { position: copyWire(position4), requiredChunks: copyWire(requiredChunks2), departingPlayerId };
-    let saves = 0;
+    let saves = 0, saveTrouble = null;
     const owed = async () => {
       if (!requestSave || saves >= 8) return false;
       saves++;
       try {
-        await requestSave();
-      } catch {
+        const r = await requestSave();
+        saveTrouble = r?.status === "committed" ? null : String(r?.reason ?? r?.status ?? "not saved");
+      } catch (e) {
+        saveTrouble = String(e?.message ?? "failed");
       }
       return true;
     };
@@ -211359,7 +211361,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requ
     }
     destinationTarget = null;
     record2("world.destinationNotReady", { state: progressState, detail: progressDetail ?? null, saves });
-    throw new Error("That place took too long to load. Try again in a moment. (" + progressState + (progressDetail ? ": " + progressDetail : "") + ")");
+    throw new Error("That place took too long to load. Try again in a moment. (" + progressState + (progressDetail ? ": " + progressDetail : "") + (saveTrouble ? "; save: " + saveTrouble.slice(0, 80) : "") + ")");
   }
   function finishDestinationPosition() {
     destinationTarget = null;
@@ -213327,6 +213329,7 @@ var GLIDE_SNAP_PX = 160;
 var LEAD_MAX_MS = 400;
 var EASE_MS = 60;
 var CORRECT_MS = 220;
+var BLOCKED_MS = 60;
 var TICK_MS3 = 1e3 / 60;
 var KEEP_FRAMES = 12;
 var DELAY_MIN_MS = 40;
@@ -213363,6 +213366,7 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
   }
   function reach(model, e, a, b) {
     if (!collides) return a;
+    if (collides(model, e, a)) return b;
     const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 4);
     let p = a;
     for (let i = 1; i <= n; i++) {
@@ -213392,7 +213396,8 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
       if (own && Math.hypot(own.x - target.x, own.y - target.y) <= GLIDE_SNAP_PX) {
         if (mode !== "lead") mode = "lead";
         jump3 = false;
-        const walked = reach(model, e, own, { x: own.x + dx * dt, y: own.y + dy * dt }), f = 1 - Math.exp(-dt / CORRECT_MS);
+        const stopped = settled && Math.hypot(vel.x, vel.y) < 0.4 * speed;
+        const walked = reach(model, e, own, { x: own.x + dx * dt, y: own.y + dy * dt }), f = 1 - Math.exp(-dt / (stopped ? BLOCKED_MS : CORRECT_MS));
         own = { x: walked.x + (target.x - walked.x) * f, y: walked.y + (target.y - walked.y) * f };
         err = { x: own.x - target.x, y: own.y - target.y };
         return own;
@@ -213619,14 +213624,33 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
     inspect: () => ({ gap: gap2, delay, spacing, jitter, frames: frames.length, speed, rtt: rtt(), pace, hostTicksPerSecond: 1e3 / pace })
   });
 }
+var obstacleTiles = /* @__PURE__ */ new WeakMap();
+function obstaclesOf(visual) {
+  let tiles9 = obstacleTiles.get(visual);
+  if (tiles9) return tiles9;
+  tiles9 = /* @__PURE__ */ new Set();
+  for (const b of visual.blockers) if (typeof b.id === "string" && b.id.startsWith("obstacle:") && b.width * b.height <= 16) for (let y = Math.floor(b.y); y < b.y + b.height; y++) for (let x = Math.floor(b.x); x < b.x + b.width; x++) tiles9.add(x + "," + y);
+  obstacleTiles.set(visual, tiles9);
+  return tiles9;
+}
 function guestCollidesV1(model, e, p) {
   const c = model?.space?.collision;
-  if (!c?.tiles && !c?.pages) return false;
-  try {
-    return collidesWithTiles(c, p.x, p.y, e.hullRadius ?? 12);
-  } catch {
-    return false;
+  if (c?.tiles || c?.pages) {
+    try {
+      return collidesWithTiles(c, p.x, p.y, e.hullRadius ?? 12);
+    } catch {
+      return false;
+    }
   }
+  const v = model?.space?.visual, size = c?.tileSize;
+  if (!Array.isArray(v?.blockers) || !v.originTile || !(size > 0)) return false;
+  const r = e.hullRadius ?? 12, tiles9 = obstaclesOf(v), o = v.originTile;
+  for (let ty = Math.floor((p.y - r) / size); ty <= Math.floor((p.y + r) / size); ty++) for (let tx = Math.floor((p.x - r) / size); tx <= Math.floor((p.x + r) / size); tx++) {
+    if (!tiles9.has(tx + "," + ty) && v.terrain?.[ty - o.y]?.[tx - o.x] !== "v") continue;
+    const nx = Math.max(tx * size, Math.min(p.x, (tx + 1) * size)), ny = Math.max(ty * size, Math.min(p.y, (ty + 1) * size));
+    if (Math.hypot(p.x - nx, p.y - ny) < r) return true;
+  }
+  return false;
 }
 function createCoopGuestSessionV1({ link, playerId, early = [], release = () => {
 }, cartographyWindow = null, onPassport, onEnd, onLobby = () => {
