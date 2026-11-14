@@ -1171,7 +1171,7 @@ function createAuthorityClock({ now: now3, step: step3, ready, observe = null, m
     if (!ready()) resetThisRun = reset("not-ready");
     else if (callbackGapMs + epsilon >= stallResetMs) resetThisRun = reset("stall");
     else {
-      const admitted2 = Math.min(due, maxStepsPerCallback);
+      const admitted2 = Math.min(due, typeof maxStepsPerCallback === "function" ? maxStepsPerCallback() : maxStepsPerCallback);
       for (; steps7 < admitted2 && ready(); steps7++) {
         step3(steps7, admitted2);
         deadline3 += period;
@@ -218310,7 +218310,7 @@ async function startWorldClient(environment) {
   const clock8 = createAuthorityClock({
     now: () => environment.performance.now(),
     step: tick,
-    maxStepsPerCallback: AUTHORITY_CLOCK_GAME_STEPS_PER_CALLBACK,
+    maxStepsPerCallback: () => coopHost ? AUTHORITY_CLOCK_GAME_STEPS_PER_CALLBACK : AUTHORITY_CLOCK_MAX_STEPS_PER_CALLBACK,
     // The callback services durability and residency even when gameplay
     // authority is gated. session.step() decides whether a tick may advance.
     ready: () => active2,
