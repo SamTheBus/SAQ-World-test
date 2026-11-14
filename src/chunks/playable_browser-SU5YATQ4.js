@@ -130584,6 +130584,7 @@ var WILDERNESS_PACK_PACING_V3_4 = Object.freeze({
   scope: "Wilderness overworld ordinary packs only",
   fullRetaliation: "any damaged pack member wakes everyone"
 });
+var hurt2 = (a) => !(typeof a.hp === "string" && a.hp === a.maxHp) && compareCombat(a.hp, a.maxHp) < 0;
 function wildernessPackPursuitAllowed(state2, group, source3, target, eligible2 = () => true) {
   const count = WILDERNESS_PACK_PACING_V3_4.maxUnprovokedPursuersPerPack;
   if (!usesWildernessFairnessV3_2(state2) || !group?.containment || group.siteId !== null || !Array.isArray(group.entityIds) || group.entityIds.length <= count || source3?.team !== "hostile" || target?.team !== "party" || source3?.boss || state2.bossCombat?.bossesByEntityId?.[source3.entityId] || state2.eliteCombat?.elitesByEntityId?.[source3.entityId]) return true;
@@ -130591,7 +130592,7 @@ function wildernessPackPursuitAllowed(state2, group, source3, target, eligible2 
   if (!player || BigInt(player.progression.level) >= BigInt(WILDERNESS_PACK_PACING_V3_4.starterHeroBelowLevel)) return true;
   if (group.entityIds.some((id2) => {
     const member = state2.entitiesById[id2];
-    return member && !member.alive || member?.alive && compareCombat(member.hp, member.maxHp) < 0;
+    return member && !member.alive || member?.alive && hurt2(member);
   })) return true;
   const d = Math.hypot(source3.position.x - target.position.x, source3.position.y - target.position.y);
   if (d <= source3.attackReach + source3.combatRadius + target.combatRadius + 4 || source3.ai?.melee?.phase && source3.ai.melee.phase !== "idle") return true;
@@ -130623,7 +130624,7 @@ function wildernessGlobalPursuerCap(state2, group, target, startLocal = null) {
   if (!Number.isFinite(level) || level < 1 || level > WILDERNESS_GLOBAL_PACK_PACING_V3_4_2.noviceLevelMaximum) return null;
   if (group.entityIds.some((id2) => {
     const a = state2.entitiesById[id2];
-    return a && (!a.alive || compareCombat(a.hp, a.maxHp) < 0);
+    return a && (!a.alive || hurt2(a));
   })) return null;
   const floor = Number(state2.d9World?.episodes?.[group.groupId]?.geography?.minimumLevel);
   const low = Number.isFinite(floor) && floor >= 1 && floor <= WILDERNESS_GLOBAL_PACK_PACING_V3_4_2.lowRegionLevelMaximum;
