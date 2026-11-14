@@ -213599,10 +213599,11 @@ var RELEASE = /data-world-release="([^"]+)"/;
 function releaseOfHtmlV1(html) {
   return RELEASE.exec(String(html))?.[1] ?? null;
 }
-function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstCheckMs = 2e4, fetchImpl = null } = {}) {
+function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstCheckMs = 2e4, fetchImpl = null, againMs = 18e5 } = {}) {
   const doc = environment.document, current = doc.documentElement.dataset.worldRelease, fetcher = fetchImpl ?? environment.fetch?.bind(environment);
   if (!current || !fetcher) return null;
-  let banner8 = null, checking = false, timer = null, stopped = false, found = null;
+  let banner8 = null, checking = false, timer = null, stopped = false, found = null, dismissedAt = null;
+  const now3 = () => environment.Date?.now?.() ?? Date.now();
   async function check() {
     if (stopped || checking || found || doc.hidden) return found;
     checking = true;
@@ -213626,19 +213627,34 @@ function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstC
   }
   function show(release) {
     if (banner8) return;
-    banner8 = doc.createElement("button");
-    banner8.type = "button";
+    banner8 = doc.createElement("div");
     banner8.id = "update-banner-v1";
     banner8.dataset.gameplayHud = "";
     banner8.setAttribute("aria-live", "polite");
+    const go = doc.createElement("button");
+    go.type = "button";
+    go.className = "ub-go";
+    const close = doc.createElement("button");
+    close.type = "button";
+    close.className = "ub-close";
+    close.textContent = "\xD7";
+    close.setAttribute("aria-label", "Not now");
     const title3 = doc.createElement("strong");
     title3.textContent = "New version ready";
     const sub = doc.createElement("span");
     sub.textContent = "Tap to update";
-    banner8.append(title3, sub);
-    banner8.addEventListener("click", async () => {
-      if (banner8.disabled) return;
-      banner8.disabled = true;
+    go.append(title3, sub);
+    banner8.append(go, close);
+    close.addEventListener("click", () => {
+      if (go.disabled) return;
+      banner8?.remove();
+      banner8 = null;
+      dismissedAt = now3();
+    });
+    go.addEventListener("click", async () => {
+      if (go.disabled) return;
+      go.disabled = true;
+      close.disabled = true;
       sub.textContent = "Saving\u2026";
       try {
         await Promise.race([Promise.resolve(save?.()), new Promise((resolve) => environment.setTimeout(resolve, 4e3))]);
@@ -213652,7 +213668,11 @@ function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstC
     doc.body.append(banner8);
   }
   const onVisible = () => {
-    if (!doc.hidden) check();
+    if (doc.hidden) return;
+    if (found && !banner8 && dismissedAt !== null && now3() - dismissedAt >= againMs) {
+      dismissedAt = null;
+      show(found);
+    } else check();
   };
   doc.addEventListener("visibilitychange", onVisible);
   environment.addEventListener("pageshow", onVisible);
