@@ -15222,7 +15222,8 @@ function fixedV3Value(key9, k) {
 var unique = (id2, name, family2, subType, noun, cls, from, biome, effect, flavor) => ({ id: id2, name, family: family2, subType, noun, cls, look: id2, from, biome, effect, flavor });
 var trophy = (...args) => ({ ...unique(...args), trophy: true });
 var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
-  // Barrow King: ghostfire, graves and risen wights.
+  // Barrow King: ghostfire, graves and risen wights (refreshed 2026-11-14: the set page and all four passes approved;
+  // his Grave Cleave, his guard's grave and hands, his Crown Flame, and a grave of your own).
   unique(
     "gravecleaver",
     "Gravecleaver",
@@ -15232,7 +15233,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "barrow_king",
     "grassland",
-    "Shield Bash also cleaves a ring of ghostfire around you. Enemies caught in it burn ({0} of a normal burn).",
+    "Once every 4 s, the third hit of your combo is a Grave Cleave: the ground splits all around you and earth slabs heave up, hitting every enemy near you for {0} of your Attack and setting them burning with ghostfire.",
     "Kneel. The barrow is patient."
   ),
   unique(
@@ -15244,7 +15245,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "barrow_king",
     "grassland",
-    "Enemies that die while bleeding burst into ghostfire, setting the enemies near them burning ({0} of a normal burn).",
+    "When an enemy dies while Bleeding, a grave opens where it fell. The dead claw up and hold every enemy near it for {0}, hitting them for 60% of your Attack. Bosses are slowed instead. One grave at a time.",
     "It remembers every throat it opened."
   ),
   unique(
@@ -15256,7 +15257,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "barrow_king",
     "grassland",
-    "Cast leaves a pool of ghostfire where it lands for {0}. Enemies standing in it burn.",
+    "Once every 4 s, Cast also throws the Crown Flame: the King's fire skull arcs onto the nearest enemy ahead and bursts for {0} of your Attack, leaving the grave earth there burning for 3 s.",
     "The crown burns colder than gold."
   ),
   unique(
@@ -15268,7 +15269,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     null,
     "barrow_king",
     "grassland",
-    "When a hit drops you below 30% Health, a wail slows enemies near you for 3 s. Once every {0}.",
+    "When a hit would kill you, you sink into a grave instead, where nothing can hit you. A moment later you climb back out with 30% Health, and ghostfire bursts around you, hitting the enemies near you for 175% of your Attack and setting them burning. Once every {0}.",
     "Worn by a king who would not stay buried."
   ),
   // Sun Pharaoh: sunlight and burning.
@@ -15718,10 +15719,10 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
 var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
 var UNIQUE_MIN_RARITY = 2;
 var UNIQUE_TIERS = freezeWire({
-  "gravecleaver": { lines: ["mainDmg", "shockDmg", "counterDmg", "critDamage", "eliteDmg"], stars: [60, 80, 100, 125], unit: "pct" },
-  "wightfang": { lines: ["offDmg", "bleedDmg", "parry", "critChance", "cdr"], stars: [60, 80, 100, 125], unit: "pct" },
-  "crownflame-scepter": { lines: ["mainDmg", "fireDmg", "bonusAreaRadius", "critChance", "eliteDmg"], stars: [120, 150, 180, 240], unit: "ticks" },
-  "barrowshroud": { lines: ["maxHpPct", "defPct", "lifeKill", "atkPct", "cdr"], stars: [2400, 2100, 1800, 1500], unit: "ticks" },
+  "gravecleaver": { lines: ["mainDmg", "fireDmg", "critDamage", "critChance", "eliteDmg"], stars: [80, 100, 120, 150], unit: "pct" },
+  "wightfang": { lines: ["offDmg", "critChance", "parry", "controlDur", "eliteDmg"], stars: [60, 75, 90, 120], unit: "ticks" },
+  "crownflame-scepter": { lines: ["mainDmg", "fireDmg", "bonusAreaRadius", "critChance", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
+  "barrowshroud": { lines: ["maxHpPct", "defPct", "lifeKill", "atkPct", "cdr"], stars: [18e3, 14400, 10800, 7200], unit: "mins" },
   "sunshield": { lines: ["block", "offDmg", "cdr", "passiveRank", "counterDmg"], stars: [2, 3, 3, 4], unit: "count" },
   "pharaoh-khopesh": { lines: ["mainDmg", "skillDmg:lunge", "critDamage", "activeSpd", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "undying-sun-staff": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [5, 4, 3, 2], unit: "nth" },
@@ -15779,6 +15780,11 @@ var UNIQUE_LINES_V3 = freezeWire({
   "ventcutter": { always: "critDamage", pool: ["critChance", "fireDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
   "coreheart": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
+  // Barrow King set (set page AJnYRRRF..., Sammy 2026-11-14).
+  "gravecleaver": { always: "areaDmg", pool: ["mainDmg", "fireDmg", "critDamage", "ailingDmg", "eliteDmg", "maxHpPct"], leg: ["branchRank:breaker"] },
+  "wightfang": { always: "controlDur", pool: ["offDmg", "critChance", "ailmentDur", "ailingDmg", "parry", "eliteDmg"], leg: ["killCdr"] },
+  "crownflame-scepter": { always: "fireDmg", pool: ["mainDmg", "bonusAreaRadius", "critChance", "activeSpd", "areaDmg", "eliteDmg"], leg: ["maxPip"] },
+  "barrowshroud": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
   "lodestone-aegis": { always: "areaDmg", pool: ["block", "offDmg", "controlDur", "cdr", "eliteDr", "perfectCdr"], leg: ["branchRank:bastion"] },
   "oathcutter": { always: "rangedDmg", pool: ["offDmg", "critChance", "parry", "classDmg", "ailmentDur", "eliteDmg"], leg: ["killCdr"] },
   "wardlight-scepter": { always: "mainDmg", pool: ["critChance", "activeSpd", "areaDmg", "maxHpPct", "eliteDr", "eliteDmg"], leg: ["maxPip"] },
@@ -27070,7 +27076,6 @@ var HIDE_TICKS = 300;
 var MAX_HIDE = 5;
 var POOL_MAX_TICKS = 240;
 var TRAIL_MAX_TICKS = 180;
-var WAIL_MAX_TICKS = 2400;
 var SHELL_MAX_TICKS = 840;
 var SUN_MAX = 4;
 var SUNFALL_MAX_CASTS = 5;
@@ -27094,6 +27099,18 @@ var UQ_PULSE_TICKS = 30;
 var TREAD_EVERY = 240;
 var TREAD_WAIT = 40;
 var QUAKE_TICKS = 30;
+var CLEAVE_EVERY = 240;
+var CLEAVE_SHOW = 90;
+var GRAVE_RISE = 30;
+var GRAVE_SINK = 24;
+var GRAVE_HOLD_MAX = 300;
+var GRAVE_HELD = 12;
+var SKULL_EVERY = 240;
+var SKULL_FLIGHT = 48;
+var SKULL_SHOW = 44;
+var SHROUD_SINK = 72;
+var SHROUD_SHOW = 44;
+var SHROUD_MAX = 18e3;
 var LODE_SHOWN = 12;
 var LODE_TICKS = 30;
 var OATH_EVERY = 180;
@@ -27154,7 +27171,7 @@ var FREE_TICKS = 180;
 var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
-var LIVE = ["croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function prune(combat) {
   const k = combat.skills;
   if (k && !Object.keys(k.cooldowns).length && !LIVE.some((key9) => k[key9])) delete combat.skills;
@@ -27200,7 +27217,6 @@ function validateClassSkillState(s, combat, actor) {
   if (k.mist !== void 0) safeInteger(k.mist, 1, MIST_TICKS);
   if (k.veil !== void 0) safeInteger(k.veil, 1, VEIL_MAX_TICKS);
   if (k.gold !== void 0) safeInteger(k.gold, 1, GOLD_TICKS);
-  if (k.wail !== void 0) safeInteger(k.wail, 1, WAIL_MAX_TICKS);
   if (k.shell !== void 0) safeInteger(k.shell, 1, SHELL_MAX_TICKS);
   if (k.sun !== void 0) safeInteger(k.sun, 1, SUN_MAX);
   if (k.casts !== void 0) safeInteger(k.casts, 1, SUNFALL_MAX_CASTS - 1);
@@ -27638,6 +27654,29 @@ function validateClassSkillState(s, combat, actor) {
       closedRecord(k.wardHit, ["x", "y", "dx", "dy", "ticks"]);
       requireContract(pos2(k.wardHit) && Number.isFinite(k.wardHit.dx) && Number.isFinite(k.wardHit.dy), "Invalid shield burst");
       safeInteger(k.wardHit.ticks, 1, WARD_HIT_TICKS);
+    }
+    for (const [key9, max2] of [["cleaveCd", CLEAVE_EVERY], ["skullCd", SKULL_EVERY], ["shroudCd", SHROUD_MAX]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
+    if (k.cleave !== void 0) {
+      closedRecord(k.cleave, ["x", "y", "sx", "sy", "ticks"]);
+      requireContract(pos2(k.cleave) && Number.isFinite(k.cleave.sx) && Number.isFinite(k.cleave.sy), "Invalid grave cleave");
+      safeInteger(k.cleave.ticks, 1, CLEAVE_SHOW);
+    }
+    if (k.grave !== void 0) {
+      const g = k.grave;
+      closedRecord(g, ["x", "y", "ticks", "hold", "held"]);
+      requireContract(pos2(g) && Array.isArray(g.held) && g.held.length <= GRAVE_HELD && g.held.every(id2) && new Set(g.held).size === g.held.length, "Invalid grave");
+      safeInteger(g.hold, 1, GRAVE_HOLD_MAX);
+      safeInteger(g.ticks, 1, GRAVE_RISE + g.hold + GRAVE_SINK);
+    }
+    if (k.skull !== void 0) {
+      closedRecord(k.skull, ["x", "y", "tx", "ty", "ticks"]);
+      requireContract(pos2(k.skull) && Number.isFinite(k.skull.tx) && Number.isFinite(k.skull.ty), "Invalid crown flame");
+      safeInteger(k.skull.ticks, 1, SKULL_FLIGHT);
+    }
+    for (const [key9, max2] of [["skullHit", SKULL_SHOW], ["sunk", SHROUD_SINK], ["risen", SHROUD_SHOW]]) if (k[key9] !== void 0) {
+      closedRecord(k[key9], ["x", "y", "ticks"]);
+      requireContract(pos2(k[key9]), "Invalid " + key9);
+      safeInteger(k[key9].ticks, 1, max2);
     }
   }
   requireContract(Object.keys(k.cooldowns).length || LIVE.some((key9) => k[key9]), "Empty skill record");
