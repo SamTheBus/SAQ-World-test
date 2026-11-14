@@ -103183,76 +103183,128 @@ function createWaterMotionV1(doc) {
   });
   const put3 = (ctx, s, x, y) => ctx.drawImage(s.c, x, y, s.w, s.h);
   const fr = (v) => v - Math.floor(v);
-  function draw(ctx, pages2, view3, time3) {
-    const x0 = view3.x - 16, y0 = view3.y - 16, x1 = view3.x + view3.width + 16, y1 = view3.y + view3.height + 16, ts = time3 / 1e3;
+  function piece3(ctx, it, ts) {
+    let u, a;
+    switch (it.k) {
+      case 0: {
+        u = fr(ts / it.cy + it.p) / CAP_ON;
+        if (u >= 1) return 0;
+        a = it.al * Math.min(1, u * 5, (1 - u) * 3.5);
+        if (a < 0.06) return 0;
+        const s = u * it.d;
+        ctx.globalAlpha = a;
+        put3(ctx, crest(it.c, it.b, Math.min(CAP_F - 1, Math.floor(u * CAP_F))), it.x + it.dx * s - 12, it.y + it.dy * s - 12);
+        return 1;
+      }
+      case 1:
+        u = fr(ts / GLINT + it.p);
+        if (u >= GLINT_ON) return 0;
+        ctx.globalAlpha = 1;
+        put3(ctx, glint(it.c, Math.round(1 + 2 * Math.sin(u / GLINT_ON * Math.PI))), it.x - 4.5, it.y - 4.5);
+        return 1;
+      case 2: {
+        const s = 0.5 + 0.5 * Math.sin(TAU155 * (ts / LACE + it.p)), off = 6 - 8 * s;
+        ctx.globalAlpha = 0.4 + 0.6 * s;
+        put3(ctx, lace(it.b), it.x + it.nx * off - 10, it.y + it.ny * off - 10);
+        return 1;
+      }
+      case 3: {
+        u = fr(ts * it.sp / FLOW6 + it.p);
+        a = 0.6 * Math.sin(u * Math.PI);
+        if (a < 0.06) return 0;
+        const s = (u - 0.5) * 30;
+        ctx.globalAlpha = a;
+        put3(ctx, dash(it.c, it.b), it.x + it.dx * s - 12, it.y + it.dy * s - 12);
+        return 1;
+      }
+      case 4:
+        u = fr(ts / RING + it.p);
+        a = 0.7 * (1 - u);
+        if (a < 0.06) return 0;
+        ctx.globalAlpha = a;
+        put3(ctx, ring12(it.c, Math.min(5, Math.floor(u * 6))), it.x - 12, it.y - 7);
+        return 1;
+      case 5:
+        u = fr(ts / BUBBLE + it.p);
+        if (u < 0.7) {
+          ctx.globalAlpha = 1;
+          put3(ctx, bubble(Math.min(4, Math.floor(u / 0.7 * 5))), it.x - 8, it.y - 8);
+          return 1;
+        }
+        a = 1 - (u - 0.7) / 0.3;
+        if (a < 0.06) return 0;
+        ctx.globalAlpha = a;
+        put3(ctx, ring12("#fff3c0", Math.min(5, Math.floor((u - 0.7) / 0.3 * 6))), it.x - 12, it.y - 7);
+        return 1;
+      default:
+        return 0;
+    }
+  }
+  const all = (ctx, pages2, x0, y0, x1, y1, ts) => {
     let n = 0;
-    frames++;
-    ctx.save();
     for (const items of pages2) for (const it of items) {
       if (it.x < x0 || it.y < y0 || it.x > x1 || it.y > y1) continue;
-      let u, a;
-      switch (it.k) {
-        case 0: {
-          u = fr(ts / it.cy + it.p) / CAP_ON;
-          if (u >= 1) continue;
-          a = it.al * Math.min(1, u * 5, (1 - u) * 3.5);
-          if (a < 0.06) continue;
-          const s = u * it.d;
-          ctx.globalAlpha = a;
-          put3(ctx, crest(it.c, it.b, Math.min(CAP_F - 1, Math.floor(u * CAP_F))), it.x + it.dx * s - 12, it.y + it.dy * s - 12);
-          break;
-        }
-        case 1:
-          u = fr(ts / GLINT + it.p);
-          if (u >= GLINT_ON) continue;
-          ctx.globalAlpha = 1;
-          put3(ctx, glint(it.c, Math.round(1 + 2 * Math.sin(u / GLINT_ON * Math.PI))), it.x - 4.5, it.y - 4.5);
-          break;
-        case 2: {
-          const s = 0.5 + 0.5 * Math.sin(TAU155 * (ts / LACE + it.p)), off = 6 - 8 * s;
-          ctx.globalAlpha = 0.4 + 0.6 * s;
-          put3(ctx, lace(it.b), it.x + it.nx * off - 10, it.y + it.ny * off - 10);
-          break;
-        }
-        case 3: {
-          u = fr(ts * it.sp / FLOW6 + it.p);
-          a = 0.6 * Math.sin(u * Math.PI);
-          if (a < 0.06) continue;
-          const s = (u - 0.5) * 30;
-          ctx.globalAlpha = a;
-          put3(ctx, dash(it.c, it.b), it.x + it.dx * s - 12, it.y + it.dy * s - 12);
-          break;
-        }
-        case 4:
-          u = fr(ts / RING + it.p);
-          a = 0.7 * (1 - u);
-          if (a < 0.06) continue;
-          ctx.globalAlpha = a;
-          put3(ctx, ring12(it.c, Math.min(5, Math.floor(u * 6))), it.x - 12, it.y - 7);
-          break;
-        case 5:
-          u = fr(ts / BUBBLE + it.p);
-          if (u < 0.7) {
-            ctx.globalAlpha = 1;
-            put3(ctx, bubble(Math.min(4, Math.floor(u / 0.7 * 5))), it.x - 8, it.y - 8);
-          } else {
-            a = 1 - (u - 0.7) / 0.3;
-            if (a < 0.06) continue;
-            ctx.globalAlpha = a;
-            put3(ctx, ring12("#fff3c0", Math.min(5, Math.floor((u - 0.7) / 0.3 * 6))), it.x - 12, it.y - 7);
-          }
-          break;
-        default:
-          continue;
-      }
-      n++;
+      n += piece3(ctx, it, ts);
     }
+    return n;
+  };
+  const LAYER_MIN = 100, LAYER_MS = 48, LAYER_MARGIN = 48;
+  let layer2 = null, layerRedraws = 0, layerReuses = 0, lastTime = -Infinity;
+  function layered(ctx, pages2, time3, ts) {
+    const m = ctx.getTransform?.(), cv = ctx.canvas;
+    if (!m || !cv || !(m.a > 0) || !(m.d > 0) || m.b || m.c || !Number.isFinite(m.e) || !Number.isFinite(m.f) || !(cv.width > 0) || !(cv.height > 0)) return -1;
+    const M4 = LAYER_MARGIN, cw = cv.width + 2 * M4, ch = cv.height + 2 * M4;
+    if (!layer2) {
+      const c = doc.createElement("canvas"), g = c.getContext?.("2d");
+      if (!g || typeof g.clearRect !== "function") return -1;
+      layer2 = { c, g, w: 0, h: 0, pages: null, at: -Infinity, n: 0 };
+    }
+    let keep8 = layer2.w === cw && layer2.h === ch && layer2.a === m.a && layer2.d === m.d && Math.abs(m.e - layer2.e) <= M4 - 2 && Math.abs(m.f - layer2.f) <= M4 - 2 && time3 >= layer2.at && time3 - layer2.at < LAYER_MS && layer2.pages.length === pages2.length;
+    if (keep8) {
+      for (let i = 0; i < pages2.length; i++) if (pages2[i] !== layer2.pages[i]) {
+        keep8 = false;
+        break;
+      }
+    }
+    if (!keep8) {
+      const g = layer2.g;
+      if (layer2.w !== cw || layer2.h !== ch) {
+        layer2.c.width = layer2.w = cw;
+        layer2.c.height = layer2.h = ch;
+      }
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.globalAlpha = 1;
+      g.clearRect(0, 0, cw, ch);
+      g.setTransform(m.a, 0, 0, m.d, m.e + M4, m.f + M4);
+      layer2.n = all(g, pages2, (-M4 - m.e) / m.a - 16, (-M4 - m.f) / m.d - 16, (cv.width + M4 - m.e) / m.a + 16, (cv.height + M4 - m.f) / m.d + 16, ts);
+      layer2.a = m.a;
+      layer2.d = m.d;
+      layer2.e = m.e;
+      layer2.f = m.f;
+      layer2.at = time3;
+      layer2.pages = pages2.slice();
+      layerRedraws++;
+    } else layerReuses++;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.drawImage(layer2.c, Math.round(m.e - layer2.e) - M4, Math.round(m.f - layer2.f) - M4);
+    return layer2.n;
+  }
+  function draw(ctx, pages2, view3, time3) {
+    const ts = time3 / 1e3;
+    let n = -1;
+    frames++;
+    ctx.save();
+    const gap2 = time3 - lastTime;
+    lastTime = time3;
+    if (lastDrawn >= LAYER_MIN && gap2 >= 0 && gap2 < LAYER_MS) n = layered(ctx, pages2, time3, ts);
+    if (n < 0) n = all(ctx, pages2, view3.x - 16, view3.y - 16, view3.x + view3.width + 16, view3.y + view3.height + 16, ts);
     ctx.globalAlpha = 1;
     ctx.restore();
     lastDrawn = n;
     return n;
   }
-  return Object.freeze({ draw, resources: () => ({ version: WATER_MOTION_VERSION, frames, lastDrawn, sprites: SPR.size }) });
+  return Object.freeze({ draw, resources: () => ({ version: WATER_MOTION_VERSION, frames, lastDrawn, sprites: SPR.size, layerRedraws, layerReuses }) });
 }
 
 // src/client/wetland_swamp_v1.js
