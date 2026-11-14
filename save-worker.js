@@ -34000,6 +34000,7 @@ function seatComparable(s, kept, party2, room2) {
   only(c.trips?.groundByPlayerId);
   only(c.trips?.tripsByPlayerId);
   if (c.trips) delete c.trips.hell;
+  if (c.trips && Object.keys(c.trips).every((k) => ["version", "bagsByPlayerId", "groundByPlayerId", "tripsByPlayerId"].includes(k)) && ["bagsByPlayerId", "groundByPlayerId", "tripsByPlayerId"].every((k) => Object.keys(c.trips[k] ?? {}).length === 0)) delete c.trips;
   delete c.arenaFallenV1;
   eachTarget(c, (row2, key9) => {
     if (party2.entities.has(row2[key9])) row2[key9] = "?";
