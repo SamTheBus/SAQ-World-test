@@ -131291,7 +131291,7 @@ function seatPartyV1(state2, { host, guests = [], seats, lastPlayerId, heroIds =
   return { state: state2, playerId: first.playerId, seats: next, party: party4, changed };
 }
 var playerSet = (s) => new Set(s.session.playerIds);
-function seatComparable(s, kept, party4, room, arrived = false) {
+function seatComparable(s, kept, party4, room) {
   const c = copyWire(s), keep8 = (pid) => kept.has(pid), only = (rows) => {
     if (rows) {
       for (const pid of Object.keys(rows)) if (!keep8(pid)) delete rows[pid];
@@ -131300,10 +131300,6 @@ function seatComparable(s, kept, party4, room, arrived = false) {
   delete c.session.playerIds;
   delete c.waitingRoom;
   delete c.identitySequence;
-  if (arrived && c.d9World) {
-    c.d9World.ownershipIndex = null;
-    c.d9World.groundIndex = null;
-  }
   for (const pid of Object.keys(c.playersById)) {
     if (!keep8(pid)) {
       delete c.playersById[pid];
@@ -131389,8 +131385,7 @@ function validateSeatChangeV1(a, b) {
   }
   const party4 = { entities, characters, kept: new Set([...kept].map((pid) => b.playersById[pid].entityId)) };
   const room = a.waitingRoom ? null : b.waitingRoom?.spaceInstanceId ?? null;
-  const arrived = [...B7].some((pid) => !A2.has(pid));
-  requireContract(seatComparable(a, kept, party4, null, arrived) === seatComparable(b, kept, party4, room, arrived), "Seat change touched more than seats");
+  requireContract(seatComparable(a, kept, party4, null) === seatComparable(b, kept, party4, room), "Seat change touched more than seats");
 }
 
 // src/shared/contracts/party_world_v1.js
@@ -210815,7 +210810,7 @@ function actorFootprintPinsD9(s) {
   }
   return pinned;
 }
-function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, siteBootstrap = null, ruinSocket = null, fortParcel = null, caveParcel = null, caveParcels = [], record: record2 = () => {
+function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requestSave = null, siteBootstrap = null, ruinSocket = null, fortParcel = null, caveParcel = null, caveParcels = [], record: record2 = () => {
 }, measure: measure2 = (_name, fn) => fn(), now: now3 = () => Date.now() }) {
   const SOFT_RESIDENT_CHUNKS = 64;
   const RELEASE_COOLDOWN_TICKS = 900, releaseCooldown = /* @__PURE__ */ new Map();
@@ -211335,13 +211330,32 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
     requireContract(!closed2 && !destinationTarget && requiredChunks2.length > 0, "Destination residency preparation already active");
     requireContract(departingPlayerId === null || borrow((s) => hasFerries(s.d9World.plannedWorld) && s.playersById[departingPlayerId]), "Unknown departing participant");
     destinationTarget = { position: copyWire(position4), requiredChunks: copyWire(requiredChunks2), departingPlayerId };
+    let saves = 0;
+    const owed = async () => {
+      if (!requestSave || saves >= 8) return false;
+      saves++;
+      try {
+        await requestSave();
+      } catch {
+      }
+      return true;
+    };
+    if (needsSave()) await owed();
     for (let attempt = 0; attempt < D9_RUNTIME_POLICY.preparedChunks; attempt++) {
       await pump();
+      if (error) {
+        destinationTarget = null;
+        throw error;
+      }
       const v = observedView(), historical = (address3) => BigInt(address3.chunkX) >= 0n && BigInt(address3.chunkY) >= 0n && BigInt(address3.chunkX) < BigInt(v.origin.originWidthChunks) && BigInt(address3.chunkY) < BigInt(v.origin.originHeightChunks);
       if (destinationTarget.requiredChunks.every((address3) => historical(address3) || v.resident.has(chunkAddressKey(address3.chunkX, address3.chunkY)))) return true;
+      if (progressState === "awaiting-save") {
+        if (!await owed()) await new Promise((resolve) => setTimeout(resolve, 50));
+      } else if (!lastRunWorked) await new Promise((resolve) => setTimeout(resolve, 25));
     }
     destinationTarget = null;
-    throw new Error("Destination residency could not become ready within the deterministic preparation budget");
+    record2("world.destinationNotReady", { state: progressState, detail: progressDetail ?? null, saves });
+    throw new Error("That place took too long to load. Try again in a moment. (" + progressState + (progressDetail ? ": " + progressDetail : "") + ")");
   }
   function finishDestinationPosition() {
     destinationTarget = null;
@@ -211872,7 +211886,10 @@ async function createLocalEndlessSessionD9(options) {
   const siteBootstrap = boundBootstrap ?? plannedBootstrap;
   const pages2 = createWorldPageBufferD9({ readPage: worker.readPage, sha256, now: now3 }), authority = createPagedWorldAuthorityD9({ initialState: opened2.state, publication: opened2.publication, task: worker, measure: measure2, developerCapabilities: { siteNavigator: siteNavigatorEnabled }, capturePages: pages2.capture, confirmedPages: pages2.acknowledge });
   const fortParcel = Object.values(opened2.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === "woodland-fort")?.parcel ?? null, caveParcel = Object.values(opened2.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === WOODLAND_CAVE_PACKAGE_ID)?.parcel ?? null, caveParcels = Object.values(opened2.state.d9World.siteReservationsById ?? {}).filter((r) => r.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID).map((r) => r.parcel).sort((a, b) => (a.regionKey ?? "").localeCompare(b.regionKey ?? "") || a.spawnOrdinal - b.spawnOrdinal);
-  const stream = createWorldResidencyD9({ authority, worker, pageBuffer: pages2, siteBootstrap, ruinSocket: ruinReservation?.socket ?? null, fortParcel, caveParcel, caveParcels, measure: measure2, now: now3 }), hostPort = createActivityClientPort({ authority, localPlayerId, measure: measure2 }), seatPorts = /* @__PURE__ */ new Map(), seatPort = (pid) => {
+  const stream = createWorldResidencyD9({ authority, worker, pageBuffer: pages2, requestSave: () => {
+    authority.drainCommands();
+    return save();
+  }, siteBootstrap, ruinSocket: ruinReservation?.socket ?? null, fortParcel, caveParcel, caveParcels, measure: measure2, now: now3 }), hostPort = createActivityClientPort({ authority, localPlayerId, measure: measure2 }), seatPorts = /* @__PURE__ */ new Map(), seatPort = (pid) => {
     if (pid === localPlayerId) return hostPort;
     let p = seatPorts.get(pid);
     if (!p) {
@@ -211965,6 +211982,7 @@ async function createLocalEndlessSessionD9(options) {
   authority.withReadyAuthority((a) => a.withAuthorityState((s) => measure2("explorationReveal", () => revealNavigationD9(s))));
   requireContract(await stream.prime(), "Nearby World collision could not become ready");
   const fortClue = ruinReservation && fortParcel ? Object.freeze({ version: "woodland-fort-guidance-d10-v1", clues: [Object.freeze({ siteId: fortParcel.siteId, target: fortParcel.socket.entrance, trailheadTarget: ruinReservation.socket.entrance, distanceTiles: fortParcel.routeDistanceTiles, side: "fort-road", label: "Woodland Fort", trailLabel: "Fort road" })] }) : null;
+  let seatCut = false;
   function save() {
     if (fatalInvariant) return Promise.resolve({ status: "aborted", reason: fatalInvariant.reason, code: fatalInvariant.code });
     if (saving) {
@@ -211995,7 +212013,7 @@ async function createLocalEndlessSessionD9(options) {
         phase2("waiting-stream");
         await stream.settled();
         phase2("preparing");
-        let prepared = false;
+        let prepared = seatCut;
         for (let attempt = 0; attempt < 3 && !prepared; attempt++) {
           prepared = await stream.syncPages();
           if (!prepared) retriedCuts++;
@@ -212471,7 +212489,12 @@ async function createLocalEndlessSessionD9(options) {
         await stream.settled();
         const ids4 = seatBook.heroIds ? [.../* @__PURE__ */ new Set([...seatBook.heroIds, ...Object.keys(seatBook.party), guest.heroId])] : null;
         const result = authority.withReadyAuthority((a) => a.seatJoinV1({ heroId: guest.heroId, passport: guest.passport }, seatBook.seats, localPlayerId, ids4));
-        durable = await save();
+        seatCut = true;
+        try {
+          durable = await save();
+        } finally {
+          seatCut = false;
+        }
         if (durable.status !== "committed") {
           try {
             authority.withReadyAuthority((a) => a.seatJoinUndoV1());

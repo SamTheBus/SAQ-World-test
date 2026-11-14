@@ -33923,7 +33923,7 @@ function isSeatChangeV1(a, b) {
   if (canonicalStringify(a.session.playerIds) !== canonicalStringify(b.session.playerIds) || canonicalStringify(a.waitingRoom ?? null) !== canonicalStringify(b.waitingRoom ?? null)) return true;
   return Boolean(b.waitingRoom) && b.session.playerIds.some((pid) => a.playersById[pid] && isWaiting(a, pid) !== isWaiting(b, pid));
 }
-function seatComparable(s, kept, party2, room2, arrived = false) {
+function seatComparable(s, kept, party2, room2) {
   const c = copyWire(s), keep = (pid) => kept.has(pid), only = (rows3) => {
     if (rows3) {
       for (const pid of Object.keys(rows3)) if (!keep(pid)) delete rows3[pid];
@@ -33932,10 +33932,6 @@ function seatComparable(s, kept, party2, room2, arrived = false) {
   delete c.session.playerIds;
   delete c.waitingRoom;
   delete c.identitySequence;
-  if (arrived && c.d9World) {
-    c.d9World.ownershipIndex = null;
-    c.d9World.groundIndex = null;
-  }
   for (const pid of Object.keys(c.playersById)) {
     if (!keep(pid)) {
       delete c.playersById[pid];
@@ -34021,8 +34017,7 @@ function validateSeatChangeV1(a, b) {
   }
   const party2 = { entities, characters, kept: new Set([...kept].map((pid) => b.playersById[pid].entityId)) };
   const room2 = a.waitingRoom ? null : b.waitingRoom?.spaceInstanceId ?? null;
-  const arrived = [...B2].some((pid) => !A.has(pid));
-  requireContract(seatComparable(a, kept, party2, null, arrived) === seatComparable(b, kept, party2, room2, arrived), "Seat change touched more than seats");
+  requireContract(seatComparable(a, kept, party2, null) === seatComparable(b, kept, party2, room2), "Seat change touched more than seats");
 }
 
 // src/shared/generation/site_discovery_d9.js
