@@ -16536,6 +16536,10 @@ function advanceVacancyD9(episode, { tick, occupied, obligationsResolved, townRe
 
 // src/shared/contracts/hero_progression_d9.js
 var D9_HERO_VERSION = "player-progression-d9-v2";
+function d9XpAtLevel(level) {
+  positiveProgression(level);
+  return progressionWire(heroXpAtLevelV2(level));
+}
 function d9LevelAtXp(totalXp) {
   const xp = progressionBigInt(totalXp);
   integerWire(xp);
@@ -31935,9 +31939,12 @@ export {
   unfrozenEpisodeD9,
   advanceVacancyD9,
   D9_HERO_VERSION,
+  d9XpAtLevel,
   d9ProgressionAtXp,
   migrateD9Participant,
   D3_ACTIVITY_FORMAT,
+  MAX_PLAYER_LEVEL,
+  xpAtLevel,
   MAX_PLAYER_XP,
   progressionAtXp,
   validatePlayerProgression,

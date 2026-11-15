@@ -175,6 +175,7 @@ import {
   LOOK_POOLS,
   MAJOR_NAME_POLICY_VERSION,
   MASTERY_FAMILIES,
+  MAX_PLAYER_LEVEL,
   MAX_PLAYER_XP,
   MAX_SKILL_COOLDOWN_TICKS,
   MOVE_SLOT,
@@ -525,6 +526,7 @@ import {
   cryptIdsForBinding,
   currentProceduralContentCatalogHash,
   d9ProgressionAtXp,
+  d9XpAtLevel,
   damageNestV1,
   damageSourceItem,
   defeatReward,
@@ -1102,8 +1104,9 @@ import {
   worldSitesV1,
   worldTimeAtMinute,
   worldTimeAtTick,
-  wrathDamageV1
-} from "./chunk-ONTJ3X3T.js";
+  wrathDamageV1,
+  xpAtLevel
+} from "./chunk-36W2JT7N.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -3719,7 +3722,7 @@ function tintImageV1(image, biome) {
   if (byBiome.has(biome)) return byBiome.get(biome);
   const w = image.naturalWidth || image.width, h = image.naturalHeight || image.height;
   if (!(w > 0 && h > 0)) return image;
-  let copy3 = image;
+  let copy4 = image;
   try {
     const cv = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(w, h) : globalThis.document?.createElement("canvas");
     if (cv) {
@@ -3736,13 +3739,13 @@ function tintImageV1(image, biome) {
         d[i + 2] = rgbOut[2];
       }
       g.putImageData(px7, 0, 0);
-      copy3 = cv;
+      copy4 = cv;
     }
   } catch {
-    copy3 = image;
+    copy4 = image;
   }
-  byBiome.set(biome, copy3);
-  return copy3;
+  byBiome.set(biome, copy4);
+  return copy4;
 }
 var contexts = /* @__PURE__ */ new WeakMap();
 function siteTintedContextV1(ctx, biome) {
@@ -90284,7 +90287,7 @@ function furMass(c, pts2, P25, s, o = {}) {
       band11(y0 + ry * 1.18, dark ? P25.furDD : P25.furD, 7);
       band11(y0 + ry * 1.62, dark ? "#62758a" : P25.furDD, 6);
     } else {
-      const sm4 = smooth20(pts2, 2), copy3 = (k, ox, oy, col2) => {
+      const sm4 = smooth20(pts2, 2), copy4 = (k, ox, oy, col2) => {
         c.fillStyle = col2;
         c.beginPath();
         sm4.forEach(([x, y], i) => {
@@ -90297,8 +90300,8 @@ function furMass(c, pts2, P25, s, o = {}) {
       const a = Math.max(1.2, rx * 0.08), b = Math.max(1.6, ry * 0.1);
       c.fillStyle = dark ? "#62758a" : P25.furDD;
       c.fillRect(x0 - 20, y0 - 20, rx * 2 + 40, ry * 2 + 40);
-      copy3(1.05, -a, -b, dark ? P25.furDD : P25.furD);
-      copy3(1.06, -a * 2.2, -b * 2.3, dark ? P25.furD : P25.fur);
+      copy4(1.05, -a, -b, dark ? P25.furDD : P25.furD);
+      copy4(1.06, -a * 2.2, -b * 2.3, dark ? P25.furD : P25.fur);
     }
     if (!dark) {
       c.fillStyle = P25.furL;
@@ -137958,6 +137961,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       if (!a.alive || !t2?.alive || --m.ticks <= 0) clearSkillState(combat, "crownMark");
     }
     if (!a.alive || combat.skills?.crownCd || combat.skills?.crownMark || !wears(a, "eyestalk-crown")) return;
+    if (s.tick % 10) return;
     const t = around3(a, a.position, CROWN_REACH).filter((n) => !isPodCombatTargetV4(n)).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0];
     if (!t) return;
     const k = classSkillsRecord(combat);
@@ -166214,7 +166218,7 @@ function createFriendsViewV1({ document: document2, environment, friends, action
     busy = null;
     render(true);
   }
-  const copy3 = async (text3, what) => {
+  const copy4 = async (text3, what) => {
     try {
       await environment.navigator.clipboard.writeText(text3);
       status2 = `${what} copied.`;
@@ -166289,7 +166293,7 @@ function createFriendsViewV1({ document: document2, environment, friends, action
     else {
       const mine2 = box6("Your friend code", "share it once"), code2 = el3("div", "fr-code"), [n, t] = me.code.split("#"), big = el3("strong", "", n);
       big.append(el3("span", "", "#" + t));
-      code2.append(big, button3("Copy", () => copy3(me.code, "Friend code"), "is-quiet"));
+      code2.append(big, button3("Copy", () => copy4(me.code, "Friend code"), "is-quiet"));
       mine2.append(code2);
       if (renaming) {
         const name = input("New player name", 16);
@@ -166369,7 +166373,7 @@ function createFriendsViewV1({ document: document2, environment, friends, action
       const back = box6("Back up my friends");
       if (showBackup) {
         const c = friends.backupCode();
-        back.append(el3("p", "fr-note", "On a new phone, open Friends and type this code to bring your friend code and friends. Keep it private: anyone with it can be you."), el3("div", "fr-backup", c), button3("Copy backup code", () => copy3(c, "Backup code"), "is-quiet"));
+        back.append(el3("p", "fr-note", "On a new phone, open Friends and type this code to bring your friend code and friends. Keep it private: anyone with it can be you."), el3("div", "fr-backup", c), button3("Copy backup code", () => copy4(c, "Backup code"), "is-quiet"));
       } else back.append(el3("p", "fr-note", "A code that moves your friend code and friends to a new phone."), button3("Show backup code", () => {
         showBackup = true;
         render(true);
@@ -167678,12 +167682,12 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
   button3.id = "rpg-interaction-v2";
   button3.hidden = true;
   button3.dataset.gameplayHud = "";
-  const key4 = doc.createElement("kbd"), copy3 = doc.createElement("span"), kind = doc.createElement("small"), label7 = doc.createElement("strong"), tap = doc.createElement("span");
+  const key4 = doc.createElement("kbd"), copy4 = doc.createElement("span"), kind = doc.createElement("small"), label7 = doc.createElement("strong"), tap = doc.createElement("span");
   key4.textContent = "E";
   tap.className = "interaction-tap";
   tap.textContent = "Tap";
-  copy3.append(kind, label7);
-  button3.append(key4, copy3, tap);
+  copy4.append(kind, label7);
+  button3.append(key4, copy4, tap);
   doc.getElementById("world-view").parentElement.append(button3);
   doc.body.dataset.rpgInteraction = "v2";
   let previous = "", writes = 0;
@@ -169032,6 +169036,54 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   const worldName = name("World update");
   worldName.append(el3("small", null, "Rebuild this world with the newest world rules"));
   const worldLine = line43(worldName, btn("See", "", () => byId("world-refresh")?.click()));
+  const dev = env.__SAQ_DEV_TOOLS_V1__ ?? null, devNote = el3("small", null, "Each one saves and reloads. You wake in Alderwood and quests here restart. Uniques come equipped at 4 stars; All gives one per slot.");
+  let devSec = null;
+  if (dev) {
+    const run2 = async (button3, change) => {
+      button3.disabled = true;
+      devNote.textContent = "Saving, then reloading\u2026";
+      try {
+        await dev.apply(change);
+      } catch (e) {
+        devNote.textContent = String(e?.message ?? e);
+        button3.disabled = false;
+      }
+    };
+    const levelIn = el3("input");
+    levelIn.type = "number";
+    levelIn.min = "1";
+    levelIn.max = "50";
+    levelIn.value = String(dev.level());
+    levelIn.style.cssText = "width:64px;height:30px;border-radius:8px;border:1px solid #2e3d48;background:#0b1015;color:#e9dfc8;font:700 13px system-ui;text-align:center";
+    levelIn.setAttribute("aria-label", "Hero level");
+    const levelBtn = btn("Set", "", () => run2(levelBtn, { level: Math.round(Number(levelIn.value)) }));
+    const levelActs = el3("div", "st-acts");
+    levelActs.append(levelIn, levelBtn);
+    const pick4 = el3("select");
+    pick4.style.cssText = "max-width:170px;height:30px;border-radius:8px;border:1px solid #2e3d48;background:#0b1015;color:#e9dfc8;font:600 12px system-ui";
+    pick4.setAttribute("aria-label", "Unique item");
+    for (const u of dev.uniques()) {
+      const o = el3("option", null, u.name + " (" + u.slot + ")");
+      o.value = u.id;
+      pick4.append(o);
+    }
+    const giveBtn = btn("Give", "", () => run2(giveBtn, { unique: pick4.value })), setBtn = btn("All", "ghost", () => run2(setBtn, (() => {
+      const seen5 = /* @__PURE__ */ new Set(), out4 = [];
+      for (const u of dev.uniques()) {
+        const k = u.slot === "ring" && seen5.has("ring") ? "ring2" : u.slot;
+        if (seen5.has(k)) continue;
+        seen5.add(k);
+        out4.push({ unique: u.id });
+      }
+      return out4;
+    })()));
+    const giveActs = el3("div", "st-acts");
+    giveActs.append(pick4, giveBtn, setBtn);
+    const goldBtn = btn("+10,000", "", () => run2(goldBtn, { gold: 1e4 }));
+    const devName = name("Developer");
+    devName.append(devNote);
+    devSec = section("Developer (test site)", line43(devName), line43(name("Level"), levelActs), line43(name("Unique"), giveActs), line43(name("Gold"), goldBtn));
+  }
   const perfNote = el3("small", null, "");
   const perfName = name("Performance sample");
   perfName.append(perfNote);
@@ -169047,7 +169099,8 @@ function createSettingsPageV1({ document: doc, environment: env }) {
     section("Sound", line43(name("Music", null, true), music.r, music.v), line43(name("Sound effects", null, true), effects2.r, effects2.v), line43(name("Mute all"), mute)),
     section("Controls", line43(name("Movement"), seg8), line43(name("Left-handed", "Attack, skills and Potion swap to the left"), left)),
     section("Screen", line43(name("Damage numbers", "Numbers that pop off hits"), numbers), line43(name("Shadows", "Simple or Off can help a slow phone"), shadowSeg)),
-    gameSec
+    gameSec,
+    ...devSec ? [devSec] : []
   );
   function paint3() {
     for (const [b, k] of [[mute, "mute"], [left, "leftHanded"], [numbers, "damageNumbers"]]) b.setAttribute("aria-checked", String(Boolean(s[k])));
@@ -218474,7 +218527,7 @@ function createDiagnosticDownloadD9({ environment, document: document2, runtimeI
     environment.setTimeout(() => environment.URL.revokeObjectURL(url), 6e4);
     return link.download;
   }
-  async function copy3() {
+  async function copy4() {
     const value2 = json2();
     if (environment.navigator.clipboard?.writeText) {
       try {
@@ -218499,7 +218552,7 @@ function createDiagnosticDownloadD9({ environment, document: document2, runtimeI
     input.remove();
     return succeeded;
   }
-  return Object.freeze({ download, copy: copy3 });
+  return Object.freeze({ download, copy: copy4 });
 }
 
 // src/client/activity_save_bridge.js
@@ -220115,19 +220168,19 @@ async function activateFunctionalSiteD9({ authority, pageBuffer, playerId, siteI
 var SITE_RESET_D13C = "site-reset-d13c1-v1";
 var same11 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var physicalFloor = (floor) => {
-  const copy3 = copyWire(floor);
-  delete copy3.groupId;
-  delete copy3.enemyIds;
-  return copy3;
+  const copy4 = copyWire(floor);
+  delete copy4.groupId;
+  delete copy4.enemyIds;
+  return copy4;
 };
 function physicalSiteIdentityD13C(site) {
-  const copy3 = copyWire(site);
-  delete copy3.conqueredTick;
-  delete copy3.discoveredByPlayerIds;
-  delete copy3.instanceHash;
-  if (copy3.interior) delete copy3.interior.groupId;
-  if (copy3.floors) copy3.floors = copy3.floors.map(physicalFloor);
-  return copy3;
+  const copy4 = copyWire(site);
+  delete copy4.conqueredTick;
+  delete copy4.discoveredByPlayerIds;
+  delete copy4.instanceHash;
+  if (copy4.interior) delete copy4.interior.groupId;
+  if (copy4.floors) copy4.floors = copy4.floors.map(physicalFloor);
+  return copy4;
 }
 var finaleKeys = /* @__PURE__ */ new Set([SMALL_CAVE_FINALE_LEADER_KEY_D13D_B, SMALL_CAVE_FINALE_ESCORT_KEY_D13D_B]);
 function pendingFinaleIdentityD13D_B(state2, currentSite, nextSite) {
@@ -221582,6 +221635,57 @@ function showWorldRefreshNoticeV1({ document: doc, onOpen, onDismiss }) {
 
 // src/shared/generation/world_maker_v1/version.js
 var WORLD_MAKER_VERSION = "world-maker-v1.22";
+
+// src/client/dev_tools_v1.js
+var DEV_LEVEL_MAX = MAX_PLAYER_LEVEL;
+var SLOT = { weapon: "weapon", subweapon: "subweapon", cape: "cape", ring: "ring1", overall: "overall", helmet: "helmet", gloves: "gloves", boots: "boots" };
+var copy3 = (v) => JSON.parse(JSON.stringify(v));
+var devToolsAllowedV1 = (location, channel2) => channel2 === "saq-test-site:" || ["localhost", "127.0.0.1", "[::1]"].includes(location?.hostname) || /\.(localhost|test)$/.test(location?.hostname ?? "");
+function devUniquesForV1(passport) {
+  const cls = heroClassOf(passport?.d8)?.id ?? null;
+  return Object.values(UNIQUE_ITEMS).filter((u) => !u.cls || u.cls === cls).map((u) => ({ id: u.id, name: u.name, slot: u.family })).sort((a, b) => a.slot < b.slot ? -1 : a.slot > b.slot ? 1 : a.name < b.name ? -1 : 1);
+}
+function devSetLevelV1(passport, level) {
+  if (!Number.isInteger(level) || level < 1 || level > DEV_LEVEL_MAX) throw Error("Level must be 1 to " + DEV_LEVEL_MAX);
+  const next = copy3(passport);
+  next.progression = copy3(passport.progression?.version === D9_HERO_VERSION ? d9ProgressionAtXp(d9XpAtLevel(level)) : progressionAtXp(xpAtLevel(level)));
+  next.d8 = copy3(updateHighestHeroLevel(next.d8, next.progression.level));
+  return validateHeroPassport(next);
+}
+function devGiveUniqueV1(passport, id2, { stars: stars2 = 4, equip = true, level = null } = {}) {
+  const u = UNIQUE_ITEMS[id2];
+  if (!u) throw Error("No unique called " + id2);
+  const cls = heroClassOf(passport.d8)?.id ?? null;
+  if (u.cls && u.cls !== cls) throw Error(u.name + " is for another class");
+  if (!Number.isInteger(stars2) || stars2 < 0 || stars2 > 4) throw Error("Stars must be 0 to 4");
+  const next = copy3(passport), at9 = level ?? Math.max(1, Number(next.progression.level) || 1), used = new Set(next.items.map((i) => i.key));
+  let n = 0;
+  while (used.has("gear:" + n)) n++;
+  const g = generateGear("dev-tools/" + id2 + "/" + n, { ...rewardProgressionD9(at9, "dev-tools:" + id2), combatHash: WORLD_COMBAT_HASH, combatQuality: "elite", gearClass: cls, wardrobe: WARDROBE_V1, unique: id2 });
+  const key4 = "gear:" + n;
+  next.items.push(copy3({ key: key4, kind: "gear", definitionId: g.definition.definitionId, generated: { ...g, definition: { ...g.definition, rarityTier: stars2 } } }));
+  if (equip) {
+    let slot = SLOT[u.family];
+    if (slot === "ring1" && next.equipped.ring1 != null && next.equipped.ring2 == null) slot = "ring2";
+    if (slot) next.equipped[slot] = key4;
+  }
+  return validateHeroPassport(next);
+}
+function devAddGoldV1(passport, amount2) {
+  if (!Number.isInteger(amount2) || amount2 < 1 || amount2 > 1e9) throw Error("Gold must be 1 to 1,000,000,000");
+  const next = copy3(passport);
+  next.gold = addAmount(next.gold, String(amount2));
+  return validateHeroPassport(next);
+}
+function devApplyV1(passport, changes) {
+  let next = passport;
+  for (const c of Array.isArray(changes) ? changes : [changes]) {
+    if (c?.level !== void 0) next = devSetLevelV1(next, c.level);
+    if (c?.unique !== void 0) next = devGiveUniqueV1(next, c.unique, { stars: c.stars ?? 4, equip: c.equip ?? true });
+    if (c?.gold !== void 0) next = devAddGoldV1(next, c.gold);
+  }
+  return next;
+}
 
 // src/shared/contracts/coop_wire_v1.js
 var COOP_PROTOCOL = "saq-coop-v1";
@@ -225967,12 +226071,12 @@ async function startWorldClient(environment) {
         plannedReview = await plannedOpening.open({ hash: builtWorld.hash, commitments: builtWorld.commitments, read: builtWorlds.read });
         const party4 = coopJoin.start.party;
         if (party4) try {
-          const copy3 = copyPartyWorld(deviceStorage, channel2, { id: party4.id, hash: world.hash, seed: builtWorld.seed, label: party4.label, owner: party4.owner });
-          if (copy3) {
-            updatePartyWorld(deviceStorage, channel2, copy3.id, (w) => noteMemberV1(noteMemberV1(w, coopJoin.start.welcome.hostName), heroName));
-            partyGuest = copy3;
-            if (!copy3.own) {
-              const store2 = createBuiltWorldStoreV1({ indexedDB: channelIndexedDb(environment.indexedDB, channel2 + heroSavePrefix(copy3.slot)), sha256 });
+          const copy4 = copyPartyWorld(deviceStorage, channel2, { id: party4.id, hash: world.hash, seed: builtWorld.seed, label: party4.label, owner: party4.owner });
+          if (copy4) {
+            updatePartyWorld(deviceStorage, channel2, copy4.id, (w) => noteMemberV1(noteMemberV1(w, coopJoin.start.welcome.hostName), heroName));
+            partyGuest = copy4;
+            if (!copy4.own) {
+              const store2 = createBuiltWorldStoreV1({ indexedDB: channelIndexedDb(environment.indexedDB, channel2 + heroSavePrefix(copy4.slot)), sha256 });
               if (!await store2.info(world.hash)) {
                 const text3 = coopJoin.start.worldText ?? await builtWorlds.read(world.hash);
                 if (text3) await store2.put(text3);
@@ -226385,8 +226489,9 @@ async function startWorldClient(environment) {
   environmentArt = await createSporeArtV1(environment, environmentArt);
   environmentArt = await createHollowArtV1(environment, environmentArt);
   let passportMark = null, passportAt = -Infinity;
+  let devPending = false;
   const saveHeroPassport = (force = true) => {
-    if (!worldBridge || !heroId) return;
+    if (devPending || !worldBridge || !heroId) return;
     try {
       const pid = opened2.localPlayerId, now3 = environment.performance.now(), passport = session.authority.withAuthority((a) => a.withAuthorityState((s) => {
         const p = s.playersById[pid];
@@ -226554,6 +226659,24 @@ async function startWorldClient(environment) {
     }
     saveHeroPassport();
   };
+  if (devToolsAllowedV1(environment.location, channel2) && worldBridge && heroId && !coopGuest) environment.__SAQ_DEV_TOOLS_V1__ = Object.freeze({
+    uniques: () => devUniquesForV1(session.authority.withAuthority((a) => a.withAuthorityState((s) => ({ d8: { heroClass: s.playersById[opened2.localPlayerId]?.d8?.heroClass } })))),
+    level: () => session.authority.withAuthority((a) => a.withAuthorityState((s) => Number(s.playersById[opened2.localPlayerId]?.progression.level ?? 1))),
+    apply: async (changes) => {
+      await saveNow();
+      const passport = readHeroPassport(deviceStorage, channel2, heroId);
+      if (!passport) throw Error("This hero has no saved passport yet. Play a few seconds and try again.");
+      const next = devApplyV1(passport, changes);
+      devPending = true;
+      try {
+        writeHeroPassport(deviceStorage, channel2, next, null);
+      } catch (error) {
+        devPending = false;
+        throw error;
+      }
+      environment.location.reload();
+    }
+  });
   const friendsCanHost = () => Boolean(coopReady && heroId && worldBridge && !coopGuest);
   let friendsLand = null;
   friends.setPresence(() => {
