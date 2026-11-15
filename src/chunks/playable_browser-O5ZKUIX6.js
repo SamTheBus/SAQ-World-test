@@ -188994,7 +188994,7 @@ function drawFriendReviveTagsV1(c, model, time3) {
     c.restore();
   }
 }
-function drawFriendDownV1(c, canvas, model, cam, time3) {
+function drawFriendDownV1(c, canvas, model, cam, time3, callTop = null) {
   const down = friendsDownV1(model), ids4 = new Set(down.map((d) => d.actor.entityId));
   for (const d of down) if (!seen3.has(d.actor.entityId)) seen3.set(d.actor.entityId, time3);
   for (const id2 of [...seen3.keys()]) if (!ids4.has(id2)) seen3.delete(id2);
@@ -189005,7 +189005,7 @@ function drawFriendDownV1(c, canvas, model, cam, time3) {
     const s = dpr * clamp65(cssH / 720, 0.82, 1.25) * (k < 0.25 ? boing3(k / 0.25) : 1), a = k > 2.8 ? 1 - (k - 2.8) / 0.4 : 1, text3 = `${nameOf(latest.actor)} is down!`;
     c.save();
     c.globalAlpha = a;
-    c.translate(W21 / 2, Math.max(96 * dpr, H8 * 0.2));
+    c.translate(W21 / 2, callTop != null ? (callTop + 30) * dpr : Math.max(96 * dpr, H8 * 0.2));
     c.scale(s, s);
     c.font = '800 30px "Baloo 2",system-ui,sans-serif';
     const tw = c.measureText(text3).width;
@@ -189060,6 +189060,99 @@ function drawFriendDownV1(c, canvas, model, cam, time3) {
     callText(c, 0, uy > 0.6 ? -16 : 16, tagOf(actor), 6.5, "#ffffff", "#ffe2a0", 2.4);
     c.restore();
   }
+}
+
+// src/client/hud_layout_v1.js
+var HUD_FIXED_V1 = Object.freeze(["#world-hud-vitals", "#world-hud-title", "#quest-tracker", "#local-world-controls", "#world-bag", ".chart-mini", ".world-mini", "#woodland-clue-v3-8"]);
+var HUD_CONTROLS_V1 = Object.freeze([".skill-wheel-ring", ".skill-slot", "#primary-attack", "#world-bag", "#carried-rations"]);
+var HUD_LAYOUT_V1 = Object.freeze({ gap: 10, barTop: 12, barHeight: 50, barWidth: 380, core: 200, barMinScale: 0.6, measureMs: 250, toastLeft: 12, toastWidth: 240, upright: 600, notice: 48, oneCard: 40, cardHeight: 47, cardGap: 5 });
+function hudClearBelowV1(rects, left, right, height) {
+  let bottom = 0;
+  for (const r of rects) {
+    if (!r || r.width < 2 || r.height < 2 || r.top > height * 0.5 || r.right <= left || r.left >= right) continue;
+    bottom = Math.max(bottom, r.bottom);
+  }
+  return bottom;
+}
+function hudControlsTopV1(rects, left, right, height) {
+  let top = null;
+  for (const r of rects) {
+    if (!r || r.width < 2 || r.height < 2 || r.top < height * 0.5 || r.right <= left || r.left >= right) continue;
+    top = top == null ? r.top : Math.min(top, r.top);
+  }
+  return top;
+}
+function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft = HUD_LAYOUT_V1.toastLeft, toastRight = HUD_LAYOUT_V1.toastLeft + HUD_LAYOUT_V1.toastWidth, controls = [] }) {
+  const { gap: gap2, barTop, barHeight, barWidth, core: core5, barMinScale, notice, oneCard } = HUD_LAYOUT_V1, cx = width2 / 2, full = Math.min(barWidth, width2 - 28);
+  const middle = hudClearBelowV1(rects, cx - core5 / 2, cx + core5 / 2, height), bar2 = middle > 0 ? Math.round(middle + gap2) : barTop;
+  let room = full / 2;
+  for (const r of rects) {
+    if (!r || r.width < 2 || r.height < 2 || r.top > height * 0.5 || r.bottom <= bar2 || r.top >= bar2 + barHeight) continue;
+    if (r.right <= cx) room = Math.min(room, cx - r.right - gap2);
+    else if (r.left >= cx) room = Math.min(room, r.left - cx - gap2);
+  }
+  const barScale = Math.max(barMinScale, Math.min(1, 2 * room / full)), w = full * barScale, left = cx - w / 2, right = cx + w / 2, barBottom = Math.round(bar2 + barHeight * barScale);
+  const callTop = bossShown ? barBottom + gap2 : bar2;
+  let toastTop = Math.round(hudClearBelowV1(rects, toastLeft, toastRight, height) + gap2);
+  if (bossShown && toastRight > left && toastLeft < right) toastTop = Math.max(toastTop, barBottom + gap2);
+  const up2 = width2 <= HUD_LAYOUT_V1.upright, cTop = up2 ? hudControlsTopV1(controls, width2 - 12 - HUD_LAYOUT_V1.toastWidth, width2 - 12, height) : null, toastBottom = cTop == null ? null : Math.round(height - cTop + gap2);
+  const below = toastBottom == null ? hudControlsTopV1(controls, toastLeft, toastRight, height) : null;
+  const toastMax = toastBottom != null ? Math.max(oneCard, Math.round(height - toastBottom - (callTop + notice))) : below != null ? Math.max(oneCard, Math.round(below - gap2 - toastTop)) : null;
+  return { barTop: bar2, barShift: bar2 - barTop, barScale, barCenter: cx, callTop, toastTop, toastBottom, toastMax };
+}
+function placeHudBarV1(c, slots2) {
+  if (!slots2?.barScale || slots2.barScale === 1) {
+    c.translate(0, slots2?.barShift ?? 0);
+    return;
+  }
+  c.translate(slots2.barCenter, slots2.barTop);
+  c.scale(slots2.barScale, slots2.barScale);
+  c.translate(-slots2.barCenter, -HUD_LAYOUT_V1.barTop);
+}
+function createHudLayoutV1(canvas) {
+  const doc = canvas?.ownerDocument, view3 = doc?.defaultView;
+  let last = -1e9, lastBoss = null, slots2 = { barTop: HUD_LAYOUT_V1.barTop, barShift: 0, barScale: 1, barCenter: 0, callTop: null, toastTop: null, toastBottom: null, toastMax: null }, written = "";
+  function measure2(bossShown) {
+    const boxes2 = (list) => {
+      const out4 = [];
+      for (const sel of list) for (const el3 of doc.querySelectorAll(sel)) {
+        if (el3.closest("[hidden]")) continue;
+        out4.push(el3.getBoundingClientRect());
+      }
+      return out4;
+    }, rects = boxes2(HUD_FIXED_V1), controls = boxes2(HUD_CONTROLS_V1);
+    const lane2 = doc.querySelector(".toast-lane-v1"), lr = lane2?.getBoundingClientRect(), cv = canvas.getBoundingClientRect();
+    const toastLeft = lr && lr.width > 0 ? lr.left : HUD_LAYOUT_V1.toastLeft, toastRight = lr && lr.width > 0 ? lr.right : toastLeft + HUD_LAYOUT_V1.toastWidth;
+    const local8 = (list) => list.map((r) => ({ left: r.left - cv.left, right: r.right - cv.left, top: r.top - cv.top, bottom: r.bottom - cv.top, width: r.width, height: r.height }));
+    const s = hudSlotsV1(local8(rects), { width: cv.width || canvas.width, height: cv.height || canvas.height, bossShown, toastLeft: toastLeft - cv.left, toastRight: toastRight - cv.left, controls: local8(controls) });
+    const card = lane2?.querySelector(".toast-v1")?.getBoundingClientRect().height || HUD_LAYOUT_V1.cardHeight, fit2 = s.toastMax == null ? 3 : Math.max(1, Math.min(3, Math.floor((s.toastMax + HUD_LAYOUT_V1.cardGap) / (card + HUD_LAYOUT_V1.cardGap))));
+    slots2 = s;
+    const bottom = s.toastBottom == null ? "" : Math.round(s.toastBottom + (view3.innerHeight - cv.bottom)) + "px", css2 = `${Math.round(s.callTop + cv.top)}px|${Math.round(s.toastTop + cv.top)}px|${bottom}|${fit2}`;
+    if (css2 !== written) {
+      written = css2;
+      const [call, toast, low, many] = css2.split("|"), b = doc.body, set = (k, v) => v ? b.style.setProperty(k, v) : b.style.removeProperty(k);
+      set("--hud-call-top", call);
+      set("--hud-toast-top", toast);
+      set("--hud-toast-bottom", low);
+      b.dataset.hudLayout = low ? "upright" : "v1";
+      b.dataset.hudToastFit = many;
+    }
+  }
+  return Object.freeze({
+    update(time3, bossShown) {
+      if (!doc?.body || !view3) return slots2;
+      if (bossShown !== lastBoss || time3 - last >= HUD_LAYOUT_V1.measureMs || time3 < last) {
+        last = time3;
+        lastBoss = bossShown;
+        try {
+          measure2(Boolean(bossShown));
+        } catch {
+        }
+      }
+      return slots2;
+    },
+    slots: () => slots2
+  });
 }
 
 // src/client/wilderness_event_pilot_presentation_v3_7.js
@@ -217384,9 +217477,9 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
   const collisionDebug = new URLSearchParams(canvas.ownerDocument.defaultView?.location?.search ?? "").get("collisionDebug") === "1";
   const heroFacing = createHeroFacing(), siteEnvironment = createSiteEnvironment(canvas, { authoredArt: environmentArt });
   let invalidations = 0, lastInvalidationReason = "none", resizeEvents = 0, resizeChanges = 0, resizeNoops = 0, lastResize = null;
-  let observedFrames = null, observedFrameKey = null;
+  let observedFrames = null, observedFrameKey = null, bossBarUp = false;
   let animatedFlowers = 0, animatedWater = 0, ambientMarks = 0, lastEnvironment = null, lastRenderedEntities = 0, seamless = false, hellShown = false, hellWarmFrame = 0;
-  const perfectBlock = createPerfectBlockArtV1(), feedback = createCombatFeedback(), healthTrails = createHealthTrailsV3(), minorBossBar = createMinorBossBarV1(), bossEffects = createBossEffectsObserver(), observeBossEffects = bossEffects.observe;
+  const perfectBlock = createPerfectBlockArtV1(), feedback = createCombatFeedback(), healthTrails = createHealthTrailsV3(), minorBossBar = createMinorBossBarV1(), hudLayout = createHudLayoutV1(canvas), bossEffects = createBossEffectsObserver(), observeBossEffects = bossEffects.observe;
   function invalidate(reason = "explicit") {
     invalidations++;
     lastInvalidationReason = reason;
@@ -217871,15 +217964,20 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     if (!drawTripSourScreenV1(ctx, canvas, model, time3)) drawTripScreenV1(ctx, canvas, localTrip?.amt ?? 0, time3);
     drawTripPortalArrowV1(ctx, canvas, model, cam, time3);
     drawNightmareArrowV1(ctx, canvas, model, cam, time3);
-    drawFriendDownV1(ctx, canvas, model, cam, time3);
+    const hudSlots = hudLayout.update(time3, bossBarUp);
+    drawFriendDownV1(ctx, canvas, model, cam, time3, hudSlots.callTop);
     const aliveBoss = Object.entries(model.entitiesById).find(([, entity]) => entity.alive && entity.boss);
     const bossVisual = aliveBoss ? healthTrails.sample("boss/" + aliveBoss[0], actorHealthRatio(aliveBoss[1]), time3) : null;
+    ctx.save();
+    placeHudBarV1(ctx, hudSlots);
     const nightmareBar = drawTripNightmareHudV1(ctx, canvas, model), styledBar7 = !nightmareBar && aliveBoss && drawStyledBossBarV1(ctx, canvas, model, aliveBoss[1], bossVisual, time3);
     const bigBossBar = nightmareBar || styledBar7 || drawRecoveredBossHudV1(ctx, canvas, model) || drawBrimstoneBossHud(ctx, canvas, model) || drawAegisBossHud(ctx, canvas, model) || drawArachnidTreantBossHudD12_5A(ctx, canvas, model);
     drawTreasuryBossHudV2(ctx, canvas, model);
-    if (!bigBossBar) minorBossBar.draw(ctx, canvas, model, actor, healthTrails, time3);
-    else minorBossBar.reset();
+    const minorBar = !bigBossBar && minorBossBar.draw(ctx, canvas, model, actor, healthTrails, time3);
+    if (bigBossBar) minorBossBar.reset();
     if (aliveBoss && !styledBar7) drawBossHealthEchoV3(ctx, canvas, aliveBoss[1], bossVisual, time3);
+    ctx.restore();
+    bossBarUp = Boolean(bigBossBar || minorBar);
     const interaction = interactionExitV2(model);
     if (interaction) {
       const screenX = (interaction.x - cam.x) * cam.zoom, screenY = (interaction.y - cam.y) * cam.zoom;

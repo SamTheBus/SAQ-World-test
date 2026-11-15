@@ -38,7 +38,7 @@ var inspection = document.getElementById("world-boundary-status");
 if (inspection) {
   import("../chunks/world_browser-UWTZF47K.js").then(({ mountWorldBoundary }) => mountWorldBoundary(inspection)).catch(reportStartupFailure);
 } else {
-  import("../chunks/playable_browser-ASHMWWKP.js").then(({ startWorldClient }) => {
+  import("../chunks/playable_browser-O5ZKUIX6.js").then(({ startWorldClient }) => {
     window.__SAQ_STARTUP_LOADING_V1__?.stage(1, "Reading the world map\u2026");
     prefetchArt();
     return startWorldClient(window);
