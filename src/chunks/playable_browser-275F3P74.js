@@ -166608,7 +166608,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     key4 = null;
     refresh(readModel());
   }
-  const hub = createMenuHubV1({ document: document2, tiles: [{ id: "quests", name: "Quests", icon: plainIcon(MENU_ICONS.quests), pick: () => questsButton.click() }, { id: "map", name: "Map", icon: MENU_HUB_ICONS.map, pick: () => {
+  const hub = createMenuHubV1({ document: document2, tiles: [{ id: "bag", name: "Bag", icon: plainIcon(MENU_ICONS.bag), pick: () => toggle() }, { id: "quests", name: "Quests", icon: plainIcon(MENU_ICONS.quests), pick: () => questsButton.click() }, { id: "map", name: "Map", icon: MENU_HUB_ICONS.map, pick: () => {
     close();
     environment.setTimeout(() => openMap?.(), 80);
   } }, { id: "bestiary", name: "Bestiary", icon: plainIcon(MENU_ICONS.bestiary), pick: () => go("bestiary") }, { id: "friends", name: "Friends", icon: plainIcon(MENU_ICONS.friends), pick: () => go("friends") }, { id: "heroes", name: "Heroes", icon: plainIcon(MENU_ICONS.heroes), pick: () => go("heroes") }, { id: "settings", name: "Settings", icon: MENU_HUB_ICONS.settings, pick: () => go("settings") }] });
@@ -166627,7 +166627,8 @@ function createInventoryPresentation({ document: document2, environment, readMod
       heroes2 = heroSlots?.list()?.heroes?.length || 1;
     } catch {
     }
-    hub.paint({ quests: { sub: active2.length ? active2.length + " active" : "None yet", badge: done3 ? "!" : "" }, map: { sub: "The whole world" }, bestiary: { sub: "Monster cards" }, friends: friendsSub(), heroes: { sub: heroes2 === 1 ? "1 hero" : heroes2 + " heroes", hidden: !heroesView }, settings: { sub: "Sound \xB7 controls", hidden: !settingsPage } });
+    const fresh = parseInt(document2.getElementById("world-bag-tab")?.querySelector(".rm-badge")?.textContent ?? "", 10) || 0;
+    hub.paint({ bag: { sub: "Gear \xB7 items \xB7 stats", badge: fresh ? String(fresh) : "" }, quests: { sub: active2.length ? active2.length + " active" : "None yet", badge: done3 ? "!" : "" }, map: { sub: "The whole world" }, bestiary: { sub: "Monster cards" }, friends: friendsSub(), heroes: { sub: heroes2 === 1 ? "1 hero" : heroes2 + " heroes", hidden: !heroesView }, settings: { sub: "Sound \xB7 controls", hidden: !settingsPage } });
   }
   const nav = panel.querySelector(".bag-section-tabs"), heading = panel.querySelector(".bag-heading");
   panel.classList.add("rpg-menu");
@@ -189105,9 +189106,10 @@ function drawFriendDownV1(c, canvas, model, cam, time3, callTop = null) {
 }
 
 // src/client/hud_layout_v1.js
-var HUD_FIXED_V1 = Object.freeze(["#world-hud-vitals", "#world-hud-title", "#quest-tracker", "#local-world-controls", "#world-bag", ".chart-mini", ".world-mini", "#woodland-clue-v3-8"]);
-var HUD_CONTROLS_V1 = Object.freeze([".skill-wheel-ring", ".skill-slot", "#primary-attack", "#world-bag", "#carried-rations"]);
-var HUD_LAYOUT_V1 = Object.freeze({ gap: 10, barTop: 12, barHeight: 50, barWidth: 380, core: 200, barMinScale: 0.6, measureMs: 250, toastLeft: 12, toastWidth: 240, upright: 600, notice: 48, oneCard: 40, cardHeight: 47, cardGap: 5 });
+var HUD_FIXED_V1 = Object.freeze(["#world-hud-vitals", "#world-hud-title", "#quest-tracker", "#local-world-controls", ".chart-mini", ".world-mini", "#woodland-clue-v3-8"]);
+var HUD_CONTROLS_V1 = Object.freeze([".skill-wheel-ring", ".skill-slot", "#primary-attack", "#carried-rations"]);
+var HUD_COMPASS_V1 = Object.freeze([".chart-mini", ".world-mini"]);
+var HUD_LAYOUT_V1 = Object.freeze({ gap: 10, barTop: 12, barHeight: 50, barWidth: 380, core: 200, barMinScale: 0.6, measureMs: 250, toastLeft: 12, toastWidth: 240, upright: 600, notice: 44, heroLine: 0.46, oneCard: 24, cardHeight: 47, chipHeight: 28, cardGap: 4, menuSize: 38, menuReach: 0.72 });
 function hudClearBelowV1(rects, left, right, height) {
   let bottom = 0;
   for (const r of rects) {
@@ -189124,8 +189126,13 @@ function hudControlsTopV1(rects, left, right, height) {
   }
   return top;
 }
+function hudMenuSpotV1(compass, size = HUD_LAYOUT_V1.menuSize) {
+  if (!compass || compass.width < 40) return null;
+  const r = compass.width / 2 - 3, cx = compass.left + compass.width / 2, cy2 = compass.top + compass.width / 2 - 2, k = HUD_LAYOUT_V1.menuReach;
+  return { x: Math.round(cx + r * k - size / 2), y: Math.round(cy2 + r * k - size / 2) };
+}
 function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft = HUD_LAYOUT_V1.toastLeft, toastRight = HUD_LAYOUT_V1.toastLeft + HUD_LAYOUT_V1.toastWidth, controls = [] }) {
-  const { gap: gap2, barTop, barHeight, barWidth, core: core5, barMinScale, notice, oneCard } = HUD_LAYOUT_V1, cx = width2 / 2, full = Math.min(barWidth, width2 - 28);
+  const { gap: gap2, barTop, barHeight, barWidth, core: core5, barMinScale, notice, heroLine: heroLine2, oneCard } = HUD_LAYOUT_V1, cx = width2 / 2, full = Math.min(barWidth, width2 - 28);
   const middle = hudClearBelowV1(rects, cx - core5 / 2, cx + core5 / 2, height), bar2 = middle > 0 ? Math.round(middle + gap2) : barTop;
   let room = full / 2;
   for (const r of rects) {
@@ -189134,13 +189141,13 @@ function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft
     else if (r.left >= cx) room = Math.min(room, r.left - cx - gap2);
   }
   const barScale = Math.max(barMinScale, Math.min(1, 2 * room / full)), w = full * barScale, left = cx - w / 2, right = cx + w / 2, barBottom = Math.round(bar2 + barHeight * barScale);
-  const callTop = bossShown ? barBottom + gap2 : bar2;
+  const callTop = bossShown ? barBottom + gap2 : bar2, upright = width2 <= HUD_LAYOUT_V1.upright;
   let toastTop = Math.round(hudClearBelowV1(rects, toastLeft, toastRight, height) + gap2);
-  if (bossShown && toastRight > left && toastLeft < right) toastTop = Math.max(toastTop, barBottom + gap2);
-  const up2 = width2 <= HUD_LAYOUT_V1.upright, cTop = up2 ? hudControlsTopV1(controls, width2 - 12 - HUD_LAYOUT_V1.toastWidth, width2 - 12, height) : null, toastBottom = cTop == null ? null : Math.round(height - cTop + gap2);
-  const below = toastBottom == null ? hudControlsTopV1(controls, toastLeft, toastRight, height) : null;
-  const toastMax = toastBottom != null ? Math.max(oneCard, Math.round(height - toastBottom - (callTop + notice))) : below != null ? Math.max(oneCard, Math.round(below - gap2 - toastTop)) : null;
-  return { barTop: bar2, barShift: bar2 - barTop, barScale, barCenter: cx, callTop, toastTop, toastBottom, toastMax };
+  if (upright) toastTop = Math.max(toastTop, callTop + notice);
+  else if (bossShown && toastRight > left && toastLeft < right) toastTop = Math.max(toastTop, barBottom + gap2);
+  const below = hudControlsTopV1(controls, toastLeft, toastRight, height), floor = Math.min(below == null ? height : below - gap2, upright ? height * heroLine2 : height);
+  const toastMax = floor < height ? Math.max(oneCard, Math.round(floor - toastTop)) : null;
+  return { barTop: bar2, barShift: bar2 - barTop, barScale, barCenter: cx, callTop, toastTop, toastMax, upright };
 }
 function placeHudBarV1(c, slots2) {
   if (!slots2?.barScale || slots2.barScale === 1) {
@@ -189153,30 +189160,45 @@ function placeHudBarV1(c, slots2) {
 }
 function createHudLayoutV1(canvas) {
   const doc = canvas?.ownerDocument, view3 = doc?.defaultView;
-  let last = -1e9, lastBoss = null, slots2 = { barTop: HUD_LAYOUT_V1.barTop, barShift: 0, barScale: 1, barCenter: 0, callTop: null, toastTop: null, toastBottom: null, toastMax: null }, written = "";
+  let last = -1e9, lastBoss = null, slots2 = { barTop: HUD_LAYOUT_V1.barTop, barShift: 0, barScale: 1, barCenter: 0, callTop: null, toastTop: null, toastMax: null, upright: false }, written = "", spotKey = "";
+  const visible3 = (el3) => !el3.closest("[hidden]");
   function measure2(bossShown) {
     const boxes2 = (list) => {
       const out4 = [];
       for (const sel of list) for (const el3 of doc.querySelectorAll(sel)) {
-        if (el3.closest("[hidden]")) continue;
-        out4.push(el3.getBoundingClientRect());
+        if (visible3(el3)) out4.push(el3.getBoundingClientRect());
       }
       return out4;
-    }, rects = boxes2(HUD_FIXED_V1), controls = boxes2(HUD_CONTROLS_V1);
+    };
+    const compass = boxes2(HUD_COMPASS_V1).find((r) => r.width >= 40), spot2 = hudMenuSpotV1(compass), b = doc.body, key4 = spot2 ? spot2.x + "|" + spot2.y : "";
+    const menu = spot2 && doc.getElementById("local-world-controls");
+    if (menu && menu.parentElement !== b) {
+      menu.dataset.gameplayHud = "";
+      b.append(menu);
+    }
+    if (key4 !== spotKey) {
+      spotKey = key4;
+      if (spot2) {
+        b.style.setProperty("--hud-menu-x", spot2.x + "px");
+        b.style.setProperty("--hud-menu-y", spot2.y + "px");
+        b.dataset.hudMenu = "ring";
+      } else delete b.dataset.hudMenu;
+    }
+    const rects = boxes2(HUD_FIXED_V1), controls = boxes2(HUD_CONTROLS_V1);
     const lane2 = doc.querySelector(".toast-lane-v1"), lr = lane2?.getBoundingClientRect(), cv = canvas.getBoundingClientRect();
     const toastLeft = lr && lr.width > 0 ? lr.left : HUD_LAYOUT_V1.toastLeft, toastRight = lr && lr.width > 0 ? lr.right : toastLeft + HUD_LAYOUT_V1.toastWidth;
     const local8 = (list) => list.map((r) => ({ left: r.left - cv.left, right: r.right - cv.left, top: r.top - cv.top, bottom: r.bottom - cv.top, width: r.width, height: r.height }));
     const s = hudSlotsV1(local8(rects), { width: cv.width || canvas.width, height: cv.height || canvas.height, bossShown, toastLeft: toastLeft - cv.left, toastRight: toastRight - cv.left, controls: local8(controls) });
-    const card = lane2?.querySelector(".toast-v1")?.getBoundingClientRect().height || HUD_LAYOUT_V1.cardHeight, fit2 = s.toastMax == null ? 3 : Math.max(1, Math.min(3, Math.floor((s.toastMax + HUD_LAYOUT_V1.cardGap) / (card + HUD_LAYOUT_V1.cardGap))));
+    const phone = Boolean(view3.matchMedia?.("(max-width: 600px), (max-height: 500px)")?.matches), card = lane2?.querySelector(".toast-v1")?.getBoundingClientRect().height || (phone ? HUD_LAYOUT_V1.chipHeight : HUD_LAYOUT_V1.cardHeight);
+    const fit2 = s.toastMax == null ? 3 : Math.max(1, Math.min(3, Math.floor((s.toastMax + HUD_LAYOUT_V1.cardGap) / (card + HUD_LAYOUT_V1.cardGap))));
     slots2 = s;
-    const bottom = s.toastBottom == null ? "" : Math.round(s.toastBottom + (view3.innerHeight - cv.bottom)) + "px", css2 = `${Math.round(s.callTop + cv.top)}px|${Math.round(s.toastTop + cv.top)}px|${bottom}|${fit2}`;
+    const css2 = `${Math.round(s.callTop + cv.top)}px|${Math.round(s.toastTop + cv.top)}px|${fit2}`;
     if (css2 !== written) {
       written = css2;
-      const [call, toast, low, many] = css2.split("|"), b = doc.body, set = (k, v) => v ? b.style.setProperty(k, v) : b.style.removeProperty(k);
-      set("--hud-call-top", call);
-      set("--hud-toast-top", toast);
-      set("--hud-toast-bottom", low);
-      b.dataset.hudLayout = low ? "upright" : "v1";
+      const [call, toast, many] = css2.split("|");
+      b.style.setProperty("--hud-call-top", call);
+      b.style.setProperty("--hud-toast-top", toast);
+      b.dataset.hudLayout = "v1";
       b.dataset.hudToastFit = many;
     }
   }
@@ -203947,19 +203969,33 @@ function createRewardFeedback(canvas) {
     heart.src = EQUIPMENT_STAT_ART.maxHp;
     stamps.heal = heart;
   }
+  function bagTarget() {
+    const bag2 = doc.getElementById("world-bag");
+    if (bag2?.getBoundingClientRect?.().width) return bag2;
+    return doc.querySelector("#local-world-controls > summary") ?? bag2;
+  }
+  let bagAt = -Infinity;
+  function bagPoint() {
+    if (lastTime - bagAt > 500 || lastTime < bagAt) {
+      bagAt = lastTime;
+      const a = doc.getElementById("world-app")?.getBoundingClientRect?.(), g = bagTarget()?.getBoundingClientRect?.();
+      if (a && g?.width) geometry.bag = { x: g.left - a.left + g.width / 2, y: g.top - a.top + g.height / 2 };
+    }
+    return geometry.bag;
+  }
   function resize() {
     if (!overlay) return;
     const a = doc.getElementById("world-app").getBoundingClientRect(), b = canvas.getBoundingClientRect(), x = doc.getElementById("world-xp-bar").getBoundingClientRect();
     overlay.width = Math.round(a.width);
     overlay.height = Math.round(a.height);
-    const g = doc.getElementById("world-bag")?.getBoundingClientRect?.();
+    const g = bagTarget()?.getBoundingClientRect?.();
     geometry = { left: b.left - a.left, top: b.top - a.top, xp: { x: x.left - a.left + x.width * 0.65, y: x.top - a.top + x.height / 2 }, bag: g && g.width ? { x: g.left - a.left + g.width / 2, y: g.top - a.top + g.height / 2 } : { x: a.width - 40, y: a.height - 40 } };
   }
   function pulse3(kind) {
     if (kind === "soul" || kind === "heal") return;
     if (lastTime - lastPulse[kind] < 250) return;
     lastPulse[kind] = lastTime;
-    const el3 = doc.getElementById(kind === "xp" ? "world-xp-bar" : kind === "bag" ? "world-bag" : "world-wallet");
+    const el3 = kind === "bag" ? bagTarget() : doc.getElementById(kind === "xp" ? "world-xp-bar" : "world-wallet");
     el3?.animate?.([{ filter: kind === "gold" ? "brightness(1.18)" : "brightness(1.8)" }, { filter: "brightness(1)" }], { duration: 240 });
   }
   function render(model, time3, cam) {
@@ -204093,7 +204129,7 @@ function createRewardFeedback(canvas) {
         pulse3("bag");
         return false;
       }
-      const up2 = Math.min(1, d / 0.35), e = up2 * up2 * (3 - 2 * up2), wx = m.x + m.dx * e, wy = m.y - 14 - e * m.rise, from = project2({ x: wx, y: wy }), fly = Math.max(0, Math.min(1, (d - 0.9) / 0.45)), to = geometry.bag, x = from.x + (to.x - from.x) * fly * fly, y = from.y + (to.y - from.y) * fly * fly - Math.sin(fly * Math.PI) * 20, s = 22 * (1 - fly * 0.35), im = matImage(m.name);
+      const up2 = Math.min(1, d / 0.35), e = up2 * up2 * (3 - 2 * up2), wx = m.x + m.dx * e, wy = m.y - 14 - e * m.rise, from = project2({ x: wx, y: wy }), fly = Math.max(0, Math.min(1, (d - 0.9) / 0.45)), to = bagPoint(), x = from.x + (to.x - from.x) * fly * fly, y = from.y + (to.y - from.y) * fly * fly - Math.sin(fly * Math.PI) * 20, s = 22 * (1 - fly * 0.35), im = matImage(m.name);
       if (im) ctx.drawImage(im, x - s / 2, y - s / 2, s, s);
       if (fly === 0) {
         ctx.save();
