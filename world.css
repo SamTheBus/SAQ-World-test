@@ -2008,8 +2008,8 @@ body[data-hud-place=attached] #world-event-stack-v4{top:var(--hud-stack-top,76px
    bold lettering like a map label on a soft dark strip with a gold rule under it, not a slate panel. */
 body[data-hud-place=attached] #world-hud-title{background:#0f171ea6!important;border:0!important;border-bottom:2px solid #f0c862!important;box-shadow:none!important;border-radius:0 0 6px 6px!important;padding:6px 10px 3px!important;text-shadow:-1px 0 0 #0b1015,1px 0 0 #0b1015,0 -1px 0 #0b1015,0 2px 0 #0b1015,0 0 4px #0b1015}
 body[data-hud-place=attached] #world-hud-title *{letter-spacing:.03em;color:#fff3d2!important;font-weight:700!important}
-/* Menu under the ring (2026-11-15): the clock pill slides left to share the row under the compass with the Menu button. */
-body[data-hud-menu=ring] .chart-mini #world-time-clock{left:calc(50% - 20px)}
+/* Menu on the ring's outer corner (2026-11-15): the compass stands 8px further in so the button clears the screen edge; the clock stays centered. */
+body[data-hud-menu=ring] .chart-mini,body[data-hud-menu=ring] .world-mini{margin-right:8px}
 /* Points to spend: a gold +N on the level disc (inventory_presentation.js paintPoints). */
 #world-hud-vitals #world-points-badge{appearance:none;position:absolute;z-index:3;left:-6px;top:-6px;box-sizing:border-box;min-width:26px!important;width:auto!important;min-height:0!important;height:20px!important;margin:0!important;padding:0 5px!important;border:1.5px solid #0b1015;border-radius:10px;background:linear-gradient(#ffe08a,#e2a93a);color:#231704;font:800 12px/17px var(--rpg-ui,system-ui);letter-spacing:.02em;text-align:center;box-shadow:0 2px 0 #070b10,0 0 0 1px #fff3c466 inset;pointer-events:auto;cursor:pointer;touch-action:manipulation;animation:points-badge 1.6s ease-in-out infinite}
 #world-hud-vitals #world-points-badge::after{content:"";position:absolute;inset:-10px}

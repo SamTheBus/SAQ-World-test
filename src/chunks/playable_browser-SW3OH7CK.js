@@ -189931,8 +189931,8 @@ function hudControlsTopV1(rects, left, right, height) {
 }
 function hudMenuSpotV1(compass, size = HUD_LAYOUT_V1.menuSize) {
   if (!compass || compass.width < 40) return null;
-  const r = compass.width / 2, cx = compass.left + r, cy2 = compass.top + r, dx = Math.max(0, r - size), dy = Math.sqrt(Math.max(0, (r + HUD_LAYOUT_V1.menuClear) ** 2 - dx * dx));
-  return { x: Math.round(cx + r - size), y: Math.round(cy2 + dy) };
+  const r = compass.width / 2, cx = compass.left + r, cy2 = compass.top + r, d = (r + size / 2 + HUD_LAYOUT_V1.menuClear) * Math.SQRT1_2;
+  return { x: Math.round(cx + d - size / 2), y: Math.round(cy2 + d - size / 2) };
 }
 function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft = HUD_LAYOUT_V1.toastLeft, toastRight = HUD_LAYOUT_V1.toastLeft + HUD_LAYOUT_V1.toastWidth, controls = [], laneBottom = null }) {
   const { gap: gap2, barTop, barHeight, barWidth, core: core5, barMinScale, heroLine: heroLine2, oneCard } = HUD_LAYOUT_V1, cx = width2 / 2, full = Math.min(barWidth, width2 - 28);
