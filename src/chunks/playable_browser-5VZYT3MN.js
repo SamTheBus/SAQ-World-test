@@ -101864,6 +101864,7 @@ function createCrispGrassV1(doc, stamp7, clock8 = () => 0) {
     }
     g.putImageData(im, 0, 0);
     p.sprite = c;
+    p.pixels = im.data;
     spritePixels += w * h;
   }
   const kept = patches.filter((p) => p.sprite);
@@ -101882,9 +101883,8 @@ function createCrispGrassV1(doc, stamp7, clock8 = () => 0) {
       t = doc.createElement("canvas");
       t.width = p.sprite.width;
       t.height = p.sprite.height;
-      const g = t.getContext("2d");
-      g.drawImage(p.sprite, 0, 0);
-      const im = g.getImageData(0, 0, t.width, t.height), a = im.data;
+      const g = t.getContext("2d"), im = g.createImageData(t.width, t.height), a = im.data;
+      a.set(p.pixels);
       for (let i = 0; i < a.length; i += 4) {
         if (a[i + 3] !== 255) continue;
         for (const [from, to] of map) if (same12(a, i, from)) {
@@ -209745,6 +209745,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     }
     return found;
   }
+  const sliceMs = () => requiredTasks.length ? 8 : queue.length && queue[0].near !== false ? 4 : 2;
   function startJob(task, mode) {
     const { space, x, y, id: id2, sig, scale } = task, at9 = performance.now();
     emit("buildStart", { id: id2, mode });
@@ -209807,7 +209808,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
       let next;
       do {
         next = job.drawing.next();
-      } while (!next.done && (complete || performance.now() - start < 2));
+      } while (!next.done && (complete || performance.now() - start < sliceMs()));
       if (next.done) {
         job.descriptor = { signature: job.task.sig, commands: job.commands, result: next.value };
         job.drawing = null;
@@ -209824,7 +209825,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
       const [method, args] = descriptor.commands[job.index++];
       if (method === "=") rc[args[0]] = args[1];
       else rc[method](...args);
-      if (!complete && job.index % 32 === 0 && performance.now() - rasterStart >= 2) break;
+      if (!complete && job.index % 32 === 0 && performance.now() - rasterStart >= sliceMs()) break;
     }
     const ms = performance.now() - rasterStart;
     job.cpu += ms;
@@ -209901,7 +209902,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
         let next;
         do {
           next = aheadJob.work.next();
-        } while (!next.done && performance.now() - at9 < 2);
+        } while (!next.done && performance.now() - at9 < sliceMs());
         const ms = performance.now() - at9;
         pathStats.environmentPathAheadSlices++;
         pathStats.environmentPathAheadMaxSliceMs = Math.max(pathStats.environmentPathAheadMaxSliceMs, ms);
@@ -209934,7 +209935,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
         let next;
         do {
           next = layoutJob.work.next();
-        } while (!next.done && performance.now() - at9 < 2);
+        } while (!next.done && performance.now() - at9 < sliceMs());
         if (next.done) {
           const prepared = layoutJob.task;
           touch2(layouts3, layoutJob.visual, next.value);
