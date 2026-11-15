@@ -125631,6 +125631,9 @@ async function claimClassKit2({ readModel, adapter, wait: wait2, say = () => {
 // src/client/toast_v1.js
 var MAX_VISIBLE = 3;
 var DEFAULT_MS = 2600;
+var QUEUE_MAX = 12;
+var QUEUED_MS = 1600;
+var HURRY_MS = 1200;
 var SVG = "http://www.w3.org/2000/svg";
 var ICONS = {
   level: '<path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/>',
@@ -125642,6 +125645,10 @@ var ICONS = {
 };
 var ACCENTS = { level: "#f5c451", mastery: "#e2b65c", potion: "#ff6a5c", loot: "#cfd8e3", soul: "#9fd6ff", event: "#c59cf0" };
 var lanes = /* @__PURE__ */ new WeakMap();
+function toastLimitV1(doc) {
+  const n = parseInt(doc?.body?.dataset?.hudToastFit ?? "", 10);
+  return n >= 1 ? Math.min(MAX_VISIBLE, n) : MAX_VISIBLE;
+}
 function laneFor(doc) {
   let lane2 = lanes.get(doc);
   if (lane2) return lane2;
@@ -125651,15 +125658,23 @@ function laneFor(doc) {
   root6.setAttribute("aria-live", "polite");
   root6.dataset.gameplayHud = "";
   doc.body.append(root6);
-  const cards = /* @__PURE__ */ new Map();
+  const cards = /* @__PURE__ */ new Map(), queue = [];
+  const showing = () => [...root6.querySelectorAll(".toast-v1:not([data-leaving])")];
   function remove(card, how = "fade") {
-    if (!card.isConnected) return;
+    if (!card.isConnected || card.dataset.leaving) return;
     clearTimeout(card.timer);
     cards.delete(card.dataset.key);
     card.dataset.leaving = how;
     setTimeout(() => card.remove(), 240);
+    pump();
+  }
+  function pump() {
+    const up2 = showing(), n = toastLimitV1(doc);
+    for (const old2 of up2.slice(n)) remove(old2);
+    for (let room = n - Math.min(up2.length, n); room > 0 && queue.length; room--) build2(queue.shift());
   }
   function arm15(card, ms) {
+    card.endsAt = Date.now() + ms;
     clearTimeout(card.timer);
     card.style.setProperty("--toast-ms", ms + "ms");
     card.classList.remove("timing");
@@ -125712,6 +125727,24 @@ function laneFor(doc) {
       arm15(prior, ms);
       return prior;
     }
+    const waiting = queue.find((q2) => q2.id === id2);
+    if (waiting) {
+      waiting.count = (waiting.count || 1) + 1;
+      if (sub) waiting.sub = sub;
+      return null;
+    }
+    const options = { kind, title: title9, sub, accent, image, id: id2, ms };
+    if (showing().length >= toastLimitV1(doc)) {
+      queue.push(options);
+      if (queue.length > QUEUE_MAX) queue.shift();
+      const up2 = showing(), oldest = up2[up2.length - 1];
+      if (oldest && oldest.endsAt - Date.now() > HURRY_MS) arm15(oldest, HURRY_MS);
+      return null;
+    }
+    return build2(options);
+  }
+  function build2({ kind, title: title9, sub, accent, image, id: id2, ms, count: count2 = 1 }) {
+    if (queue.length) ms = Math.min(ms, QUEUED_MS);
     const card = doc.createElement("div");
     card.className = "toast-v1";
     card.dataset.kind = kind;
@@ -125739,19 +125772,25 @@ function laneFor(doc) {
     s.className = "toast-sub";
     s.textContent = sub;
     text3.append(t, s);
-    const count2 = doc.createElement("span");
-    count2.className = "toast-count";
-    card.append(badge2, text3, count2);
+    const counter2 = doc.createElement("span");
+    counter2.className = "toast-count";
+    if (count2 > 1) {
+      card.dataset.count = String(count2);
+      counter2.textContent = "\xD7" + count2;
+    }
+    card.append(badge2, text3, counter2);
     root6.prepend(card);
     cards.set(id2, card);
     swipe(card);
     arm15(card, ms);
-    const visible3 = [...root6.querySelectorAll(".toast-v1:not([data-leaving])")];
-    for (const old2 of visible3.slice(MAX_VISIBLE)) remove(old2);
     return card;
   }
-  lane2 = { show, destroy() {
+  const watch = typeof doc.defaultView?.MutationObserver === "function" ? new doc.defaultView.MutationObserver(pump) : null;
+  watch?.observe(doc.body, { attributes: true, attributeFilter: ["data-hud-toast-fit"] });
+  lane2 = { show, waiting: () => queue.length, destroy() {
+    watch?.disconnect();
     for (const c of cards.values()) clearTimeout(c.timer);
+    queue.length = 0;
     root6.remove();
     lanes.delete(doc);
   } };
@@ -189140,7 +189179,7 @@ function hudMenuSpotV1(compass, size = HUD_LAYOUT_V1.menuSize) {
   return { x: Math.round(cx + r * k - size / 2), y: Math.round(cy2 + r * k - size / 2) };
 }
 function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft = HUD_LAYOUT_V1.toastLeft, toastRight = HUD_LAYOUT_V1.toastLeft + HUD_LAYOUT_V1.toastWidth, controls = [], laneBottom = null }) {
-  const { gap: gap2, barTop, barHeight, barWidth, core: core5, barMinScale, notice, heroLine: heroLine2, oneCard } = HUD_LAYOUT_V1, cx = width2 / 2, full = Math.min(barWidth, width2 - 28);
+  const { gap: gap2, barTop, barHeight, barWidth, core: core5, barMinScale, heroLine: heroLine2, oneCard } = HUD_LAYOUT_V1, cx = width2 / 2, full = Math.min(barWidth, width2 - 28);
   const middle = hudClearBelowV1(rects, cx - core5 / 2, cx + core5 / 2, height), bar2 = middle > 0 ? Math.round(middle + gap2) : barTop;
   let room = full / 2;
   for (const r of rects) {
@@ -189152,9 +189191,9 @@ function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft
   let callTop = bossShown ? barBottom + gap2 : bar2;
   const upright = width2 <= HUD_LAYOUT_V1.upright;
   let toastTop = Math.round(hudClearBelowV1(rects, toastLeft, toastRight, height) + gap2);
-  if (upright && bossShown) toastTop = Math.max(toastTop, callTop + notice);
-  else if (bossShown && toastRight > left && toastLeft < right) toastTop = Math.max(toastTop, barBottom + gap2);
-  const below = hudControlsTopV1(controls, toastLeft, toastRight, height), floor = Math.min(below == null ? height : below - gap2, upright ? height * heroLine2 : height);
+  const shares = bossShown && toastRight > left && toastLeft < right, aboveBar = shares && toastTop < bar2;
+  if (shares && !aboveBar) toastTop = Math.max(toastTop, barBottom + gap2);
+  const below = hudControlsTopV1(controls, toastLeft, toastRight, height), floor = Math.min(below == null ? height : below - gap2, upright ? height * heroLine2 : height, aboveBar ? bar2 - gap2 : height);
   const toastMax = floor < height ? Math.max(oneCard, Math.round(floor - toastTop)) : null;
   if (upright && !bossShown && laneBottom != null) callTop = Math.max(callTop, Math.round(laneBottom + gap2));
   return { barTop: bar2, barShift: bar2 - barTop, barScale, barCenter: cx, callTop, toastTop, toastMax, upright };

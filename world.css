@@ -1985,7 +1985,7 @@ html[data-hand=left] #primary-attack .attack-notches{transform:scaleX(-1)}
 .coop-joining .coop-actions{justify-content:center}
 /* HUD layout v1 (Sammy 2026-11-15: boss bar hidden, pickups covering the HUD): pop-ups go under the fixed HUD and any boss bar, at tops measured by hud_layout_v1.js. */
 body[data-hud-layout] .toast-lane-v1{top:var(--hud-toast-top)!important}
-body[data-hud-toast-fit="1"] .toast-lane-v1>.toast-v1:nth-last-child(n+2),body[data-hud-toast-fit="2"] .toast-lane-v1>.toast-v1:nth-last-child(n+3){display:none}
+
 /* Menu on the compass, Bag in the Menu (Sammy 2026-11-15, mockup 7teqbtFr... "Build it"): the spot is measured by hud_layout_v1.js. */
 html body #world-bag{display:none!important}
 html body[data-hud-menu=ring] #local-world-controls:not([open]){position:fixed!important;left:var(--hud-menu-x)!important;top:var(--hud-menu-y)!important;right:auto!important;bottom:auto!important;z-index:8!important}
