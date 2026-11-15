@@ -2661,8 +2661,9 @@ var BIOME_BOSSES_V1 = Object.freeze({
 });
 var BIOME_BOSS_IDS_V1 = Object.freeze(Object.keys(BIOME_BOSSES_V1));
 var BIOME_BOSS_DAMAGE_V1 = Object.freeze({ grave_cleave: 19, crown_flame: 15, solar_beam: 17, sunfall: 15 });
-var BIOME_BOSS_REACH_V1 = Object.freeze({ grave_cleave: 104, crown_flame: 70, solar_beam: 280, solarBeamHalfWidth: 24, sunfall: 40 });
-var BIOME_BOSS_POOLS_V1 = Object.freeze({ ghostfire: Object.freeze([44, 300]), sunfire: Object.freeze([30, 240]) });
+var BIOME_BOSS_REACH_V1 = Object.freeze({ grave_cleave: 104, crown_flame: 70, solar_beam: 320, solarBeamHalfWidth: 30, sunfall: 50 });
+var BIOME_BOSS_POOLS_V1 = Object.freeze({ ghostfire: Object.freeze([44, 300]), sunfire: Object.freeze([38, 240]) });
+var SOLAR_BEAM_SWEEP_V1 = Object.freeze({ start: 30, ticks: 30 });
 
 // src/shared/content/bestiary_bosses_v1.js
 var LABELS = { aegis_goliath: "SHIELD WARDEN", brimstone_colossus: "BRIMSTONE COLOSSUS", arachnid_treant: "ARACHNID TREANT" };
@@ -20076,7 +20077,7 @@ function validateRecoveredBossV1(state, id2, b) {
     "statusesByEntityId",
     "lastTrailPosition",
     "lastAction"
-  ], ["coinShots", "archive", "goldRush"]);
+  ], ["coinShots", "archive", "goldRush", "beamSweep"]);
   const spec = recoveredBossForId(b.bossDefinitionId), actor = state.entitiesById[id2], group = state.groupsById[b.groupId], c = state.spacesByInstanceId[b.spaceInstanceId]?.collision;
   requireContract(spec && b.version === RECOVERED_BOSS_VERSION && b.entityId === id2 && /^boss:[a-f0-9]{32}$/.test(b.bossId) && actor?.team === "hostile" && actor.contentDefinitionId === ARACHNID_TREANT_PROFILE.contentDefinitionId && group?.entityIds.includes(id2) && group.siteId === b.siteId && actor.residency.spaceInstanceId === b.spaceInstanceId && actor.residency.residencyRevision === b.sourceResidencyRevision && c && point5(b.homePosition) && !collidesWithTiles(c, b.homePosition.x, b.homePosition.y, ARACHNID_TREANT_PROFILE.hullRadius), "Recovered boss identity invalid");
   requireContract([1, 2].includes(b.phase) && b.phase2Triggered === (b.phase === 2) && states.includes(b.actionState), "Recovered boss phase invalid");
@@ -20107,6 +20108,13 @@ function validateRecoveredBossV1(state, id2, b) {
     }
   }
   if (b.actionState === "dashing") requireContract(b.bossDefinitionId === "marcus" && b.goldRush, "Missing Marcus Gold Rush path");
+  if (b.beamSweep !== void 0) {
+    const r = b.beamSweep;
+    requireContract(b.bossDefinitionId === "sun_pharaoh" && r && typeof r === "object", "Only the Sun Pharaoh sweeps a Solar Beam");
+    closedRecord(r, ["startedTick", "originPosition", "targetPosition", "hitEntityIds"]);
+    safeInteger(r.startedTick, b.activatedTick, state.tick);
+    requireContract(state.tick - r.startedTick <= SOLAR_BEAM_SWEEP_V1.ticks && point5(r.originPosition) && point5(r.targetPosition) && Array.isArray(r.hitEntityIds) && r.hitEntityIds.length <= 12 && new Set(r.hitEntityIds).size === r.hitEntityIds.length && r.hitEntityIds.every((id3) => state.entitiesById[id3]?.team === "party"), "Invalid Solar Beam sweep");
+  }
   if (b.actionState === "dazed") safeInteger(b.dazedUntilTick, state.tick + 1, state.tick + 300);
   else requireContract(b.dazedUntilTick === null, "Recovered boss stale daze");
   if (b.shieldBrokenTick !== null) safeInteger(b.shieldBrokenTick, b.activatedTick, state.tick);
@@ -27107,6 +27115,8 @@ var TRAIL_MAX_TICKS = 180;
 var SHELL_MAX_TICKS = 840;
 var SUN_MAX = 4;
 var SUNFALL_MAX_CASTS = 5;
+var SUN_BEAM_TICKS = 15;
+var STAFF_SUNS_TICKS = 40;
 var MOSS_TICKS = 600;
 var MIST_TICKS = 180;
 var VEIL_MAX_TICKS = 480;
@@ -27199,7 +27209,7 @@ var FREE_TICKS = 180;
 var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
-var LIVE = ["cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function prune(combat) {
   const k = combat.skills;
   if (k && !Object.keys(k.cooldowns).length && !LIVE.some((key9) => k[key9])) delete combat.skills;
@@ -27259,6 +27269,18 @@ function validateClassSkillState(s, combat, actor) {
     safeInteger(k.focus.hits, 1, 5);
   }
   const pos = (v) => Number.isFinite(v.x) && Number.isFinite(v.y), ids = (list2, max2) => requireContract(Array.isArray(list2) && list2.length <= max2 && list2.every((id2) => typeof id2 === "string" && id2.length <= 200), "Invalid skill targets");
+  if (k.sunBeam !== void 0) {
+    closedRecord(k.sunBeam, ["x", "y", "x2", "y2", "since", "power", "hit"]);
+    requireContract(pos(k.sunBeam) && Number.isFinite(k.sunBeam.x2) && Number.isFinite(k.sunBeam.y2) && actor.alive && Array.isArray(k.sunBeam.hit) && k.sunBeam.hit.length <= 64 && k.sunBeam.hit.every((id2) => typeof id2 === "string"), "Invalid Sunshield beam");
+    safeInteger(k.sunBeam.since, 0, SUN_BEAM_TICKS);
+    safeInteger(k.sunBeam.power, 1, SUN_MAX);
+  }
+  if (k.staffSuns !== void 0) {
+    closedRecord(k.staffSuns, ["x", "y", "seed", "ticks"]);
+    requireContract(pos(k.staffSuns) && actor.alive, "Invalid Undying Sun suns");
+    safeInteger(k.staffSuns.seed, 0);
+    safeInteger(k.staffSuns.ticks, 1, STAFF_SUNS_TICKS);
+  }
   if (k.ram !== void 0) {
     closedRecord(k.ram, ["x", "y", "dx", "dy", "ticks"], ["hit"]);
     requireContract(pos(k.ram) && Math.abs(Math.hypot(k.ram.dx, k.ram.dy) - 1) < 1e-9 && actor.alive, "Invalid Shield Charge");

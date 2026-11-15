@@ -476,17 +476,22 @@ var BIOME_BOSSES_V1 = Object.freeze({
 });
 var BIOME_BOSS_IDS_V1 = Object.freeze(Object.keys(BIOME_BOSSES_V1));
 var BIOME_BOSS_DAMAGE_V1 = Object.freeze({ grave_cleave: 19, crown_flame: 15, solar_beam: 17, sunfall: 15 });
-var BIOME_BOSS_REACH_V1 = Object.freeze({ grave_cleave: 104, crown_flame: 70, solar_beam: 280, solarBeamHalfWidth: 24, sunfall: 40 });
-var BIOME_BOSS_POOLS_V1 = Object.freeze({ ghostfire: Object.freeze([44, 300]), sunfire: Object.freeze([30, 240]) });
+var BIOME_BOSS_REACH_V1 = Object.freeze({ grave_cleave: 104, crown_flame: 70, solar_beam: 320, solarBeamHalfWidth: 30, sunfall: 50 });
+var BIOME_BOSS_POOLS_V1 = Object.freeze({ ghostfire: Object.freeze([44, 300]), sunfire: Object.freeze([38, 240]) });
 var unit = (seed, sequence, salt) => {
   let v = (seed ^ Math.imul(sequence + 1, 2654435761) ^ salt) >>> 0;
   v = Math.imul(v ^ v >>> 16, 2246822507) >>> 0;
   v = Math.imul(v ^ v >>> 13, 3266489909) >>> 0;
   return ((v ^ v >>> 16) >>> 0) / 4294967296;
 };
-function sunfallDiscsV1(seed, sequence, pos) {
+function sunfallDiscsV1(seed, sequence, pos, spread = 72) {
   const a = unit(seed, sequence, 1597463007) * Math.PI * 2;
-  return [{ x: pos.x, y: pos.y }, { x: pos.x + Math.cos(a) * 58, y: pos.y + Math.sin(a) * 58 }, { x: pos.x + Math.cos(a + 2.4) * 58, y: pos.y + Math.sin(a + 2.4) * 58 }];
+  return [{ x: pos.x, y: pos.y }, { x: pos.x + Math.cos(a) * spread, y: pos.y + Math.sin(a) * spread }, { x: pos.x + Math.cos(a + 2.4) * spread, y: pos.y + Math.sin(a + 2.4) * spread }];
+}
+var SOLAR_BEAM_SWEEP_V1 = Object.freeze({ start: 30, ticks: 30 });
+function solarBeamStrikeV1(since) {
+  const v = Math.max(0, Math.min(1, since / SOLAR_BEAM_SWEEP_V1.ticks));
+  return SOLAR_BEAM_SWEEP_V1.start + (BIOME_BOSS_REACH_V1.solar_beam - SOLAR_BEAM_SWEEP_V1.start) * (1 - Math.pow(1 - v, 1.5));
 }
 
 // src/shared/content/bestiary_bosses_v1.js
@@ -17725,7 +17730,7 @@ function validateRecoveredBossV1(state, id, b) {
     "statusesByEntityId",
     "lastTrailPosition",
     "lastAction"
-  ], ["coinShots", "archive", "goldRush"]);
+  ], ["coinShots", "archive", "goldRush", "beamSweep"]);
   const spec = recoveredBossForId(b.bossDefinitionId), actor = state.entitiesById[id], group = state.groupsById[b.groupId], c = state.spacesByInstanceId[b.spaceInstanceId]?.collision;
   requireContract(spec && b.version === RECOVERED_BOSS_VERSION && b.entityId === id && /^boss:[a-f0-9]{32}$/.test(b.bossId) && actor?.team === "hostile" && actor.contentDefinitionId === ARACHNID_TREANT_PROFILE.contentDefinitionId && group?.entityIds.includes(id) && group.siteId === b.siteId && actor.residency.spaceInstanceId === b.spaceInstanceId && actor.residency.residencyRevision === b.sourceResidencyRevision && c && point4(b.homePosition) && !collidesWithTiles(c, b.homePosition.x, b.homePosition.y, ARACHNID_TREANT_PROFILE.hullRadius), "Recovered boss identity invalid");
   requireContract([1, 2].includes(b.phase) && b.phase2Triggered === (b.phase === 2) && states.includes(b.actionState), "Recovered boss phase invalid");
@@ -17756,6 +17761,13 @@ function validateRecoveredBossV1(state, id, b) {
     }
   }
   if (b.actionState === "dashing") requireContract(b.bossDefinitionId === "marcus" && b.goldRush, "Missing Marcus Gold Rush path");
+  if (b.beamSweep !== void 0) {
+    const r = b.beamSweep;
+    requireContract(b.bossDefinitionId === "sun_pharaoh" && r && typeof r === "object", "Only the Sun Pharaoh sweeps a Solar Beam");
+    closedRecord(r, ["startedTick", "originPosition", "targetPosition", "hitEntityIds"]);
+    safeInteger(r.startedTick, b.activatedTick, state.tick);
+    requireContract(state.tick - r.startedTick <= SOLAR_BEAM_SWEEP_V1.ticks && point4(r.originPosition) && point4(r.targetPosition) && Array.isArray(r.hitEntityIds) && r.hitEntityIds.length <= 12 && new Set(r.hitEntityIds).size === r.hitEntityIds.length && r.hitEntityIds.every((id2) => state.entitiesById[id2]?.team === "party"), "Invalid Solar Beam sweep");
+  }
   if (b.actionState === "dazed") safeInteger(b.dazedUntilTick, state.tick + 1, state.tick + 300);
   else requireContract(b.dazedUntilTick === null, "Recovered boss stale daze");
   if (b.shieldBrokenTick !== null) safeInteger(b.shieldBrokenTick, b.activatedTick, state.tick);
@@ -31508,6 +31520,8 @@ export {
   BIOME_BOSS_REACH_V1,
   BIOME_BOSS_POOLS_V1,
   sunfallDiscsV1,
+  SOLAR_BEAM_SWEEP_V1,
+  solarBeamStrikeV1,
   BOSS_PAGE_IDS,
   BOSS_PAGE_NAMES,
   bossPageFor,

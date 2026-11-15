@@ -619,8 +619,9 @@ var BIOME_BOSSES_V1 = Object.freeze({
 });
 var BIOME_BOSS_IDS_V1 = Object.freeze(Object.keys(BIOME_BOSSES_V1));
 var BIOME_BOSS_DAMAGE_V1 = Object.freeze({ grave_cleave: 19, crown_flame: 15, solar_beam: 17, sunfall: 15 });
-var BIOME_BOSS_REACH_V1 = Object.freeze({ grave_cleave: 104, crown_flame: 70, solar_beam: 280, solarBeamHalfWidth: 24, sunfall: 40 });
-var BIOME_BOSS_POOLS_V1 = Object.freeze({ ghostfire: Object.freeze([44, 300]), sunfire: Object.freeze([30, 240]) });
+var BIOME_BOSS_REACH_V1 = Object.freeze({ grave_cleave: 104, crown_flame: 70, solar_beam: 320, solarBeamHalfWidth: 30, sunfall: 50 });
+var BIOME_BOSS_POOLS_V1 = Object.freeze({ ghostfire: Object.freeze([44, 300]), sunfire: Object.freeze([38, 240]) });
+var SOLAR_BEAM_SWEEP_V1 = Object.freeze({ start: 30, ticks: 30 });
 
 // src/shared/content/recovered_boss_catalog_v4.js
 var RECOVERED_BOSSES2 = Object.freeze({ ...RECOVERED_BOSSES, corrosive_abomination: Object.freeze({ ...RECOVERED_BOSSES.corrosive_abomination, adds: CORROSIVE_SHEDDING_V4.maxDamageSheds, sheddingPolicy: 4 }), ...BIOME_BOSSES_V1 });
