@@ -189110,6 +189110,14 @@ var HUD_FIXED_V1 = Object.freeze(["#world-hud-vitals", "#world-hud-title", "#que
 var HUD_CONTROLS_V1 = Object.freeze([".skill-wheel-ring", ".skill-slot", "#primary-attack", "#carried-rations"]);
 var HUD_COMPASS_V1 = Object.freeze([".chart-mini", ".world-mini"]);
 var HUD_LAYOUT_V1 = Object.freeze({ gap: 10, barTop: 12, barHeight: 50, barWidth: 380, core: 200, barMinScale: 0.6, measureMs: 250, toastLeft: 12, toastWidth: 240, upright: 600, notice: 44, heroLine: 0.46, oneCard: 24, cardHeight: 47, chipHeight: 28, cardGap: 4, menuSize: 38, menuReach: 0.72 });
+function hudPlaceNameV1(label7) {
+  return typeof label7 === "string" ? label7.split(" \xB7 ").filter((part3) => !/^Band \d+$/.test(part3.trim())).join(" \xB7 ") : "";
+}
+function hudPlaceSpotV1(vitals, bar2) {
+  if (!vitals || vitals.width < 40) return null;
+  const x = Math.round(bar2 && bar2.width > 0 ? bar2.left - 14 : vitals.left + vitals.width * 0.2);
+  return { x, y: Math.round(vitals.bottom - 3), w: Math.max(80, Math.round(vitals.right - 6 - x)) };
+}
 function hudClearBelowV1(rects, left, right, height) {
   let bottom = 0;
   for (const r of rects) {
@@ -189131,7 +189139,7 @@ function hudMenuSpotV1(compass, size = HUD_LAYOUT_V1.menuSize) {
   const r = compass.width / 2 - 3, cx = compass.left + compass.width / 2, cy2 = compass.top + compass.width / 2 - 2, k = HUD_LAYOUT_V1.menuReach;
   return { x: Math.round(cx + r * k - size / 2), y: Math.round(cy2 + r * k - size / 2) };
 }
-function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft = HUD_LAYOUT_V1.toastLeft, toastRight = HUD_LAYOUT_V1.toastLeft + HUD_LAYOUT_V1.toastWidth, controls = [] }) {
+function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft = HUD_LAYOUT_V1.toastLeft, toastRight = HUD_LAYOUT_V1.toastLeft + HUD_LAYOUT_V1.toastWidth, controls = [], laneBottom = null }) {
   const { gap: gap2, barTop, barHeight, barWidth, core: core5, barMinScale, notice, heroLine: heroLine2, oneCard } = HUD_LAYOUT_V1, cx = width2 / 2, full = Math.min(barWidth, width2 - 28);
   const middle = hudClearBelowV1(rects, cx - core5 / 2, cx + core5 / 2, height), bar2 = middle > 0 ? Math.round(middle + gap2) : barTop;
   let room = full / 2;
@@ -189141,12 +189149,14 @@ function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft
     else if (r.left >= cx) room = Math.min(room, r.left - cx - gap2);
   }
   const barScale = Math.max(barMinScale, Math.min(1, 2 * room / full)), w = full * barScale, left = cx - w / 2, right = cx + w / 2, barBottom = Math.round(bar2 + barHeight * barScale);
-  const callTop = bossShown ? barBottom + gap2 : bar2, upright = width2 <= HUD_LAYOUT_V1.upright;
+  let callTop = bossShown ? barBottom + gap2 : bar2;
+  const upright = width2 <= HUD_LAYOUT_V1.upright;
   let toastTop = Math.round(hudClearBelowV1(rects, toastLeft, toastRight, height) + gap2);
-  if (upright) toastTop = Math.max(toastTop, callTop + notice);
+  if (upright && bossShown) toastTop = Math.max(toastTop, callTop + notice);
   else if (bossShown && toastRight > left && toastLeft < right) toastTop = Math.max(toastTop, barBottom + gap2);
   const below = hudControlsTopV1(controls, toastLeft, toastRight, height), floor = Math.min(below == null ? height : below - gap2, upright ? height * heroLine2 : height);
   const toastMax = floor < height ? Math.max(oneCard, Math.round(floor - toastTop)) : null;
+  if (upright && !bossShown && laneBottom != null) callTop = Math.max(callTop, Math.round(laneBottom + gap2));
   return { barTop: bar2, barShift: bar2 - barTop, barScale, barCenter: cx, callTop, toastTop, toastMax, upright };
 }
 function placeHudBarV1(c, slots2) {
@@ -189160,7 +189170,7 @@ function placeHudBarV1(c, slots2) {
 }
 function createHudLayoutV1(canvas) {
   const doc = canvas?.ownerDocument, view3 = doc?.defaultView;
-  let last = -1e9, lastBoss = null, slots2 = { barTop: HUD_LAYOUT_V1.barTop, barShift: 0, barScale: 1, barCenter: 0, callTop: null, toastTop: null, toastMax: null, upright: false }, written = "", spotKey = "";
+  let last = -1e9, lastBoss = null, slots2 = { barTop: HUD_LAYOUT_V1.barTop, barShift: 0, barScale: 1, barCenter: 0, callTop: null, toastTop: null, toastMax: null, upright: false }, written = "", spotKey = "", placeKey = "", laneKey = "";
   const visible3 = (el3) => !el3.closest("[hidden]");
   function measure2(bossShown) {
     const boxes2 = (list) => {
@@ -189184,11 +189194,30 @@ function createHudLayoutV1(canvas) {
         b.dataset.hudMenu = "ring";
       } else delete b.dataset.hudMenu;
     }
+    const vit = doc.getElementById("world-hud-vitals"), place4 = vit && visible3(vit) ? hudPlaceSpotV1(vit.getBoundingClientRect(), doc.getElementById("world-hp-bar")?.getBoundingClientRect()) : null, pkey = place4 ? place4.x + "|" + place4.y + "|" + place4.w : "";
+    if (pkey !== placeKey) {
+      placeKey = pkey;
+      if (place4) {
+        b.style.setProperty("--hud-place-x", place4.x + "px");
+        b.style.setProperty("--hud-place-y", place4.y + "px");
+        b.style.setProperty("--hud-place-w", place4.w + "px");
+        b.dataset.hudPlace = "attached";
+      } else delete b.dataset.hudPlace;
+    }
     const rects = boxes2(HUD_FIXED_V1), controls = boxes2(HUD_CONTROLS_V1);
-    const lane2 = doc.querySelector(".toast-lane-v1"), lr = lane2?.getBoundingClientRect(), cv = canvas.getBoundingClientRect();
+    const lane2 = doc.querySelector(".toast-lane-v1"), cv = canvas.getBoundingClientRect();
+    if (lane2) {
+      const w = compass ? Math.max(160, Math.round(compass.left - HUD_LAYOUT_V1.gap - lane2.getBoundingClientRect().left)) + "px" : "";
+      if (w !== laneKey) {
+        laneKey = w;
+        if (w) b.style.setProperty("--hud-lane-w", w);
+        else b.style.removeProperty("--hud-lane-w");
+      }
+    }
+    const lr = lane2?.getBoundingClientRect(), cards = lane2?.querySelectorAll(".toast-v1"), shown2 = cards ? [...cards].filter((c) => c.offsetParent !== null && c.getBoundingClientRect().height > 0) : [], laneBottom = shown2.length ? Math.max(...shown2.map((c) => c.getBoundingClientRect().bottom)) : null;
     const toastLeft = lr && lr.width > 0 ? lr.left : HUD_LAYOUT_V1.toastLeft, toastRight = lr && lr.width > 0 ? lr.right : toastLeft + HUD_LAYOUT_V1.toastWidth;
     const local8 = (list) => list.map((r) => ({ left: r.left - cv.left, right: r.right - cv.left, top: r.top - cv.top, bottom: r.bottom - cv.top, width: r.width, height: r.height }));
-    const s = hudSlotsV1(local8(rects), { width: cv.width || canvas.width, height: cv.height || canvas.height, bossShown, toastLeft: toastLeft - cv.left, toastRight: toastRight - cv.left, controls: local8(controls) });
+    const s = hudSlotsV1(local8(rects), { width: cv.width || canvas.width, height: cv.height || canvas.height, bossShown, toastLeft: toastLeft - cv.left, toastRight: toastRight - cv.left, controls: local8(controls), laneBottom: laneBottom == null ? null : laneBottom - cv.top });
     const phone = Boolean(view3.matchMedia?.("(max-width: 600px), (max-height: 500px)")?.matches), card = lane2?.querySelector(".toast-v1")?.getBoundingClientRect().height || (phone ? HUD_LAYOUT_V1.chipHeight : HUD_LAYOUT_V1.cardHeight);
     const fit2 = s.toastMax == null ? 3 : Math.max(1, Math.min(3, Math.floor((s.toastMax + HUD_LAYOUT_V1.cardGap) / (card + HUD_LAYOUT_V1.cardGap))));
     slots2 = s;
@@ -219112,7 +219141,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     }
     if (levelNotice) levelNotice.hidden = inventory.isOpen() || !model.entitiesById[participant.entityId].alive || !(time3 < levelNoticeUntil);
     const updateDom = () => {
-      setText(label7, model.space.label);
+      setText(label7, hudPlaceNameV1(model.space.label));
       if (generation) setText(generation, model.space.overworld?.seedHex ? `World ${model.space.overworld.manifestId.slice(-8)} \xB7 Seed ${model.space.overworld.seedHex}${model.space.overworld.regionThreatTier ? ` \xB7 Region threat ${model.space.overworld.regionThreatTier} \xB7 ${model.space.overworld.populationGroups} ordinary groups` : ""}` : "");
       setText(provenance, profile.read().provenance);
       const activeSite = model.space.site ?? model.space.functionalSite, conquered = activeSite?.conqueredTick !== null && activeSite?.conqueredTick !== void 0 && model.tick - activeSite.conqueredTick < 180;

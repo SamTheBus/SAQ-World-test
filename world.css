@@ -1991,8 +1991,12 @@ html body #world-bag{display:none!important}
 html body[data-hud-menu=ring] #local-world-controls:not([open]){position:fixed!important;left:var(--hud-menu-x)!important;top:var(--hud-menu-y)!important;right:auto!important;bottom:auto!important;z-index:8!important}
 html body[data-hud-menu=ring] #local-world-controls:not([open])>summary{--k:38px!important}
 html body[data-hud-menu=ring] #local-world-controls:not([open])>summary::after{content:none!important}
+/* The place name hangs from the bottom of the health panel, without the Band (Sammy 2026-11-15); pickups take the room. */
+html body[data-hud-place=attached] #world-hud-title{position:fixed!important;left:var(--hud-place-x)!important;top:var(--hud-place-y)!important;right:auto!important;bottom:auto!important;transform:none!important;width:auto!important;min-width:0!important;max-width:var(--hud-place-w)!important;z-index:0!important;margin:0!important;padding:5px 12px 5px!important;border-top:0!important;border-radius:0 0 10px 10px!important;align-items:flex-start!important;text-align:left!important}
+html body[data-hud-place=attached] #space-label{display:block;max-width:100%;font-size:13px!important;line-height:1.25!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:400px){html body[data-hud-place=attached] #world-hud-title{padding:4px 8px 5px!important}html body[data-hud-place=attached] #space-label{font-size:12px!important}}
 /* Phones: pickups are one-line chips at the left edge ("drops in portrait just block the whole combat view"). */
-@media(max-width:600px),(max-height:500px){body[data-hud-layout] .toast-lane-v1{left:calc(12px + var(--world-safe-left))!important;right:auto!important;width:auto!important;max-width:min(320px,70vw);gap:4px;align-items:flex-start}
+@media(max-width:600px),(max-height:500px){body[data-hud-layout] .toast-lane-v1{left:calc(12px + var(--world-safe-left))!important;right:auto!important;width:auto!important;max-width:min(var(--hud-lane-w,320px),320px,70vw);gap:4px;align-items:flex-start}
  body[data-hud-layout] .toast-lane-v1 .toast-v1{width:auto;max-width:100%;padding:3px 12px 4px 4px;gap:6px;border-radius:999px;box-shadow:0 3px 8px #0007,inset 0 1px 0 #ffffff14}
  body[data-hud-layout] .toast-lane-v1 .toast-v1 .toast-badge{width:20px;height:20px}body[data-hud-layout] .toast-lane-v1 .toast-v1 .toast-badge svg{width:11px;height:11px}body[data-hud-layout] .toast-lane-v1 .toast-v1 .toast-badge img{width:17px;height:17px}
  body[data-hud-layout] .toast-lane-v1 .toast-v1 .toast-text{flex-direction:row;align-items:baseline;gap:5px;white-space:nowrap;min-width:0}
