@@ -190975,6 +190975,42 @@ function plannedVillageDepthItems(m, v) {
 }
 
 // src/client/generated_town_presentation_v1.js
+var PROP_BOX = Object.freeze({ x: -70, y: -120, w: 140, h: 140 });
+var PROP_KEEP = 96;
+var propSprites = /* @__PURE__ */ new Map();
+var propBuilt = 0;
+var propDrawn = 0;
+var propScale = (s) => Math.max(0.5, Math.min(3, Math.round(s * 20) / 20));
+function streetPropSpriteV1(c, t, o, kind, lx, ly, i) {
+  const m = c.getTransform?.(), doc = c.canvas?.ownerDocument;
+  if (!m || !(m.a > 0) || m.b || m.c || !doc?.createElement) {
+    c.save();
+    c.translate(o.x, o.y);
+    streetProp(c, kind, lx, ly, i, t.biome);
+    c.restore();
+    return;
+  }
+  const s = propScale(m.a), key4 = t.id + "|" + i + "|" + kind + "@" + s;
+  let sprite7 = propSprites.get(key4);
+  if (sprite7) propSprites.delete(key4);
+  else {
+    const cv = doc.createElement("canvas");
+    cv.width = Math.ceil(PROP_BOX.w * s);
+    cv.height = Math.ceil(PROP_BOX.h * s);
+    const g = cv.getContext("2d");
+    g.setTransform(s, 0, 0, s, (-PROP_BOX.x - lx) * s, (-PROP_BOX.y - ly) * s);
+    try {
+      streetProp(g, kind, lx, ly, i, t.biome);
+    } catch {
+    }
+    sprite7 = cv;
+    propBuilt++;
+    if (propSprites.size >= PROP_KEEP) propSprites.delete(propSprites.keys().next().value);
+  }
+  propSprites.set(key4, sprite7);
+  propDrawn++;
+  c.drawImage(sprite7, o.x + lx + PROP_BOX.x, o.y + ly + PROP_BOX.y, PROP_BOX.w, PROP_BOX.h);
+}
 var T117 = 32;
 var OL115 = "#151515";
 var STONE34 = { desert: "#d6bc8e", frostland: "#b9bfc4", volcanic: "#5c5452", wetland: "#9e9886", upland: "#a9a9a1", tropical: "#c2b391" };
@@ -191469,12 +191505,7 @@ function generatedTownDepthItems(m, v, env = null) {
       for (const [i, p] of townStreetPlanV1(t).entries()) {
         const lx = p.x * T117, ly = p.y * T117 - 4, x = o.x + lx, y = o.y + ly;
         if (!seen4(v, x - 50, y - 100, 100, 110)) continue;
-        out4.push(depthItem({ id: key4 + "prop:" + i, anchorX: x, anchorY: y, draw: (c) => {
-          c.save();
-          c.translate(o.x, o.y);
-          streetProp(c, p.kind, lx, ly, i, t.biome);
-          c.restore();
-        } }));
+        out4.push(depthItem({ id: key4 + "prop:" + i, anchorX: x, anchorY: y, draw: (c) => streetPropSpriteV1(c, t, o, p.kind, lx, ly, i) }));
       }
       for (const { b, d, south } of fencesOf(t)) {
         const x = o.x + b.x * T117, y0 = o.y + (south ? b.y + b.h : b.y - d) * T117;
@@ -210500,6 +210531,34 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
   }
   return Object.freeze({ flowers, water: pilot?.waterMotion?.(space, bounds2) ?? [], obstacleVisualIds, woodlandDetailIds, paintedTerrainTiles, paintedBlockers, paintedDecorations, totalTerrainTiles: c.width * c.height });
 }
+var markerStamps = /* @__PURE__ */ new Map();
+function markerStampV1(ctx, text3) {
+  let s = markerStamps.get(text3);
+  if (s !== void 0) return s;
+  s = null;
+  try {
+    const doc = ctx.canvas?.ownerDocument;
+    if (doc?.createElement) {
+      const S15 = 3, pad2 = 3, cv = doc.createElement("canvas"), g = cv.getContext("2d");
+      g.font = "11px Georgia";
+      const w = Math.ceil(g.measureText(text3).width) + pad2 * 2, h = 11 + pad2 * 2 + 3;
+      cv.width = w * S15;
+      cv.height = h * S15;
+      const k = cv.getContext("2d");
+      k.scale(S15, S15);
+      k.font = "11px Georgia";
+      k.textAlign = "center";
+      k.fillStyle = "#eadca5";
+      k.fillText(text3, w / 2, pad2 + 11);
+      s = { cv, w, h, base: pad2 + 11 };
+    }
+  } catch {
+    s = null;
+  }
+  if (markerStamps.size > 40) markerStamps.clear();
+  markerStamps.set(text3, s);
+  return s;
+}
 function drawEnvironmentMarkers(ctx, space) {
   if (space.settlementSafe) {
     const marker2 = space.overworld?.safeRegions[0]?.marker ?? { x: 528, y: 368, label: "ALDERWATCH" };
@@ -210508,11 +210567,15 @@ function drawEnvironmentMarkers(ctx, space) {
     ctx.beginPath();
     ctx.arc(marker2.x, marker2.y, 22, 0, TAU225);
     ctx.stroke();
-    ctx.font = "11px Georgia";
-    ctx.fillStyle = "#eadca5";
-    ctx.textAlign = "center";
-    ctx.fillText(marker2.label, marker2.x, marker2.y + 38);
-    ctx.textAlign = "left";
+    const stamp7 = markerStampV1(ctx, String(marker2.label));
+    if (stamp7) ctx.drawImage(stamp7.cv, marker2.x - stamp7.w / 2, marker2.y + 38 - stamp7.base, stamp7.w, stamp7.h);
+    else {
+      ctx.font = "11px Georgia";
+      ctx.fillStyle = "#eadca5";
+      ctx.textAlign = "center";
+      ctx.fillText(marker2.label, marker2.x, marker2.y + 38);
+      ctx.textAlign = "left";
+    }
   }
 }
 function drawEnvironmentLabels(ctx, space) {
@@ -222112,8 +222175,20 @@ function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstC
       banner8 = null;
       dismissedAt = now3();
     });
+    let armed = false;
     go.addEventListener("click", () => {
       if (go.disabled) return;
+      if (!armed) {
+        armed = true;
+        sub.textContent = "Tap again to update";
+        environment.setTimeout(() => {
+          if (!go.disabled) {
+            armed = false;
+            sub.textContent = "Tap to update";
+          }
+        }, 4e3);
+        return;
+      }
       go.disabled = true;
       close.disabled = true;
       update(release, (text3) => {
