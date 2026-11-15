@@ -28174,7 +28174,7 @@ var BY_NOUN = Object.freeze({
   "Cloth Slippers": "apprentice-slippers",
   "Wizard Hat": "hat",
   "Silk Robe": "robe",
-  "Silk Wraps": "wraps",
+  "Silk Wraps": "silk-wraps",
   "Silk Slippers": "slippers"
 });
 var OVERALL_LEGS = Object.freeze({ plate: "greaves", breastplate: "greaves", "fluted-plate": "greaves", hauberk: "chausses", "surcoat-mail": "chausses", "banded-mail": "chausses", doublet: "breeches", jerkin: "breeches", "cutpurse-vest": "breeches", leather: "trousers", brigandine: "trousers", lamellar: "trousers", "mossback-pelt": "pelt", wardenplate: "warden-greaves" });
@@ -28206,12 +28206,19 @@ var LOOK_POOLS = Object.freeze({
   "studded-gloves": Object.freeze(["studded-gloves", "knuckle-gloves", "bracer-gloves"]),
   "leather-boots": Object.freeze(["boots", "wrapped-boots", "buckled-boots"]),
   tall: Object.freeze(["tall", "footpad-boots", "laced-boots"]),
+  // Mage armor (class gear looks v1). Silk Wraps have a type of their own, so the Cloth Wraps keep theirs.
+  "apprentice-robe": Object.freeze(["apprentice-robe", "scholar-robe", "wrap-robe"]),
+  robe: Object.freeze(["robe", "star-robe", "sorcerer-robe"]),
+  wraps: Object.freeze(["wraps", "ribbon-wraps", "cloth-mitts"]),
+  "silk-wraps": Object.freeze(["silk-wraps", "rune-gloves", "flared-gloves"]),
+  "apprentice-slippers": Object.freeze(["apprentice-slippers", "curled-slippers", "sandals"]),
+  slippers: Object.freeze(["slippers", "gilded-shoes", "pointed-shoes"]),
   cape: Object.freeze(["traveler-cape", "ragged-cape", "magic-cape"]),
   cloak: Object.freeze(["hooded-cloak", "fur-cloak", "scalloped-cloak"]),
   mantle: Object.freeze(["royal-mantle", "capelet", "banner-cape"]),
   hood: Object.freeze(["hood", "pilfer-cap", "plate-hood"]),
-  hat: Object.freeze(["hat", "wide-brim-hat", "circlet"]),
-  cowl: Object.freeze(["cowl", "mage-hood", "moon-hat"]),
+  hat: Object.freeze(["hat", "jester-cap", "circlet"]),
+  cowl: Object.freeze(["cowl", "sage-band", "moon-hat"]),
   buckler: Object.freeze(["buckler", "targe", "roundel"]),
   kite: Object.freeze(["kite", "heater", "iron-kite"]),
   tower: Object.freeze(["tower", "pavise", "bulwark"]),
@@ -28247,7 +28254,7 @@ function itemLook(item) {
   const look = itemLookType(item);
   return look && fromPool(look, item);
 }
-var ARMOR_TYPE_WAS = Object.freeze({ "mail-gloves": "gauntlets", "knight-boots": "boots", "leather-boots": "boots", "studded-gloves": "gloves" });
+var ARMOR_TYPE_WAS = Object.freeze({ "mail-gloves": "gauntlets", "knight-boots": "boots", "leather-boots": "boots", "studded-gloves": "gloves", "silk-wraps": "wraps" });
 var nounLookType = (noun) => BY_NOUN[noun] ?? null;
 
 // src/shared/contracts/unique_rewards_v1.js

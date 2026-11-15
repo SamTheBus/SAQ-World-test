@@ -1101,7 +1101,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-CXGFP2E2.js";
+} from "./chunk-3JSIFZWS.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -112886,12 +112886,12 @@ var OFF_FAMILY = {
   "tome-thunder": "tome",
   "tome-tempest": "tome"
 };
-var ROBES = /* @__PURE__ */ new Set(["robe", "apprentice-robe"]);
-var HATS = /* @__PURE__ */ new Set(["hat", "cowl", "bandana", "skullcap", "head-wrap", "slouch-cap", "pilfer-cap", "leather-cap", "feathered-cap", "wide-brim-hat", "circlet", "moon-hat", "backwards-cap", "eyestalk-crown"]);
+var ROBES = /* @__PURE__ */ new Set(["robe", "apprentice-robe", "scholar-robe", "wrap-robe", "star-robe", "sorcerer-robe"]);
+var HATS = /* @__PURE__ */ new Set(["hat", "cowl", "jester-cap", "sage-band", "bandana", "skullcap", "head-wrap", "slouch-cap", "pilfer-cap", "leather-cap", "feathered-cap", "wide-brim-hat", "circlet", "moon-hat", "backwards-cap", "eyestalk-crown"]);
 var HOOD_FACE = /* @__PURE__ */ new Set(["hood", "bandit-hood"]);
 var COIF_FACE = /* @__PURE__ */ new Set(["coif", "kettle-hat", "nasal-helm", "barbute", "burgonet"]);
 var OPEN_HOOD_FACE = /* @__PURE__ */ new Set(["scout-hood", "plate-hood", "mage-hood", "rimecoil-hood"]);
-var HAIR_SHOWS = /* @__PURE__ */ new Set(["circlet", "eyestalk-crown"]);
+var HAIR_SHOWS = /* @__PURE__ */ new Set(["circlet", "sage-band", "eyestalk-crown"]);
 function kit(spec) {
   const k = KITS3[spec.cls] ?? KITS3.knight, g = spec.gear ?? {}, look = (slot, fallback) => g[slot] ? g[slot].kind ?? fallback : null;
   const body6 = look("body", k.body) ?? "tunic", off = look("off", spec.offType ? OFF_KINDS[spec.offType] : k.off);
@@ -119106,6 +119106,1218 @@ KG_HELM["pilfer-cap"] = (c, A2, face5, sway = 0) => {
   rgPilferDeco(c, A2, s, H8, [-1.4, -16.2], 0.76);
 };
 GLOVES["cuffed-gloves"] = RG_CUFF;
+var MG = {
+  sage: { b: "#5f7d5a", d: "#47603f", l: "#7d9a74" },
+  sageDark: { b: "#47603f", d: "#384c32" },
+  teal: { b: "#2f7f86", d: "#235f65", l: "#45a0a6" },
+  tealDark: { b: "#235f65", d: "#1b4a4f" },
+  ochre: { b: "#c8862e", d: "#9c6620", l: "#e0a24a" },
+  navy: { b: "#2c3a73", d: "#212c58", l: "#3f529a" },
+  navyDark: { b: "#212c58", d: "#1a2246" },
+  silver: { b: "#9fb0de", d: "#7d8fc2" },
+  crimson: { b: "#8e2f3c", d: "#6b222d", l: "#b04452" },
+  crimsonDark: { b: "#6b222d", d: "#561b24" },
+  black: { b: "#2a2230", d: "#1d1722", l: "#3d3346" },
+  gold: { b: "#d9b44a", d: "#a8862c", l: "#f3d878" },
+  felt: { b: "#7b5a3c", d: "#5e432c", l: "#97714d" },
+  mitt: { b: "#a5523a", d: "#7e3d2b", l: "#c46a4f" },
+  cork: { b: "#a87a4a", d: "#7d5832" },
+  rune: { b: "#2a2f4a", d: "#1f2338", l: "#3b4266" }
+};
+var MG_ROBE = [-8, 0, 6, 0, 6.9, 8.2, 9.8, 18.4, 2, 18.4, 0.7, 16.8, -0.6, 18.4, -10.6, 18.4, -8.9, 8.2];
+function mgRobe(c, A2, o) {
+  const pts2 = o.shape ?? MG_ROBE, shape3 = poly11(pts2);
+  G3(c, pts2, o.cloth, { split: 0.68 });
+  c.save();
+  c.clip(shape3);
+  o.inside?.(c);
+  px3(c, -11.2, o.accY ?? 16.7, 21.6, o.accH ?? 1.7, A2.c);
+  c.restore();
+  c.lineWidth = 1.5;
+  c.strokeStyle = K6;
+  c.stroke(shape3);
+  G3(c, [-8.9, -0.8, 6.9, -0.8, 8, 3.6, -10, 3.6], o.collar, { split: 0.7, lw: 1.3 });
+  c.lineWidth = 1.3;
+  c.strokeStyle = K6;
+  c.beginPath();
+  c.moveTo(-3.4, -0.8);
+  c.lineTo(-0.6, 3.4);
+  c.lineTo(2.2, -0.8);
+  c.stroke();
+}
+function mgTrim(c, pts2, col2, w = 0.9) {
+  c.save();
+  c.lineJoin = "round";
+  c.lineCap = "round";
+  c.beginPath();
+  c.moveTo(pts2[0], pts2[1]);
+  for (let i = 2; i < pts2.length; i += 2) c.lineTo(pts2[i], pts2[i + 1]);
+  c.strokeStyle = K6;
+  c.lineWidth = w + 0.9;
+  c.stroke();
+  c.strokeStyle = tint(col2);
+  c.lineWidth = w;
+  c.stroke();
+  c.restore();
+}
+function mgStar(c, x, y, s = 1) {
+  px3(c, x - 0.9 * s, y - 0.25 * s, 1.8 * s, 0.5 * s, MG.gold.l);
+  px3(c, x - 0.25 * s, y - 0.9 * s, 0.5 * s, 1.8 * s, MG.gold.l);
+}
+function mgMoon(c, x, y, r, bg) {
+  c.save();
+  c.fillStyle = tint(MG.gold.b);
+  c.beginPath();
+  c.arc(x, y, r, 0, Math.PI * 2);
+  c.fill();
+  c.lineWidth = 0.8;
+  c.strokeStyle = K6;
+  c.stroke();
+  c.fillStyle = tint(bg.b);
+  c.beginPath();
+  c.arc(x + r * 0.45, y - r * 0.25, r * 0.78, 0, Math.PI * 2);
+  c.fill();
+  c.restore();
+}
+var MG_DAG = (() => {
+  const p = [-8, 0, 6, 0, 6.9, 8.2, 9.8, 17];
+  const n = 8, x0 = 9.8, x1 = -10.6;
+  for (let i = 1; i <= n * 2; i++) {
+    const x = x0 + (x1 - x0) * i / (n * 2);
+    p.push(x, i % 2 ? 18.8 : 17);
+  }
+  p.push(-8.9, 8.2);
+  return p;
+})();
+var mgSleeve = (cloth2, cuff, extra) => (c) => {
+  G3(c, [0, -2.4, 7.6, -3.8, 7.6, 3.8, 0, 2.4], cloth2, { split: 0.6, lw: 1.3 });
+  G3(c, [6, -3.5, 7.6, -3.8, 7.6, 3.8, 6, 3.5], cuff, { flat: true, lw: 1 });
+  extra?.(c);
+};
+Object.assign(KG_SLEEVE, {
+  "scholar-robe": mgSleeve(MG.sage, P14.linen),
+  "wrap-robe": mgSleeve(MG.teal, P14.linen, (c) => px3(c, 1.4, -2.6, 0.5, 5.2, MG.tealDark.d)),
+  "star-robe": mgSleeve(MG.navy, MG.gold, (c) => mgStar(c, 3.2, 0, 0.8)),
+  "sorcerer-robe": mgSleeve(MG.crimson, MG.black, (c) => px3(c, 6, -3.4, 0.5, 6.8, MG.gold.b))
+});
+Object.assign(GLOVES, { "ribbon-wraps": P14.linen, "cloth-mitts": MG.mitt, "silk-wraps": P14.purpleDark, "rune-gloves": MG.rune, "flared-gloves": P14.purple });
+var mgAcc = (w) => accOf(w.g.gloves);
+function mgLine(c, pts2, col2, w = 0.6) {
+  c.save();
+  c.lineJoin = "round";
+  c.lineCap = "round";
+  c.strokeStyle = tint(col2);
+  c.lineWidth = w;
+  c.beginPath();
+  c.moveTo(pts2[0], pts2[1]);
+  for (let i = 2; i < pts2.length; i += 2) c.lineTo(pts2[i], pts2[i + 1]);
+  c.stroke();
+  c.restore();
+}
+function mgDash(c, x0, y0, x1, y1, col2, n) {
+  for (let i = 0; i < n; i++) {
+    const t = (i + 0.25) / n;
+    px3(c, x0 + (x1 - x0) * t - 0.25, y0 + (y1 - y0) * t, 0.5, 0.8, col2);
+  }
+}
+function mgShade(c, cloth2, folds2 = [[-5.4, 10.4, -6.6, 17.8], [5, 10.4, 6.6, 17.8]]) {
+  mgLine(c, [-7.3, 0.4, -8.1, 8.2, -9.6, 18.2], cloth2.l, 0.8);
+  for (const f of folds2) mgLine(c, f, cloth2.d, 0.7);
+}
+function mgRope(c, x0, x1, y, h) {
+  R3(c, x0, y, x1 - x0, h, M.rope, { flat: true, lw: 1.2 });
+  c.save();
+  c.strokeStyle = tint(M.rope.d);
+  c.lineWidth = 0.5;
+  c.beginPath();
+  for (let x = x0 + 0.4; x < x1; x += 1.3) {
+    c.moveTo(x, y + 0.35);
+    c.lineTo(x + 0.9, y + h - 0.35);
+  }
+  c.stroke();
+  c.restore();
+  px3(c, x0, y + 0.3, x1 - x0, 0.35, "#ffffff40");
+}
+function mgCord(c, A2, x, y, len, dx = 0) {
+  mgLine(c, [x, y, x + dx, y + len], K6, 1.5);
+  mgLine(c, [x, y, x + dx, y + len], M.rope.b, 0.8);
+  R3(c, x + dx - 0.8, y + len, 1.6, 1.8, M.rope, { flat: true, lw: 0.8 });
+  px3(c, x + dx - 0.6, y + len + 1.3, 1.2, 0.5, A2.c);
+}
+var MG_INNER = [-0.9, 1.2, 2.3, 1.2, 3.1, 17.4, 1.6, 17.4, 0.7, 16.2, -0.3, 17.4, -1.9, 17.4];
+var mgSleeve2 = (cloth2, cuff, lining, extra) => (c) => {
+  G3(c, [0, -2.4, 7.6, -3.8, 7.6, 3.8, 0, 2.4], cloth2, { split: 0.6, lw: 1.3 });
+  mgLine(c, [1, -1.6, 6, -2.6], cloth2.l, 0.6);
+  mgLine(c, [2.4, 1.4, 6, 2.4], cloth2.d, 0.6);
+  G3(c, [6.6, -3.6, 7.6, -3.8, 7.6, 3.8, 6.6, 3.6], cuff, { flat: true, lw: 0.9 });
+  G3(c, [7.6, -3.4, 8.2, -3, 8.2, 3, 7.6, 3.4], lining, { flat: true, lw: 0.7 });
+  extra?.(c);
+};
+Object.assign(KG_SLEEVE, {
+  "apprentice-robe": mgSleeve2(M.blue, M.rope, M.blueInner),
+  "scholar-robe": mgSleeve2(MG.sage, P14.linen, MG.sageDark),
+  "wrap-robe": mgSleeve2(MG.teal, P14.linen, MG.tealDark, (c) => px3(c, 1.4, -2.6, 0.5, 5.2, MG.tealDark.d))
+});
+function mgSheen(c, cloth2) {
+  c.save();
+  c.globalAlpha = 0.55;
+  G3(c, [-6.2, 10.6, -4.6, 10.6, -5.4, 18.4, -7.4, 18.4], { b: cloth2.l }, { flat: true, line: false });
+  c.restore();
+}
+Object.assign(KG_SLEEVE, {
+  robe: mgSleeve2(P14.purple, MG.gold, P14.purpleInner),
+  "star-robe": mgSleeve2(MG.navy, MG.gold, MG.silver, (c) => {
+    mgStar(c, 3.2, 0, 0.8);
+    px3(c, 1.6, -1.6, 0.45, 0.45, MG.gold.l);
+    px3(c, 4.8, 1.6, 0.45, 0.45, MG.gold.l);
+  }),
+  "sorcerer-robe": mgSleeve2(MG.crimson, MG.black, MG.black, (c) => px3(c, 6.5, -3.5, 0.4, 7, MG.gold.b))
+});
+function mgWind(c, x0, y0, w, h, band10, step3 = 1.9, bw = 0.8) {
+  c.save();
+  c.beginPath();
+  c.rect(x0, y0, w, h);
+  c.clip();
+  for (let x = x0 - h; x < x0 + w + h; x += step3) {
+    G3(c, [x, y0 + h, x + bw, y0 + h, x + bw + h * 0.6, y0, x + h * 0.6, y0], band10, { flat: true, line: false });
+    c.fillStyle = "#00000040";
+    c.fill(poly11([x + bw, y0 + h, x + bw + 0.3, y0 + h, x + bw + 0.3 + h * 0.6, y0, x + bw + h * 0.6, y0]));
+  }
+  c.restore();
+}
+function mgKnit(c, x0, y0, w, h, col2) {
+  c.save();
+  c.beginPath();
+  c.rect(x0, y0, w, h);
+  c.clip();
+  c.strokeStyle = tint(col2);
+  c.lineWidth = 0.4;
+  c.beginPath();
+  for (let y = y0 + 0.6; y < y0 + h; y += 1.3) for (let x = x0 + 0.3; x < x0 + w; x += 1.2) {
+    c.moveTo(x, y);
+    c.lineTo(x + 0.6, y + 0.6);
+    c.lineTo(x + 1.2, y);
+  }
+  c.stroke();
+  c.restore();
+}
+var MG_GLOVE = [-2.8, 1.8, -2.8, -4, -2.2, -4.8, 2, -4.8, 2.6, -4, 2.6, -0.8, 4.2, -2.4, 5, -1.6, 2.6, 1.8];
+function mgOutline(c, pts2, w = 1.2) {
+  c.lineWidth = w;
+  c.strokeStyle = K6;
+  c.stroke(poly11(pts2));
+}
+function mgGlow(c, x, y, r, col2) {
+  c.save();
+  c.globalAlpha = 0.22;
+  c.fillStyle = tint(col2);
+  c.beginPath();
+  c.arc(x, y, r, 0, Math.PI * 2);
+  c.fill();
+  c.globalAlpha = 0.14;
+  c.beginPath();
+  c.arc(x, y, r * 0.7, 0, Math.PI * 2);
+  c.fill();
+  c.restore();
+}
+function mgGemSet(c, x, y, r) {
+  c.save();
+  c.fillStyle = tint(MG.gold.b);
+  c.beginPath();
+  c.arc(x, y, r, 0, Math.PI * 2);
+  c.fill();
+  c.lineWidth = 0.35;
+  c.strokeStyle = tint(MG.gold.d);
+  c.stroke();
+  c.restore();
+  px3(c, x - r * 0.6, y - r * 0.75, r * 0.5, r * 0.35, MG.gold.l);
+}
+function mgPom(c, x, y, r, col2) {
+  c.save();
+  c.fillStyle = tint(col2);
+  c.beginPath();
+  c.arc(x, y, r, 0, Math.PI * 2);
+  c.fill();
+  c.lineWidth = 0.7;
+  c.strokeStyle = K6;
+  c.stroke();
+  c.restore();
+  px3(c, x - r * 0.55, y - r * 0.6, r * 0.5, r * 0.45, "#ffffff80");
+}
+function mgJBell(c, x, y, r, col2) {
+  c.save();
+  c.lineWidth = 0.6;
+  c.strokeStyle = K6;
+  c.beginPath();
+  c.arc(x, y - r - 0.35, 0.5, 0, Math.PI * 2);
+  c.stroke();
+  const ball6 = new Path2D();
+  ball6.arc(x, y, r, 0, Math.PI * 2);
+  c.fillStyle = tint(col2);
+  c.fill(ball6);
+  const sh3 = new Path2D();
+  sh3.arc(x, y, r, 0, Math.PI * 2);
+  sh3.arc(x - r * 0.38, y - r * 0.38, r, 0, Math.PI * 2);
+  c.fillStyle = "#00000040";
+  c.fill(sh3, "evenodd");
+  c.lineWidth = 0.75;
+  c.strokeStyle = K6;
+  c.stroke(ball6);
+  c.lineCap = "round";
+  c.lineWidth = 0.45;
+  c.beginPath();
+  c.moveTo(x - r * 0.5, y + r * 0.3);
+  c.lineTo(x + r * 0.5, y + r * 0.3);
+  c.stroke();
+  c.fillStyle = K6;
+  c.beginPath();
+  c.arc(x, y + r * 0.3, 0.32, 0, Math.PI * 2);
+  c.fill();
+  c.restore();
+  px3(c, x - r * 0.6, y - r * 0.65, r * 0.5, r * 0.32, "#ffffffa0");
+}
+function mgShine(c, col2, lw, pts2) {
+  c.save();
+  c.lineCap = "round";
+  c.strokeStyle = tint(col2);
+  c.lineWidth = lw;
+  c.beginPath();
+  c.moveTo(pts2[0], pts2[1]);
+  for (let i = 2; i < pts2.length; i += 4) c.quadraticCurveTo(pts2[i], pts2[i + 1], pts2[i + 2], pts2[i + 3]);
+  c.stroke();
+  c.restore();
+}
+Object.assign(KG_BODY, {
+  "scholar-robe"(c, A2, acc2) {
+    mgRobe(c, A2, { cloth: MG.sage, collar: MG.sageDark, inside(c2) {
+      mgShade(c2, MG.sage, [[-5.8, 10.4, -7.2, 17.8], [5.6, 10.4, 7.4, 17.8]]);
+      G3(c2, [-3, 1.2, 3.6, 1.2, 4.8, 18.4, -4.4, 18.4], MG.sageDark, { flat: true, lw: 1 });
+      G3(c2, [-2.2, 1.2, 2.8, 1.2, 3.8, 18.4, -3.4, 18.4], P14.linen, { flat: true, lw: 0 });
+      mgLine(c2, [-1.8, 10.6, -2.8, 14.8], P14.linen.l, 0.6);
+      px3(c2, -0.2, 1.2, 0.5, 17.2, MG.sage.d);
+      mgDash(c2, -1.5, 10.8, -2.6, 14.6, MG.sage.b, 4);
+      mgDash(c2, 2.2, 10.8, 3, 14.6, MG.sage.b, 4);
+      px3(c2, -11.2, 15, 21.6, 1.7, P14.linen.b);
+      for (let x = -10.4; x < 10; x += 1.6) px3(c2, x, 15.7, 0.8, 0.35, P14.linen.d);
+      R3(c2, -11, 7.9, 22, 2.3, P14.strap, { flat: true, lw: 1.2 });
+      for (let x = -10.4; x < 10; x += 1.4) px3(c2, x, 8.9, 0.7, 0.3, P14.leather.l);
+    } });
+    R3(c, -1.6, 7.6, 2.8, 2.9, { b: RG.brass, d: RG.brassD }, { flat: true, lw: 1 });
+    px3(c, -0.8, 8.4, 1.2, 1.2, P14.strap.b);
+    px3(c, -1.3, 7.9, 1.6, 0.4, "#fff3c0");
+    gem2(c, 2.4, 9, 1.1, A2.gem);
+    R3(c, -7.4, 8.4, 2.4, 5.2, P14.page, { flat: true, lw: 1 });
+    px3(c, -7.2, 8.6, 0.6, 4.8, "#ffffff80");
+    px3(c, -7.4, 10.4, 2.4, 0.7, MG.ochre.b);
+    px3(c, -7.4, 12.2, 2.4, 0.7, MG.ochre.b);
+    c.fillStyle = tint(P14.page.d);
+    c.beginPath();
+    c.ellipse(-6.2, 8.4, 1.2, 0.5, 0, 0, Math.PI * 2);
+    c.fill();
+    c.lineWidth = 0.6;
+    c.strokeStyle = K6;
+    c.stroke();
+    G3(c, [-6.4, 13.2, -5.6, 13.2, -5.4, 15.6, -6, 15.2, -6.6, 15.6], P14.red, { flat: true, lw: 0.7 });
+    c.fillStyle = tint(P14.red.b);
+    c.beginPath();
+    c.arc(-6, 11.3, 0.9, 0, Math.PI * 2);
+    c.fill();
+    c.lineWidth = 0.6;
+    c.strokeStyle = K6;
+    c.stroke();
+    px3(c, -6.3, 11, 0.5, 0.4, P14.red.l);
+  },
+  "wrap-robe"(c, A2, acc2) {
+    const shape3 = [-8, 0, 6, 0, 6.9, 8.2, 9.8, 18.4, -10.6, 18.4, -8.9, 8.2];
+    mgRobe(c, A2, { shape: shape3, cloth: MG.teal, collar: MG.tealDark, inside(c2) {
+      mgShade(c2, MG.teal, [[-4.4, 10.8, -5.6, 17.8], [-1.2, 10.8, -1.6, 17.8]]);
+      G3(c2, [-3.6, -1, 9, -1, 11, 19, 5.4, 19, 3.4, 10.6], MG.tealDark, { flat: true, lw: 0 });
+      mgLine(c2, [6.4, 11, 8, 17.8], MG.tealDark.d, 0.7);
+      px3(c2, -11.2, 15.2, 21.6, 1.5, MG.tealDark.d);
+      mgTrim(c2, [-3.6, -1, 3.4, 10.6, 5.4, 19], P14.linen.b, 1.1);
+      mgDash(c2, 3.6, 11.2, 5.2, 18, P14.linen.d, 5);
+      R3(c2, -11, 7.7, 22, 2.9, MG.ochre, { flat: true, lw: 1.2 });
+      px3(c2, -11, 8, 22, 0.5, MG.ochre.l);
+      px3(c2, -11, 9.3, 22, 0.4, MG.ochre.d);
+    } });
+    R3(c, -8.6, 7.4, 2.8, 3.4, MG.ochre, { flat: true, lw: 1.1 });
+    px3(c, -8.3, 7.7, 2.2, 0.5, MG.ochre.l);
+    px3(c, -7.4, 7.6, 0.5, 3, MG.ochre.d);
+    G3(c, [-8.4, 10.6, -6.8, 10.6, -6.4, 15.8, -7.6, 16.6, -8.8, 15.6], MG.ochre, { split: 0.6, lw: 1 });
+    mgLine(c, [-7.6, 11, -7.6, 15.6], MG.ochre.d, 0.5);
+    G3(c, [-6.6, 10.6, -5.2, 10.6, -4.6, 14, -5.6, 14.6, -6.6, 13.8], MG.ochre, { split: 0.6, lw: 1 });
+    for (const [x, y] of [[-8.4, 16], [-7.6, 16.6], [-6.8, 16.1], [-6.4, 14.4], [-5.5, 14.8], [-4.8, 14.3]]) px3(c, x, y, 0.5, 1, MG.ochre.d);
+    px3(c, -8.4, 15, 1.4, 0.6, A2.c);
+    gem2(c, -7.2, 9.1, 1.1, A2.gem);
+  },
+  "star-robe"(c, A2, acc2) {
+    mgRobe(c, A2, { cloth: MG.navy, collar: MG.navyDark, inside(c2) {
+      mgShade(c2, MG.navy, [[-3, 10.6, -3.8, 17.8], [5.2, 10.6, 6.8, 17.8]]);
+      mgSheen(c2, MG.navy);
+      G3(c2, MG_INNER, MG.silver, { flat: true, lw: 1 });
+      mgDash(c2, 0.2, 10.6, -0.2, 15.6, MG.silver.d, 4);
+      mgTrim(c2, [-0.9, 1.2, -1.9, 17.4], MG.gold.b, 0.7);
+      mgTrim(c2, [2.3, 1.2, 3.1, 17.4], MG.gold.b, 0.7);
+      mgLine(c2, [-6.4, 5.6, -4.2, 12.6, -8, 15.8], MG.gold.d, 0.35);
+      mgLine(c2, [4.6, 4.8, 5.4, 10.6, 6.6, 13.4, 8, 16.4], MG.gold.d, 0.35);
+      for (const [x, y, s] of [[-6.4, 5.6, 1], [4.6, 4.8, 0.8], [-4.2, 12.6, 1.2], [6.6, 13.4, 1], [-8, 15.8, 0.8], [5.4, 10.6, 0.7], [-6.8, 10.4, 0.7], [8, 16.4, 0.7]]) mgStar(c2, x, y, s);
+      px3(c2, -4.45, 12.35, 0.5, 0.5, "#ffffff");
+      px3(c2, 6.35, 13.15, 0.5, 0.5, "#ffffff");
+      for (const [x, y] of [[-2.8, 6.4], [3.6, 12.2], [-7.6, 12.8], [7.4, 11.4], [-2.6, 14.2]]) px3(c2, x, y, 0.45, 0.45, MG.gold.l);
+      px3(c2, -11.2, 15.2, 21.6, 1.5, MG.gold.b);
+      px3(c2, -11.2, 15.25, 21.6, 0.35, MG.gold.l);
+      for (let x = -10.6; x < 10; x += 2.4) px3(c2, x, 15.75, 0.6, 0.6, MG.navyDark.b);
+      R3(c2, -11, 7.9, 22, 2.3, MG.navyDark, { flat: true, lw: 1.2 });
+      px3(c2, -11, 8.1, 22, 0.35, MG.gold.d);
+      px3(c2, -11, 9.9, 22, 0.35, MG.gold.d);
+    } });
+    mgMoon(c, 0.7, 9, 1.9, MG.navyDark);
+    px3(c, -0.6, 8.2, 0.5, 0.5, "#fff6d0");
+    mgLine(c, [2.6, 10, 3.4, 13.4], MG.gold.d, 0.5);
+    mgLine(c, [3.4, 10, 4.6, 12.6], MG.gold.d, 0.5);
+    mgStar(c, 3.4, 13.8, 0.7);
+    mgStar(c, 4.6, 13, 0.6);
+    gem2(c, 3.2, 9.1, 1.1, A2.gem);
+  },
+  "sorcerer-robe"(c, A2, acc2) {
+    mgRobe(c, A2, { shape: MG_DAG, cloth: MG.crimson, collar: MG.crimsonDark, accY: 15.3, accH: 1.1, inside(c2) {
+      mgShade(c2, MG.crimson, [[-6, 10.6, -7, 16.6], [6, 10.6, 7.2, 16.6]]);
+      mgSheen(c2, MG.crimson);
+      G3(c2, [-1.4, 9, 2.6, 9, 5.2, 19, -4, 19], MG.black, { flat: true, lw: 0 });
+      for (const [x, y] of [[0.2, 11.6], [1.6, 13.8], [-1, 15.2], [2.8, 16.6], [0.6, 17.6]]) px3(c2, x, y, 0.7, 0.7, MG.black.l);
+      mgLine(c2, [-0.2, 11.8, 1.8, 13.9, -0.8, 15.3, 3, 16.7], MG.black.l, 0.35);
+      mgTrim(c2, [-1.4, 9, -4, 19], MG.gold.b, 0.9);
+      mgTrim(c2, [2.6, 9, 5.2, 19], MG.gold.b, 0.9);
+      const n = 8, x0 = 9.8, x1 = -10.6;
+      for (let i = 1; i < n * 2; i += 2) {
+        const x = x0 + (x1 - x0) * i / (n * 2);
+        G3(c2, [x - 0.9, 17.2, x + 0.9, 17.2, x, 18.5], MG.crimsonDark, { flat: true, line: false });
+      }
+      px3(c2, -11.2, 16.4, 21.6, 0.7, MG.gold.b);
+      R3(c2, -11, 7.6, 22, 2.6, MG.black, { flat: true, lw: 1.2 });
+      px3(c2, -11, 7.9, 22, 0.5, MG.gold.b);
+      px3(c2, -11, 9.6, 22, 0.4, MG.gold.d);
+    } });
+    G3(c, [3.8, 10, 5.4, 10, 6, 15.4, 5, 16.4, 3.8, 15.2], MG.black, { flat: true, lw: 1 });
+    px3(c, 4, 15, 1.6, 0.6, MG.gold.b);
+    G3(c, [5.4, 10, 6.6, 10, 7.4, 13.6, 6.6, 14.4, 5.8, 13.4], MG.black, { flat: true, lw: 1 });
+    px3(c, 5.9, 13.2, 1.2, 0.5, MG.gold.b);
+    R3(c, -0.6, 7.2, 2.4, 3.4, MG.gold, { flat: true, lw: 1 });
+    px3(c, -0.3, 7.5, 1.8, 0.4, MG.gold.l);
+    gem2(c, 0.6, 8.9, 1.2, A2.gem);
+  },
+  "apprentice-robe"(c, A2, acc2) {
+    mgRobe(c, A2, { cloth: M.blue, collar: M.blueDark, inside(c2) {
+      mgShade(c2, M.blue);
+      G3(c2, MG_INNER, M.blueInner, { flat: true, lw: 1 });
+      mgDash(c2, -0.6, 10.6, -1.4, 16.6, M.blueInner.d, 5);
+      mgDash(c2, 2.1, 10.6, 2.8, 16.6, M.blueInner.d, 5);
+      px3(c2, -11.2, 15.6, 21.6, 0.7, M.blue.d);
+      mgRope(c2, -11, 11, 7.9, 2.3);
+    } });
+    R3(c, 2.6, 7.4, 2.6, 3.2, M.rope, { flat: true, lw: 1 });
+    px3(c, 2.9, 7.7, 2, 0.5, "#ffffff50");
+    mgCord(c, A2, 3.4, 10.6, 3.6, -0.3);
+    mgCord(c, A2, 4.6, 10.6, 2.6, 0.5);
+    gem2(c, -0.6, 5.8, 1.6, A2.gem);
+  },
+  robe(c, A2, acc2) {
+    mgRobe(c, A2, { cloth: P14.purple, collar: P14.purpleDark, inside(c2) {
+      mgShade(c2, P14.purple, [[-2.6, 10.6, -3.4, 17.8], [5, 10.6, 6.6, 17.8]]);
+      mgSheen(c2, P14.purple);
+      G3(c2, MG_INNER, P14.purpleInner, { flat: true, lw: 1 });
+      mgTrim(c2, [-0.9, 1.2, -1.9, 17.4], MG.gold.b, 0.6);
+      mgTrim(c2, [2.3, 1.2, 3.1, 17.4], MG.gold.b, 0.6);
+      mgDash(c2, 0.2, 10.6, -0.2, 15.6, P14.purpleInner.d, 4);
+      px3(c2, -11.2, 15.8, 21.6, 0.6, MG.gold.b);
+      R3(c2, -11, 7.9, 22, 2.3, acc2, { flat: true, lw: 1.2 });
+      px3(c2, -11, 8.2, 22, 0.4, "#ffffff45");
+    } });
+    c.save();
+    c.strokeStyle = K6;
+    c.lineWidth = 1.2;
+    c.beginPath();
+    c.arc(4.4, 9.1, 0.8, 0, Math.PI * 2);
+    c.stroke();
+    c.strokeStyle = tint(MG.gold.b);
+    c.lineWidth = 0.55;
+    c.stroke();
+    c.restore();
+    G3(c, [3.6, 10.2, 5.2, 10.2, 5.6, 14.6, 4.4, 15.2, 3.4, 14.6], acc2, { flat: true, lw: 1 });
+    px3(c, 3.8, 13.8, 1.6, 0.6, MG.gold.b);
+    for (const x of [3.7, 4.4, 5.1]) px3(c, x, 15, 0.4, 1, MG.gold.d);
+    gem2(c, -0.6, 5.8, 1.6, A2.gem);
+  }
+});
+Object.assign(KG_HAND, {
+  "ribbon-wraps"(c, w) {
+    G3(c, [7.6, 1.6, 8.6, 1.8, 8.4, 5.4, 8, 4.7, 7.4, 5.2], P14.linen, { flat: true, lw: 0.8 });
+    G3(c, [8.4, 1.8, 9.4, 2, 9.8, 4.6, 9.2, 4.1, 8.6, 4.6], P14.linen, { flat: true, lw: 0.8 });
+    px3(c, 7.8, 2.2, 0.4, 2.4, P14.linen.d);
+    R3(c, 7.8, -2.6, 4.4, 5.2, P14.linen, { split: 0.6, lw: 1.2 });
+    rgLaces(c, 8.4, 11.8, -2, 2.2, P14.linen.d, 1.4);
+    px3(c, 8.1, -2.3, 3.8, 0.5, P14.linen.l);
+    px3(c, 11.4, -2.2, 0.5, 4.4, "#00000026");
+    c.lineWidth = 1.2;
+    c.strokeStyle = K6;
+    c.strokeRect(7.8, -2.6, 4.4, 5.2);
+    px3(c, 7.9, -2.4, 0.6, 4.8, mgAcc(w).c);
+  },
+  "cloth-mitts"(c, w) {
+    R3(c, 8.2, -2.9, 4.4, 5.8, MG.mitt, { split: 0.6, lw: 1.2 });
+    mgKnit(c, 8.2, -2.9, 4.4, 5.8, MG.mitt.d);
+    px3(c, 10.2, -2.9, 1, 5.8, P14.linen.b);
+    mgKnit(c, 10.2, -2.9, 1, 5.8, P14.linen.d);
+    px3(c, 12, -2.2, 0.5, 4.4, MG.mitt.l);
+    c.lineWidth = 1.2;
+    c.strokeStyle = K6;
+    c.strokeRect(8.2, -2.9, 4.4, 5.8);
+    R3(c, 9.6, -4, 2, 1.4, MG.mitt, { flat: true, lw: 0.9 });
+    R3(c, 6.6, -3.1, 2, 6.2, P14.linen, { flat: true, lw: 1 });
+    for (const y of [-2.2, -0.8, 0.6, 2]) px3(c, 6.8, y, 1.6, 0.4, P14.linen.d);
+    px3(c, 6.8, -3, 1.6, 0.4, P14.linen.l);
+    px3(c, 8.4, -2.6, 0.5, 5.2, mgAcc(w).c);
+  },
+  "silk-wraps"(c, w) {
+    R3(c, 7.8, -2.4, 4.2, 4.8, P14.purpleDark, { split: 0.6, lw: 1.2 });
+    c.save();
+    c.beginPath();
+    c.rect(7.8, -2.4, 4.2, 4.8);
+    c.clip();
+    c.globalAlpha = 0.5;
+    G3(c, [8.6, 2.4, 9.6, 2.4, 11.2, -2.4, 10.2, -2.4], { b: P14.purple.l }, { flat: true, line: false });
+    c.restore();
+    for (const y of [-1.4, 0.4]) {
+      px3(c, 8, y, 3.8, 0.7, MG.gold.b);
+      px3(c, 8, y, 3.8, 0.25, MG.gold.l);
+    }
+    px3(c, 11.5, -2.2, 0.4, 4.4, "#00000030");
+    c.lineWidth = 1.2;
+    c.strokeStyle = K6;
+    c.strokeRect(7.8, -2.4, 4.2, 4.8);
+    R3(c, 7.3, -2.7, 0.9, 5.4, MG.gold, { flat: true, lw: 0.8 });
+    px3(c, 7.9, -2.2, 0.6, 4.4, mgAcc(w).c);
+  },
+  "rune-gloves"(c, w) {
+    const a = mgAcc(w);
+    R3(c, 8, -2.6, 4.2, 5.2, MG.rune, { split: 0.6, lw: 1.2 });
+    px3(c, 8.3, -2.3, 3.4, 0.5, MG.rune.l);
+    mgGlow(c, 10.2, 0, 2.1, a.c);
+    c.save();
+    c.strokeStyle = tint(a.c);
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.arc(10.2, 0, 1.3, 0, Math.PI * 2);
+    c.moveTo(10.2, -1.3);
+    c.lineTo(10.2, 1.3);
+    c.moveTo(9.1, -0.6);
+    c.lineTo(11.3, 0.6);
+    c.stroke();
+    c.restore();
+    px3(c, 9.6, -0.9, 0.35, 0.35, "#ffffff");
+    for (let x = 8.4; x < 11.8; x += 0.9) px3(c, x, 2, 0.45, 0.3, MG.rune.l);
+    R3(c, 7.2, -2.9, 1.2, 5.8, MG.gold, { flat: true, lw: 0.9 });
+    px3(c, 7.3, -2.7, 0.4, 5.4, MG.gold.l);
+  },
+  "flared-gloves"(c, w) {
+    R3(c, 8, -2.6, 4.2, 5.2, P14.purple, { split: 0.6, lw: 1.2 });
+    px3(c, 8.3, -2.3, 3.4, 0.5, P14.purple.l);
+    G3(c, [5, -4, 8.6, -2.8, 8.6, 2.8, 5, 4], P14.purple, { split: 0.55, lw: 1.1 });
+    G3(c, [5, -4, 5.8, -3.7, 5.8, 3.7, 5, 4], P14.purpleInner, { flat: true, lw: 0.7 });
+    for (const y of [-1.6, 0, 1.6]) mgLine(c, [6.2, y * 1.25, 8.4, y * 0.85], P14.purpleDark.b, 0.45);
+    mgTrim(c, [5, -4, 5, 4], MG.gold.b, 0.8);
+    px3(c, 4.75, -3.9, 0.3, 7.8, MG.gold.l);
+    px3(c, 7.8, -2.6, 0.6, 5.2, mgAcc(w).c);
+  },
+  wraps(c, w) {
+    R3(c, 7.8, -2.4, 4.2, 4.8, M.blueDark, { split: 0.6, lw: 1.2 });
+    mgWind(c, 7.8, -2.4, 4.2, 4.8, P14.linen);
+    px3(c, 8.1, -2.1, 3.6, 0.5, "#ffffff40");
+    c.lineWidth = 1.2;
+    c.strokeStyle = K6;
+    c.strokeRect(7.8, -2.4, 4.2, 4.8);
+    R3(c, 7.4, -2.6, 1, 5.2, P14.linen, { flat: true, lw: 0.9 });
+    px3(c, 7.5, -2.4, 0.8, 4.8, mgAcc(w).c);
+  }
+});
+Object.assign(KG_BOOT, {
+  "curled-slippers"(c, A2) {
+    G3(c, [-1.4, 18, 4.6, 18, 7.4, 18.4, 9, 17.4, 9.6, 16.2, 10.6, 16.4, 10.4, 18, 8.6, 20, -1.4, 20], MG.felt, { split: 0.6, lw: 1.1 });
+    px3(c, -1, 18.3, 5.2, 0.4, MG.felt.l);
+    mgDash(c, 1, 19.1, 8, 19.1, MG.felt.d, 5);
+    px3(c, -1.6, 19.5, 9.6, 0.5, "#2a1f17");
+    c.fillStyle = tint(MG.gold.b);
+    c.beginPath();
+    c.arc(10.2, 15.9, 0.95, 0, Math.PI * 2);
+    c.fill();
+    c.lineWidth = 0.8;
+    c.strokeStyle = K6;
+    c.stroke();
+    px3(c, 9.8, 15.4, 0.45, 0.45, MG.gold.l);
+    px3(c, 1.6, 18.6, 1.6, 0.9, A2.c);
+  },
+  sandals(c, A2) {
+    R3(c, -1.4, 17.4, 6.6, 2, P14.linen, { lw: 1, nohi: true });
+    R3(c, 4.4, 17.6, 1.6, 1.8, P14.linen, { flat: true, lw: 0.8 });
+    mgLine(c, [-1, 17.7, 4.8, 17.7], P14.linen.l, 0.4);
+    c.save();
+    c.strokeStyle = tint(P14.strap.b);
+    c.lineWidth = 0.8;
+    c.beginPath();
+    c.moveTo(-1, 17.6);
+    c.lineTo(2.6, 19.2);
+    c.moveTo(-1, 19.2);
+    c.lineTo(2.6, 17.6);
+    c.moveTo(3.4, 17.6);
+    c.lineTo(3.4, 19.2);
+    c.stroke();
+    c.restore();
+    px3(c, 0.5, 18.1, 0.7, 0.7, RG.brass);
+    R3(c, -1.8, 19.2, 8.4, 1.2, MG.cork, { flat: true, lw: 1 });
+    px3(c, -1.5, 19.4, 7.8, 0.3, "#e0b47a");
+    for (let x = -1; x < 6; x += 1.4) px3(c, x, 19.9, 0.6, 0.3, MG.cork.d);
+    px3(c, 1.4, 19.5, 1.4, 0.6, A2.c);
+  },
+  "gilded-shoes"(c, A2) {
+    R3(c, -1.4, 17.8, 6.6, 1.6, P14.cover, { lw: 1, nohi: true });
+    px3(c, -1, 18.1, 5.6, 0.35, P14.purple.b);
+    R3(c, 4.4, 17, 2, 2.4, P14.cover, { flat: true, lw: 1 });
+    px3(c, 4.6, 17.3, 1.4, 0.35, P14.purple.b);
+    R3(c, -1.8, 19.2, 8.4, 1.1, MG.gold, { flat: true, lw: 1 });
+    px3(c, -1.5, 19.4, 7.8, 0.3, MG.gold.l);
+    for (let x = -1; x < 6; x += 1.6) px3(c, x, 19.85, 0.5, 0.3, MG.gold.d);
+    R3(c, -1.8, 18.6, 1.4, 1.7, MG.gold, { flat: true, lw: 0.8 });
+    px3(c, 1.6, 18.2, 1.4, 0.8, A2.c);
+    c.save();
+    c.strokeStyle = tint(MG.gold.b);
+    c.lineWidth = 0.5;
+    c.beginPath();
+    c.arc(5.4, 18.1, 0.85, 0, Math.PI * 2);
+    c.stroke();
+    c.restore();
+    gem2(c, 5.4, 18.1, 0.9, A2.gem);
+  },
+  "pointed-shoes"(c, A2) {
+    G3(c, [-1.4, 18, 4.4, 18, 7.2, 18.8, 10.8, 19.4, 7.2, 20, -1.4, 20], MG.navy, { split: 0.6, lw: 1.1 });
+    px3(c, -1, 18.3, 5.2, 0.35, MG.navy.l);
+    mgLine(c, [4.6, 18.5, 7.2, 19.1, 9.6, 19.4], MG.navy.l, 0.35);
+    px3(c, -1.4, 18, 4.8, 0.45, MG.gold.b);
+    px3(c, 9, 19.1, 1.6, 0.6, MG.gold.b);
+    px3(c, 9.2, 19.1, 0.8, 0.25, MG.gold.l);
+    mgDash(c, 0.2, 19.4, 6.4, 19.6, MG.gold.d, 4);
+    px3(c, 1.6, 18.6, 1.6, 0.8, A2.c);
+  },
+  "apprentice-slippers"(c, A2) {
+    G3(c, [-1.4, 18.2, 4.4, 18.2, 5.6, 17.2, 6.4, 17.4, 6.8, 18.6, 6.4, 20, -1.4, 20], M.blue, { split: 0.7, lw: 1.1 });
+    px3(c, -1, 18.5, 5, 0.4, M.blue.l);
+    px3(c, -1.4, 18.2, 4.8, 0.6, M.rope.b);
+    px3(c, -1.6, 19.5, 8.2, 0.5, M.blueDark.d);
+    px3(c, 1.6, 18.8, 1.6, 0.8, A2.c);
+  },
+  slippers(c, A2) {
+    G3(c, [-1.4, 18.2, 4.4, 18.2, 5.6, 17.2, 6.4, 17.4, 6.8, 18.6, 6.4, 20, -1.4, 20], P14.cover, { split: 0.7, lw: 1.1 });
+    px3(c, -1, 18.5, 5, 0.4, P14.purple.b);
+    px3(c, -1.4, 18.2, 4.8, 0.45, MG.gold.b);
+    px3(c, 6, 17.7, 0.6, 0.6, MG.gold.l);
+    px3(c, -1.6, 19.5, 8.2, 0.5, "#1d1722");
+    px3(c, 1.6, 18.8, 1.6, 0.8, A2.c);
+  }
+});
+Object.assign(KG_BOOT_ICON, {
+  "curled-slippers"(c, A2) {
+    G3(c, [-2.4, -3.4, 3, -3.4, 5, -2.6, 6.8, -2.6, 7.8, -4.4, 8.8, -4.2, 8.6, -1.6, 7.2, 0, -2.4, 0], MG.felt, { split: 0.62, lw: 1.2 });
+    px3(c, -1.9, -2.9, 4.6, 0.5, MG.felt.l);
+    mgDash(c, -1.6, -1.2, 6.6, -1.2, MG.felt.d, 6);
+    c.fillStyle = tint(MG.gold.b);
+    c.beginPath();
+    c.arc(8.6, -4.9, 1.05, 0, Math.PI * 2);
+    c.fill();
+    c.lineWidth = 0.8;
+    c.strokeStyle = K6;
+    c.stroke();
+    px3(c, 8.1, -5.5, 0.5, 0.5, MG.gold.l);
+    px3(c, 1.4, -2.6, 1.2, 0.8, A2.c);
+    kgSole(c, 9.6);
+  },
+  sandals(c, A2) {
+    G3(c, [-2.4, -3.6, 3, -3.6, 5.2, -2.4, 6.6, -2.2, 6.6, 0, -2.4, 0], P14.linen, { split: 0.62, lw: 1.2 });
+    px3(c, -1.9, -3.1, 4.6, 0.5, P14.linen.l);
+    c.save();
+    c.strokeStyle = tint(P14.strap.b);
+    c.lineWidth = 0.9;
+    c.beginPath();
+    c.moveTo(-2, -3.2);
+    c.lineTo(2.4, -0.4);
+    c.moveTo(-2, -0.4);
+    c.lineTo(2.4, -3.2);
+    c.moveTo(4, -2.6);
+    c.lineTo(4, -0.2);
+    c.stroke();
+    c.restore();
+    px3(c, -0.1, -2.2, 0.9, 0.9, RG.brass);
+    px3(c, 0.1, -2, 0.4, 0.4, RG.brassD);
+    R3(c, -2.8, 0, 9.8, 1.6, MG.cork, { flat: true, lw: 1 });
+    px3(c, -2.5, 0.25, 9.2, 0.35, "#e0b47a");
+    for (let x = -2.2; x < 6.6; x += 1.5) px3(c, x, 1, 0.7, 0.35, MG.cork.d);
+    px3(c, 1, 0.4, 1.6, 0.6, A2.c);
+  },
+  "gilded-shoes"(c, A2) {
+    G3(c, [-2.4, -3.4, 3, -3.4, 5, -2.2, 6.6, -3.4, 6.6, 0, -2.4, 0], P14.cover, { split: 0.62, lw: 1.2 });
+    px3(c, -1.9, -2.9, 4.6, 0.45, P14.purple.b);
+    px3(c, 5.2, -2.9, 1, 0.4, P14.purple.b);
+    c.save();
+    c.strokeStyle = tint(MG.gold.b);
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.arc(5, -1.8, 1, 0, Math.PI * 2);
+    c.stroke();
+    c.restore();
+    gem2(c, 5, -1.8, 1.1, A2.gem);
+    px3(c, 1.4, -2.6, 1.2, 0.8, A2.c);
+    R3(c, -2.8, 0, 9.8, 1.4, MG.gold, { flat: true, lw: 1 });
+    px3(c, -2.5, 0.25, 9.2, 0.3, MG.gold.l);
+    for (let x = -2; x < 6.6; x += 1.7) px3(c, x, 0.85, 0.6, 0.3, MG.gold.d);
+    R3(c, -2.8, -0.8, 1.6, 2.2, MG.gold, { flat: true, lw: 0.9 });
+  },
+  "pointed-shoes"(c, A2) {
+    G3(c, [-2.4, -3.4, 3, -3.4, 5.4, -2, 10.4, -0.6, 10.4, 0, -2.4, 0], MG.navy, { split: 0.62, lw: 1.2 });
+    px3(c, -1.9, -2.9, 4.6, 0.45, MG.navy.l);
+    mgLine(c, [3.4, -2.6, 6, -1.7, 9.4, -0.7], MG.navy.l, 0.4);
+    px3(c, -1.9, -2.6, 4.6, 0.6, MG.gold.b);
+    px3(c, 8.4, -0.9, 1.8, 0.6, MG.gold.b);
+    px3(c, 8.6, -0.9, 0.9, 0.25, MG.gold.l);
+    mgDash(c, -1.6, -1, 7, -0.6, MG.gold.d, 5);
+    px3(c, 1.4, -2.2, 1.2, 0.8, A2.c);
+    kgSole(c, 9.4);
+  },
+  "apprentice-slippers"(c, A2) {
+    G3(c, [-2.4, -3.4, 3, -3.4, 5, -2.6, 6.4, -2.6, 7, -1.4, 6.8, 0, -2.4, 0], M.blue, { split: 0.62, lw: 1.2 });
+    px3(c, -1.9, -2.9, 4.6, 0.5, M.blue.l);
+    px3(c, -1.9, -2.6, 4.6, 0.9, M.rope.b);
+    px3(c, -1.9, -2.6, 4.6, 0.3, "#ffffff55");
+    px3(c, -1.9, -1.85, 4.6, 0.25, M.rope.d);
+    mgDash(c, 3, -2.2, 6.2, -1.2, M.blueDark.b, 3);
+    px3(c, 1.4, -2.4, 1.2, 0.8, A2.c);
+    kgSole(c, 9.6);
+  },
+  slippers(c, A2) {
+    G3(c, [-2.4, -3.4, 3, -3.4, 5, -2.6, 6.4, -2.6, 7, -1.4, 6.8, 0, -2.4, 0], P14.cover, { split: 0.62, lw: 1.2 });
+    px3(c, -1.9, -2.9, 4.6, 0.5, P14.purple.b);
+    px3(c, -1.9, -2.6, 4.6, 0.7, MG.gold.b);
+    px3(c, -1.9, -2.6, 4.6, 0.25, MG.gold.l);
+    c.fillStyle = tint(MG.gold.b);
+    c.beginPath();
+    c.arc(6.2, -2.2, 0.7, 0, Math.PI * 2);
+    c.fill();
+    c.lineWidth = 0.6;
+    c.strokeStyle = K6;
+    c.stroke();
+    px3(c, 1.4, -2.4, 1.2, 0.8, A2.c);
+    kgSole(c, 9.6);
+  }
+});
+Object.assign(KG_GLOVE_ICON, {
+  "ribbon-wraps"(c, A2) {
+    G3(c, [1.6, 3.4, 2.8, 3.4, 4.6, 7.4, 3.8, 6.8, 3.4, 7.8], P14.linen, { flat: true, lw: 0.8 });
+    G3(c, [0.4, 3.6, 1.6, 3.6, 1.6, 7.2, 1, 6.6, 0.4, 7.2], P14.linen, { flat: true, lw: 0.8 });
+    kgGlove(c, P14.linen, P14.linen);
+    c.save();
+    c.clip(poly11([-2.8, 1.8, -2.8, -4, -2.2, -4.8, 2, -4.8, 2.6, -4, 2.6, -0.8, 4.2, -2.4, 5, -1.6, 2.6, 1.8]));
+    px3(c, -2.4, -4.4, 4, 0.5, P14.linen.l);
+    px3(c, 1.8, -4, 0.6, 5.6, "#00000026");
+    c.restore();
+    rgLaces(c, -2.2, 2, -3.8, 1.4, P14.linen.d, 1.5);
+    c.lineWidth = 1.2;
+    c.strokeStyle = K6;
+    c.stroke(poly11([-2.8, 1.8, -2.8, -4, -2.2, -4.8, 2, -4.8, 2.6, -4, 2.6, -0.8, 4.2, -2.4, 5, -1.6, 2.6, 1.8]));
+    px3(c, -0.8, 2.5, 1.6, 1, A2.c);
+  },
+  "cloth-mitts"(c, A2) {
+    const M22 = [-2.8, 1.8, -2.8, -3.4, -1.8, -4.8, 1.6, -4.8, 2.6, -3.4, 2.6, -1, 4.2, -2.6, 5, -1.8, 2.6, 1.8];
+    G3(c, M22, MG.mitt, { split: 0.6, lw: 1.2 });
+    c.save();
+    c.clip(poly11(M22));
+    mgKnit(c, -3, -5, 8, 7, MG.mitt.d);
+    px3(c, -3, -1.6, 8, 1.3, P14.linen.b);
+    mgKnit(c, -3, -1.6, 8, 1.3, P14.linen.d);
+    c.restore();
+    c.lineWidth = 1.2;
+    c.strokeStyle = K6;
+    c.stroke(poly11(M22));
+    px3(c, -2.2, -4.2, 0.6, 2.4, MG.mitt.l);
+    R3(c, -3.4, 1.6, 6.6, 3, P14.linen, { flat: true, lw: 1.1 });
+    for (const x of [-2.4, -1, 0.4, 1.8]) px3(c, x, 1.9, 0.5, 2.4, P14.linen.d);
+    px3(c, -3.2, 1.8, 6.2, 0.4, P14.linen.l);
+    px3(c, -0.8, 2.6, 1.6, 1, A2.c);
+  },
+  "silk-wraps"(c, A2) {
+    kgGlove(c, P14.purpleDark, P14.purple);
+    c.save();
+    c.clip(poly11(MG_GLOVE));
+    c.globalAlpha = 0.5;
+    G3(c, [-2.4, 1.8, -1, 1.8, 2.6, -4.8, 1.2, -4.8], { b: P14.purple.l }, { flat: true, line: false });
+    c.restore();
+    mgOutline(c, MG_GLOVE);
+    for (const y of [-1.8, -0.2]) {
+      px3(c, -2.4, y, 4.6, 0.7, MG.gold.b);
+      px3(c, -2.4, y, 4.6, 0.25, MG.gold.l);
+    }
+    px3(c, -3, 1.8, 5.8, 0.6, MG.gold.b);
+    px3(c, -0.8, 2.6, 1.6, 1, A2.c);
+  },
+  "rune-gloves"(c, A2) {
+    kgGlove(c, MG.rune, MG.gold);
+    px3(c, -2.4, -4.4, 4, 0.5, MG.rune.l);
+    px3(c, -3, 2.1, 5.8, 0.4, MG.gold.l);
+    c.save();
+    c.clip(poly11(MG_GLOVE));
+    mgGlow(c, -0.1, -1.6, 2.6, A2.c);
+    c.restore();
+    c.save();
+    c.strokeStyle = tint(A2.c);
+    c.lineWidth = 0.7;
+    c.beginPath();
+    c.arc(-0.1, -1.6, 1.5, 0, Math.PI * 2);
+    c.moveTo(-0.1, -3.1);
+    c.lineTo(-0.1, -0.1);
+    c.moveTo(-1.4, -2.3);
+    c.lineTo(1.2, -0.9);
+    c.stroke();
+    c.restore();
+    px3(c, -0.8, -2.7, 0.4, 0.4, "#ffffff");
+  },
+  "flared-gloves"(c, A2) {
+    kgGlove(c, P14.purple, P14.purple);
+    px3(c, -2.4, -4.4, 4, 0.5, P14.purple.l);
+    G3(c, [-3.2, 1.4, 3, 1.4, 5, 6.2, -5.2, 6.2], P14.purple, { split: 0.55, lw: 1.1 });
+    G3(c, [-5.2, 6.2, 5, 6.2, 4.6, 5.2, -4.8, 5.2], P14.purpleInner, { flat: true, lw: 0.7 });
+    for (const x of [-2.2, -0.1, 2]) mgLine(c, [x * 0.7, 1.8, x * 1.25, 5], P14.purpleDark.b, 0.45);
+    px3(c, -5, 6.1, 9.8, 0.7, MG.gold.b);
+    px3(c, -5, 6.1, 9.8, 0.25, MG.gold.l);
+    px3(c, -0.8, 2.2, 1.6, 0.9, A2.c);
+  },
+  wraps(c, A2) {
+    kgGlove(c, M.blueDark, P14.linen);
+    c.save();
+    c.clip(poly11([-2.8, 1.8, -2.8, -4, -2.2, -4.8, 2, -4.8, 2.6, -4, 2.6, -0.8, 4.2, -2.4, 5, -1.6, 2.6, 1.8]));
+    for (let y = -5.6; y < 2.6; y += 1.9) {
+      G3(c, [-3.4, y + 1.2, 5.4, y - 0.4, 5.4, y + 0.4, -3.4, y + 2], P14.linen, { flat: true, line: false });
+      px3(c, -3.4, y + 2, 8.8, 0.3, "#00000040");
+    }
+    c.restore();
+    c.lineWidth = 1.2;
+    c.strokeStyle = K6;
+    c.stroke(poly11([-2.8, 1.8, -2.8, -4, -2.2, -4.8, 2, -4.8, 2.6, -4, 2.6, -0.8, 4.2, -2.4, 5, -1.6, 2.6, 1.8]));
+    for (const fx of [-1.4, 0, 1.3]) px3(c, fx, -4.8, 0.5, 1.8, "#00000059");
+    px3(c, -2.4, -4.4, 4, 0.5, "#ffffff40");
+    for (let x = -2.8; x < 2.8; x += 1.1) px3(c, x, 3.2, 0.5, 0.35, P14.linen.d);
+    px3(c, -0.8, 2.3, 1.6, 0.9, A2.c);
+  }
+});
+Object.assign(KG_HELM, {
+  // Cowl round 4: a better wizard hat. A smooth cone that bends back and flops at the tip to the rarity pom, a curved
+  // brim with thickness, a twisted rope band knotted at the back with two short tails, the gem on gold at the front.
+  cowl(c, A2, face5, sway = 0) {
+    const H8 = M.blue, s = sway * 0.7;
+    const cone8 = new Path2D();
+    cone8.moveTo(-9.2, -15.2);
+    cone8.quadraticCurveTo(-9.4, -21.4, -6.8, -25.4);
+    cone8.quadraticCurveTo(-8.4, -28, -11.4 + s, -28.6);
+    cone8.quadraticCurveTo(-8.6, -31.6, -4.6, -30.2);
+    cone8.quadraticCurveTo(-1.2, -28.4, 0.6, -24.2);
+    cone8.quadraticCurveTo(3.4, -19.4, 6.6, -15.2);
+    cone8.closePath();
+    rgSoft(c, cone8, H8, 0.68);
+    c.save();
+    c.lineCap = "round";
+    c.strokeStyle = tint(H8.l);
+    c.lineWidth = 0.8;
+    c.beginPath();
+    c.moveTo(-8.4, -16.4);
+    c.quadraticCurveTo(-8.4, -21.4, -6, -25.2);
+    c.moveTo(-9.6 + s * 0.8, -29.4);
+    c.quadraticCurveTo(-7.4, -30.6, -5, -29.6);
+    c.stroke();
+    c.strokeStyle = tint(H8.d);
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.moveTo(-6.4, -25.6);
+    c.quadraticCurveTo(-4, -26.6, -2, -27.6);
+    c.moveTo(-3.6, -16.4);
+    c.quadraticCurveTo(-4, -21, -2.4, -24.6);
+    c.moveTo(3, -16.4);
+    c.quadraticCurveTo(2, -18.6, 0.8, -20.4);
+    c.stroke();
+    c.restore();
+    const band10 = new Path2D();
+    band10.moveTo(-9.5, -15);
+    band10.quadraticCurveTo(-1.4, -17.2, 6.8, -15);
+    band10.lineTo(6.2, -17.6);
+    band10.quadraticCurveTo(-1.4, -19.8, -9.3, -17.6);
+    band10.closePath();
+    c.fillStyle = tint(M.rope.b);
+    c.fill(band10);
+    c.save();
+    c.clip(band10);
+    c.fillStyle = tint(M.rope.d);
+    for (let x = -9; x < 7; x += 2.2) {
+      c.beginPath();
+      c.moveTo(x, -20);
+      c.lineTo(x + 0.8, -20);
+      c.lineTo(x - 0.4, -14);
+      c.lineTo(x - 1.2, -14);
+      c.closePath();
+      c.fill();
+    }
+    c.strokeStyle = "#ffffff55";
+    c.lineWidth = 0.45;
+    c.beginPath();
+    c.moveTo(-9.2, -17.2);
+    c.quadraticCurveTo(-1.4, -19.3, 6.3, -17.2);
+    c.stroke();
+    c.restore();
+    c.lineWidth = 1.1;
+    c.strokeStyle = K6;
+    c.stroke(band10);
+    const brim = new Path2D();
+    brim.moveTo(-14.6, -13.4);
+    brim.quadraticCurveTo(-2, -17.6, 11.8, -13.8);
+    brim.lineTo(12, -12.6);
+    brim.quadraticCurveTo(-2, -15, -14.4, -12.2);
+    brim.closePath();
+    rgSoft(c, brim, H8, 0.7);
+    c.save();
+    c.clip(brim);
+    c.strokeStyle = tint(H8.l);
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.moveTo(-14, -13.2);
+    c.quadraticCurveTo(-2, -17, 11.4, -13.6);
+    c.stroke();
+    c.strokeStyle = "#00000040";
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.moveTo(-14, -12.5);
+    c.quadraticCurveTo(-2, -15.2, 11.6, -12.9);
+    c.stroke();
+    c.restore();
+    px3(c, -9.6, -13.4, 17.4, 0.7, "#00000033");
+    G3(c, [-10.2, -16.4, -12.6 + s, -12.4, -11.6 + s, -12, -9.6, -15.6], M.rope, { flat: true, lw: 0.9 });
+    G3(c, [-9.8, -16, -10.8 + s * 0.8, -11.6, -9.8 + s * 0.8, -11.4, -9.2, -15.4], M.rope, { flat: true, lw: 0.9 });
+    px3(c, -12.2 + s, -12.8, 1, 0.6, M.rope.d);
+    px3(c, -10.6 + s * 0.8, -12, 1, 0.6, M.rope.d);
+    c.save();
+    c.fillStyle = tint(M.rope.b);
+    c.beginPath();
+    c.arc(-9.8, -16.5, 1.15, 0, Math.PI * 2);
+    c.fill();
+    c.lineWidth = 0.8;
+    c.strokeStyle = K6;
+    c.stroke();
+    c.restore();
+    px3(c, -10.3, -17.1, 0.6, 0.4, "#ffffff60");
+    mgGemSet(c, -0.6, -17.3, 1.5);
+    gem2(c, -0.6, -17.3, 1.5, A2.gem);
+    mgPom(c, -11.8 + s, -28.4, 1.35, A2.c);
+  },
+  // Moon Hat round 2: seated on the head like the Cowl, but upright. A tall cone standing straight with a slight crook,
+  // a big gold crescent on the front, a navy band of little stars, the gem on gold, and a gold star charm on the tip.
+  "moon-hat"(c, A2, face5, sway = 0) {
+    const H8 = M.blue, s = sway * 0.4, NV = MG.navy;
+    const cone8 = new Path2D();
+    cone8.moveTo(-8.8, -15.2);
+    cone8.quadraticCurveTo(-8.2, -21.6, -5, -26.8);
+    cone8.quadraticCurveTo(-3.6, -29.4, -3.4 + s, -32);
+    cone8.quadraticCurveTo(-1, -29.6, 0.4, -27.4);
+    cone8.quadraticCurveTo(3.4, -21.6, 6.4, -15.2);
+    cone8.closePath();
+    rgSoft(c, cone8, H8, 0.68);
+    c.save();
+    c.lineCap = "round";
+    c.strokeStyle = tint(H8.l);
+    c.lineWidth = 0.8;
+    c.beginPath();
+    c.moveTo(-8, -16.4);
+    c.quadraticCurveTo(-7.4, -21.6, -4.6, -26.4);
+    c.stroke();
+    c.strokeStyle = tint(H8.d);
+    c.lineWidth = 0.55;
+    c.beginPath();
+    c.moveTo(3.2, -16.4);
+    c.quadraticCurveTo(2, -19.4, 0.6, -21.2);
+    c.stroke();
+    c.restore();
+    const moon = new Path2D();
+    moon.arc(-1.2, -22.4, 3.1, 0, Math.PI * 2);
+    moon.arc(0.2, -23.2, 2.6, 0, Math.PI * 2, true);
+    c.fillStyle = tint(GOLD_BAND.b);
+    c.fill(moon, "evenodd");
+    c.lineWidth = 0.7;
+    c.strokeStyle = K6;
+    c.stroke(moon);
+    c.save();
+    c.clip(moon, "evenodd");
+    c.strokeStyle = tint(GOLD_BAND.l);
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.arc(-1.2, -22.4, 2.6, Math.PI * 0.55, Math.PI * 1.35);
+    c.stroke();
+    c.restore();
+    mgStar(c, -5.4, -20, 0.7);
+    mgStar(c, 2.8, -26.2, 0.55);
+    mgStar(c, 3.4, -19, 0.5);
+    const band10 = new Path2D();
+    band10.moveTo(-9.1, -15);
+    band10.quadraticCurveTo(-1.2, -17.2, 6.6, -15);
+    band10.lineTo(6, -17.4);
+    band10.quadraticCurveTo(-1.2, -19.6, -8.9, -17.4);
+    band10.closePath();
+    c.fillStyle = tint(NV.b);
+    c.fill(band10);
+    c.save();
+    c.clip(band10);
+    c.strokeStyle = "#ffffff40";
+    c.lineWidth = 0.45;
+    c.beginPath();
+    c.moveTo(-8.8, -17);
+    c.quadraticCurveTo(-1.2, -19.1, 6, -17);
+    c.stroke();
+    c.restore();
+    c.lineWidth = 1.1;
+    c.strokeStyle = K6;
+    c.stroke(band10);
+    for (const [x, y] of [[-6.8, -16.6], [-4.2, -17.1], [2.4, -17.1], [4.8, -16.5]]) px3(c, x, y, 0.6, 0.6, MG.silver.l);
+    const brim = new Path2D();
+    brim.moveTo(-14.4, -13.4);
+    brim.quadraticCurveTo(-2, -17.6, 11.6, -13.8);
+    brim.lineTo(11.8, -12.6);
+    brim.quadraticCurveTo(-2, -15, -14.2, -12.2);
+    brim.closePath();
+    rgSoft(c, brim, H8, 0.7);
+    c.save();
+    c.clip(brim);
+    c.strokeStyle = tint(H8.l);
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.moveTo(-13.8, -13.2);
+    c.quadraticCurveTo(-2, -17, 11.2, -13.6);
+    c.stroke();
+    c.strokeStyle = "#00000040";
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.moveTo(-13.8, -12.5);
+    c.quadraticCurveTo(-2, -15.2, 11.4, -12.9);
+    c.stroke();
+    c.restore();
+    px3(c, -9.6, -13.4, 17.4, 0.7, "#00000033");
+    mgGemSet(c, -1.2, -17.2, 1.5);
+    gem2(c, -1.2, -17.2, 1.5, A2.gem);
+    const st = (x, y, r) => {
+      c.save();
+      c.beginPath();
+      for (let k = 0; k < 10; k++) {
+        const a = -Math.PI / 2 + k * Math.PI / 5, rr3 = k % 2 ? r * 0.45 : r;
+        c.lineTo(x + Math.cos(a) * rr3, y + Math.sin(a) * rr3);
+      }
+      c.closePath();
+      c.fillStyle = tint(A2.c);
+      c.fill();
+      c.lineWidth = 0.6;
+      c.strokeStyle = K6;
+      c.stroke();
+      c.restore();
+    };
+    st(-3.4 + s, -32.4, 1.6);
+  },
+  // Sage Band: a blue cloth band across the brow, a gold plate with the gem at the front, knotted at the back with two
+  // long tails tipped in the rarity color. The hair shows.
+  "sage-band"(c, A2, face5, sway = 0) {
+    const H8 = M.blue, s = sway * 0.8;
+    c.save();
+    c.translate(0, -1.8);
+    G3(c, [-10.8, -12.2, -15.2 + s, -8.4, -14.6 + s, -4.2, -12.8 + s, -4.6, -10.8, -10.4], H8, { split: 0.5, lw: 1 });
+    G3(c, [-10.6, -11.4, -12.8 + s * 0.7, -5.6, -11.6 + s * 0.7, -2.2, -10, -3, -10.2, -10], H8, { split: 0.5, lw: 1 });
+    px3(c, -15 + s, -5.2, 2.4, 0.9, A2.c);
+    px3(c, -12 + s * 0.7, -3.4, 2, 0.9, A2.c);
+    const b = new Path2D();
+    b.moveTo(-10.8, -11);
+    b.quadraticCurveTo(-1, -13.4, 8.6, -12.2);
+    b.lineTo(8.6, -9.8);
+    b.quadraticCurveTo(-1, -11, -10.8, -8.6);
+    b.closePath();
+    rgSoft(c, b, H8, 0.74);
+    c.save();
+    c.clip(b);
+    c.strokeStyle = tint(H8.l);
+    c.lineWidth = 0.5;
+    c.beginPath();
+    c.moveTo(-10.6, -10.6);
+    c.quadraticCurveTo(-1, -13, 8.4, -11.8);
+    c.stroke();
+    c.restore();
+    c.save();
+    c.fillStyle = tint(M.blue.b);
+    c.beginPath();
+    c.arc(-11, -10, 1.5, 0, Math.PI * 2);
+    c.fill();
+    c.lineWidth = 0.8;
+    c.strokeStyle = K6;
+    c.stroke();
+    c.restore();
+    G3(c, [1.6, -12.6, 6, -12.6, 6.8, -11, 6, -9.6, 1.6, -9.6, 0.8, -11], MG.gold, { flat: true, lw: 0.9 });
+    px3(c, 2, -12.2, 3.6, 0.4, MG.gold.l);
+    gem2(c, 3.8, -11.1, 1.4, A2.gem);
+    c.restore();
+  },
+  // Circlet: a slim lit gold band hugging the brow, a pointed setting with the gem at the front flanked by two small gold
+  // leaves, a little rarity stone at the side. The hair shows.
+  circlet(c, A2) {
+    const b = new Path2D();
+    b.moveTo(-10.8, -12.4);
+    b.quadraticCurveTo(-1, -13.8, 8.8, -12.8);
+    b.lineTo(8.8, -11.2);
+    b.quadraticCurveTo(-1, -12.2, -10.8, -10.8);
+    b.closePath();
+    c.fillStyle = tint(GOLD_BAND.b);
+    c.fill(b);
+    c.save();
+    c.clip(b);
+    c.strokeStyle = tint(GOLD_BAND.l);
+    c.lineWidth = 0.45;
+    c.beginPath();
+    c.moveTo(-10.6, -12.1);
+    c.quadraticCurveTo(-1, -13.5, 8.6, -12.5);
+    c.stroke();
+    c.fillStyle = tint(GOLD_BAND.d);
+    for (let x = -8.6; x < 4; x += 2.2) c.fillRect(x, -12.2 + Math.abs(x + 1) * 0.02, 0.5, 0.5);
+    c.restore();
+    c.lineWidth = 1;
+    c.strokeStyle = K6;
+    c.stroke(b);
+    G3(c, [3.4, -12.5, 4.6, -14.2, 5.6, -12.7], GOLD_BAND, { flat: true, lw: 0.5 });
+    G3(c, [4.8, -12.3, 7, -17.2, 9.2, -12.3, 7, -10.9], GOLD_BAND, { flat: true, lw: 0.7 });
+    px3(c, 5.8, -14.4, 0.5, 1.8, GOLD_BAND.l);
+    gem2(c, 7, -13.6, 1.45, A2.gem ?? "#e8eef2");
+    px3(c, -6.4, -12.4, 1.4, 1, A2.c);
+  },
+  "jester-cap"(c, A2, face5, sway = 0) {
+    const H8 = P14.purple, D2 = { b: "#5b2c6f", d: "#4a235a", l: "#7d3c98" }, s = sway * 0.6;
+    const t = s * 0.7, near5 = new Path2D();
+    near5.moveTo(-5.6, -21);
+    near5.bezierCurveTo(-4.6, -24.4, 2.8, -24.8, 3.6, -20.4);
+    near5.bezierCurveTo(1.6, -15.6, -8.6, -13.6, -13 + t, -8.4);
+    near5.bezierCurveTo(-14, -12.8, -10.4, -18.4, -5.6, -21);
+    near5.closePath();
+    rgSoft(c, near5, H8, 0.66);
+    mgShine(c, H8.l, 0.9, [-4.8, -22.2, -0.6, -24.2, 2.6, -21.2]);
+    mgShine(c, H8.l, 0.7, [-13.2, -12.2, -13.4, -10.6, -13 + t, -9.6]);
+    c.save();
+    c.lineCap = "round";
+    c.strokeStyle = tint(H8.d);
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.moveTo(0.2, -20.4);
+    c.quadraticCurveTo(-2.6, -16.6, -6.2 + t, -12.6);
+    c.stroke();
+    c.restore();
+    const cap9 = new Path2D();
+    cap9.moveTo(-11.4, -12.4);
+    cap9.lineTo(-11.9, -15);
+    cap9.bezierCurveTo(-12.1, -19.8, -7, -21.8, -1.4, -21.8);
+    cap9.bezierCurveTo(4.6, -21.8, 9.9, -19.6, 9.9, -15);
+    cap9.lineTo(9.7, -12.4);
+    cap9.closePath();
+    rgSoft(c, cap9, H8, 0.74);
+    c.save();
+    c.clip(cap9);
+    const bp = new Path2D();
+    bp.moveTo(-20, -30);
+    bp.lineTo(-1.4, -30);
+    bp.lineTo(-1.4, -21.8);
+    bp.quadraticCurveTo(-3.4, -17, -2.4, -12);
+    bp.lineTo(-20, -12);
+    bp.closePath();
+    c.fillStyle = tint(D2.b);
+    c.fill(bp);
+    c.fillStyle = tint(D2.d);
+    c.fillRect(-20, -30, 8.6, 20);
+    c.lineWidth = 0.8;
+    c.strokeStyle = K6;
+    c.beginPath();
+    c.moveTo(-1.4, -21.8);
+    c.quadraticCurveTo(-3.4, -17, -2.4, -12);
+    c.stroke();
+    mgShine(c, D2.l, 0.9, [-10.9, -14.6, -10.4, -19.6, -4, -20.9]);
+    mgShine(c, H8.l, 0.9, [0.2, -20.9, 6.2, -20.6, 8.6, -16.8]);
+    c.lineCap = "round";
+    c.lineWidth = 0.6;
+    for (const [x, col2] of [[1.8, H8.d], [5.6, H8.d]]) {
+      c.strokeStyle = tint(col2);
+      c.beginPath();
+      c.moveTo(x, -13.2);
+      c.quadraticCurveTo(x + 0.6, -14.4, x + 0.2, -15.8);
+      c.stroke();
+    }
+    c.restore();
+    c.lineWidth = 1.3;
+    c.lineJoin = "round";
+    c.strokeStyle = K6;
+    c.stroke(cap9);
+    const back = new Path2D();
+    back.moveTo(-3.2, -21.4);
+    back.bezierCurveTo(-9.6, -24.4, -15.8, -21.4, -17.2 + s, -14.6);
+    back.bezierCurveTo(-15.4, -15.6, -13.6, -15.6, -11.6, -14.4);
+    back.quadraticCurveTo(-6.6, -16.6, -3.2, -21.4);
+    back.closePath();
+    rgSoft(c, back, D2, 0.3);
+    mgShine(c, D2.l, 0.8, [-6.8, -22.6, -12.4, -22.8, -15.8 + s, -16.6]);
+    mgStar(c, 5, -18.4, 1.05);
+    mgStar(c, 7.4, -15.2, 0.8);
+    mgStar(c, -13.2, -18.6, 0.85);
+    const band10 = new Path2D();
+    band10.moveTo(-11.9, -13.7);
+    band10.quadraticCurveTo(-1, -14.5, 10.1, -13.5);
+    band10.lineTo(10.1, -11.4);
+    for (let i = 0, w = 22 / 5; i < 5; i++) {
+      const x = 10.1 - i * w;
+      band10.quadraticCurveTo(x - w / 2, -8.4, x - w, -11.4);
+    }
+    band10.closePath();
+    c.fillStyle = tint(MG.gold.b);
+    c.fill(band10);
+    c.save();
+    c.clip(band10);
+    c.fillStyle = tint(MG.gold.d);
+    for (let i = 0, w = 22 / 5; i < 5; i++) {
+      const x = 10.1 - i * w;
+      c.beginPath();
+      c.moveTo(x - w * 0.5, -11.4);
+      c.quadraticCurveTo(x - w * 0.5, -9.2, x - w * 0.82, -9.9);
+      c.lineTo(x - w, -11.4);
+      c.fill();
+    }
+    c.strokeStyle = tint(MG.gold.l);
+    c.lineWidth = 0.6;
+    c.beginPath();
+    c.moveTo(-11.6, -13.1);
+    c.quadraticCurveTo(-1, -13.9, 9.8, -12.9);
+    c.stroke();
+    c.strokeStyle = tint(MG.gold.d);
+    c.lineWidth = 0.5;
+    c.beginPath();
+    c.moveTo(-11.9, -11.4);
+    c.lineTo(10.1, -11.4);
+    c.stroke();
+    c.restore();
+    c.lineWidth = 1;
+    c.strokeStyle = K6;
+    c.stroke(band10);
+    px3(c, -9.6, -9.4, 17.4, 0.6, "#00000030");
+    mgGemSet(c, -1.2, -12.5, 1.7);
+    gem2(c, -1.2, -12.5, 1.35, A2.gem);
+    mgJBell(c, -17.2 + s, -13.2, 1.55, MG.gold.b);
+  }
+});
 function bootIcon(c, kind, A2) {
   if (KG_BOOT_ICON[kind]) {
     KG_BOOT_ICON[kind](c, A2);
@@ -119412,9 +120624,14 @@ function drawItemIcon(c, item2, size = 48) {
   } else {
     const w = { helmet: kind, body: kind, legs: kind, boots: kind, g: { body: { tier: tier2 }, legs: { tier: tier2 }, boots: { tier: tier2 }, helmet: { tier: tier2 } } };
     if (item2.slot === "helmet") {
-      const tall = kind === "hat" || kind === "cowl", wrap3 = kind === "bandana";
+      const tall = kind === "hat", wrap3 = kind === "bandana";
       if (kind === "eyestalk-crown") fit2(-1.2, -17.4, 23.5);
       else if (kind === "skullcap") fit2(-1.2, -14, 24);
+      else if (kind === "cowl") fit2(-1.4, -20.4, 27.5);
+      else if (kind === "moon-hat") fit2(-1.4, -21.4, 27.5);
+      else if (kind === "sage-band") fit2(-3.4, -9.4, 25);
+      else if (kind === "jester-cap") fit2(-3.8, -16.4, 31);
+      else if (kind === "circlet") fit2(-0.6, -12.6, 21);
       else if (kind === "head-wrap") fit2(-3.2, -13.6, 26);
       else if (kind === "slouch-cap") fit2(-1.6, -14.6, 27);
       else if (kind === "pilfer-cap") fit2(-2.6, -12.8, 23.5);
@@ -119444,8 +120661,8 @@ function drawItemIcon(c, item2, size = 48) {
       legs3(c, { ...w, boots: "none" }, S15, 0);
       px3(c, -6.8, 10.6, 10.2, 0.9, "#00000033");
     } else if (item2.slot === "boots") {
-      const low = !BOOT_SHAFT[kind];
-      fit2(1, low ? -1.4 : -4.8, low ? 14 : 17.5);
+      const low = !BOOT_SHAFT[kind], long = kind === "curled-slippers" || kind === "pointed-shoes";
+      fit2(long ? 2.6 : 1, low ? -1.4 : -4.8, long ? 16.5 : low ? 14 : 17.5);
       for (const [x, y] of [[-3.6, -1.2], [1.2, 1.4]]) {
         c.save();
         c.translate(x, y);
@@ -145652,10 +146869,35 @@ var HERO_DRAWN = Object.freeze({
     "cuffed-gloves",
     "studded-gloves",
     "knuckle-gloves",
-    "bracer-gloves"
+    "bracer-gloves",
+    "wraps",
+    "ribbon-wraps",
+    "cloth-mitts",
+    "silk-wraps",
+    "rune-gloves",
+    "flared-gloves"
   ]),
-  helmet: /* @__PURE__ */ new Set(["eyestalk-crown", "coif", "kettle-hat", "nasal-helm", "helm", "barbute", "burgonet", "skullcap", "head-wrap", "slouch-cap", "hood", "pilfer-cap", "plate-hood"]),
-  body: /* @__PURE__ */ new Set(["hauberk", "surcoat-mail", "banded-mail", "plate", "breastplate", "fluted-plate", "doublet", "jerkin", "cutpurse-vest", "leather", "brigandine", "lamellar"]),
+  helmet: /* @__PURE__ */ new Set(["eyestalk-crown", "coif", "kettle-hat", "nasal-helm", "helm", "barbute", "burgonet", "skullcap", "head-wrap", "slouch-cap", "hood", "pilfer-cap", "plate-hood", "cowl", "sage-band", "moon-hat", "jester-cap", "circlet"]),
+  body: /* @__PURE__ */ new Set([
+    "hauberk",
+    "surcoat-mail",
+    "banded-mail",
+    "plate",
+    "breastplate",
+    "fluted-plate",
+    "doublet",
+    "jerkin",
+    "cutpurse-vest",
+    "leather",
+    "brigandine",
+    "lamellar",
+    "apprentice-robe",
+    "scholar-robe",
+    "wrap-robe",
+    "robe",
+    "star-robe",
+    "sorcerer-robe"
+  ]),
   boots: /* @__PURE__ */ new Set([
     "knight-boots",
     "mail-boots",
@@ -145668,7 +146910,13 @@ var HERO_DRAWN = Object.freeze({
     "buckled-boots",
     "tall",
     "footpad-boots",
-    "laced-boots"
+    "laced-boots",
+    "apprentice-slippers",
+    "curled-slippers",
+    "sandals",
+    "slippers",
+    "gilded-shoes",
+    "pointed-shoes"
   ])
 });
 var hasObjectIcon = (item2) => Boolean(ART3[item2?.slot]?.[item2.kind] || HERO_DRAWN[item2?.slot]?.has(item2?.kind));
