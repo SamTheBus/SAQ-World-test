@@ -756,12 +756,16 @@ import {
   observeSiteRunEpisodesD13B,
   oldwardAreaDefinition,
   oldwardSpace,
+  onOriginalRing,
   openDenV1,
   ordinaryEnemyForProfile,
   ordinaryKillXp,
   ordinaryRosterNativesV1,
   ordinaryTier,
   originManifestForState,
+  originalArenaRing,
+  originalCinderRushEndpoint,
+  originalFireCone,
   outgoingCombat,
   ownedItem,
   packSizeRangeV1,
@@ -850,6 +854,7 @@ import {
   purchaseAvailability,
   questGearSourceIdV1,
   queuePacedSporeV5,
+  range,
   readStandsCell,
   readTerrace,
   readVolcano,
@@ -899,6 +904,7 @@ import {
   salvageQuote,
   seededCommitmentsV1,
   seededMultiroomV1,
+  segmentDistance,
   selectForwardActors,
   selectSimpleEnemyTarget,
   semanticPlaceAtWorldPosition,
@@ -946,6 +952,7 @@ import {
   summitGroupV1,
   sunfallDiscsV1,
   supplyCount,
+  sweptPathClear,
   swiftMoveV1,
   syncVigorV1,
   takeDenShovesV1,
@@ -1108,7 +1115,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-BUT2I3PK.js";
+} from "./chunk-E4UG3W2S.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -1315,10 +1322,10 @@ function createHeroFacing() {
     const result = {};
     for (const [id2, actor] of Object.entries(model.entitiesById)) if (actor.team !== "hostile") {
       const previous = records.get(id2), primary = model.primary?.actorsById[id2];
-      let facing3 = previous?.facing ?? ((primary?.facing.x ?? 1) < 0 ? -1 : 1);
-      if (previous && actor.position.x !== previous.x) facing3 = actor.position.x > previous.x ? 1 : -1;
-      records.set(id2, { x: actor.position.x, y: actor.position.y, facing: facing3 });
-      const used = model.combatPresentation?.families?.[id2]?.skill, turned = used && model.tick - used.tick < SKILL_TURN_TICKS && Math.abs(used.x) > 0.2 ? used.x < 0 ? -1 : 1 : null, shown2 = turned ?? facing3;
+      let facing2 = previous?.facing ?? ((primary?.facing.x ?? 1) < 0 ? -1 : 1);
+      if (previous && actor.position.x !== previous.x) facing2 = actor.position.x > previous.x ? 1 : -1;
+      records.set(id2, { x: actor.position.x, y: actor.position.y, facing: facing2 });
+      const used = model.combatPresentation?.families?.[id2]?.skill, turned = used && model.tick - used.tick < SKILL_TURN_TICKS && Math.abs(used.x) > 0.2 ? used.x < 0 ? -1 : 1 : null, shown2 = turned ?? facing2;
       result[id2] = {
         facing: primary?.current ? primary.current.aim.x < 0 ? -1 : 1 : shown2,
         primary: primary && !primary.current ? { ...primary, facing: { x: shown2, y: 0 } } : primary
@@ -1354,8 +1361,8 @@ function createCamera() {
     const snap2 = !Number.isFinite(Number(time3)) || lastTime === null || elapsed <= 0 || elapsed >= SNAP_GAP_MS || current.spaceKey !== key4 || lastWidth !== width2 || lastHeight !== height || current.zoom !== zoom || actorJump >= SNAP_DISTANCE;
     if (snap2) current = Object.freeze({ ...target, zoom, spaceKey: key4 });
     else {
-      const goal = (value2, wanted, zone) => Math.abs(wanted - value2) <= zone ? value2 : wanted - Math.sign(wanted - value2) * zone, alpha = 1 - Math.exp(-elapsed / FOLLOW_TIME_MS), clamp82 = (value2, map, view3) => c.endless ? value2 : map <= view3 ? (map - view3) / 2 : Math.max(0, Math.min(map - view3, value2));
-      current = Object.freeze({ x: clamp82(current.x + (goal(current.x, target.x, DEAD_ZONE_X) - current.x) * alpha, mapWidth, viewWidth), y: clamp82(current.y + (goal(current.y, target.y, DEAD_ZONE_Y) - current.y) * alpha, mapHeight, viewHeight), zoom, spaceKey: key4 });
+      const goal = (value2, wanted, zone) => Math.abs(wanted - value2) <= zone ? value2 : wanted - Math.sign(wanted - value2) * zone, alpha = 1 - Math.exp(-elapsed / FOLLOW_TIME_MS), clamp83 = (value2, map, view3) => c.endless ? value2 : map <= view3 ? (map - view3) / 2 : Math.max(0, Math.min(map - view3, value2));
+      current = Object.freeze({ x: clamp83(current.x + (goal(current.x, target.x, DEAD_ZONE_X) - current.x) * alpha, mapWidth, viewWidth), y: clamp83(current.y + (goal(current.y, target.y, DEAD_ZONE_Y) - current.y) * alpha, mapHeight, viewHeight), zoom, spaceKey: key4 });
     }
     lastTime = Number.isFinite(Number(time3)) ? Number(time3) : null;
     lastWidth = width2;
@@ -2449,10 +2456,10 @@ function skullV3(c, x, y, s) {
   c.restore();
 }
 function burrowV3(c, x, y, s) {
-  const lip2 = smooth([[x - 15 * s, y + 1], [x - 11 * s, y - 5 * s], [x, y - 6.4 * s], [x + 11 * s, y - 5 * s], [x + 15 * s, y + 1], [x + 9 * s, y + 5 * s], [x - 9 * s, y + 5 * s]]), hole = ell(x, y, 9.4 * s, 3.8 * s);
-  contour(c, [lip2], 0.9);
-  fill(c, lip2, DIRT.l);
-  clip(c, lip2, () => {
+  const lip3 = smooth([[x - 15 * s, y + 1], [x - 11 * s, y - 5 * s], [x, y - 6.4 * s], [x + 11 * s, y - 5 * s], [x + 15 * s, y + 1], [x + 9 * s, y + 5 * s], [x - 9 * s, y + 5 * s]]), hole = ell(x, y, 9.4 * s, 3.8 * s);
+  contour(c, [lip3], 0.9);
+  fill(c, lip3, DIRT.l);
+  clip(c, lip3, () => {
     c.fillStyle = DIRT.m;
     c.fillRect(x - 16 * s, y + 0.5, 32 * s, 8 * s);
     c.fillStyle = DIRT.h;
@@ -2859,10 +2866,10 @@ function paintFortWallV(c, x0, y0, y1, biome, outer = "west", seed2 = 1) {
   c.fillRect(outer === "west" ? x1 : x0 - 6, y0 + 8, 6, y1 - y0 - 8);
   const walk = rect2(x0 + 6, y0, x1 - 6, y1);
   flags(c, walk, x0 + 6, y0, x1 - 6, y1, S15, seed2);
-  const lip2 = rect2(ix, y0, ix + 8, y1);
-  contour(c, [lip2], 1);
-  fill(c, lip2, S15.m);
-  clip(c, lip2, () => {
+  const lip3 = rect2(ix, y0, ix + 8, y1);
+  contour(c, [lip3], 1);
+  fill(c, lip3, S15.m);
+  clip(c, lip3, () => {
     c.fillStyle = S15.l;
     c.fillRect(ix, y0, 3, y1 - y0);
   });
@@ -2901,10 +2908,10 @@ function paintFortTower(c, cx, cy2, biome, seed2 = 1, { roofH = 150, flagColor =
   windowArch(c, cx, top + 44, 14, 22, S15, true);
   faceDress(c, cx - 72, cx + 72, top + 10, yb, biome, seed2);
   footAlong(c, cx - 72, cx + 72, yb, biome, seed2);
-  const band11 = rect2(cx - 80, top - 10, cx + 80, top);
-  contour(c, [band11], 1.2);
-  fill(c, band11, S15.m);
-  clip(c, band11, () => {
+  const band12 = rect2(cx - 80, top - 10, cx + 80, top);
+  contour(c, [band12], 1.2);
+  fill(c, band12, S15.m);
+  clip(c, band12, () => {
     c.fillStyle = S15.l;
     c.fillRect(cx - 80, top - 10, 160, 3);
   });
@@ -3015,10 +3022,10 @@ function paintFortGateTower(c, x0, y0, biome, seed2 = 1, i = 0, torchSide = 1) {
     torch(c, torchSide < 0 ? x0 + 8 : x1 - 8, top + 78);
     faceDress(c, x0, x1, top + 10, yb, biome, seed2 + i * 3);
     footAlong(c, x0 - 4, x1 + 4, yb, biome, seed2 + i);
-    const band11 = rect2(x0 - 8, top - 8, x1 + 8, top);
-    contour(c, [band11], 1.1);
-    fill(c, band11, S15.m);
-    clip(c, band11, () => {
+    const band12 = rect2(x0 - 8, top - 8, x1 + 8, top);
+    contour(c, [band12], 1.1);
+    fill(c, band12, S15.m);
+    clip(c, band12, () => {
       c.fillStyle = S15.l;
       c.fillRect(x0 - 8, top - 8, 80, 3);
     });
@@ -3107,17 +3114,17 @@ function paintFortGateArch(c, px0, y0, biome, seed2 = 1) {
     contour(c, [sp], 0.8);
     fill(c, sp, IRON2.m);
   }
-  const band11 = P2();
-  band11.moveTo(x0 - 6, spring + 4);
-  band11.lineTo(x0 - 6, top);
-  band11.lineTo(x1 + 6, top);
-  band11.lineTo(x1 + 6, spring + 4);
-  band11.lineTo(x1, spring + 4);
-  band11.lineTo(x1, spring - 6);
-  band11.quadraticCurveTo(cx, crown6 - 26, x0, spring - 6);
-  band11.lineTo(x0, spring + 4);
-  band11.closePath();
-  masonry(c, band11, x0 - 6, top, x1 + 6, spring + 4, S15, seed2 + 21, 11);
+  const band12 = P2();
+  band12.moveTo(x0 - 6, spring + 4);
+  band12.lineTo(x0 - 6, top);
+  band12.lineTo(x1 + 6, top);
+  band12.lineTo(x1 + 6, spring + 4);
+  band12.lineTo(x1, spring + 4);
+  band12.lineTo(x1, spring - 6);
+  band12.quadraticCurveTo(cx, crown6 - 26, x0, spring - 6);
+  band12.lineTo(x0, spring + 4);
+  band12.closePath();
+  masonry(c, band12, x0 - 6, top, x1 + 6, spring + 4, S15, seed2 + 21, 11);
   const ringOuter = P2();
   ringOuter.moveTo(x0 - 2, spring + 4);
   ringOuter.lineTo(x0 - 2, spring - 6);
@@ -3481,10 +3488,10 @@ function turretTop(c, x, y, r, S15, R11, biome, seed2, show) {
   turretCap(c, x, top, r, S15, R11, biome, seed2, 1);
 }
 function turretCap(c, x, top, r, S15, R11, biome, seed2, k) {
-  const band11 = P2();
-  band11.ellipse(x, top, r + 5, (r + 5) * 0.36, 0, 0, TAU);
-  contour(c, [band11], 1.2);
-  fill(c, band11, S15.l);
+  const band12 = P2();
+  band12.ellipse(x, top, r + 5, (r + 5) * 0.36, 0, 0, TAU);
+  contour(c, [band12], 1.2);
+  fill(c, band12, S15.l);
   for (let i = 0; i < 7; i++) {
     const a = Math.PI * (0.08 + i * 0.14), mx = x + Math.cos(a) * (r + 1), my = top + Math.sin(a) * (r + 1) * 0.36, m = rect2(mx - 5, my - 11, mx + 5, my);
     contour(c, [m], 1);
@@ -4691,10 +4698,10 @@ function* roofTexture(c, S15, biome, col2, top, bot, x0, x1, r, back) {
       let i = 0;
       for (let x = x0 - 8; x <= x1 + 8; x += 4.5, i++) pts2.push([x, y + 15 + (i % 2 ? r() * 5 : r() * 1.5)]);
       pts2.push([x1 + 8, y]);
-      const band11 = poly2(pts2);
+      const band12 = poly2(pts2);
       c.fillStyle = f;
-      c.fill(band11);
-      clip2(c, band11, () => {
+      c.fill(band12);
+      clip2(c, band12, () => {
         c.fillStyle = tone(f, -0.2);
         c.fillRect(x0 - 8, y + 10, x1 - x0 + 16, 12);
         for (let x = x0 - 6; x < x1 + 6; x += 3 + r() * 2) line(c, [[x, y + 1], [x + (r() - 0.5) * 2, y + 12 + r() * 6]], r() < 0.5 ? tone(f, -0.32) : tone(f, 0.26), 1.1);
@@ -5902,9 +5909,9 @@ var box = (list) => {
 var span = (L, f, u, k0, k1, j0, j1) => box([{ x: L.x + f.x * k0 + u.x * j0, y: L.y + f.y * k0 + u.y * j0 }, { x: L.x + f.x * k1 + u.x * j1, y: L.y + f.y * k1 + u.y * j1 }]);
 var inside = (r, x, y) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
 function harborLayoutV1(landing2, length, id2 = "ferry:landing") {
-  const f = landing2.facing, facing3 = FACING[f.x + "," + f.y];
-  if (!facing3) return null;
-  const t = HARBOR_TEMPLATES[facing3], L = landing2.tile, u = across(f), origin = { x: L.x - t.landing[0], y: L.y - t.landing[1] }, body6 = { x: origin.x, y: origin.y, w: t.core[0], h: t.core[1] };
+  const f = landing2.facing, facing2 = FACING[f.x + "," + f.y];
+  if (!facing2) return null;
+  const t = HARBOR_TEMPLATES[facing2], L = landing2.tile, u = across(f), origin = { x: L.x - t.landing[0], y: L.y - t.landing[1] }, body6 = { x: origin.x, y: origin.y, w: t.core[0], h: t.core[1] };
   const at9 = (k, j) => ({ x: L.x + f.x * k + u.x * j, y: L.y + f.y * k + u.y * j });
   const pierDressing = [{ id: "pier:crates", kind: "crates", ...at9(2, -1) }, { id: "pier:barrel", kind: "barrels", ...at9(3, 1) }, { id: "pier:bollard", kind: "bollard", ...at9(length - 2, 1) }, { id: "pier:lamp", kind: "lamp", ...at9(length - 1, -1) }];
   const pier2 = span(L, f, u, 0, length - 1, -1, 1), boat = span(L, f, u, length - 6, length - 1, 2, 4);
@@ -5913,7 +5920,7 @@ function harborLayoutV1(landing2, length, id2 = "ferry:landing") {
     id: HARBOR_TOWN_ID,
     name: HARBOR_TOWN_NAME,
     landingId: landing2.id ?? id2,
-    facing: facing3,
+    facing: facing2,
     f: { ...f },
     u,
     template: t,
@@ -5979,8 +5986,8 @@ function createHarborTownTiles(terrain, h) {
 function harborChunkBlockers(h, cx, cy2) {
   const x = cx * 32, y = cy2 * 26, r = h.body;
   if (x + 32 <= r.x || x >= r.x + r.w || y + 26 <= r.y || y >= r.y + r.h) return [];
-  const clip23 = (bx, by, bw, bh) => ({ x: Math.max(x, bx) - x, y: Math.max(y, by) - y, width: Math.min(x + 32, bx + bw) - Math.max(x, bx), height: Math.min(y + 26, by + bh) - Math.max(y, by) });
-  return [{ id: h.id + ":clearing:" + cx + "," + cy2, kind: "civilian-clearing", ...clip23(r.x, r.y, r.w, r.h), detail: "" }, ...h.template.buildings.filter((b) => b.x + h.origin.x < x + 32 && b.x + b.w + h.origin.x > x && b.y + h.origin.y < y + 26 && b.y + b.h + h.origin.y > y).map((b) => ({ id: h.id + ":" + b.id, kind: "civilian-building", ...clip23(b.x + h.origin.x, b.y + h.origin.y, b.w, b.h), detail: b.label }))];
+  const clip22 = (bx, by, bw, bh) => ({ x: Math.max(x, bx) - x, y: Math.max(y, by) - y, width: Math.min(x + 32, bx + bw) - Math.max(x, bx), height: Math.min(y + 26, by + bh) - Math.max(y, by) });
+  return [{ id: h.id + ":clearing:" + cx + "," + cy2, kind: "civilian-clearing", ...clip22(r.x, r.y, r.w, r.h), detail: "" }, ...h.template.buildings.filter((b) => b.x + h.origin.x < x + 32 && b.x + b.w + h.origin.x > x && b.y + h.origin.y < y + 26 && b.y + b.h + h.origin.y > y).map((b) => ({ id: h.id + ":" + b.id, kind: "civilian-building", ...clip22(b.x + h.origin.x, b.y + h.origin.y, b.w, b.h), detail: b.label }))];
 }
 
 // src/client/settlement_building_presentation.js
@@ -9616,7 +9623,7 @@ function plazaFurnitureTropical(p, size) {
 }
 function cityBandsTropical(c, p) {
   const x = p.x * T8, y = p.y * T8, w = p.w * T8, h = p.h * T8, fx = x + w / 2, fy = y + h / 2 + 20, S15 = "#e3d5b8";
-  const band11 = (x0, y0, x1, y1) => {
+  const band12 = (x0, y0, x1, y1) => {
     const hz = Math.abs(x1 - x0) > Math.abs(y1 - y0), bw = 34, bx = hz ? Math.min(x0, x1) : x0 - bw / 2, by = hz ? y0 - bw / 2 : Math.min(y0, y1), W21 = hz ? Math.abs(x1 - x0) : bw, H8 = hz ? bw : Math.abs(y1 - y0);
     c.fillStyle = OL10;
     c.fillRect(bx - 1, by - 1, W21 + 2, H8 + 2);
@@ -9644,10 +9651,10 @@ function cityBandsTropical(c, p) {
   c.beginPath();
   c.roundRect(x + 3, y + 3, w - 6, h - 6, 5);
   c.clip();
-  band11(x + 20, fy, fx - 120, fy);
-  band11(fx + 120, fy, x + w - 20, fy);
-  band11(fx, y + 20, fx, fy - 72);
-  band11(fx, fy + 72, fx, y + h - 20);
+  band12(x + 20, fy, fx - 120, fy);
+  band12(fx + 120, fy, x + w - 20, fy);
+  band12(fx, y + 20, fx, fy - 72);
+  band12(fx, fy + 72, fx, y + h - 20);
   c.restore();
 }
 function cityPlazaTopTropical(c, f, joint4) {
@@ -29705,15 +29712,15 @@ function towerBodyD(c, b, r) {
   cwin(c, cx, JR, ry + 3, 0, jt + 12, 22, true);
   cwin(c, cx, JR, ry + 3, 0.5, jt + 14, 20, false);
   {
-    const by = top + 4, rx = JR + 8, rh = 14, band11 = new Path2D();
-    band11.moveTo(cx - rx, by - rh);
-    band11.lineTo(cx - rx, by);
-    band11.ellipse(cx, by, rx, ry + 6, 0, Math.PI, 0, true);
-    band11.lineTo(cx + rx, by - rh);
-    band11.ellipse(cx, by - rh, rx, ry + 6, 0, 0, Math.PI, false);
-    band11.closePath();
-    prop2(c, [[band11, WOOD21]], 1.6);
-    clip3(c, band11, () => {
+    const by = top + 4, rx = JR + 8, rh = 14, band12 = new Path2D();
+    band12.moveTo(cx - rx, by - rh);
+    band12.lineTo(cx - rx, by);
+    band12.ellipse(cx, by, rx, ry + 6, 0, Math.PI, 0, true);
+    band12.lineTo(cx + rx, by - rh);
+    band12.ellipse(cx, by - rh, rx, ry + 6, 0, 0, Math.PI, false);
+    band12.closePath();
+    prop2(c, [[band12, WOOD21]], 1.6);
+    clip3(c, band12, () => {
       c.fillStyle = "rgba(255,220,150,.35)";
       c.fillRect(cx - rx, by - rh, rx * 2, rh + ry + 8);
       c.fillStyle = WOOD21;
@@ -29971,17 +29978,17 @@ function cone(c, cx, base3, R11, ry, H8, col2, r, snowy, seed2) {
           c.lineCap = "butt";
         }
       }
-      const top = base3 - 16, band11 = new Path2D();
+      const top = base3 - 16, band12 = new Path2D();
       const n = 16;
       for (let i = 0; i <= n; i++) {
         const a = Math.PI - i / n * Math.PI, x = cx + Math.cos(a) * (R11 + 16), y = top + Math.sin(a) * (ry * 0.9) - (i % 2 ? 3 : 0) - s() * 2;
-        i ? band11.lineTo(x, y) : band11.moveTo(x, y);
+        i ? band12.lineTo(x, y) : band12.moveTo(x, y);
       }
-      band11.lineTo(cx + R11 + 16, base3 + 8);
-      band11.ellipse(cx, base3 + 2, R11 + 14, ry + 6, 0, 0, Math.PI, false);
-      band11.closePath();
+      band12.lineTo(cx + R11 + 16, base3 + 8);
+      band12.ellipse(cx, base3 + 2, R11 + 14, ry + 6, 0, 0, Math.PI, false);
+      band12.closePath();
       c.fillStyle = SNOW2;
-      c.fill(band11);
+      c.fill(band12);
       c.fillStyle = SNOW_SHADE;
       c.beginPath();
       c.ellipse(cx, base3 + 2, R11 + 10, ry + 2, 0, 0, Math.PI, false);
@@ -35141,7 +35148,7 @@ function monumentGround2(c, f, biome, slot) {
         c.fillRect(px7 - 2.4, py - 2.4, 4, 1.1);
       }
     }
-    const band11 = (hz, w) => {
+    const band12 = (hz, w) => {
       c.fillStyle = tone2(S03, -0.3);
       if (hz) c.fillRect(x - R11, y - w / 2, R11 * 2, w);
       else c.fillRect(x - w / 2, y - R11, w, R11 * 2);
@@ -35155,8 +35162,8 @@ function monumentGround2(c, f, biome, slot) {
         }
       }
     };
-    band11(false, 120);
-    band11(true, 64);
+    band12(false, 120);
+    band12(true, 64);
   });
   if (deep2()) {
     c.save();
@@ -35451,7 +35458,7 @@ function monumentGround22(c, f, biome, slot) {
         c.fillRect(px7 - 2.4, py - 2.4, 4, 1.1);
       }
     }
-    const band11 = (hz, w) => {
+    const band12 = (hz, w) => {
       c.fillStyle = tone2(S04, -0.3);
       if (hz) c.fillRect(x - R11, y - w / 2, R11 * 2, w);
       else c.fillRect(x - w / 2, y - R11, w, R11 * 2);
@@ -35465,8 +35472,8 @@ function monumentGround22(c, f, biome, slot) {
         }
       }
     };
-    band11(false, 120);
-    band11(true, 64);
+    band12(false, 120);
+    band12(true, 64);
   });
   if (deep3()) {
     c.save();
@@ -35762,7 +35769,7 @@ function monumentGround23(c, f, biome, slot) {
         c.fillRect(px7 - 2.4, py - 2.4, 4, 1.1);
       }
     }
-    const band11 = (hz, w) => {
+    const band12 = (hz, w) => {
       c.fillStyle = tone2(S05, -0.3);
       if (hz) c.fillRect(x - R11, y - w / 2, R11 * 2, w);
       else c.fillRect(x - w / 2, y - R11, w, R11 * 2);
@@ -35776,8 +35783,8 @@ function monumentGround23(c, f, biome, slot) {
         }
       }
     };
-    band11(false, 120);
-    band11(true, 64);
+    band12(false, 120);
+    band12(true, 64);
   });
   for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const a0 = sx < 0 ? sy < 0 ? Math.PI : Math.PI / 2 : sy < 0 ? 1.5 * Math.PI : 0, a1 = a0 + Math.PI / 2;
@@ -36043,7 +36050,7 @@ function monumentGround24(c, f, biome, slot) {
         c.fillRect(px7 - 2.4, py - 2.4, 4, 1.1);
       }
     }
-    const band11 = (hz, w) => {
+    const band12 = (hz, w) => {
       c.fillStyle = tone2(S06, -0.3);
       if (hz) c.fillRect(x - R11, y - w / 2, R11 * 2, w);
       else c.fillRect(x - w / 2, y - R11, w, R11 * 2);
@@ -36057,8 +36064,8 @@ function monumentGround24(c, f, biome, slot) {
         }
       }
     };
-    band11(false, 120);
-    band11(true, 64);
+    band12(false, 120);
+    band12(true, 64);
   });
   for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const a0 = sx < 0 ? sy < 0 ? Math.PI : Math.PI / 2 : sy < 0 ? 1.5 * Math.PI : 0, a1 = a0 + Math.PI / 2;
@@ -36318,7 +36325,7 @@ function monumentGround25(c, f, biome, slot) {
         c.fillRect(px7 - 2.4, py - 2.4, 4, 1.1);
       }
     }
-    const band11 = (hz, w) => {
+    const band12 = (hz, w) => {
       c.fillStyle = tone2(S07, -0.3);
       if (hz) c.fillRect(x - R11, y - w / 2, R11 * 2, w);
       else c.fillRect(x - w / 2, y - R11, w, R11 * 2);
@@ -36332,8 +36339,8 @@ function monumentGround25(c, f, biome, slot) {
         }
       }
     };
-    band11(false, 120);
-    band11(true, 64);
+    band12(false, 120);
+    band12(true, 64);
   });
   for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const a0 = sx < 0 ? sy < 0 ? Math.PI : Math.PI / 2 : sy < 0 ? 1.5 * Math.PI : 0, a1 = a0 + Math.PI / 2;
@@ -36600,7 +36607,7 @@ function monumentGround26(c, f, biome, slot) {
         c.fillRect(px7 - 2.4, py - 2.4, 4, 1.1);
       }
     }
-    const band11 = (hz, w) => {
+    const band12 = (hz, w) => {
       c.fillStyle = tone2(S08, -0.3);
       if (hz) c.fillRect(x - R11, y - w / 2, R11 * 2, w);
       else c.fillRect(x - w / 2, y - R11, w, R11 * 2);
@@ -36614,8 +36621,8 @@ function monumentGround26(c, f, biome, slot) {
         }
       }
     };
-    band11(false, 120);
-    band11(true, 64);
+    band12(false, 120);
+    band12(true, 64);
   });
   for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const a0 = sx < 0 ? sy < 0 ? Math.PI : Math.PI / 2 : sy < 0 ? 1.5 * Math.PI : 0, a1 = a0 + Math.PI / 2;
@@ -37461,7 +37468,7 @@ function monumentGroundDesert(c, f, slot) {
         c.fillRect(px7 - 2.4, py - 2.4, 4, 1.1);
       }
     }
-    const band11 = (hz, w) => {
+    const band12 = (hz, w) => {
       c.fillStyle = tone40(S09, -0.3);
       if (hz) c.fillRect(x - R11, y - w / 2, R11 * 2, w);
       else c.fillRect(x - w / 2, y - R11, w, R11 * 2);
@@ -37475,8 +37482,8 @@ function monumentGroundDesert(c, f, slot) {
         }
       }
     };
-    band11(false, 120);
-    band11(true, 64);
+    band12(false, 120);
+    band12(true, 64);
   });
   for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const a0 = sx < 0 ? sy < 0 ? Math.PI : Math.PI / 2 : sy < 0 ? 1.5 * Math.PI : 0, a1 = a0 + Math.PI / 2;
@@ -42710,14 +42717,14 @@ function thatch22(c, x0, x1, eave, ridge4, r) {
     c.fillStyle = tone47(THATCH5, 0.14);
     c.fill(hl);
   });
-  const lip2 = new Path2D();
-  lip2.moveTo(L, E9 - 12);
-  lip2.quadraticCurveTo((L + R11) / 2, E9 - 6, R11, E9 - 12);
-  lip2.lineTo(R11 + 2, E9 + 2);
-  lip2.quadraticCurveTo((L + R11) / 2, E9 + 8, L - 2, E9 + 2);
-  lip2.closePath();
-  prop2(c, [[lip2, tone47(THATCH5, 0.1)]], 2);
-  clip3(c, lip2, () => {
+  const lip3 = new Path2D();
+  lip3.moveTo(L, E9 - 12);
+  lip3.quadraticCurveTo((L + R11) / 2, E9 - 6, R11, E9 - 12);
+  lip3.lineTo(R11 + 2, E9 + 2);
+  lip3.quadraticCurveTo((L + R11) / 2, E9 + 8, L - 2, E9 + 2);
+  lip3.closePath();
+  prop2(c, [[lip3, tone47(THATCH5, 0.1)]], 2);
+  clip3(c, lip3, () => {
     for (let xx = L; xx < R11; xx += 4) {
       c.strokeStyle = tone47(THATCH5, (r() - 0.5) * 0.2 - 0.12);
       c.lineWidth = 1.2;
@@ -44142,7 +44149,7 @@ function cityPlaza2Bands(c, p, biome) {
   if (biome === "desert") return plazaDesert(c, p, "city");
   if (biome === "frostland") return plazaSnow(c, p, "city");
   const x = p.x * T59, y = p.y * T59, w = p.w * T59, h = p.h * T59, S15 = biome === "upland" && UPQ.pave === "granite" ? "#b2b3ac" : "#bdb39e", fx = x + w / 2, fy = y + h / 2 + 20;
-  const band11 = (x0, y0, x1, y1) => {
+  const band12 = (x0, y0, x1, y1) => {
     const L = Math.hypot(x1 - x0, y1 - y0), hz = Math.abs(x1 - x0) > Math.abs(y1 - y0), bw = 34;
     c.fillStyle = biome === "upland" && UPQ.pave === "granite" ? "#6c6d67" : "#8e8473";
     if (hz) c.fillRect(Math.min(x0, x1), y0 - bw / 2, Math.abs(x1 - x0), bw);
@@ -44165,10 +44172,10 @@ function cityPlaza2Bands(c, p, biome) {
   c.beginPath();
   c.roundRect(x + 3, y + 3, w - 6, h - 6, 5);
   c.clip();
-  band11(x + 20, fy, fx - 120, fy);
-  band11(fx + 120, fy, x + w - 20, fy);
-  band11(fx, y + 20, fx, fy - 72);
-  band11(fx, fy + 72, fx, y + h - 20);
+  band12(x + 20, fy, fx - 120, fy);
+  band12(fx + 120, fy, x + w - 20, fy);
+  band12(fx, y + 20, fx, fy - 72);
+  band12(fx, fy + 72, fx, y + h - 20);
   c.restore();
 }
 function plazaFurniture(p, biome, size) {
@@ -45059,7 +45066,7 @@ function signIcon3(c, x, y, s) {
     }
     return;
   }
-  const BONE10 = "#efe4c6", HIDE = "#8a5a34";
+  const BONE10 = "#efe4c6", HIDE2 = "#8a5a34";
   for (const k of [-1, 1]) {
     const pts2 = [[x + k * 3 * s, y - 4 * s], [x + k * 9 * s, y - 12 * s], [x + k * 11 * s, y - 20 * s]];
     line3(c, pts2, OL67, 3.6 * s);
@@ -45069,7 +45076,7 @@ function signIcon3(c, x, y, s) {
       line3(c, [[a, b], [a + dx * s, b + dy * s]], BONE10, 1.7 * s);
     }
   }
-  for (const k of [-1, 1]) prop2(c, [[poly3([[x + k * 4 * s, y - 3 * s], [x + k * 12 * s, y - 5 * s], [x + k * 6 * s, y + 1 * s]]), tone48(HIDE, 0.1)]], 0.9);
+  for (const k of [-1, 1]) prop2(c, [[poly3([[x + k * 4 * s, y - 3 * s], [x + k * 12 * s, y - 5 * s], [x + k * 6 * s, y + 1 * s]]), tone48(HIDE2, 0.1)]], 0.9);
   const hd = new Path2D();
   hd.moveTo(x - 5.4 * s, y - 4 * s);
   hd.quadraticCurveTo(x - 6 * s, y + 6 * s, x - 2.6 * s, y + 12 * s);
@@ -45077,8 +45084,8 @@ function signIcon3(c, x, y, s) {
   hd.quadraticCurveTo(x + 6 * s, y + 6 * s, x + 5.4 * s, y - 4 * s);
   hd.quadraticCurveTo(x, y - 7 * s, x - 5.4 * s, y - 4 * s);
   hd.closePath();
-  prop2(c, [[hd, HIDE]], 1.2);
-  c.fillStyle = tone48(HIDE, 0.3);
+  prop2(c, [[hd, HIDE2]], 1.2);
+  c.fillStyle = tone48(HIDE2, 0.3);
   c.beginPath();
   c.ellipse(x, y + 9.5 * s, 2.8 * s, 2.6 * s, 0, 0, TAU71);
   c.fill();
@@ -47748,14 +47755,14 @@ function thatch23(c, x0, x1, eave, ridge4, r) {
     c.fillStyle = tone51(THATCH6, 0.14);
     c.fill(hl);
   });
-  const lip2 = new Path2D();
-  lip2.moveTo(L, E9 - 12);
-  lip2.quadraticCurveTo((L + R11) / 2, E9 - 6, R11, E9 - 12);
-  lip2.lineTo(R11 + 2, E9 + 2);
-  lip2.quadraticCurveTo((L + R11) / 2, E9 + 8, L - 2, E9 + 2);
-  lip2.closePath();
-  prop2(c, [[lip2, tone51(THATCH6, 0.1)]], 2);
-  clip3(c, lip2, () => {
+  const lip3 = new Path2D();
+  lip3.moveTo(L, E9 - 12);
+  lip3.quadraticCurveTo((L + R11) / 2, E9 - 6, R11, E9 - 12);
+  lip3.lineTo(R11 + 2, E9 + 2);
+  lip3.quadraticCurveTo((L + R11) / 2, E9 + 8, L - 2, E9 + 2);
+  lip3.closePath();
+  prop2(c, [[lip3, tone51(THATCH6, 0.1)]], 2);
+  clip3(c, lip3, () => {
     for (let xx = L; xx < R11; xx += 4) {
       c.strokeStyle = tone51(THATCH6, (r() - 0.5) * 0.2 - 0.12);
       c.lineWidth = 1.2;
@@ -49540,14 +49547,14 @@ function leanFrontW(c, E9, r, O15) {
     c.lineWidth = 2.4;
     c.stroke(rp);
     prop2(c, [[rect4(cx - 14, y - 8, 28, 6), tone54(STONE17, -0.05)]], 1);
-    const L = x - 12, R11 = x + w + 16, E10 = eave + 4, lip2 = new Path2D();
-    lip2.moveTo(L, E10 - 8);
-    lip2.quadraticCurveTo((L + R11) / 2, E10 - 4, R11, E10 - 8);
-    lip2.lineTo(R11 + 2, E10 + 6);
-    lip2.quadraticCurveTo((L + R11) / 2, E10 + 11, L - 2, E10 + 6);
-    lip2.closePath();
-    prop2(c, [[lip2, tone54(THATCH7, 0.1)]], 2);
-    clip3(c, lip2, () => {
+    const L = x - 12, R11 = x + w + 16, E10 = eave + 4, lip3 = new Path2D();
+    lip3.moveTo(L, E10 - 8);
+    lip3.quadraticCurveTo((L + R11) / 2, E10 - 4, R11, E10 - 8);
+    lip3.lineTo(R11 + 2, E10 + 6);
+    lip3.quadraticCurveTo((L + R11) / 2, E10 + 11, L - 2, E10 + 6);
+    lip3.closePath();
+    prop2(c, [[lip3, tone54(THATCH7, 0.1)]], 2);
+    clip3(c, lip3, () => {
       for (let xx = L; xx < R11; xx += 4) {
         c.strokeStyle = tone54(THATCH7, (r() - 0.5) * 0.2 - 0.12);
         c.lineWidth = 1.2;
@@ -52543,10 +52550,10 @@ function clayBowl(c, x, y, fill9, heap2) {
     c.fill();
   }
 }
-function strawHat(c, x, y, band11) {
+function strawHat(c, x, y, band12) {
   prop(c, [[ell2(x, y, 11, 4), "#e2c27a"]], 1.1);
   prop(c, [[poly2([[x - 5, y - 1], [x + 5, y - 1], [x + 4, y - 7], [x - 4, y - 7]]), "#d8b468"]], 1);
-  c.fillStyle = band11;
+  c.fillStyle = band12;
   c.fillRect(x - 5, y - 3.4, 10, 2.2);
   c.strokeStyle = tone("#e2c27a", -0.25);
   c.lineWidth = 0.7;
@@ -53150,14 +53157,14 @@ function stallVTrop(sx, sy, k, slot, opt = {}) {
       hull3.closePath();
       prop(c, [[hull3, WOODC]], 1.8);
       clip2(c, hull3, () => {
-        const band11 = new Path2D();
-        band11.moveTo(x - 18, top - 4);
-        band11.quadraticCurveTo(x + w / 2, top + 9, x + w + 18, top - 4);
-        band11.lineTo(x + w + 18, top + 1);
-        band11.quadraticCurveTo(x + w / 2, top + 14, x - 18, top + 1);
-        band11.closePath();
+        const band12 = new Path2D();
+        band12.moveTo(x - 18, top - 4);
+        band12.quadraticCurveTo(x + w / 2, top + 9, x + w + 18, top - 4);
+        band12.lineTo(x + w + 18, top + 1);
+        band12.quadraticCurveTo(x + w / 2, top + 14, x - 18, top + 1);
+        band12.closePath();
         c.fillStyle = aw[0];
-        c.fill(band11);
+        c.fill(band12);
         c.strokeStyle = aw[1] === "#f6efe0" ? "#f6efe0" : aw[1];
         c.lineWidth = 1.3;
         c.beginPath();
@@ -69245,8 +69252,8 @@ async function createHollowGroundCoverV1(env, { root: root6 = new URL("../../ass
       if (!ids.includes(row2.id) || row2.path !== row2.id + ".webp") throw Error("Unrecognized Hollow plant");
       const response2 = await env.fetch(new URL(row2.path, root6));
       if (!response2.ok) throw Error("Missing Hollow plant");
-      const b = await response2.arrayBuffer(), hash73 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
-      if (hash73 !== row2.sha256 || b.byteLength !== row2.bytes) throw Error("Hollow plant hash mismatch");
+      const b = await response2.arrayBuffer(), hash74 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
+      if (hash74 !== row2.sha256 || b.byteLength !== row2.bytes) throw Error("Hollow plant hash mismatch");
       downloadBytes += b.byteLength;
       const image = await env.createImageBitmap(new Blob([b], { type: "image/webp" }));
       try {
@@ -71087,7 +71094,7 @@ function quad(c, a, b, wa, wb) {
   c.closePath();
   return { dx, dy, d, nx, ny };
 }
-function leg(c, L, w, base3, band11, lw, flash2, hair) {
+function leg(c, L, w, base3, band12, lw, flash2, hair) {
   for (const [a, b, wa, wb] of [[L.R, L.K, w, w * 0.8], [L.K, L.F, w * 0.78, w * 0.3]]) {
     const g = quad(c, a, b, wa, wb);
     c.fillStyle = col(flash2, base3);
@@ -71096,7 +71103,7 @@ function leg(c, L, w, base3, band11, lw, flash2, hair) {
       c.save();
       quad(c, a, b, wa, wb);
       c.clip();
-      c.strokeStyle = band11;
+      c.strokeStyle = band12;
       c.lineWidth = Math.max(0.9, wa * 0.75);
       for (const t of [0.36, 0.7]) {
         const x = a.x + g.dx * t, y = a.y + g.dy * t;
@@ -71127,7 +71134,7 @@ function leg(c, L, w, base3, band11, lw, flash2, hair) {
       c.stroke();
     }
   }
-  c.fillStyle = col(flash2, band11);
+  c.fillStyle = col(flash2, band12);
   c.beginPath();
   c.arc(L.K.x, L.K.y, w * 0.6, 0, TAU116);
   c.fill();
@@ -72092,16 +72099,16 @@ var clamp9 = (x) => Math.max(0, Math.min(1, x));
 var mix6 = (a, b, t) => a + (b - a) * t;
 var color3 = (flash2, hex6) => flash2 ? "#fff" : hex6;
 var rotate = (x, y, a) => ({ x: Math.cos(a) * x - Math.sin(a) * y, y: Math.sin(a) * x + Math.cos(a) * y });
-function localDirection(direction3, rotation, facing3) {
+function localDirection(direction3, rotation, facing2) {
   const co = Math.cos(rotation), si = Math.sin(rotation);
-  return { x: (co * direction3.x + si * direction3.y) * facing3, y: -si * direction3.x + co * direction3.y };
+  return { x: (co * direction3.x + si * direction3.y) * facing2, y: -si * direction3.x + co * direction3.y };
 }
 function swordRay(u) {
   const dot16 = STRIKE_GRIP.x * u.x + STRIKE_GRIP.y * u.y, perp2 = STRIKE_GRIP.x ** 2 + STRIKE_GRIP.y ** 2 - dot16 * dot16;
   return dot16 + Math.sqrt(Math.max(0, BLADE_REACH ** 2 - perp2));
 }
-function armorSwordFrontV4(direction3, rotation, facing3 = 1, size = 1) {
-  return swordRay(localDirection(direction3, rotation, facing3)) * SCALE3 * size;
+function armorSwordFrontV4(direction3, rotation, facing2 = 1, size = 1) {
+  return swordRay(localDirection(direction3, rotation, facing2)) * SCALE3 * size;
 }
 function animatedArmorMeleePoseV4(actor, tick) {
   const phase2 = actor.meleePhase, g = actor.meleeGeometry;
@@ -72109,8 +72116,8 @@ function animatedArmorMeleePoseV4(actor, tick) {
   const dx = g.targetPosition ? g.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g.targetPosition ? g.targetPosition.y - actor.position.y : 0, d = Math.hypot(dx, dy);
   const direction3 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g.sourceRadius, targetRadius = g.targetRadius;
   const centerLimit = g.mode === "clearHullGap" ? g.reach + sourceRadius + targetRadius : g.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = Math.max(sourceRadius, Math.min(weaponReach, d - targetRadius));
-  const p = clamp9((tick - phase2.phaseStartedTick) / Math.max(1, phase2.phaseEndsTick - phase2.phaseStartedTick)), facing3 = actor.presentationFacingX === -1 ? -1 : 1, size = actor.elite?.scale ?? 1;
-  const frame4 = uprightAttackFrame({ front: armorSwordFrontV4(direction3, 0.08 * direction3.x, facing3, size), recoil: 2, lift: 1, lean: -0.1, hitLean: 0.08, squeezeX: 1, squeezeY: 1, hitX: 1, hitY: 1 }, phase2.phase, p, direction3, contactReach);
+  const p = clamp9((tick - phase2.phaseStartedTick) / Math.max(1, phase2.phaseEndsTick - phase2.phaseStartedTick)), facing2 = actor.presentationFacingX === -1 ? -1 : 1, size = actor.elite?.scale ?? 1;
+  const frame4 = uprightAttackFrame({ front: armorSwordFrontV4(direction3, 0.08 * direction3.x, facing2, size), recoil: 2, lift: 1, lean: -0.1, hitLean: 0.08, squeezeX: 1, squeezeY: 1, hitX: 1, hitY: 1 }, phase2.phase, p, direction3, contactReach);
   return {
     family: "animated_armor",
     phase: phase2.phase,
@@ -72124,16 +72131,16 @@ function animatedArmorMeleePoseV4(actor, tick) {
     ...frame4,
     upright: true,
     bodyPivot: { x: 0, y: -16 * SCALE3 * size },
-    idleFacingX: facing3,
+    idleFacingX: facing2,
     disableFacingFlip: false
   };
 }
 function armorSwordGeometryV4(action2 = null, step3 = 0, death = 0, separate = 0) {
-  const weight2 = action2?.artWeight ?? 0, strike2 = action2?.strikeBlend ?? 0, facing3 = action2?.idleFacingX ?? 1;
+  const weight2 = action2?.artWeight ?? 0, strike2 = action2?.strikeBlend ?? 0, facing2 = action2?.idleFacingX ?? 1;
   const shoulder2 = { x: 14 + separate, y: -3 + death * 5 }, idleAngle = 0.3 - step3 * 0.035 + death * 0.8;
   const arm15 = rotate(1, 12, idleAngle - 0.1), hilt2 = rotate(0, -4, idleAngle);
   const idleGrip = { x: shoulder2.x + arm15.x + hilt2.x, y: shoulder2.y + arm15.y + hilt2.y };
-  const u = action2 ? localDirection(action2.direction, action2.body.rotation, facing3) : { x: 1, y: 0 }, distance12 = swordRay(u);
+  const u = action2 ? localDirection(action2.direction, action2.body.rotation, facing2) : { x: 1, y: 0 }, distance12 = swordRay(u);
   const goal = Math.atan2(u.y * distance12 - STRIKE_GRIP.y, u.x * distance12 - STRIKE_GRIP.x) - Math.PI / 2;
   const grip = { x: mix6(idleGrip.x, mix6(10, STRIKE_GRIP.x, strike2), weight2), y: mix6(idleGrip.y, mix6(-8, STRIKE_GRIP.y, strike2), weight2) };
   const angle3 = mix6(idleAngle, mix6(-2.8, goal, strike2), weight2);
@@ -72362,20 +72369,20 @@ var IDLE_GRIP = Object.freeze({ x: -11 - Math.sin(IDLE_ANGLE) * 8, y: 7 + Math.c
 var clamp10 = (x) => Math.max(0, Math.min(1, x));
 var mix7 = (a, b, t) => a + (b - a) * t;
 var color4 = (flash2, hex6) => flash2 ? "#fff" : hex6;
-function localDirection2(direction3, rotation, facing3) {
+function localDirection2(direction3, rotation, facing2) {
   const co = Math.cos(rotation), si = Math.sin(rotation);
-  return { x: (co * direction3.x + si * direction3.y) * facing3, y: -si * direction3.x + co * direction3.y };
+  return { x: (co * direction3.x + si * direction3.y) * facing2, y: -si * direction3.x + co * direction3.y };
 }
 function swordRay2(u) {
   const dot16 = STRIKE_GRIP2.x * u.x + STRIKE_GRIP2.y * u.y, perp2 = STRIKE_GRIP2.x ** 2 + STRIKE_GRIP2.y ** 2 - dot16 * dot16;
   return dot16 + Math.sqrt(Math.max(0, BLADE_REACH2 ** 2 - perp2));
 }
-function gargoyleSwordFrontV4(direction3, rotation, facing3 = 1, size = 1) {
-  return swordRay2(localDirection2(direction3, rotation, facing3)) * SCALE4 * size;
+function gargoyleSwordFrontV4(direction3, rotation, facing2 = 1, size = 1) {
+  return swordRay2(localDirection2(direction3, rotation, facing2)) * SCALE4 * size;
 }
 function gargoyleSwordGeometryV4(action2 = null) {
-  const weight2 = action2?.artWeight ?? 0, strike2 = action2?.strikeBlend ?? 0, facing3 = action2?.idleFacingX ?? 1;
-  const u = action2 ? localDirection2(action2.direction, action2.body.rotation, facing3) : { x: 1, y: 0 }, distance12 = swordRay2(u);
+  const weight2 = action2?.artWeight ?? 0, strike2 = action2?.strikeBlend ?? 0, facing2 = action2?.idleFacingX ?? 1;
+  const u = action2 ? localDirection2(action2.direction, action2.body.rotation, facing2) : { x: 1, y: 0 }, distance12 = swordRay2(u);
   const goal = Math.atan2(u.y * distance12 - STRIKE_GRIP2.y, u.x * distance12 - STRIKE_GRIP2.x) + Math.PI / 2 - IDLE_ANGLE;
   const braceAngle = -0.38 * (Math.sign(goal) || 1);
   const grip = { x: mix7(IDLE_GRIP.x, mix7(-8, STRIKE_GRIP2.x, strike2), weight2), y: mix7(IDLE_GRIP.y, mix7(8, STRIKE_GRIP2.y, strike2), weight2) };
@@ -72390,8 +72397,8 @@ function gargoyleMeleePoseV4(actor, tick) {
   const dx = g.targetPosition ? g.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g.targetPosition ? g.targetPosition.y - actor.position.y : 0, d = Math.hypot(dx, dy);
   const direction3 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g.sourceRadius, targetRadius = g.targetRadius;
   const centerLimit = g.mode === "clearHullGap" ? g.reach + sourceRadius + targetRadius : g.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = Math.max(sourceRadius, Math.min(weaponReach, d - targetRadius));
-  const p = clamp10((tick - phase2.phaseStartedTick) / Math.max(1, phase2.phaseEndsTick - phase2.phaseStartedTick)), facing3 = actor.presentationFacingX === -1 ? -1 : 1, size = actor.elite?.scale ?? 1;
-  const tuning = { front: gargoyleSwordFrontV4(direction3, 0.1 * direction3.x, facing3, size), recoil: 3, lift: 2, lean: -0.12, hitLean: 0.1, squeezeX: 1, squeezeY: 1, hitX: 1, hitY: 1 };
+  const p = clamp10((tick - phase2.phaseStartedTick) / Math.max(1, phase2.phaseEndsTick - phase2.phaseStartedTick)), facing2 = actor.presentationFacingX === -1 ? -1 : 1, size = actor.elite?.scale ?? 1;
+  const tuning = { front: gargoyleSwordFrontV4(direction3, 0.1 * direction3.x, facing2, size), recoil: 3, lift: 2, lean: -0.12, hitLean: 0.1, squeezeX: 1, squeezeY: 1, hitX: 1, hitY: 1 };
   const frame4 = uprightAttackFrame(tuning, phase2.phase, p, direction3, contactReach);
   return {
     family: "gargoyle",
@@ -72406,7 +72413,7 @@ function gargoyleMeleePoseV4(actor, tick) {
     ...frame4,
     upright: true,
     bodyPivot: { x: 0, y: -12 * SCALE4 * size },
-    idleFacingX: facing3,
+    idleFacingX: facing2,
     gargoyleScale: size,
     disableFacingFlip: false
   };
@@ -72652,8 +72659,8 @@ function watcherLookTarget(actor, entitiesById) {
 function watcherLookDirection(actor, target, pose3 = null) {
   if (!point2(actor?.position) || !point2(target)) return { x: 0, y: 0 };
   const dx = target.x - actor.position.x - (pose3?.body?.x ?? 0), dy = target.y - actor.position.y - (pose3?.body?.y ?? 0), angle3 = pose3?.body?.rotation ?? 0;
-  const cos = Math.cos(angle3), sin = Math.sin(angle3), facing3 = actor.presentationFacingX === -1 ? -1 : 1;
-  return { x: (dx * cos + dy * sin) * facing3, y: dy * cos - dx * sin };
+  const cos = Math.cos(angle3), sin = Math.sin(angle3), facing2 = actor.presentationFacingX === -1 ? -1 : 1;
+  return { x: (dx * cos + dy * sin) * facing2, y: dy * cos - dx * sin };
 }
 function watcherEyePose(tick, seed2, direction3 = null, phase2 = "idle", flash2 = false) {
   const dx = point2(direction3) ? direction3.x : 0, dy = point2(direction3) ? direction3.y : 0, length = Math.max(64, Math.hypot(dx, dy));
@@ -72673,10 +72680,10 @@ var blend = (a, b, w) => ({ x: mix8(a.x, b.x, w), y: mix8(a.y, b.y, w) });
 var turn = (x) => Math.atan2(Math.sin(x), Math.cos(x));
 var color5 = (flash2, hex6) => flash2 ? "#fff" : hex6;
 function local(a, p) {
-  const b = a.body, v = a.bodyPivot, size = a.riftDrifterScale ?? 1, facing3 = a.idleFacingX ?? 1;
+  const b = a.body, v = a.bodyPivot, size = a.riftDrifterScale ?? 1, facing2 = a.idleFacingX ?? 1;
   const x = p.x - b.x - v.x, y = p.y - b.y - v.y, co = Math.cos(b.rotation), si = Math.sin(b.rotation);
   return {
-    x: ((co * x + si * y) / b.scaleX + v.x) / (SCALE5 * size) * facing3,
+    x: ((co * x + si * y) / b.scaleX + v.x) / (SCALE5 * size) * facing2,
     y: ((-si * x + co * y) / b.scaleY + v.y) / (SCALE5 * size)
   };
 }
@@ -72838,10 +72845,10 @@ var mix9 = (a, b, w) => a + (b - a) * w;
 var blend2 = (a, b, w) => ({ x: mix9(a.x, b.x, w), y: mix9(a.y, b.y, w) });
 var color6 = (flash2, hex6) => flash2 ? "#fff" : hex6;
 function local2(a, p) {
-  const b = a.body, v = a.bodyPivot, size = a.voidWraithScale ?? 1, facing3 = a.idleFacingX ?? 1;
+  const b = a.body, v = a.bodyPivot, size = a.voidWraithScale ?? 1, facing2 = a.idleFacingX ?? 1;
   const x = p.x - b.x - v.x, y = p.y - b.y - v.y, co = Math.cos(b.rotation), si = Math.sin(b.rotation);
   return {
-    x: ((co * x + si * y) / b.scaleX + v.x) / (SCALE6 * size) * facing3,
+    x: ((co * x + si * y) / b.scaleX + v.x) / (SCALE6 * size) * facing2,
     y: ((-si * x + co * y) / b.scaleY + v.y) / (SCALE6 * size)
   };
 }
@@ -73058,10 +73065,10 @@ var mix10 = (a, b, w) => a + (b - a) * w;
 var pointMix = (a, b, w) => ({ x: mix10(a.x, b.x, w), y: mix10(a.y, b.y, w) });
 var color7 = (flash2, hex6) => flash2 ? "#fff" : hex6;
 function toLocal(a, point14) {
-  const b = a.body, pivot2 = a.bodyPivot, size = a.voidSpectreScale ?? 1, facing3 = a.idleFacingX ?? 1;
+  const b = a.body, pivot2 = a.bodyPivot, size = a.voidSpectreScale ?? 1, facing2 = a.idleFacingX ?? 1;
   const x = point14.x - b.x - pivot2.x, y = point14.y - b.y - pivot2.y, co = Math.cos(b.rotation), si = Math.sin(b.rotation);
   return {
-    x: ((co * x + si * y) / b.scaleX + pivot2.x) / (SCALE7 * size) * facing3,
+    x: ((co * x + si * y) / b.scaleX + pivot2.x) / (SCALE7 * size) * facing2,
     y: ((-si * x + co * y) / b.scaleY + pivot2.y) / (SCALE7 * size)
   };
 }
@@ -73639,11 +73646,11 @@ function drawGildedScuttlerV4(c, m, time3, seed2) {
 }
 function drawGildedScuttlerAttackV4(c, pose3, flash2 = false) {
   if (pose3?.family !== "gilded_scuttler") return false;
-  const size = pose3.gildedScuttlerScale ?? 1, scale = SCALE9 * size, facing3 = pose3.idleFacingX ?? 1;
-  const angle3 = Math.atan2(pose3.direction.y, pose3.direction.x * facing3) * pose3.artWeight;
+  const size = pose3.gildedScuttlerScale ?? 1, scale = SCALE9 * size, facing2 = pose3.idleFacingX ?? 1;
+  const angle3 = Math.atan2(pose3.direction.y, pose3.direction.x * facing2) * pose3.artWeight;
   c.save();
   c.translate(pose3.body.x + pose3.bodyPivot.x, pose3.body.y + pose3.bodyPivot.y);
-  c.scale(facing3, 1);
+  c.scale(facing2, 1);
   c.rotate(angle3);
   c.scale(scale, scale);
   c.lineJoin = "round";
@@ -73665,9 +73672,9 @@ var smooth7 = (x) => {
   return p * p * (3 - 2 * p);
 };
 var HULL = Object.freeze([[-16, -16], [16, -16], [18, 2], [0, 22], [-18, 2]].map((p) => Object.freeze(p)));
-function mimicShieldBashRadiusV4(direction3, rotation, facing3 = 1, size = 1) {
+function mimicShieldBashRadiusV4(direction3, rotation, facing2 = 1, size = 1) {
   const co = Math.cos(rotation), si = Math.sin(rotation), scale = SCALE10 * size;
-  const vertices = HULL.map(([x, y]) => ({ x: (co * x * facing3 - si * y) * scale, y: (si * x * facing3 + co * y) * scale }));
+  const vertices = HULL.map(([x, y]) => ({ x: (co * x * facing2 - si * y) * scale, y: (si * x * facing2 + co * y) * scale }));
   const cross7 = (a, b) => a.x * b.y - a.y * b.x;
   let distance12 = Infinity;
   for (let i = 0; i < vertices.length; i++) {
@@ -73810,10 +73817,10 @@ function coinElementalGeometryV4(time3, seed2, pose3 = null) {
     const start = (pose3.coinElementalActionStartTick ?? pose3.presentationTick ?? time3 * 0.06) * 1e3 / 60;
     const visible3 = orbit(start, seed2).filter((c) => c.z >= 0);
     strikeCoin = visible3[((seed2 >>> 0) + (pose3.coinElementalActionSequence ?? 0) * 13 >>> 0) % visible3.length].id;
-    const coin4 = coins[strikeCoin], size = pose3.coinElementalScale ?? 1, facing3 = pose3.idleFacingX ?? 1;
+    const coin4 = coins[strikeCoin], size = pose3.coinElementalScale ?? 1, facing2 = pose3.idleFacingX ?? 1;
     const co = Math.cos(pose3.body.rotation), si = Math.sin(pose3.body.rotation), scale = SCALE11 * size;
     const dx = pose3.direction.x * pose3.limb.extension, dy = pose3.direction.y * pose3.limb.extension;
-    const tip = { x: (co * dx + si * dy) / (pose3.body.scaleX * scale * facing3), y: (-si * dx + co * dy) / (pose3.body.scaleY * scale) };
+    const tip = { x: (co * dx + si * dy) / (pose3.body.scaleX * scale * facing2), y: (-si * dx + co * dy) / (pose3.body.scaleY * scale) };
     const length = Math.hypot(tip.x, tip.y) || 1, ux = tip.x / length, uy = tip.y / length;
     const ct = Math.cos(coin4.tilt), st = Math.sin(coin4.tilt), axisX = ux * ct + uy * st, axisY = -ux * st + uy * ct;
     const radius = 1 / Math.sqrt((axisX / coin4.rx) ** 2 + (axisY / coin4.ry) ** 2);
@@ -74169,17 +74176,17 @@ function wireframeOrbGeometryV4(time3, seed2, pose3 = null) {
   const vertices = verticesAt(time3, seed2), weight2 = pose3?.artWeight ?? 0;
   let strikeVertex = null;
   if (weight2 > 0) {
-    const start = verticesAt((pose3.wireframeOrbActionStartTick ?? pose3.presentationTick) * 1e3 / 60, seed2), facing3 = pose3.idleFacingX ?? 1;
+    const start = verticesAt((pose3.wireframeOrbActionStartTick ?? pose3.presentationTick) * 1e3 / 60, seed2), facing2 = pose3.idleFacingX ?? 1;
     let best = -Infinity;
     for (const [i, v2] of start.entries()) {
-      const score = v2.x * pose3.direction.x * facing3 + v2.y * pose3.direction.y;
+      const score = v2.x * pose3.direction.x * facing2 + v2.y * pose3.direction.y;
       if (score > best) {
         best = score;
         strikeVertex = i;
       }
     }
     const size = pose3.wireframeOrbScale ?? 1, dx = pose3.direction.x * pose3.limb.extension, dy = pose3.direction.y * pose3.limb.extension, co = Math.cos(pose3.body.rotation), si = Math.sin(pose3.body.rotation);
-    const x = (co * dx + si * dy) / (pose3.body.scaleX * size * SCALE12 * facing3), y = (-si * dx + co * dy) / (pose3.body.scaleY * size * SCALE12);
+    const x = (co * dx + si * dy) / (pose3.body.scaleX * size * SCALE12 * facing2), y = (-si * dx + co * dy) / (pose3.body.scaleY * size * SCALE12);
     const v = vertices[strikeVertex];
     v.x += (x - v.x) * weight2;
     v.y += (y - v.y) * weight2;
@@ -74928,10 +74935,10 @@ function drawStarWeaverV4(c, m, time3, seed2) {
 }
 function drawStarWeaverAttackV4(c, pose3, flash2 = false) {
   if (pose3?.family !== "star_weaver") return false;
-  const facing3 = pose3.idleFacingX ?? 1, size = pose3.starWeaverScale ?? 1, localAim = Math.atan2(pose3.direction.y, pose3.direction.x * facing3), angle3 = localAim * pose3.artWeight;
+  const facing2 = pose3.idleFacingX ?? 1, size = pose3.starWeaverScale ?? 1, localAim = Math.atan2(pose3.direction.y, pose3.direction.x * facing2), angle3 = localAim * pose3.artWeight;
   c.save();
   c.translate(pose3.lunge.x + pose3.bodyPivot.x, pose3.lunge.y + pose3.bodyPivot.y);
-  c.scale(facing3, 1);
+  c.scale(facing2, 1);
   c.rotate(angle3);
   const tip = pose3.limb.extension + 13.2 * (size - 1) * (1 - pose3.artWeight);
   head4(c, 0.78 * size, flash2);
@@ -75101,10 +75108,10 @@ function drawNeonSpiderV4(c, m, time3, seed2) {
 }
 function drawNeonSpiderAttackV4(c, pose3, flash2 = false) {
   if (pose3?.family !== "neon_spider") return false;
-  const size = pose3.neonSpiderScale ?? 1, scale = 0.9 * size, facing3 = pose3.idleFacingX ?? 1, angle3 = Math.atan2(pose3.direction.y, pose3.direction.x * facing3) * pose3.artWeight;
+  const size = pose3.neonSpiderScale ?? 1, scale = 0.9 * size, facing2 = pose3.idleFacingX ?? 1, angle3 = Math.atan2(pose3.direction.y, pose3.direction.x * facing2) * pose3.artWeight;
   c.save();
   c.translate(pose3.lunge.x + pose3.bodyPivot.x, pose3.lunge.y + pose3.bodyPivot.y);
-  c.scale(facing3, 1);
+  c.scale(facing2, 1);
   c.rotate(angle3);
   head5(c, scale, flash2);
   mandibles(c, pose3.limb.extension + 16 * (size - 1) * (1 - pose3.artWeight), pose3.limb.open, scale, flash2);
@@ -75140,10 +75147,10 @@ var hash31 = (v) => {
   return (v ^ v >>> 16) >>> 0;
 };
 function local3(a, p) {
-  const b = a.body, v = a.bodyPivot, size = a.cyberWraithScale ?? 1, facing3 = a.idleFacingX ?? 1;
+  const b = a.body, v = a.bodyPivot, size = a.cyberWraithScale ?? 1, facing2 = a.idleFacingX ?? 1;
   const x = p.x - b.x - v.x, y = p.y - b.y - v.y, co = Math.cos(b.rotation), si = Math.sin(b.rotation);
   return {
-    x: ((co * x + si * y) / b.scaleX + v.x) / (SCALE13 * size) * facing3,
+    x: ((co * x + si * y) / b.scaleX + v.x) / (SCALE13 * size) * facing2,
     y: (((-si * x + co * y) / b.scaleY + v.y) / size + 8) / SCALE13
   };
 }
@@ -76395,8 +76402,8 @@ function toxicFlyMotionV4(m, time3) {
   const weight2 = !cast2 ? 0 : cast2.phase === "windup" ? smooth13(cast2.progress) : 1 - smooth13(cast2.progress);
   let aim2 = { x: 0, y: -1 };
   if (cast2) {
-    const co = Math.cos(cast2.body.rotation), si = Math.sin(cast2.body.rotation), facing3 = cast2.drawFacingX ?? 1;
-    const local8 = { x: (co * cast2.direction.x + si * cast2.direction.y) * facing3, y: -si * cast2.direction.x + co * cast2.direction.y };
+    const co = Math.cos(cast2.body.rotation), si = Math.sin(cast2.body.rotation), facing2 = cast2.drawFacingX ?? 1;
+    const local8 = { x: (co * cast2.direction.x + si * cast2.direction.y) * facing2, y: -si * cast2.direction.x + co * cast2.direction.y };
     const angle3 = -Math.PI / 2 + Math.atan2(local8.x, -local8.y) * weight2;
     aim2 = { x: Math.cos(angle3), y: Math.sin(angle3) };
   }
@@ -76796,9 +76803,9 @@ var FRONT4 = (NECK2 + NOSE) * SCALE21;
 var clamp19 = (x) => Math.max(0, Math.min(1, x));
 var mix14 = (a, b, t) => a + (b - a) * t;
 var color23 = (flash2, hex6) => flash2 ? "#fff" : hex6;
-function localDirection3(direction3, rotation, facing3) {
+function localDirection3(direction3, rotation, facing2) {
   const co = Math.cos(rotation), si = Math.sin(rotation);
-  return { x: (co * direction3.x + si * direction3.y) * facing3, y: -si * direction3.x + co * direction3.y };
+  return { x: (co * direction3.x + si * direction3.y) * facing2, y: -si * direction3.x + co * direction3.y };
 }
 function hellBatMeleePoseV4(actor, tick) {
   const phase2 = actor.meleePhase, g = actor.meleeGeometry;
@@ -76979,9 +76986,9 @@ var FRONT5 = (NECK3 + NOSE2) * SCALE22;
 var clamp20 = (x) => Math.max(0, Math.min(1, x));
 var mix15 = (a, b, t) => a + (b - a) * t;
 var color24 = (flash2, hex6) => flash2 ? "#fff" : hex6;
-function localDirection4(direction3, rotation, facing3) {
+function localDirection4(direction3, rotation, facing2) {
   const co = Math.cos(rotation), si = Math.sin(rotation);
-  return { x: (co * direction3.x + si * direction3.y) * facing3, y: -si * direction3.x + co * direction3.y };
+  return { x: (co * direction3.x + si * direction3.y) * facing2, y: -si * direction3.x + co * direction3.y };
 }
 function lavaSerpentMeleePoseV4(actor, tick) {
   const phase2 = actor.meleePhase, g = actor.meleeGeometry;
@@ -77682,7 +77689,7 @@ function hoopV2(c, K13, x0, x1, base3, H8, { open: open3 = true, hide = false, b
     const u = (x - xm) / half, st = Math.sin(t);
     return P10(x + F6 * st * u * u * u, 6 - 6 * Math.cos(t), base3 + H8 * st + F6 * 0.5 * st * u * u * u * u - SAG * (1 - u * u) * st);
   };
-  const top = Math.PI - Math.atan(H8 / 6), band11 = (a, b) => [...ts(a, b).map((t) => Q(x0, t)), ...xs().map((x) => Q(x, b)), ...ts(b, a).map((t) => Q(x1, t)), ...xs().reverse().map((x) => Q(x, a))];
+  const top = Math.PI - Math.atan(H8 / 6), band12 = (a, b) => [...ts(a, b).map((t) => Q(x0, t)), ...xs().map((x) => Q(x, b)), ...ts(b, a).map((t) => Q(x1, t)), ...xs().reverse().map((x) => Q(x, a))];
   const body6 = [...ts(0, top).map((t) => Q(x0, t)), ...xs(12).map((x) => Q(x, top)), ...ts(top, 0).map((t) => Q(x1, t)), ...xs().reverse().map((x) => Q(x, 0))];
   fillPts(c, body6, K13.canvas, 0);
   c.save();
@@ -77691,7 +77698,7 @@ function hoopV2(c, K13, x0, x1, base3, H8, { open: open3 = true, hide = false, b
   if (K13.stripes) {
     c.fillStyle = K13.trim;
     for (let x = x0; x < x1; x += 12) c.fillRect(x + DEPTH_X * 12 - 2, -base3 - H8 - 20, 6, H8 + 30);
-  } else if (!hide) fillPts(c, band11(0.34, 0.52), K13.trim, 0);
+  } else if (!hide) fillPts(c, band12(0.34, 0.52), K13.trim, 0);
   if (hide) {
     c.fillStyle = shade3(K13.canvas, -0.18);
     for (let x = x0 + 6; x < x1; x += 11) {
@@ -77712,8 +77719,8 @@ function hoopV2(c, K13, x0, x1, base3, H8, { open: open3 = true, hide = false, b
       c.setLineDash([]);
     }
   }
-  fillPts(c, band11(0, 0.42), "rgba(40,28,18,.2)", 0);
-  fillPts(c, band11(1.25, top), "rgba(255,255,255,.2)", 0);
+  fillPts(c, band12(0, 0.42), "rgba(40,28,18,.2)", 0);
+  fillPts(c, band12(1.25, top), "rgba(255,255,255,.2)", 0);
   c.lineWidth = 1.3;
   c.strokeStyle = shade3(K13.canvas, -0.3);
   for (let i = 1; i < 5; i++) {
@@ -79505,7 +79512,7 @@ var ART = {
   },
   tomb_mummy(c) {
     const wrap3 = "#e0d2ad", W21 = ramp2(wrap3, "#2a2010", "#fffbe8");
-    const band11 = (p, seed2, dense = 2.2) => {
+    const band12 = (p, seed2, dense = 2.2) => {
       part(c, [[p, W21.m]], 1.5);
       shade4(c, p, W21, 1.8);
       const R11 = rng25(seed2);
@@ -79522,10 +79529,10 @@ var ART = {
       c.restore();
     };
     for (const [x, s] of [[-3.4, 1], [3.6, 2]]) {
-      band11(sm([[x - 3, -15], [x + 3, -15], [x + 3.2, -2], [x + 4.4, 0], [x - 3.6, 0], [x - 3.2, -2]]), s);
+      band12(sm([[x - 3, -15], [x + 3, -15], [x + 3.2, -2], [x + 4.4, 0], [x - 3.6, 0], [x - 3.2, -2]]), s);
     }
     const torso6 = sm([[-7.4, -28], [7, -28.4], [8, -20], [6.4, -13.6], [-6.6, -13.6], [-8, -20]]);
-    band11(torso6, 3);
+    band12(torso6, 3);
     c.save();
     c.clip(torso6);
     c.fillStyle = "rgba(40,25,10,.55)";
@@ -79534,7 +79541,7 @@ var ART = {
     c.fill();
     c.restore();
     for (const [y, s] of [[-26, 4], [-22.4, 5]]) {
-      band11(sm([[1, y - 2.2], [14.6, y - 1.4], [15.6, y + 0.4], [14.6, y + 2], [1, y + 2]]), s, 1.8);
+      band12(sm([[1, y - 2.2], [14.6, y - 1.4], [15.6, y + 0.4], [14.6, y + 2], [1, y + 2]]), s, 1.8);
       solid(c, ell5(15.2, y + 0.3, 1.6, 1.9), tone85(wrap3, -0.1), 1, 0.6);
     }
     const loose = new Path2D();
@@ -79545,7 +79552,7 @@ var ART = {
     loose.closePath();
     part(c, [[loose, W21.l]], 1);
     const head19 = sm([[-5.4, -28.6], [-6.4, -34], [-4, -38.4], [1, -39.2], [5.4, -36.6], [6.2, -31.4], [4.6, -28.2], [0, -27.4]]);
-    band11(head19, 6, 1.9);
+    band12(head19, 6, 1.9);
     part(c, [[sm([[0.2, -34], [5.6, -33.6], [5.4, -31.6], [0.4, -31.8]]), "#2a2018"]], 0.7);
     eye2(c, 2.8, -32.6, 1.1, "#ffd84a", "rgba(255,210,70,.7)");
     c.fillStyle = "rgba(230,215,180,.7)";
@@ -81772,17 +81779,17 @@ function splash(c, x, y, u, n, height, col2, seed2) {
 }
 function gameRingWarn(c, x, y, r0, r1, p, age, g) {
   const fade = clamp28(age / 0.13), flash2 = p > 0.86 ? Math.sin((p - 0.86) / 0.14 * Math.PI * 3) ** 2 : 0, m = (r0 + r1) / 2, h = (r1 - r0) / 2 * ease4(p);
-  const band11 = (a, b) => {
+  const band12 = (a, b) => {
     c.beginPath();
     c.arc(x, y, b, 0, TAU147);
     c.arc(x, y, Math.max(0.01, a), 0, TAU147, true);
   };
   c.save();
   c.globalAlpha = fade;
-  band11(r0, r1);
+  band12(r0, r1);
   c.fillStyle = g.fill + "26";
   c.fill();
-  band11(m - h, m + h);
+  band12(m - h, m + h);
   c.fillStyle = g.fill + "52";
   c.fill();
   c.globalAlpha = fade * 0.9;
@@ -81810,7 +81817,7 @@ function gameRingWarn(c, x, y, r0, r1, p, age, g) {
 function gameRingBurst(c, x, y, r0, r1, age, g, dur = 0.45) {
   const q2 = clamp28(age / dur);
   if (q2 >= 1 || age < 0) return;
-  const band11 = (a, b) => {
+  const band12 = (a, b) => {
     c.beginPath();
     c.arc(x, y, b, 0, TAU147);
     c.arc(x, y, Math.max(0.01, a), 0, TAU147, true);
@@ -81818,12 +81825,12 @@ function gameRingBurst(c, x, y, r0, r1, age, g, dur = 0.45) {
   c.save();
   if (age < 0.1) {
     c.globalAlpha = 1 - age / 0.1;
-    band11(r0, r1);
+    band12(r0, r1);
     c.fillStyle = g.lit;
     c.fill();
   }
   c.globalAlpha = 1 - q2;
-  band11(r0, r1);
+  band12(r0, r1);
   c.fillStyle = g.fill + "60";
   c.fill();
   const R11 = mix18((r0 + r1) / 2, r1 + 6, ease4(q2));
@@ -87465,7 +87472,7 @@ var GAP2 = 0.32;
 function croakRing(c, x, y, r, gapAt, k, G5 = CROAK_LOOK, w = RING_W, gap2 = GAP2) {
   if (k <= 0 || r <= 0) return;
   const r0 = Math.max(0.5, r - w / 2), r1 = r + w / 2, a0 = gapAt + gap2, a1 = gapAt - gap2 + TAU147;
-  const band11 = () => {
+  const band12 = () => {
     c.beginPath();
     c.arc(x, y, r1, a0, a1);
     c.arc(x, y, r0, a1, a0, true);
@@ -87473,7 +87480,7 @@ function croakRing(c, x, y, r, gapAt, k, G5 = CROAK_LOOK, w = RING_W, gap2 = GAP
   };
   c.save();
   c.globalAlpha = k;
-  band11();
+  band12();
   c.fillStyle = G5.fill + "78";
   c.fill();
   c.strokeStyle = G5.lit;
@@ -87481,11 +87488,11 @@ function croakRing(c, x, y, r, gapAt, k, G5 = CROAK_LOOK, w = RING_W, gap2 = GAP
   c.beginPath();
   c.arc(x, y, r - 1, a0 + 0.04, a1 - 0.04);
   c.stroke();
-  band11();
+  band12();
   c.strokeStyle = G5.dark;
   c.lineWidth = 3.2;
   c.stroke();
-  band11();
+  band12();
   c.strokeStyle = G5.edge;
   c.lineWidth = 1.4;
   c.stroke();
@@ -90308,7 +90315,7 @@ function furMass(c, pts2, P25, s, o = {}) {
     shape3();
     c.clip();
     const xs = pts2.map((p) => p[0]), ys = pts2.map((p) => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), cx = (x0 + x1) / 2, cy2 = (y0 + y1) / 2, rx = (x1 - x0) / 2, ry = (y1 - y0) / 2;
-    const band11 = (yy, col2, sc2) => {
+    const band12 = (yy, col2, sc2) => {
       c.fillStyle = col2;
       c.beginPath();
       c.moveTo(x0 - 12, y1 + 12);
@@ -90323,8 +90330,8 @@ function furMass(c, pts2, P25, s, o = {}) {
       c.fill();
     };
     if (o.bands) {
-      band11(y0 + ry * 1.18, dark ? P25.furDD : P25.furD, 7);
-      band11(y0 + ry * 1.62, dark ? "#62758a" : P25.furDD, 6);
+      band12(y0 + ry * 1.18, dark ? P25.furDD : P25.furD, 7);
+      band12(y0 + ry * 1.62, dark ? "#62758a" : P25.furDD, 6);
     } else {
       const sm4 = smooth20(pts2, 2), copy4 = (k, ox, oy, col2) => {
         c.fillStyle = col2;
@@ -91167,7 +91174,7 @@ function ghostRibbon(c, spine2, w0, s, o = {}) {
     L.push([p[0] - dy / l * w, p[1] + dx / l * w]);
     R11.push([p[0] + dy / l * w, p[1] - dx / l * w]);
   }
-  const band11 = (sc2 = 1) => {
+  const band12 = (sc2 = 1) => {
     c.beginPath();
     L.forEach((p, i) => {
       const m = spine2[i], x = m[0] + (p[0] - m[0]) * sc2, y = m[1] + (p[1] - m[1]) * sc2;
@@ -91185,14 +91192,14 @@ function ghostRibbon(c, spine2, w0, s, o = {}) {
     c.shadowBlur = o.glow ?? 9;
   }
   c.globalAlpha = o.alpha ?? 0.9;
-  band11();
+  band12();
   c.fillStyle = W12(s, o.dark ? "#93c4dc" : "#b6e2f3");
   c.fill();
   c.globalAlpha = 1;
   if (!s.flash) c.restore();
   if (!s.flash) {
     c.save();
-    band11();
+    band12();
     c.clip();
     c.fillStyle = o.dark ? "#6f9fbd" : "#86bdd8";
     c.beginPath();
@@ -91203,12 +91210,12 @@ function ghostRibbon(c, spine2, w0, s, o = {}) {
     }
     c.closePath();
     c.fill();
-    band11(0.34);
+    band12(0.34);
     c.fillStyle = o.dark ? "#c4e6f4" : "#e6f8ff";
     c.fill();
     c.restore();
   }
-  band11();
+  band12();
   c.strokeStyle = INK31;
   c.lineWidth = o.lw ?? FINE11 + 0.2;
   c.stroke();
@@ -93348,8 +93355,8 @@ function mouthPts(M4, grow2, a0, a1, N3 = 36) {
 }
 function lipBack(c, s, P25, M4 = MOUTH) {
   const Lp = M4.lip, a0 = Math.PI * 0.94, a1 = Math.PI * 2.06;
-  const band11 = mouthPts(M4, Lp, a0, a1).concat(mouthPts(M4, 0, a0, a1).reverse());
-  fillPts3(c, band11, W13(s, P25.rockD));
+  const band12 = mouthPts(M4, Lp, a0, a1).concat(mouthPts(M4, 0, a0, a1).reverse());
+  fillPts3(c, band12, W13(s, P25.rockD));
   if (!s.flash) fillPts3(c, mouthPts(M4, Lp * 0.85, a0 + 0.14, a1 - 0.14).concat(mouthPts(M4, 1, a0 + 0.14, a1 - 0.14).reverse()), P25.rockL);
   inkPts(c, mouthPts(M4, Lp, a0, a1), LW14, false);
   inkPts(c, mouthPts(M4, 0, a0, a1), FINE12, false);
@@ -97168,7 +97175,7 @@ var vineSide = (actor, k) => sideOf2(k.target && k.origin ? k.target.x - k.origi
 function vinePose(actor, k, tick, s) {
   const VINE3 = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], hold = VINE3.snare ? VINE3.rootTicks : 36;
   if (VINE3.snare) s.alt = true;
-  let face5 = actor.presentationFacingX === -1 ? -1 : 1, x = 0, y = 0, clip23 = false, ahead = VINE_AHEAD;
+  let face5 = actor.presentationFacingX === -1 ? -1 : 1, x = 0, y = 0, clip22 = false, ahead = VINE_AHEAD;
   const mel = meleeOf6(actor, tick);
   if (mel && (!k || k.phase === "ready")) {
     face5 = mel.dir.x < 0 ? -1 : 1;
@@ -97187,7 +97194,7 @@ function vinePose(actor, k, tick, s) {
       s.gape = 0.7;
       s.noShadow = true;
     } else if (k.phase === "up") {
-      clip23 = true;
+      clip22 = true;
       s.noShadow = true;
       if (age < hold) {
         s.emerge = true;
@@ -97201,7 +97208,7 @@ function vinePose(actor, k, tick, s) {
       } else y = (1 - ease4((age - hold - 12) / (VINE3.upTicks - hold - 12))) * 30;
     }
   }
-  return { face: face5, x: x + face5 * ahead, y, rot: 0, sq: 1, clip: clip23 };
+  return { face: face5, x: x + face5 * ahead, y, rot: 0, sq: 1, clip: clip22 };
 }
 function rotLean(k, tick) {
   const { age, q: q2 } = phaseAge(k, ROT, tick);
@@ -97575,10 +97582,10 @@ function drawNamedEliteGroundV1(c, model, tick) {
 function namedEliteChargePoseV1(actor, tick) {
   const k = chargeOf(actor);
   if (!k || k.phase !== "windup" && k.phase !== "charging") return actor;
-  const facing3 = { value: k.direction.x < 0 ? -1 : 1, enumerable: true };
-  if (k.phase === "charging") return Object.create(actor, { presentationFacingX: facing3 });
+  const facing2 = { value: k.direction.x < 0 ? -1 : 1, enumerable: true };
+  if (k.phase === "charging") return Object.create(actor, { presentationFacingX: facing2 });
   const q2 = clamp29(1 - (k.phaseEndsTick - tick) / CHARGE.windupTicks), pull = 2.5 * q2, shake = Math.sin(tick * 1.7) * 0.8 * q2;
-  return Object.create(actor, { presentationFacingX: facing3, position: { value: { x: actor.position.x - k.direction.x * pull + shake, y: actor.position.y - k.direction.y * pull }, enumerable: true } });
+  return Object.create(actor, { presentationFacingX: facing2, position: { value: { x: actor.position.x - k.direction.x * pull + shake, y: actor.position.y - k.direction.y * pull }, enumerable: true } });
 }
 function drawNamedEliteShellV1(c, actor, tick) {
   if (!actor.alive || actor.elite?.namedEliteId !== "queen_kheptra") return;
@@ -102326,8 +102333,8 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
   for (const f of manifest.files) {
     const r = await environment.fetch(new URL(f.path, base3));
     if (!r.ok) throw Error("Missing Woodland asset " + f.path);
-    const bytes = await r.arrayBuffer(), hash73 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", bytes)), (v) => v.toString(16).padStart(2, "0")).join("");
-    if (bytes.byteLength !== f.bytes || hash73 !== f.sha256) throw Error("Woodland asset commitment mismatch " + f.path);
+    const bytes = await r.arrayBuffer(), hash74 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", bytes)), (v) => v.toString(16).padStart(2, "0")).join("");
+    if (bytes.byteLength !== f.bytes || hash74 !== f.sha256) throw Error("Woodland asset commitment mismatch " + f.path);
     files[f.path] = bytes;
     downloads += bytes.byteLength;
   }
@@ -104249,8 +104256,8 @@ async function createWoodlandFoliageV2(environment, prior) {
   for (const f of manifest.files) {
     const r3 = await environment.fetch(new URL(f.path, root6));
     if (!r3.ok) throw Error("Missing Woodland foliage " + f.path);
-    const b = await r3.arrayBuffer(), hash73 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
-    if (b.byteLength !== f.bytes || hash73 !== f.sha256) throw Error("Woodland foliage commitment mismatch");
+    const b = await r3.arrayBuffer(), hash74 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
+    if (b.byteLength !== f.bytes || hash74 !== f.sha256) throw Error("Woodland foliage commitment mismatch");
     bytes += b.byteLength;
     const image = await environment.createImageBitmap(new Blob([b], { type: "image/webp" }));
     try {
@@ -105632,8 +105639,8 @@ function extractPaintedEdge(pixels3, width2, height, spec) {
   }
   return { id: spec.id, width: w, height: ph, data, lipData, opaquePixels: opaque, minEdge: Math.min(...edge), maxEdge: Math.max(...edge) };
 }
-function samplePaintedEdge(p, u, v, out4, lip2 = false) {
-  const data = lip2 ? p.lipData : p.data;
+function samplePaintedEdge(p, u, v, out4, lip3 = false) {
+  const data = lip3 ? p.lipData : p.data;
   if (v < 0 || v >= p.height - 1) {
     out4[3] = 0;
     return out4;
@@ -105718,8 +105725,8 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
   for (const [file, f] of kit2.files.entries()) {
     const response = await env.fetch(new URL(f.path, root6));
     if (!response.ok) throw Error("Missing painted path source");
-    const bytes = await response.arrayBuffer(), hash73 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (v) => v.toString(16).padStart(2, "0")).join("");
-    if (hash73 !== f.sha256 || bytes.byteLength !== f.bytes) throw Error("Painted path source commitment mismatch");
+    const bytes = await response.arrayBuffer(), hash74 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (v) => v.toString(16).padStart(2, "0")).join("");
+    if (hash74 !== f.sha256 || bytes.byteLength !== f.bytes) throw Error("Painted path source commitment mismatch");
     const bitmap = await env.createImageBitmap(new Blob([bytes], { type: "image/webp" })), c = env.document.createElement("canvas");
     if (bitmap.width !== f.width || bitmap.height !== f.height) throw Error("Painted path source dimensions");
     c.width = f.width;
@@ -105798,7 +105805,7 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
     if (!build2) return null;
     const started = env.performance.now(), c = env.document.createElement("canvas");
     c.width = c.height = PAINTED_PAGE_SIZE;
-    const g = c.getContext("2d"), im = g.createImageData(PAINTED_PAGE_SIZE, PAINTED_PAGE_SIZE), out4 = im.data, s = {}, edge = new Float64Array(4), lip2 = new Float64Array(4);
+    const g = c.getContext("2d"), im = g.createImageData(PAINTED_PAGE_SIZE, PAINTED_PAGE_SIZE), out4 = im.data, s = {}, edge = new Float64Array(4), lip3 = new Float64Array(4);
     const stride = PAINTED_PAGE_SIZE / 32 + 1, warp2 = [];
     for (let y = 0; y < stride; y++) for (let x = 0; x < stride; x++) {
       const wx = px7 + o.x + x * 32, wy = py + o.y + y * 32;
@@ -105855,14 +105862,14 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
         if (d < 18) {
           const horizontal = Math.abs(s.gy) >= Math.abs(s.gx), positive3 = horizontal ? s.gy > 0 : s.gx > 0, choice = choices[(horizontal ? 2 : 0) + (positive3 ? 1 : 0)], k = horizontal ? x : y, p = profiles2[choice.indices[k]], u = choice.u[k], vv = 40 + d / kit2.sourcePixelScale;
           samplePaintedEdge(p, u, vv, edge);
-          samplePaintedEdge(p, u, vv, lip2, true);
+          samplePaintedEdge(p, u, vv, lip3, true);
           a *= 1 - edge[3];
-          const la = lip2[3];
+          const la = lip3[3];
           if (la) {
             const na = a * (1 - la) + la;
-            rr3 = (rr3 * a * (1 - la) + lip2[0] * la) / na;
-            gg = (gg * a * (1 - la) + lip2[1] * la) / na;
-            bb = (bb * a * (1 - la) + lip2[2] * la) / na;
+            rr3 = (rr3 * a * (1 - la) + lip3[0] * la) / na;
+            gg = (gg * a * (1 - la) + lip3[1] * la) / na;
+            bb = (bb * a * (1 - la) + lip3[2] * la) / na;
             a = na;
           }
         }
@@ -107278,8 +107285,8 @@ function createTerracePainter() {
       Q.addPath(L.P);
       const skip = (x) => rp && x >= rp.minX - 8 && x <= rp.maxX + 8 || stair2 && stair2.k === k && x >= stair2.x0 - 14 && x <= stair2.x0 + stair2.w + 14;
       const cliffs = [], tufts8 = [], feet = [];
-      for (const lip2 of L.lips) {
-        const a = lip2[0], z = lip2.at(-1), pts2 = [[a[0] - 4, a[1]], ...lip2, [z[0] + 4, z[1]]];
+      for (const lip3 of L.lips) {
+        const a = lip3[0], z = lip3.at(-1), pts2 = [[a[0] - 4, a[1]], ...lip3, [z[0] + 4, z[1]]];
         const top = pts2.map(([x, y]) => [x, y - 3]), bot = pts2.map(([x, y]) => [x, y + H8]).reverse();
         const shape3 = poly9([...top, ...bot]), outline5 = line19([[pts2[0][0], pts2[0][1]], ...pts2.map(([x, y]) => [x, y + H8]), [pts2.at(-1)[0], pts2.at(-1)[1]]]);
         const footBand = poly9([...pts2.map(([x, y]) => [x, y + H8 - 7]), ...bot]), lipBand = poly9([...top, ...pts2.map(([x, y]) => [x, y + 4]).reverse()]), lipLine = line19(pts2);
@@ -108528,12 +108535,12 @@ function createVolcanoPainter() {
   const LAVA_W = 48;
   function craterShape(g) {
     const p = g.pool, cx = (p.x + 0.5) * T107, cy2 = (p.y + 0.5) * T107, R11 = rng26(g.d.sh ^ 1799596469), r = p.rx * T107 / 1.25;
-    const pool4 = blob3(R11, cx, cy2, r - 2, 0.12, 40), lip2 = blob3(R11, cx, cy2 + 2, r + 14, 0.1, 40);
+    const pool4 = blob3(R11, cx, cy2, r - 2, 0.12, 40), lip3 = blob3(R11, cx, cy2 + 2, r + 14, 0.1, 40);
     const plates = [];
     for (let i = 0; i < 10; i++) plates.push({ a: R11() * TAU162, r: 0.15 + R11() * 0.55, spin: (R11() - 0.5) * 4e-4, shape: plateShape(R11, 6 + R11() * 8) });
     const streaks = [];
     for (let i = 0; i < 7; i++) streaks.push({ y: (R11() - 0.5) * p.ry * T107 * 1.2, w: p.rx * T107 * (0.25 + R11() * 0.4), ph: R11(), sp: 8e-3 + R11() * 0.01 });
-    return { pool: pool4, lip: lip2, plates, streaks, cx, cy: cy2, rx: p.rx * T107, ry: p.ry * T107 };
+    return { pool: pool4, lip: lip3, plates, streaks, cx, cy: cy2, rx: p.rx * T107, ry: p.ry * T107 };
   }
   function plateShape(R11, r) {
     const P25 = new Path2D(), n = 6 + Math.floor(R11() * 3);
@@ -109190,8 +109197,8 @@ function createForestStandsArtV2(env, prior) {
     };
     const [body6, bg] = mk();
     for (let o = 0; o <= h; o++) {
-      const band11 = Math.floor(o / 7);
-      bg.fillStyle = o < 3 ? tone87(P25.bands[0], -0.25) : P25.bands[band11 % P25.bands.length];
+      const band12 = Math.floor(o / 7);
+      bg.fillStyle = o < 3 ? tone87(P25.bands[0], -0.25) : P25.bands[band12 % P25.bands.length];
       bg.fill(up2(o));
     }
     {
@@ -111279,10 +111286,10 @@ function createCurvedRoutesV1(env, review, prior) {
     const paints = [...codes].some((code2) => PAINTED.has(code2)) && needsPaint(m, b), key4 = pageKey(m, b), layer2 = !paints ? void 0 : quick ? layers.get(key4) : yield* layerFor(m, b, view3);
     for (const code2 of codes) {
       if (layer2 !== void 0 && PAINTED.has(code2)) continue;
-      const clip23 = tileClip(m, b, (x, y) => biomeOf3(m, x, y) === code2 && !CUT2.has(terrainOf(m, x, y)));
-      if (!clip23) continue;
+      const clip22 = tileClip(m, b, (x, y) => biomeOf3(m, x, y) === code2 && !CUT2.has(terrainOf(m, x, y)));
+      if (!clip22) continue;
       c.save();
-      c.clip(clip23);
+      c.clip(clip22);
       try {
         drawRibbons(c, all, STYLE[code2] ? code2 : "w", { box: box6, world, near: near5 });
       } finally {
@@ -111296,10 +111303,10 @@ function createCurvedRoutesV1(env, review, prior) {
       c.globalCompositeOperation = "source-over";
       c.drawImage(layer2.canvas, 0, 0, layer2.w, layer2.h, layer2.ax - m.dx, layer2.ay - m.dy, layer2.w, layer2.h);
       c.restore();
-      const clip23 = tileClip(m, b, (x, y) => PAINTED.has(biomeOf3(m, x, y)) && !CUT2.has(terrainOf(m, x, y)));
-      if (clip23) {
+      const clip22 = tileClip(m, b, (x, y) => PAINTED.has(biomeOf3(m, x, y)) && !CUT2.has(terrainOf(m, x, y)));
+      if (clip22) {
         c.save();
-        c.clip(clip23);
+        c.clip(clip22);
         try {
           drawWorn(c, view3.roads, { near: near5 });
         } finally {
@@ -114647,7 +114654,7 @@ function smithHammer(c, A2) {
 }
 function slagmaul(c, A2, t = 0) {
   const coal3 = { b: "#3a2c26", d: "#2a201b", l: "#4e3c33" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, iron = { b: "#4a4f57", d: "#33373d", l: "#6b727c" }, bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, knuck = { b: "#5f555b", d: "#463e43", l: "#7a6e70" }, slag2 = { b: "#3b3439", d: "#29242a" };
-  const heat = 0.75 + 0.25 * Math.sin(t * 3.2), LAVA5 = "#f6662c", GOLD45 = "#ffbd53";
+  const heat = 0.75 + 0.25 * Math.sin(t * 3.2), LAVA5 = "#f6662c", GOLD46 = "#ffbd53";
   G3(c, [10.2, -1.8, 11.6, -2.2, 12.6, -1.2, 12.4, 1.4, 11, 2.1, 9.8, 1], slag2, { split: 0.5, lw: 1 });
   px3(c, 10.8, -0.4, 1, 0.8, LAVA5);
   R3(c, 12.4, -1, 12.4, 2, coal3, { flat: true, lw: 1.2 });
@@ -114669,7 +114676,7 @@ function slagmaul(c, A2, t = 0) {
     c.moveTo(29.6, y);
     c.lineTo(35.4, y);
     c.stroke();
-    c.strokeStyle = GOLD45;
+    c.strokeStyle = GOLD46;
     c.globalAlpha = heat;
     c.lineWidth = 0.6;
     c.beginPath();
@@ -114688,10 +114695,10 @@ function slagmaul(c, A2, t = 0) {
     c.save();
     c.lineCap = "round";
     c.lineJoin = "round";
-    for (const [col2, lw] of [[LAVA5, w], [GOLD45, w * 0.4]]) {
+    for (const [col2, lw] of [[LAVA5, w], [GOLD46, w * 0.4]]) {
       c.strokeStyle = col2;
       c.lineWidth = lw;
-      if (col2 === GOLD45) c.globalAlpha = heat;
+      if (col2 === GOLD46) c.globalAlpha = heat;
       c.beginPath();
       pts2.forEach(([x, y], k) => k ? c.lineTo(x, y) : c.moveTo(x, y));
       c.stroke();
@@ -114706,7 +114713,7 @@ function slagmaul(c, A2, t = 0) {
 var VENT_CHARGE = null;
 function ventcutter(c, A2, t = 0) {
   const obs = { b: "#2f2935", d: "#211d26", l: "#5a4f66" }, bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, slag2 = { b: "#3b3439", d: "#29242a" };
-  const LAVA5 = "#f6662c", GOLD45 = "#ffbd53", WHITE7 = "#fff0b0", heat = 0.75 + 0.25 * Math.sin(t * 3.6), n = VENT_CHARGE;
+  const LAVA5 = "#f6662c", GOLD46 = "#ffbd53", WHITE7 = "#fff0b0", heat = 0.75 + 0.25 * Math.sin(t * 3.6), n = VENT_CHARGE;
   G3(c, [10.6, -1.6, 12, -2, 12.8, -1, 12.6, 1.2, 11.4, 1.8, 10.4, 0.8], slag2, { split: 0.5, lw: 1 });
   px3(c, 11.1, -0.3, 0.9, 0.7, LAVA5);
   R3(c, 12.4, -1.1, 4, 2.2, wrap3, { flat: true, lw: 1.2 });
@@ -114717,7 +114724,7 @@ function ventcutter(c, A2, t = 0) {
   c.lineCap = "round";
   c.lineJoin = "round";
   const edge = [[18.6, 1.5], [24, 0.95], [28.8, 0.15], [31.6, -0.6], [34.2, -4.8]];
-  for (const [col2, lw, a] of [[LAVA5, 0.95, 1], [GOLD45, 0.4, heat]]) {
+  for (const [col2, lw, a] of [[LAVA5, 0.95, 1], [GOLD46, 0.4, heat]]) {
     c.strokeStyle = col2;
     c.lineWidth = lw;
     c.globalAlpha = a;
@@ -114748,7 +114755,7 @@ function ventcutter(c, A2, t = 0) {
     c.stroke();
     c.beginPath();
     c.ellipse(x, y - 0.05, 0.75, 0.45, -0.12, 0, TAU167);
-    c.fillStyle = lit2 > 0.5 ? ready ? WHITE7 : GOLD45 : "#5a2c22";
+    c.fillStyle = lit2 > 0.5 ? ready ? WHITE7 : GOLD46 : "#5a2c22";
     c.fill();
     if (lit2 > 0.5) {
       const [r, g, b] = ready ? [255, 240, 176] : [255, 189, 83];
@@ -114765,7 +114772,7 @@ function ventcutter(c, A2, t = 0) {
 var CORE_PRIMED = null;
 function coreheart(c, A2, t = 0) {
   const bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, iron = { b: "#4a4f57", d: "#33373d", l: "#6b727c" }, claw4 = { b: "#7c828c", d: "#5a6068", l: "#a3a9b2" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, slag2 = { b: "#3b3439", d: "#29242a" };
-  const LAVA5 = "#f6662c", DEEP8 = "#c9361f", GOLD45 = "#ffbd53", WHITE7 = "#fff0b0", p = CORE_PRIMED ?? 0, heat = 0.7 + 0.3 * Math.sin(t * (3 + p * 5));
+  const LAVA5 = "#f6662c", DEEP8 = "#c9361f", GOLD46 = "#ffbd53", WHITE7 = "#fff0b0", p = CORE_PRIMED ?? 0, heat = 0.7 + 0.3 * Math.sin(t * (3 + p * 5));
   G3(c, [9.8, -1.3, 11, -1.6, 11.8, -0.8, 11.6, 1, 10.6, 1.5, 9.6, 0.6], slag2, { split: 0.5, lw: 0.9 });
   R3(c, 11.4, -1, 3.8, 2, wrap3, { flat: true, lw: 1.1 });
   px3(c, 12.6, -1, 0.5, 2, "#00000044");
@@ -114793,12 +114800,12 @@ function coreheart(c, A2, t = 0) {
     c.beginPath();
     for (let i = 0; i < h.length; i += 2) i ? c.lineTo(h[i], h[i + 1]) : c.moveTo(h[i], h[i + 1]);
     c.closePath();
-    c.fillStyle = p > 0.5 ? GOLD45 : LAVA5;
+    c.fillStyle = p > 0.5 ? GOLD46 : LAVA5;
     c.fill();
   }
   c.save();
   c.globalAlpha = heat * (p > 0.5 ? 1 : 0.6);
-  c.fillStyle = p > 0.5 ? WHITE7 : GOLD45;
+  c.fillStyle = p > 0.5 ? WHITE7 : GOLD46;
   c.beginPath();
   c.ellipse(27.6, -0.2, 0.9 + p * 0.4, 0.6 + p * 0.3, 0, 0, TAU167);
   c.fill();
@@ -119482,13 +119489,13 @@ Object.assign(KG_SLEEVE, {
   }),
   "sorcerer-robe": mgSleeve2(MG.crimson, MG.black, MG.black, (c) => px3(c, 6.5, -3.5, 0.4, 7, MG.gold.b))
 });
-function mgWind(c, x0, y0, w, h, band11, step3 = 1.9, bw = 0.8) {
+function mgWind(c, x0, y0, w, h, band12, step3 = 1.9, bw = 0.8) {
   c.save();
   c.beginPath();
   c.rect(x0, y0, w, h);
   c.clip();
   for (let x = x0 - h; x < x0 + w + h; x += step3) {
-    G3(c, [x, y0 + h, x + bw, y0 + h, x + bw + h * 0.6, y0, x + h * 0.6, y0], band11, { flat: true, line: false });
+    G3(c, [x, y0 + h, x + bw, y0 + h, x + bw + h * 0.6, y0, x + h * 0.6, y0], band12, { flat: true, line: false });
     c.fillStyle = "#00000040";
     c.fill(poly11([x + bw, y0 + h, x + bw + 0.3, y0 + h, x + bw + 0.3 + h * 0.6, y0, x + bw + h * 0.6, y0]));
   }
@@ -120158,16 +120165,16 @@ Object.assign(KG_HELM, {
     c.quadraticCurveTo(2, -18.6, 0.8, -20.4);
     c.stroke();
     c.restore();
-    const band11 = new Path2D();
-    band11.moveTo(-9.5, -15);
-    band11.quadraticCurveTo(-1.4, -17.2, 6.8, -15);
-    band11.lineTo(6.2, -17.6);
-    band11.quadraticCurveTo(-1.4, -19.8, -9.3, -17.6);
-    band11.closePath();
+    const band12 = new Path2D();
+    band12.moveTo(-9.5, -15);
+    band12.quadraticCurveTo(-1.4, -17.2, 6.8, -15);
+    band12.lineTo(6.2, -17.6);
+    band12.quadraticCurveTo(-1.4, -19.8, -9.3, -17.6);
+    band12.closePath();
     c.fillStyle = tint(M.rope.b);
-    c.fill(band11);
+    c.fill(band12);
     c.save();
-    c.clip(band11);
+    c.clip(band12);
     c.fillStyle = tint(M.rope.d);
     for (let x = -9; x < 7; x += 2.2) {
       c.beginPath();
@@ -120187,7 +120194,7 @@ Object.assign(KG_HELM, {
     c.restore();
     c.lineWidth = 1.1;
     c.strokeStyle = K6;
-    c.stroke(band11);
+    c.stroke(band12);
     const brim = new Path2D();
     brim.moveTo(-14.6, -13.4);
     brim.quadraticCurveTo(-2, -17.6, 11.8, -13.8);
@@ -120275,16 +120282,16 @@ Object.assign(KG_HELM, {
     mgStar(c, -5.4, -20, 0.7);
     mgStar(c, 2.8, -26.2, 0.55);
     mgStar(c, 3.4, -19, 0.5);
-    const band11 = new Path2D();
-    band11.moveTo(-9.1, -15);
-    band11.quadraticCurveTo(-1.2, -17.2, 6.6, -15);
-    band11.lineTo(6, -17.4);
-    band11.quadraticCurveTo(-1.2, -19.6, -8.9, -17.4);
-    band11.closePath();
+    const band12 = new Path2D();
+    band12.moveTo(-9.1, -15);
+    band12.quadraticCurveTo(-1.2, -17.2, 6.6, -15);
+    band12.lineTo(6, -17.4);
+    band12.quadraticCurveTo(-1.2, -19.6, -8.9, -17.4);
+    band12.closePath();
     c.fillStyle = tint(NV.b);
-    c.fill(band11);
+    c.fill(band12);
     c.save();
-    c.clip(band11);
+    c.clip(band12);
     c.strokeStyle = "#ffffff40";
     c.lineWidth = 0.45;
     c.beginPath();
@@ -120294,7 +120301,7 @@ Object.assign(KG_HELM, {
     c.restore();
     c.lineWidth = 1.1;
     c.strokeStyle = K6;
-    c.stroke(band11);
+    c.stroke(band12);
     for (const [x, y] of [[-6.8, -16.6], [-4.2, -17.1], [2.4, -17.1], [4.8, -16.5]]) px3(c, x, y, 0.6, 0.6, MG.silver.l);
     const brim = new Path2D();
     brim.moveTo(-14.4, -13.4);
@@ -120487,19 +120494,19 @@ Object.assign(KG_HELM, {
     mgStar(c, 5, -18.4, 1.05);
     mgStar(c, 7.4, -15.2, 0.8);
     mgStar(c, -13.2, -18.6, 0.85);
-    const band11 = new Path2D();
-    band11.moveTo(-11.9, -13.7);
-    band11.quadraticCurveTo(-1, -14.5, 10.1, -13.5);
-    band11.lineTo(10.1, -11.4);
+    const band12 = new Path2D();
+    band12.moveTo(-11.9, -13.7);
+    band12.quadraticCurveTo(-1, -14.5, 10.1, -13.5);
+    band12.lineTo(10.1, -11.4);
     for (let i = 0, w = 22 / 5; i < 5; i++) {
       const x = 10.1 - i * w;
-      band11.quadraticCurveTo(x - w / 2, -8.4, x - w, -11.4);
+      band12.quadraticCurveTo(x - w / 2, -8.4, x - w, -11.4);
     }
-    band11.closePath();
+    band12.closePath();
     c.fillStyle = tint(MG.gold.b);
-    c.fill(band11);
+    c.fill(band12);
     c.save();
-    c.clip(band11);
+    c.clip(band12);
     c.fillStyle = tint(MG.gold.d);
     for (let i = 0, w = 22 / 5; i < 5; i++) {
       const x = 10.1 - i * w;
@@ -120524,7 +120531,7 @@ Object.assign(KG_HELM, {
     c.restore();
     c.lineWidth = 1;
     c.strokeStyle = K6;
-    c.stroke(band11);
+    c.stroke(band12);
     px3(c, -9.6, -9.4, 17.4, 0.6, "#00000030");
     mgGemSet(c, -1.2, -12.5, 1.7);
     gem2(c, -1.2, -12.5, 1.35, A2.gem);
@@ -123041,7 +123048,7 @@ var QUEST_ITEM_POLICY = Object.freeze({
   leftoverCap: 99,
   leftoverKinds: 16
 });
-var item = (id2, name, plural3, creatures, art, desc, title9, why) => Object.freeze({ id: id2, name, plural: plural3, creatures, art, desc, title: title9, why });
+var item = (id2, name, plural3, creatures, art, desc, title10, why) => Object.freeze({ id: id2, name, plural: plural3, creatures, art, desc, title: title10, why });
 var QUEST_ITEMS = Object.freeze({
   tusk_boar: item("boar-tusk", "Boar Tusk", "Boar Tusks", "Tusk Boars", "tusk", "Pried from a Tusk Boar.", "Tusk Trouble", "Tusk Boars have been tearing up the fields {dir} of {town}."),
   field_scarecrow: item("scarecrow-cape", "Scarecrow's Torn Cape", "Scarecrow's Torn Capes", "Field Scarecrows", "gear:cape:ragged-cape", "Torn off a Field Scarecrow.", "Rags in the Wind", "Field Scarecrows walk the meadows {dir} of {town} at all hours."),
@@ -123146,18 +123153,18 @@ function landOf(view3, town) {
   }
   return best;
 }
-function nearest(list, town, land, band11, key4, preferUnfound, poolSize = P15.reach.pool) {
+function nearest(list, town, land, band12, key4, preferUnfound, poolSize = P15.reach.pool) {
   const ok = list.filter((t) => {
     const d = Math.hypot(t.x - town.x, t.y - town.y);
-    return d >= P15.reach.min && d <= P15.reach.max && (t.band ?? 1) <= band11 + 1 && (!land || !t.landmassId || t.landmassId === land);
+    return d >= P15.reach.min && d <= P15.reach.max && (t.band ?? 1) <= band12 + 1 && (!land || !t.landmassId || t.landmassId === land);
   });
   const unfound = preferUnfound ? ok.filter((t) => !t.found) : [], pool4 = (unfound.length ? unfound : ok).sort((a, b) => Math.hypot(a.x - town.x, a.y - town.y) - Math.hypot(b.x - town.x, b.y - town.y) || (a.id ?? a.siteId).localeCompare(b.id ?? b.siteId)).slice(0, poolSize);
   return pool4.length ? pick3(pool4, key4) : null;
 }
 var DIFFICULTY_STEPS = ["easy", "normal", "hard"];
-function questDifficultyV1(kind, { named: named2 = false, tier: tier2 = "standard", band: band11 = 1, townBand = 1, step: step3 = 1 } = {}) {
+function questDifficultyV1(kind, { named: named2 = false, tier: tier2 = "standard", band: band12 = 1, townBand = 1, step: step3 = 1 } = {}) {
   let i = kind === "carry" || kind === "find" ? 0 : kind === "hunt" ? named2 ? 2 : 1 : kind === "clear" ? tier2 === "small" ? 0 : tier2 === "standard" ? 1 : 2 : kind === "collect" ? step3 : 1;
-  if (band11 > townBand) i = Math.min(2, i + 1);
+  if (band12 > townBand) i = Math.min(2, i + 1);
   return DIFFICULTY_STEPS[i];
 }
 function questGearGroupV1(kind, key4) {
@@ -123166,29 +123173,29 @@ function questGearGroupV1(kind, key4) {
   return (h >>> 8) % 100 < g.fitPercent ? g.fits[kind] : ["weapons", "armor", "accessories"][(h >>> 16) % 3];
 }
 function questTargetV1(view3, town, kind, key4) {
-  const land = view3.land?.get(town.id) ?? landOf(view3, town), band11 = town.band ?? 1;
+  const land = view3.land?.get(town.id) ?? landOf(view3, town), band12 = town.band ?? 1;
   let t;
   const out4 = (target, tBand, extra) => {
     const b = tBand ?? 1;
-    return { kind, target, tx: Math.floor(t.x), ty: Math.floor(t.y), band: b, difficulty: questDifficultyV1(kind, { ...extra, band: b, townBand: band11 }), gearGroup: questGearGroupV1(kind, key4) };
+    return { kind, target, tx: Math.floor(t.x), ty: Math.floor(t.y), band: b, difficulty: questDifficultyV1(kind, { ...extra, band: b, townBand: band12 }), gearGroup: questGearGroupV1(kind, key4) };
   };
   if (kind === "clear") {
-    t = nearest(view3.sites.filter((s) => s.tier === "standard" && !view3.eliteSites.has(s.reservationId)), town, land, band11, key4, true);
+    t = nearest(view3.sites.filter((s) => s.tier === "standard" && !view3.eliteSites.has(s.reservationId)), town, land, band12, key4, true);
     if (t) return out4(t.siteId, t.band, { tier: t.tier });
   } else if (kind === "hunt") {
-    t = nearest(view3.sites.filter(huntableSiteV1), town, land, band11, key4, false);
+    t = nearest(view3.sites.filter(huntableSiteV1), town, land, band12, key4, false);
     if (t) return out4(t.siteId, t.band, { named: Boolean(huntSpecV1(t)?.named) });
   } else if (kind === "carry") {
-    t = nearest(view3.settlements.filter((s) => s.id !== town.id && s.board), town, null, band11, key4, true);
+    t = nearest(view3.settlements.filter((s) => s.id !== town.id && s.board), town, null, band12, key4, true);
     if (t) return out4(t.id, t.band, {});
   } else if (kind === "find") {
-    t = nearest(view3.clearings.filter((c) => c.category !== "pathside" && c.event !== "raided_camp"), town, land, band11, key4, true);
-    if (t) return out4(t.id, t.band ?? band11, {});
+    t = nearest(view3.clearings.filter((c) => c.category !== "pathside" && c.event !== "raided_camp"), town, land, band12, key4, true);
+    if (t) return out4(t.id, t.band ?? band12, {});
   } else if (kind === "rescue") {
-    t = nearest(view3.clearings.filter((c) => c.event === "raided_camp"), town, land, band11, key4, false) ?? nearest(view3.clearings.filter((c) => c.category === "backcountry"), town, land, band11, key4 + "/any", false);
-    if (t) return out4(t.id, t.band ?? band11, {});
+    t = nearest(view3.clearings.filter((c) => c.event === "raided_camp"), town, land, band12, key4, false) ?? nearest(view3.clearings.filter((c) => c.category === "backcountry"), town, land, band12, key4 + "/any", false);
+    if (t) return out4(t.id, t.band ?? band12, {});
   } else if (kind === "collect") {
-    t = nearest(view3.sites.filter((s) => collectFamiliesV1(s.biome).length), town, land, band11, key4, false, 3);
+    t = nearest(view3.sites.filter((s) => collectFamiliesV1(s.biome).length), town, land, band12, key4, false, 3);
     if (t) {
       const fams = collectFamiliesV1(t.biome), family = fams[questHash(key4 + "/family") % fams.length], q2 = out4(t.siteId, t.band, { step: questHash(key4 + "/step") % 2 });
       return { ...q2, family, need: QUEST_ITEM_POLICY.need[q2.difficulty] };
@@ -123287,35 +123294,35 @@ function questTextV1(q2, names2) {
     ...it ? { need: String(q2.need), plural: it.plural, Plural: it.plural, creatures: it.creatures } : {}
   };
   const found = Boolean(names2.found);
-  let title9, step3, note2;
+  let title10, step3, note2;
   if (q2.kind === "collect") {
-    title9 = it.title;
+    title10 = it.title;
     note2 = fill3(it.why + " Bring me {need} {plural}.", v);
     step3 = fill3("Collect {need} {plural} from {creatures}", v);
   } else if (q2.kind === "clear") {
-    title9 = fill3("Trouble at {label}", v);
+    title10 = fill3("Trouble at {label}", v);
     note2 = fill3("Something has moved into {label}, {dir} of {town}. Clear it out.", v);
     step3 = fill3(found ? "Clear out {label}" : "Find {label} \xB7 search the marked area", v);
   } else if (q2.kind === "hunt") {
-    title9 = fill3("Wanted: {kind}", v);
+    title10 = fill3("Wanted: {kind}", v);
     note2 = fill3("{a} has made a lair in {label}, {dir} of {town}. Hunt {it} down.", v);
     step3 = fill3("Hunt {the} at {label}", v);
   } else if (q2.kind === "carry") {
-    title9 = PARCEL_TITLE[parcel2] + " for " + (names2.dest ?? "a town to the " + dir);
+    title10 = PARCEL_TITLE[parcel2] + " for " + (names2.dest ?? "a town to the " + dir);
     note2 = fill3("Carry this letter to {dest} and hand it in at the notice board there.", v);
     step3 = fill3("Take the {parcel} to {dest}", v);
   } else if (q2.kind === "find") {
-    title9 = "The lost " + v.item;
+    title10 = "The lost " + v.item;
     note2 = fill3("Someone lost " + aOrAn(v.item) + " in a clearing {dir} of {town}. Search the clearing and bring it back.", v);
     step3 = found ? "Search the clearing for the " + v.item : "Find the clearing \xB7 search the marked area";
   } else {
-    title9 = "Taken by looters";
+    title10 = "Taken by looters";
     note2 = fill3("Looters are holding {captive} at their camp {dir} of {town}. Drive them off and bring {freed} home.", v);
     step3 = fill3("Free {freed} at the looters' camp", v);
   }
   if (folk) note2 = fill3(FOLK[q2.kind][folk] ?? FOLK[q2.kind].general, v);
   if (q2.status === "ready") step3 = fill3(q2.source === "folk" ? "Return to {giver} in {town}" : "Return to the {town} notice board", { ...v, giver: giverWord(names2.giverName, names2.town) });
-  return { title: sentences(title9), note: sentences(note2), step: sentences(step3) };
+  return { title: sentences(title10), note: sentences(note2), step: sentences(step3) };
 }
 
 // src/shared/generation/alderwood_access_v1.js
@@ -124452,10 +124459,10 @@ function summitPlanV1(g, tile2, cx, cy2, otherAnchors = []) {
       break;
     }
   }
-  const clamp82 = (v, hi) => Math.max(16, Math.min(hi - 16, v));
+  const clamp83 = (v, hi) => Math.max(16, Math.min(hi - 16, v));
   let position4 = cp;
   if (ledge3) {
-    const p = { x: clamp82(Math.round((cp.x + ledge3.x) / 2), CW * T111), y: clamp82(Math.round((cp.y + ledge3.y) / 2), CH * T111) };
+    const p = { x: clamp83(Math.round((cp.x + ledge3.x) / 2), CW * T111), y: clamp83(Math.round((cp.y + ledge3.y) / 2), CH * T111) };
     if (Math.hypot(cp.x - p.x, cp.y - p.y) <= REACH3 && Math.hypot(ledge3.x - p.x, ledge3.y - p.y) <= REACH3) position4 = p;
     else ledge3 = null;
   }
@@ -125358,9 +125365,9 @@ function mountPlannedReviewControlsV1({ environment, controls, review, session }
   };
   const doc = environment.document, section = doc.createElement("details");
   section.id = "planned-world-review";
-  const title9 = doc.createElement("summary");
-  title9.textContent = (doc.body.dataset.cumulativeReview === "true" ? "Cumulative world preview \xB7 " : "Planned world review \xB7 ") + review.asset.assetId;
-  section.append(title9);
+  const title10 = doc.createElement("summary");
+  title10.textContent = (doc.body.dataset.cumulativeReview === "true" ? "Cumulative world preview \xB7 " : "Planned world review \xB7 ") + review.asset.assetId;
+  section.append(title10);
   if (review.binding.settlementServicesVersion) review.targets.push({ id: "life:town-enchanter", label: "Selene \xB7 Enchanter (inspection)", tile: { x: 5909, y: 5754 } });
   const note2 = doc.createElement("p");
   note2.textContent = review.binding.sitePopulation ? review.binding.wildernessVersion ? "Wilderness V2: 108 playable sites (40 caves, 18 forts, 34 ruins, 16 crypts) including 73 scattered wilderness additions. Trails and event clearing capacities reserved. Original Alpha geography and baseline sites preserved. " : "Alpha population: 35 playable sites - 12 caves, 7 forts, 9 ruins, 7 crypts. All tiers now have real Alpha destinations. Original 48 reservations remain; three explicit additions bring the roster to 51. Signature families remain reserved and UNBUILT. Town and furnished tavern, refined water, Hybrid V2, provisional routes and six future islands are preserved. Named coastal ferries connect all seven populated islands. Walk to a landing and press E/touch; no inspection travel is required.  Large Cave rewards are provisional; Deep Cave finale remains UNBOUND. Optional fixtures remain separate campaigns." : (review.asset.reviewFixture ? "ISOLATED " + (review.asset.assetId === "crypt-large-fixture" ? "LARGE CRYPT" : review.asset.assetId === "ruin-deep-fixture" ? "DEEP RUIN" : "DEEP FORT") + " FIXTURE. Separate disposable campaign; NOT a populated Alpha destination. " : "") + (review.binding.cryptPrototype ? "Crypt family: Alpha Small (1), Standard (2) and Deep (4) floors; Large (3) is an optional isolated fixture. " : "") + (review.binding.ruinPrototype ? (review.binding.ruinPrototype === PLANNED_RUIN_V2 ? review.asset.reviewFixture ? "Deep Ruin: four floors. " : "Three Alpha ruins: Small, Standard and Large (three floors). Deep is a separate optional fixture. " : "Small and Standard ruins playable. ") + "Ordinary personal floor chests; existing temporary encounters. " : "") + (review.binding.fortPrototype ? "Fort family review. Existing upper commander/underground elites are temporary encounters. Ocean-separated forts need inspection travel. " : "") + (review.binding.cavePrototype ? review.caveReservations.length > 1 ? "Four procedural caves playable; native cave art/rosters reused. Large rewards provisional; Deep finale UNBOUND. Island Deep has no walking connection to the mainland. " : "One Desert Standard Cave is playable via the existing trail. Native cave art/roster reused. " : "") + (review.binding.townPrototype ? "One populated open town and furnished two-floor tavern; remaining reservations are UNBUILT. " : "") + "Provisional travel-network candidate \xB7 actual campaign \xB7 20 settlements / 48 sites / 6 future islands / 3 campuses reserved. Other settlement buildings and destination interiors remain UNBUILT. Timber bridges cross suitable local channels. Ocean travel is not implemented.";
@@ -125484,23 +125491,23 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
     const q2 = tx.objectStore(name).get(key4);
     q2.onsuccess = () => done3(q2.result ?? null);
   });
-  const describe = async (hash73) => HASH.test(hash73) ? info(await get(WORLDS, hash73)) : null, campaignWorld = async (campaignId) => (await get(CAMPAIGNS, campaignId))?.hash ?? null;
+  const describe = async (hash74) => HASH.test(hash74) ? info(await get(WORLDS, hash74)) : null, campaignWorld = async (campaignId) => (await get(CAMPAIGNS, campaignId))?.hash ?? null;
   return Object.freeze({
     // Keeps a world file the world maker built. Returns what a page needs to name it.
     async put(text3) {
       if (typeof text3 !== "string") throw new TypeError("A built world is JSON text");
-      const bytes = new TextEncoder().encode(text3), hash73 = bytesToHex(await sha256(bytes)), asset = JSON.parse(text3);
-      const record2 = { hash: hash73, seed: String(asset.upstream?.seed ?? asset.seed), commitments: seededCommitmentsV1(asset), size: bytes.length, ...await pack(bytes) };
+      const bytes = new TextEncoder().encode(text3), hash74 = bytesToHex(await sha256(bytes)), asset = JSON.parse(text3);
+      const record2 = { hash: hash74, seed: String(asset.upstream?.seed ?? asset.seed), commitments: seededCommitmentsV1(asset), size: bytes.length, ...await pack(bytes) };
       await run2([WORLDS], "readwrite", (tx) => {
-        tx.objectStore(WORLDS).put(record2, hash73);
+        tx.objectStore(WORLDS).put(record2, hash74);
       });
       return info(record2);
     },
     // The world's seed, commitments and size, or null when it isn't stored.
     info: describe,
     // The world file as text, or null when it isn't stored. The asset store checks its hash.
-    async read(hash73) {
-      const r = HASH.test(hash73) ? await get(WORLDS, hash73) : null;
+    async read(hash74) {
+      const r = HASH.test(hash74) ? await get(WORLDS, hash74) : null;
       if (!r) return null;
       try {
         return new TextDecoder("utf-8", { fatal: true }).decode(r.encoding === "gzip" ? await pipe(r.bytes, new DecompressionStream("gzip")) : r.bytes);
@@ -125509,11 +125516,11 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
       }
     },
     // A seeded campaign names its world before the launcher points at it.
-    bindCampaign: (campaignId, hash73) => run2([WORLDS, CAMPAIGNS], "readwrite", (tx, done3, fail) => {
-      const q2 = tx.objectStore(WORLDS).get(hash73);
+    bindCampaign: (campaignId, hash74) => run2([WORLDS, CAMPAIGNS], "readwrite", (tx, done3, fail) => {
+      const q2 = tx.objectStore(WORLDS).get(hash74);
       q2.onsuccess = () => {
         if (!q2.result) fail(new Error("Seeded world missing"));
-        else tx.objectStore(CAMPAIGNS).put({ hash: hash73 }, campaignId);
+        else tx.objectStore(CAMPAIGNS).put({ hash: hash74 }, campaignId);
       };
     }),
     // The hash of the world a campaign plays on, or null for a campaign on today's map.
@@ -125521,9 +125528,9 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
     // The world a start plays on: the one a resumed campaign was made on, or for a new campaign the
     // stored world it asks for. null is today's map; a named world that isn't stored is an error.
     async forStart({ resume = null, requested = null } = {}) {
-      const hash73 = resume ? await campaignWorld(resume.campaignId) : requested || null;
-      if (!hash73) return null;
-      const found = await describe(hash73);
+      const hash74 = resume ? await campaignWorld(resume.campaignId) : requested || null;
+      if (!hash74) return null;
+      const found = await describe(hash74);
       if (!found) throw new Error("Seeded world missing");
       return found;
     }
@@ -125751,8 +125758,8 @@ function laneFor(doc) {
     card.addEventListener("pointerup", end);
     card.addEventListener("pointercancel", end);
   }
-  function show({ kind = "loot", title: title9, sub = "", accent = null, image = null, key: key4 = null, ms = DEFAULT_MS }) {
-    const id2 = key4 ?? kind + "/" + title9, prior = cards.get(id2);
+  function show({ kind = "loot", title: title10, sub = "", accent = null, image = null, key: key4 = null, ms = DEFAULT_MS }) {
+    const id2 = key4 ?? kind + "/" + title10, prior = cards.get(id2);
     if (prior) {
       const n = Number(prior.dataset.count || 1) + 1;
       prior.dataset.count = String(n);
@@ -125770,7 +125777,7 @@ function laneFor(doc) {
       if (sub) waiting.sub = sub;
       return null;
     }
-    const options = { kind, title: title9, sub, accent, image, id: id2, ms };
+    const options = { kind, title: title10, sub, accent, image, id: id2, ms };
     if (showing().length >= toastLimitV1(doc)) {
       queue.push(options);
       if (queue.length > QUEUE_MAX) queue.shift();
@@ -125780,7 +125787,7 @@ function laneFor(doc) {
     }
     return build2(options);
   }
-  function build2({ kind, title: title9, sub, accent, image, id: id2, ms, count: count2 = 1 }) {
+  function build2({ kind, title: title10, sub, accent, image, id: id2, ms, count: count2 = 1 }) {
     if (queue.length) ms = Math.min(ms, QUEUED_MS);
     const card = doc.createElement("div");
     card.className = "toast-v1";
@@ -125804,7 +125811,7 @@ function laneFor(doc) {
     const text3 = doc.createElement("div");
     text3.className = "toast-text";
     const t = doc.createElement("strong");
-    t.textContent = title9;
+    t.textContent = title10;
     const s = doc.createElement("small");
     s.className = "toast-sub";
     s.textContent = sub;
@@ -125879,9 +125886,9 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   root6.setAttribute("role", "dialog");
   root6.setAttribute("aria-modal", "true");
   root6.setAttribute("aria-labelledby", "hero-creator-title");
-  const panel = el3("div", "hc-panel"), head19 = el3("header", "hc-head"), title9 = el3("h2", "", "Create your hero"), intro = el3("p", "hc-intro");
-  title9.id = "hero-creator-title";
-  head19.append(title9, intro);
+  const panel = el3("div", "hc-panel"), head19 = el3("header", "hc-head"), title10 = el3("h2", "", "Create your hero"), intro = el3("p", "hc-intro");
+  title10.id = "hero-creator-title";
+  head19.append(title10, intro);
   if (beforeGame?.strip) head19.append(beforeGame.strip);
   const body6 = el3("div", "hc-body"), preview = el3("div", "hc-preview"), stage2 = el3("canvas", "hc-stage"), bar2 = el3("div", "hc-bar");
   stage2.setAttribute("role", "img");
@@ -125898,7 +125905,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   });
   status2.setAttribute("role", "status");
   foot2.append(status2, switchHero, cancel, confirm);
-  let mode = "create", cls = null, deferClass = false, look = { ...DEFAULT_LOOK }, facing3 = 1, showGear = true, busy = false, thumbsKey = "", opener = null, kitBusy = false, kitRetryAt = 0, roomNoticed = false;
+  let mode = "create", cls = null, deferClass = false, look = { ...DEFAULT_LOOK }, facing2 = 1, showGear = true, busy = false, thumbsKey = "", opener = null, kitBusy = false, kitRetryAt = 0, roomNoticed = false;
   const toggle = (text3, get, set) => {
     const b = button3("hc-toggle", text3, () => {
       set(!get());
@@ -125915,7 +125922,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   });
   const randomButton = button3("hc-toggle", "Random look", randomLook);
   bar2.append(button3("hc-toggle", "Turn", () => {
-    facing3 = -facing3;
+    facing2 = -facing2;
   }), gearToggle.b, helmToggle.b, randomButton);
   preview.append(stage2, bar2);
   const field3 = (label7, content, id2) => {
@@ -126089,8 +126096,8 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   function paintStage(t) {
     draw(stage2, specFor(heroClass() ?? (mode === "look" ? null : cls), previewGear()), (c, w, h) => {
       const s = Math.min(h / 56, w / 58);
-      c.translate(w * 0.5 - (facing3 > 0 ? 3 : -3) * s, h - 22 - 20 * 0.8 * s);
-      c.scale(0.8 * s * facing3, 0.8 * s);
+      c.translate(w * 0.5 - (facing2 > 0 ? 3 : -3) * s, h - 22 - 20 * 0.8 * s);
+      c.scale(0.8 * s * facing2, 0.8 * s);
     }, t);
   }
   function confirmState() {
@@ -126109,7 +126116,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     laterRow.hidden = mode !== "create";
     for (const f of lookFields) f.f.hidden = mode === "class";
     helmToggle.b.hidden = randomButton.hidden = mode === "class";
-    title9.textContent = mode === "create" ? "Create your hero" : mode === "class" ? "Choose your class" : "Your hero\u2019s look";
+    title10.textContent = mode === "create" ? "Create your hero" : mode === "class" ? "Choose your class" : "Your hero\u2019s look";
     intro.textContent = mode === "create" ? "Name your hero and choose how they look. Pick a class now or later; once picked, it\u2019s permanent." : mode === "class" ? "Your class is permanent for this hero. Your name and look stay as they are." : "Change how your hero looks. Your gear still goes on top.";
     for (const [id2, { b }] of Object.entries(cardButtons)) {
       b.setAttribute("aria-pressed", String(id2 === cls));
@@ -126240,7 +126247,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
       cls = hasClass ? null : Object.values(HERO_CLASSES).find((c) => c.offhand === current)?.id ?? null;
     }
     showGear = true;
-    facing3 = 1;
+    facing2 = 1;
     status2.textContent = "";
     thumbsKey = "";
     opener = document2.activeElement;
@@ -126266,7 +126273,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     cls = hero?.cls ?? null;
     deferClass = Boolean(hero?.deferClass);
     showGear = true;
-    facing3 = 1;
+    facing2 = 1;
     status2.textContent = "";
     thumbsKey = "";
     root6.hidden = false;
@@ -126342,9 +126349,9 @@ async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV
 function chooseWorld(document2, { pick: pick4, text: text3, roll: roll9 }) {
   const { el: el3, button: button3, icon: icon2, dialog } = dom(document2);
   return new Promise((resolve) => {
-    const root6 = dialog("new-world-title"), panel = el3("div", "nw-panel"), head19 = el3("header", "nw-head"), title9 = el3("h2", "", "Choose your world");
-    title9.id = "new-world-title";
-    head19.append(title9, el3("p", "nw-intro", "Each hero lives in one world. Play the classic map, or grow a new one from a seed."));
+    const root6 = dialog("new-world-title"), panel = el3("div", "nw-panel"), head19 = el3("header", "nw-head"), title10 = el3("h2", "", "Choose your world");
+    title10.id = "new-world-title";
+    head19.append(title10, el3("p", "nw-intro", "Each hero lives in one world. Play the classic map, or grow a new one from a seed."));
     const body6 = el3("div", "nw-body"), cards = el3("div", "nw-cards"), legend = el3("p", "nw-legend", "World");
     const card = (kind, name, about, tag2) => {
       const b = button3("nw-card is-" + kind, "", () => {
@@ -126472,10 +126479,10 @@ async function buildWithHero(environment, seed2, save, startBuild) {
 }
 function buildStrip(document2, seed2) {
   const { el: el3, icon: icon2 } = dom(document2);
-  const root6 = el3("div", "nw-strip"), title9 = el3("strong", "nw-strip-title"), detail = el3("span", "nw-strip-detail"), bar2 = el3("span", "nw-bar"), fill9 = el3("span", "nw-bar-fill"), percent = el3("span", "nw-strip-percent");
+  const root6 = el3("div", "nw-strip"), title10 = el3("strong", "nw-strip-title"), detail = el3("span", "nw-strip-detail"), bar2 = el3("span", "nw-bar"), fill9 = el3("span", "nw-bar-fill"), percent = el3("span", "nw-strip-percent");
   root6.setAttribute("role", "status");
   bar2.append(fill9);
-  root6.append(icon2("seeded", "nw-strip-icon"), title9, detail, bar2, percent);
+  root6.append(icon2("seeded", "nw-strip-icon"), title10, detail, bar2, percent);
   let last = "";
   return { root: root6, paint(state2) {
     const key4 = JSON.stringify([Math.floor(state2.fraction * 100), state2.stage, state2.failed]);
@@ -126484,7 +126491,7 @@ function buildStrip(document2, seed2) {
     const done3 = state2.stage === WORLD_BUILD_STAGES.length, shown2 = Math.floor(state2.fraction * 100);
     root6.classList.toggle("is-failed", Boolean(state2.failed));
     root6.classList.toggle("is-done", done3);
-    title9.textContent = state2.failed ? "This world couldn\u2019t be built" : done3 ? "Your world is ready" : "Building your world";
+    title10.textContent = state2.failed ? "This world couldn\u2019t be built" : done3 ? "Your world is ready" : "Building your world";
     detail.textContent = state2.failed ? "Seed " + seed2.seed + " \xB7 you can try again after making your hero" : "Seed " + seed2.seed + (done3 ? "" : " \xB7 " + WORLD_BUILD_STAGES[state2.stage].label);
     bar2.hidden = percent.hidden = Boolean(state2.failed);
     fill9.style.width = shown2 + "%";
@@ -126493,9 +126500,9 @@ function buildStrip(document2, seed2) {
 }
 function waitingPanel(document2, environment, seed2) {
   const { el: el3, button: button3, dialog } = dom(document2);
-  const root6 = dialog("new-world-wait-title"), panel = el3("div", "nw-panel nw-wait-panel"), head19 = el3("header", "nw-head"), title9 = el3("h2", "", "Your world is almost ready"), intro = el3("p", "nw-intro");
-  title9.id = "new-world-wait-title";
-  head19.append(title9, intro);
+  const root6 = dialog("new-world-wait-title"), panel = el3("div", "nw-panel nw-wait-panel"), head19 = el3("header", "nw-head"), title10 = el3("h2", "", "Your world is almost ready"), intro = el3("p", "nw-intro");
+  title10.id = "new-world-wait-title";
+  head19.append(title10, intro);
   root6.hidden = true;
   const body6 = el3("div", "nw-wait"), heroBox = el3("div", "nw-wait-hero"), portrait = el3("canvas", "nw-wait-portrait"), heroName = el3("strong", "nw-wait-name"), heroClass = el3("span", "nw-wait-class");
   portrait.setAttribute("aria-hidden", "true");
@@ -126572,10 +126579,10 @@ function waitingPanel(document2, environment, seed2) {
     });
     intro.textContent = state2.failed ? `${name} is ready, but this seed\u2019s world couldn\u2019t be made.` : `${name} is ready. The adventure starts as soon as the world is built.`;
     if (state2.failed) {
-      title9.textContent = "This world couldn\u2019t be built";
+      title10.textContent = "This world couldn\u2019t be built";
       note2.textContent = "The world maker stopped: " + state2.failed + ". Try again, or play the classic world with " + name + ".";
     } else {
-      title9.textContent = "Your world is almost ready";
+      title10.textContent = "Your world is almost ready";
       note2.textContent = "Your world is saved with " + name + ", so it only builds once.";
     }
     retry.hidden = classic.hidden = !state2.failed;
@@ -129285,8 +129292,8 @@ function validateQuestsV1(root6) {
 }
 var viewCache = null;
 function baseView(state2) {
-  const k = state2.d9World.navigation.knowledge, hash73 = state2.d9World.plannedWorld.assetHash, rev = worldRevisionV1();
-  if (viewCache?.hash === hash73 && viewCache.rev === rev) return viewCache.view;
+  const k = state2.d9World.navigation.knowledge, hash74 = state2.d9World.plannedWorld.assetHash, rev = worldRevisionV1();
+  if (viewCache?.hash === hash74 && viewCache.rev === rev) return viewCache.view;
   const settlements = k.settlements.map((s) => {
     const t = generatedTownV1(s.id);
     return { id: s.id, label: s.label, x: s.x, y: s.y, band: s.band, board: Boolean(t), boardTile: t ? townStartV1(t).note : null };
@@ -129295,8 +129302,8 @@ function baseView(state2) {
     const id2 = r.socket.provenance?.reservationId ?? "", [, family, biome] = id2.split(":"), p = mapTilePosition(r.socket.entrance);
     return { siteId: r.siteId, reservationId: id2, family, biome: r.socket.region?.biome ?? biome, tier: r.socket.provenance?.sizeTier ?? "standard", band: r.socket.provenance?.band ?? 1, x: p.x, y: p.y, label: String(r.parcel?.label ?? r.socket.label ?? family).slice(0, 60), landmassId: worldSiteV1(id2)?.landmassId ?? null };
   }).sort((a, b) => a.siteId.localeCompare(b.siteId));
-  const view3 = { seed: hash73, settlements, sites, clearings: questClearingsV1(), eliteSites: new Set(Object.values(worldRolesV1().eliteSites ?? {}).flat()), land: /* @__PURE__ */ new Map() };
-  viewCache = { hash: hash73, rev, view: view3 };
+  const view3 = { seed: hash74, settlements, sites, clearings: questClearingsV1(), eliteSites: new Set(Object.values(worldRolesV1().eliteSites ?? {}).flat()), land: /* @__PURE__ */ new Map() };
+  viewCache = { hash: hash74, rev, view: view3 };
   return view3;
 }
 var atCache = { key: null, view: null };
@@ -134484,9 +134491,9 @@ function separationImpulse(a, b) {
     y = dy / d;
   } else {
     const first = a.entityId < b.entityId, key4 = first ? a.entityId + b.entityId : b.entityId + a.entityId;
-    let hash73 = 0;
-    for (let i = 0; i < key4.length; i++) hash73 = Math.imul(hash73, 31) + key4.charCodeAt(i) >>> 0;
-    const angle3 = hash73 % 8 * Math.PI / 4, sign4 = first ? 1 : -1;
+    let hash74 = 0;
+    for (let i = 0; i < key4.length; i++) hash74 = Math.imul(hash74, 31) + key4.charCodeAt(i) >>> 0;
+    const angle3 = hash74 % 8 * Math.PI / 4, sign4 = first ? 1 : -1;
     x = Math.cos(angle3) * sign4;
     y = Math.sin(angle3) * sign4;
   }
@@ -138387,10 +138394,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     ["superconductor", 5, (k, t, mechanic) => mechanic === "lightning" && (k.ticking(t, "burn") || k.frosted(t))],
     ["marked_foe", 4, (k, t) => k.on(t, "mark")],
     ["marked_for_death", 4, (k, t) => k.on(t, "deathmark")],
-    ["kindle", 5, (k, t, mechanic) => FIRE7.includes(mechanic) && k.on(t, "kindle")],
+    ["kindle", 5, (k, t, mechanic) => FIRE8.includes(mechanic) && k.on(t, "kindle")],
     ["exploit", 3, (k, t) => k.on(t, "expose")]
   ];
-  const SLAMS = /* @__PURE__ */ new Set(["earth_breaker", "retribution"]), FIRE7 = ["fire", "burn"], ELEMENT_OF = { fire: 1, burn: 1, frost: 2, lightning: 3 }, SIGNATURES = /* @__PURE__ */ new Set(["shield_bash", "flurry", "cast"]), SHOCKWAVES = /* @__PURE__ */ new Set(["earth_breaker", "skyfall_leap"]);
+  const SLAMS = /* @__PURE__ */ new Set(["earth_breaker", "retribution"]), FIRE8 = ["fire", "burn"], ELEMENT_OF = { fire: 1, burn: 1, frost: 2, lightning: 3 }, SIGNATURES = /* @__PURE__ */ new Set(["shield_bash", "flurry", "cast"]), SHOCKWAVES = /* @__PURE__ */ new Set(["earth_breaker", "skyfall_leap"]);
   function outgoing(source3, target, raw, mechanic, trigger, critical = false) {
     let out4 = raw;
     const whole = (v) => v === raw ? v : outgoingCombat(v);
@@ -138467,7 +138474,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       if (tenths) out4 = pct3(out4, 2 * vengeance * tenths);
     }
     if (rank(source3, "blood_price")) out4 = pct3(out4, 25);
-    if (rank(source3, "glass_furnace") && FIRE7.includes(mechanic)) out4 = pct3(out4, 35);
+    if (rank(source3, "glass_furnace") && FIRE8.includes(mechanic)) out4 = pct3(out4, 35);
     if (rank(source3, "toxic_blood")) out4 = mechanic === "bleed" || mechanic === "poison" ? pct3(out4, 40) : trigger === "periodic" ? out4 : multiplyCombat(out4, 85, 100);
     if (rank(source3, "last_stand") && low(source3, 30)) out4 = multiplyCombat(out4, 85, 100);
     const coup = rank(source3, "coup_de_grace");
@@ -138518,7 +138525,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       let extra = 0;
       if (B8) {
         const b = B8.stats;
-        extra += (FIRE7.includes(mechanic) ? b.fireDmg : mechanic === "frost" ? b.frostDmg : mechanic === "lightning" ? b.lightningDmg : mechanic === "bleed" ? b.bleedDmg : mechanic === "poison" ? b.poisonDmg : 0) ?? 0;
+        extra += (FIRE8.includes(mechanic) ? b.fireDmg : mechanic === "frost" ? b.frostDmg : mechanic === "lightning" ? b.lightningDmg : mechanic === "bleed" ? b.bleedDmg : mechanic === "poison" ? b.poisonDmg : 0) ?? 0;
         if ((waving || SHOCKWAVES.has(current)) && b.shockDmg) extra += b.shockDmg;
         if ((trigger === "reactive" || current === "retribution") && b.counterDmg) extra += b.counterDmg;
         if (b.eliteDmg && eliteOrBoss(target)) extra += b.eliteDmg;
@@ -138530,7 +138537,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       }
       if (mechanic === "main") extra += gear2.mainDmg;
       if (SIGNATURES.has(current) || !current && trigger === "proc" && mechanic !== "main") extra += gear2.offDmg;
-      extra += FIRE7.includes(mechanic) ? gear2.fireDmg : mechanic === "frost" ? gear2.frostDmg : mechanic === "lightning" ? gear2.lightningDmg : mechanic === "bleed" ? gear2.bleedDmg : mechanic === "poison" ? gear2.poisonDmg : 0;
+      extra += FIRE8.includes(mechanic) ? gear2.fireDmg : mechanic === "frost" ? gear2.frostDmg : mechanic === "lightning" ? gear2.lightningDmg : mechanic === "bleed" ? gear2.bleedDmg : mechanic === "poison" ? gear2.poisonDmg : 0;
       if (waving || SHOCKWAVES.has(current)) extra += gear2.shockDmg;
       if (trigger === "reactive" || current === "retribution") extra += gear2.counterDmg;
       if (current && gear2.skills[current]) extra += gear2.skills[current];
@@ -139958,75 +139965,6 @@ function originalMarcusDashNodes(origin, target) {
   ];
 }
 
-// src/simulation/archived_boss_attack_geometry_v1.js
-var clip20 = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
-var range = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-var facing = (from, to) => to.x < from.x ? -1 : 1;
-function segmentDistance(p, a, b) {
-  const dx = b.x - a.x, dy = b.y - a.y, length2 = dx * dx + dy * dy;
-  if (length2 === 0) return range(p, a);
-  const t = clip20(((p.x - a.x) * dx + (p.y - a.y) * dy) / length2);
-  return Math.hypot(p.x - (a.x + dx * t), p.y - (a.y + dy * t));
-}
-function originalFireCone(origin, target, person, rangeLimit = 110, halfAngle = 0.8, hull3 = 9) {
-  const dx = person.x - origin.x, dy = person.y - origin.y, d = Math.hypot(dx, dy);
-  if (d > rangeLimit + hull3) return false;
-  const s = facing(origin, target), dot16 = dx * s;
-  if (dot16 < -hull3) return false;
-  if (d <= hull3) return true;
-  const angular = Math.atan2(Math.abs(dy), dot16);
-  return angular <= halfAngle + Math.asin(Math.min(1, hull3 / d));
-}
-function originalCinderRushEndpoint(collision, origin, target, radius = 28) {
-  const dx = target.x - origin.x, dy = target.y - origin.y, d = Math.hypot(dx, dy) || 1;
-  const nx = dx / d, ny = dy / d, max = Math.min(220, d + 64);
-  let end = { x: origin.x, y: origin.y };
-  for (let length = 4; length <= max; length += 4) {
-    const next = { x: origin.x + nx * length, y: origin.y + ny * length };
-    if (!sweptPathClear(collision, origin, next, radius)) break;
-    end = next;
-  }
-  return end;
-}
-function sweptPathClear(collision, from, to, radius = 12) {
-  if (!collision || collidesWithTiles(collision, from.x, from.y, radius) || collidesWithTiles(collision, to.x, to.y, radius)) return false;
-  const d = range(from, to), steps7 = Math.max(1, Math.ceil(d / Math.max(3, collision.tileSize / 6)));
-  for (let i = 1; i < steps7; i++) {
-    const p = { x: from.x + (to.x - from.x) * i / steps7, y: from.y + (to.y - from.y) * i / steps7 };
-    if (collidesWithTiles(collision, p.x, p.y, radius)) return false;
-  }
-  return true;
-}
-function originalArenaRing(collision, home, index) {
-  if (!Number.isInteger(index) || index < 0 || index > 7) return null;
-  const s = collision.tileSize, cols = collision.width, rows = collision.height;
-  const centerX = Math.floor(home.x / s), centerY = Math.floor(home.y / s);
-  const half = Math.min(9, Math.floor((Math.min(cols, rows) - 4) / 2));
-  const minColumn = Math.max(0, centerX - half + 2 + index), maxColumn = Math.min(cols - 1, centerX + half - 2 - index);
-  const minRow = Math.max(0, centerY - half + 2 + index), maxRow = Math.min(rows - 1, centerY + half - 2 - index);
-  if (minColumn >= maxColumn || minRow >= maxRow) return null;
-  const ring12 = { index, minColumn, maxColumn, minRow, maxRow, tileSize: s };
-  const tiles9 = originalRingTiles(ring12).filter((p) => !collidesWithTiles(collision, p.x + s / 2, p.y + s / 2, s / 5));
-  return tiles9.length ? { ...ring12, tiles: tiles9 } : null;
-}
-function originalRingTiles(r) {
-  const out4 = [], s = r.tileSize;
-  for (let col2 = r.minColumn; col2 <= r.maxColumn; col2++) {
-    out4.push({ column: col2, row: r.minRow, x: col2 * s, y: r.minRow * s, size: s });
-    out4.push({ column: col2, row: r.maxRow, x: col2 * s, y: r.maxRow * s, size: s });
-  }
-  for (let row2 = r.minRow + 1; row2 < r.maxRow; row2++) {
-    out4.push({ column: r.minColumn, row: row2, x: r.minColumn * s, y: row2 * s, size: s });
-    out4.push({ column: r.maxColumn, row: row2, x: r.maxColumn * s, y: row2 * s, size: s });
-  }
-  return out4;
-}
-function onOriginalRing(r, p) {
-  if (!r?.tiles?.length) return false;
-  const col2 = Math.floor(p.x / r.tileSize), row2 = Math.floor(p.y / r.tileSize);
-  return r.tiles.some((tile2) => tile2.column === col2 && tile2.row === row2);
-}
-
 // src/simulation/archived_boss_runtime_v1.js
 var rounded2 = (hp, n, d) => combatInteger(multiplyCombat(hp, n, d), "round");
 var within = (a, b, r) => range(a, b) <= r;
@@ -140201,21 +140139,65 @@ function createArchivedBossFightRuntime(state2, { pool: pool4, damage, hit: hit2
       damagePacket(a, t, rounded2(a.attackDamage, 1, 2), "boss_body_contact", { sourceActionSequence: b.abilitySequence });
     }
   }
-  function collapseRing(b, a, c) {
+  const ASHFANG_MAX_RINGS = 4, THROW_TICKS2 = 12;
+  function innerFloor(b) {
+    const rs = b.archive.collapsedRings;
+    if (!rs.length) return null;
+    const r = rs.reduce((m, x) => x.index > m.index ? x : m), s = r.tileSize;
+    return { x0: (r.minColumn + 1) * s, x1: r.maxColumn * s, y0: (r.minRow + 1) * s, y1: r.maxRow * s };
+  }
+  const clampInto = (box6, p, h) => ({ x: Math.min(box6.x1 - h, Math.max(box6.x0 + h, p.x)), y: Math.min(box6.y1 - h, Math.max(box6.y0 + h, p.y)) });
+  const onFallen = (b, p) => b.archive.collapsedRings.some((r) => onOriginalRing(r, p));
+  function shove2(b, t, to, ticks) {
+    b.archive.ashfangShoves ??= {};
+    b.archive.ashfangShoves[t.entityId] = { from: point5(t.position), to: point5(to), startedTick: state2.tick, durationTicks: ticks };
+  }
+  function collapseRing(b, a, c, locked = []) {
     if (b.bossDefinitionId !== "ashfang" || !b.archive) return false;
-    const idx = b.archive.collapsedRings.length, ring12 = originalArenaRing(c, b.homePosition, idx);
+    const idx = b.archive.collapsedRings.length;
+    if (idx >= ASHFANG_MAX_RINGS) return false;
+    const ring12 = originalArenaRing(c, b.homePosition, idx);
     if (!ring12) return false;
     b.archive.collapsedRings.push({ ...ring12, createdTick: state2.tick });
     b.collapseStep = Math.min(7, idx + 1);
+    const box6 = innerFloor(b);
+    for (const t of locked) {
+      if (!onOriginalRing(ring12, t.position)) continue;
+      shove2(b, t, clampInto(box6, t.position, (t.hullRadius ?? 9) + 2), THROW_TICKS2);
+      if (compareCombat(t.hp, "1") > 0) damagePacket(a, t, combatInteger(minCombat(rounded2(t.maxHp, 15, 100), subtractCombat(t.hp, "1")), "round"), "ashfang_collapse_throw", { sourceActionSequence: b.abilitySequence, nonLethal: true });
+    }
     return true;
   }
-  function tickCollapsedRings(b, a, all) {
-    if (b.bossDefinitionId !== "ashfang" || !b.archive || !b.archive.collapsedRings.length || state2.tick % 40 !== 0) return;
-    for (const t of targetsIn(b, all)) {
-      if (!b.archive.collapsedRings.some((r) => onOriginalRing(r, t.position))) continue;
-      if (compareCombat(t.hp, "1") <= 0) continue;
-      const requested = combatInteger(minCombat(rounded2(t.maxHp, 8, 100), subtractCombat(t.hp, "1")), "round");
-      damagePacket(a, t, requested, "ashfang_void", { sourceActionSequence: b.abilitySequence, nonLethal: true });
+  const ROAR_DELAY = 24, ROAR_TICKS = 16, ROAR_REACH = 190, ROAR_PUSH = 52;
+  function tickAshfangFloor(b, a, all, c) {
+    if (b.bossDefinitionId !== "ashfang" || !b.archive) return;
+    const ar = b.archive, targets = targetsIn(b, all);
+    if (ar.ashfangRoarTick != null && state2.tick === ar.ashfangRoarTick + ROAR_DELAY) {
+      const aim2 = b.lastAction?.targetPosition ?? targets[0]?.position, side = aim2 && aim2.x < a.position.x ? -1 : 1;
+      for (const t of targets) {
+        const dx = t.position.x - a.position.x, dy = t.position.y - a.position.y, d = Math.hypot(dx, dy);
+        if (d > ROAR_REACH + (t.hullRadius ?? 9) || dx * side < -8) continue;
+        const ux = d > 1 ? dx / d : side, uy = d > 1 ? dy / d : 0;
+        shove2(b, t, { x: t.position.x + ux * ROAR_PUSH, y: t.position.y + uy * ROAR_PUSH }, ROAR_TICKS);
+      }
+    }
+    for (const [id2, v] of Object.entries(ar.ashfangShoves ?? {}).sort(([x], [y]) => x.localeCompare(y))) {
+      const t = state2.entitiesById[id2], q2 = Math.min(1, (state2.tick - v.startedTick) / v.durationTicks);
+      if (!t?.alive) {
+        delete ar.ashfangShoves[id2];
+        continue;
+      }
+      const e = 1 - Math.pow(1 - q2, 2.2), want = { x: v.from.x + (v.to.x - v.from.x) * e, y: v.from.y + (v.to.y - v.from.y) * e };
+      moveAegisAffectedActor(c, t, { x: want.x - t.position.x, y: want.y - t.position.y });
+      if (q2 >= 1) delete ar.ashfangShoves[id2];
+    }
+    if (ar.ashfangShoves && !Object.keys(ar.ashfangShoves).length) delete ar.ashfangShoves;
+    const box6 = innerFloor(b);
+    if (!box6) return;
+    for (const t of targets) {
+      if (ar.ashfangShoves?.[t.entityId] || !onFallen(b, t.position)) continue;
+      const to = clampInto(box6, t.position, (t.hullRadius ?? 9) + 1);
+      moveAegisAffectedActor(c, t, { x: to.x - t.position.x, y: to.y - t.position.y });
     }
   }
   function resolveOriginal(b, a, targets, ability, pos, c) {
@@ -140243,7 +140225,7 @@ function createArchivedBossFightRuntime(state2, { pool: pool4, damage, hit: hit2
     } else if (ability === "hooked_tail" && kind === "ashfang") {
       for (const t of locked) if (within(t.position, pos, 64 + (t.hullRadius ?? 9)) && damagePacket(a, t, rounded2(a.attackDamage, 18, 10), "ashfang_slam", { sourceActionSequence: b.abilitySequence })) hits2.push(t.entityId);
     } else if (ability === "arena_collapse" && kind === "ashfang") {
-      collapseRing(b, a, c);
+      collapseRing(b, a, c, locked);
     } else if (ability === "singularity" && kind === "void_overseer") {
       for (const t of locked) if (within(t.position, a.position, conf.singularity.radius + (t.hullRadius ?? 9)) && damagePacket(a, t, rounded2(a.attackDamage, 195, 100), "void_singularity", { sourceActionSequence: b.abilitySequence })) hits2.push(t.entityId);
     } else return false;
@@ -140337,7 +140319,7 @@ function createArchivedBossFightRuntime(state2, { pool: pool4, damage, hit: hit2
       tickSpores(b, a, all, c);
       tickPoison(b, a, all);
     }
-    if (b.bossDefinitionId === "ashfang") tickCollapsedRings(b, a, all);
+    if (b.bossDefinitionId === "ashfang") tickAshfangFloor(b, a, all, c);
     if (b.bossDefinitionId === "cinderhart") tickCinderFires(b, a, all);
     if (b.bossDefinitionId === "nexus_overseer") advanceNexusDecoys(b, a, all, c);
     if (["corrosive_abomination", "void_overseer"].includes(b.bossDefinitionId)) tickContact(b, a, all);
@@ -140534,6 +140516,10 @@ function createRecoveredBossCombatV1(state2, { applyDirectDamage, eligible: elig
     if (b.bossDefinitionId === "nexus_overseer") awaken(b, 2);
     if (b.bossDefinitionId === "cinderhart") awaken(b, 2);
     if (b.bossDefinitionId === "barrow_king" || b.bossDefinitionId === "sun_pharaoh") awaken(b, 2);
+    if (b.bossDefinitionId === "ashfang" && b.archive) {
+      b.archive.ashfangRoarTick = state2.tick;
+      b.nextActionTick = Math.max(b.nextActionTick, state2.tick + 58);
+    }
     if (b.bossDefinitionId === "chronos_arbitrator") {
       b.nextActionTick = state2.tick;
       if (b.archive) {
@@ -140563,7 +140549,7 @@ function createRecoveredBossCombatV1(state2, { applyDirectDamage, eligible: elig
     if (id2 === "marcus") return b.phase === 2 && r < 0.23 ? "molten_shield" : r < 0.48 ? "coin_barrage" : r < 0.71 ? "gold_rush" : r < 0.86 ? "inversion" : "gilded_lasso";
     if (id2 === "ashfang") {
       if (b.archive) {
-        const pool5 = b.phase === 2 ? ["hooked_tail", "scarlet_fire", "arena_collapse"] : ["hooked_tail", "scarlet_fire"];
+        const pool5 = b.phase === 2 && b.archive.collapsedRings.length < 4 ? ["hooked_tail", "scarlet_fire", "arena_collapse"] : ["hooked_tail", "scarlet_fire"];
         const chosen = pool5[Math.floor(roll8(b.selectionSeed, b.abilitySequence, 568840981) * pool5.length)];
         return dist3(a.position, target.position) < 64 && roll8(b.selectionSeed, b.abilitySequence, 3366196011) < 0.8 ? "hooked_tail" : chosen;
       }
@@ -141438,8 +141424,8 @@ function createLesserBossCombatV1(state2, { applyDirectDamage, eligible: eligibl
     }
     if (k.phase === "dizzy" && state2.tick >= k.phaseEndsTick) rest2(a, k, t);
   }
-  function burst7(e, a, k, t, targets, band11) {
-    const [r0, r1] = t.bands[band11];
+  function burst7(e, a, k, t, targets, band12) {
+    const [r0, r1] = t.bands[band12];
     for (const p of targets) {
       const d = distance7(k.origin, p.position);
       if (d < r0 || d > r1) continue;
@@ -141548,7 +141534,7 @@ function createLesserBossCombatV1(state2, { applyDirectDamage, eligible: eligibl
     else if (k.phase === "volley") phase2(k, "sprouts", t.sproutTicks);
     else if (k.phase === "sprouts") rest2(a, k, t);
   }
-  function tongue11(e, a, k, t, targets, c) {
+  function tongue13(e, a, k, t, targets, c) {
     if (k.phase === "ready") {
       const p = ready(a, k) ? nearest2(a, targets, t.minRange, t.maxRange) : null;
       if (p) {
@@ -142267,7 +142253,7 @@ function createLesserBossCombatV1(state2, { applyDirectDamage, eligible: eligibl
       else if (t.kind === "dive") dive(e, a, k, t, targets, c);
       else if (t.kind === "burrow") burrow2(e, a, k, t, targets, c);
       else if (t.kind === "seeds") seeds(e, a, k, t, targets);
-      else if (t.kind === "tongue") tongue11(e, a, k, t, targets, c);
+      else if (t.kind === "tongue") tongue13(e, a, k, t, targets, c);
       else if (t.kind === "reap") reap(e, a, k, t, targets);
       else if (t.kind === "stings") stings(e, a, k, t, targets);
       else if (t.kind === "pit") pit2(e, a, k, t, targets, c);
@@ -143463,13 +143449,13 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     requireContract(state2.proofCase !== "A", "Synthetic placement is unavailable in normal play");
     relocate(entityId2, spaceInstanceId, position4);
   }
-  function developerRelocateToWorld(playerId, position4, facing3) {
+  function developerRelocateToWorld(playerId, position4, facing2) {
     requireContract(developerCapabilities.siteNavigator === true, "Developer Site Navigator capability unavailable");
-    const player = state2.playersById[playerId], actor = state2.entitiesById[player?.entityId], length = Math.hypot(facing3?.x ?? 0, facing3?.y ?? 0);
+    const player = state2.playersById[playerId], actor = state2.entitiesById[player?.entityId], length = Math.hypot(facing2?.x ?? 0, facing2?.y ?? 0);
     requireContract(player?.connectionStatus === "connected" && actor?.alive && actor.residency.spaceInstanceId === state2.overworldInstanceId, "Developer relocation requires a live overworld participant");
     requireContract(length > 1e-4 && Number.isFinite(position4?.x) && Number.isFinite(position4?.y), "Invalid developer relocation target");
     relocate(actor.entityId, state2.overworldInstanceId, position4);
-    state2.primary.actorsById[actor.entityId].facing = { x: facing3.x / length, y: facing3.y / length };
+    state2.primary.actorsById[actor.entityId].facing = { x: facing2.x / length, y: facing2.y / length };
     version++;
     return freezeWire({ status: "relocated", playerId, position: copyWire(position4), facing: copyWire(state2.primary.actorsById[actor.entityId].facing) });
   }
@@ -144612,19 +144598,19 @@ var mapSiteLabel = (state2, id2, label7) => {
   return label7 + " / " + tier2[0].toUpperCase() + tier2.slice(1);
 };
 function rustNibblerFacingD11_2({ position: position4, previousPosition = null, movementIntentX = 0, attackTargetPosition = null, meleePhase = "idle", lastFacing = 1, alive = true }) {
-  let facing3 = lastFacing === -1 ? -1 : 1;
-  if (!alive) return facing3;
+  let facing2 = lastFacing === -1 ? -1 : 1;
+  if (!alive) return facing2;
   if (meleePhase !== "idle" && attackTargetPosition) {
     const dx = attackTargetPosition.x - position4.x;
     if (Math.abs(dx) >= 0.25) return dx < 0 ? -1 : 1;
-    return facing3;
+    return facing2;
   }
   if (Math.abs(movementIntentX) >= 0.05) return movementIntentX < 0 ? -1 : 1;
   if (previousPosition) {
     const dx = position4.x - previousPosition.x, dy = position4.y - previousPosition.y;
-    if (Math.abs(dx) >= 0.15 && Math.abs(dx) >= Math.abs(dy) * 0.4) facing3 = dx < 0 ? -1 : 1;
+    if (Math.abs(dx) >= 0.15 && Math.abs(dx) >= Math.abs(dy) * 0.4) facing2 = dx < 0 ? -1 : 1;
   }
-  return facing3;
+  return facing2;
 }
 var staticLayout = null;
 var staticSpots = /* @__PURE__ */ new Map();
@@ -145297,8 +145283,8 @@ function createWorldEventHudV4(document2, onActivate = () => {
   root6.hidden = true;
   root6.setAttribute("data-gameplay-hud", "");
   root6.setAttribute("aria-label", "Local event");
-  const tag2 = document2.createElement("small"), head19 = document2.createElement("div"), title9 = document2.createElement("strong"), timer = document2.createElement("time"), row2 = document2.createElement("div"), pips = document2.createElement("span"), bar2 = document2.createElement("span"), fill9 = document2.createElement("i"), barText = document2.createElement("b"), line43 = document2.createElement("p"), action2 = document2.createElement("button");
-  head19.append(title9, timer);
+  const tag2 = document2.createElement("small"), head19 = document2.createElement("div"), title10 = document2.createElement("strong"), timer = document2.createElement("time"), row2 = document2.createElement("div"), pips = document2.createElement("span"), bar2 = document2.createElement("span"), fill9 = document2.createElement("i"), barText = document2.createElement("b"), line43 = document2.createElement("p"), action2 = document2.createElement("button");
+  head19.append(title10, timer);
   bar2.append(fill9, barText);
   row2.append(pips, bar2);
   action2.type = "button";
@@ -145377,7 +145363,7 @@ function createWorldEventHudV4(document2, onActivate = () => {
     root6.style.setProperty("--accent", trackerRow.accent ?? "#c27dff");
     root6.dataset.kind = trackerRow.kind ?? "";
     tag2.textContent = trackerRow.tag ?? "";
-    title9.textContent = trackerRow.title ?? "";
+    title10.textContent = trackerRow.title ?? "";
     timer.textContent = trackerRow.timer ?? "";
     line43.textContent = trackerRow.line ?? "";
     const n = trackerRow.pips ?? 0;
@@ -147006,7 +146992,7 @@ BOOTS["gorehide-stompers"] = (c, A2) => {
   G4(c, [25.6, 22, 27.8, 18.4, 30.4, 16.8, 31, 17.8, 29, 19.6, 27.6, 22.6], TQ.tusk, { split: 0.6, lw: 0.9 });
 };
 BOOTS["brimstone-treads"] = (c, A2) => {
-  const bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, iron = { b: "#4a4f57", d: "#33373d", l: "#6b727c" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, slag2 = { b: "#3b3439", d: "#29242a" }, LAVA5 = "#f6662c", GOLD45 = "#ffbd53";
+  const bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, iron = { b: "#4a4f57", d: "#33373d", l: "#6b727c" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, slag2 = { b: "#3b3439", d: "#29242a" }, LAVA5 = "#f6662c", GOLD46 = "#ffbd53";
   {
     const g = c.createRadialGradient(18, 26, 0, 18, 26, 13);
     g.addColorStop(0, "rgba(246,102,44,.32)");
@@ -147030,7 +147016,7 @@ BOOTS["brimstone-treads"] = (c, A2) => {
     for (let i = 2; i < pts2.length; i += 2) c.lineTo(pts2[i], pts2[i + 1]);
     c.stroke();
   }
-  c.strokeStyle = GOLD45;
+  c.strokeStyle = GOLD46;
   c.lineWidth = 0.45;
   c.beginPath();
   c.moveTo(11.5, 23.4);
@@ -147046,8 +147032,8 @@ BOOTS["brimstone-treads"] = (c, A2) => {
   gem3(c, 13.3, 12.9, 2.2, A2.gem);
   R6(c, 8.2, 25.4, 21, 3, slag2, { split: 0.6, lw: 1 });
   px4(c, 8.8, 25, 19.8, 1, LAVA5);
-  px4(c, 12, 25.1, 3, 0.7, GOLD45);
-  px4(c, 21, 25.1, 2.4, 0.7, GOLD45);
+  px4(c, 12, 25.1, 3, 0.7, GOLD46);
+  px4(c, 21, 25.1, 2.4, 0.7, GOLD46);
 };
 GLOVES2["sunsting-grips"] = (c, A2) => {
   glove(c, A2, { hand: TQ.amber, cuff: TQ.chitin, joints: true });
@@ -148609,9 +148595,9 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     g.append(formatAmount(gold) + " gold");
     box6.append(g, el3("span", "+" + Number(xp).toLocaleString("en-US") + " XP", "qr-xp"));
     if (gear2) {
-      const [title9, how] = (GEAR_GROUP[gear2.group] ?? GEAR_GROUP.any)(gear2.cls), item2 = el3("div", null, "qr-item"), q2 = el3("span", "?", "qr-q"), t = el3("div");
+      const [title10, how] = (GEAR_GROUP[gear2.group] ?? GEAR_GROUP.any)(gear2.cls), item2 = el3("div", null, "qr-item"), q2 = el3("span", "?", "qr-q"), t = el3("div");
       q2.setAttribute("aria-hidden", "true");
-      t.append(el3("b", title9 + (gear2.cls ? " for your " + (CLASS_LABEL[gear2.cls] ?? gear2.cls) : "")), el3("small", how));
+      t.append(el3("b", title10 + (gear2.cls ? " for your " + (CLASS_LABEL[gear2.cls] ?? gear2.cls) : "")), el3("small", how));
       item2.append(q2, t);
       box6.append(item2);
       const odds = el3("div", null, "qr-odds"), bar2 = el3("div", null, "qr-bar"), legend = el3("div", null, "qr-legend");
@@ -148783,10 +148769,10 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     }
     if (notice) body6.append(el3("p", notice, "qb-note"));
     const active2 = new Map(q2.active.map((a) => [a.id, a])), full = q2.active.length >= q2.limit, cur = trackedQuest(q2);
-    const card = (kind, label7, title9, text3, cls = "") => {
+    const card = (kind, label7, title10, text3, cls = "") => {
       const c = el3("article", null, "qb-card" + cls), k = el3("span", null, "qb-kind");
       k.append(icon2(kind, "qb-ico"), label7);
-      c.append(k, el3("h4", title9), el3("p", text3, "qb-text"));
+      c.append(k, el3("h4", title10), el3("p", text3, "qb-text"));
       body6.append(c);
       return c;
     };
@@ -149653,16 +149639,16 @@ var pal = (base3, o = {}) => ramp4(base3, o.cool ?? "#0f1724", o.warm ?? "#fff3d
 function capTop(c, S15, d, P25, o = 1.1) {
   const s = new Path2D();
   s.addPath(S15, new DOMMatrix([1, 0, 0, 1, 0, d]));
-  const band11 = new Path2D();
-  band11.addPath(S15);
-  band11.addPath(s);
+  const band12 = new Path2D();
+  band12.addPath(S15);
+  band12.addPath(s);
   c.save();
   c.clip(S15);
   c.strokeStyle = OL113;
   c.lineWidth = o * 2;
   c.stroke(s);
   c.fillStyle = P25.m;
-  c.fill(band11, "evenodd");
+  c.fill(band12, "evenodd");
   const hi = new Path2D();
   hi.addPath(S15, new DOMMatrix([1, 0, 0, 1, -1, d * 0.45]));
   const top = new Path2D();
@@ -150352,21 +150338,21 @@ function paintCaveEntranceV3(c, x, y, biome, seed2 = 11, plant = null) {
     grass2(c, X, Y + 6, 7 + R11() * 6, b.leaf, 4 + (R11() * 3 | 0), seed2 + (a * 100 | 0), 1.3, 1.1);
   }
   else if (b.cover === "snow") {
-    const lip2 = new Path2D();
+    const lip3 = new Path2D();
     for (let a = 0; a <= 1.0001; a += 0.05) {
       const ang = Math.PI * (1.04 + a * 0.92), X = mx + Math.cos(ang) * 114, Y = y - 14 + Math.sin(ang) * 120;
-      a ? lip2.lineTo(X, Y) : lip2.moveTo(X, Y);
+      a ? lip3.lineTo(X, Y) : lip3.moveTo(X, Y);
     }
     c.strokeStyle = OL113;
     c.lineWidth = 7;
     c.lineCap = "round";
-    c.stroke(lip2);
+    c.stroke(lip3);
     c.strokeStyle = SNOW5.m;
     c.lineWidth = 4.5;
-    c.stroke(lip2);
+    c.stroke(lip3);
     c.strokeStyle = SNOW5.h;
     c.lineWidth = 1.6;
-    c.stroke(lip2);
+    c.stroke(lip3);
   }
   const m = smooth22([[mx - 46, y + 18], [mx - 50, y - 22], [mx - 38, y - 62], [mx - 10, y - 80], [mx + 20, y - 82], [mx + 44, y - 62], [mx + 52, y - 22], [mx + 48, y + 18]]);
   opening2(c, m, mx, y - 82, y + 18, biome === "volcanic" ? "rgba(255,110,40,.45)" : null);
@@ -151024,7 +151010,7 @@ function chain(c, x0, y0, x1, y1, col2 = "#8d8a96", r = 2.4) {
     c.restore();
   }
 }
-function chest(c, x, y, w, h, open3, wood3 = "#7a4a2a", band11 = "#3e3a45", trim3 = "#e2b54e") {
+function chest(c, x, y, w, h, open3, wood3 = "#7a4a2a", band12 = "#3e3a45", trim3 = "#e2b54e") {
   const W21 = ramp4(wood3), lidH = h * 0.5, body6 = poly12([[x - w / 2, y], [x + w / 2, y], [x + w / 2, y - h], [x - w / 2, y - h]]);
   shadow68(c, x + 2, y + 1, w * 0.62, w * 0.16, 0.35);
   if (open3) {
@@ -151042,7 +151028,7 @@ function chest(c, x, y, w, h, open3, wood3 = "#7a4a2a", band11 = "#3e3a45", trim
   c.fillRect(x - w / 2, y - h, w, h * 0.22);
   c.fillStyle = W21.d;
   c.fillRect(x - w / 2, y - h * 0.32, w, h * 0.32);
-  c.fillStyle = band11;
+  c.fillStyle = band12;
   for (const bx of [-0.32, 0.32]) c.fillRect(x + bx * w - 1.6, y - h, 3.2, h);
   c.restore();
   if (!open3) {
@@ -151055,7 +151041,7 @@ function chest(c, x, y, w, h, open3, wood3 = "#7a4a2a", band11 = "#3e3a45", trim
     c.clip(lid);
     c.fillStyle = W21.h;
     c.fill(ell9(x - w * 0.15, y - h - lidH * 0.55, w * 0.3, lidH * 0.3));
-    c.fillStyle = band11;
+    c.fillStyle = band12;
     for (const bx of [-0.32, 0.32]) c.fillRect(x + bx * w - 1.6, y - h - lidH, 3.2, lidH);
     c.restore();
   }
@@ -153213,7 +153199,7 @@ function fill4(c, p, col2) {
   c.fillStyle = col2;
   c.fill(p);
 }
-function clip21(c, p, f) {
+function clip20(c, p, f) {
   c.save();
   c.clip(p);
   f();
@@ -153260,7 +153246,7 @@ function moss5(c, x, y, w, h, seed2, o = 1) {
   const p = lobes4(L);
   contour3(c, [p], o);
   fill4(c, p, MOSS13.d);
-  clip21(c, p, () => {
+  clip20(c, p, () => {
     c.save();
     c.translate(-0.7, -1);
     c.fillStyle = MOSS13.m;
@@ -153293,7 +153279,7 @@ function shelf2(c, x, y, w, o = 1) {
   p.closePath();
   contour3(c, [p], o);
   fill4(c, p, FUNGUS2.m);
-  clip21(c, p, () => {
+  clip20(c, p, () => {
     c.fillStyle = FUNGUS2.d;
     c.fillRect(x - w, y + w * 0.02, w * 3, w);
     c.fillStyle = FUNGUS2.l;
@@ -153317,12 +153303,12 @@ function mushroom2(c, x, y, s, R11, spots2 = true, o = 0.9) {
   cap9.closePath();
   contour3(c, [st, cap9], o);
   fill4(c, st, "#efe4cc");
-  clip21(c, st, () => {
+  clip20(c, st, () => {
     c.fillStyle = "#c9bb9c";
     c.fillRect(x + 0.2 * s, y - 7 * s, 3 * s, 8 * s);
   });
   fill4(c, cap9, R11.m);
-  clip21(c, cap9, () => {
+  clip20(c, cap9, () => {
     c.fillStyle = R11.d;
     c.beginPath();
     c.ellipse(x + 2.6 * s, y - 6 * s, 5 * s, 3.4 * s, 0, 0, TAU171);
@@ -153361,7 +153347,7 @@ function drawHollowStumpV3(c, { t = 0, state: state2 = "sleep" } = {}) {
   contour3(c, [rootL, rootR, trunk], 1.3);
   for (const [p, dir] of [[rootL, -1], [rootR, 1]]) {
     fill4(c, p, BARK4.m);
-    clip21(c, p, () => {
+    clip20(c, p, () => {
       c.fillStyle = dir < 0 ? BARK4.l : BARK4.d;
       c.fill(smooth23(dir < 0 ? [[-30, -46], [-40, -24], [-60, -6], [-72, -1], [-50, -4], [-34, -20]] : [[34, -30], [48, -12], [76, 0], [70, 6], [44, 6], [30, 0]]));
       c.fillStyle = BARK4.d2;
@@ -153370,7 +153356,7 @@ function drawHollowStumpV3(c, { t = 0, state: state2 = "sleep" } = {}) {
     });
   }
   fill4(c, trunk, BARK4.m);
-  clip21(c, trunk, () => {
+  clip20(c, trunk, () => {
     c.fillStyle = BARK4.l;
     c.fill(poly14([[-50, 10], [-50, -112], [-23, -112], [-26, -84], [-22, -60], [-25, -34], [-21, -12], [-24, 10]]));
     c.fillStyle = BARK4.h;
@@ -153388,7 +153374,7 @@ function drawHollowStumpV3(c, { t = 0, state: state2 = "sleep" } = {}) {
   });
   contour3(c, [face5], 1);
   fill4(c, face5, WOOD65.m);
-  clip21(c, face5, () => {
+  clip20(c, face5, () => {
     c.fillStyle = WOOD65.d;
     c.fill(smooth23([[4, -70], [26, -86], [34, -70]]));
     c.fillStyle = WOOD65.l;
@@ -153418,14 +153404,14 @@ function drawHollowStumpV3(c, { t = 0, state: state2 = "sleep" } = {}) {
   hole.closePath();
   contour3(c, [rim2], 1.2);
   fill4(c, rim2, mix24(WOOD65.d2, BARK4.d, 0.35));
-  clip21(c, rim2, () => {
+  clip20(c, rim2, () => {
     c.fillStyle = WOOD65.d;
     c.fill(poly14([[-26, 4], [-26, -28], [-14, -44], [2, -46], [-6, -40], [-21, -26], [-21, 4]]));
     c.fillStyle = BARK4.d2;
     c.fillRect(10, -46, 24, 52);
   });
   fill4(c, hole, "#1a120c");
-  clip21(c, hole, () => {
+  clip20(c, hole, () => {
     c.fillStyle = "#0d0907";
     c.fill(smooth23([[-16, 4], [-14, -26], [0, -32], [14, -26], [16, 4]]));
     c.fillStyle = "#060404";
@@ -153465,7 +153451,7 @@ function drawHollowStumpV3(c, { t = 0, state: state2 = "sleep" } = {}) {
   contour3(c, roots3, 1.1);
   for (const [i, p] of roots3.entries()) {
     fill4(c, p, BARK4.m);
-    clip21(c, p, () => {
+    clip20(c, p, () => {
       const dir = i % 2 ? 1 : -1;
       c.fillStyle = BARK4.d;
       c.save();
@@ -153490,7 +153476,7 @@ function drawHollowStumpV3(c, { t = 0, state: state2 = "sleep" } = {}) {
     const p = leafPath2(hx2, -43, len, Math.PI / 2 + (rnd8(s) - 0.5) * 0.2, 1.5);
     contour3(c, [p], 0.7);
     fill4(c, p, MOSS13.d);
-    clip21(c, p, () => {
+    clip20(c, p, () => {
       c.fillStyle = MOSS13.m;
       c.fillRect(hx2 - 3, -44, 2.4, len + 2);
     });
@@ -153512,7 +153498,7 @@ function drawHollowStumpV3(c, { t = 0, state: state2 = "sleep" } = {}) {
     const x = -36 + Math.sin(i * 1.2 + 0.6) * 3, y = -4 - i * 11, a = i % 2 ? -2.4 : -0.6, p = leafPath2(x, y, 7.5, a, 3.2);
     contour3(c, [p], 0.8);
     fill4(c, p, i % 2 ? "#4f9a34" : "#3f8a2c");
-    clip21(c, p, () => {
+    clip20(c, p, () => {
       c.fillStyle = "#6db84a";
       c.fill(leafPath2(x, y, 5, a, 1.4));
     });
@@ -153550,7 +153536,7 @@ function oakLeaf(c, x, y, s, a, R11) {
   const p = smooth23([[-7, 0], [-5, -2.6], [-3, -1.4], [-1, -3.4], [1.4, -1.8], [3.6, -3.2], [5, -1.2], [7.4, 0], [5, 1.2], [3.6, 3.2], [1.4, 1.8], [-1, 3.4], [-3, 1.4], [-5, 2.6]]);
   contour3(c, [p], 0.55 / s);
   fill4(c, p, R11.m);
-  clip21(c, p, () => {
+  clip20(c, p, () => {
     c.fillStyle = R11.d;
     c.fillRect(-8, 0.4, 16, 4);
     c.fillStyle = R11.l;
@@ -153571,7 +153557,7 @@ function pebble3(c, x, y, s, seed2) {
   }));
   contour3(c, [p], 0.6);
   fill4(c, p, STONE28.m);
-  clip21(c, p, () => {
+  clip20(c, p, () => {
     c.fillStyle = STONE28.d;
     c.fillRect(x - 4 * s, y + 0.2 * s, 9 * s, 4 * s);
     c.fillStyle = STONE28.l;
@@ -153600,7 +153586,7 @@ function skullV32(c, x, y, s) {
   const B8 = ramp5("#ece2c8"), p = smooth23([[-6.4, -1], [-6.6, -7], [-3.6, -10.6], [3.6, -10.6], [6.6, -7], [6.4, -1], [3, 0.8], [-3, 0.8]]);
   contour3(c, [p], 0.8);
   fill4(c, p, B8.m);
-  clip21(c, p, () => {
+  clip20(c, p, () => {
     c.fillStyle = B8.d;
     c.fillRect(1, -12, 8, 14);
     c.fillStyle = B8.l;
@@ -153623,10 +153609,10 @@ function skullV32(c, x, y, s) {
   c.restore();
 }
 function burrowV32(c, x, y, s) {
-  const lip2 = smooth23([[x - 15 * s, y + 1], [x - 11 * s, y - 5 * s], [x, y - 6.4 * s], [x + 11 * s, y - 5 * s], [x + 15 * s, y + 1], [x + 9 * s, y + 5 * s], [x - 9 * s, y + 5 * s]]), hole = ell11(x, y, 9.4 * s, 3.8 * s);
-  contour3(c, [lip2], 0.9);
-  fill4(c, lip2, DIRT3.l);
-  clip21(c, lip2, () => {
+  const lip3 = smooth23([[x - 15 * s, y + 1], [x - 11 * s, y - 5 * s], [x, y - 6.4 * s], [x + 11 * s, y - 5 * s], [x + 15 * s, y + 1], [x + 9 * s, y + 5 * s], [x - 9 * s, y + 5 * s]]), hole = ell11(x, y, 9.4 * s, 3.8 * s);
+  contour3(c, [lip3], 0.9);
+  fill4(c, lip3, DIRT3.l);
+  clip20(c, lip3, () => {
     c.fillStyle = DIRT3.m;
     c.fillRect(x - 16 * s, y + 0.5, 32 * s, 8 * s);
     c.fillStyle = DIRT3.h;
@@ -153635,7 +153621,7 @@ function burrowV32(c, x, y, s) {
     c.fill();
   });
   fill4(c, hole, "#130d08");
-  clip21(c, hole, () => {
+  clip20(c, hole, () => {
     c.fillStyle = DIRT3.d2;
     c.fillRect(x - 10 * s, y - 4 * s, 20 * s, 2.2 * s);
   });
@@ -153659,7 +153645,7 @@ function drawHollowClearingV3(c, { rx = 150, ry = 62, seed: seed2 = 4 } = {}) {
   const patch = smooth23(outline5);
   contour3(c, [patch], 1.1);
   fill4(c, patch, DIRT3.m);
-  clip21(c, patch, () => {
+  clip20(c, patch, () => {
     c.fillStyle = DIRT3.d;
     c.fill(smooth23([[-96, -40], [-40, -56], [40, -56], [100, -38], [70, -16], [20, -22], [-30, -18], [-80, -16]]));
     c.fillStyle = mix24(DIRT3.m, DIRT3.l, 0.55);
@@ -153735,27 +153721,27 @@ function drawHollowClearingV3(c, { rx = 150, ry = 62, seed: seed2 = 4 } = {}) {
     c.fillRect(-9, -0.8, 18, 0.5);
     c.restore();
   }
-  const lip2 = P23();
+  const lip3 = P23();
   for (let i = 0; i < outline5.length; i++) {
     const [x, y] = outline5[i], a = i / 40 * TAU171, n = 3 + Math.round(rnd8(seed2 + i) * 2);
     if (rnd8(seed2 * 9 + i) < 0.3) continue;
     for (let k = 0; k < n; k++) {
       const t = k / n, aa = a + t * (TAU171 / 40), w = 1 + (rnd8(seed2 + i * 1.7) - 0.5) * 0.14 + Math.sin(aa * 3 + seed2) * 0.04, px7 = Math.cos(aa) * rx * w * 1.005, py = Math.sin(aa) * ry * w * 1.005, r = 1.6 + rnd8(i * 5 + k) * 1.8;
-      lip2.moveTo(px7 + r, py);
-      lip2.arc(px7, py, r, 0, TAU171);
+      lip3.moveTo(px7 + r, py);
+      lip3.arc(px7, py, r, 0, TAU171);
     }
   }
   c.fillStyle = GRASS2.d;
   c.save();
   c.translate(0.4, 0.8);
-  c.fill(lip2);
+  c.fill(lip3);
   c.restore();
   c.fillStyle = GRASS2.m;
-  c.fill(lip2);
+  c.fill(lip3);
   c.fillStyle = GRASS2.l;
   c.save();
   c.translate(-0.5, -0.6);
-  c.fill(lip2);
+  c.fill(lip3);
   c.restore();
   for (let i = 0; i < 40; i++) {
     if (rnd8(seed2 + i * 2.9) < 0.5) continue;
@@ -153811,7 +153797,7 @@ function drawHollowHoardV3(c, { open: open3 = false, t = 0, ready = false } = {}
   const hide = smooth23([[-29, 2], [-26, -3], [-30, -7], [-20, -8], [-12, -12], [6, -12], [16, -9], [27, -10], [24, -4], [30, 1], [22, 5], [8, 4], [0, 7], [-10, 4], [-22, 6]]);
   contour3(c, [hide], 0.9);
   fill4(c, hide, "#9a7450");
-  clip21(c, hide, () => {
+  clip20(c, hide, () => {
     c.fillStyle = "#86603e";
     c.fill(smooth23([[-32, 2], [-10, 1], [12, 2], [34, 1], [30, 8], [-30, 8]]));
     c.fillStyle = "#b8946a";
@@ -153829,14 +153815,14 @@ function drawHollowHoardV3(c, { open: open3 = false, t = 0, ready = false } = {}
     const rim2 = ell11(0, 0, 11, 9.6), face5 = ell11(0, 0, 9, 7.8), boss = ell11(0.4, -0.2, 2.8, 2.5);
     contour3(c, [rim2], 1);
     fill4(c, rim2, IRON20.d);
-    clip21(c, rim2, () => {
+    clip20(c, rim2, () => {
       c.fillStyle = IRON20.l;
       c.beginPath();
       c.ellipse(-3, -4, 8, 4, -0.5, 0, TAU171);
       c.fill();
     });
     fill4(c, face5, WOODS2.m);
-    clip21(c, face5, () => {
+    clip20(c, face5, () => {
       c.fillStyle = WOODS2.l;
       c.fillRect(-9, -8, 3, 16);
       c.fillStyle = WOODS2.d;
@@ -153861,7 +153847,7 @@ function drawHollowHoardV3(c, { open: open3 = false, t = 0, ready = false } = {}
     const blade6 = poly14([[-4, -8], [-10.6, -31], [-8.8, -31.6], [-2.2, -8.6]]), guard = poly14([[-12.6, -27.6], [-5.4, -30.8], [-5, -29.4], [-12.2, -26.2]]), grip = poly14([[-10.4, -31.2], [-12, -36.4], [-10.6, -36.8], [-9, -31.6]]), pom = ell11(-11.6, -37.6, 1.7, 1.6);
     contour3(c, [blade6, guard, grip, pom], 0.8);
     fill4(c, blade6, STEEL9.m);
-    clip21(c, blade6, () => {
+    clip20(c, blade6, () => {
       c.save();
       c.translate(-1.2, 0.3);
       c.fillStyle = STEEL9.h;
@@ -153888,7 +153874,7 @@ function drawHollowHoardV3(c, { open: open3 = false, t = 0, ready = false } = {}
   const body6 = smooth23([[-W21 - 3, 1], ...top, [W21 + 3, 1], [0, 3]]);
   contour3(c, [body6], 1);
   fill4(c, body6, GOLD26.m);
-  clip21(c, body6, () => {
+  clip20(c, body6, () => {
     c.fillStyle = GOLD26.d;
     c.fill(smooth23([[W21 * 0.25, -H8], [W21 + 4, -2], [W21 + 4, 4], [-W21 - 4, 4], [-W21 - 4, 0], [0, -1]]));
     c.fillStyle = GOLD26.d2;
@@ -153918,10 +153904,10 @@ function drawHollowHoardV3(c, { open: open3 = false, t = 0, ready = false } = {}
     c.save();
     c.translate(-1, -17);
     c.rotate(-0.35);
-    const cup = smooth23([[-4, -5], [4, -5], [3.4, -1], [1, 1.2], [-1, 1.2], [-3.4, -1]]), stem = poly14([[-0.7, 1], [0.7, 1], [0.6, 4.4], [-0.6, 4.4]]), foot2 = ell11(0, 4.8, 3, 1.1), lip2 = ell11(0, -5, 4, 1.3);
-    contour3(c, [cup, stem, foot2, lip2], 0.8);
+    const cup = smooth23([[-4, -5], [4, -5], [3.4, -1], [1, 1.2], [-1, 1.2], [-3.4, -1]]), stem = poly14([[-0.7, 1], [0.7, 1], [0.6, 4.4], [-0.6, 4.4]]), foot2 = ell11(0, 4.8, 3, 1.1), lip3 = ell11(0, -5, 4, 1.3);
+    contour3(c, [cup, stem, foot2, lip3], 0.8);
     fill4(c, cup, GOLD26.m);
-    clip21(c, cup, () => {
+    clip20(c, cup, () => {
       c.fillStyle = GOLD26.d;
       c.fillRect(1, -6, 5, 8);
       c.fillStyle = GOLD26.h;
@@ -153929,7 +153915,7 @@ function drawHollowHoardV3(c, { open: open3 = false, t = 0, ready = false } = {}
     });
     fill4(c, stem, GOLD26.d);
     fill4(c, foot2, GOLD26.m);
-    fill4(c, lip2, GOLD26.l);
+    fill4(c, lip3, GOLD26.l);
     c.fillStyle = "#5a3008";
     c.beginPath();
     c.ellipse(0, -5, 2.8, 0.7, 0, 0, TAU171);
@@ -153943,7 +153929,7 @@ function drawHollowHoardV3(c, { open: open3 = false, t = 0, ready = false } = {}
   const pot3 = smooth23([[-6, -6], [-7.6, 0], [-5, 6], [5, 6], [7.6, 0], [6, -6], [3.4, -7.6], [-3.4, -7.6]]), lipP = ell11(0, -7.6, 4.2, 1.8), mouthP = ell11(0, -7.6, 2.8, 1.1);
   contour3(c, [pot3, lipP], 0.9);
   fill4(c, pot3, CLAY8.m);
-  clip21(c, pot3, () => {
+  clip20(c, pot3, () => {
     c.fillStyle = CLAY8.d;
     c.fillRect(1.8, -9, 8, 17);
     c.fillStyle = CLAY8.d2;
@@ -153988,10 +153974,10 @@ function drawHollowHoardV3(c, { open: open3 = false, t = 0, ready = false } = {}
   c.save();
   c.translate(19, -1);
   c.rotate(0.22);
-  const helm2 = smooth23([[-6.6, 1.4], [-7, -3.6], [-4.4, -8.4], [0, -9.4], [4.4, -8.4], [7, -3.6], [6.6, 1.4]]), band11 = poly14([[-7, -0.6], [7, -0.6], [7, 2], [-7, 2]]), nasal = poly14([[-1, 1.6], [1, 1.6], [0.8, 6], [-0.8, 6]]);
-  contour3(c, [helm2, band11, nasal], 0.9);
+  const helm2 = smooth23([[-6.6, 1.4], [-7, -3.6], [-4.4, -8.4], [0, -9.4], [4.4, -8.4], [7, -3.6], [6.6, 1.4]]), band12 = poly14([[-7, -0.6], [7, -0.6], [7, 2], [-7, 2]]), nasal = poly14([[-1, 1.6], [1, 1.6], [0.8, 6], [-0.8, 6]]);
+  contour3(c, [helm2, band12, nasal], 0.9);
   fill4(c, helm2, STEEL9.m);
-  clip21(c, helm2, () => {
+  clip20(c, helm2, () => {
     c.fillStyle = STEEL9.d;
     c.fillRect(1.8, -10, 7, 13);
     c.fillStyle = STEEL9.d2;
@@ -154009,7 +153995,7 @@ function drawHollowHoardV3(c, { open: open3 = false, t = 0, ready = false } = {}
     c.ellipse(1.1, -6.6, 1.2, 0.5, 0.4, 0, TAU171);
     c.fill();
   });
-  fill4(c, band11, STEEL9.d);
+  fill4(c, band12, STEEL9.d);
   fill4(c, nasal, STEEL9.d);
   for (const rx of [-5, -1.6, 1.6, 5]) {
     c.fillStyle = STEEL9.h;
@@ -154279,8 +154265,8 @@ function drawBoarWallowMouthV1(c, { t = 0, state: state2 = "sleep" } = {}) {
       c.fill(tk);
     }
   }
-  const tongue11 = smooth([[-17, 1], [17, 1], [22, 6], [0, 9], [-22, 6]]);
-  fill(c, tongue11, MUD2.d);
+  const tongue13 = smooth([[-17, 1], [17, 1], [22, 6], [0, 9], [-22, 6]]);
+  fill(c, tongue13, MUD2.d);
   c.fillStyle = MUD2.l;
   c.beginPath();
   c.ellipse(-6, 4, 7, 1, 0, 0, TAU);
@@ -154526,27 +154512,27 @@ function drawBoarWallowClearingV1(c, { rx = 150, ry = 62, seed: seed2 = 4 } = {}
     const a = rnd(seed2 * 13 + i) * TAU, r = 0.3 + rnd(seed2 + i * 4.4) * 0.6;
     pebble(c, Math.cos(a) * rx * r, Math.sin(a) * ry * r, 0.5 + rnd(i) * 0.4, i * 13);
   }
-  const lip2 = P2();
+  const lip3 = P2();
   for (let i = 0; i < outline5.length; i++) {
     const a = i / 40 * TAU, n = 3 + Math.round(rnd(seed2 + i) * 2);
     if (rnd(seed2 * 9 + i) < 0.3) continue;
     for (let k = 0; k < n; k++) {
       const t = k / n, aa = a + t * (TAU / 40), w = 1 + (rnd(seed2 + i * 1.7) - 0.5) * 0.14 + Math.sin(aa * 3 + seed2) * 0.04, px7 = Math.cos(aa) * rx * w * 1.005, py = Math.sin(aa) * ry * w * 1.005, r = 1.6 + rnd(i * 5 + k) * 1.8;
-      lip2.moveTo(px7 + r, py);
-      lip2.arc(px7, py, r, 0, TAU);
+      lip3.moveTo(px7 + r, py);
+      lip3.arc(px7, py, r, 0, TAU);
     }
   }
   c.fillStyle = GRASS.d;
   c.save();
   c.translate(0.4, 0.8);
-  c.fill(lip2);
+  c.fill(lip3);
   c.restore();
   c.fillStyle = GRASS.m;
-  c.fill(lip2);
+  c.fill(lip3);
   c.fillStyle = GRASS.l;
   c.save();
   c.translate(-0.5, -0.6);
-  c.fill(lip2);
+  c.fill(lip3);
   c.restore();
   for (let i = 0; i < 40; i++) {
     if (rnd(seed2 + i * 2.9) < 0.5) continue;
@@ -154759,7 +154745,7 @@ function drawBoarWallowHoardV1(c, { open: open3 = false, t = 0, ready = false } 
     c.save();
     c.translate(18, 4);
     c.rotate(-0.1);
-    const brim = ell(0, 0, 10, 3.4), crown6 = smooth([[-5, -0.4], [-5, -4.6], [-3, -6.6], [3, -6.6], [5, -4.6], [5, -0.4]]), band11 = poly([[-5.2, -2.6], [5.2, -2.6], [5.2, -0.8], [-5.2, -0.8]]);
+    const brim = ell(0, 0, 10, 3.4), crown6 = smooth([[-5, -0.4], [-5, -4.6], [-3, -6.6], [3, -6.6], [5, -4.6], [5, -0.4]]), band12 = poly([[-5.2, -2.6], [5.2, -2.6], [5.2, -0.8], [-5.2, -0.8]]);
     contour(c, [brim, crown6], 0.8);
     fill(c, brim, STRAW.m);
     clip(c, brim, () => {
@@ -154785,7 +154771,7 @@ function drawBoarWallowHoardV1(c, { open: open3 = false, t = 0, ready = false } 
         c.stroke();
       }
     });
-    fill(c, band11, "#b8342e");
+    fill(c, band12, "#b8342e");
     c.fillStyle = "#e8645a";
     c.fillRect(-5.2, -2.6, 4, 0.6);
     for (const [x, a] of [[-10, 3.4], [9.6, -0.2], [6, 1.2]]) taper(c, x, 0.4, x + Math.cos(a) * 3, 0.4 + Math.sin(a) * 1.4 + 1, 0.4, 0, STRAW.d);
@@ -154818,7 +154804,7 @@ function sandstone(c, pts2, R11, seed2, o = 1.3) {
   contour(c, [p], o);
   fill(c, p, R11.m);
   clip(c, p, () => {
-    const band11 = (a, b, col2) => {
+    const band12 = (a, b, col2) => {
       const q2 = [[x0 - 4, y1 + 4]];
       for (let i = 0; i <= 8; i++) {
         const y = y1 + 4 - i / 8 * (y1 - y0 + 8);
@@ -154838,8 +154824,8 @@ function sandstone(c, pts2, R11, seed2, o = 1.3) {
       c.fillStyle = col2;
       c.fill(poly(q2));
     };
-    band11(0.32, R11.l);
-    band11(0.14, R11.h);
+    band12(0.32, R11.l);
+    band12(0.14, R11.h);
     dark(0.66, R11.d);
     dark(0.84, R11.d2);
     for (let i = 1; i < 5; i++) {
@@ -155086,13 +155072,13 @@ function drawAntlionPitClearingV1(c, { rx = 150, ry = 62, seed: seed2 = 4, t = 0
     }
   });
   const px7 = -6, py = -ry * 0.05;
-  const lip2 = smooth(Array.from({ length: 24 }, (_, i) => {
+  const lip3 = smooth(Array.from({ length: 24 }, (_, i) => {
     const a = i / 24 * TAU, w = 1 + (rnd(seed2 * 3 + i) - 0.5) * 0.08;
     return [px7 + Math.cos(a) * 62 * w, py + 2 + Math.sin(a) * 25 * w];
   }));
-  contour(c, [lip2], 1);
-  fill(c, lip2, SAND9.l);
-  clip(c, lip2, () => {
+  contour(c, [lip3], 1);
+  fill(c, lip3, SAND9.l);
+  clip(c, lip3, () => {
     c.fillStyle = SAND9.h;
     c.fill(smooth([[px7 - 60, py - 2], [px7 - 30, py - 24], [px7 + 30, py - 24], [px7 + 50, py - 12], [px7, py - 14], [px7 - 40, py - 8]]));
     c.fillStyle = SAND9.m;
@@ -155596,8 +155582,8 @@ function drawYetiCaveMouthV1(c, { t = 0, state: state2 = "sleep" } = {}) {
       c.fill();
     }
   }
-  const tongue11 = smooth([[-20, 1], [20, 1], [24, 6], [0, 9], [-24, 6]]);
-  fill(c, tongue11, PACK.d);
+  const tongue13 = smooth([[-20, 1], [20, 1], [24, 6], [0, 9], [-24, 6]]);
+  fill(c, tongue13, PACK.d);
   c.fillStyle = PACK.l;
   c.beginPath();
   c.ellipse(-6, 4, 8, 1, 0, 0, TAU);
@@ -155698,14 +155684,14 @@ function snowRock(c, x, y, s, seed2) {
   snowCap5(c, x, y - 4.6 * s, 13 * s, 3 * s, seed2, 0.7, 0);
 }
 function snowHole(c, x, y, s) {
-  const lip2 = lobes([[x - 12 * s, y - 1, 4.4 * s], [x - 6 * s, y - 4.6 * s, 5 * s], [x + 1 * s, y - 5.4 * s, 5.2 * s], [x + 8 * s, y - 4 * s, 4.6 * s], [x + 13 * s, y - 0.6, 4 * s]]), hole = ell(x, y, 9.4 * s, 3.8 * s);
-  contour(c, [lip2], 0.9);
-  fill(c, lip2, SNOW6.m);
-  clip(c, lip2, () => {
+  const lip3 = lobes([[x - 12 * s, y - 1, 4.4 * s], [x - 6 * s, y - 4.6 * s, 5 * s], [x + 1 * s, y - 5.4 * s, 5.2 * s], [x + 8 * s, y - 4 * s, 4.6 * s], [x + 13 * s, y - 0.6, 4 * s]]), hole = ell(x, y, 9.4 * s, 3.8 * s);
+  contour(c, [lip3], 0.9);
+  fill(c, lip3, SNOW6.m);
+  clip(c, lip3, () => {
     c.save();
     c.translate(-0.8, -1.2);
     c.fillStyle = SNOW6.l;
-    c.fill(lip2);
+    c.fill(lip3);
     c.restore();
     c.fillStyle = SNOW6.d;
     c.fillRect(x - 18 * s, y - 1, 36 * s, 8);
@@ -155821,29 +155807,29 @@ function drawYetiCaveClearingV1(c, { rx = 150, ry = 62, seed: seed2 = 4 } = {}) 
     for (let i = -5; i <= 5; i += 2.4) for (const s of [-1, 1]) taper(c, i, 0, i + 2.4, s * 3, 0.5, 0, PINE.m);
     c.restore();
   }
-  const lip2 = P2();
+  const lip3 = P2();
   for (let i = 0; i < outline5.length; i++) {
     const a = i / 40 * TAU, n = 3 + Math.round(rnd(seed2 + i) * 2);
     if (rnd(seed2 * 9 + i) < 0.2) continue;
     for (let k = 0; k < n; k++) {
       const tt = k / n, aa = a + tt * (TAU / 40), w = 1 + (rnd(seed2 + i * 1.7) - 0.5) * 0.14 + Math.sin(aa * 3 + seed2) * 0.04, px7 = Math.cos(aa) * rx * w * 1.005, py = Math.sin(aa) * ry * w * 1.005, r = 2 + rnd(i * 5 + k) * 2.4;
-      lip2.moveTo(px7 + r * 1.3, py);
-      lip2.ellipse(px7, py, r * 1.3, r, 0, 0, TAU);
+      lip3.moveTo(px7 + r * 1.3, py);
+      lip3.ellipse(px7, py, r * 1.3, r, 0, 0, TAU);
     }
   }
   c.fillStyle = SNOW6.d2;
   c.save();
   c.translate(0.4, 1.2);
-  c.fill(lip2);
+  c.fill(lip3);
   c.restore();
   c.fillStyle = SNOW6.d;
-  c.fill(lip2);
+  c.fill(lip3);
   c.save();
   c.beginPath();
-  c.clip(lip2);
+  c.clip(lip3);
   c.fillStyle = SNOW6.l;
   c.translate(-0.6, -1.2);
-  c.fill(lip2);
+  c.fill(lip3);
   c.restore();
   c.restore();
 }
@@ -156004,8 +155990,8 @@ function drawYetiCaveHoardV1(c, { open: open3 = false, t = 0, ready = false } = 
     c.save();
     c.translate(19, 3);
     c.rotate(-0.25);
-    const crown6 = smooth([[-6, 0], [-6, -5], [-3.6, -8.6], [0, -9.6], [3.6, -8.6], [6, -5], [6, 0]]), band11 = smooth([[-6.6, 0.4], [-6.6, -3], [6.6, -3], [6.6, 0.4], [0, 1.6]]), pom = lobes([[0, -10.6, 2.4], [-1.4, -11.6, 1.6], [1.4, -11.4, 1.6]]);
-    contour(c, [crown6, band11, pom], 0.8);
+    const crown6 = smooth([[-6, 0], [-6, -5], [-3.6, -8.6], [0, -9.6], [3.6, -8.6], [6, -5], [6, 0]]), band12 = smooth([[-6.6, 0.4], [-6.6, -3], [6.6, -3], [6.6, 0.4], [0, 1.6]]), pom = lobes([[0, -10.6, 2.4], [-1.4, -11.6, 1.6], [1.4, -11.4, 1.6]]);
+    contour(c, [crown6, band12, pom], 0.8);
     fill(c, crown6, "#c0362e");
     clip(c, crown6, () => {
       c.fillStyle = "#e05a4a";
@@ -156021,8 +156007,8 @@ function drawYetiCaveHoardV1(c, { open: open3 = false, t = 0, ready = false } = 
         c.stroke();
       }
     });
-    fill(c, band11, "#efe6d8");
-    clip(c, band11, () => {
+    fill(c, band12, "#efe6d8");
+    clip(c, band12, () => {
       c.fillStyle = "#c8bca8";
       for (let x = -6; x < 7; x += 1.6) c.fillRect(x, -3, 0.6, 4.6);
       c.fillStyle = "#d8ccb8";
@@ -156477,14 +156463,14 @@ function slither(c, x, y, len, a, col2, w = 2.2) {
   c.restore();
 }
 function mudHole(c, x, y, s) {
-  const lip2 = lobes([[x - 12 * s, y - 1, 4.2 * s], [x - 6 * s, y - 4.2 * s, 4.8 * s], [x + 1 * s, y - 5 * s, 5 * s], [x + 8 * s, y - 3.8 * s, 4.4 * s], [x + 13 * s, y - 0.6, 3.8 * s], [x, y + 2.6 * s, 6 * s]]), hole = ell(x, y, 9.4 * s, 3.8 * s);
-  contour(c, [lip2], 0.9);
-  fill(c, lip2, MUD3.m);
-  clip(c, lip2, () => {
+  const lip3 = lobes([[x - 12 * s, y - 1, 4.2 * s], [x - 6 * s, y - 4.2 * s, 4.8 * s], [x + 1 * s, y - 5 * s, 5 * s], [x + 8 * s, y - 3.8 * s, 4.4 * s], [x + 13 * s, y - 0.6, 3.8 * s], [x, y + 2.6 * s, 6 * s]]), hole = ell(x, y, 9.4 * s, 3.8 * s);
+  contour(c, [lip3], 0.9);
+  fill(c, lip3, MUD3.m);
+  clip(c, lip3, () => {
     c.save();
     c.translate(-0.8, -1.2);
     c.fillStyle = MUD3.l;
-    c.fill(lip2);
+    c.fill(lip3);
     c.restore();
     c.fillStyle = WET.m;
     c.fillRect(x - 18 * s, y + 0.6, 36 * s, 8);
@@ -156649,24 +156635,24 @@ function drawBogHollowClearingV1(c, { rx = 150, ry = 62, seed: seed2 = 4 } = {})
   for (const [x, y, s, sd] of [[-rx * 0.86, -ry * 0.06, 0.9, 1], [rx * 0.88, ry * 0.14, 0.8, 2], [-rx * 0.26, ry * 0.36, 0.7, 3], [rx * 0.84, ry * 0.5, 0.75, 4], [-rx * 0.5, -ry * 0.5, 0.7, 5], [rx * 0.44, -ry * 0.56, 0.7, 6]]) reedTuft(c, x, y, s, sd * 19);
   cattails2(c, -rx * 0.12, ry * 0.46, 0.7, 31, 3);
   cattails2(c, -rx * 0.82, ry * 0.2, 0.75, 37, 3);
-  const lip2 = P2();
+  const lip3 = P2();
   for (let i = 0; i < outline5.length; i++) {
     const a = i / 40 * TAU, n = 3 + Math.round(rnd(seed2 + i) * 2);
     if (rnd(seed2 * 9 + i) < 0.3) continue;
     for (let k = 0; k < n; k++) {
       const tt = k / n, aa = a + tt * (TAU / 40), w = 1 + (rnd(seed2 + i * 1.7) - 0.5) * 0.14 + Math.sin(aa * 3 + seed2) * 0.04, px7 = Math.cos(aa) * rx * w * 1.002, py = Math.sin(aa) * ry * w * 1.002, r = 1.4 + rnd(i * 5 + k) * 1.6;
-      lip2.moveTo(px7 + r * 1.8, py);
-      lip2.ellipse(px7, py, r * 1.8, r * 0.55, 0, 0, TAU);
+      lip3.moveTo(px7 + r * 1.8, py);
+      lip3.ellipse(px7, py, r * 1.8, r * 0.55, 0, 0, TAU);
     }
   }
   c.fillStyle = WET.m;
-  c.fill(lip2);
+  c.fill(lip3);
   c.save();
   c.beginPath();
-  c.clip(lip2);
+  c.clip(lip3);
   c.fillStyle = MUD3.d;
   c.translate(-0.4, -0.6);
-  c.fill(lip2);
+  c.fill(lip3);
   c.restore();
   for (let i = 0; i < 34; i++) {
     const a = i / 34 * TAU + rnd(seed2 + i) * 0.15, w = 1 + Math.sin(a * 3 + seed2) * 0.04, x = Math.cos(a) * rx * w * 0.99, y = Math.sin(a) * ry * w * 0.99;
@@ -156772,8 +156758,8 @@ function drawBogHollowHoardV1(c, { open: open3 = false, t = 0, ready = false } =
     c.save();
     c.translate(-14, -2);
     c.rotate(-0.08);
-    const box6 = poly([[-11, 0], [-11, -10], [11, -10], [11, 0]]), mouth6 = poly([[-11, -10], [11, -10], [9, -14], [-9, -14]]), lid = poly([[-9, -14], [9, -14], [10.4, -25], [-10.4, -25]]), lip2 = poly([[-10.4, -25], [10.4, -25], [10.8, -27], [-10.8, -27]]);
-    contour(c, [box6, mouth6, lid, lip2], 0.9);
+    const box6 = poly([[-11, 0], [-11, -10], [11, -10], [11, 0]]), mouth6 = poly([[-11, -10], [11, -10], [9, -14], [-9, -14]]), lid = poly([[-9, -14], [9, -14], [10.4, -25], [-10.4, -25]]), lip3 = poly([[-10.4, -25], [10.4, -25], [10.8, -27], [-10.8, -27]]);
+    contour(c, [box6, mouth6, lid, lip3], 0.9);
     fill(c, lid, WOODS.d2);
     clip(c, lid, () => {
       c.fillStyle = WOODS.d;
@@ -156791,7 +156777,7 @@ function drawBogHollowHoardV1(c, { open: open3 = false, t = 0, ready = false } =
         c.fillRect(bx - 1.2, -25, 2.4, 11);
       }
     });
-    fill(c, lip2, WOODS.m);
+    fill(c, lip3, WOODS.m);
     fill(c, mouth6, "#1c140c");
     clip(c, mouth6, () => {
       c.fillStyle = "#34261a";
@@ -157426,24 +157412,24 @@ function drawGriffinAerieClearingV1(c, { rx = 150, ry = 62, seed: seed2 = 4 } = 
   heather9(c, rx * 0.66, ry * 0.5, 0.55, 23);
   heather9(c, -rx * 0.08, ry * 0.5, 0.5, 25);
   heather9(c, rx * 0.3, -ry * 0.5, 0.5, 27);
-  const lip2 = P2();
+  const lip3 = P2();
   for (let i = 0; i < outline5.length; i++) {
     const a = i / 40 * TAU, n = 3 + Math.round(rnd(seed2 + i) * 2);
     if (rnd(seed2 * 9 + i) < 0.3) continue;
     for (let k = 0; k < n; k++) {
       const tt = k / n, aa = a + tt * (TAU / 40), w = 1 + (rnd(seed2 + i * 1.7) - 0.5) * 0.14 + Math.sin(aa * 3 + seed2) * 0.04, px7 = Math.cos(aa) * rx * w * 1.002, py = Math.sin(aa) * ry * w * 1.002, r = 1.4 + rnd(i * 5 + k) * 1.6;
-      lip2.moveTo(px7 + r * 1.8, py);
-      lip2.ellipse(px7, py, r * 1.8, r * 0.55, 0, 0, TAU);
+      lip3.moveTo(px7 + r * 1.8, py);
+      lip3.ellipse(px7, py, r * 1.8, r * 0.55, 0, 0, TAU);
     }
   }
   c.fillStyle = PEAT.m;
-  c.fill(lip2);
+  c.fill(lip3);
   c.save();
   c.beginPath();
-  c.clip(lip2);
+  c.clip(lip3);
   c.fillStyle = TURF5.d;
   c.translate(-0.4, -0.6);
-  c.fill(lip2);
+  c.fill(lip3);
   c.restore();
   for (let i = 0; i < 34; i++) {
     const a = i / 34 * TAU + rnd(seed2 + i) * 0.15, w = 1 + Math.sin(a * 3 + seed2) * 0.04, x = Math.cos(a) * rx * w * 0.99, y = Math.sin(a) * ry * w * 0.99;
@@ -158108,24 +158094,24 @@ function drawWyrmHollowClearingV1(c, { rx = 150, ry = 62, seed: seed2 = 4 } = {}
   fern2(c, -rx * 0.8, ry * 0.42, -1.9, 14, 11);
   fern2(c, rx * 0.7, ry * 0.52, -1.2, 14, 12);
   fern2(c, -rx * 0.06, ry * 0.52, -1.6, 11, 13);
-  const lip2 = P2();
+  const lip3 = P2();
   for (let i = 0; i < outline5.length; i++) {
     const a = i / 40 * TAU, n = 3 + Math.round(rnd(seed2 + i) * 2);
     if (rnd(seed2 * 9 + i) < 0.3) continue;
     for (let k = 0; k < n; k++) {
       const tt = k / n, aa = a + tt * (TAU / 40), w = 1 + (rnd(seed2 + i * 1.7) - 0.5) * 0.14 + Math.sin(aa * 3 + seed2) * 0.04, px7 = Math.cos(aa) * rx * w * 1.002, py = Math.sin(aa) * ry * w * 1.002, r = 1.4 + rnd(i * 5 + k) * 1.6;
-      lip2.moveTo(px7 + r * 1.8, py);
-      lip2.ellipse(px7, py, r * 1.8, r * 0.55, 0, 0, TAU);
+      lip3.moveTo(px7 + r * 1.8, py);
+      lip3.ellipse(px7, py, r * 1.8, r * 0.55, 0, 0, TAU);
     }
   }
   c.fillStyle = HUMUS.m;
-  c.fill(lip2);
+  c.fill(lip3);
   c.save();
   c.beginPath();
-  c.clip(lip2);
+  c.clip(lip3);
   c.fillStyle = EARTH4.d;
   c.translate(-0.4, -0.6);
-  c.fill(lip2);
+  c.fill(lip3);
   c.restore();
   for (let i = 0; i < 30; i++) {
     const a = i / 30 * TAU + rnd(seed2 + i) * 0.15, w = 1 + Math.sin(a * 3 + seed2) * 0.04, x = Math.cos(a) * rx * w * 1, y = Math.sin(a) * ry * w * 1;
@@ -158357,8 +158343,8 @@ function drawWyrmHollowHoardV1(c, { open: open3 = false, t = 0, ready = false } 
     c.save();
     c.translate(-20, 2);
     c.rotate(-1.25);
-    const body6 = smooth([[-4.6, -1], [-6, -6], [-4, -11], [0, -12.4], [4, -11], [6, -6], [4.6, -1], [0, 1.6]]), neck = poly([[-2.4, -12], [2.4, -12], [2, -15], [-2, -15]]), lip2 = ell(0, -15.4, 3.2, 1.2);
-    contour(c, [body6, neck, lip2], 0.8);
+    const body6 = smooth([[-4.6, -1], [-6, -6], [-4, -11], [0, -12.4], [4, -11], [6, -6], [4.6, -1], [0, 1.6]]), neck = poly([[-2.4, -12], [2.4, -12], [2, -15], [-2, -15]]), lip3 = ell(0, -15.4, 3.2, 1.2);
+    contour(c, [body6, neck, lip3], 0.8);
     fill(c, body6, CLAY.m);
     clip(c, body6, () => {
       c.fillStyle = CLAY.d;
@@ -158372,7 +158358,7 @@ function drawWyrmHollowHoardV1(c, { open: open3 = false, t = 0, ready = false } 
       for (let x = -6; x < 7; x += 2.4) c.fill(poly([[x, -6.6], [x + 1.2, -5.4], [x + 2.4, -6.6]]));
     });
     fill(c, neck, CLAY.d);
-    fill(c, lip2, CLAY.m);
+    fill(c, lip3, CLAY.m);
     c.fillStyle = "#1a0e08";
     c.fill(ell(0, -15.4, 2, 0.7));
     c.restore();
@@ -158694,10 +158680,10 @@ function drawCinderTubeMouthV1(c, { t = 0, state: state2 = "sleep" } = {}) {
   if (state2 === "roar") ashBurst(c, 0, 0, t);
 }
 function vent(c, x, y, s) {
-  const lip2 = smooth([[x - 14 * s, y + 1], [x - 10 * s, y - 5 * s], [x, y - 6 * s], [x + 10 * s, y - 5 * s], [x + 14 * s, y + 1], [x + 9 * s, y + 5 * s], [x - 9 * s, y + 5 * s]]), hole = ell(x, y, 8.6 * s, 3.4 * s);
-  contour(c, [lip2], 0.9);
-  fill(c, lip2, CRUST.l);
-  clip(c, lip2, () => {
+  const lip3 = smooth([[x - 14 * s, y + 1], [x - 10 * s, y - 5 * s], [x, y - 6 * s], [x + 10 * s, y - 5 * s], [x + 14 * s, y + 1], [x + 9 * s, y + 5 * s], [x - 9 * s, y + 5 * s]]), hole = ell(x, y, 8.6 * s, 3.4 * s);
+  contour(c, [lip3], 0.9);
+  fill(c, lip3, CRUST.l);
+  clip(c, lip3, () => {
     c.fillStyle = CRUST.m;
     c.fillRect(x - 15 * s, y + 0.5, 30 * s, 8 * s);
     c.fillStyle = SULF.d;
@@ -158883,24 +158869,24 @@ function drawCinderTubeClearingV1(c, { rx = 150, ry = 62, seed: seed2 = 4 } = {}
   for (const [x, y, s, a] of [[-rx * 0.18, ry * 0.56, 1, 0.4], [rx * 0.5, ry * 0.4, 0.9, -0.5], [-rx * 0.6, -ry * 0.4, 0.8, 0.2], [rx * 0.3, -ry * 0.5, 0.8, -0.2]]) shard4(c, x, y, s, a);
   sulfur(c, -rx * 0.4, ry * 0.1, 0.9);
   sulfur(c, rx * 0.16, ry * 0.5, 0.8);
-  const lip2 = P2();
+  const lip3 = P2();
   for (let i = 0; i < outline5.length; i++) {
     const a = i / 40 * TAU, n = 3 + Math.round(rnd(seed2 + i) * 2);
     if (rnd(seed2 * 9 + i) < 0.3) continue;
     for (let k = 0; k < n; k++) {
       const tt = k / n, aa = a + tt * (TAU / 40), w = 1 + (rnd(seed2 + i * 1.7) - 0.5) * 0.14 + Math.sin(aa * 3 + seed2) * 0.04, px7 = Math.cos(aa) * rx * w * 1.002, py = Math.sin(aa) * ry * w * 1.002, r = 1.4 + rnd(i * 5 + k) * 1.6;
-      lip2.moveTo(px7 + r * 1.8, py);
-      lip2.ellipse(px7, py, r * 1.8, r * 0.55, 0, 0, TAU);
+      lip3.moveTo(px7 + r * 1.8, py);
+      lip3.ellipse(px7, py, r * 1.8, r * 0.55, 0, 0, TAU);
     }
   }
   c.fillStyle = CIND.d;
-  c.fill(lip2);
+  c.fill(lip3);
   c.save();
   c.beginPath();
-  c.clip(lip2);
+  c.clip(lip3);
   c.fillStyle = CIND.l;
   c.translate(-0.4, -0.6);
-  c.fill(lip2);
+  c.fill(lip3);
   c.restore();
   for (let i = 0; i < 34; i++) {
     const a = i / 34 * TAU + rnd(seed2 + i) * 0.15, w = 1 + Math.sin(a * 3 + seed2) * 0.04, x = Math.cos(a) * rx * w, y = Math.sin(a) * ry * w;
@@ -159065,8 +159051,8 @@ function drawCinderTubeHoardV1(c, { open: open3 = false, t = 0, ready = false } 
     c.save();
     c.translate(4, -13);
     c.rotate(-0.08);
-    const band11 = poly([[-7, 0], [7, 0], [6.4, 4], [-6.4, 4]]), pts2 = poly([[-7, 0], [-7.4, -6], [-4.4, -2.6], [-2.2, -8], [0, -3], [2.2, -8], [4.4, -2.6], [7.4, -6], [7, 0]]);
-    contour(c, [band11, pts2], 0.8);
+    const band12 = poly([[-7, 0], [7, 0], [6.4, 4], [-6.4, 4]]), pts2 = poly([[-7, 0], [-7.4, -6], [-4.4, -2.6], [-2.2, -8], [0, -3], [2.2, -8], [4.4, -2.6], [7.4, -6], [7, 0]]);
+    contour(c, [band12, pts2], 0.8);
     fill(c, pts2, GOLD.m);
     clip(c, pts2, () => {
       c.fillStyle = GOLD.l;
@@ -159074,7 +159060,7 @@ function drawCinderTubeHoardV1(c, { open: open3 = false, t = 0, ready = false } 
       c.fillStyle = GOLD.d;
       c.fillRect(3, -9, 6, 9);
     });
-    fill(c, band11, GOLD.d);
+    fill(c, band12, GOLD.d);
     c.fillStyle = GOLD.l;
     c.fillRect(-6.6, 0.4, 8, 1.2);
     for (const [x, y] of [[-7.4, -6], [-2.2, -8], [2.2, -8], [7.4, -6]]) {
@@ -159417,7 +159403,7 @@ function drawDenMouthV1(c, x, y, { skin = "woodland", t = 0, state: state2 = "sl
   ({ roots, bramble: bramble2, pit: pitBack, icecave, log, aerie, vines: vines2, tube })[K13.mouth](c, K13, t, state2);
   c.restore();
 }
-function arch3(c, K13, cx, cy2, w, h, { lip: lip2 = null, glowRgb = null } = {}) {
+function arch3(c, K13, cx, cy2, w, h, { lip: lip3 = null, glowRgb = null } = {}) {
   const pts2 = (n) => {
     const o = [];
     for (let i = 0; i <= n; i++) {
@@ -159426,7 +159412,7 @@ function arch3(c, K13, cx, cy2, w, h, { lip: lip2 = null, glowRgb = null } = {})
     }
     return o;
   };
-  if (lip2) poly15(c, [...pts2(16).map(([px7, py]) => [cx + (px7 - cx) * 1.16, cy2 + (py - cy2) * 1.12]), [cx + w * 1.16, cy2 + 2], [cx - w * 1.16, cy2 + 2]], lip2, 1.1);
+  if (lip3) poly15(c, [...pts2(16).map(([px7, py]) => [cx + (px7 - cx) * 1.16, cy2 + (py - cy2) * 1.12]), [cx + w * 1.16, cy2 + 2], [cx - w * 1.16, cy2 + 2]], lip3, 1.1);
   poly15(c, [...pts2(16), [cx + w, cy2 + 1.5], [cx - w, cy2 + 1.5]], K13.inside, 1.2);
   const inner = [];
   for (let i = 0; i <= 14; i++) {
@@ -160090,8 +160076,8 @@ function waysideTracker(e) {
   const w = e.wayside, name = (WAYSIDE_SKINS_V1[e.skin] ?? WAYSIDE_SKINS_V1.woodland).name, base3 = { groupId: e.groupId, kind: e.kind, accent: "#f0c46a", tag: "WAYSIDE SHRINE", title: name, pips: 0, done: 0 };
   if (e.status === "dormant") return { ...base3, line: "Pray here for a blessing that lasts 3 minutes.", action: { label: e.canActivate ? "E / tap \xB7 Pray" : e.activeCount >= 4 ? "Finish another event first" : "Walk up to the shrine", enabled: Boolean(e.canActivate) } };
   if (!w.blessing) return { ...base3, title: "Praying\u2026", bar: w.prayer, barText: "Prayer", line: "Stay close to the shrine." };
-  const [title9, fx] = BLESSING_NAMES[w.blessing] ?? [w.blessing, ""];
-  return { ...base3, tag: "BLESSED", title: title9, line: fx + " for 3 minutes. The shrine relights after a while." };
+  const [title10, fx] = BLESSING_NAMES[w.blessing] ?? [w.blessing, ""];
+  return { ...base3, tag: "BLESSED", title: title10, line: fx + " for 3 minutes. The shrine relights after a while." };
 }
 function blessingBadgeV1(model) {
   const b = model.eventBlessing;
@@ -160612,10 +160598,10 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
         body6.classList.toggle("wheel-move-away", away);
       }
     });
-    const band11 = g.radius + g.slot / 2 + 10, hole = g.radius - g.slot / 2 - 10, circle9 = (r, c) => `M ${(c - r).toFixed(1)},${c.toFixed(1)} a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(2 * r).toFixed(1)},0 a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(-2 * r).toFixed(1)},0 Z`;
+    const band12 = g.radius + g.slot / 2 + 10, hole = g.radius - g.slot / 2 - 10, circle9 = (r, c) => `M ${(c - r).toFixed(1)},${c.toFixed(1)} a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(2 * r).toFixed(1)},0 a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(-2 * r).toFixed(1)},0 Z`;
     wheel.style.setProperty("--slot", g.slot + "px");
     document2.body.style.setProperty("--wheel-slot", g.slot + "px");
-    ring12.style.cssText = `left:${(g.cx - band11).toFixed(1)}px;top:${(g.cy - band11).toFixed(1)}px;width:${(band11 * 2).toFixed(1)}px;height:${(band11 * 2).toFixed(1)}px;--hole:${hole.toFixed(1)}px;clip-path:path(evenodd,"${circle9(band11, band11)} ${circle9(hole, band11)}")`;
+    ring12.style.cssText = `left:${(g.cx - band12).toFixed(1)}px;top:${(g.cy - band12).toFixed(1)}px;width:${(band12 * 2).toFixed(1)}px;height:${(band12 * 2).toFixed(1)}px;--hole:${hole.toFixed(1)}px;clip-path:path(evenodd,"${circle9(band12, band12)} ${circle9(hole, band12)}")`;
     done3.style.cssText = `left:${(g.cx - g.hub).toFixed(1)}px;top:${(g.cy - g.hub).toFixed(1)}px;width:${(g.hub * 2).toFixed(1)}px;height:${(g.hub * 2).toFixed(1)}px`;
     attackSkill.style.left = done3.style.left;
     attackSkill.style.top = done3.style.top;
@@ -161810,21 +161796,21 @@ function updatePartyWorld(storage, channel2, id2, fn) {
   r.worlds[id2] = clean;
   return write3(storage, channel2, r) ? clean : w;
 }
-function sharePartyWorld(storage, channel2, { id: id2, slot, hash: hash73, seed: seed2, owner }) {
+function sharePartyWorld(storage, channel2, { id: id2, slot, hash: hash74, seed: seed2, owner }) {
   const r = readPartyWorlds(storage, channel2), had = Object.values(r.worlds).find((w2) => w2.own && w2.slot === slot);
   if (had) return had;
-  const w = cleanWorld({ id: id2, hash: hash73, seed: seed2, owner, label: `${owner}\u2019s world`, own: true, slot, members: [owner] });
+  const w = cleanWorld({ id: id2, hash: hash74, seed: seed2, owner, label: `${owner}\u2019s world`, own: true, slot, members: [owner] });
   if (!w) return null;
   r.worlds[id2] = w;
   return write3(storage, channel2, r) ? w : null;
 }
-function copyPartyWorld(storage, channel2, { id: id2, hash: hash73, seed: seed2, label: label7, owner }) {
+function copyPartyWorld(storage, channel2, { id: id2, hash: hash74, seed: seed2, label: label7, owner }) {
   const r = readPartyWorlds(storage, channel2);
   if (r.worlds[id2]) return r.worlds[id2];
   let slot = PARTY_SLOT_BASE + 1;
   while (Object.values(r.worlds).some((w2) => w2.slot === slot)) slot++;
   if (slot > PARTY_SLOT_BASE + PARTY_SLOT_LIMIT) return null;
-  const w = cleanWorld({ id: id2, hash: hash73, seed: seed2, label: label7, owner, own: false, slot, members: [owner] });
+  const w = cleanWorld({ id: id2, hash: hash74, seed: seed2, label: label7, owner, own: false, slot, members: [owner] });
   if (!w) return null;
   r.worlds[id2] = w;
   return write3(storage, channel2, r) ? w : null;
@@ -162135,7 +162121,7 @@ function comboPhaseV2(current, tick) {
   return { phase: current.phase, k: clamp012((tick - current.phaseStartedTick) / len), len };
 }
 var FEET = 18;
-function comboMatrixV2(x, y, facing3, aim2, p) {
+function comboMatrixV2(x, y, facing2, aim2, p) {
   const m = [1, 0, 0, 1, x + p.x * 0.8 * aim2.x, y - 8 + p.y * 0.8 + p.x * 0.8 * aim2.y], mul = (n) => {
     const [a, b, c, d, e, f] = m;
     m[0] = a * n[0] + c * n[1];
@@ -162145,7 +162131,7 @@ function comboMatrixV2(x, y, facing3, aim2, p) {
     m[4] = a * n[4] + c * n[5] + e;
     m[5] = b * n[4] + d * n[5] + f;
   };
-  mul([0.8 * facing3, 0, 0, 0.8, 0, 0]);
+  mul([0.8 * facing2, 0, 0, 0.8, 0, 0]);
   const r = p.lean, cs = Math.cos(r), sn = Math.sin(r);
   mul([cs, sn, -sn, cs, 0, 0]);
   mul([1, 0, 0, 1, 0, FEET]);
@@ -162281,8 +162267,8 @@ function tongue3(c, x, y, h, w, t, seed2) {
   shape3(0.78, GHOST);
   shape3(0.42, GHOST_L);
 }
-function cleaveStrikePoint(boss, facing3) {
-  return { x: boss.x + 90 * facing3, y: boss.y + 32 };
+function cleaveStrikePoint(boss, facing2) {
+  return { x: boss.x + 90 * facing2, y: boss.y + 32 };
 }
 function crack5(c, x, y, a, r0, r1, w, glowK, bend) {
   const x0 = x + Math.cos(a) * r0, y0 = y + Math.sin(a) * r0, x1 = x + Math.cos(a + bend) * r1, y1 = y + Math.sin(a + bend) * r1, mx = x + Math.cos(a + bend * 0.5) * (r0 + r1) / 2, my = y + Math.sin(a + bend * 0.5) * (r0 + r1) / 2, nx = -Math.sin(a) * w, ny = Math.cos(a) * w;
@@ -162573,11 +162559,11 @@ function glow12(c, blur, draw) {
   draw();
   c.restore();
 }
-function flameReleasePoint(boss, facing3) {
-  return { x: boss.x - 12 * facing3, y: boss.y, z: 67 };
+function flameReleasePoint(boss, facing2) {
+  return { x: boss.x - 12 * facing2, y: boss.y, z: 67 };
 }
-function flightAt(boss, facing3, target, u) {
-  const r = flameReleasePoint(boss, facing3), d = Math.hypot(target.x - r.x, target.y - r.y), H8 = 34 + d * 0.22;
+function flightAt(boss, facing2, target, u) {
+  const r = flameReleasePoint(boss, facing2), d = Math.hypot(target.x - r.x, target.y - r.y), H8 = 34 + d * 0.22;
   return { x: lerp6(r.x, target.x, u), y: lerp6(r.y, target.y, u), z: r.z * (1 - u) + H8 * 4 * u * (1 - u), vz: -r.z + H8 * 4 * (1 - 2 * u) };
 }
 function fireSkull(c, x, y, s, t, dir) {
@@ -162627,7 +162613,7 @@ function fireSkull(c, x, y, s, t, dir) {
   }
   c.restore();
 }
-function drawCrownFlameWarning(c, { target, charge: charge3, boss, facing: facing3, t }) {
+function drawCrownFlameWarning(c, { target, charge: charge3, boss, facing: facing2, t }) {
   const p = clamp35(charge3), R11 = FLAME_REACH, x = target.x, y = target.y;
   c.save();
   c.globalAlpha = 0.1 + 0.12 * p;
@@ -162677,7 +162663,7 @@ function drawCrownFlameWarning(c, { target, charge: charge3, boss, facing: facin
     glow12(c, 4, () => tongue4(c, x + Math.cos(a) * R11, y + Math.sin(a) * R11, (3.2 + Math.sin(t * 0.3 + i) * 0.8 + (p > 0.85 ? 2.5 : 0)) * lit2, 1.3, t, i));
   }
   if (charge3 >= FLAME_RELEASE) {
-    const u = (charge3 - FLAME_RELEASE) / (1 - FLAME_RELEASE), f = flightAt(boss, facing3, target, u), s = clamp35(1 - f.z / 120);
+    const u = (charge3 - FLAME_RELEASE) / (1 - FLAME_RELEASE), f = flightAt(boss, facing2, target, u), s = clamp35(1 - f.z / 120);
     c.save();
     c.fillStyle = `rgba(10,18,8,${0.25 + 0.3 * s})`;
     c.beginPath();
@@ -162686,14 +162672,14 @@ function drawCrownFlameWarning(c, { target, charge: charge3, boss, facing: facin
     c.restore();
   }
 }
-function crownFlameFlightItem({ target, charge: charge3, boss, facing: facing3, t }) {
+function crownFlameFlightItem({ target, charge: charge3, boss, facing: facing2, t }) {
   if (charge3 < FLAME_RELEASE || charge3 >= 1) return null;
-  const u = (charge3 - FLAME_RELEASE) / (1 - FLAME_RELEASE), f = flightAt(boss, facing3, target, u), f2 = flightAt(boss, facing3, target, Math.min(1, u + 0.02)), dir = Math.atan2(f2.y - f2.z - (f.y - f.z), f2.x - f.x);
+  const u = (charge3 - FLAME_RELEASE) / (1 - FLAME_RELEASE), f = flightAt(boss, facing2, target, u), f2 = flightAt(boss, facing2, target, Math.min(1, u + 0.02)), dir = Math.atan2(f2.y - f2.z - (f.y - f.z), f2.x - f.x);
   return { y: f.y + 2, draw: (c) => {
     for (let i = 4; i >= 1; i--) {
       const v = u - i * 0.045;
       if (v < 0) continue;
-      const g = flightAt(boss, facing3, target, v);
+      const g = flightAt(boss, facing2, target, v);
       c.save();
       c.globalAlpha = 0.75 - i * 0.15;
       glow12(c, 5, () => tongue4(c, g.x, g.y - g.z + 4, 9 - i * 1.4, 3.6 - i * 0.5, t, i + 20, false));
@@ -163898,10 +163884,10 @@ function crescent(ctx, p, u0, u1, width2, color28, alpha, wave = 0) {
 }
 function drawFlurry(ctx, x, y, dx, dy, age, style = null, fourth = false) {
   if (age < 0 || age >= (fourth ? FOURTH_CUT_ART_LIFE : FLURRY_ART_LIFE)) return;
-  const l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, facing3 = ux < 0 ? -1 : 1, cx = x + ux * 24, cy2 = y - 11 + uy * 12;
+  const l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, facing2 = ux < 0 ? -1 : 1, cx = x + ux * 24, cy2 = y - 11 + uy * 12;
   ctx.save();
   ctx.translate(cx, cy2);
-  ctx.scale(facing3, 1);
+  ctx.scale(facing2, 1);
   for (const s of fourth ? FOURTH_STRIKES : STRIKES) {
     const t = age - FLURRY_CUT_MS[s.cut], k = t / 90, fade = 1 - smooth25((t - 90) / 250);
     if (t < 0 || fade <= 0) continue;
@@ -163924,14 +163910,14 @@ function drawFlurry(ctx, x, y, dx, dy, age, style = null, fourth = false) {
   }
   ctx.restore();
 }
-function drawParryWard(ctx, x, y, facing3, ready, time3, spentAge = -1) {
+function drawParryWard(ctx, x, y, facing2, ready, time3, spentAge = -1) {
   const flare = spentAge >= 0 && spentAge < 300 ? 1 - spentAge / 300 : 0;
   if (!ready && !flare) return;
-  const t = time3 / 1e3, wx = x + facing3 * 15, wy = y - 12, a = ready ? 1 : flare;
+  const t = time3 / 1e3, wx = x + facing2 * 15, wy = y - 12, a = ready ? 1 : flare;
   blob7(ctx, wx, wy, 12, ROGUE_VIOLET, 0.22 * a + 0.3 * flare);
   ctx.save();
   ctx.translate(wx, wy);
-  ctx.scale(facing3, 1);
+  ctx.scale(facing2, 1);
   glowStroke(ctx, ROGUE_VIOLET, 8, (1.2 + 1.4 * flare) * a, () => {
     ctx.beginPath();
     ctx.ellipse(0, 0, 4, 12, 0, -1.25, 1.25);
@@ -163959,8 +163945,8 @@ function drawParryWard(ctx, x, y, facing3, ready, time3, spentAge = -1) {
   ctx.restore();
   if (flare) {
     const q2 = 1 - flare;
-    bloom3(ctx, wx + facing3 * 4, wy, 6 + 16 * q2, ROGUE_VIOLET, 0.9 * flare);
-    star42(ctx, wx + facing3 * 4, wy, 7 * flare + 1, ROGUE_CORE, flare);
+    bloom3(ctx, wx + facing2 * 4, wy, 6 + 16 * q2, ROGUE_VIOLET, 0.9 * flare);
+    star42(ctx, wx + facing2 * 4, wy, 7 * flare + 1, ROGUE_CORE, flare);
   }
 }
 function drawDashChevron(ctx, x, y, dx, dy, age, landing2) {
@@ -164157,7 +164143,7 @@ function setTripHeroWiltV1(id2, amt) {
   if (h) h.wilt = amt;
 }
 var ghostBuf = null;
-function drawTripGhostsV1(c, id2, spec, facing3, time3, big, lift = 0) {
+function drawTripGhostsV1(c, id2, spec, facing2, time3, big, lift = 0) {
   const h = heroes.get(id2);
   if (!h || h.trail.length < 2 || typeof document === "undefined") return;
   if (!ghostBuf) {
@@ -164172,7 +164158,7 @@ function drawTripGhostsV1(c, id2, spec, facing3, time3, big, lift = 0) {
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.globalCompositeOperation = "source-over";
     g.clearRect(0, 0, 200, 200);
-    g.setTransform(2.5 * 0.8 * facing3, 0, 0, 2.5 * 0.8, 100, 120);
+    g.setTransform(2.5 * 0.8 * facing2, 0, 0, 2.5 * 0.8, 100, 120);
     const pose3 = { t: at9, step: Math.sin(at9 * 1e3 / 90), moving: true, front: -0.6, noTrail: true };
     drawTripHeroV1(g, spec, pose3, big);
     g.setTransform(1, 0, 0, 1, 0, 0);
@@ -164228,7 +164214,7 @@ var unit7 = (v) => {
   const l = Math.hypot(v?.x ?? 1, v?.y ?? 0) || 1;
   return { x: (v?.x ?? 1) / l, y: (v?.y ?? 0) / l };
 };
-var frontAngle = (pose3, primary, facing3) => primary ? Math.atan2(pose3.aim.y, pose3.aim.x * facing3) + pose3.sword : -0.6;
+var frontAngle = (pose3, primary, facing2) => primary ? Math.atan2(pose3.aim.y, pose3.aim.x * facing2) + pose3.sword : -0.6;
 var clamp013 = (v) => Math.max(0, Math.min(1, v));
 var smooth26 = (v) => {
   v = clamp013(v);
@@ -164250,8 +164236,8 @@ function bashPose(age) {
   if (!(age >= 0 && age < BASH_POSE_TICKS)) return null;
   return { guard: true, guardY: 0, jab: 10 * smooth26(age / 3) * (1 - smooth26((age - 8) / 14)) };
 }
-function castCirclePosition(actor, facing3) {
-  return { x: actor.position.x + 0.8 * facing3 * CAST_CIRCLE_LOCAL.x, y: actor.position.y - 8 + 0.8 * CAST_CIRCLE_LOCAL.y };
+function castCirclePosition(actor, facing2) {
+  return { x: actor.position.x + 0.8 * facing2 * CAST_CIRCLE_LOCAL.x, y: actor.position.y - 8 + 0.8 * CAST_CIRCLE_LOCAL.y };
 }
 function drawWorldHero(ctx, actor, ...rest2) {
   const sink2 = shroudSinkDepth(actor.uniqueCharge?.sink ?? 0);
@@ -164269,10 +164255,10 @@ function drawWorldHero(ctx, actor, ...rest2) {
     ctx.restore();
   }
 }
-function drawWorldHeroBody(ctx, actor, facing3, presentationTime, primary = null, tick = 0, hurtFlash = false, skill = null) {
+function drawWorldHeroBody(ctx, actor, facing2, presentationTime, primary = null, tick = 0, hurtFlash = false, skill = null) {
   let guardY = 0;
   if (actor.subType === "shield" && actor.guard?.raised) {
-    facing3 = actor.guard.direction.x < 0 ? -1 : 1;
+    facing2 = actor.guard.direction.x < 0 ? -1 : 1;
     primary = { ...primary, facing: actor.guard.direction };
     guardY = actor.guard.direction.y;
   }
@@ -164281,7 +164267,7 @@ function drawWorldHeroBody(ctx, actor, facing3, presentationTime, primary = null
   const leapAge = skill?.skillId === "skyfall_leap" ? tick - skill.tick : -1, air = skill?.air ?? 20, lift = (leapAge >= 0 && leapAge < air ? Math.sin(Math.PI * leapAge / air) * (air > 20 ? 40 : 26) : 0) + hop.lift;
   const current = primary?.current, spec = current ? heroSpecForActor(actor) : null, cls = current ? comboClassV2(spec) : null;
   if (cls) {
-    const { phase: phase2, k } = comboPhaseV2(current, tick), p = comboPoseV2(cls, current.comboStep, phase2, k), aim2 = unit7(current.aim ?? primary.facing), aimAngle = Math.atan2(aim2.y, aim2.x * facing3), m = comboMatrixV2(actor.position.x, actor.position.y - lift, facing3, aim2, p);
+    const { phase: phase2, k } = comboPhaseV2(current, tick), p = comboPoseV2(cls, current.comboStep, phase2, k), aim2 = unit7(current.aim ?? primary.facing), aimAngle = Math.atan2(aim2.y, aim2.x * facing2), m = comboMatrixV2(actor.position.x, actor.position.y - lift, facing2, aim2, p);
     ctx.save();
     ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
     drawTripHeroV1(ctx, spec, {
@@ -164306,12 +164292,12 @@ function drawWorldHeroBody(ctx, actor, facing3, presentationTime, primary = null
       ...cast2 ?? {}
     }, big);
     ctx.restore();
-    drawComboSmearV2(ctx, cls, mainWeaponOf(spec), current.comboStep, current, tick, { x: actor.position.x, y: actor.position.y, facing: facing3, aim: aim2, aimAngle, lift }, hurtFlash);
+    drawComboSmearV2(ctx, cls, mainWeaponOf(spec), current.comboStep, current, tick, { x: actor.position.x, y: actor.position.y, facing: facing2, aim: aim2, aimAngle, lift }, hurtFlash);
     return;
   }
   ctx.save();
   ctx.translate(actor.position.x, actor.position.y - 8 - lift);
-  ctx.scale(0.8 * facing3, 0.8);
+  ctx.scale(0.8 * facing2, 0.8);
   if (hop.squash) {
     ctx.translate(0, 20);
     ctx.scale(1 + hop.squash, 1 - hop.squash);
@@ -164324,7 +164310,7 @@ function drawWorldHeroBody(ctx, actor, facing3, presentationTime, primary = null
     sway: Math.sin(presentationTime / 560) * 0.5,
     step: moving2 ? Math.sin(presentationTime / 90) : 0,
     moving: Boolean(moving2),
-    front: frontAngle(pose3, primary, facing3),
+    front: frontAngle(pose3, primary, facing2),
     guard: Boolean(actor.guard?.raised),
     guardY,
     jab: riposteAge >= 0 && riposteAge < 12 ? Math.sin(Math.PI * riposteAge / 12) * 7 : 0,
@@ -164637,7 +164623,7 @@ var ARROW_DOWN = '<svg width="9" height="9" viewBox="0 0 12 12" aria-hidden="tru
 function characterStatGroupsV3(model) {
   const p = model.playersById[model.localPlayerId], s = p.stats, f = s.familyProperties ?? {}, groups = [];
   const value2 = (v) => v === void 0 ? "\u2014" : statText(v, true), pct3 = (v) => v === void 0 ? "\u2014" : statText(statScale(v, 100), true) + "%", mult = (v) => v === void 0 ? "\u2014" : statText(v, true) + "\xD7";
-  const group = (title9, rows) => groups.push({ title: title9, rows: rows.filter((r) => r[1] !== void 0).map(([label7, v, format = value2]) => ({ label: label7, value: format(v) })) });
+  const group = (title10, rows) => groups.push({ title: title10, rows: rows.filter((r) => r[1] !== void 0).map(([label7, v, format = value2]) => ({ label: label7, value: format(v) })) });
   group("Combat", [
     ["Attack", s.attack],
     ["Defense", s.defense],
@@ -165204,11 +165190,11 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
       sheetBody.replaceChildren(el3("p", "Tap a skill to see what it does and learn it.", "sheet-empty"));
       return;
     }
-    const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el3("div", "", "sheet-head"), icon2 = disc4(n, false), title9 = el3("div"), tags = el3("div", "", "sheet-tags");
+    const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el3("div", "", "sheet-head"), icon2 = disc4(n, false), title10 = el3("div"), tags = el3("div", "", "sheet-tags");
     stateClasses(headRow, n, s);
     tags.append(el3("span", tree2 === "utility" ? "Utility" : TIER_TAGS[n.tier]), el3("span", s.maxed ? "Mastered" : `Rank ${rankText(n, s.rank)}`, s.maxed ? "done" : ""));
-    title9.append(el3("h3", n.name), tags);
-    headRow.append(icon2.wrap, title9, button3("\xD7", "sheet-close", close));
+    title10.append(el3("h3", n.name), tags);
+    headRow.append(icon2.wrap, title10, button3("\xD7", "sheet-close", close));
     const parts = [headRow, el3("p", nodeDescription(n), "sheet-desc")], effect = (label7, text3, cls = "") => {
       const e = el3("div", "", `sheet-effect ${cls}`);
       e.append(el3("b", label7), el3("span", text3));
@@ -166331,8 +166317,8 @@ function createFriendsViewV1({ document: document2, environment, friends, action
     }
     render(true);
   };
-  const box6 = (title9, count2) => {
-    const b = el3("div", "fr-box"), h = el3("h4", "", title9);
+  const box6 = (title10, count2) => {
+    const b = el3("div", "fr-box"), h = el3("h4", "", title10);
     if (count2 != null) h.append(el3("span", "", String(count2)));
     b.append(h);
     return b;
@@ -167314,16 +167300,16 @@ function createInventoryPresentation({ document: document2, environment, readMod
     close2.className = "gx-close";
     close2.dataset.action = "dismiss";
     close2.setAttribute("aria-label", "Close item");
-    const head19 = element("div", "", "gx-head"), frame4 = element("div", "", "gx-itemicon"), info2 = element("div", "", "gx-iteminfo"), title9 = element("h4", displayName(d), "gx-itemname");
-    title9.id = "world-item-title";
-    title9.tabIndex = -1;
+    const head19 = element("div", "", "gx-head"), frame4 = element("div", "", "gx-itemicon"), info2 = element("div", "", "gx-iteminfo"), title10 = element("h4", displayName(d), "gx-itemname");
+    title10.id = "world-item-title";
+    title10.tabIndex = -1;
     frame4.append(itemIcon(item2));
     const unique = uniqueOf(d);
     if (unique) {
-      title9.classList.add("is-unique");
-      title9.append(element("span", "Unique", "gx-uniquetag"));
+      title10.classList.add("is-unique");
+      title10.append(element("span", "Unique", "gx-uniquetag"));
     }
-    info2.append(title9, element("span", [RARITY_NAMES[d.rarityTier ?? 0], `${d.rarityTier ?? 0}\u2605`, (SLOT_NAMES[equippedSlot ?? (d.slot === "ring" ? "ring1" : d.slot)] ?? label6(d.slot)).replace(/ \d$/, ""), gen?.itemPower != null ? "Lv " + statText(gen.itemPower) : null].filter(Boolean).join(" \xB7 "), "gx-itemsub"));
+    info2.append(title10, element("span", [RARITY_NAMES[d.rarityTier ?? 0], `${d.rarityTier ?? 0}\u2605`, (SLOT_NAMES[equippedSlot ?? (d.slot === "ring" ? "ring1" : d.slot)] ?? label6(d.slot)).replace(/ \d$/, ""), gen?.itemPower != null ? "Lv " + statText(gen.itemPower) : null].filter(Boolean).join(" \xB7 "), "gx-itemsub"));
     head19.append(frame4, info2, close2);
     scroll.append(head19);
     if (target && d.slot === "ring") {
@@ -167838,7 +167824,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
   root6.hidden = true;
   root6.setAttribute("data-gameplay-hud", "");
   root6.setAttribute("aria-label", "Local event objectives");
-  const tag2 = document2.createElement("small"), title9 = document2.createElement("strong"), objective = document2.createElement("p"), bars = document2.createElement("div"), detail = document2.createElement("span");
+  const tag2 = document2.createElement("small"), title10 = document2.createElement("strong"), objective = document2.createElement("p"), bars = document2.createElement("div"), detail = document2.createElement("span");
   const pods = Array.from({ length: 3 }, (_, n) => {
     const row2 = document2.createElement("div"), label7 = document2.createElement("span"), bar2 = document2.createElement("progress");
     label7.textContent = "Pod " + (n + 1);
@@ -167854,7 +167840,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
   action2.onclick = () => {
     if (currentGroup && !root6.hidden && !action2.hidden && !action2.disabled) onActivate(currentGroup);
   };
-  root6.append(tag2, title9, objective, bars, detail, action2);
+  root6.append(tag2, title10, objective, bars, detail, action2);
   const style = document2.createElement("style");
   style.textContent = `#world-event-hud-v3{position:absolute;z-index:7;top:76px;left:12px;width:min(258px,52vw);padding:10px 13px;border:1px solid #8863a6;border-left:3px solid #b282d7;border-radius:3px 8px 8px 3px;background:linear-gradient(120deg,#152330f2,#17212ae8);color:#eef4f4;font:12px/1.4 system-ui;pointer-events:none;box-sizing:border-box}#world-event-hud-v3 button{pointer-events:auto;touch-action:manipulation;margin-top:8px;padding:7px 10px;font:600 12px system-ui;border:1px solid #ab87cc;border-radius:4px;background:#32404f;color:#f0e7fa}#world-event-hud-v3 button:disabled{opacity:.6}#world-event-hud-v3[hidden]{display:none!important}#world-event-hud-v3 small{display:block;color:#ceabea;letter-spacing:.14em;font-size:9px;font-weight:800}#world-event-hud-v3 strong{display:block;font-size:16px;margin:2px 0 5px}#world-event-hud-v3 p{margin:4px 0 7px}#world-event-hud-v3>span{display:block;margin-top:7px;font-size:11px;color:#bbcfd4}#world-event-hud-v3>div>div{display:flex;align-items:center;gap:8px;margin:3px 0}#world-event-hud-v3 progress{width:100%;height:7px;accent-color:#afdf9d}#world-event-hud-v3 div span{min-width:47px;font-size:10px}#world-event-hud-v3[data-state=completed]{border-color:#7fbd95}#world-event-hud-v3[data-state=dormant]>div{display:none}@media(max-width:600px){#world-event-hud-v3{top:68px;left:8px;width:min(210px,51vw);padding:7px 9px;font-size:11px}#world-event-hud-v3 strong{font-size:14px}}@media(max-height:450px){#world-event-hud-v3{top:62px;padding:5px 9px}#world-event-hud-v3>div{display:none}}`;
   document2.head.append(style);
@@ -167890,7 +167876,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
       action2.hidden = event.status !== "dormant";
       action2.disabled = !event.canActivate;
       action2.textContent = event.canActivate ? "E / tap \xB7 Investigate" : "Approach the hollow";
-      title9.textContent = "Hidden Hollow";
+      title10.textContent = "Hidden Hollow";
       tag2.textContent = event.status === "completed" ? "EVENT COMPLETE" : event.status === "dormant" ? "LOCAL EVENT" : model.tick - enteredTick < 150 ? "EVENT STARTED" : "LOCAL EVENT \xB7 ACTIVE";
       objective.textContent = event.status === "dormant" ? "Something is moving inside the fallen tree." : event.status === "completed" ? event.rewardClaimed ? "Reward claimed." : "Claim your reward chest." : h.guardian ? "Defeat the Hollow Guardian" : `Drive back the creatures \xB7 wave ${Math.max(1, h.wave)}/3`;
       detail.textContent = event.status === "dormant" ? "Investigate deliberately to begin." : event.status === "completed" ? "The hollow falls quiet." : h.living ? `${h.living} enemies emerging / fighting \xB7 ${h.remaining} total remaining` : h.nextWaveTicks ? `Movement inside \xB7 ${Math.ceil(h.nextWaveTicks / 60)}s` : "Watch the hollow entrance.";
@@ -167906,7 +167892,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
     action2.textContent = event.canActivate ? "E / tap \xB7 Disturb pod" : "Approach a pod";
     root6.dataset.state = event.status;
     tag2.textContent = event.status === "dormant" ? "LOCAL EVENT" : event.status === "completed" ? "EVENT COMPLETE" : model.tick - enteredTick < 150 ? "EVENT STARTED" : "LOCAL EVENT \xB7 ACTIVE";
-    title9.textContent = "Spore Outbreak";
+    title10.textContent = "Spore Outbreak";
     objective.textContent = event.status === "dormant" ? "E / tap near a pod to disturb it." : event.status === "completed" ? event.rewardClaimed ? "Reward claimed." : "Claim your reward chest." : `Destroy the spore pods \xB7 ${destroyed}/3`;
     pods.forEach(({ label: label7, bar: bar2 }, n) => {
       label7.textContent = event.pods[n]?.used ? "Broken" : "Pod " + (n + 1);
@@ -168465,9 +168451,9 @@ function createSettlementServicesMenu2(options) {
     panel.dataset.serviceKind = kind;
     panel.replaceChildren();
     const shell4 = el3("div", void 0, "tn-shell"), head19 = el3("div", void 0, "tn-head"), face5 = markup(el3("div", void 0, "tn-npc"), FACES3[kind]), who = el3("div", void 0, "tn-who");
-    const title9 = el3("h3", npc?.name ?? "Potions");
-    if (npc?.tier && npc.stock?.length) title9.append(el3("span", { village: "Village", town: "Town", city: "City" }[npc.tier], "tn-tier"));
-    who.append(title9, el3("small", npc?.roleLabel ?? "Your potion belt"));
+    const title10 = el3("h3", npc?.name ?? "Potions");
+    if (npc?.tier && npc.stock?.length) title10.append(el3("span", { village: "Village", town: "Town", city: "City" }[npc.tier], "tn-tier"));
+    who.append(title10, el3("small", npc?.roleLabel ?? "Your potion belt"));
     const exit = button3("", close, "close", "tn-x");
     exit.innerHTML = CLOSE2;
     exit.setAttribute("aria-label", "Close");
@@ -168615,7 +168601,7 @@ function createSettlementServicesMenu2(options) {
       body6.append(card);
       if (npc?.role === "general") {
         const B8 = POTION_BELT_POLICY;
-        for (const [offerId, title10, max, text3, icon2] of [[B8.offers.capacity, "Bigger belt", B8.maxCapacityUpgrades, () => ["Carry ", belt2.capacity, belt2.capacity + 1, " potions"], FLASK(true)], [B8.offers.potency, "Stronger brew", B8.maxPotencyUpgrades, () => ["Heal ", belt2.healPercent + "%", belt2.healPercent + B8.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
+        for (const [offerId, title11, max, text3, icon2] of [[B8.offers.capacity, "Bigger belt", B8.maxCapacityUpgrades, () => ["Carry ", belt2.capacity, belt2.capacity + 1, " potions"], FLASK(true)], [B8.offers.potency, "Stronger brew", B8.maxPotencyUpgrades, () => ["Heal ", belt2.healPercent + "%", belt2.healPercent + B8.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
           const u = potionUpgrade(p, offerId), row2 = el3("div", void 0, "tn-card tn-upg"), info2 = el3("div");
           info2.style.flex = "1";
           const [a, b, c, d] = text3(), line44 = el3("p");
@@ -168626,12 +168612,12 @@ function createSettlementServicesMenu2(options) {
           } else line44.append("Fully upgraded");
           const pips = el3("div", void 0, "tn-pips");
           for (let n = 0; n < max; n++) pips.append(el3("i", void 0, n < u.done ? "on" : ""));
-          info2.append(el3("h4", title10), line44, pips);
+          info2.append(el3("h4", title11), line44, pips);
           const buy = button3("", () => issue("service.buy", { npcId, offerId }), "buy:" + offerId, "tn-btn is-gold is-small");
           if (u.price) buy.append(coin4(), formatAmount(u.price));
           else buy.append("Done");
           buy.disabled = busy || !u.price || compareAmount(inv.gold, u.price) < 0;
-          buy.setAttribute("aria-label", u.price ? title10 + ", " + u.price + " gold" : title10 + ", fully upgraded");
+          buy.setAttribute("aria-label", u.price ? title11 + ", " + u.price + " gold" : title11 + ", fully upgraded");
           row2.append(markup(el3("div", void 0, "tn-ic"), icon2), info2, buy);
           body6.append(row2);
         }
@@ -169020,8 +169006,8 @@ function createSettingsPageV1({ document: doc, environment: env }) {
     if (text3 !== void 0) e.textContent = text3;
     return e;
   };
-  const name = (title9, note2, fixed) => {
-    const n = el3("div", "st-name" + (fixed ? " fixed" : ""), title9);
+  const name = (title10, note2, fixed) => {
+    const n = el3("div", "st-name" + (fixed ? " fixed" : ""), title10);
     if (note2) n.append(el3("small", null, note2));
     return n;
   };
@@ -169030,9 +169016,9 @@ function createSettingsPageV1({ document: doc, environment: env }) {
     l.append(...kids);
     return l;
   };
-  const section = (title9, ...lines2) => {
+  const section = (title10, ...lines2) => {
     const sec4 = el3("section", "st-sec");
-    sec4.append(el3("h3", null, title9), ...lines2);
+    sec4.append(el3("h3", null, title10), ...lines2);
     return sec4;
   };
   const toggle = (label7, key4) => {
@@ -170775,7 +170761,7 @@ function createDungeonMapV1({ document: doc, environment: env, store: store2, re
 .dm-body canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 @media (max-width:600px){.dm-title strong{font-size:20px}.dm-head{padding:10px 58px 8px 10px}.dm-body{margin:0 8px 8px}}
 `;
-  const sheet2 = el3("section", "dm-sheet"), head19 = el3("div", "dm-head"), title9 = el3("div", "dm-title"), titleName = el3("strong"), titleSub = el3("span"), tabs = el3("div", "dm-tabs"), close = el3("button", "dm-close"), body6 = el3("div", "dm-body"), canvas = el3("canvas");
+  const sheet2 = el3("section", "dm-sheet"), head19 = el3("div", "dm-head"), title10 = el3("div", "dm-title"), titleName = el3("strong"), titleSub = el3("span"), tabs = el3("div", "dm-tabs"), close = el3("button", "dm-close"), body6 = el3("div", "dm-body"), canvas = el3("canvas");
   sheet2.hidden = true;
   sheet2.setAttribute("role", "dialog");
   sheet2.setAttribute("aria-modal", "true");
@@ -170783,8 +170769,8 @@ function createDungeonMapV1({ document: doc, environment: env, store: store2, re
   close.type = "button";
   close.setAttribute("aria-label", "Close map");
   close.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
-  title9.append(titleName, titleSub);
-  head19.append(title9, tabs);
+  title10.append(titleName, titleSub);
+  head19.append(title10, tabs);
   body6.append(canvas);
   sheet2.append(head19, close, body6);
   doc.head?.append(style);
@@ -171103,12 +171089,12 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   zoomIn.setAttribute("aria-label", "Zoom minimap in");
   zoomOut.setAttribute("aria-label", "Zoom minimap out");
   mini.append(small, zoomIn, zoomOut, placeLine);
-  const atlas = el3("section", "m2-atlas"), large = el3("canvas"), title9 = el3("div", "m2-title"), titleSub = el3("span"), tools2 = el3("div", "m2-tools"), sheet2 = el3("aside", "m2-sheet"), toast = el3("div", "m2-toast"), kneelBox = el3("div", "m2-kneel"), kneelMedal = el3("canvas"), kneelText = el3("strong"), kneelBar = el3("b"), banner8 = el3("div", "m2-banner"), bannerCanvas = el3("canvas"), notice = el3("div", "m2-notice"), noticeIcon = el3("canvas"), noticeTop = el3("small"), noticeName = el3("strong");
+  const atlas = el3("section", "m2-atlas"), large = el3("canvas"), title10 = el3("div", "m2-title"), titleSub = el3("span"), tools2 = el3("div", "m2-tools"), sheet2 = el3("aside", "m2-sheet"), toast = el3("div", "m2-toast"), kneelBox = el3("div", "m2-kneel"), kneelMedal = el3("canvas"), kneelText = el3("strong"), kneelBar = el3("b"), banner8 = el3("div", "m2-banner"), bannerCanvas = el3("canvas"), notice = el3("div", "m2-notice"), noticeIcon = el3("canvas"), noticeTop = el3("small"), noticeName = el3("strong");
   atlas.hidden = true;
   atlas.setAttribute("role", "dialog");
   atlas.setAttribute("aria-modal", "true");
   atlas.setAttribute("aria-label", "World map");
-  title9.append(el3("strong", void 0, "The Known World"), titleSub);
+  title10.append(el3("strong", void 0, "The Known World"), titleSub);
   sheet2.hidden = true;
   sheet2.setAttribute("aria-live", "polite");
   toast.hidden = true;
@@ -171129,7 +171115,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     notice.hidden = true;
     notice.setAttribute("role", "status");
   }
-  atlas.append(large, title9, tools2, sheet2);
+  atlas.append(large, title10, tools2, sheet2);
   doc.body.append(mini, atlas, toast, kneelBox, banner8, notice);
   let open3 = false, closed2 = false, meta = null, model = null, center3 = null, span3 = 600, selected = null, sheetMode = null, hits2 = [], lastPaint = -1, dirty = true, busy = false, metadataError = null, requests = 0, rasterBuilds = 0, cacheHits = 0, paintMs = 0, atlasSize = null, gesture = null;
   let questTarget = null, tracked = store.get("saq-map-track"), miniOffset = Number(store.get("saq-minimap-zoom")) || 0, kneel = null, toastUntil = 0, seen5 = null, bannerQueue = [], bannerUntil = 0, insideTown = null, placeLineUntil = 0, lastBanner = { id: null }, placesKey = null, placesList = [], bezel = null;
@@ -171645,7 +171631,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     doc.documentElement.dataset.worldMapOpen = "false";
   }
   const maxSpan = () => meta ? Math.max(meta.widthTiles, meta.heightTiles) * 1.3 : 4096;
-  function clamp82() {
+  function clamp83() {
     if (!meta || !center3) return;
     span3 = Math.max(110, Math.min(maxSpan(), span3));
     center3.x = Math.max(-span3 * 0.1, Math.min(meta.widthTiles + span3 * 0.1, center3.x));
@@ -171655,7 +171641,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     if (!meta || !center3) return;
     const r = atlasDims(), old2 = span3;
     span3 *= factor;
-    clamp82();
+    clamp83();
     if (point14) {
       center3.x += (point14.x / r.width - 0.5) * (old2 - span3);
       center3.y += (point14.y / r.height - 0.5) * (old2 - span3) * r.height / r.width;
@@ -171900,24 +171886,24 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     c.strokeStyle = "#2a1d12";
     c.lineWidth = 3;
     c.strokeRect(1.5, 1.5, w - 3, h - 3);
-    const band11 = 9;
+    const band12 = 9;
     c.fillStyle = "#efe2bf";
-    c.fillRect(3, 3, w - 6, band11);
-    c.fillRect(3, h - 3 - band11, w - 6, band11);
-    c.fillRect(3, 3, band11, h - 6);
-    c.fillRect(w - 3 - band11, 3, band11, h - 6);
+    c.fillRect(3, 3, w - 6, band12);
+    c.fillRect(3, h - 3 - band12, w - 6, band12);
+    c.fillRect(3, 3, band12, h - 6);
+    c.fillRect(w - 3 - band12, 3, band12, h - 6);
     c.fillStyle = "#2a1d12";
     const seg8 = 16;
-    for (let x = 3 + band11; x < w - 3 - band11; x += seg8 * 2) {
-      c.fillRect(x, 5, Math.min(seg8, w - 3 - band11 - x), band11 - 4);
-      c.fillRect(x, h - 3 - band11 + 2, Math.min(seg8, w - 3 - band11 - x), band11 - 4);
+    for (let x = 3 + band12; x < w - 3 - band12; x += seg8 * 2) {
+      c.fillRect(x, 5, Math.min(seg8, w - 3 - band12 - x), band12 - 4);
+      c.fillRect(x, h - 3 - band12 + 2, Math.min(seg8, w - 3 - band12 - x), band12 - 4);
     }
-    for (let y = 3 + band11; y < h - 3 - band11; y += seg8 * 2) {
-      c.fillRect(5, y, band11 - 4, Math.min(seg8, h - 3 - band11 - y));
-      c.fillRect(w - 3 - band11 + 2, y, band11 - 4, Math.min(seg8, h - 3 - band11 - y));
+    for (let y = 3 + band12; y < h - 3 - band12; y += seg8 * 2) {
+      c.fillRect(5, y, band12 - 4, Math.min(seg8, h - 3 - band12 - y));
+      c.fillRect(w - 3 - band12 + 2, y, band12 - 4, Math.min(seg8, h - 3 - band12 - y));
     }
     c.lineWidth = 1.5;
-    c.strokeRect(3 + band11 + 0.75, 3 + band11 + 0.75, w - 6 - band11 * 2 - 1.5, h - 6 - band11 * 2 - 1.5);
+    c.strokeRect(3 + band12 + 0.75, 3 + band12 + 0.75, w - 6 - band12 * 2 - 1.5, h - 6 - band12 * 2 - 1.5);
     c.restore();
   }
   function drawAtlas() {
@@ -172408,7 +172394,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       center3.x -= (q2.x - old2.x) * span3 / q2.width;
       center3.y -= (q2.y - old2.y) * span3 / q2.width;
       gesture.moved ||= Math.hypot(q2.x - old2.x, q2.y - old2.y) > 3;
-      clamp82();
+      clamp83();
       dirty = true;
     } else if (ps.length === 2) {
       const d = Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y);
@@ -172485,7 +172471,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     view: (x, y, s) => {
       center3 = { x, y };
       span3 = s;
-      clamp82();
+      clamp83();
       dirty = true;
     },
     trackQuest(t) {
@@ -172727,8 +172713,8 @@ function drawCartographyD9(ctx, { pages: pages2, pending = [], viewport, width: 
   }
   return { visible: visible3, markers };
 }
-function drawPlayer(ctx, x, y, facing3, size = 8) {
-  const angle3 = Math.atan2(facing3?.y ?? -1, facing3?.x ?? 0) + Math.PI / 2;
+function drawPlayer(ctx, x, y, facing2, size = 8) {
+  const angle3 = Math.atan2(facing2?.y ?? -1, facing2?.x ?? 0) + Math.PI / 2;
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(size / 8, size / 8);
@@ -173101,13 +173087,13 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
       if (open3) reviewMarks.push({ x, y, label: label7 + " \xB7 woodland discovery" });
       else miniMarks.push({ x, y, label: label7 + " \xB7 woodland discovery" });
     }
-    const actual = n.position, local8 = model.playersById[model.localPlayerId], facing3 = model.primary?.actorsById?.[local8.entityId]?.facing;
-    if (!open3) drawPlayer(ctx, width2 / 2, height / 2, facing3, planned ? 16 : 8);
+    const actual = n.position, local8 = model.playersById[model.localPlayerId], facing2 = model.primary?.actorsById?.[local8.entityId]?.facing;
+    if (!open3) drawPlayer(ctx, width2 / 2, height / 2, facing2, planned ? 16 : 8);
     else {
       const size = 1n << BigInt(lod), cx = floorDiv(BigInt(actual.chunkX), size), cy2 = floorDiv(BigInt(actual.chunkY), size), dx = cx - BigInt(v.x), dy = cy2 - BigInt(v.y);
       if (dx >= 0n && dy >= 0n && dx < BigInt(v.width) && dy < BigInt(v.height)) {
         const x = v.screenX + Number(dx) * v.cellW + (Number(BigInt(actual.chunkX) - cx * size) * 1024 + actual.localX) * scale, y = v.screenY + Number(dy) * v.cellH + (Number(BigInt(actual.chunkY) - cy2 * size) * 832 + actual.localY) * scale;
-        drawPlayer(ctx, x, y, facing3, planned ? 10 : 8);
+        drawPlayer(ctx, x, y, facing2, planned ? 10 : 8);
       }
     }
   }
@@ -174427,7 +174413,7 @@ function casterFor(b, t, offset2) {
 function outdoorLightClipV1(space, light2) {
   const t = space.collision.tileSize, origin = light2.occlusionOrigin ?? light2, radius = Math.min(DAY_NIGHT_LIMITS.outdoorLightRadius, light2.radius), x = origin.x, y = origin.y, solid5 = (b) => b.kind === "building" || b.kind === "civilian-building" || b.kind === "fence" || b.kind === "ruin-exterior-masonry" || b.kind === "cave-rock-wall" || b.kind.startsWith("fort-") && b.kind !== "fort-prop-solid";
   const rectangles = (space.visual?.blockers ?? []).filter(solid5).map((b) => ({ x: b.x * t, y: b.y * t, w: b.width * t, h: b.height * t })).filter((b) => b.x <= x + radius && b.x + b.w >= x - radius && b.y <= y + radius && b.y + b.h >= y - radius).sort((a, b) => Math.hypot(a.x + a.w * 0.5 - x, a.y + a.h * 0.5 - y) - Math.hypot(b.x + b.w * 0.5 - x, b.y + b.h * 0.5 - y) || a.x - b.x || a.y - b.y).slice(0, DAY_NIGHT_LIMITS.outdoorLightBlockers);
-  const facing3 = { south: [0, Math.PI], north: [-Math.PI, 0], east: [-Math.PI / 2, Math.PI / 2], west: [Math.PI / 2, Math.PI * 1.5] }[light2.facing], start = facing3?.[0] ?? -Math.PI, end = facing3?.[1] ?? Math.PI, angles = [];
+  const facing2 = { south: [0, Math.PI], north: [-Math.PI, 0], east: [-Math.PI / 2, Math.PI / 2], west: [Math.PI / 2, Math.PI * 1.5] }[light2.facing], start = facing2?.[0] ?? -Math.PI, end = facing2?.[1] ?? Math.PI, angles = [];
   for (let i = 0; i <= 64; i++) angles.push(start + (end - start) * i / 64);
   for (const b of rectangles) for (const [px7, py] of [[b.x, b.y], [b.x + b.w, b.y], [b.x + b.w, b.y + b.h], [b.x, b.y + b.h]]) {
     let angle3 = Math.atan2(py - y, px7 - x);
@@ -174461,7 +174447,7 @@ function outdoorLightClipV1(space, light2) {
     points2.push({ x: x + dx * reach, y: y + dy * reach });
   }
   const path17 = new Path2D();
-  if (facing3) path17.moveTo(x, y);
+  if (facing2) path17.moveTo(x, y);
   else if (points2.length) path17.moveTo(points2[0].x, points2[0].y);
   for (const p of points2) path17.lineTo(p.x, p.y);
   path17.closePath();
@@ -180993,10 +180979,10 @@ function drawPlain(c, id2, flash2) {
   c.arc(4, -58, 1.6, 0, TAU189);
   c.fill();
 }
-function drawRelease(c, a, q2, facing3) {
+function drawRelease(c, a, q2, facing2) {
   const x = a.position.x, y = a.position.y + FEET2;
   if (q2.last === "solar_beam" && q2.since < 18 && q2.target) {
-    const k = q2.since / 18, pose3 = staffPose(q2, 0), [sx, sy] = around2(PIVOT.sun_pharaoh, pose3, SUN6[0], SUN6[1]), from = { x: x + sx * SCALE25 * facing3, y: y + sy * SCALE25 };
+    const k = q2.since / 18, pose3 = staffPose(q2, 0), [sx, sy] = around2(PIVOT.sun_pharaoh, pose3, SUN6[0], SUN6[1]), from = { x: x + sx * SCALE25 * facing2, y: y + sy * SCALE25 };
     const angle3 = Math.atan2(q2.target.y - a.position.y, q2.target.x - a.position.x), length = BIOME_BOSS_REACH_V1.solar_beam, w = BIOME_BOSS_REACH_V1.solarBeamHalfWidth * (1 - k * 0.6);
     const beam6 = () => {
       c.save();
@@ -181035,8 +181021,8 @@ function biomeBossReleaseDepthItemsV1(c, model, t) {
   const items2 = [];
   for (const [id2, a] of Object.entries(model.entitiesById ?? {})) {
     if (!a.alive || !hasBiomeBossPainter(a.boss?.bossDefinitionId) || a.boss.bossDefinitionId === "sun_pharaoh") continue;
-    const facing3 = views3.get(a.boss.bossId ?? "boss")?.facing ?? 1;
-    spreadPiecesV1(() => drawRelease(c, a, cast(a.boss, t), facing3)).forEach((p, k) => items2.push(depthItem({ id: "boss-release/" + id2 + "/" + k, anchorX: a.position.x, anchorY: p.y + 0.5, draw: (g) => {
+    const facing2 = views3.get(a.boss.bossId ?? "boss")?.facing ?? 1;
+    spreadPiecesV1(() => drawRelease(c, a, cast(a.boss, t), facing2)).forEach((p, k) => items2.push(depthItem({ id: "boss-release/" + id2 + "/" + k, anchorX: a.position.x, anchorY: p.y + 0.5, draw: (g) => {
       g.save();
       p.draw();
       g.restore();
@@ -181053,7 +181039,7 @@ function biomeBossReleaseLightsV1(model, t) {
     const q2 = cast(a.boss, t), x = a.position.x, y = a.position.y + FEET2;
     if (!q2.target) continue;
     if (q2.last === "solar_beam" && q2.since < 18) {
-      const k = q2.since / 18, facing3 = views3.get(a.boss.bossId ?? "boss")?.facing ?? 1, [sx, sy] = around2(PIVOT.sun_pharaoh, staffPose(q2, 0), SUN6[0], SUN6[1]), from = { x: x + sx * SCALE25 * facing3, y: y + sy * SCALE25 };
+      const k = q2.since / 18, facing2 = views3.get(a.boss.bossId ?? "boss")?.facing ?? 1, [sx, sy] = around2(PIVOT.sun_pharaoh, staffPose(q2, 0), SUN6[0], SUN6[1]), from = { x: x + sx * SCALE25 * facing2, y: y + sy * SCALE25 };
       const angle3 = Math.atan2(q2.target.y - a.position.y, q2.target.x - a.position.x), length = BIOME_BOSS_REACH_V1.solar_beam;
       for (let i = 0; i <= 5; i++) out4.push({ x: from.x + Math.cos(angle3) * length * i / 5, y: from.y + Math.sin(angle3) * length * i / 5, r: 52, color: "#ffd36a", alpha: 0.7 * (1 - ease20(k)) });
     }
@@ -184382,6 +184368,12 @@ var BELLY = "#ab513e";
 var HORN3 = "#d77a3a";
 var PALE8 = "#ffe7a5";
 var FIRE3 = "#ff6031";
+var SIZE10 = 1.3;
+var KINDLE = 80;
+var IGN = -1;
+var EMBER3 = "#ff7a3a";
+var HOTE = "#ffd27a";
+var FLAP_TICKS = 38;
 var clamp60 = (x) => Math.max(0, Math.min(1, x));
 var ease28 = (x) => {
   x = clamp60(x);
@@ -184440,13 +184432,38 @@ function glow21(c, x, y, r, color82) {
   g.addColorStop(1, "#00000000");
   ellipse8(c, x, y, r, r, g);
 }
+function tongue7(c, x, y, w, h, tick, seed2 = 0) {
+  if (IGN >= 0) {
+    const d = seed2 % 13 * 2.2, k = clamp60((IGN - 8 - d) / 6), leap = Math.sin(Math.PI * clamp60((IGN - 8 - d) / 34));
+    if (k <= 0) return;
+    h *= k * (1 + 0.9 * leap);
+    w *= 1 + 0.3 * leap;
+  }
+  const sway = Math.sin(tick * 0.16 + seed2 * 1.7) * w * 0.35, tip = h * (0.86 + 0.14 * Math.sin(tick * 0.23 + seed2));
+  const shape3 = (k) => {
+    c.beginPath();
+    c.moveTo(x - w * k, y);
+    c.quadraticCurveTo(x - w * k * 0.9, y - tip * k * 0.55, x + sway * k, y - tip * k);
+    c.quadraticCurveTo(x + w * k * 0.9, y - tip * k * 0.55, x + w * k, y);
+    c.closePath();
+  };
+  shape3(1);
+  c.fillStyle = "#b8302a";
+  c.fill();
+  shape3(0.7);
+  c.fillStyle = FIRE3;
+  c.fill();
+  shape3(0.38);
+  c.fillStyle = HOTE;
+  c.fill();
+}
 function rotate2(x, y, a) {
   return point24(x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a));
 }
 function ashfangAttackPose(actor2, tick) {
-  const b = actor2.boss ?? {}, alive = actor2.alive !== false, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity, recent = age >= 0 && age < 42 ? last : null, row2 = pending ?? recent, q2 = pending ? progress4(pending, tick) : 0;
-  const facing3 = (pending?.facing ?? recent?.facing ?? b.facing ?? -1) < 0 ? -1 : 1, seed2 = hash54(actor2.entityId ?? ID7) % 193, hover = Math.sin((tick + seed2) / 13) * 1.65;
-  const p = { ability: row2?.ability ?? null, p: q2, age, facing: facing3, orientation: -facing3, bodyX: 22, bodyY: -14 + hover, neckX: 0, neckY: 0, headAngle: 0.025 * Math.sin(tick / 23), jaw: 0.07 + 0.025 * Math.sin(tick / 17), heat: 0, pulse: 0, wing: 0.1 * Math.sin(tick / 12), coil: 0, compression: 0, tailDrive: 0, tailReturn: 0, target: row2?.targetPosition ?? actor2.position };
+  const b = actor2.boss ?? {}, alive = actor2.alive !== false, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity, recent = age >= 0 && age < (last?.ability === "calamity_slam" ? 58 : 42) ? last : null, row2 = pending ?? recent, q2 = pending ? progress4(pending, tick) : 0;
+  const facing2 = (pending?.facing ?? recent?.facing ?? b.facing ?? -1) < 0 ? -1 : 1, seed2 = hash54(actor2.entityId ?? ID7) % 193, flapT = (tick + seed2) / FLAP_TICKS * TAU199, flap = Math.sin(flapT) + 0.25 * Math.sin(flapT * 2), hover = -Math.cos(flapT) * 2.4;
+  const p = { ability: row2?.ability ?? null, p: q2, age, facing: facing2, orientation: -facing2, bodyX: 22, bodyY: -14 + hover, neckX: 0, neckY: 0, headAngle: 0.025 * Math.sin(tick / 23), jaw: 0.07 + 0.025 * Math.sin(tick / 17), heat: 0, pulse: 0, wing: 0.5 * flap, beat: Math.cos(flapT), p2: b.phase === 2, glow: 0.5 + 0.5 * Math.sin(tick * 0.08), tick, coil: 0, compression: 0, tailDrive: 0, tailReturn: 0, lift: 0, tilt: 0, jolt: 0, target: row2?.targetPosition ?? actor2.position };
   if (pending?.ability === "scarlet_fire") {
     const u = ease28(q2 / 0.86);
     p.bodyX += 3 * u;
@@ -184469,7 +184486,7 @@ function ashfangAttackPose(actor2, tick) {
     p.wing -= 0.12 * u;
     p.coil = 0.3 * u;
   } else if (pending?.ability === "slam") {
-    const rise = ease28(q2 / 0.61), drive = ease28((q2 - 0.72) / 0.28);
+    const rise = ease28(q2 / 0.61), drive = Math.pow(clamp60((q2 - 0.72) / 0.28), 2.2);
     p.bodyY += -14 * rise + 17 * drive;
     p.neckY = -3 * rise + 5 * drive;
     p.headAngle = -0.13 * rise + 0.18 * drive;
@@ -184487,35 +184504,70 @@ function ashfangAttackPose(actor2, tick) {
     p.wing += 0.02 * u;
     p.coil = u;
     p.tailDrive = 1;
-    p.tailReturn = ease28(age / 38);
+    p.tailReturn = ease28((age - 8) / 22);
     p.compression = 0.12 * u;
   } else if (pending?.ability === "calamity_slam") {
-    const rise = ease28(q2 / 0.63), drive = ease28((q2 - 0.81) / 0.19);
-    p.bodyY += -22 * rise + 25 * drive;
-    p.neckY = -7 * rise + 10 * drive;
-    p.headAngle = -0.22 * rise + 0.3 * drive;
-    p.jaw += 0.2 * rise + 0.15 * drive;
-    p.wing += 0.72 * rise - 0.88 * drive;
+    const still = ease28(q2 / 0.12), rise = ease28(q2 / 0.55), hang = clamp60((q2 - 0.55) / 0.29), drop3 = Math.pow(clamp60((q2 - 0.84) / 0.16), 2.6);
+    p.wing -= 0.5 * flap * still;
+    p.beat *= 1 - still;
+    p.bodyY -= hover * still;
+    p.bodyY += -72 * rise + 88 * drop3 + Math.sin(hang * Math.PI) * 3;
+    p.lift = rise * (1 - drop3);
+    p.tilt = 0.12 * rise * (1 - drop3) - 0.16 * drop3;
+    p.jolt = Math.sin(tick * 2.1) * 0.9 * hang * (1 - drop3);
+    p.neckY = -8 * rise + 12 * drop3;
+    p.headAngle = -0.26 * rise + 0.5 * drop3;
+    p.jaw += 0.3 * rise - 0.2 * drop3;
+    p.wing += 1 * rise + 0.25 * hang;
     p.coil = rise;
-    p.compression = 0.18 * drive;
+    p.compression = -0.08 * rise * (1 - drop3);
     p.heat = 0.48 * rise;
     p.pulse = Math.sin(Math.PI * clamp60((q2 - 0.86) / 0.14));
   } else if (recent?.ability === "calamity_slam") {
-    const u = 1 - ease28(age / 42);
-    p.bodyY += 3 * u;
-    p.neckY = 3 * u;
-    p.headAngle = 0.08 * u;
-    p.jaw += 0.35 * u;
-    p.wing -= 0.16 * u;
-    p.coil = u;
-    p.compression = 0.18 * u;
-    p.heat = 0.48 * u;
+    const hit2 = 1 - ease28(age / 8), pinned = 1 - ease28((age - 22) / 26), up2 = Math.sin(Math.PI * clamp60((age - 22) / 22));
+    p.wing -= 0.5 * flap * pinned;
+    p.beat *= 1 - pinned;
+    p.bodyY -= hover * pinned;
+    p.bodyY += 16 * pinned + 5 * hit2 - 6 * up2;
+    p.compression = 0.44 * hit2 + 0.1 * pinned;
+    p.wing += -1.25 * pinned - 0.2 * hit2 + 0.9 * up2;
+    p.headAngle = 0.5 * hit2 + 0.2 * pinned;
+    p.neckY = 6 * hit2 + 9 * pinned;
+    p.jaw += 0.38 * pinned;
+    p.tilt = -0.07 * pinned;
+    p.jolt = Math.sin(age * 2.7) * 4 * (1 - ease28(age / 12));
+    p.coil = pinned;
+    p.heat = 0.48 * pinned;
   } else if (recent?.ability === "strike" && age < 20) {
     const u = 1 - ease28(age / 20);
     p.neckX = -7 * u;
     p.headAngle = -0.08 * u;
     p.jaw += 0.32 * u;
     p.wing += 0.1 * u;
+  }
+  const kAge = b.phaseStartedTick == null ? -1 : tick - b.phaseStartedTick;
+  p.kAge = alive && kAge >= 0 && kAge < KINDLE ? kAge : -1;
+  if (p.kAge >= 0) {
+    const flare = Math.sin(Math.PI * clamp60(kAge / 60));
+    p.p2 = kAge >= 14;
+    p.flare = flare;
+    const inhale = ease28(kAge / 14) * (1 - ease28((kAge - 14) / 6)), roarK = ease28((kAge - 13) / 4) * (1 - ease28((kAge - 50) / 8));
+    p.roar = roarK;
+    p.heat = Math.max(p.heat, kAge < 14 ? ease28(kAge / 14) : roarK > 0.05 ? 1 : 1 - 0.55 * ease28((kAge - 58) / 22));
+    p.pulse = Math.max(p.pulse, kAge < 14 ? ease28(kAge / 14) * 0.6 : 0.6 + 0.4 * Math.sin(tick * 0.9) * roarK);
+    if (!pending) {
+      const still = 1 - ease28((kAge - 52) / 16);
+      p.wing -= 0.5 * Math.sin((tick + hash54(actor2.entityId ?? ID7) % 193) / FLAP_TICKS * TAU199) * still;
+      p.beat *= 1 - still;
+      p.headAngle += -0.4 * inhale + 0.16 * roarK;
+      p.neckX += 4 * inhale - 10 * roarK;
+      p.neckY += -7 * inhale + 5 * roarK;
+      p.jaw += 0.04 * inhale + 0.6 * roarK;
+      p.compression += -0.12 * inhale + 0.05 * roarK;
+      p.bodyY += -7 * inhale - 3 * roarK;
+      p.jolt = Math.sin(tick * 2.4) * 1.5 * roarK;
+      p.wing += 0.35 * inhale + 0.55 * roarK;
+    }
   }
   return p;
 }
@@ -184525,13 +184577,22 @@ function idleTail(p, tick) {
 function tailNodes(actor2, p, tick) {
   const idle2 = idleTail(p, tick);
   if (p.ability !== "slam") return idle2;
-  const gathering = p.p ? ease28(p.p / 0.61) : 1, drive = p.tailDrive * (1 - p.tailReturn), tip = idle2.at(-1), cock = point24(53, -85), target = point24((p.target.x - actor2.position.x) / p.orientation - p.bodyX, p.target.y - actor2.position.y - p.bodyY - 2);
-  const end = point24(mix33(mix33(tip.x, cock.x, gathering), target.x, drive), mix33(mix33(tip.y, cock.y, gathering), target.y, drive));
+  const gathering = p.p ? ease28(p.p / 0.61) : 1, drive = p.tailDrive * (1 - p.tailReturn), tip = idle2.at(-1), cock = point24(53, -85), target = point24((p.target.x - actor2.position.x) / SIZE10 / p.orientation - p.bodyX, (p.target.y - actor2.position.y) / SIZE10 - p.bodyY - 2);
   const start2 = idle2[0], control = point24(mix33(95, target.x * 0.4, drive), mix33(-60, -85, drive));
-  return idle2.map((v, i) => {
-    const t = i / 6, u = 1 - t, curve2 = point24(u * u * start2.x + 2 * u * t * control.x + t * t * end.x, u * u * start2.y + 2 * u * t * control.y + t * t * end.y), weight2 = gathering * (1 - p.tailReturn);
+  const build2 = (end2) => idle2.map((v, i) => {
+    const t = i / 6, u = 1 - t, curve2 = point24(u * u * start2.x + 2 * u * t * control.x + t * t * end2.x, u * u * start2.y + 2 * u * t * control.y + t * t * end2.y), weight2 = gathering * (1 - p.tailReturn);
     return { x: mix33(v.x, curve2.x, weight2), y: mix33(v.y, curve2.y, weight2), r: v.r };
   });
+  let end = point24(mix33(mix33(tip.x, cock.x, gathering), target.x, drive), mix33(mix33(tip.y, cock.y, gathering), target.y, drive));
+  let nodes = build2(end);
+  if (drive > 0) {
+    for (let k = 0; k < 2; k++) {
+      const last = nodes.at(-1), prior = nodes.at(-2), a = Math.atan2(last.y - prior.y, last.x - prior.x), hp = rotate2(15, -20, a);
+      end = point24(end.x - (last.x + hp.x - target.x) * drive, end.y - (last.y + hp.y - target.y) * drive);
+      nodes = build2(end);
+    }
+  }
+  return nodes;
 }
 function smoothBoundary(c, nodes) {
   const sides = [];
@@ -184552,6 +184613,9 @@ function smoothBoundary(c, nodes) {
   }
   c.closePath();
 }
+var TAILP2 = false;
+var TAILHOT = 0;
+var TICKNOW = 0;
 function tail(c, nodes, flash2) {
   smoothBoundary(c, nodes);
   c.fillStyle = flash2 ? "#fff" : SCARLET;
@@ -184593,14 +184657,28 @@ function tail(c, nodes, flash2) {
   c.strokeStyle = INK56;
   c.lineWidth = 1.2;
   c.stroke();
-  if (!flash2) line33(c, [[2, -1], [9, -4], [13, -12]], "#ffbb66", 0.8);
+  if (!flash2) line33(c, [[2, -1], [9, -4], [13, -12]], TAILP2 ? HOTE : "#ffbb66", TAILP2 ? 1.3 : 0.8);
+  if (!flash2 && TAILHOT > 0.05) {
+    c.beginPath();
+    c.moveTo(1, 0);
+    c.quadraticCurveTo(11, -5, 14, -17);
+    c.quadraticCurveTo(16, -7, 8, 1.5);
+    c.closePath();
+    c.fillStyle = TAILHOT > 0.7 ? "#ff9a3c" : "#e8602e";
+    c.fill();
+    line33(c, [[3, -0.5], [10, -4], [14, -15]], TAILHOT > 0.7 ? "#fff3c4" : HOTE, 0.8 + TAILHOT);
+    for (let i = 0; i < 3; i++) {
+      const u = (TICKNOW * 0.05 + i / 3) % 1;
+      ellipse8(c, 13 - u * 3 + i, -14 + u * 16, 1.1 * (1 - u) + 0.3, 1.1 * (1 - u) + 0.3, i % 2 ? HOTE : FIRE3);
+    }
+  }
   c.restore();
 }
 function wing10(c, p, flash2, far = false) {
   c.save();
   c.translate(far ? 12 : 22, far ? -28 : -24);
   c.rotate((far ? -0.12 : 0.04) + p.wing * (far ? -0.48 : -0.72));
-  c.scale(far ? 0.68 : 1, far ? 0.82 : 1);
+  c.scale(far ? 0.68 : 1, (far ? 0.82 : 1) * (1 - 0.26 * (p.beat ?? 0)));
   c.beginPath();
   c.moveTo(-6, 5);
   c.quadraticCurveTo(3, -29, 19, -44);
@@ -184629,6 +184707,19 @@ function wing10(c, p, flash2, far = false) {
       c.stroke();
     }
     line33(c, [[2, -10], [18, -42], [43, -55]], far ? "#83523d" : "#dd7651", 0.9);
+    for (const [a, b2] of [[[30, -46], [38, -38]], [[40, -40], [46, -34]], [[34, -22], [44, -20]], [[42, -16], [50, -10]], [[24, -6], [30, 4]], [[36, -4], [42, 4]]]) line33(c, [a, b2], far ? "#5a2c2c" : "#8a3436", 0.6);
+    c.beginPath();
+    c.moveTo(52, -60);
+    c.quadraticCurveTo(35, -35, 34, -25);
+    c.quadraticCurveTo(42, -33, 57, -32);
+    c.quadraticCurveTo(43, -16, 41, -5);
+    c.quadraticCurveTo(50, -13, 61, -6);
+    c.quadraticCurveTo(44, 16, 27, 17);
+    c.strokeStyle = p.p2 ? far ? "#c4472e" : FIRE3 : far ? "#1c0f17" : "#261019";
+    c.lineWidth = p.p2 ? 1.4 : 1.8;
+    c.stroke();
+    polygon21(c, [[17, -44], [14, -52], [21, -46]], far ? "#8a5a3a" : HORN3, true, 0.8);
+    if (p.p2) for (const [i, [x, y]] of [[52, -60], [57, -32], [61, -6], [27, 17], [40, -20], [44, 2]].entries()) tongue7(c, x, y + 1, far ? 2.6 : 3.2, (far ? 6 : 8) + i % 2 * 3, p.tick ?? 0, i + (far ? 7 : 0));
   }
   c.restore();
 }
@@ -184649,6 +184740,9 @@ function head18(c, p, flash2) {
   c.stroke();
   if (!flash2) {
     for (let i = 0; i < 4; i++) line33(c, [[4 + i * 3, 3 + i * 2], [12 + i * 2, 2 + i * 3]], "#632b30", 0.8);
+    line33(c, [[6, -3], [10, 3], [13, 9], [15, 14]], "#7a2420", 2.2);
+    glow21(c, 11, 5, 9, p.p2 ? "rgba(255,170,80,0.5)" : `rgba(255,96,40,${0.18 + 0.2 * p.glow})`);
+    line33(c, [[6, -3], [10, 3], [13, 9], [15, 14]], p.p2 ? HOTE : p.glow > 0.5 ? EMBER3 : "#d2502c", 1.1);
     if (p.heat > 0) {
       glow21(c, 5, 3, 17, `rgba(255,84,24,${0.22 + 0.4 * p.heat})`);
       line33(c, [[4, 0], [8, 3], [11, 8]], p.pulse > 0.35 ? PALE8 : "#fa8d3b", 1 + p.heat);
@@ -184662,6 +184756,37 @@ function head18(c, p, flash2) {
   polygon21(c, [[-24, 1], [-21, -4], [-18, 2]], fill9(PALE8), true, 0.7);
   polygon21(c, [[-11, 3], [-8, -1], [-6, 4]], fill9("#e5bd85"), true, 0.7);
   c.restore();
+  if (!flash2 && p.ability === "scarlet_fire" && p.p > 0) {
+    for (let i = 0; i < 12; i++) {
+      const u = ((p.tick ?? 0) * 0.045 + i / 12) % 1, a = -0.9 + i * 0.53 % 1.8, d = (1 - u) * (26 + i % 3 * 8);
+      c.save();
+      c.globalAlpha *= u * Math.min(1, p.p * 2.2) * 0.85;
+      const x = -24 - Math.cos(a) * d, y = 2 + Math.sin(a) * d;
+      line33(c, [[x, y], [x + Math.cos(a) * 4, y - Math.sin(a) * 4]], i % 3 ? "#f6dfb0" : EMBER3, 0.9);
+      c.restore();
+    }
+    if (p.p > 0.72) {
+      const k = (p.p - 0.72) / 0.28;
+      c.save();
+      c.rotate(-p.jaw);
+      tongue7(c, -27, 4, 2.4 * k + 0.6, 7 * k + 1, p.tick ?? 0, 5);
+      c.restore();
+    }
+  }
+  if (!flash2 && (p.roar ?? 0) > 0.05) {
+    const k = p.roar;
+    c.save();
+    c.rotate(-p.jaw * 0.5);
+    glow21(c, -26, 3, 20 * k, "rgba(255,150,60,0.7)");
+    ellipse8(c, -22, 3, 10 * k, 4 * k, "#ff7a2e");
+    ellipse8(c, -24, 3, 6 * k, 2.2 * k, PALE8);
+    c.save();
+    c.translate(-30, 3);
+    c.rotate(-Math.PI / 2 + 0.15);
+    tongue7(c, 0, 0, 3.4 * k, 13 * k, p.tick ?? 0, 7);
+    c.restore();
+    c.restore();
+  }
   if (!flash2 && p.heat > 0) {
     glow21(c, -23, 2, 13 + p.pulse * 7, `rgba(255,109,32,${p.heat * 0.5 + p.pulse * 0.4})`);
     ellipse8(c, -21, 2, 8 * p.heat, 2.5 + p.heat, "#ee552b");
@@ -184676,7 +184801,14 @@ function head18(c, p, flash2) {
   polygon21(c, [[-32, 2], [-29, 6], [-27, 1]], fill9(PALE8), true, 0.7);
   polygon21(c, [[-19, 1], [-16, 5], [-14, 1]], fill9("#d9b18a"), true, 0.7);
   polygon21(c, [[-4, -24], [2, -40], [15, -48], [10, -33], [5, -19]], fill9(HORN3));
-  if (!flash2) polygon21(c, [[0, -28], [7, -38], [13, -45], [8, -31], [5, -25]], "#efaa59", false);
+  if (!flash2) {
+    polygon21(c, [[0, -28], [7, -38], [13, -45], [8, -31], [5, -25]], "#efaa59", false);
+    for (const [a, b2] of [[[-2, -27], [5, -26]], [[0, -32], [7, -31]], [[3, -37], [9, -36]], [[6, -41], [11, -41]]]) line33(c, [a, b2], "#9a4f24", 0.7);
+    if (p.p2) {
+      ellipse8(c, 14, -47, 1.6, 1.6, HOTE);
+      tongue7(c, 14, -46, 2, 6, p.tick ?? 0, 3);
+    }
+  }
   polygon21(c, [[-17, -20], [-17, -32], [-9, -22]], fill9("#30212c"));
   ellipse8(c, -15, -11, 5.7, 4.1, fill9("#ad292c"), true, 1);
   if (!flash2) {
@@ -184685,6 +184817,14 @@ function head18(c, p, flash2) {
     ellipse8(c, -18, -12.3, 0.75, 0.65, "#fff1c5");
     line33(c, [[-21, -15], [-15, -17], [-9, -14]], "#0b0a12", 1.3);
     ellipse8(c, -34, -4, 0.85, 0.75, "#09080f");
+    if (p.p2) glow21(c, -16, -11, 9, "rgba(255,120,60,0.55)");
+    for (let i = 0; i < 3; i++) {
+      const u = ((p.tick ?? 0) * 0.022 + i / 3) % 1, r23 = 1.3 + u * 3;
+      c.save();
+      c.globalAlpha *= (1 - u) * (0.55 + 0.3 * p.heat);
+      ellipse8(c, -36 - u * 7, -6 - u * 13 + Math.sin(u * 6 + i) * 1.5, r23, r23 * 0.85, u < 0.3 ? "#8a7f80" : "#6e6668");
+      c.restore();
+    }
   }
   c.restore();
 }
@@ -184709,12 +184849,22 @@ function torso5(c, p, flash2) {
     c.clip();
     polygon21(c, [[-12, -32], [3, -39], [19, -30], [9, -20], [-12, -15]], "#9c3c3e", false);
     polygon21(c, [[-11, -14], [8, -10], [28, -15], [25, 0], [7, 4], [-14, -7]], BELLY, false);
-    for (let i = 0; i < 4; i++) line33(c, [[-10 + i * 7, -11], [-7 + i * 7, -3]], "#642c32", 0.8);
+    for (let i = 0; i < 4; i++) {
+      line33(c, [[-10 + i * 7, -11], [-7 + i * 7, -3]], "#5a1c20", 1.8);
+      line33(c, [[-10 + i * 7, -11], [-7 + i * 7, -3]], p.p2 || p.heat > 0.6 ? HOTE : (p.glow + i * 0.15) % 1 > 0.5 || p.heat > 0.25 ? EMBER3 : "#c9472b", 0.8 + p.heat * 0.6);
+    }
     polygon21(c, [[17, -34], [29, -25], [34, -10], [23, -6], [16, -18]], "#321923", false);
     c.restore();
     line33(c, [[-10, -30], [-1, -34], [6, -31]], "#ca6853", 0.9);
+    for (const [x, y] of [[-6, -26], [2, -29], [10, -25], [-1, -21], [7, -19], [15, -21]]) line33(c, [[x - 3, y - 1.5], [x, y + 1.5], [x + 3, y - 1.5]], "#4e1a22", 0.8);
+    const seam5 = p.p2 ? HOTE : p.glow > 0.55 ? EMBER3 : "#c9472b";
+    for (const crack8 of [[[-11, -25], [-5, -22], [0, -24], [5, -20]], [[6, -33], [11, -29], [17, -30]], [[12, -21], [18, -17], [24, -19]]]) {
+      line33(c, crack8, "#5a1a1c", 1.9);
+      line33(c, crack8, seam5, 0.85);
+    }
   }
   for (const [x, y, r] of [[2, -39, 9], [15, -35, 7], [25, -27, 6]]) polygon21(c, [[x - 4, y + 4], [x, y - r], [x + 4, y + 2]], flash2 ? "#fff" : BLACK, true, 1.1);
+  if (!flash2 && p.p2) for (const [i, [x, y, r]] of [[2, -39, 9], [15, -35, 7], [25, -27, 6]].entries()) tongue7(c, x, y - r + 1, 2.4, 7 - i, p.tick ?? 0, i + 11);
   c.restore();
 }
 function drawAshfang(c, actor2, tick, flash2 = false) {
@@ -184722,12 +184872,28 @@ function drawAshfang(c, actor2, tick, flash2 = false) {
   const p = ashfangAttackPose(actor2, tick), death = actor2.alive === false ? ease28((actor2.deathAge ?? 0) / 42) : 0;
   c.save();
   c.translate(actor2.position.x, actor2.position.y);
+  c.scale(SIZE10, SIZE10);
+  TAILP2 = !!p.p2;
+  TICKNOW = tick;
+  IGN = (p.kAge ?? -1) >= 0 ? p.kAge - 8 : -1;
+  TAILHOT = p.ability === "slam" ? p.coil * (1 - p.tailReturn) : 0;
   c.lineCap = "round";
   c.lineJoin = "round";
   c.globalAlpha *= 1 - death;
-  ellipse8(c, -p.facing * 38, 5, 66, 9, "#08080d55");
+  {
+    const k = 1 - 0.5 * (p.lift ?? 0);
+    c.save();
+    c.globalAlpha *= 1 - 0.45 * (p.lift ?? 0);
+    ellipse8(c, -p.facing * 38, 5, (66 - 6 * (p.beat ?? 0)) * k, 9 * k, "#08080d55");
+    c.restore();
+  }
   c.scale(p.orientation, 1);
-  c.translate(p.bodyX, p.bodyY + death * 16);
+  c.translate(p.bodyX + (p.jolt ?? 0), p.bodyY + death * 16);
+  if (p.tilt) {
+    c.translate(8, -20);
+    c.rotate(-p.tilt);
+    c.translate(-8, 20);
+  }
   wing10(c, p, flash2, true);
   tail(c, tailNodes(actor2, p, tick), flash2);
   torso5(c, p, flash2);
@@ -184748,163 +184914,538 @@ function drawAshfang(c, actor2, tick, flash2 = false) {
     }
   }
   c.restore();
+  IGN = -1;
   return true;
 }
 function mouth3(actor2, p) {
   const q2 = rotate2(-35, 5 + p.jaw * 7, p.headAngle);
-  return point24(actor2.position.x + (p.bodyX - 15 + p.neckX + q2.x) * p.orientation, actor2.position.y + p.bodyY - 31 + p.neckY + q2.y);
+  return point24(actor2.position.x + (p.bodyX - 15 + p.neckX + q2.x) * p.orientation * SIZE10, actor2.position.y + (p.bodyY - 31 + p.neckY + q2.y) * SIZE10);
 }
 function ringWarning(c, row2, tick) {
   const ring12 = row2.ring;
   if (!ring12) return;
-  const q2 = progress4(row2, tick), pulse3 = 0.7 + 0.3 * Math.sin(tick * 0.4);
+  const q2 = progress4(row2, tick), show = ease28(q2 / 0.15), hot = ease28((q2 - 0.78) / 0.22), shaking = ease28((q2 - 0.25) / 0.2);
   c.save();
+  c.globalAlpha *= show;
   for (const tile2 of ring12.tiles ?? []) {
-    const seed2 = (tile2.column * 71 + tile2.row * 97) % 19, x = tile2.x, y = tile2.y, s2 = tile2.size ?? ring12.tileSize;
-    c.fillStyle = `rgba(170,45,37,${0.035 + 0.09 * q2})`;
-    c.fillRect(x + 0.5, y + 0.5, s2 - 1, s2 - 1);
-    const reach = ease28((q2 - seed2 * 0.011) / 0.66), a = [[x + s2 * 0.08, y + s2 * 0.24], [x + s2 * 0.36, y + s2 * 0.48], [x + s2 * 0.52, y + s2 * 0.33], [x + s2 * 0.67, y + s2 * 0.68], [x + s2 * 0.94, y + s2 * 0.82]];
+    const seed2 = (tile2.column * 71 + tile2.row * 97) % 19, s2 = tile2.size ?? ring12.tileSize;
+    const jx = Math.sin(tick * 1.9 + seed2 * 2.1) * (0.5 + 1.3 * hot) * shaking, jy = Math.cos(tick * 2.3 + seed2) * 0.6 * shaking + hot * 2.2;
+    const x = tile2.x + jx, y = tile2.y + jy;
+    if (hot > 0) {
+      c.fillStyle = "#3a1d16";
+      c.fillRect(tile2.x + 0.5, tile2.y, s2 - 1, 0.8 + hot * 3);
+      c.fillStyle = "#ff8a3a";
+      c.fillRect(tile2.x + 3, tile2.y + 0.6, s2 - 6, hot * 1.2);
+    }
+    c.strokeStyle = "#4a2c18";
+    c.lineWidth = 1.2 + 1.8 * q2 + 1.6 * hot;
+    c.strokeRect(x + 0.8, y + 0.8, s2 - 1.6, s2 - 1.6);
+    if (hot > 0.15) {
+      c.strokeStyle = hot > 0.6 ? "#ffb060" : "#e8642c";
+      c.lineWidth = 0.4 + 0.5 * hot;
+      c.strokeRect(x + 0.8, y + 0.8, s2 - 1.6, s2 - 1.6);
+    }
+    c.strokeStyle = "#ecd2a0";
+    c.lineWidth = 0.8;
+    c.strokeRect(x + 2.4, y + 2.4, s2 - 4.8, s2 - 4.8);
+    const reach = ease28((q2 - seed2 * 0.011) / 0.6), a = [[0.08, 0.24], [0.36, 0.48], [0.52, 0.33], [0.67, 0.68], [0.94, 0.82]].map(([u, v]) => [x + s2 * (seed2 % 2 ? 1 - u : u), y + s2 * (seed2 % 3 === 0 ? 1 - v : v)]);
     const end = Math.max(1, Math.floor(reach * 4));
-    path12(c, a.slice(0, end + 1));
-    c.strokeStyle = INK56;
-    c.lineWidth = 2.8;
-    c.stroke();
-    c.strokeStyle = q2 > 0.82 ? "#ffd097" : "#b94a3e";
-    c.lineWidth = 0.65 + q2 * 0.35;
-    c.stroke();
-    if (q2 > 0.45) {
-      c.globalAlpha = (0.2 + 0.6 * q2) * pulse3;
-      line33(c, [[x + s2 * 0.37, y + s2 * 0.48], [x + s2 * 0.28, y + s2 * 0.79]], FIRE3, 0.6);
-      c.globalAlpha = 1;
+    if (reach > 0) {
+      line33(c, a.slice(0, end + 1).map(([px7, py]) => [px7, py + 1]), "#ecd2a0", 1);
+      line33(c, a.slice(0, end + 1), "#5a3820", 1.8);
+      if (hot > 0.3) line33(c, a.slice(0, end + 1), "#ff9a48", 0.7);
+      if (q2 > 0.5 && seed2 % 2) line33(c, [a[2], [a[2][0] + s2 * 0.1, a[2][1] - s2 * 0.25]], "#5a3820", 1.2);
+    }
+    if (shaking > 0) for (let i = 0; i < 3; i++) {
+      const u = (tick * 0.045 + seed2 * 0.13 + i * 0.33) % 1, side = (seed2 + i) % 4, along4 = ((seed2 * 7 + i * 11) % 24 + 4) / 32 * s2;
+      const gx = side === 0 ? x + along4 : side === 1 ? x + s2 - 1 : side === 2 ? x + along4 : x + 1, gy = side === 0 ? y + 1 : side === 1 ? y + along4 : y + s2 - 1, gy2 = side === 3 ? y + along4 : gy;
+      c.save();
+      c.globalAlpha *= shaking * (1 - u);
+      ellipse8(c, gx, gy2 - 4 + u * 5, 0.9, 1.2, i % 2 ? "#e8cc96" : "#c49a62");
+      c.restore();
     }
   }
-  const s = ring12.tileSize, l = ring12.minColumn * s, t = ring12.minRow * s, r = (ring12.maxColumn + 1) * s, b = (ring12.maxRow + 1) * s;
-  c.strokeStyle = "#e06c4b";
-  c.lineWidth = 0.9;
-  c.strokeRect(l + 0.4, t + 0.4, r - l - 0.8, b - t - 0.8);
-  c.strokeRect(l + s - 0.4, t + s - 0.4, r - l - 2 * s + 0.8, b - t - 2 * s + 0.8);
   c.restore();
+}
+var holeKeys = /* @__PURE__ */ new Set();
+function veinY(col2, row2) {
+  return 0.22 + (col2 * 37 + row2 * 61) % 56 / 100;
+}
+function veinX(col2, row2) {
+  return 0.22 + (col2 * 53 + row2 * 29) % 56 / 100;
+}
+function lip(c, pts2) {
+  line33(c, pts2, "#5a3820", 2.6);
+  line33(c, pts2.map(([x, y]) => [x, y - 0.8]), "#ecd2a0", 1.2);
 }
 function collapsedRing(c, row2, tick) {
   const ring12 = row2.ring;
   if (!ring12) return;
   const age = tick - row2.createdTick;
   if (age < 0) return;
+  const fresh = 1 - ease28(age / 70);
   c.save();
   for (const tile2 of ring12.tiles ?? []) {
-    const s2 = tile2.size ?? ring12.tileSize, x = tile2.x, y = tile2.y, seed2 = (tile2.column * 71 + tile2.row * 97) % 19;
-    c.fillStyle = "#070810";
-    c.fillRect(x - 0.2, y - 0.2, s2 + 0.4, s2 + 0.4);
-    c.save();
-    c.beginPath();
-    c.rect(x, y, s2, s2);
-    c.clip();
-    const hot = 1 - ease28(age / 44);
-    if (hot > 0) {
-      glow21(c, x + s2 / 2, y + s2 * 0.6, s2 * 0.8, `rgba(191,42,35,${hot * 0.18})`);
+    const s2 = tile2.size ?? ring12.tileSize, x = tile2.x, y = tile2.y, seed2 = (tile2.column * 71 + tile2.row * 97) % 19, col2 = tile2.column, rw = tile2.row;
+    const has = (dc, dr) => holeKeys.has(col2 + dc + "," + (rw + dr));
+    c.fillStyle = "#2a1411";
+    c.fillRect(x - 0.3, y - 0.3, s2 + 0.6, s2 + 0.6);
+    const glowK = Math.min(1, 0.5 + 0.18 * Math.sin(tick * 0.045 + seed2) + fresh * 0.5);
+    const h = [[x, y + s2 * veinY(col2, rw)], [x + s2 * 0.35, y + s2 * (0.3 + seed2 % 5 * 0.1)], [x + s2 * 0.68, y + s2 * (0.65 - seed2 % 4 * 0.08)], [x + s2, y + s2 * veinY(col2 + 1, rw)]];
+    const v = [[x + s2 * veinX(col2, rw), y], [x + s2 * (0.4 + seed2 % 3 * 0.1), y + s2 * 0.5], [x + s2 * veinX(col2, rw + 1), y + s2]];
+    for (const pts2 of seed2 % 3 ? [h, v] : [h]) {
+      line33(c, pts2, "#5e2016", 3.2);
+      c.save();
+      c.globalAlpha *= glowK;
+      line33(c, pts2, "#d9502a", 1.5);
+      c.restore();
+      if (glowK > 0.72) line33(c, pts2, "#ffb060", 0.6);
     }
-    const local32 = Math.max(0, age - seed2 % 6), u = clamp60(local32 / 27), fall = ease28(u), drop3 = (u * 0.45 + u * u * 0.85) * s2, shrink = 1 - fall * 0.34;
+    if (!has(0, -1)) {
+      const wh = s2 * 0.42;
+      c.fillStyle = "#8a5a36";
+      c.fillRect(x - 0.3, y, s2 + 0.6, wh);
+      c.fillStyle = "#6c4026";
+      c.fillRect(x - 0.3, y + wh * 0.55, s2 + 0.6, wh * 0.45);
+      line33(c, [[x + 1, y + wh * 0.35], [x + s2 * 0.4, y + wh * 0.3], [x + s2 - 1, y + wh * 0.38]], "#5a3420", 0.9);
+      line33(c, [[x + 3, y + wh * 0.75], [x + s2 * 0.6, y + wh * 0.8], [x + s2 - 2, y + wh * 0.72]], "#4a2a1a", 0.9);
+      lip(c, [[x, y + 1], [x + s2 * 0.3, y + 1.8 + seed2 % 3 * 0.6], [x + s2 * 0.62, y + 0.6], [x + s2, y + 1.5]]);
+    }
+    const j = (k) => (seed2 * 13 + k * 7) % 5 * 0.5;
+    if (!has(-1, 0)) lip(c, [[x + 1 + j(1), y], [x + 2 + j(2), y + s2 * 0.4], [x + 0.8 + j(3), y + s2 * 0.7], [x + 1.6 + j(4), y + s2]]);
+    if (!has(1, 0)) lip(c, [[x + s2 - 1 - j(1), y], [x + s2 - 2 - j(2), y + s2 * 0.45], [x + s2 - 1 - j(3), y + s2 * 0.75], [x + s2 - 1.5 - j(4), y + s2]]);
+    if (!has(0, 1)) lip(c, [[x, y + s2 - 1.2 - j(1)], [x + s2 * 0.35, y + s2 - 2 - j(2)], [x + s2 * 0.7, y + s2 - 0.8 - j(3)], [x + s2, y + s2 - 1.5 - j(4)]]);
+    const local32 = Math.max(0, age - seed2 % 6), u = clamp60(local32 / 27), fall = ease28(u), drop3 = (u * 0.45 + u * u * 0.85) * s2, shrink = 1 - fall * 0.4;
     if (fall < 1) {
       c.save();
+      c.beginPath();
+      c.rect(x - 4, y - 4, s2 + 8, s2 + 8);
+      c.clip();
       c.translate(x + s2 * 0.5, y + s2 * 0.5 + drop3);
       c.scale((seed2 % 2 ? -1 : 1) * shrink, shrink);
-      c.globalAlpha *= 1 - ease28((fall - 0.52) / 0.48);
-      const h = s2 * 0.44, split = (seed2 % 5 - 2) * 1.4;
+      c.globalAlpha *= 1 - ease28((fall - 0.55) / 0.45);
+      const hh = s2 * 0.46, split = (seed2 % 5 - 2) * 1.4;
       c.save();
       c.translate(-0.65 - fall * (3 + seed2 % 3), -fall * 2);
       c.rotate(-fall * (0.14 + seed2 % 3 * 0.035));
-      polygon21(c, [[-h, -h], [h, -h], [split + 3, -3], [split - 4, 4], [-h, h]], seed2 % 3 ? "#393340" : "#473a45", true, 1);
-      line33(c, [[-h + 2, -h + 2], [h - 3, -h + 2]], "#6a535d", 0.85);
+      polygon21(c, [[-hh, -hh], [hh, -hh], [split + 3, -3], [split - 4, 4], [-hh, hh]], seed2 % 3 ? "#c9a36e" : "#bf9864", false);
+      c.strokeStyle = "#8a6440";
+      c.lineWidth = 0.8;
+      c.stroke();
+      line33(c, [[-hh + 2, -hh + 2], [hh - 3, -hh + 2]], "#ecd2a0", 0.9);
       c.restore();
       c.save();
       c.translate(0.65 + fall * 4, fall * (7 + seed2 % 4));
       c.rotate(fall * (0.17 + seed2 % 3 * 0.04));
-      polygon21(c, [[h, -h + 2], [h, h], [-h + 2, h], [split - 3, 5], [split + 5, -1]], seed2 % 3 ? "#282636" : "#34303e", true, 1);
-      line33(c, [[h - 2, -h + 4], [h - 2, h - 3]], "#69505d", 0.85);
+      polygon21(c, [[hh, -hh + 2], [hh, hh], [-hh + 2, hh], [split - 3, 5], [split + 5, -1]], seed2 % 3 ? "#b88f5c" : "#ad8452", false);
+      c.strokeStyle = "#7a5634";
+      c.lineWidth = 0.8;
+      c.stroke();
+      c.fillStyle = "#7a5634";
+      c.fillRect(-hh + 2, hh - 3, hh * 2 - 2, 3);
       c.restore();
-      c.save();
-      c.translate(split - fall * 5, 3 + fall * 20);
-      c.rotate(fall * 1.8 + seed2);
-      polygon21(c, [[-3, -3], [3, -2], [4, 1], [-1, 4]], "#78606a", true, 0.6);
-      c.restore();
-      c.restore();
-    }
-    for (let i = 0; i < 3; i++) {
-      const u2 = ((tick * 0.011 + seed2 * 0.07 + i * 0.31) % 1 + 1) % 1;
-      c.save();
-      c.globalAlpha *= (0.12 + hot * 0.5) * Math.sin(Math.PI * u2);
-      ellipse8(c, x + 4 + (seed2 * 7 + i * 11) % (s2 - 8), y + s2 - 4 - u2 * s2, hot ? 1.2 : 0.65, hot ? 1.4 : 0.9, i % 2 ? "#8d4c75" : "#ce503c");
       c.restore();
     }
+    for (let i = 0; i < 2; i++) {
+      const u2 = ((tick * 0.012 + seed2 * 0.07 + i * 0.5) % 1 + 1) % 1;
+      c.save();
+      c.globalAlpha *= (0.35 + 0.6 * fresh) * Math.sin(Math.PI * u2);
+      ellipse8(c, x + 4 + (seed2 * 7 + i * 11) % (s2 - 8), y + s2 - 4 - u2 * s2 * 1.2, 0.9 + fresh * 0.5, 1.1 + fresh * 0.5, i % 2 ? HOTE : FIRE3);
+      c.restore();
+    }
+  }
+  c.restore();
+}
+var breathSpots = /* @__PURE__ */ new Map();
+function breathSpot(row2) {
+  const key4 = (row2.bossId ?? "a") + ":" + (row2.sequence ?? 0) + ":" + (row2.resolvedTick ?? row2.startedTick ?? 0);
+  let m = breathSpots.get(key4);
+  if (!m) {
+    const o = row2.originPosition, t = row2.targetPosition ?? o;
+    m = { x: o.x, y: o.y, sign: t.x < o.x ? -1 : 1 };
+    breathSpots.set(key4, m);
+    if (breathSpots.size > 24) breathSpots.delete(breathSpots.keys().next().value);
+  }
+  return m;
+}
+function conePoints(ox, oy, sign4, reach, half, seed2) {
+  const pts2 = [[ox + sign4 * 8, oy - 4], [ox + sign4 * 8, oy + 4]];
+  const n = 13;
+  for (let i = 0; i <= n; i++) {
+    const a = half - 2 * half * i / n, j = 0.9 + hash54(seed2 + i * 7) % 13 / 13 * 0.16 - (i % 2 ? 0.07 : 0);
+    pts2.splice(1 + i, 0, [ox + sign4 * Math.cos(a) * reach * j, oy + Math.sin(a) * reach * j]);
+  }
+  return pts2;
+}
+function scorchCone(c, row2, tick, reach, heat, alpha) {
+  const o = row2.originPosition, t = row2.targetPosition ?? o, sign4 = row2.spot ? row2.spot.sign : t.x < o.x ? -1 : 1, ox = row2.spot ? row2.spot.x : o.x, oy = row2.spot ? row2.spot.y : o.y;
+  const half = (row2.halfAngle ?? 0.8) * 0.92, seed2 = hash54(String(row2.sequence ?? 0)) % 97;
+  c.save();
+  c.globalAlpha *= alpha;
+  const pts2 = conePoints(ox, oy, sign4, reach, half, seed2);
+  polygon21(c, pts2, "#7d5536", false);
+  path12(c, pts2, true);
+  c.strokeStyle = "#3e2618";
+  c.lineWidth = 1.3;
+  c.stroke();
+  polygon21(c, conePoints(ox, oy, sign4, reach * 0.78, half * 0.86, seed2 + 3), "#5f3d26", false);
+  polygon21(c, conePoints(ox, oy, sign4, reach * 0.5, half * 0.7, seed2 + 5), "#4a2e1e", false);
+  for (let i = 0; i < 16; i++) {
+    const a = hash54(seed2 + i * 13) % 100 / 100 * 2 * half - half, d = reach * (0.2 + hash54(seed2 + i * 5) % 70 / 100);
+    ellipse8(c, ox + sign4 * Math.cos(a) * d, oy + Math.sin(a) * d, 1.4, 0.8, heat > 0.25 ? i % 3 ? EMBER3 : HOTE : "#3a2418");
+  }
+  if (heat > 0.02) {
+    c.save();
+    c.globalAlpha *= heat;
+    const rim2 = pts2.slice(1, -1);
+    path12(c, rim2);
+    c.strokeStyle = "#b8302a";
+    c.lineWidth = 3;
+    c.stroke();
+    path12(c, rim2);
+    c.strokeStyle = heat > 0.7 ? HOTE : FIRE3;
+    c.lineWidth = 1.2;
+    c.stroke();
     c.restore();
   }
-  const s = ring12.tileSize, l = ring12.minColumn * s, t = ring12.minRow * s, r = (ring12.maxColumn + 1) * s, b = (ring12.maxRow + 1) * s;
-  c.strokeStyle = age < 24 ? "#e48157" : "#663b53";
-  c.lineWidth = age < 24 ? 1.4 : 0.9;
-  c.strokeRect(l + s - 0.2, t + s - 0.2, r - l - 2 * s + 0.4, b - t - 2 * s + 0.4);
   c.restore();
 }
 function fireWarning(c, row2, tick) {
-  const q2 = progress4(row2, tick), p = row2.originPosition, r = row2.range ?? 110, a = row2.facing < 0 ? Math.PI : 0, h = row2.halfAngle ?? 0.8;
+  const q2 = progress4(row2, tick), r = row2.range ?? 110, o = row2.originPosition, t = row2.targetPosition ?? o, sign4 = t.x < o.x ? -1 : 1;
+  const half = (row2.halfAngle ?? 0.8) * 0.92, seed2 = hash54(String(row2.sequence ?? 0)) % 97, show = ease28(q2 / 0.15), hot = ease28((q2 - 0.75) / 0.25);
+  const pulse3 = 0.5 + 0.5 * Math.sin(tick * (0.18 + 0.3 * q2));
   c.save();
-  c.translate(p.x, p.y);
-  c.rotate(a);
-  c.beginPath();
-  c.moveTo(0, 0);
-  c.arc(0, 0, r, -h, h);
-  c.closePath();
-  c.fillStyle = `rgba(227,67,34,${0.025 + 0.04 * q2})`;
-  c.fill();
-  c.strokeStyle = "#aa463755";
-  c.lineWidth = 0.6;
+  c.globalAlpha *= show;
+  const pts2 = conePoints(o.x, o.y, sign4, r, half, seed2);
+  polygon21(c, pts2, hot > 0.5 ? "#f2a85a" : "#e8a058", false);
+  polygon21(c, conePoints(o.x, o.y, sign4, r * (0.55 + 0.08 * pulse3), half * 0.9, seed2 + 4), hot > 0.5 ? "#ffd27e" : "#f5bd6c", false);
+  polygon21(c, conePoints(o.x, o.y, sign4, r * (0.26 + 0.05 * pulse3), half * 0.8, seed2 + 8), hot > 0.5 ? "#fff0b8" : "#ffd88e", false);
+  path12(c, pts2.slice(1, -1));
+  c.strokeStyle = "#b8442a";
+  c.lineWidth = 3;
   c.stroke();
-  c.beginPath();
-  c.arc(0, 0, r, -h, h);
-  c.strokeStyle = q2 > 0.83 ? "#ffc084" : "#d26346";
-  c.lineWidth = 0.8;
+  path12(c, pts2.slice(1, -1));
+  c.strokeStyle = hot > 0.4 ? "#fff0c0" : "#ffc070";
+  c.lineWidth = 1.4 + hot * 0.6;
   c.stroke();
-  for (const s of [-1, 1]) line33(c, [[Math.cos(s * h) * r * 0.76, Math.sin(s * h) * r * 0.76], [Math.cos(s * h) * r, Math.sin(s * h) * r]], "#d46d4f", 0.8);
+  const landed2 = Math.floor(4 + 18 * q2);
+  for (let i = 0; i < landed2; i++) {
+    const a = (hash54(seed2 + i * 9) % 100 / 100 * 2 - 1) * half, d = r * (0.18 + hash54(seed2 + i * 5) % 80 / 100);
+    const x = o.x + sign4 * Math.cos(a) * d, y = o.y + Math.sin(a) * d, tw = 0.5 + 0.5 * Math.sin(tick * 0.3 + i * 1.9);
+    ellipse8(c, x, y, 2.6, 1.7, "#c0402a");
+    ellipse8(c, x, y, 1.9, 1.25, tw > 0.5 || hot > 0.5 ? HOTE : FIRE3);
+  }
   c.restore();
 }
-function slamWarning(c, row2, tick) {
-  const p = row2.targetPosition, r = row2.radius ?? 64, q2 = progress4(row2, tick);
-  c.save();
-  ellipse8(c, p.x, p.y, r, r, "#a82f2a12");
-  circle5(c, p.x, p.y, r, INK56, 2.8);
-  circle5(c, p.x, p.y, r, "#db7252", 1.1);
+function warningSparks(c, row2, tick, model2) {
+  const q2 = progress4(row2, tick), r = row2.range ?? 110, o = row2.originPosition, t = row2.targetPosition ?? o, sign4 = t.x < o.x ? -1 : 1;
+  const half = (row2.halfAngle ?? 0.8) * 0.85, seed2 = hash54(String(row2.sequence ?? 0)) % 97, actor2 = model2.entitiesById?.[row2.sourceEntityId] ?? model2.entities?.find?.((e) => e.entityId === row2.sourceEntityId);
+  if (!actor2) return;
+  const from = mouth3(actor2, ashfangAttackPose(actor2, tick)), n = Math.floor(3 + 9 * q2);
+  for (let i = 0; i < n; i++) {
+    const u = (i * 0.37 + tick * 0.03) % 1, a = (hash54(seed2 + i * 41) % 100 / 100 * 2 - 1) * half, d = r * (0.25 + hash54(seed2 + i * 7) % 70 / 100);
+    const ex = o.x + sign4 * Math.cos(a) * d, ey = o.y + Math.sin(a) * d;
+    const x = from.x + (ex - from.x) * u, y = from.y + (ey - from.y) * u - Math.sin(u * Math.PI) * 10;
+    c.save();
+    c.globalAlpha *= Math.min(1, q2 * 3) * (1 - u * 0.3);
+    ellipse8(c, x, y, 1.6, 2, i % 3 ? HOTE : FIRE3);
+    c.restore();
+  }
+}
+function fireScorch(c, row2, tick) {
+  const age = tick - row2.resolvedTick;
+  if (age < 0 || age >= 130) return;
+  scorchCone(c, { ...row2, spot: breathSpot(row2) }, tick, (row2.range ?? 110) * (0.2 + 0.8 * ease28(age / 16)), 1 - ease28((age - 18) / 60), 1 - ease28((age - 92) / 38));
+}
+function hookShape(c, x, y, k, sign4) {
   c.beginPath();
-  c.arc(p.x, p.y, r - 3, -Math.PI / 2, -Math.PI / 2 + TAU199 * q2);
-  c.strokeStyle = PALE8;
-  c.lineWidth = 1.2;
+  c.moveTo(x - 14 * k * sign4, y + 10 * k);
+  c.quadraticCurveTo(x + 6 * k * sign4, y + 4 * k, x + 10 * k * sign4, y - 14 * k);
+  c.quadraticCurveTo(x + 18 * k * sign4, y + 2 * k, x + 2 * k * sign4, y + 16 * k);
+  c.closePath();
+}
+function slamWarning(c, row2, tick) {
+  const p = row2.targetPosition, r = row2.radius ?? 64, q2 = progress4(row2, tick), show = ease28(q2 / 0.2), fall = ease28((q2 - 0.55) / 0.45), sign4 = (row2.originPosition?.x ?? p.x) > p.x ? -1 : 1;
+  c.save();
+  c.globalAlpha *= show;
+  ellipse8(c, p.x, p.y, r, r, "rgba(74,44,26,0.22)");
+  circle5(c, p.x, p.y, r, "#7c5432", 2.2);
+  hookShape(c, p.x, p.y, 1.1 + 1.5 * fall, sign4);
+  c.fillStyle = "rgba(52,28,18," + (0.28 + 0.24 * fall) + ")";
+  c.fill();
+  c.beginPath();
+  c.arc(p.x, p.y, r - 1.5, 0, TAU199);
+  c.strokeStyle = fall > 0.6 ? "#fbe6b6" : "#e2c08a";
+  c.lineWidth = 1 + fall;
   c.stroke();
-  for (let i = 0; i < 5; i++) {
-    const a = i * TAU199 / 5 + 0.3, reach = (5 + 15 * ease28(q2)) * q2;
-    line33(c, [[p.x + Math.cos(a) * 4, p.y + Math.sin(a) * 4], [p.x + Math.cos(a + 0.12) * reach, p.y + Math.sin(a + 0.12) * reach]], q2 > 0.85 ? "#ffd6a0" : "#813d37", 0.8);
+  if (fall > 0) for (let i = 0; i < 22; i++) {
+    const a = i * TAU199 / 22 + hash54(String(row2.sequence ?? 0)) % 7, hop = Math.abs(Math.sin(tick * 0.5 + i * 2.3)) * 5 * fall, d = r + 2 + i % 3 * 3, x = p.x + Math.cos(a) * d, y = p.y + Math.sin(a) * d;
+    ellipse8(c, x, y, 1.3, 0.8, "#00000022");
+    ellipse8(c, x, y - hop, 1.2, 1.2, i % 2 ? "#e8cc96" : "#c49a62");
   }
   c.restore();
 }
 function slamGround3(c, row2, tick) {
   const age = tick - row2.resolvedTick;
-  if (age < 0 || age >= 42) return;
-  const p = row2.targetPosition, r = row2.radius ?? 64, u = ease28(age / 16), fade = 1 - ease28(age / 42);
+  if (age < 0 || age >= 110) return;
+  const p = row2.targetPosition, r = 64, rc = 25, seed2 = hash54(String(row2.sequence ?? 0)) % 97, grow2 = ease28(age / 6), fade = 1 - ease28((age - 70) / 40);
   c.save();
   c.globalAlpha *= fade;
-  ellipse8(c, p.x, p.y, r, r, "#0e101d50");
-  if (age < 12) {
-    ellipse8(c, p.x, p.y, r, r, `rgba(234,104,56,${(1 - ease28(age / 12)) * 0.16})`);
-    circle5(c, p.x, p.y, r, "#f9c08b", 1.4 * (1 - ease28(age / 12)) + 0.2);
+  for (let i = 0; i < 8; i++) {
+    const a = i * TAU199 / 8 + seed2 % 10 * 0.07 + i % 2 * 0.2, len = r * (0.62 + (seed2 + i * 13) % 30 / 100) * grow2;
+    if (len <= rc) continue;
+    const m = rc + (len - rc) * 0.5;
+    const pts2 = [[p.x + Math.cos(a) * rc, p.y + Math.sin(a) * rc * 0.72], [p.x + Math.cos(a + 0.09) * m, p.y + Math.sin(a + 0.09) * m * 0.85], [p.x + Math.cos(a - 0.05) * len, p.y + Math.sin(a - 0.05) * len * 0.9]];
+    line33(c, pts2.map(([x, y]) => [x, y + 1]), "#f0d9a8", 1.2);
+    line33(c, pts2, "#6a4528", 2);
+    if (i % 2 === 0) line33(c, [pts2[1], [pts2[1][0] + Math.cos(a + 0.8) * 9, pts2[1][1] + Math.sin(a + 0.8) * 7]], "#6a4528", 1.2);
   }
-  for (let i = 0; i < 9; i++) {
-    const a = i * TAU199 / 9 + 0.15, rr3 = r * (0.45 + i % 3 * 0.16) * (0.82 + 0.18 * u), points2 = [[p.x, p.y], [p.x + Math.cos(a + 0.09) * rr3 * 0.38, p.y + Math.sin(a + 0.09) * rr3 * 0.38], [p.x + Math.cos(a - 0.07) * rr3 * 0.68, p.y + Math.sin(a - 0.07) * rr3 * 0.68], [p.x + Math.cos(a) * rr3, p.y + Math.sin(a) * rr3]];
-    line33(c, points2, INK56, 3);
-    line33(c, points2, age < 18 ? "#cf633d" : "#513e46", 1);
+  ellipse8(c, p.x, p.y + 1, rc + 6, (rc + 6) * 0.72, "#ddbb82");
+  ellipse8(c, p.x, p.y, rc, rc * 0.72, "#a57a48");
+  ellipse8(c, p.x, p.y + 3, rc * 0.8, rc * 0.5, "#c19060");
+  ellipse8(c, p.x, p.y + 1, rc * 0.58, rc * 0.36, "#7e5734");
+  c.beginPath();
+  c.ellipse(p.x, p.y + 1, rc + 6, (rc + 6) * 0.72, 0, Math.PI * 1.05, Math.PI * 1.95);
+  c.strokeStyle = "#f6e2b4";
+  c.lineWidth = 1.6;
+  c.stroke();
+  c.beginPath();
+  c.ellipse(p.x, p.y, rc, rc * 0.72, 0, 0, TAU199);
+  c.strokeStyle = "#6a4528";
+  c.lineWidth = 1.4;
+  c.stroke();
+  line33(c, [[p.x - 6, p.y - 2], [p.x + 1, p.y + 2], [p.x + 7, p.y + 1]], "#4e321e", 2.2);
+  if (age > 18) for (let i = 0; i < 9; i++) {
+    const a = i * 2.39996 + seed2, d = rc + 10 + (seed2 + i * 17) % 36, x = p.x + Math.cos(a) * d, y = p.y + Math.sin(a) * d * 0.8, s2 = 1.6 + i % 3 * 0.6;
+    polygon21(c, [[x - s2, y - s2 * 0.6], [x + s2 * 0.6, y - s2 * 0.8], [x + s2, y + s2 * 0.4], [x - s2 * 0.4, y + s2 * 0.7]], i % 2 ? "#8d6a4a" : "#a07e58", true, 0.6);
   }
-  if (age < 22) circle5(c, p.x, p.y, r * (0.12 + 0.88 * u), "#c67e5a", 1.3 * (1 - ease28(age / 22)) + 0.1);
+  if (age < 14) {
+    const u = ease28(age / 14), rr3 = rc + (r - rc) * u;
+    c.globalAlpha *= 1 - ease28((age - 6) / 8);
+    circle5(c, p.x, p.y, rr3, "#a8804e", 4.5 * (1 - u) + 1.5);
+    circle5(c, p.x, p.y - 1, rr3, "#f6e2b4", 2 * (1 - u) + 0.8);
+  }
+  c.restore();
+}
+function slamSpot(row2) {
+  return { x: row2.originPosition.x - (row2.facing < 0 ? -1 : 1) * 46, y: row2.originPosition.y + 2 };
+}
+function slamShock(c, row2, age) {
+  if (age < 0 || age >= 100) return;
+  const p = slamSpot(row2), seed2 = hash54(String(row2.sequence ?? 0)) % 97, grow2 = ease28(age / 5), fade = 1 - ease28((age - 60) / 40);
+  c.save();
+  c.globalAlpha *= fade;
+  for (let i = 0; i < 11; i++) {
+    const a = i * TAU199 / 11 + seed2 % 7 * 0.09 + i % 2 * 0.18, len = (84 + (seed2 + i * 17) % 40) * grow2;
+    if (len <= 40) continue;
+    const m = 40 + (len - 40) * 0.5, pts2 = [[p.x + Math.cos(a) * 40 * 1.2, p.y + Math.sin(a) * 17], [p.x + Math.cos(a + 0.1) * m * 1.2, p.y + Math.sin(a + 0.1) * m * 0.5], [p.x + Math.cos(a - 0.06) * len * 1.2, p.y + Math.sin(a - 0.06) * len * 0.5]];
+    line33(c, pts2.map(([x, y]) => [x, y + 1]), "#f0d9a8", 1.3);
+    line33(c, pts2, "#5e3c22", 2.6);
+    if (age < 10) line33(c, pts2, "#ffd08a", 1.1 * (1 - age / 10));
+    if (i % 3 === 0) line33(c, [pts2[1], [pts2[1][0] + Math.cos(a + 0.9) * 10, pts2[1][1] + Math.sin(a + 0.9) * 6]], "#5e3c22", 1.3);
+  }
+  ellipse8(c, p.x, p.y + 1, 72, 30, "#dcba82");
+  ellipse8(c, p.x, p.y, 64, 25, "#ae8452");
+  ellipse8(c, p.x, p.y + 3, 54, 18, "#bf9262");
+  c.beginPath();
+  c.ellipse(p.x, p.y + 1, 72, 30, 0, Math.PI * 1.08, Math.PI * 1.92);
+  c.strokeStyle = "#f6e2b4";
+  c.lineWidth = 1.6;
+  c.stroke();
+  c.beginPath();
+  c.ellipse(p.x, p.y, 64, 25, 0, 0, TAU199);
+  c.strokeStyle = "#6a4528";
+  c.lineWidth = 1.3;
+  c.stroke();
+  if (age < 18) {
+    const u = ease28(age / 18), r = 60 + 130 * u;
+    c.globalAlpha *= 1 - ease28((age - 8) / 10);
+    c.beginPath();
+    c.ellipse(p.x, p.y + 2, r, r * 0.6, 0, 0, TAU199);
+    c.strokeStyle = "#a07848";
+    c.lineWidth = 10 * (1 - u) + 2;
+    c.stroke();
+    c.beginPath();
+    c.ellipse(p.x, p.y - 1, r, r * 0.6, 0, 0, TAU199);
+    c.strokeStyle = "#f6e2b4";
+    c.lineWidth = 4 * (1 - u) + 1;
+    c.stroke();
+  }
+  c.restore();
+}
+function slamBurst(c, row2, age, front2 = true) {
+  if (age < 0 || age >= 56) return;
+  const p = slamSpot(row2), seed2 = hash54(String(row2.sequence ?? 0)) % 97, out4 = ease28(age / 30), fade = 1 - ease28((age - 22) / 34);
+  c.save();
+  c.globalAlpha *= fade;
+  const puffs = [];
+  for (let i = 0; i < 40; i++) {
+    const a = i * TAU199 / 40 + seed2 % 9 * 0.07, v = (seed2 + i * 13) % 10 / 10, r = 44 + (64 + 22 * v) * out4;
+    const x = p.x + Math.cos(a) * r * 1.2, y = p.y + Math.sin(a) * r * 0.55;
+    if (Math.sin(a) > 0 !== front2) continue;
+    puffs.push({ x, y: y - 2 - age * 0.1, r: (13 + 7 * v) * (0.5 + 0.7 * ease28(age / 16)), v });
+  }
+  puffs.sort((a, b) => a.y - b.y);
+  for (const f of puffs) {
+    ellipse8(c, f.x, f.y + f.r * 0.25, f.r * 1.25, f.r * 0.62, "#b8915e");
+    ellipse8(c, f.x, f.y, f.r * 1.1, f.r * 0.7, f.v > 0.5 ? "#d9bb86" : "#d0ad78");
+    ellipse8(c, f.x - f.r * 0.3, f.y - f.r * 0.25, f.r * 0.55, f.r * 0.35, "#f1dcae");
+  }
+  for (let i = 0; i < 12; i++) {
+    const a = i * 2.39996 + seed2, q2 = clamp60(age / 26);
+    if (Math.sin(a) > 0 !== front2 || q2 >= 1) continue;
+    const r23 = 40 + q2 * (70 + i % 4 * 14), x = p.x + Math.cos(a) * r23 * 1.2, y = p.y + Math.sin(a) * r23 * 0.55 - Math.sin(q2 * Math.PI) * (10 + i % 3 * 5), s2 = 2.4 + i % 3 * 0.9;
+    c.save();
+    c.translate(x, y);
+    c.rotate(i + q2 * 6);
+    polygon21(c, [[-s2, -s2], [s2 * 0.7, -s2 * 0.6], [s2, s2 * 0.5], [-s2 * 0.5, s2]], i % 2 ? "#8d6a4a" : "#a07e58", true, 0.7);
+    c.restore();
+  }
+  c.restore();
+}
+function roarWaves(c, actor2, tick, age) {
+  const p = ashfangAttackPose(actor2, tick);
+  if (!(p.roar > 0)) return;
+  const from = mouth3(actor2, p), dir = p.facing < 0 ? Math.PI : 0;
+  c.save();
+  const sx = Math.cos(dir), cx = from.x - sx * 4;
+  const crescent2 = (r, thick2, spread, lead) => {
+    const n = 18, pts2 = [];
+    for (let j = 0; j <= n; j++) {
+      const a = -spread + 2 * spread * j / n;
+      pts2.push([cx + sx * Math.cos(a) * r, from.y + Math.sin(a) * r * 0.82]);
+    }
+    for (let j = n; j >= 0; j--) {
+      const a = -spread + 2 * spread * j / n, w = Math.pow(Math.sin(Math.PI * j / n), 0.75) * thick2, rr3 = r - w * (lead ? 1 : 1);
+      pts2.push([cx + sx * Math.cos(a) * rr3, from.y + Math.sin(a) * rr3 * 0.82]);
+    }
+    c.beginPath();
+    pts2.forEach(([x, y], k) => k ? c.lineTo(x, y) : c.moveTo(x, y));
+    c.closePath();
+  };
+  for (let i = 0; i < 16; i++) {
+    const born = 16 + i % 8 * 4.5, t = (age - born) / 14;
+    if (t < 0 || t > 1 || age > 60) continue;
+    const a = (i * 0.618 % 1 - 0.5) * 1.15, d0 = 20 + t * 120, len = 16 + i % 3 * 8, w = 2.4 * Math.sin(Math.PI * t) + 0.4;
+    const x0 = cx + sx * Math.cos(a) * d0, y0 = from.y + Math.sin(a) * d0 * 0.82, x1 = cx + sx * Math.cos(a) * (d0 + len), y1 = from.y + Math.sin(a) * (d0 + len) * 0.82, nx = -Math.sin(a) * 0.82, ny = Math.cos(a);
+    c.globalAlpha = Math.sin(Math.PI * t);
+    c.beginPath();
+    c.moveTo(x0, y0);
+    c.lineTo((x0 + x1) / 2 + sx * nx * w, (y0 + y1) / 2 + ny * w);
+    c.lineTo(x1, y1);
+    c.lineTo((x0 + x1) / 2 - sx * nx * w, (y0 + y1) / 2 - ny * w);
+    c.closePath();
+    c.fillStyle = i % 3 ? "#fff1cc" : "#ffc27a";
+    c.fill();
+  }
+  if (age >= 13 && age < 24) {
+    const u = (age - 13) / 11;
+    c.globalAlpha = 1 - u;
+    const gr = c.createRadialGradient(from.x, from.y, 0, from.x, from.y, 18 + 26 * u);
+    gr.addColorStop(0, "rgba(255,236,190,0.9)");
+    gr.addColorStop(0.5, "rgba(255,170,90,0.45)");
+    gr.addColorStop(1, "rgba(255,150,70,0)");
+    c.fillStyle = gr;
+    c.beginPath();
+    c.arc(from.x, from.y, 18 + 26 * u, 0, TAU199);
+    c.fill();
+    c.beginPath();
+    c.ellipse(from.x, from.y, 8 + 22 * u, (8 + 22 * u) * 0.82, 0, 0, TAU199);
+    c.strokeStyle = "#fff1cc";
+    c.lineWidth = 3 * (1 - u) + 0.6;
+    c.stroke();
+  }
+  const airLine = (r, spread, width2, color28, alpha, gaps, seed2) => {
+    const n = 30;
+    for (let j = 0; j < n; j++) {
+      const t0 = j / n, t1 = (j + 1) / n, mid = (t0 + t1) / 2;
+      if (gaps && Math.floor(mid * gaps + seed2) % 4 === 3) continue;
+      const a0 = -spread + 2 * spread * t0, a1 = -spread + 2 * spread * t1, taper6 = Math.pow(Math.sin(Math.PI * mid), 0.7);
+      c.globalAlpha = alpha * taper6;
+      c.beginPath();
+      c.arc(0, 0, r, a0, a1);
+      c.strokeStyle = color28;
+      c.lineWidth = width2 * taper6 + 0.3;
+      c.stroke();
+    }
+  };
+  for (let i = 0; i < 6; i++) {
+    const u = (age - 14 - i * 6) / 24;
+    if (u < 0 || u > 1) continue;
+    const r = 22 + u * 168, spread = 0.62 + 0.26 * u, k = 1 - ease28((u - 0.55) / 0.45), haze2 = Math.min(26, r * 0.45) * (1 - 0.4 * u);
+    c.save();
+    c.translate(cx, from.y);
+    c.scale(sx, 0.82);
+    c.lineCap = "butt";
+    const g = c.createRadialGradient(0, 0, Math.max(0, r - haze2), 0, 0, r);
+    g.addColorStop(0, "rgba(255,170,90,0)");
+    g.addColorStop(0.75, `rgba(255,190,110,${0.22 * k})`);
+    g.addColorStop(1, `rgba(255,236,190,${0.34 * k})`);
+    c.beginPath();
+    c.arc(0, 0, r, -spread, spread);
+    c.arc(0, 0, Math.max(0, r - haze2), spread, -spread, true);
+    c.closePath();
+    c.fillStyle = g;
+    c.fill();
+    airLine(r, spread, 3.8 * (1 - u) + 1.5, "#fff6dc", 0.95 * k, 9, i * 1.7);
+    airLine(r - 3, spread * 0.92, 2 * (1 - u) + 0.6, "#ffab5a", 0.7 * k, 7, i * 2.3 + 1);
+    airLine(r - 9 - 4 * u, spread * 0.85, 1.4, "#ffe2b0", 0.45 * k, 6, i + 2);
+    airLine(r - 17 - 7 * u, spread * 0.75, 1.1, "#ffe2b0", 0.25 * k, 5, i + 3);
+    c.restore();
+    c.globalAlpha = k;
+    for (let j = 0; j < 4; j++) {
+      const a = (j / 3 - 0.5) * spread * 1.3 + Math.sin(age * 0.5 + j + i) * 0.05, x = cx + sx * Math.cos(a) * (r + 2), y = from.y + Math.sin(a) * (r + 2) * 0.82;
+      ellipse8(c, x, y, 1.3 * (1 - u) + 0.5, 1.3 * (1 - u) + 0.5, j % 2 ? HOTE : "#fff4d2");
+    }
+  }
+  for (let i = 0; i < 26; i++) {
+    const born = 14 + i % 9 * 4, t = (age - born) / 16;
+    if (t < 0 || t > 1 || age > 58) continue;
+    const a = dir + (i * 0.618 % 1 - 0.5) * 1.1, d = 10 + t * (70 + i % 4 * 18), x = from.x + Math.cos(a) * d, y = from.y + Math.sin(a) * d * 0.8 + 10 * t * t;
+    c.globalAlpha = 1 - ease28((t - 0.5) / 0.5);
+    line33(c, [[x, y], [x - Math.cos(a) * 6, y - Math.sin(a) * 4.8]], i % 3 ? HOTE : FIRE3, 1.6);
+  }
+  c.restore();
+}
+function roarGround(c, actor2, tick, age) {
+  if (age < 14 || age >= 66) return;
+  const p = ashfangAttackPose(actor2, tick), m = mouth3(actor2, p), sign4 = p.facing < 0 ? -1 : 1, g = { x: m.x + sign4 * 10, y: actor2.position.y + 6 }, k = 1 - ease28((age - 52) / 14);
+  c.save();
+  c.globalAlpha *= k;
+  for (let i = 0; i < 22; i++) {
+    const a = (i / 21 - 0.5) * 1.3, d = 18 + ((age - 14) * 3.2 + i * 23) % 110, len = 10 + i % 3 * 5, f = 1 - d / 128;
+    const x0 = g.x + sign4 * Math.cos(a) * d, y0 = g.y + Math.sin(a) * d * 0.55, x1 = x0 + sign4 * Math.cos(a) * len, y1 = y0 + Math.sin(a) * len * 0.55;
+    c.save();
+    c.globalAlpha *= f;
+    line33(c, [[x0, y0 + 1.2], [x1, y1 + 1.2]], "#9a7244", 3);
+    line33(c, [[x0, y0], [x1, y1]], i % 2 ? "#f1dcae" : "#e2c48e", 2);
+    c.restore();
+  }
+  for (let i = 0; i < 12; i++) {
+    const a = (i * 0.618 % 1 - 0.5) * 1.2, d = 30 + i % 4 * 24 + (age - 14) * 0.5, hop = Math.abs(Math.sin(age * 0.7 + i * 1.3)) * 4, s2 = 1.6 + i % 3 * 0.6;
+    const x = g.x + sign4 * Math.cos(a) * d, y = g.y + Math.sin(a) * d * 0.55;
+    ellipse8(c, x, y + 1, s2 * 1.1, s2 * 0.45, "#8a6a44");
+    polygon21(c, [[x - s2, y - hop - s2], [x + s2 * 0.7, y - hop - s2 * 0.6], [x + s2, y - hop + s2 * 0.5], [x - s2 * 0.5, y - hop + s2]], i % 2 ? "#8d6a4a" : "#a07e58", true, 0.6);
+  }
+  c.restore();
+}
+function emberBurst(c, actor2, age) {
+  const p = actor2.boss.kindleAt ?? actor2.position, cx = p.x + 6, cy2 = p.y - 46;
+  c.save();
+  for (let i = 0; i < 30; i++) {
+    const born = i % 6 * 2, t = (age - born) / 46;
+    if (t < 0 || t > 1) continue;
+    const a = -Math.PI / 2 + (i * 0.618 % 1 - 0.5) * 2.8, sp = 50 + i % 5 * 14, x = cx + Math.cos(a) * sp * t, y = cy2 + Math.sin(a) * sp * t + 40 * t * t;
+    c.globalAlpha = 1 - ease28((t - 0.5) / 0.5);
+    ellipse8(c, x, y, 1.4 + i % 3 * 0.5, 1.6 + i % 3 * 0.5, i % 3 ? HOTE : FIRE3);
+  }
   c.restore();
 }
 function drawAshfangGround(c, model2, tick) {
   const h = model2.bossHazards ?? {};
   c.save();
+  holeKeys = /* @__PURE__ */ new Set();
+  for (const row2 of h.ashfangCollapsedRings ?? []) if (tick >= row2.createdTick) for (const t of row2.ring?.tiles ?? []) holeKeys.add(t.column + "," + t.row);
   for (const row2 of h.ashfangCollapsedRings ?? []) collapsedRing(c, row2, tick);
   for (const row2 of h.ashfangTelegraphs ?? []) {
     if (tick < row2.startedTick || tick > row2.resolvesTick) continue;
@@ -184913,71 +185454,140 @@ function drawAshfangGround(c, model2, tick) {
     else if (row2.ability === "calamity_slam") ringWarning(c, row2, tick);
   }
   for (const row2 of h.ashfangImpacts ?? []) if (row2.ability === "slam") slamGround3(c, row2, tick);
+  else if (row2.ability === "scarlet_fire") fireScorch(c, row2, tick);
+  else if (row2.ability === "calamity_slam") {
+    slamShock(c, row2, tick - row2.resolvedTick);
+    slamBurst(c, row2, tick - row2.resolvedTick, false);
+  }
   for (const actor2 of Object.values(model2.entitiesById ?? {})) {
     if (actor2.boss?.bossDefinitionId !== ID7) continue;
     const age = tick - (actor2.boss.phaseStartedTick ?? -1e3);
-    if (age >= 0 && age < 32) {
-      c.save();
-      c.globalAlpha *= 1 - ease28(age / 32);
-      circle5(c, actor2.position.x, actor2.position.y, 24 + 72 * ease28(age / 32), "#ce5142", 1.5);
-      c.restore();
-    }
+    if (actor2.alive !== false) roarGround(c, actor2, tick, age);
   }
   c.restore();
 }
 function fireBurst(c, row2, tick, model2) {
   const age = tick - row2.resolvedTick;
-  if (age < 0 || age >= 30) return;
-  const actor2 = model2.entitiesById?.[row2.sourceEntityId], caster2 = actor2 ? { ...actor2, alive: true, position: row2.originPosition, boss: { ...actor2.boss, pendingAction: null, lastAction: row2 } } : { position: row2.originPosition, boss: { lastAction: row2, facing: row2.facing } }, pose3 = ashfangAttackPose(caster2, row2.resolvedTick), from = mouth3(caster2, pose3), sign4 = row2.facing < 0 ? -1 : 1, range2 = row2.range ?? 110, half = row2.halfAngle ?? 0.8, outer = point24(row2.originPosition.x + sign4 * range2, row2.originPosition.y - 13), width2 = range2 * Math.sin(half), fade = 1 - ease28((age - 6) / 24), burn2 = 1 - ease28(age / 15);
+  if (age < 0 || age >= 46) return;
+  const actor2 = model2.entitiesById?.[row2.sourceEntityId], spot2 = breathSpot(row2);
+  const caster2 = actor2 ? { ...actor2, alive: true, boss: { ...actor2.boss, facing: spot2.sign, pendingAction: null, lastAction: row2 } } : { position: row2.originPosition, boss: { lastAction: row2, facing: spot2.sign } };
+  const pose3 = ashfangAttackPose(caster2, tick), from = mouth3(caster2, pose3), sign4 = spot2.sign, range2 = row2.range ?? 110, half = (row2.halfAngle ?? 0.8) * 0.85, seed2 = hash54(String(row2.sequence ?? 0)) % 97;
   c.save();
-  c.translate(from.x, from.y);
-  c.scale(sign4, 1);
-  const length = (outer.x - from.x) * sign4, dy = outer.y - from.y;
-  c.globalAlpha = fade * 0.35;
-  glow21(c, length * 0.54, dy * 0.54, width2 * 0.86, "#ed4b3180");
-  for (let i = -3; i <= 3; i++) {
-    const offset2 = i / 3 * width2 * 0.77, reach = length * (0.83 + 0.15 * (1 - Math.abs(i) / 3)) + Math.sin(age * 0.58 + i * 1.7) * 3, endY = dy + offset2, w = (12 + 4 * (1 - Math.abs(i) / 3)) * (0.84 + 0.16 * burn2), curl = Math.sin(age * 0.34 + i * 2.1) * 4;
-    for (let layer2 = 0; layer2 < 3; layer2++) {
-      const k = [1.35, 0.94, 0.44][layer2], l = reach * [1, 0.96, 0.8][layer2], ey = endY * [1, 0.97, 0.89][layer2], thick2 = w * k;
+  const puffs = [];
+  for (let i = 0; i < 40; i++) {
+    const born = i * 0.6, life = 18 + i % 4 * 2, t = (age - born) / life;
+    if (t < 0 || t > 1) continue;
+    const a = (hash54(seed2 + i * 31) % 100 / 100 * 2 - 1) * half, d = range2 * (0.42 + hash54(seed2 + i * 17) % 58 / 100);
+    const ex = spot2.x + sign4 * Math.cos(a) * d, ey = spot2.y + Math.sin(a) * d - 6;
+    const k = 1 - (1 - t) * (1 - t), x = from.x + (ex - from.x) * k, y = from.y + (ey - from.y) * k - Math.sin(t * Math.PI) * 6 - t * t * 8;
+    puffs.push({ x, y, t, r: 4 + 17 * Math.sqrt(t), i });
+  }
+  for (const f of puffs) {
+    const { x, y, t, r, i } = f;
+    if (t > 0.78) {
+      c.save();
+      c.globalAlpha *= (1 - t) / 0.22 * 0.55;
+      ellipse8(c, x, y - (t - 0.78) * 30, r * 1.05, r * 0.95, i % 2 ? "#5a4a48" : "#6e5f5c");
+      c.restore();
+      continue;
+    }
+    ellipse8(c, x, y, r, r * 0.92, t < 0.5 ? "#d9452f" : "#a8302a");
+    ellipse8(c, x - r * 0.12, y - r * 0.1, r * 0.7, r * 0.64, t < 0.55 ? "#ff963d" : "#e05a30");
+    if (t < 0.6) ellipse8(c, x - r * 0.18, y - r * 0.18, r * 0.38 * (1 - t), r * 0.34 * (1 - t), "#ffe9a5");
+  }
+  if (age < 20) {
+    const k = 1 - ease28((age - 8) / 12), mid = { x: spot2.x + sign4 * range2 * 0.48, y: spot2.y - 10 }, dx = mid.x - from.x, dy = mid.y - from.y, n = Math.hypot(dx, dy) || 1, nx = -dy / n, ny = dx / n;
+    for (const [w, col2] of [[9, "#d9452f"], [6, "#ff963d"], [2.8, "#ffe9a5"]]) {
+      const ww = w * k * (0.9 + 0.1 * Math.sin(tick * 1.3)), flick = Math.sin(tick * 0.9) * 3;
       c.beginPath();
-      c.moveTo(0, -1.5 - layer2);
-      c.bezierCurveTo(l * 0.24, ey * 0.17 - thick2 * 0.25, l * 0.5, ey * 0.48 - thick2 * 1.05, l * 0.66, ey * 0.67 - thick2 * 0.82);
-      c.quadraticCurveTo(l * 0.79, ey - thick2 * 1.24, l * 0.88, ey - thick2 * 0.42 + curl);
-      c.quadraticCurveTo(l * 0.94, ey - thick2 * 0.02, l * 1.04, ey - thick2 * 0.52);
-      c.quadraticCurveTo(l * 0.96, ey + thick2 * 0.68 + curl, l * 0.78, ey + thick2 * 0.44);
-      c.quadraticCurveTo(l * 0.62, ey * 0.82 + thick2 * 1.12, l * 0.49, ey * 0.52 + thick2 * 0.49);
-      c.bezierCurveTo(l * 0.34, ey * 0.31 + thick2 * 0.27, l * 0.12, 3.1, 0, 2);
+      c.moveTo(from.x + nx * ww * 0.25, from.y + ny * ww * 0.25);
+      c.quadraticCurveTo(from.x + dx * 0.5 + nx * ww, from.y + dy * 0.5 + ny * ww + flick, mid.x + nx * ww * 1.4, mid.y + ny * ww * 1.4);
+      c.lineTo(mid.x - nx * ww * 1.4, mid.y - ny * ww * 1.4);
+      c.quadraticCurveTo(from.x + dx * 0.5 - nx * ww, from.y + dy * 0.5 - ny * ww - flick, from.x - nx * ww * 0.25, from.y - ny * ww * 0.25);
       c.closePath();
-      c.globalAlpha = fade * [0.64, 0.82, 0.85][layer2];
-      c.fillStyle = ["#d9452f", "#ff963d", "#ffe9a5"][layer2];
+      c.fillStyle = col2;
       c.fill();
     }
+    c.save();
+    c.globalAlpha *= k;
+    glow21(c, from.x, from.y, 16, "rgba(255,210,120,0.7)");
+    c.restore();
   }
-  c.globalAlpha = fade * 0.8;
-  glow21(c, 0, 0, 15 + 8 * burn2, "#ffd070aa");
-  for (let i = 0; i < 14; i++) {
-    const t = (age * 0.049 + i * 0.077) % 1, a = (i % 7 - 3) / 3, px7 = length * t, py = dy * t + a * width2 * t * 0.77 + Math.sin(t * 9 + i) * 4;
+  for (let i = 0; i < 12; i++) {
+    const t = (age * 0.05 + i * 0.083) % 1, a = (i * 0.37 % 1 * 2 - 1) * half, d = range2 * (0.2 + t * 0.9);
+    c.save();
+    c.globalAlpha *= (1 - t) * (1 - ease28((age - 24) / 18));
+    ellipse8(c, spot2.x + sign4 * Math.cos(a) * d, spot2.y + Math.sin(a) * d - 10 - Math.sin(t * Math.PI) * 14, 1, 1.3, i % 3 ? HOTE : "#fff3c8");
+    c.restore();
+  }
+  c.restore();
+}
+function scorchFlameSpot(row2, i) {
+  const spot2 = breathSpot(row2), range2 = row2.range ?? 110, half = (row2.halfAngle ?? 0.8) * 0.8, seed2 = hash54(String(row2.sequence ?? 0)) % 97;
+  const a = (hash54(seed2 + i * 23) % 100 / 100 * 2 - 1) * half, d = range2 * (0.3 + hash54(seed2 + i * 11) % 65 / 100);
+  return { x: spot2.x + spot2.sign * Math.cos(a) * d, y: spot2.y + Math.sin(a) * d, seed: seed2 + i };
+}
+function scorchFlame(c, row2, tick, i) {
+  const age = tick - row2.resolvedTick;
+  if (age < 10 || age >= 70) return;
+  const f = scorchFlameSpot(row2, i), life = 1 - ease28((age - 22) / 48);
+  tongue7(c, f.x, f.y, 3, (7 + i % 3 * 3) * life * ease28((age - 10) / 8), tick, f.seed);
+}
+function tailEnd(c, actor2, tick) {
+  const p = ashfangAttackPose(actor2, tick);
+  if (p.ability !== "slam") return;
+  const nodes = tailNodes(actor2, p, tick);
+  c.save();
+  c.translate(actor2.position.x, actor2.position.y);
+  c.scale(SIZE10, SIZE10);
+  c.scale(p.orientation, 1);
+  c.translate(p.bodyX, p.bodyY);
+  c.lineCap = "round";
+  c.lineJoin = "round";
+  TAILP2 = !!p.p2;
+  TICKNOW = tick;
+  TAILHOT = p.coil * (1 - p.tailReturn);
+  tail(c, nodes.slice(-3), false);
+  c.restore();
+}
+function roar(c, row2, tick, model2) {
+  const q2 = progress4(row2, tick), actor2 = model2.entitiesById?.[row2.sourceEntityId];
+  if (!actor2 || q2 < 0.12 || q2 > 0.9) return;
+  const p = ashfangAttackPose(actor2, tick), from = mouth3(actor2, p), dir = p.facing < 0 ? Math.PI : 0, k = Math.sin(Math.PI * clamp60((q2 - 0.12) / 0.78));
+  c.save();
+  for (let i = 0; i < 3; i++) {
+    const u = (tick * 0.035 + i / 3) % 1, r = 10 + u * 48;
+    c.globalAlpha = k * (1 - u);
     c.beginPath();
-    c.moveTo(px7 - 5, py);
-    c.quadraticCurveTo(px7, py - 2, px7 + 4, py + a * 2);
-    c.strokeStyle = i % 3 ? "#ffd475" : "#fff3c8";
-    c.lineWidth = 0.8;
+    c.arc(from.x, from.y, r, dir - 0.55, dir + 0.55);
+    c.strokeStyle = "#5a2a20";
+    c.lineWidth = 3.4 * (1 - u) + 1;
+    c.stroke();
+    c.strokeStyle = "#ffe6b8";
+    c.lineWidth = 1.6 * (1 - u) + 0.5;
     c.stroke();
   }
   c.restore();
 }
 function impactDebris(c, row2, tick) {
   const age = tick - row2.resolvedTick;
-  if (age < 0 || age >= 34) return;
-  const p = row2.targetPosition, seed2 = hash54(row2.id ?? row2.sequence), q2 = age / 34;
+  if (age < 0 || age >= 40) return;
+  const p = row2.targetPosition, seed2 = hash54(String(row2.sequence ?? 0)) % 97, q2 = age / 40;
   c.save();
-  c.globalAlpha *= 1 - ease28((q2 - 0.55) / 0.45);
-  for (let i = 0; i < 13; i++) {
-    const a = i * 2.39996 + seed2 % 13, r = 12 + age * (0.7 + i % 3 * 0.17), x = p.x + Math.cos(a) * r, y = p.y + Math.sin(a) * r * 0.6 - Math.sin(q2 * Math.PI) * (10 + i % 4 * 6), s = 1.5 + i % 3 * 0.55;
+  for (let i = 0; i < 16; i++) {
+    const a = i * TAU199 / 16 + seed2 * 0.1, sp = 0.9 + (seed2 + i * 7) % 10 / 12, d = 22 + age * sp * 1.1, h = Math.sin(Math.min(1, q2 * 1.4) * Math.PI) * (16 + i % 4 * 7), k = 1 - ease28((q2 - 0.35) / 0.4);
+    if (k <= 0) continue;
+    const x = p.x + Math.cos(a) * d, y = p.y + Math.sin(a) * d * 0.72 - h, rr3 = (3 + i % 3 * 1.4) * k;
+    ellipse8(c, x, y, rr3, rr3 * 0.8, i % 3 ? "#e2c48e" : "#c9a06a");
+    ellipse8(c, x - rr3 * 0.3, y - rr3 * 0.3, rr3 * 0.45, rr3 * 0.35, "#f4e0b4");
+  }
+  for (let i = 0; i < 11; i++) {
+    if (q2 > 0.62) break;
+    const a = i * 2.39996 + seed2, r23 = 14 + age * (0.8 + i % 3 * 0.2), x = p.x + Math.cos(a) * r23, y = p.y + Math.sin(a) * r23 * 0.72 - Math.sin(Math.min(1, q2 * 1.6) * Math.PI) * (12 + i % 4 * 7), s2 = 1.6 + i % 3 * 0.6;
     c.save();
     c.translate(x, y);
-    c.rotate(i + q2 * 3);
-    polygon21(c, [[-s, -s], [s * 0.7, -s * 0.6], [s, s * 0.5], [-s * 0.5, s]], i % 2 ? "#5b4650" : "#8d5e4e", true, 0.65);
+    c.rotate(i + q2 * 6);
+    polygon21(c, [[-s2, -s2], [s2 * 0.7, -s2 * 0.6], [s2, s2 * 0.5], [-s2 * 0.5, s2]], i % 2 ? "#8d6a4a" : "#a07e58", true, 0.65);
     c.restore();
   }
   c.restore();
@@ -184987,12 +185597,28 @@ function ashfangDepthItems(model2, tick, viewport = null) {
   const add2 = (id2, p, r, draw) => {
     if (visible3(p, r)) items2.push(Object.freeze({ id: "ashfang-vfx/" + id2, anchorX: p.x, anchorY: p.y + 1, draw }));
   };
+  for (const actor2 of Object.values(model2.entitiesById ?? {})) {
+    if (actor2.boss?.bossDefinitionId !== ID7 || actor2.alive === false) continue;
+    const p = ashfangAttackPose(actor2, tick), reach = p.ability === "slam" ? p.tailDrive * (1 - p.tailReturn) : 0;
+    if (reach > 0.35 && p.target) add2((actor2.entityId ?? "a") + "/hook", { x: p.target.x, y: p.target.y + 8 }, 90, (c) => tailEnd(c, actor2, tick));
+  }
+  for (const actor2 of Object.values(model2.entitiesById ?? {})) {
+    if (actor2.boss?.bossDefinitionId !== ID7 || actor2.boss.phaseStartedTick == null) continue;
+    const age = tick - actor2.boss.phaseStartedTick;
+    if (age >= 14 && age < 68) add2((actor2.entityId ?? "a") + "/flare", { x: (actor2.boss.kindleAt ?? actor2.position).x, y: (actor2.boss.kindleAt ?? actor2.position).y + 30 }, 120, (c) => emberBurst(c, actor2, age - 14));
+    if (age >= 14 && age < 70 && actor2.alive !== false) add2((actor2.entityId ?? "a") + "/roarwaves", { x: actor2.position.x, y: actor2.position.y + 40 }, 220, (c) => roarWaves(c, actor2, tick, age));
+  }
+  for (const row2 of h.ashfangTelegraphs ?? []) if (row2.ability === "calamity_slam" && tick >= row2.startedTick && tick <= row2.resolvesTick) add2((row2.id ?? "cast") + "/roar", row2.originPosition, 200, (c) => roar(c, row2, tick, model2));
+  for (const row2 of h.ashfangTelegraphs ?? []) if (row2.ability === "scarlet_fire" && tick >= row2.startedTick && tick <= row2.resolvesTick) add2((row2.id ?? "cast") + "/sparks", row2.originPosition, 160, (c) => warningSparks(c, row2, tick, model2));
   for (const row2 of h.ashfangImpacts ?? []) {
     const age = tick - row2.resolvedTick;
-    if (age < 0 || age >= 42) continue;
+    if (age < 0 || age >= (row2.ability === "scarlet_fire" ? 72 : 42)) continue;
     const id2 = row2.id ?? row2.bossId + "/" + row2.sequence;
-    if (row2.ability === "scarlet_fire") add2(id2 + "/fire", row2.originPosition, 160, (c) => fireBurst(c, row2, tick, model2));
-    else if (row2.ability === "slam") add2(id2 + "/debris", row2.targetPosition, 90, (c) => impactDebris(c, row2, tick));
+    if (row2.ability === "scarlet_fire") {
+      add2(id2 + "/fire", row2.originPosition, 160, (c) => fireBurst(c, row2, tick, model2));
+      if (age >= 10) for (let i = 0; i < 9; i++) add2(id2 + "/scorch-flame/" + i, scorchFlameSpot(row2, i), 20, (c) => scorchFlame(c, row2, tick, i));
+    } else if (row2.ability === "slam") add2(id2 + "/debris", row2.targetPosition, 90, (c) => impactDebris(c, row2, tick));
+    else if (row2.ability === "calamity_slam") add2(id2 + "/slam", { x: slamSpot(row2).x, y: slamSpot(row2).y + 40 }, 170, (c) => slamBurst(c, row2, age));
     else if (row2.ability === "strike" && age < 12) add2(id2 + "/bite", row2.targetPosition, 26, (c) => {
       c.save();
       c.globalAlpha *= 1 - ease28(age / 12);
@@ -185015,13 +185641,13 @@ var RED = "#ba442a";
 var FIRE4 = "#f27632";
 var GOLD33 = "#ffc36b";
 var HOT2 = "#fff0b5";
-var SIZE10 = 1.3;
+var SIZE11 = 1.3;
 var BUNNY_SIZE = 1.18;
 var STEP5 = 15;
 var CHAR2 = "#2f2725";
 var CHAR_FAR = "#221c1b";
 var FLARE = 0;
-var KINDLE = 80;
+var KINDLE2 = 80;
 var WALK_DIST = 59.8;
 var walkMemory = /* @__PURE__ */ new Map();
 function walkCycle(actor2, tick) {
@@ -185093,7 +185719,7 @@ function ring9(c, x, y, r, color82, width2 = 1) {
 function progress5(row2, tick) {
   return clamp61((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 }
-function tongue7(c, x, y, width2, height, tick, seed2 = 0, heat = 1) {
+function tongue8(c, x, y, width2, height, tick, seed2 = 0, heat = 1) {
   const bend = Math.sin(tick * 0.16 + seed2) * width2 * 0.35;
   c.save();
   c.translate(x, y);
@@ -185203,7 +185829,7 @@ function cinderhartAttackPose(actor2, tick) {
     p.heat = 0.2 + 0.65 * u;
   }
   const kAge = b.phaseStartedTick == null ? -1 : tick - b.phaseStartedTick;
-  if (alive && kAge >= 0 && kAge < KINDLE) {
+  if (alive && kAge >= 0 && kAge < KINDLE2) {
     p.heat = Math.max(p.heat, kAge < 22 ? 0.12 + 0.88 * ease29(kAge / 22) : 1 - 0.28 * ease29((kAge - 22) / 40));
     p.p2 = kAge >= 12;
     p.flare = Math.sin(Math.PI * clamp61(kAge / 64));
@@ -185270,7 +185896,7 @@ function antler(c, far, heat, tick, flash2) {
     for (const [i, branch] of branches.entries()) {
       const end = branch.at(-1);
       ellipse9(c, end[0], end[1], 1.3 + 0.6 * heat, 1.6 + heat, hot ? HOT2 : GOLD33);
-      if (i % 2 === 0 || heat > 0.35 || FLARE > 0.1) tongue7(c, end[0], end[1] + 0.4, 1.7 + heat, ((i % 2 === 0 ? 5.5 : 3.5) + heat * 7) * (1 + 1.1 * FLARE), tick, i, Math.max(0.4, heat));
+      if (i % 2 === 0 || heat > 0.35 || FLARE > 0.1) tongue8(c, end[0], end[1] + 0.4, 1.7 + heat, ((i % 2 === 0 ? 5.5 : 3.5) + heat * 7) * (1 + 1.1 * FLARE), tick, i, Math.max(0.4, heat));
     }
   }
   c.restore();
@@ -185303,9 +185929,9 @@ function stagHead(c, p, tick, flash2) {
     c.save();
     c.translate(27, 7);
     c.rotate(1.05 - 0.25 * bellow);
-    const roar = 1 + 0.6 * FLARE;
-    tongue7(c, 0, 0, (6 * bellow + 1) * roar, (28 * bellow + 2) * roar, tick, 3, 1);
-    tongue7(c, -2, 1, 3.4 * bellow + 0.5, 17 * bellow + 1, tick + 9, 5, 0.9);
+    const roar2 = 1 + 0.6 * FLARE;
+    tongue8(c, 0, 0, (6 * bellow + 1) * roar2, (28 * bellow + 2) * roar2, tick, 3, 1);
+    tongue8(c, -2, 1, 3.4 * bellow + 0.5, 17 * bellow + 1, tick + 9, 5, 0.9);
     c.restore();
   }
   if (!flash2 && p.smoke > 0) for (let i = 0; i < 4; i++) {
@@ -185366,7 +185992,7 @@ function stagBody(c, p, tick, flash2) {
       c.save();
       c.translate(11 + i * 2.2, -31 - i * 4.5);
       c.rotate(-0.42 - i * 0.02);
-      tongue7(c, 0, 0, 3.4 + p.heat * 0.5, (8.5 + p.heat * 7 + i % 2 * 3 + (i > 2 && i < 6 ? 2 : 0)) * (1 + 0.85 * (p.flare || 0)), tick + i * 5, i, p.heat + 0.35);
+      tongue8(c, 0, 0, 3.4 + p.heat * 0.5, (8.5 + p.heat * 7 + i % 2 * 3 + (i > 2 && i < 6 ? 2 : 0)) * (1 + 0.85 * (p.flare || 0)), tick + i * 5, i, p.heat + 0.35);
       c.restore();
     }
   }
@@ -185379,7 +186005,7 @@ function drawCinderhart(c, actor2, tick, flash2 = false) {
   const death = actor2.alive === false ? ease29((actor2.deathAge ?? 0) / 48) : 0;
   c.save();
   c.translate(actor2.position.x, actor2.position.y);
-  c.scale(SIZE10, SIZE10);
+  c.scale(SIZE11, SIZE11);
   c.lineCap = "round";
   c.lineJoin = "round";
   c.globalAlpha *= 1 - death;
@@ -185531,8 +186157,8 @@ function drawCinderBunny(c, actor2, tick, flash2 = false) {
     line34(c, [[10.5, -3.7], [12.3, -3.5]], "#302d30", 0.65);
   }
   if (!flash2 && !dead) {
-    tongue7(c, -4, -11, 4, 10 + Math.sin((tick + seed2) * 0.17) * 2, tick, seed2, 0.8);
-    tongue7(c, -10, -8, 1.9, 5, tick + 8, seed2 + 2, 0.7);
+    tongue8(c, -4, -11, 4, 10 + Math.sin((tick + seed2) * 0.17) * 2, tick, seed2, 0.8);
+    tongue8(c, -10, -8, 1.9, 5, tick + 8, seed2 + 2, 0.7);
   }
   if (dead && !flash2) {
     for (let i = 0; i < 6; i++) {
@@ -185587,9 +186213,9 @@ function fireTongues(c, row2, tick) {
   c.translate(row2.position.x, row2.position.y);
   if (heat > 0.02) {
     const h = (6 + 14 * heat) * grow2;
-    tongue7(c, -6, 2, 4.4, h * 0.75, tick, seed2, Math.max(0.3, heat));
-    tongue7(c, 6, 3, 4, h * 0.85, tick + 6, seed2 + 2, Math.max(0.3, heat));
-    tongue7(c, 0, 0, 5, h * 1.1, tick + 11, seed2 + 4, Math.max(0.3, heat));
+    tongue8(c, -6, 2, 4.4, h * 0.75, tick, seed2, Math.max(0.3, heat));
+    tongue8(c, 6, 3, 4, h * 0.85, tick + 6, seed2 + 2, Math.max(0.3, heat));
+    tongue8(c, 0, 0, 5, h * 1.1, tick + 11, seed2 + 4, Math.max(0.3, heat));
   }
   for (let i = 0; i < 3; i++) {
     const u = (tick * 0.04 + i / 3 + seed2 * 0.1) % 1;
@@ -185678,7 +186304,7 @@ function drawFurrow(c, ch, tick) {
   const dx = end.x - from.x, dy = end.y - from.y, n = Math.hypot(dx, dy) || 1, ux = dx / n, uy = dy / n, nx = -uy, ny = ux;
   const fade = clamp61((live.at(-1).expiresTick - tick) / 12);
   const reach = Math.max(...live.map((f) => (f.position.x - from.x) * ux + (f.position.y - from.y) * uy)) + r * 0.4, start = -r * 0.4;
-  const band11 = (half, s2) => {
+  const band12 = (half, s2) => {
     const a = [], b = [];
     for (let d = start; d <= reach; d += 5) {
       const w1 = half + wob2(d, seed2 + s2), w2 = half + wob2(d, seed2 + s2 + 5);
@@ -185690,13 +186316,13 @@ function drawFurrow(c, ch, tick) {
   };
   c.save();
   c.globalAlpha *= fade;
-  path13(c, band11(r + 4, 1), true);
+  path13(c, band12(r + 4, 1), true);
   c.fillStyle = "#4a3428";
   c.fill();
   c.strokeStyle = "#241812";
   c.lineWidth = 1.2;
   c.stroke();
-  const trench = band11(r * 0.62, 3);
+  const trench = band12(r * 0.62, 3);
   path13(c, trench, true);
   c.fillStyle = "#2a1d17";
   c.fill();
@@ -185753,7 +186379,7 @@ function burrow(c, x, y, seed2, glow25, since2, tick) {
   ellipse9(c, 0, 0, hr, hr * 0.5, "#120c0a", "#241812", 0.8);
   ellipse9(c, 0, 0.4, hr * 0.62, hr * 0.26, open3 ? "#5a2418" : RED);
   if (!open3 || since2 < 60) ellipse9(c, 0, 0.5, hr * (0.32 + glow25 * 0.22), hr * (0.13 + glow25 * 0.1), glow25 > 0.4 ? HOT2 : glow25 > 0 || !open3 ? FIRE4 : RED);
-  if (glow25 > 0.3) tongue7(c, 0, 0.6, 1.5 + glow25 * 1.5, 3 + glow25 * 7, tick, seed2, glow25);
+  if (glow25 > 0.3) tongue8(c, 0, 0.6, 1.5 + glow25 * 1.5, 3 + glow25 * 7, tick, seed2, glow25);
   if (glow25 > 0.05) for (let i = 0; i < 4; i++) {
     const a = i * 1.7 + seed2, l = 3 + glow25 * 8, x0 = Math.cos(a) * 5, y0 = Math.sin(a) * 2.4;
     const pts2 = [[x0, y0], [x0 + Math.cos(a) * l * 0.5 + 1, y0 + Math.sin(a) * l * 0.25], [x0 + Math.cos(a) * l, y0 + Math.sin(a) * l * 0.48]];
@@ -185802,7 +186428,7 @@ function stomp(c, actor2, tick) {
   if (l?.ability !== "warren_call") return;
   const age = tick - l.resolvedTick;
   if (age < 0 || age >= 20) return;
-  const f = (actor2.boss.facing ?? 1) < 0 ? -1 : 1, x = actor2.position.x + 26 * f * SIZE10, y = actor2.position.y + 3, k = age / 20;
+  const f = (actor2.boss.facing ?? 1) < 0 ? -1 : 1, x = actor2.position.x + 26 * f * SIZE11, y = actor2.position.y + 3, k = age / 20;
   for (let i = 0; i < 10; i++) {
     const a = i / 10 * TAU200, r = 8 + ease29(k) * 26, lift = Math.sin(Math.PI * k) * (6 + i % 3 * 3);
     c.save();
@@ -185886,7 +186512,7 @@ function kindleFlames(c, actor2, age, tick, front2) {
     const a = i / 18 * TAU200 + 0.2, sy = Math.sin(a);
     if (front2 !== sy >= 0) continue;
     const x = p.x + Math.cos(a) * r * 0.92, y = p.y + 2 + sy * r * 0.46;
-    tongue7(c, x, y, 5.5, (16 + i % 3 * 7) * life, tick + i * 7, seed2 + i, 1);
+    tongue8(c, x, y, 5.5, (16 + i % 3 * 7) * life, tick + i * 7, seed2 + i, 1);
   }
 }
 function furrowFlames(c, row2, tick, i) {
@@ -185903,9 +186529,9 @@ function furrowFlames(c, row2, tick, i) {
   const seed2 = hash55(row2.id) % 23, h = (8 + 8 * grow2) * (0.25 + 0.75 * heat);
   c.save();
   c.translate(row2.position.x, row2.position.y);
-  tongue7(c, -5, 2, 4.6, h * 0.8, tick, seed2, heat);
-  tongue7(c, 5, 3, 4.2, h * 0.9, tick + 7, seed2 + 2, heat);
-  tongue7(c, 0, 0, 5, h * 1.15, tick + 12, seed2 + 4, heat);
+  tongue8(c, -5, 2, 4.6, h * 0.8, tick, seed2, heat);
+  tongue8(c, 5, 3, 4.2, h * 0.9, tick + 7, seed2 + 2, heat);
+  tongue8(c, 0, 0, 5, h * 1.15, tick + 12, seed2 + 4, heat);
   c.restore();
 }
 function rushWake(c, actor2, tick) {
@@ -185915,12 +186541,12 @@ function rushWake(c, actor2, tick) {
   c.save();
   c.translate(actor2.position.x, actor2.position.y);
   for (let i = 0; i < 7; i++) {
-    const d = -6 + i * 10, lift = 66 - i * 3 + Math.sin(tick * 0.5 + i) * 2, x = -nx * d * SIZE10, y = -ny * d * SIZE10 * 0.5 - lift;
+    const d = -6 + i * 10, lift = 66 - i * 3 + Math.sin(tick * 0.5 + i) * 2, x = -nx * d * SIZE11, y = -ny * d * SIZE11 * 0.5 - lift;
     c.save();
     c.translate(x, y);
     c.rotate(back + Math.PI / 2 + 0.35 * Math.sign(nx || 1));
     c.globalAlpha *= 1 - i / 9;
-    tongue7(c, 0, 0, 7.5 - i * 0.6, 26 - i * 2.5, tick + i * 4, i, 1);
+    tongue8(c, 0, 0, 7.5 - i * 0.6, 26 - i * 2.5, tick + i * 4, i, 1);
     c.restore();
   }
   for (let i = 0; i < 9; i++) {
@@ -186057,10 +186683,10 @@ function originalActor(actor, tick) {
   const b = actor.boss;
   const pending = action(kind, b.pendingAction, actor.position), last = action(kind, b.lastAction, actor.position);
   const aim2 = pending?.targetPosition ?? last?.targetPosition;
-  const facing3 = aim2?.x < actor.position.x ? -1 : 1;
+  const facing2 = aim2?.x < actor.position.x ? -1 : 1;
   const add2 = {
-    facing: facing3,
-    ...kind === "cinderhart" ? phaseMark(b, actor, tick) : { phaseStartedTick: null },
+    facing: facing2,
+    ...kind === "cinderhart" || kind === "ashfang" ? phaseMark(b, actor, tick) : { phaseStartedTick: null },
     abilitySequence: b.abilitySequence ?? 0,
     pendingAction: pending,
     lastAction: last
@@ -186145,7 +186771,7 @@ function projected(model, tick) {
   const impacts2 = [];
   for (const b of bosses) {
     const last = b.boss.lastAction, age = last ? tick - last.resolvedTick : Infinity;
-    if (!last || age < 0 || age >= 40) continue;
+    if (!last || age < 0 || age >= (b.boss.bossDefinitionId === "ashfang" && ["scarlet_fire", "hooked_tail", "arena_collapse"].includes(last.ability) ? 130 : 40)) continue;
     impacts2.push({
       ...last,
       ability: renamed(b.boss.bossDefinitionId, last.ability),
@@ -188817,7 +189443,7 @@ function drawRecoveredBossGroundV1(c, model, t) {
   }
   for (const q2 of h.recoveredTelegraphs ?? []) {
     const spec = recoveredBossForId(q2.bossDefinitionId);
-    if (!spec || q2.ability === "eye_lance" || hasBiomeBossPainter(q2.bossDefinitionId) || hasTreasuryBossPainter(q2.bossDefinitionId) || hasArchivedBossPainter(q2.bossDefinitionId) && !(q2.bossDefinitionId === "ashfang" && q2.ability === "arena_collapse") && !(q2.bossDefinitionId === "nexus_overseer" && q2.ability === "prism_slam")) continue;
+    if (!spec || q2.ability === "eye_lance" || hasBiomeBossPainter(q2.bossDefinitionId) || hasTreasuryBossPainter(q2.bossDefinitionId) || hasArchivedBossPainter(q2.bossDefinitionId) && !(q2.bossDefinitionId === "nexus_overseer" && q2.ability === "prism_slam")) continue;
     const span3 = Math.max(1, q2.resolvesTick - q2.startedTick), progress8 = ease32((t - q2.startedTick) / span3);
     c.save();
     c.translate(q2.position.x, q2.position.y);
@@ -189656,7 +190282,7 @@ var LAVA3 = "#f6662c";
 var DEEP3 = "#c9361f";
 var GOLD38 = "#ffbd53";
 var WHITE4 = "#fff0b0";
-var EMBER3 = "#ed9a54";
+var EMBER4 = "#ed9a54";
 var DUST3 = "#7d6858";
 var DUST22 = "#9a836f";
 var clamp67 = (v) => Math.max(0, Math.min(1, v));
@@ -189888,10 +190514,10 @@ function strikeWarnGround(c, t, q2) {
     const arc5 = furrowArc(r, -STRIKE_HALF + 0.12, STRIKE_HALF - 0.12);
     taper5(c, arc5, 1.2, 2.8, "#2a212466");
     const lit2 = partial2(arc5, ease35(q2 * 1.2 - k * 0.08));
-    if (lit2.length > 1) line38(c, lit2, q2 > 0.7 ? GOLD38 : EMBER3, 1.3);
+    if (lit2.length > 1) line38(c, lit2, q2 > 0.7 ? GOLD38 : EMBER4, 1.3);
   }
   polygon25(c, cone8, null, INK63, 3.4);
-  polygon25(c, cone8, null, q2 > 0.6 ? "#ffc768" : EMBER3, 1.5);
+  polygon25(c, cone8, null, q2 > 0.6 ? "#ffc768" : EMBER4, 1.5);
   c.restore();
 }
 function strikeHitGround(c, a, b, tick) {
@@ -189930,7 +190556,7 @@ function strikeDepth(a, b, tick, add2) {
     c.translate(o.x, o.y - 24);
     const head19 = angle3 - 1.1 + 2.2 * ease35(Math.min(1, age / 4)), tail2 = Math.max(angle3 - 1.1, head19 - 1.7 + age / 9 * 1.3);
     c.globalAlpha *= 1 - ease35((age - 4) / 6);
-    const band11 = (r0, r1, col2, edge) => {
+    const band12 = (r0, r1, col2, edge) => {
       const pts2 = [], n = 12, w = (i) => Math.sin(Math.PI * Math.min(1, i / n * 1.15)) * (r1 - r0) / 2, m = (r0 + r1) / 2;
       for (let i = 0; i <= n; i++) {
         const t = tail2 + (head19 - tail2) * i / n;
@@ -189942,10 +190568,10 @@ function strikeDepth(a, b, tick, add2) {
       }
       polygon25(c, pts2, col2, edge ? INK63 : null);
     };
-    band11(18, 64, "#d73f29", true);
-    band11(24, 58, LAVA3, false);
-    band11(31, 51, GOLD38, false);
-    band11(37, 45, WHITE4, false);
+    band12(18, 64, "#d73f29", true);
+    band12(24, 58, LAVA3, false);
+    band12(31, 51, GOLD38, false);
+    band12(37, 45, WHITE4, false);
     c.restore();
   });
   for (let i = 0; i < 13; i++) {
@@ -190023,7 +190649,7 @@ function slamWarnGround(c, t, q2, tick) {
   c.strokeStyle = INK63;
   c.lineWidth = 4;
   c.stroke();
-  c.strokeStyle = EMBER3;
+  c.strokeStyle = EMBER4;
   c.lineWidth = 1.8;
   c.stroke();
   for (let i = 0; i < 12; i++) {
@@ -190198,7 +190824,7 @@ function ventWarnGround(c, p, q2, seed2) {
   c.strokeStyle = INK63;
   c.lineWidth = 3.4;
   c.stroke();
-  c.strokeStyle = EMBER3;
+  c.strokeStyle = EMBER4;
   c.lineWidth = 1.5;
   c.stroke();
   for (let i = 0; i < 8; i++) {
@@ -191840,11 +192466,11 @@ var M_LOOKS = {
   trader: { look: { hair: "ponytail", facialHair: "stubble", hairColor: "black", skin: "brown" } },
   wealthy: { look: { hair: "swept", facialHair: "goatee", hairColor: "auburn", skin: "light" } }
 };
-function merchant(c, x, y, kind, t, facing3 = 1, opts = {}) {
+function merchant(c, x, y, kind, t, facing2 = 1, opts = {}) {
   const flip = t * 1 % 1, up2 = flip < 0.5, armA = up2 ? 1.92 + Math.sin(flip / 0.5 * Math.PI) * 0.8 : 1.92, bob = Math.sin(t * TAU212) * 0.3;
   c.save();
   c.translate(x, y - 16);
-  c.scale(0.8 * facing3, 0.8);
+  c.scale(0.8 * facing2, 0.8);
   shadowLocal(c);
   drawBlockyHero(c, { cls: null, look: opts.look ?? M_LOOKS[kind].look, gear: {} }, { t: 3, bob, offReach: opts.wave ? armA : opts.reach ?? 1.92, blink: opts.blink ?? (t * 16 | 0) === 11, still: false });
   c.save();
@@ -191924,11 +192550,11 @@ var S_LOOKS = {
   armorer: { look: { hair: "short", facialHair: "mustache", hairColor: "brown", skin: "light" }, gear: { body: { tier: 0, kind: "hauberk" }, gloves: { tier: 0, kind: "gloves" }, legs: { tier: 0, kind: "trousers" } } },
   young: { look: { hair: "ponytail", facialHair: "none", hairColor: "copper", skin: "light" }, gear: { helmet: { tier: 0, kind: "bandana" }, gloves: { tier: 0, kind: "gloves" }, legs: { tier: 0, kind: "breeches" } } }
 };
-function smith(c, x, y, kind, t, facing3 = 1, opts = {}) {
+function smith(c, x, y, kind, t, facing2 = 1, opts = {}) {
   const L = S_LOOKS[kind], bob = Math.sin(t * TAU212) * 0.25;
   c.save();
   c.translate(x, y - 16);
-  c.scale(0.8 * facing3, 0.8);
+  c.scale(0.8 * facing2, 0.8);
   c.fillStyle = "rgba(10,14,12,.25)";
   c.beginPath();
   c.ellipse(0, 20, 12, 3.6, 0, 0, TAU212);
@@ -191970,11 +192596,11 @@ var I_LOOKS = {
   barmaid: { look: { hair: "braid", facialHair: "none", hairColor: "auburn", skin: "tan", face: "rosy" }, gear: {} },
   host: { look: { hair: "bald", facialHair: "chops", hairColor: "brown", skin: "brown" }, gear: { legs: { tier: 0, kind: "trousers" } } }
 };
-function innkeeper(c, x, y, kind, t, facing3 = -1, opts = {}) {
+function innkeeper(c, x, y, kind, t, facing2 = -1, opts = {}) {
   const L = I_LOOKS[kind], bob = Math.sin(t * TAU212) * 0.25, wipe = opts.idle ? null : t;
   c.save();
   c.translate(x, y - 16);
-  c.scale(0.8 * facing3, 0.8);
+  c.scale(0.8 * facing2, 0.8);
   c.fillStyle = "rgba(10,14,12,.25)";
   c.beginPath();
   c.ellipse(0, 20, 12, 3.6, 0, 0, TAU212);
@@ -192020,11 +192646,11 @@ var E_LOOKS = {
   sage: { name: "Aldous", look: { hair: "long", facialHair: "long", hairColor: "white", skin: "tan" }, gear: { body: { tier: 0, kind: "apprentice-robe" }, helmet: { tier: 0, kind: "moon-hat" } } },
   young: { name: "Wren", look: { hair: "bun", facialHair: "none", hairColor: "black", skin: "brown", face: "rosy" }, gear: { body: { tier: 0, kind: "robe" }, helmet: { tier: 0, kind: "hat" } } }
 };
-function enchanter(c, x, y, kind, t, facing3 = -1, opts = {}) {
+function enchanter(c, x, y, kind, t, facing2 = -1, opts = {}) {
   const L = E_LOOKS[kind], bob = Math.sin(t * TAU212) * 0.25, still = opts.idle, reach = still ? 1.92 : 1.2 + 0.06 * Math.sin(t * TAU212);
   c.save();
   c.translate(x, y - 16);
-  c.scale(0.8 * facing3, 0.8);
+  c.scale(0.8 * facing2, 0.8);
   c.fillStyle = "rgba(10,14,12,.25)";
   c.beginPath();
   c.ellipse(0, 20, 12, 3.6, 0, 0, TAU212);
@@ -192081,11 +192707,11 @@ function remap(c, m) {
 }
 var DRAW3 = { general: (c, kit2, t, o) => merchant(c, 0, 0, kit2, t, 1, o), smith: (c, kit2, t, o) => smith(c, 0, 0, kit2, t, 1, { ...o, front: o.front }), innkeeper: (c, kit2, t, o) => innkeeper(c, 0, 0, kit2, t, 1, o), enchanter: (c, kit2, t, o) => enchanter(c, 0, 0, kit2, t, 1, o) };
 var KITS4 = { general: "shopkeeper", smith: "blacksmith", innkeeper: "innkeeper", enchanter: "mystic" };
-function drawShopkeeperV1(c, role, cast2, x, y, t, facing3 = 1) {
+function drawShopkeeperV1(c, role, cast2, x, y, t, facing2 = 1) {
   const draw = DRAW3[role] ?? DRAW3.general, kit2 = cast2?.kit ?? KITS4[role] ?? "shopkeeper";
   c.save();
   c.translate(x, y);
-  c.scale(facing3 < 0 ? -1 : 1, 1);
+  c.scale(facing2 < 0 ? -1 : 1, 1);
   draw(remap(c, swapMap(kit2, role, cast2?.cloth ?? "#3f7a52", cast2?.skirt ?? "#4a4f5a")), kit2, t, cast2?.look ? { look: cast2.look } : {});
   c.restore();
 }
@@ -192734,7 +193360,7 @@ var shadow69 = (c, x, y, rx, ry, a = 0.22) => {
   c.ellipse(x, y, rx, ry, 0, 0, TAU214);
   c.fill();
 };
-var clip22 = (c, p, fn) => {
+var clip21 = (c, p, fn) => {
   c.save();
   c.clip(p);
   fn();
@@ -193659,14 +194285,14 @@ function masonry4(c) {
   c.restore();
 }
 function roundWall(c, t) {
-  const band11 = new Path2D();
-  band11.moveTo(E8.cx - E8.rx, E8.cy - WALL9);
-  band11.ellipse(E8.cx, E8.cy - WALL9, E8.rx, E8.ry, 0, Math.PI, TAU214);
-  band11.lineTo(E8.cx + E8.rx, E8.cy);
-  band11.ellipse(E8.cx, E8.cy, E8.rx, E8.ry, 0, TAU214, Math.PI, true);
-  band11.closePath();
-  prop2(c, [[band11, TSTONE]], 2);
-  clip22(c, band11, () => {
+  const band12 = new Path2D();
+  band12.moveTo(E8.cx - E8.rx, E8.cy - WALL9);
+  band12.ellipse(E8.cx, E8.cy - WALL9, E8.rx, E8.ry, 0, Math.PI, TAU214);
+  band12.lineTo(E8.cx + E8.rx, E8.cy);
+  band12.ellipse(E8.cx, E8.cy, E8.rx, E8.ry, 0, TAU214, Math.PI, true);
+  band12.closePath();
+  prop2(c, [[band12, TSTONE]], 2);
+  clip21(c, band12, () => {
     for (const [a, b, k] of [[0, 0.2, -0.2], [0.2, 0.34, -0.1], [0.66, 0.8, -0.1], [0.8, 1, -0.2]]) {
       c.fillStyle = tone2(TSTONE, k);
       c.fillRect(E8.cx - E8.rx + a * 2 * E8.rx, 0, (b - a) * 2 * E8.rx, E8.cy + 4);
@@ -193799,7 +194425,7 @@ function nightReadabilityStrength(frame4) {
 function createGroundGlowClipsV1() {
   const clips = /* @__PURE__ */ new Map();
   let builds = 0, cells2 = 0;
-  function clip23(ctx, space, id2, x, y, radius) {
+  function clip22(ctx, space, id2, x, y, radius) {
     const collision = space?.collision, t = collision?.tileSize;
     if (!Number.isFinite(t) || t <= 0 || ![x, y, radius].every(Number.isFinite) || radius <= 0) return false;
     const left = Math.floor((x - radius) / t), top = Math.floor((y - radius) / t), right = Math.floor((x + radius) / t), bottom = Math.floor((y + radius) / t), w = right - left + 1, h = bottom - top + 1;
@@ -193835,7 +194461,7 @@ function createGroundGlowClipsV1() {
     ctx.clip(path17);
     return true;
   }
-  return { clip: clip23, clear: () => clips.clear(), resources: () => ({ clipPages: clips.size, clipBuilds: builds, sampledCells: cells2 }) };
+  return { clip: clip22, clear: () => clips.clear(), resources: () => ({ clipPages: clips.size, clipBuilds: builds, sampledCells: cells2 }) };
 }
 function createNightActorReadabilityV1(document2, { enabled = () => true } = {}) {
   const stamp7 = document2.createElement("canvas");
@@ -194836,14 +195462,14 @@ function lightning(ctx, x0, y0, x1, y1, seed2, amp, width2, alpha = 1) {
   }
   ctx.restore();
 }
-function drawCastSigil(ctx, x, y, element, age, facing3 = 1) {
+function drawCastSigil(ctx, x, y, element, age, facing2 = 1) {
   if (age < 0 || age >= CAST_SIGIL_LIFE) return;
   const C3 = CAST_COLORS[element] ?? CAST_COLORS.fire, t = age / 1e3, s = easeOut2(age / 70) * (1 - smooth25((age - 380) / 140));
   if (s > 0) {
     const rx = 9 * HERO * s, ry = 22 * HERO * s;
     ctx.save();
     ctx.translate(x, y);
-    ctx.scale(facing3, 1);
+    ctx.scale(facing2, 1);
     bloom3(ctx, 0, 0, ry * 1.2, C3.main, 0.35 * s);
     glowStroke(ctx, C3.main, 10, 1.6, () => {
       ctx.beginPath();
@@ -194872,7 +195498,7 @@ function drawCastSigil(ctx, x, y, element, age, facing3 = 1) {
     bloom3(ctx, x, y, (7 + 17 * q2) * HERO * 1.4, C3.main, 0.8 * (1 - q2));
     glowStroke(ctx, C3.main, 8, 1.6 * (1 - q2), () => {
       ctx.beginPath();
-      ctx.ellipse(x + facing3 * 6 * q2, y, (4 + 10 * q2) * HERO, (16 + 16 * q2) * HERO, 0, 0, TAU178);
+      ctx.ellipse(x + facing2 * 6 * q2, y, (4 + 10 * q2) * HERO, (16 + 16 * q2) * HERO, 0, 0, TAU178);
     }, false);
   }
 }
@@ -195362,8 +195988,8 @@ function rune(ctx, x, y, r, lit2, alpha) {
   ctx.stroke();
   ctx.restore();
 }
-function guardFace(x, y, facing3) {
-  return { x: x + 0.8 * facing3 * 11.8, y: y - 8 + 0.8 * 5.6 };
+function guardFace(x, y, facing2) {
+  return { x: x + 0.8 * facing2 * 11.8, y: y - 8 + 0.8 * 5.6 };
 }
 function drawGuardWard(ctx, x, y, angle3, type, open3, runes, blockAge, time3, move2 = null, wall5 = 0) {
   if (open3 <= 0.01) return;
@@ -195712,10 +196338,10 @@ function sealShape(ctx, x, y, s, K13, alpha) {
     ctx.lineTo(x + 1.5 * s, y + 2.5 * s);
   }, alpha);
 }
-function drawCounterWard(ctx, x, y, facing3, ready, time3, spentAge = -1) {
+function drawCounterWard(ctx, x, y, facing2, ready, time3, spentAge = -1) {
   const K13 = C.reprisal, flare = spentAge >= 0 && spentAge < 380 ? spentAge / 380 : -1;
   if (!ready && flare < 0) return;
-  const t = time3 / 1e3, cx = x + facing3 * 15, cy2 = y - 14;
+  const t = time3 / 1e3, cx = x + facing2 * 15, cy2 = y - 14;
   if (ready && uprightPassV1()) {
     const breathe = 1.2 + 0.07 * Math.sin(t * 7);
     blob7(ctx, cx, cy2, 18, K13.main, 0.35);
@@ -201075,14 +201701,14 @@ var flashRing = (c, x, y, rx, ry, f) => {
 };
 function croakRing2(c, x, y, r, a, w = 7) {
   if (a <= 0 || r <= 0) return;
-  const band11 = () => {
+  const band12 = () => {
     c.beginPath();
     c.ellipse(x, y, r + w / 2, (r + w / 2) * 0.5, 0, 0, TAU147);
     c.ellipse(x, y, Math.max(0.5, r - w / 2), Math.max(0.5, r - w / 2) * 0.5, 0, 0, TAU147, true);
   };
   c.save();
   c.globalAlpha = a;
-  band11();
+  band12();
   c.fillStyle = TRIP2.fill + "78";
   c.fill("evenodd");
   c.strokeStyle = TRIP2.lit;
@@ -201090,11 +201716,11 @@ function croakRing2(c, x, y, r, a, w = 7) {
   c.beginPath();
   c.ellipse(x, y, r, r * 0.5, 0, 0, TAU147);
   c.stroke();
-  band11();
+  band12();
   c.strokeStyle = TRIP2.dark;
   c.lineWidth = 2.6;
   c.stroke();
-  band11();
+  band12();
   c.strokeStyle = TRIP2.edge;
   c.lineWidth = 1.1;
   c.stroke();
@@ -201151,7 +201777,7 @@ function drawCroakPips(c, x, feet, n, flash2) {
     }
   });
 }
-function tongue8(c, x0, y0, x1, y1, t, lx, ly, { sag = 0, sc: sc2 = 0.55, bite: bite2 = 0 } = {}) {
+function tongue9(c, x0, y0, x1, y1, t, lx, ly, { sag = 0, sc: sc2 = 0.55, bite: bite2 = 0 } = {}) {
   const mx = mix18(x0, x1, 0.5), my = mix18(y0, y1, 0.5) + sag, pts2 = [];
   for (let i = 0; i <= 14; i++) {
     const u = i / 14, v = 1 - u;
@@ -201194,7 +201820,7 @@ function drawLash(c, l, time3) {
   if (reel > 0 && reel < 1) standV1(c, l.tgy - 0.2, () => drag(c, l.tx, l.tgy, reel, dir));
   if (k < ARRIVE2 + 0.14) {
     const u = back > 0 ? 1 - ease4(back) : ease4(out4);
-    standV1(c, Math.max(l.hgy, l.tgy) + 1.5, () => tongue8(c, l.hx, l.hy, mix18(l.hx, l.tx, u), mix18(l.hy, l.ty, u), t, l.tx, l.ty, { sag: arc4(reel) * 3 + (1 - out4) * 2, bite: k >= LATCH && k < LATCH + 0.2 ? 1 - (k - LATCH) / 0.2 : 0 }));
+    standV1(c, Math.max(l.hgy, l.tgy) + 1.5, () => tongue9(c, l.hx, l.hy, mix18(l.hx, l.tx, u), mix18(l.hy, l.ty, u), t, l.tx, l.ty, { sag: arc4(reel) * 3 + (1 - out4) * 2, bite: k >= LATCH && k < LATCH + 0.2 ? 1 - (k - LATCH) / 0.2 : 0 }));
   }
 }
 function drawLashReady(c, x, feet, lashCd) {
@@ -202163,8 +202789,8 @@ function createCombatVfx() {
   function spawnAfterimage(ctx, id2, a, f, time3) {
     const last = afterimages.findLast((i) => i.id === id2);
     if (last && time3 - last.born < 30) return;
-    const facing3 = f.dash.x < 0 ? -1 : 1, count2 = afterimages.filter((i) => i.id === id2).length;
-    const image = makeAfterimage(ctx.canvas?.ownerDocument, (o) => drawWorldHero(o, { ...a, position: { x: 32, y: 52 }, movedLastTick: false }, facing3, time3), count2 % 2 ? DASH_LIGHT : DASH_DARK);
+    const facing2 = f.dash.x < 0 ? -1 : 1, count2 = afterimages.filter((i) => i.id === id2).length;
+    const image = makeAfterimage(ctx.canvas?.ownerDocument, (o) => drawWorldHero(o, { ...a, position: { x: 32, y: 52 }, movedLastTick: false }, facing2, time3), count2 % 2 ? DASH_LIGHT : DASH_DARK);
     if (!image) return;
     afterimages.push({ id: id2, image, x: a.position.x, y: a.position.y, born: time3 });
     if (afterimages.length > 12) afterimages.shift();
@@ -202343,12 +202969,12 @@ function createCombatVfx() {
         if (old2.echo && (!f.echo || f.echo.x !== old2.echo.x || f.echo.y !== old2.echo.y)) add2("skill:afterimage_burst", { position: old2.echo }, time3, 1, 0, { reach: 44 });
         if (old2.dash > 0 && f.dash.frames === 0) add2(f.blink ? "blinkEnd" : "dashEnd", a, time3, old2.dx, old2.dy);
         if (f.skill && f.skill.tick !== old2.skill) {
-          const facing3 = poses[id2]?.facing ?? 1, cast2 = f.skill.skillId === "cast", own = !cast2 && f.skill.skillId !== "shield_bash";
-          add2("skill:" + f.skill.skillId, cast2 ? { position: castCirclePosition(a, facing3) } : a, time3, f.skill.x, f.skill.y, { facing: facing3, ground: a.position.y, reach: f.skill.r, air: f.skill.air, ox: own ? f.skill.ox : void 0, oy: own ? f.skill.oy : void 0, ox2: f.skill.ox2, oy2: f.skill.oy2, spread: f.skill.spread, n: f.skill.n, subType: a.subType, element: cast2 ? castElement(m, id2, f.element) : null, shield: f.skill.skillId === "shield_bash" ? shieldTypeOf(a.heroLook?.gear?.off?.kind) : null, dagger: f.skill.skillId === "flurry" ? daggerTypeOf(a.heroLook?.gear?.off?.kind) : null });
+          const facing2 = poses[id2]?.facing ?? 1, cast2 = f.skill.skillId === "cast", own = !cast2 && f.skill.skillId !== "shield_bash";
+          add2("skill:" + f.skill.skillId, cast2 ? { position: castCirclePosition(a, facing2) } : a, time3, f.skill.x, f.skill.y, { facing: facing2, ground: a.position.y, reach: f.skill.r, air: f.skill.air, ox: own ? f.skill.ox : void 0, oy: own ? f.skill.oy : void 0, ox2: f.skill.ox2, oy2: f.skill.oy2, spread: f.skill.spread, n: f.skill.n, subType: a.subType, element: cast2 ? castElement(m, id2, f.element) : null, shield: f.skill.skillId === "shield_bash" ? shieldTypeOf(a.heroLook?.gear?.off?.kind) : null, dagger: f.skill.skillId === "flurry" ? daggerTypeOf(a.heroLook?.gear?.off?.kind) : null });
           bursts[bursts.length - 1].color = SKILL_ELEMENT_COLORS[f.element] ?? SKILL_ELEMENT_COLORS.fire;
           const gear2 = a.heroLook?.gear, landing2 = f.skill.ox !== void 0 ? { tx: a.position.x + f.skill.ox, ty: a.position.y + f.skill.oy } : null;
-          if (f.skill.skillId === "shield_bash" && gear2?.off?.kind === "sunshield" && landing2) add2("uq:beam", a, time3, 1, 0, { ...landing2, facing: facing3 });
-          if (cast2 && gear2?.main?.kind === "undying-sun-staff" && landing2) add2("uq:sunfall", a, time3, 1, 0, { ...landing2, facing: facing3, seed: f.skill.tick });
+          if (f.skill.skillId === "shield_bash" && gear2?.off?.kind === "sunshield" && landing2) add2("uq:beam", a, time3, 1, 0, { ...landing2, facing: facing2 });
+          if (cast2 && gear2?.main?.kind === "undying-sun-staff" && landing2) add2("uq:sunfall", a, time3, 1, 0, { ...landing2, facing: facing2, seed: f.skill.tick });
         }
       }
       if (seen5 && a) {
@@ -204494,10 +205120,10 @@ function drawGeneratedCaveSurfaceD12_1(ctx, space) {
   ctx.restore();
   const boundary2 = [];
   for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) if (rows[y][x] === "0" && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => rows[y + dy]?.[x + dx] === "1")) boundary2.push({ x, y });
-  const band11 = new Path2D();
-  for (const b of boundary2) band11.roundRect(b.x * t - 3, b.y * t - 3, t + 6, t + 6, 10);
+  const band12 = new Path2D();
+  for (const b of boundary2) band12.roundRect(b.x * t - 3, b.y * t - 3, t + 6, t + 6, 10);
   ctx.fillStyle = "#222e2a";
-  ctx.fill(band11);
+  ctx.fill(band12);
   for (const b of boundary2) {
     const n = hash61(b.x, b.y, space.visual.motifs?.length ?? 0) >>> 0;
     if (n % 100 > 62) continue;
@@ -204590,10 +205216,10 @@ function drawCaveSurfaceD10(ctx, space) {
   ctx.restore();
   const boundary2 = [];
   for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) if (rows[y][x] === "0" && [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]].some(([dx, dy]) => rows[y + dy]?.[x + dx] === "1")) boundary2.push({ x, y });
-  const band11 = new Path2D();
-  for (const b of boundary2) band11.roundRect(b.x * t - 4, b.y * t - 4, t + 8, t + 8, 12);
+  const band12 = new Path2D();
+  for (const b of boundary2) band12.roundRect(b.x * t - 4, b.y * t - 4, t + 8, t + 8, 12);
   ctx.fillStyle = "#222e2a";
-  ctx.fill(band11);
+  ctx.fill(band12);
   const faces = [[[[5.5, 4.4], [8.2, 2.8], [14.6, 2.7], [18.1, 4.6], [17.4, 5.5], [9.1, 4.7]], "#3d4b45"], [[[3.1, 7], [4.3, 5.5], [5.1, 6.4], [4.2, 12.3], [6.2, 14.2], [5, 15.1], [3.2, 12.6]], "#34413c"], [[[6.2, 13.4], [8.8, 14.6], [11.2, 13.8], [13, 14.8], [12.2, 15.8], [7.1, 15.8]], "#3b4842"], [[[20.3, 4.8], [22.1, 3.4], [25.3, 3.7], [27, 5.7], [26.7, 9.8], [25.6, 10.9], [25.4, 5.3]], "#3a4842"], [[[19.3, 10], [22, 10.3], [24.7, 11.2], [26.1, 10], [26.7, 11.1], [24.9, 12.1], [21.1, 11.4]], "#303d38"]];
   for (const [points2, color28] of faces) poly28(ctx, points2.map(([x, y]) => [x * t, y * t]), color28, null);
   for (const b of boundary2) {
@@ -206117,13 +206743,13 @@ function sprite6(key4, box6, paint3) {
   while (sprites6.size > LIMIT6) sprites6.delete(sprites6.keys().next().value);
   return s;
 }
-function stamp6(ctx, s, x, y, facing3 = 0) {
+function stamp6(ctx, s, x, y, facing2 = 0) {
   if (!s) return;
   const [l, t, r, b] = s.box;
   ctx.save();
-  if (facing3) {
+  if (facing2) {
     ctx.translate(x, y);
-    ctx.rotate(facing3 * Math.PI / 2);
+    ctx.rotate(facing2 * Math.PI / 2);
     ctx.translate(-x, -y);
   }
   ctx.drawImage(s.canvas, x + l, y + t, r - l, b - t);
@@ -206197,9 +206823,9 @@ function drawSiteInteriorExitV3(ctx, space, exit) {
   const site = space.site ?? space.functionalSite, k = sitePremiumKitV1(site);
   stamp6(ctx, sprite6("exit/" + k.family + "/" + k.biome, BOX3.exit, (c) => EXIT[k.family](c, 0, 0, k, k.biome)), exit.x, exit.y - (EXIT_LIFT_V1[k.family] ?? 0));
 }
-function drawSiteInteriorStairsV3(ctx, space, x, y, dir, facing3 = 0) {
+function drawSiteInteriorStairsV3(ctx, space, x, y, dir, facing2 = 0) {
   const site = space.site ?? space.functionalSite, k = sitePremiumKitV1(site);
-  stamp6(ctx, sprite6("stairs/" + k.family + "/" + k.biome + "/" + dir, BOX3.stairs, (c) => STAIRS[k.family](c, 0, 0, k, k.biome, dir)), x, y, Number.isInteger(facing3) ? facing3 : 0);
+  stamp6(ctx, sprite6("stairs/" + k.family + "/" + k.biome + "/" + dir, BOX3.stairs, (c) => STAIRS[k.family](c, 0, 0, k, k.biome, dir)), x, y, Number.isInteger(facing2) ? facing2 : 0);
 }
 
 // src/client/site_environment_presentation.js
@@ -209699,7 +210325,7 @@ function composeSceneryPageV1(ctx, raster, x, y, size, m) {
 
 // src/client/environment_cache.js
 function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, prepareDepthItems = null, prepareShadowCasters = null, drawFallback = null, drawRequiredObstacle = null, presentationIdentity = null, depthColliderVisuals = null, prepareAhead = null, fallbackReady = null } = {}) {
-  const SIZE11 = 256, BASE_LIMIT = 32, MAX_LIMIT = 128, DESCRIPTORS = 64, PREFETCH = 8, ROUTE_PREFETCH = 16, RECENT = 24, LAYOUTS = 4;
+  const SIZE12 = 256, BASE_LIMIT = 32, MAX_LIMIT = 128, DESCRIPTORS = 64, PREFETCH = 8, ROUTE_PREFETCH = 16, RECENT = 24, LAYOUTS = 4;
   const pages2 = /* @__PURE__ */ new Map(), fallbacks = /* @__PURE__ */ new Map(), descriptors = /* @__PURE__ */ new Map(), layouts3 = /* @__PURE__ */ new Map(), stamps = /* @__PURE__ */ new Map(), flowerStamps = [], rasterPool = [];
   const win13 = canvas.ownerDocument.defaultView ?? globalThis;
   const aheadReady = /* @__PURE__ */ new Map(), pathStats = { environmentPathScreenColdFrames: 0, environmentPathScreenColdEntries: 0, environmentPathScreenPeakCold: 0, environmentPathScreenColdPages: 0, environmentPathAheadCompleted: 0, environmentPathAheadCancelled: 0, environmentPathAheadSlices: 0, environmentPathAheadMaxSliceMs: 0, environmentPathFallbackUpgrades: 0, environmentFallbackEvictions: 0 };
@@ -209738,7 +210364,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     const cx = v.x + v.width / 2, cy2 = v.y + v.height / 2;
     let best, far = -1;
     for (const id2 of ids4) {
-      const [x, y] = id2.split("/").map(Number), d = Math.abs(x + SIZE11 / 2 - cx) + Math.abs(y + SIZE11 / 2 - cy2);
+      const [x, y] = id2.split("/").map(Number), d = Math.abs(x + SIZE12 / 2 - cx) + Math.abs(y + SIZE12 / 2 - cy2);
       if (d > far) {
         far = d;
         best = id2;
@@ -209819,12 +210445,12 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
   function signature(space, x, y) {
     const v = space.visual, t = space.collision.tileSize, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
     let text3 = JSON.stringify(environmentWorldOffset(space)) + "|";
-    for (let row2 = y / t - 7; row2 < (y + SIZE11) / t + 7; row2++) text3 += (v.terrain[row2 - oy] ?? "").slice(Math.max(0, x / t - 7 - ox), Math.max(0, (x + SIZE11) / t + 7 - ox)) + "|";
-    for (let row2 = y / t - 7; row2 < (y + SIZE11) / t + 7; row2++) text3 += (v.biomes?.[row2 - oy] ?? "").slice(Math.max(0, x / t - 7 - ox), Math.max(0, (x + SIZE11) / t + 7 - ox)) + "|";
-    if (v.stands) for (let row2 = y / t - 3; row2 < (y + SIZE11) / t + 3; row2++) text3 += (v.stands[row2 - oy] ?? "").slice(Math.max(0, x / t - 3 - ox), Math.max(0, (x + SIZE11) / t + 3 - ox)) + "|";
-    for (const b of v.blockers) if ((b.x + b.width) * t >= x - 64 && (b.y + b.height) * t >= y - 64 && b.x * t < x + SIZE11 + 64 && b.y * t < y + SIZE11 + 64) text3 += JSON.stringify(b);
-    for (const d of v.decorations ?? []) if (d.x * t >= x - 640 && d.y * t >= y - 360 && d.x * t < x + SIZE11 + 640 && d.y * t < y + SIZE11 + 360) text3 += JSON.stringify(d);
-    for (const e of space.exits ?? []) if (e.x >= x - 640 && e.y >= y - 360 && e.x < x + SIZE11 + 640 && e.y < y + SIZE11 + 360) text3 += "|e" + e.x + "/" + e.y + "/" + e.label;
+    for (let row2 = y / t - 7; row2 < (y + SIZE12) / t + 7; row2++) text3 += (v.terrain[row2 - oy] ?? "").slice(Math.max(0, x / t - 7 - ox), Math.max(0, (x + SIZE12) / t + 7 - ox)) + "|";
+    for (let row2 = y / t - 7; row2 < (y + SIZE12) / t + 7; row2++) text3 += (v.biomes?.[row2 - oy] ?? "").slice(Math.max(0, x / t - 7 - ox), Math.max(0, (x + SIZE12) / t + 7 - ox)) + "|";
+    if (v.stands) for (let row2 = y / t - 3; row2 < (y + SIZE12) / t + 3; row2++) text3 += (v.stands[row2 - oy] ?? "").slice(Math.max(0, x / t - 3 - ox), Math.max(0, (x + SIZE12) / t + 3 - ox)) + "|";
+    for (const b of v.blockers) if ((b.x + b.width) * t >= x - 64 && (b.y + b.height) * t >= y - 64 && b.x * t < x + SIZE12 + 64 && b.y * t < y + SIZE12 + 64) text3 += JSON.stringify(b);
+    for (const d of v.decorations ?? []) if (d.x * t >= x - 640 && d.y * t >= y - 360 && d.x * t < x + SIZE12 + 640 && d.y * t < y + SIZE12 + 360) text3 += JSON.stringify(d);
+    for (const e of space.exits ?? []) if (e.x >= x - 640 && e.y >= y - 360 && e.x < x + SIZE12 + 640 && e.y < y + SIZE12 + 360) text3 += "|e" + e.x + "/" + e.y + "/" + e.label;
     return text3;
   }
   function layoutFor(space) {
@@ -209845,7 +210471,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     for (const b of v.blockers) if (["thicket", "trees", "rock", "building", "fence", "hollow-trunk"].includes(b.kind) || b.kind.startsWith("fort-") || b.kind === "ruin-exterior-masonry" && b.plannedRuinExterior === true) for (let ty = b.y; ty < b.y + b.height; ty++) for (let tx = b.x; tx < b.x + b.width; tx++) {
       const x = tx * tile2, y = ty * tile2;
       if (x + tile2 <= bounds2.x || y + tile2 <= bounds2.y || x >= bounds2.x + bounds2.width || y >= bounds2.y + bounds2.height) continue;
-      const code2 = v.biomes?.[ty - tileOy]?.[tx - tileOx] ?? (b.kind === "rock" ? "r" : "w"), visualKind = b.kind === "building" || b.kind === "fence" || b.kind === "hollow-trunk" || b.kind.startsWith("fort-") || b.plannedRuinExterior === true ? "solid" : code2 === "r" ? "rock" : code2 === "m" ? "tree" : "base", id2 = obstacleTileVisualId(b, tx, ty, visualKind), ownerPageId = Math.floor(x / SIZE11) * SIZE11 + "/" + Math.floor(y / SIZE11) * SIZE11, coverageRatio = obstacleTileVisualCoverage(b, visualKind);
+      const code2 = v.biomes?.[ty - tileOy]?.[tx - tileOx] ?? (b.kind === "rock" ? "r" : "w"), visualKind = b.kind === "building" || b.kind === "fence" || b.kind === "hollow-trunk" || b.kind.startsWith("fort-") || b.plannedRuinExterior === true ? "solid" : code2 === "r" ? "rock" : code2 === "m" ? "tree" : "base", id2 = obstacleTileVisualId(b, tx, ty, visualKind), ownerPageId = Math.floor(x / SIZE12) * SIZE12 + "/" + Math.floor(y / SIZE12) * SIZE12, coverageRatio = obstacleTileVisualCoverage(b, visualKind);
       found.set(id2, { b, tx, ty, visualKind, ownerPageId, coverageRatio });
     }
     return found;
@@ -209871,7 +210497,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
       created++;
       emit("allocate", { id: id2 });
     }
-    const pixels3 = Math.max(1, Math.round(32 * scale)) * (SIZE11 / 32);
+    const pixels3 = Math.max(1, Math.round(32 * scale)) * (SIZE12 / 32);
     if (raster.width !== pixels3 || raster.height !== pixels3) {
       raster.width = pixels3;
       raster.height = pixels3;
@@ -209897,11 +210523,11 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
         });
         return methods.get(name);
       } });
-      drawing = prepareDrawing(recording, space, { x, y, width: SIZE11, height: SIZE11 }, layoutFor(space), art);
+      drawing = prepareDrawing(recording, space, { x, y, width: SIZE12, height: SIZE12 }, layoutFor(space), art);
     }
     rc.resetTransform();
     rc.clearRect(0, 0, pixels3, pixels3);
-    rc.scale(pixels3 / SIZE11, pixels3 / SIZE11);
+    rc.scale(pixels3 / SIZE12, pixels3 / SIZE12);
     rc.translate(-x, -y);
     lastRasterLifecycle = { phase: "staging", pageId: id2, visualGeneration: task.visualGeneration, signature: sig };
     emit("stage", { id: id2, visualGeneration: task.visualGeneration });
@@ -209944,7 +210570,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
       releaseRaster(job.raster);
       return true;
     }
-    const expected = obstacleVisuals(space, { x: job.task.x, y: job.task.y, width: SIZE11, height: SIZE11 }), recorded = new Set(descriptor.result.obstacleVisualIds ?? []);
+    const expected = obstacleVisuals(space, { x: job.task.x, y: job.task.y, width: SIZE12, height: SIZE12 }), recorded = new Set(descriptor.result.obstacleVisualIds ?? []);
     let repaired = 0;
     for (const [visualId, o] of expected) if (o.b.kind !== "fort-prop-solid" && o.ownerPageId === id2 && !recorded.has(visualId)) {
       drawRequiredObstacle?.(rc, space, o.b, o.tx, o.ty);
@@ -209984,17 +210610,17 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
       const aheadTasks = [...requiredTasks, ...routeQueue, ...queue];
       const needsAhead = (t) => {
         if (activeJob?.task.id === t.id || pages2.get(t.id)?.signature === t.sig || fallbacks.get(t.id)?.signature === t.sig && fallbacks.get(t.id).artReady) return false;
-        return aheadReady.get(t.id) !== t.sig || visibleIds.has(t.id) && fallbackReady && !fallbackReady(t.space, { x: t.x, y: t.y, width: SIZE11, height: SIZE11 });
+        return aheadReady.get(t.id) !== t.sig || visibleIds.has(t.id) && fallbackReady && !fallbackReady(t.space, { x: t.x, y: t.y, width: SIZE12, height: SIZE12 });
       };
       if (aheadJob && !aheadTasks.some((t) => t.id === aheadJob.task.id && t.sig === aheadJob.task.sig)) {
-        const t = aheadJob.task, v = lastView, near5 = v && t.x + SIZE11 > v.x - SIZE11 * 2 && t.y + SIZE11 > v.y - SIZE11 * 2 && t.x < v.x + v.width + SIZE11 * 2 && t.y < v.y + v.height + SIZE11 * 2;
+        const t = aheadJob.task, v = lastView, near5 = v && t.x + SIZE12 > v.x - SIZE12 * 2 && t.y + SIZE12 > v.y - SIZE12 * 2 && t.x < v.x + v.width + SIZE12 * 2 && t.y < v.y + v.height + SIZE12 * 2;
         if (!near5 || !currentSpace || signature(currentSpace, t.x, t.y) !== t.sig) stopAhead();
       }
       const nextAhead = () => !prepareAhead ? null : aheadJob?.task ?? aheadTasks.find(needsAhead);
       let aheadTask = nextAhead();
       while (aheadTask && (routeBurst < 3 || !activeJob && !queue.length)) {
         if (!aheadJob) {
-          const work = prepareAhead(aheadTask.space, { x: aheadTask.x, y: aheadTask.y, width: SIZE11, height: SIZE11 });
+          const work = prepareAhead(aheadTask.space, { x: aheadTask.x, y: aheadTask.y, width: SIZE12, height: SIZE12 });
           if (work) aheadJob = { task: aheadTask, work };
           else {
             touch2(aheadReady, aheadTask.id, aheadTask.sig);
@@ -210093,9 +210719,9 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     }
     lastView = { x: view3.x, y: view3.y, width: view3.width, height: view3.height };
     frameSequence++;
-    const endless = space.collision.endless, required = [], requiredObstacleIds = obstacleVisuals(space, view3), x0 = (endless ? Math.floor(view3.x / SIZE11) : Math.max(0, Math.floor(view3.x / SIZE11))) * SIZE11, y0 = (endless ? Math.floor(view3.y / SIZE11) : Math.max(0, Math.floor(view3.y / SIZE11))) * SIZE11;
-    const xmax = endless ? view3.x + view3.width + SIZE11 * 2 : space.collision.width * 32, ymax = endless ? view3.y + view3.height + SIZE11 * 2 : space.collision.height * 32;
-    for (let y = y0; y < view3.y + view3.height && y < ymax; y += SIZE11) for (let x = x0; x < view3.x + view3.width && x < xmax; x += SIZE11) required.push({ x, y, id: x + "/" + y });
+    const endless = space.collision.endless, required = [], requiredObstacleIds = obstacleVisuals(space, view3), x0 = (endless ? Math.floor(view3.x / SIZE12) : Math.max(0, Math.floor(view3.x / SIZE12))) * SIZE12, y0 = (endless ? Math.floor(view3.y / SIZE12) : Math.max(0, Math.floor(view3.y / SIZE12))) * SIZE12;
+    const xmax = endless ? view3.x + view3.width + SIZE12 * 2 : space.collision.width * 32, ymax = endless ? view3.y + view3.height + SIZE12 * 2 : space.collision.height * 32;
+    for (let y = y0; y < view3.y + view3.height && y < ymax; y += SIZE12) for (let x = x0; x < view3.x + view3.width && x < xmax; x += SIZE12) required.push({ x, y, id: x + "/" + y });
     const nextVisible = new Set(required.map((t) => t.id)), returnedIds = new Set([...nextVisible].filter((id2) => recentSeen.has(id2)));
     for (const id2 of visibleIds) if (!nextVisible.has(id2) && pages2.has(id2)) recentSeen.set(id2, frameSequence);
     for (const id2 of nextVisible) recentSeen.delete(id2);
@@ -210104,7 +210730,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     recentIds = new Set([...recentSeen].sort((a, b) => b[1] - a[1]).slice(0, RECENT).map(([id2]) => id2));
     for (const id2 of [...recentSeen.keys()]) if (!recentIds.has(id2)) recentSeen.delete(id2);
     nearIds = /* @__PURE__ */ new Set();
-    for (let y = y0 - SIZE11; y <= view3.y + view3.height + SIZE11 && y < ymax; y += SIZE11) for (let x = x0 - SIZE11; x <= view3.x + view3.width + SIZE11 && x < xmax; x += SIZE11) if (endless || x >= 0 && y >= 0) nearIds.add(x + "/" + y);
+    for (let y = y0 - SIZE12; y <= view3.y + view3.height + SIZE12 && y < ymax; y += SIZE12) for (let x = x0 - SIZE12; x <= view3.x + view3.width + SIZE12 && x < xmax; x += SIZE12) if (endless || x >= 0 && y >= 0) nearIds.add(x + "/" + y);
     protectedIds = /* @__PURE__ */ new Set([...visibleIds, ...nearIds, ...preloadIds, ...recentIds]);
     capacity = Math.min(MAX_LIMIT, Math.max(BASE_LIMIT, nearIds.size + PREFETCH + RECENT));
     while (pages2.size > capacity) {
@@ -210139,17 +210765,17 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
         schedule();
         fallbackPages++;
         let fallback = fallbacks.get(t.id), result;
-        const bounds2 = { x: t.x, y: t.y, width: SIZE11, height: SIZE11 }, reusable = fallback?.signature === sig && fallback?.scale === renderScale, artReady = reusable && fallback.artReady || !fallbackReady || fallbackReady(space, bounds2);
+        const bounds2 = { x: t.x, y: t.y, width: SIZE12, height: SIZE12 }, reusable = fallback?.signature === sig && fallback?.scale === renderScale, artReady = reusable && fallback.artReady || !fallbackReady || fallbackReady(space, bounds2);
         if (!fallback || fallback.signature !== sig || fallback.scale !== renderScale || artReady && !fallback.artReady) {
           if (fallback && artReady && !fallback.artReady) pathStats.environmentPathFallbackUpgrades++;
           misses++;
           lastMissReason = missReason;
           emit("miss", { id: t.id, reason: missReason, required: required.length, protected: protectedIds.size, pages: pages2.size });
-          const raster = canvas.ownerDocument.createElement("canvas"), pixels3 = Math.ceil(SIZE11 * renderScale);
+          const raster = canvas.ownerDocument.createElement("canvas"), pixels3 = Math.ceil(SIZE12 * renderScale);
           raster.width = pixels3;
           raster.height = pixels3;
           const rc = raster.getContext("2d");
-          rc.scale(pixels3 / SIZE11, pixels3 / SIZE11);
+          rc.scale(pixels3 / SIZE12, pixels3 / SIZE12);
           rc.translate(-t.x, -t.y);
           result = drawFallback?.(rc, space, bounds2);
           fallback = { raster, signature: sig, scale: renderScale, result, artReady };
@@ -210160,15 +210786,15 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
           result = fallback.result;
           fallbackHits++;
         }
-        const clip23 = { x: Math.max(t.x, screen.x), y: Math.max(t.y, screen.y), width: Math.min(t.x + SIZE11, screen.x + screen.width) - Math.max(t.x, screen.x), height: Math.min(t.y + SIZE11, screen.y + screen.height) - Math.max(t.y, screen.y) };
-        if (clip23.width > 0 && clip23.height > 0) {
+        const clip22 = { x: Math.max(t.x, screen.x), y: Math.max(t.y, screen.y), width: Math.min(t.x + SIZE12, screen.x + screen.width) - Math.max(t.x, screen.x), height: Math.min(t.y + SIZE12, screen.y + screen.height) - Math.max(t.y, screen.y) };
+        if (clip22.width > 0 && clip22.height > 0) {
           nextPathScreenIds.add(t.id);
-          if (!artReady && fallbackReady && !fallbackReady(space, clip23)) {
+          if (!artReady && fallbackReady && !fallbackReady(space, clip22)) {
             screenCold++;
             if (!pathScreenIds.has(t.id)) pathStats.environmentPathScreenColdEntries++;
           }
         }
-        composeSceneryPageV1(ctx, fallback.raster, t.x, t.y, SIZE11, composeTransform);
+        composeSceneryPageV1(ctx, fallback.raster, t.x, t.y, SIZE12, composeTransform);
         if (result) {
           paintedTerrainTiles += result.paintedTerrainTiles;
           paintedBlockers += result.paintedBlockers;
@@ -210182,11 +210808,11 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
         emit("hit", { id: t.id });
       }
       if (entry2) {
-        if (t.x + SIZE11 > screen.x && t.y + SIZE11 > screen.y && t.x < screen.x + screen.width && t.y < screen.y + screen.height) nextPathScreenIds.add(t.id);
+        if (t.x + SIZE12 > screen.x && t.y + SIZE12 > screen.y && t.x < screen.x + screen.width && t.y < screen.y + screen.height) nextPathScreenIds.add(t.id);
         visibleRasterPages++;
         touch2(pages2, t.id, entry2);
         const at9 = diagnostics ? performance.now() : 0;
-        composeSceneryPageV1(ctx, entry2.raster, t.x, t.y, SIZE11, composeTransform);
+        composeSceneryPageV1(ctx, entry2.raster, t.x, t.y, SIZE12, composeTransform);
         emit("compose", { id: t.id, ms: diagnostics ? performance.now() - at9 : 0 });
         paintedTerrainTiles += entry2.result.paintedTerrainTiles;
         paintedBlockers += entry2.result.paintedBlockers;
@@ -210221,20 +210847,20 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
       lastColliderRepair = { ...lastColliderAudit, descriptorPresent, rasterPresent, ownerRasterGeneration: ownerRaster?.rasterGeneration ?? null, ownerVisualGeneration: ownerRaster?.visualGeneration ?? null, fallbackConsideredPresent: presented?.source === "fallback" };
       emit("colliderVisualRepair", lastColliderRepair);
     }
-    const nextPlan = x0 + "/" + y0 + "/" + Math.floor((view3.x + view3.width) / SIZE11) + "/" + Math.floor((view3.y + view3.height) / SIZE11) + "/" + travelX + "/" + travelY;
+    const nextPlan = x0 + "/" + y0 + "/" + Math.floor((view3.x + view3.width) / SIZE12) + "/" + Math.floor((view3.y + view3.height) / SIZE12) + "/" + travelX + "/" + travelY;
     if (planKey === nextPlan && planVisual === v) return { paintedTerrainTiles, paintedBlockers, totalTerrainTiles: space.collision.width * space.collision.height };
     planKey = nextPlan;
     planVisual = v;
     const ox = (v.originTile?.x ?? 0) * 32, oy = (v.originTile?.y ?? 0) * 32, right = ox + (v.terrain[0]?.length ?? 0) * 32, bottom = oy + v.terrain.length * 32, candidates = [];
-    for (let y = endless ? y0 - SIZE11 * 2 : Math.max(0, y0 - SIZE11 * 2); y <= Math.min(ymax - 1, view3.y + view3.height + SIZE11 * 2); y += SIZE11) for (let x = endless ? x0 - SIZE11 * 2 : Math.max(0, x0 - SIZE11 * 2); x <= Math.min(xmax - 1, view3.x + view3.width + SIZE11 * 2); x += SIZE11) {
+    for (let y = endless ? y0 - SIZE12 * 2 : Math.max(0, y0 - SIZE12 * 2); y <= Math.min(ymax - 1, view3.y + view3.height + SIZE12 * 2); y += SIZE12) for (let x = endless ? x0 - SIZE12 * 2 : Math.max(0, x0 - SIZE12 * 2); x <= Math.min(xmax - 1, view3.x + view3.width + SIZE12 * 2); x += SIZE12) {
       const id2 = x + "/" + y;
       if (visibleIds.has(id2)) continue;
-      if (endless ? x - 64 < ox || y - 64 < oy || x + SIZE11 + 64 > right || y + SIZE11 + 64 > bottom : x - 64 < Math.max(0, ox) && ox > 0 || y - 64 < Math.max(0, oy) && oy > 0 || x + SIZE11 + 64 > right && right < xmax || y + SIZE11 + 64 > bottom && bottom < ymax) continue;
+      if (endless ? x - 64 < ox || y - 64 < oy || x + SIZE12 + 64 > right || y + SIZE12 + 64 > bottom : x - 64 < Math.max(0, ox) && ox > 0 || y - 64 < Math.max(0, oy) && oy > 0 || x + SIZE12 + 64 > right && right < xmax || y + SIZE12 + 64 > bottom && bottom < ymax) continue;
       const entry2 = pages2.get(id2), sig = entry2?.visual === v ? entry2.signature : signature(space, x, y);
       if (entry2?.signature === sig) continue;
-      const distance12 = Math.max(0, view3.x - x - SIZE11, x - view3.x - view3.width) + Math.max(0, view3.y - y - SIZE11, y - view3.y - view3.height);
-      const ahead = (x + SIZE11 / 2 - view3.x - view3.width / 2) * travelX + (y + SIZE11 / 2 - view3.y - view3.height / 2) * travelY;
-      candidates.push({ id: id2, x, y, space, sig, scale: renderScale, distance: distance12 - (ahead > 0 ? SIZE11 : 0), routeDistance: distance12 - (ahead > 0 ? SIZE11 * 2 : 0), near: x >= x0 - SIZE11 && y >= y0 - SIZE11 && x <= view3.x + view3.width + SIZE11 && y <= view3.y + view3.height + SIZE11, visualGeneration });
+      const distance12 = Math.max(0, view3.x - x - SIZE12, x - view3.x - view3.width) + Math.max(0, view3.y - y - SIZE12, y - view3.y - view3.height);
+      const ahead = (x + SIZE12 / 2 - view3.x - view3.width / 2) * travelX + (y + SIZE12 / 2 - view3.y - view3.height / 2) * travelY;
+      candidates.push({ id: id2, x, y, space, sig, scale: renderScale, distance: distance12 - (ahead > 0 ? SIZE12 : 0), routeDistance: distance12 - (ahead > 0 ? SIZE12 * 2 : 0), near: x >= x0 - SIZE12 && y >= y0 - SIZE12 && x <= view3.x + view3.width + SIZE12 && y <= view3.y + view3.height + SIZE12, visualGeneration });
     }
     routeQueue = [...candidates].sort((a, b) => a.routeDistance - b.routeDistance || a.y - b.y || a.x - b.x).slice(0, ROUTE_PREFETCH);
     candidates.sort((a, b) => a.distance - b.distance || a.y - b.y || a.x - b.x);
@@ -210291,7 +210917,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     schedule();
     return true;
   }
-  return Object.freeze({ draw, drawWater, drawFlowers, depthItems: (space, view3, time3) => prepareDepthItems?.(space, view3, layoutFor(space), art, time3) ?? [], shadowCasters: (space, view3) => prepareShadowCasters?.(space, view3, layoutFor(space)) ?? [], prepareVisible, clear: clear2, resources: () => ({ ...pathStats, waterMotion: waterMotion.resources(), environmentPathPreparationVersion: "moving-path-priority-v3", environmentPathLookaheadPixels: SIZE11 * 2, environmentPathPrefetchLimit: ROUTE_PREFETCH, environmentPathQueued: routeQueue.length, environmentPathAheadActive: Boolean(aheadJob), environmentPathAheadRecords: aheadReady.size, overworldRasterPages: pages2.size, overworldRasterBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0), environmentRetainedCanvasBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0) + [...fallbacks.values()].reduce((n, p) => n + (p.raster?.width ?? 0) * (p.raster?.height ?? 0) * 4, 0) + rasterPool.reduce((n, c) => n + c.width * c.height * 4, 0) + [...stamps.values(), ...flowerStamps.filter(Boolean)].reduce((n, c) => n + c.width * c.height * 4, 0), overworldRasterBuilds: builds, overworldRasterCanvasesCreated: created, overworldRasterEvictions: evictions, environmentRasterMisses: misses, environmentFallbackBuilds: fallbackBuilds, environmentFallbackHits: fallbackHits, environmentFallbackCachePages: fallbacks.size, environmentFallbackLimit: Math.max(capacity, visibleIds.size), environmentLastMissReason: lastMissReason, environmentCacheClears: clearCount, environmentLastClearReason: lastClearReason, environmentClearReasons: { ...clearReasons }, environmentProtectedRasters: protectedIds.size, environmentVisibleRetained: visibleIds.size, environmentPreloadRetained: preloadIds.size, environmentRecentRetained: recentIds.size, environmentRetentionHits: retentionHits, visibleRasterPages, fallbackRasterPages: fallbackPages, environmentPeakFallbackPages: peakFallbackPages, activeColliderVisuals, missingColliderVisuals, underCoveredColliderVisuals, lastColliderAudit, lastColliderRepair, lastRasterLifecycle, environmentVisualGeneration: visualGeneration, environmentRasterGeneration: rasterGeneration, environmentStaleRasterDiscards: staleRasterDiscards, environmentAtomicRasterReplacements: atomicRasterReplacements, environmentRasterCompletenessRepairs: rasterCompletenessRepairs, environmentArtStamps: stamps.size + flowerStamps.filter(Boolean).length, environmentDescriptorTiles: descriptors.size, environmentDescriptorCommands: [...descriptors.values()].reduce((n, d) => n + d.commands.length, 0), environmentDescriptorReuses: descriptorReuses, environmentLayoutPages: layouts3.size, environmentRequiredMissing: requiredTasks.length, environmentPrefetchQueued: queue.length, environmentPrefetchActive: Boolean(activeJob || layoutJob || pending !== null), environmentPeakNeeded: peakNeeded, environmentPeakPrefetch: peakPrefetched, environmentRasterLimit: capacity, environmentRasterMaximum: MAX_LIMIT, environmentDescriptorLimit: DESCRIPTORS, environmentPrefetchLimit: PREFETCH, environmentRecentLimit: RECENT }) });
+  return Object.freeze({ draw, drawWater, drawFlowers, depthItems: (space, view3, time3) => prepareDepthItems?.(space, view3, layoutFor(space), art, time3) ?? [], shadowCasters: (space, view3) => prepareShadowCasters?.(space, view3, layoutFor(space)) ?? [], prepareVisible, clear: clear2, resources: () => ({ ...pathStats, waterMotion: waterMotion.resources(), environmentPathPreparationVersion: "moving-path-priority-v3", environmentPathLookaheadPixels: SIZE12 * 2, environmentPathPrefetchLimit: ROUTE_PREFETCH, environmentPathQueued: routeQueue.length, environmentPathAheadActive: Boolean(aheadJob), environmentPathAheadRecords: aheadReady.size, overworldRasterPages: pages2.size, overworldRasterBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0), environmentRetainedCanvasBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0) + [...fallbacks.values()].reduce((n, p) => n + (p.raster?.width ?? 0) * (p.raster?.height ?? 0) * 4, 0) + rasterPool.reduce((n, c) => n + c.width * c.height * 4, 0) + [...stamps.values(), ...flowerStamps.filter(Boolean)].reduce((n, c) => n + c.width * c.height * 4, 0), overworldRasterBuilds: builds, overworldRasterCanvasesCreated: created, overworldRasterEvictions: evictions, environmentRasterMisses: misses, environmentFallbackBuilds: fallbackBuilds, environmentFallbackHits: fallbackHits, environmentFallbackCachePages: fallbacks.size, environmentFallbackLimit: Math.max(capacity, visibleIds.size), environmentLastMissReason: lastMissReason, environmentCacheClears: clearCount, environmentLastClearReason: lastClearReason, environmentClearReasons: { ...clearReasons }, environmentProtectedRasters: protectedIds.size, environmentVisibleRetained: visibleIds.size, environmentPreloadRetained: preloadIds.size, environmentRecentRetained: recentIds.size, environmentRetentionHits: retentionHits, visibleRasterPages, fallbackRasterPages: fallbackPages, environmentPeakFallbackPages: peakFallbackPages, activeColliderVisuals, missingColliderVisuals, underCoveredColliderVisuals, lastColliderAudit, lastColliderRepair, lastRasterLifecycle, environmentVisualGeneration: visualGeneration, environmentRasterGeneration: rasterGeneration, environmentStaleRasterDiscards: staleRasterDiscards, environmentAtomicRasterReplacements: atomicRasterReplacements, environmentRasterCompletenessRepairs: rasterCompletenessRepairs, environmentArtStamps: stamps.size + flowerStamps.filter(Boolean).length, environmentDescriptorTiles: descriptors.size, environmentDescriptorCommands: [...descriptors.values()].reduce((n, d) => n + d.commands.length, 0), environmentDescriptorReuses: descriptorReuses, environmentLayoutPages: layouts3.size, environmentRequiredMissing: requiredTasks.length, environmentPrefetchQueued: queue.length, environmentPrefetchActive: Boolean(activeJob || layoutJob || pending !== null), environmentPeakNeeded: peakNeeded, environmentPeakPrefetch: peakPrefetched, environmentRasterLimit: capacity, environmentRasterMaximum: MAX_LIMIT, environmentDescriptorLimit: DESCRIPTORS, environmentPrefetchLimit: PREFETCH, environmentRecentLimit: RECENT }) });
 }
 
 // src/client/environment_presentation.js
@@ -213296,7 +213922,7 @@ function beam5(c, x, y, w, h, k) {
   c.quadraticCurveTo(x, y, x + k, y);
   c.closePath();
 }
-function tongue9(c, x, y, w, h, t, seed2, hot) {
+function tongue10(c, x, y, w, h, t, seed2, hot) {
   const sway = Math.sin(t * 9 + seed2 * 1.7) * w * 0.35, tip = h * (0.88 + 0.12 * Math.sin(t * 13 + seed2));
   const shape3 = (s) => {
     c.beginPath();
@@ -213511,7 +214137,7 @@ var CINDER_BAR = {
       c.arc(px7, py, 1.2, 0, TAU231);
       c.fillStyle = ph2 ? HOT5 : GOLD44;
       c.fill();
-      tongue9(c, px7, py + 0.5, ph2 ? 2.4 : 1.8, ph2 ? 8.5 : 5.5, t, i, ph2);
+      tongue10(c, px7, py + 0.5, ph2 ? 2.4 : 1.8, ph2 ? 8.5 : 5.5, t, i, ph2);
     }
     c.restore();
     if (ph2 && a > 0) {
@@ -213519,7 +214145,7 @@ var CINDER_BAR = {
       for (let i = 0; i < n; i++) {
         const fx = x + (i + 0.5) * (w * a / n) + Math.sin(i * 1.9) * 3;
         if (fx > x + w * a - 3) continue;
-        tongue9(c, fx, y + 1, 2.6, 6.5 + 2.5 * Math.sin(t * 5 + i), t, i + 3, true);
+        tongue10(c, fx, y + 1, 2.6, 6.5 + 2.5 * Math.sin(t * 5 + i), t, i + 3, true);
       }
       for (let i = 0; i < 6; i++) {
         const f = (t * 0.6 + hash72(i)) % 1, px7 = x + w * a * hash72(i + 9), py = y - 2 - f * 13;
@@ -213567,8 +214193,337 @@ function drawCinderhartBar(c, canvas, reading, time3, st = {}, name = "Cinderhar
   c.restore();
 }
 
+// src/client/boss_bar_ashfang_v1.js
+var TAU232 = Math.PI * 2;
+var clamp79 = (v) => Math.max(0, Math.min(1, v));
+var INK77 = "#100e17";
+var BLACK2 = "#1c1219";
+var BLACK_LIT = "#3a2430";
+var HIDE = "#7a1c26";
+var SCARLET2 = "#c02a2e";
+var FIRE7 = "#ff6031";
+var EMBER5 = "#ff9a4a";
+var GOLD45 = "#ffd27a";
+var HOT6 = "#fff0c0";
+var HORN4 = "#d77a3a";
+var HORN_LIT = "#efaa59";
+function vgrad7(c, y, h, stops) {
+  const g = c.createLinearGradient(0, y, 0, y + h);
+  stops.forEach((s, i) => g.addColorStop(i / (stops.length - 1), s));
+  return g;
+}
+function hash73(n) {
+  const s = Math.sin(n * 127.1 + 31.7) * 43758.5453;
+  return s - Math.floor(s);
+}
+function band11(c, x, y, w, h, k) {
+  c.beginPath();
+  c.moveTo(x + k, y);
+  c.lineTo(x + w - k, y);
+  c.quadraticCurveTo(x + w, y, x + w, y + k);
+  c.lineTo(x + w, y + h - k);
+  c.quadraticCurveTo(x + w, y + h, x + w - k, y + h);
+  c.lineTo(x + k, y + h);
+  c.quadraticCurveTo(x, y + h, x, y + h - k);
+  c.lineTo(x, y + k);
+  c.quadraticCurveTo(x, y, x + k, y);
+  c.closePath();
+}
+function tongue11(c, x, y, w, h, t, seed2, hot) {
+  const sway = Math.sin(t * 9 + seed2 * 1.7) * w * 0.35, tip = h * (0.88 + 0.12 * Math.sin(t * 13 + seed2));
+  const shape3 = (s) => {
+    c.beginPath();
+    c.moveTo(x - w * s, y);
+    c.quadraticCurveTo(x - w * s * 0.9, y - tip * s * 0.55, x + sway * s, y - tip * s);
+    c.quadraticCurveTo(x + w * s * 0.9, y - tip * s * 0.55, x + w * s, y);
+    c.closePath();
+  };
+  shape3(1);
+  c.fillStyle = "#b8302a";
+  c.fill();
+  shape3(0.7);
+  c.fillStyle = FIRE7;
+  c.fill();
+  shape3(0.38);
+  c.fillStyle = hot ? HOT6 : GOLD45;
+  c.fill();
+}
+var SMOKE = ["#9a9092", "#77706f", "#55504f"];
+function styledBar7(c, box6, reading, s, t, st = {}) {
+  const { x, y, w, h } = box6, a = clamp79(reading.actual), tr = Math.max(a, clamp79(reading.trail)), imp2 = reading.impact || 0, jolt = imp2 > 0 ? Math.sin(imp2 * 31) * imp2 * 2 : 0;
+  c.save();
+  c.translate(jolt, 0);
+  s.under?.(c, x, y, w, h, t, a, imp2, st);
+  s.track(c, x, y, w, h, t);
+  c.save();
+  s.shape(c, x, y, w, h);
+  c.clip();
+  if (tr > a + 5e-4) {
+    c.fillStyle = reading.flash ? "#ffffff" : vgrad7(c, y, h, s.chunk);
+    c.fillRect(x + w * a, y, w * (tr - a) + 0.5, h);
+  }
+  if (a > 0) s.fill(c, x, y, w * a, h, t, w, st);
+  c.fillStyle = "#0000004d";
+  for (let i = 1; i < 10; i++) if (i !== 5) c.fillRect(x + w * i / 10 - 0.5, y + h * 0.5, 1, h * 0.5);
+  c.fillStyle = "#fff3d6c0";
+  c.fillRect(x + w * 0.5 - 0.75, y, 1.5, h);
+  if (a > 0 && a < 1) s.edge(c, x + w * a, y, h, imp2, t);
+  c.restore();
+  if (tr > a + 5e-4) s.chunkMotion?.(c, x + w * a, y, w * (tr - a), h, t);
+  s.over?.(c, x, y, w, h, t, a, imp2, st);
+  c.restore();
+}
+var BAR_H7 = 7;
+var BAR_Y7 = 19;
+var ASH_BAR = {
+  shape: (c, x, y, w, h) => band11(c, x, y, w, h, 2.5),
+  chunk: SMOKE,
+  under(c, x, y, w, h, t, a, imp2, st) {
+    const ex = x + w + 1.5, ey = y + h / 2;
+    c.beginPath();
+    c.moveTo(ex - 2, ey - h / 2 - 1.6);
+    c.quadraticCurveTo(ex + 9, ey - 4, ex + 11, ey - 14);
+    c.quadraticCurveTo(ex + 15, ey - 3, ex + 6, ey + h / 2 + 1.2);
+    c.lineTo(ex - 2, ey + h / 2 + 1.6);
+    c.closePath();
+    c.fillStyle = HORN4;
+    c.fill();
+    c.lineWidth = 1.1;
+    c.strokeStyle = INK77;
+    c.stroke();
+    c.beginPath();
+    c.moveTo(ex, ey - 0.5);
+    c.quadraticCurveTo(ex + 7, ey - 3, ex + 10, ey - 11);
+    c.lineWidth = st.ph2 ? 1.2 : 0.8;
+    c.strokeStyle = st.ph2 ? HOT6 : "#ffbb66";
+    c.stroke();
+    if (st.ph2) tongue11(c, ex + 11, ey - 13, 1.8, 6, t, 5, true);
+  },
+  track(c, x, y, w, h) {
+    band11(c, x - 2.3, y - 2.3, w + 4.6, h + 4.6, 4);
+    c.fillStyle = vgrad7(c, y - 2.3, h + 4.6, [BLACK_LIT, BLACK2, "#120a10"]);
+    c.fill();
+    c.lineWidth = 1;
+    c.strokeStyle = INK77;
+    c.stroke();
+    c.strokeStyle = "#5a3446";
+    c.lineWidth = 0.7;
+    c.beginPath();
+    for (let i = 0; i < w / 6; i++) {
+      const sx = x + 3 + i * 6;
+      c.moveTo(sx - 2.4, y - 1.2);
+      c.quadraticCurveTo(sx, y - 2.6, sx + 2.4, y - 1.2);
+      c.moveTo(sx + 0.6, y + h + 1.2);
+      c.quadraticCurveTo(sx + 3, y + h + 2.6, sx + 5.4, y + h + 1.2);
+    }
+    c.stroke();
+    band11(c, x, y, w, h, 2.5);
+    c.fillStyle = "#160a0e";
+    c.fill();
+    c.strokeStyle = "#3a141a";
+    c.lineWidth = 0.7;
+    c.beginPath();
+    for (let i = 0; i < 16; i++) {
+      const cx = x + w * (i + 0.3) / 16, cy2 = y + h * 0.5;
+      c.moveTo(cx - 2.5, cy2 - 1.5);
+      c.lineTo(cx, cy2 + 1.5);
+      c.lineTo(cx + 2.5, cy2 - 1.5);
+    }
+    c.stroke();
+  },
+  fill(c, x, y, fw, h, t, W21, st) {
+    const ph2 = st.ph2;
+    c.fillStyle = vgrad7(c, y, h, ph2 ? [EMBER5, FIRE7, SCARLET2, HIDE] : [SCARLET2, "#a82430", HIDE, "#5a1420"]);
+    c.fillRect(x, y, fw, h);
+    c.strokeStyle = "#4e1a22";
+    c.lineWidth = 0.8;
+    c.beginPath();
+    for (let i = 0; i < W21 / 9; i++) {
+      const sx = x + 4 + i * 9;
+      if (sx > x + fw - 3) break;
+      const sy = y + (i % 2 ? h * 0.68 : h * 0.32);
+      c.moveTo(sx - 2.6, sy - 1.4);
+      c.lineTo(sx, sy + 1.4);
+      c.lineTo(sx + 2.6, sy - 1.4);
+    }
+    c.stroke();
+    const seam5 = [];
+    for (let i = 0; i <= W21 / 6; i++) {
+      const sx = x + i * 6;
+      if (sx > x + fw) break;
+      seam5.push([sx, y + h * 0.5 + (hash73(i + 3) - 0.5) * 2.2]);
+    }
+    if (seam5.length > 1) {
+      const line43 = (col2, wd) => {
+        c.beginPath();
+        seam5.forEach(([px7, py], i) => i ? c.lineTo(px7, py) : c.moveTo(px7, py));
+        c.strokeStyle = col2;
+        c.lineWidth = wd;
+        c.stroke();
+      };
+      line43("#4a1016", 2.2);
+      const pulse3 = 0.5 + 0.5 * Math.sin(t * 2.2);
+      line43(ph2 ? GOLD45 : pulse3 > 0.5 ? EMBER5 : FIRE7, 1.1);
+      if (ph2) line43(HOT6, 0.45);
+    }
+    c.fillStyle = ph2 ? "#ffe6b0" : "#ff9a7a";
+    c.globalAlpha = 0.55;
+    c.fillRect(x, y + 0.6, fw, 0.7);
+    c.globalAlpha = 1;
+  },
+  edge(c, ex, y, h, imp2, t) {
+    c.save();
+    c.shadowColor = FIRE7;
+    c.shadowBlur = 4 + imp2 * 4;
+    c.fillStyle = HOT6;
+    c.fillRect(ex - 1.6, y, 1.8, h);
+    c.restore();
+    c.fillStyle = "#ffffff";
+    c.fillRect(ex - 1, y + 1, 0.8, h - 2);
+  },
+  chunkMotion(c, x, y, cw, h, t) {
+    for (let i = 0; i < 6; i++) {
+      const k = (t * 0.8 + i / 6) % 1, px7 = x + cw * (0.1 + i * 0.16) + Math.sin(i * 2.3 + k * 5) * 1.8, py = y - k * 12, r = 0.8 + k * 1.8;
+      c.globalAlpha = (1 - k) * 0.85;
+      c.fillStyle = SMOKE[i % 3];
+      c.beginPath();
+      c.arc(px7, py, r, 0, TAU232);
+      c.fill();
+    }
+    c.globalAlpha = 1;
+  },
+  over(c, x, y, w, h, t, a, imp2, st = {}) {
+    const ph2 = !!st.ph2;
+    const gx = x + w / 2, gy = y + h + 4.4;
+    c.beginPath();
+    c.moveTo(gx, gy - 4.4);
+    c.lineTo(gx + 5, gy);
+    c.lineTo(gx, gy + 4);
+    c.lineTo(gx - 5, gy);
+    c.closePath();
+    c.fillStyle = BLACK2;
+    c.fill();
+    c.lineWidth = 0.9;
+    c.strokeStyle = INK77;
+    c.stroke();
+    const pulse3 = 0.5 + 0.5 * Math.sin(t * 3);
+    c.save();
+    c.shadowColor = FIRE7;
+    c.shadowBlur = 2 + pulse3 * 2 + (ph2 ? 2 : 0);
+    c.beginPath();
+    c.ellipse(gx, gy, 2.9, 1.8, 0, 0, TAU232);
+    c.fillStyle = ph2 ? "#ff7a3a" : "#e8302a";
+    c.fill();
+    c.restore();
+    c.beginPath();
+    c.ellipse(gx, gy, 0.6, 1.6, 0, 0, TAU232);
+    c.fillStyle = "#09080f";
+    c.fill();
+    c.beginPath();
+    c.arc(gx - 1.2, gy - 0.6, 0.5, 0, TAU232);
+    c.fillStyle = ph2 ? HOT6 : "#ffd0a0";
+    c.fill();
+    const sx = x - 1, sy = y + h / 2;
+    c.beginPath();
+    c.moveTo(sx + 2, sy - h / 2 - 1.5);
+    c.quadraticCurveTo(sx - 1, sy - 13, sx - 10, sy - 21);
+    c.quadraticCurveTo(sx - 11, sy - 5, sx + 1, sy + h / 2 + 1.5);
+    c.closePath();
+    c.fillStyle = HORN4;
+    c.fill();
+    c.lineWidth = 1.1;
+    c.strokeStyle = INK77;
+    c.stroke();
+    c.beginPath();
+    c.moveTo(sx, sy - 4);
+    c.quadraticCurveTo(sx - 2.5, sy - 12, sx - 9, sy - 19);
+    c.lineWidth = 1.3;
+    c.strokeStyle = HORN_LIT;
+    c.stroke();
+    c.strokeStyle = "#9a4f24";
+    c.lineWidth = 0.7;
+    c.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const u = i / 4, hx2 = sx - 3 - u * 6, hy = sy - 2 - u * 14;
+      c.moveTo(hx2 - 2.2, hy + 0.8);
+      c.lineTo(hx2 + 2.4, hy + 0.2);
+    }
+    c.stroke();
+    if (ph2) {
+      c.beginPath();
+      c.arc(sx - 10, sy - 21, 1.3, 0, TAU232);
+      c.fillStyle = HOT6;
+      c.fill();
+      tongue11(c, sx - 10, sy - 20, 2.2, 8, t, 3, true);
+    }
+    c.beginPath();
+    c.ellipse(sx, sy, 2.6, h / 2 + 2.8, 0, 0, TAU232);
+    c.fillStyle = BLACK_LIT;
+    c.fill();
+    c.lineWidth = 1;
+    c.strokeStyle = INK77;
+    c.stroke();
+    for (let i = 0; i < 3; i++) {
+      c.beginPath();
+      c.arc(sx, sy - h / 2 - 0.8 + i * (h + 1.6) / 2, 0.75, 0, TAU232);
+      c.fillStyle = ph2 ? GOLD45 : FIRE7;
+      c.fill();
+    }
+    if (ph2 && a > 0) {
+      const n = Math.max(1, Math.floor(w * a / 26));
+      for (let i = 0; i < n; i++) {
+        const fx = x + (i + 0.5) * (w * a / n) + Math.sin(i * 1.9) * 3;
+        if (fx > x + w * a - 3) continue;
+        tongue11(c, fx, y + 1, 2.6, 6.5 + 2.5 * Math.sin(t * 5 + i), t, i + 3, true);
+      }
+      for (let i = 0; i < 6; i++) {
+        const f = (t * 0.6 + hash73(i)) % 1, px7 = x + w * a * hash73(i + 9), py = y - 2 - f * 13;
+        c.globalAlpha = 1 - f;
+        c.fillStyle = i % 2 ? GOLD45 : FIRE7;
+        c.fillRect(px7 - 0.6, py, 1.2, 1.6);
+      }
+      c.globalAlpha = 1;
+    }
+    if (imp2 > 0) {
+      const ex = x + w * a, k = 1 - imp2;
+      for (let i = 0; i < 7; i++) {
+        const ang = -1.4 + i * 0.47, d = 3 + k * 12, px7 = ex + Math.cos(ang) * d, py = y + h / 2 + Math.sin(ang) * d + k * k * 6;
+        c.globalAlpha = imp2;
+        c.fillStyle = i % 2 ? SMOKE[0] : i % 4 ? GOLD45 : HOT6;
+        c.fillRect(px7 - 0.8, py - 0.8, 1.6, 1.6);
+      }
+      c.globalAlpha = 1;
+    }
+  }
+};
+function title9(c, cx, y, name) {
+  c.save();
+  c.textAlign = "center";
+  c.textBaseline = "alphabetic";
+  c.lineJoin = "round";
+  c.font = "900 13px Georgia,serif";
+  c.shadowColor = "#000000a0";
+  c.shadowBlur = 4;
+  c.shadowOffsetY = 1;
+  c.lineWidth = 3.4;
+  c.strokeStyle = "#1a080c";
+  c.strokeText(name, cx, y);
+  c.shadowColor = "transparent";
+  c.fillStyle = vgrad7(c, y - 10, 11, [GOLD45, EMBER5, SCARLET2]);
+  c.fillText(name, cx, y);
+  c.restore();
+}
+var ASHFANG_BAR_SIDE = 24;
+function drawAshfangBar(c, canvas, reading, time3, st = {}, name = "Ashfang") {
+  const w = Math.min(360, canvas.width - 28 - ASHFANG_BAR_SIDE * 2), x = (canvas.width - w) / 2 + ASHFANG_BAR_SIDE * 0.3, y = 12, t = time3 / 1e3;
+  c.save();
+  title9(c, canvas.width / 2, y + 13, name);
+  styledBar7(c, { x, y: y + BAR_Y7, w, h: BAR_H7 }, reading, ASH_BAR, t, st);
+  c.restore();
+}
+
 // src/client/big_boss_bar_v1.js
-var clamp79 = (v) => Math.max(0, Math.min(1, Number.isFinite(v) ? v : 0));
+var clamp80 = (v) => Math.max(0, Math.min(1, Number.isFinite(v) ? v : 0));
 var losses = /* @__PURE__ */ new Map();
 function track2(key4, alive, tick) {
   let mem = losses.get(key4);
@@ -213585,7 +214540,7 @@ function track2(key4, alive, tick) {
 }
 function windup(p, tick) {
   if (!p || p.startedTick == null || p.resolvesTick == null) return 0;
-  return clamp79((tick - p.startedTick) / Math.max(1, p.resolvesTick - p.startedTick));
+  return clamp80((tick - p.startedTick) / Math.max(1, p.resolvesTick - p.startedTick));
 }
 function treantState(model, id2, b, tick) {
   const cocoons = Object.values(model.entitiesById).filter((a) => a.alive && a.bossSummon?.stage === "cocoon").length;
@@ -213602,11 +214557,11 @@ function treantState(model, id2, b, tick) {
 function wardenState(id2, b, tick) {
   const m = b.mimicEncounter, enraged = m?.enragedTick != null, two = b.phase === 2;
   const sworn = two ? 0 : m ? m.livingMimics : 3;
-  const tower9 = two && !enraged && m ? clamp79(presentCombat(m.towerHp) / Math.max(1, presentCombat(m.towerMaxHp))) : null;
+  const tower9 = two && !enraged && m ? clamp80(presentCombat(m.towerHp) / Math.max(1, presentCombat(m.towerMaxHp))) : null;
   return {
     sworn,
     lost: two ? [] : track2("warden/" + id2, sworn, tick),
-    recall: b.actionState === "recalling" && m?.recallStartedTick != null ? clamp79((tick - m.recallStartedTick) / 120) : null,
+    recall: b.actionState === "recalling" && m?.recallStartedTick != null ? clamp80((tick - m.recallStartedTick) / 120) : null,
     tower: tower9,
     fused: m?.fusedOrdinals?.length ?? 0,
     dazed: b.actionState === "dazed",
@@ -213619,7 +214574,8 @@ var BARS = {
   aegis_goliath: (c, canvas, model, a, r, time3) => drawWardenBar(c, canvas, r, time3, wardenState(a.entityId ?? a.boss.bossId, a.boss, model.tick)),
   barrow_king: (c, canvas, model, a, r, time3) => drawBarrowKingBar(c, canvas, r, time3, { ph2: a.boss.phase === 2 }),
   sun_pharaoh: (c, canvas, model, a, r, time3) => drawSunPharaohBar(c, canvas, r, time3, { ph2: a.boss.phase === 2 }),
-  cinderhart: (c, canvas, model, a, r, time3) => drawCinderhartBar(c, canvas, r, time3, { ph2: a.boss.phase === 2 })
+  cinderhart: (c, canvas, model, a, r, time3) => drawCinderhartBar(c, canvas, r, time3, { ph2: a.boss.phase === 2 }),
+  ashfang: (c, canvas, model, a, r, time3) => drawAshfangBar(c, canvas, r, time3, { ph2: a.boss.phase === 2 })
 };
 function drawStyledBossBarV1(c, canvas, model, boss, reading, time3) {
   const bar2 = BARS[boss?.boss?.bossDefinitionId];
@@ -213629,17 +214585,17 @@ function drawStyledBossBarV1(c, canvas, model, boss, reading, time3) {
 }
 
 // src/client/aegis_mimic_presentation_v2.js
-var TAU232 = Math.PI * 2;
-var clamp80 = (v) => Math.max(0, Math.min(1, v));
+var TAU233 = Math.PI * 2;
+var clamp81 = (v) => Math.max(0, Math.min(1, v));
 function drawAttachedAegisMimic(c, actor, tick, flash2 = false) {
   const m = actor.aegisMimic;
   if (!m || m.stage === "detached" || !actor.alive) return false;
-  const profile = creaturePresentationForRenderV3("mimic_shield"), f = profile.painterFrame, landing2 = m.stage === "landing", lift = landing2 ? 24 * (1 - clamp80((tick - m.detachedTick) / 30)) : 24;
+  const profile = creaturePresentationForRenderV3("mimic_shield"), f = profile.painterFrame, landing2 = m.stage === "landing", lift = landing2 ? 24 * (1 - clamp81((tick - m.detachedTick) / 30)) : 24;
   c.save();
   c.translate(actor.position.x, actor.position.y);
   c.fillStyle = "#0c142b44";
   c.beginPath();
-  c.ellipse(0, 8, 13, 5, 0, 0, TAU232);
+  c.ellipse(0, 8, 13, 5, 0, 0, TAU233);
   c.fill();
   c.translate(0, -lift);
   c.save();
@@ -213647,7 +214603,7 @@ function drawAttachedAegisMimic(c, actor, tick, flash2 = false) {
   c.scale(profile.visualScale, profile.visualScale);
   drawMimicShieldV4(c, { x: f.x, y: f.y, w: f.width, h: f.height, flashTimer: flash2 ? 1 : 0, familyAttack: null, aegisDormant: m.stage === "orbiting" }, tick * 1e3 / 60, actor.visualSeed ?? 17);
   c.restore();
-  const ratio = clamp80(actor.hp.m / Math.max(1e-12, actor.maxHp.m));
+  const ratio = clamp81(actor.hp.m / Math.max(1e-12, actor.maxHp.m));
   c.fillStyle = "#11151a";
   c.fillRect(-14, -31, 28, 5);
   c.fillStyle = m.stage === "recalling" ? "#f2c678" : "#70e5e6";
@@ -213678,12 +214634,12 @@ function aegisMimicTetherDepthItems(model, tick) {
 }
 
 // src/client/boss_presentation_aegis_v1.js
-var TAU233 = Math.PI * 2;
-var clamp81 = (v) => Math.max(0, Math.min(1, v));
+var TAU234 = Math.PI * 2;
+var clamp82 = (v) => Math.max(0, Math.min(1, v));
 function drawAegisBossHud(c, canvas, model) {
   const actor = Object.values(model.entitiesById).find((a) => a.alive && a.boss?.bossDefinitionId === "aegis_goliath");
   if (!actor) return false;
-  const width2 = Math.min(340, canvas.width - 32), x = (canvas.width - width2) / 2, y = 12, ratio = clamp81(actor.hp?.m !== void 0 ? actor.hp.m / Math.max(1e-12, actor.maxHp.m) : presentCombat(actor.hp) / Math.max(1, presentCombat(actor.maxHp))), b = actor.boss;
+  const width2 = Math.min(340, canvas.width - 32), x = (canvas.width - width2) / 2, y = 12, ratio = clamp82(actor.hp?.m !== void 0 ? actor.hp.m / Math.max(1e-12, actor.maxHp.m) : presentCombat(actor.hp) / Math.max(1, presentCombat(actor.maxHp))), b = actor.boss;
   c.save();
   c.fillStyle = "#101827e8";
   c.fillRect(x, y, width2, 42);
@@ -213704,12 +214660,12 @@ function drawAegisBossHud(c, canvas, model) {
   const names2 = { magnetic_pull: "MAGNETIC PULL \u2192 SLAM", boomerang_shield: "RETURNING SHIELDS", shield_bash: "SHIELD BASH" };
   c.fillText(b.actionState === "recalling" ? "RECALLING MIMICS \xB7 FINISH THE WOUNDED" : b.mimicEncounter && b.mimicEncounter.enragedTick !== null ? b.pendingAction ? "ENRAGED \xB7 " + names2[b.pendingAction.ability] : "ENRAGED \xB7 CORE EXPOSED" : b.actionState === "dazed" ? "DAZED \xB7 SHIELD DOWN" : b.pendingAction ? names2[b.pendingAction.ability] : b.phase === 2 ? "TOWER SHIELD \xB7 FLANK TO STRIKE" : "ORBITAL AEGIS", canvas.width / 2, y + 37);
   if (b.actionState === "recalling" && b.mimicEncounter) {
-    const p = clamp81((model.tick - b.mimicEncounter.recallStartedTick) / 120);
+    const p = clamp82((model.tick - b.mimicEncounter.recallStartedTick) / 120);
     c.fillStyle = "#ffc67b";
     c.fillRect(x + 10, y + 40, (width2 - 20) * p, 2);
   }
   if (b.mimicEncounter && b.mimicEncounter.fusedOrdinals.length) {
-    const ratio2 = clamp81(presentCombat(b.mimicEncounter.towerHp) / Math.max(1, presentCombat(b.mimicEncounter.towerMaxHp)));
+    const ratio2 = clamp82(presentCombat(b.mimicEncounter.towerHp) / Math.max(1, presentCombat(b.mimicEncounter.towerMaxHp)));
     c.fillStyle = "#101827";
     c.fillRect(x, y + 43, width2, 17);
     c.fillStyle = "#9fe6e4";
@@ -214899,7 +215855,7 @@ function frogDepthItemsV1(n, model, time3, depthItem2) {
   }
   return out4;
 }
-function tongue10(c, x0, y0, x1, y1, t, lx, ly, { sag = 0, splat: splat3 = 0 } = {}) {
+function tongue12(c, x0, y0, x1, y1, t, lx, ly, { sag = 0, splat: splat3 = 0 } = {}) {
   const mx = mix18(x0, x1, 0.5), my = mix18(y0, y1, 0.5) + sag, pts2 = [];
   for (let i = 0; i <= 16; i++) {
     const u = i / 16, v = 1 - u;
@@ -214941,15 +215897,15 @@ function drawFrogOverV1(c, n, model, time3) {
     const h = heroNear(model, n.x, n.y), lx = h?.position.x ?? tip.x, ly = (h?.position.y ?? tip.y) - 20;
     if (k >= T121.wu && k < T121.lash) {
       const u = ease4((k - T121.wu) / (T121.lash - T121.wu));
-      tongue10(c, mo.x, mo.y, mix18(mo.x, tip.x, u), mix18(mo.y, tip.y, u), t, lx, ly);
+      tongue12(c, mo.x, mo.y, mix18(mo.x, tip.x, u), mix18(mo.y, tip.y, u), t, lx, ly);
     } else if (caught && k >= T121.lash && k < T121.crouch) {
-      tongue10(c, mo.x, mo.y, tip.x, tip.y, t, lx, ly, { sag: Math.sin(clamp28((k - T121.lash) / (T121.crouch - T121.lash)) * Math.PI) * 4, splat: 1 - clamp28((k - T121.lash) / 0.3) });
+      tongue12(c, mo.x, mo.y, tip.x, tip.y, t, lx, ly, { sag: Math.sin(clamp28((k - T121.lash) / (T121.crouch - T121.lash)) * Math.PI) * 4, splat: 1 - clamp28((k - T121.lash) / 0.3) });
       tag(c, tip.x, tip.y - 38, "Caught!", 8, "#f0d0ff");
     } else {
       const from = caught ? T121.crouch : T121.lash;
       if (k >= from && k < from + 0.15) {
         const u = ease4((k - from) / 0.15);
-        tongue10(c, mo.x, mo.y, mix18(tip.x, mo.x, u), mix18(tip.y, mo.y, u), t, lx, ly);
+        tongue12(c, mo.x, mo.y, mix18(tip.x, mo.x, u), mix18(tip.y, mo.y, u), t, lx, ly);
       }
     }
   }
@@ -215522,7 +216478,7 @@ function drawTripFallingHeroV1(ctx, actor, spec, l, time3) {
   drawBlockyHero(ctx, spec, { t, bob: 0, step: 0, moving: false, front: -1.6, noTrail: true });
   ctx.restore();
 }
-function drawTripGooFeetV1(ctx, model, entityId2, actor, time3, facing3) {
+function drawTripGooFeetV1(ctx, model, entityId2, actor, time3, facing2) {
   const l = landing(model, entityId2);
   if (!l || l.k < 1 || l.heavyLeft <= 0) return;
   const t = time3 / 1e3, step3 = actor.movedLastTick ? Math.sin(t * 9 * 0.6) : 0, end = l.heavyLeft;
@@ -215530,7 +216486,7 @@ function drawTripGooFeetV1(ctx, model, entityId2, actor, time3, facing3) {
   ctx.save();
   ctx.translate(actor.position.x, actor.position.y + FEET5);
   ctx.scale(HS, HS);
-  gooFeet(ctx, 0, 0, t, amt, step3 * (facing3 < 0 ? -1 : 1), { hard, crack: crack8 });
+  gooFeet(ctx, 0, 0, t, amt, step3 * (facing2 < 0 ? -1 : 1), { hard, crack: crack8 });
   ctx.restore();
 }
 var prints2 = /* @__PURE__ */ new Map();
@@ -215847,7 +216803,7 @@ function tripBadBadgeV1(model) {
 }
 
 // src/client/trip_hell_v1/imps.js
-var INK77 = "#11151a";
+var INK78 = "#11151a";
 var LW22 = 1.35;
 var PAL2 = {
   coin: { skin: "#94a46e", shade: "#6e7c4e", belly: "#b4bc88", ear: "#7e5a48", horn: "#d8ccb0", nail: "#d8ccb0" },
@@ -215867,7 +216823,7 @@ function cel2(c, path17, main, shade9, ox, oy) {
   c.restore();
 }
 var ink4 = (c, w = LW22) => {
-  c.strokeStyle = INK77;
+  c.strokeStyle = INK78;
   c.lineWidth = w;
   c.lineJoin = "round";
   c.lineCap = "round";
@@ -215878,7 +216834,7 @@ var limb4 = (c, pts2, w, col2) => {
   pts2.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y));
   c.lineJoin = "round";
   c.lineCap = "round";
-  c.strokeStyle = INK77;
+  c.strokeStyle = INK78;
   c.lineWidth = w + LW22 * 2;
   c.stroke();
   c.strokeStyle = col2;
@@ -215900,7 +216856,7 @@ function imp(c, x, y, t, { kind = "coin", run: run2 = 0, dir = 1, flash: flash2 
   c.beginPath();
   c.moveTo(-4, -9);
   c.quadraticCurveTo(-12, -6 + tw, -13, -12 + tw);
-  c.strokeStyle = INK77;
+  c.strokeStyle = INK78;
   c.lineWidth = 1.6 + LW22 * 2;
   c.lineCap = "round";
   c.stroke();
@@ -215982,7 +216938,7 @@ function imp(c, x, y, t, { kind = "coin", run: run2 = 0, dir = 1, flash: flash2 
     c.lineTo(5.6, 2.4);
     c.moveTo(2, 4.4);
     c.lineTo(5.6, 4.4);
-    c.strokeStyle = INK77;
+    c.strokeStyle = INK78;
     c.lineWidth = 0.5;
     c.stroke();
     c.beginPath();
@@ -216026,7 +216982,7 @@ function imp(c, x, y, t, { kind = "coin", run: run2 = 0, dir = 1, flash: flash2 
   c.beginPath();
   c.moveTo(-5.6, -5.4);
   c.quadraticCurveTo(0, -1, 3.6, 6.4);
-  c.strokeStyle = INK77;
+  c.strokeStyle = INK78;
   c.lineWidth = 2 + LW22 * 2;
   c.stroke();
   c.strokeStyle = W21(rare ? "#4a3a30" : "#6e5032");
@@ -216093,7 +217049,7 @@ function imp(c, x, y, t, { kind = "coin", run: run2 = 0, dir = 1, flash: flash2 
   const ex = look ? 1.2 : 2.6;
   c.beginPath();
   c.ellipse(ex, -1.6, 1.9, 1.4, -0.2, 0, TAU147);
-  c.fillStyle = INK77;
+  c.fillStyle = INK78;
   c.fill();
   c.beginPath();
   c.ellipse(ex + (look ? -0.4 : 0.4), -1.6, 1, 0.8, 0, 0, TAU147);
@@ -216102,13 +217058,13 @@ function imp(c, x, y, t, { kind = "coin", run: run2 = 0, dir = 1, flash: flash2 
   c.beginPath();
   c.moveTo(-0.4, -3.6);
   c.lineTo(4.4, -2.6);
-  c.strokeStyle = INK77;
+  c.strokeStyle = INK78;
   c.lineWidth = 1.1;
   c.stroke();
   c.beginPath();
   c.moveTo(0.4, 2.4);
   c.quadraticCurveTo(3.4, 4.6, 6.6, 3.2);
-  c.strokeStyle = INK77;
+  c.strokeStyle = INK78;
   c.lineWidth = 1.1;
   c.stroke();
   for (const tx of [1.8, 4.4]) {
@@ -216139,7 +217095,7 @@ function imp(c, x, y, t, { kind = "coin", run: run2 = 0, dir = 1, flash: flash2 
   c.restore();
   if (hit2) {
     const w = 24 * s, by = y - hop * s - 36 * s;
-    c.fillStyle = INK77;
+    c.fillStyle = INK78;
     c.fillRect(x - w / 2, by, w, 3);
     c.fillStyle = rare ? "#8fd8ff" : "#e8584a";
     c.fillRect(x - w / 2 + 0.6, by + 0.6, (w - 1.2) * clamp28(hp), 1.8);
@@ -216231,7 +217187,7 @@ function heroNear3(model, x, y) {
   }
   return best;
 }
-function facing2(model, m) {
+function facing(model, m) {
   if (m.run) return m.dx < 0 ? -1 : 1;
   const h = heroNear3(model, m.x, m.y);
   return h ? h.position.x < m.x ? -1 : 1 : m.n % 2 ? -1 : 1;
@@ -216267,7 +217223,7 @@ function drawTripImpV1(ctx, actor, id2, model, time3, flash2) {
     const tr = trailOf(id2, x, y, t, Boolean(m.run));
     sparkleTrail(ctx, tr.map((p) => [p.x, p.y + FEET6 - 10, t - p.t]), t);
   }
-  imp(ctx, x, y + FEET6, t, { kind: m.kind, run: run2, dir: facing2(model, { ...m, x, y }), flash: flash2 ? 1 : 0, look: run2, i: m.n, s: HS2 });
+  imp(ctx, x, y + FEET6, t, { kind: m.kind, run: run2, dir: facing(model, { ...m, x, y }), flash: flash2 ? 1 : 0, look: run2, i: m.n, s: HS2 });
   return true;
 }
 function crack7(c, x, y, k, seed2) {
@@ -216419,7 +217375,7 @@ function tripImpDepthItemsV1(model, time3, depthItem2) {
         c.rect(m.x - 30, m.y + FEET6 - 60, 60, 60);
         c.clip();
         const rise = (1 - ease4(k)) * 26;
-        imp(c, m.x, m.y + FEET6 + rise, t, { kind: m.kind, dir: facing2(model, m), i: m.n, s: HS2 });
+        imp(c, m.x, m.y + FEET6 + rise, t, { kind: m.kind, dir: facing(model, m), i: m.n, s: HS2 });
         c.restore();
       } }));
     }
@@ -216766,7 +217722,7 @@ function cliff(c, pts2, front2, t, D2 = 12, mode) {
   });
   c.restore();
 }
-function lip(c, pts2, t) {
+function lip2(c, pts2, t) {
   c.save();
   closed(c, pts2);
   c.clip();
@@ -217125,7 +218081,7 @@ function toothSeam(c, x, y, L, ang, t, id2) {
     const lx = (u - 0.5) * L, ly = Math.sin(u * TAU147) * L * 0.06;
     return [x + lx * Math.cos(ang) - ly * Math.sin(ang), y + lx * Math.sin(ang) + ly * Math.cos(ang)];
   }, nx = -Math.sin(ang), ny = Math.cos(ang);
-  const band11 = (th) => {
+  const band12 = (th) => {
     c.beginPath();
     for (let k = 0; k <= n; k++) {
       const u = k / n, [px7, py] = P25(u), w = Math.sin(u * Math.PI) * th;
@@ -217139,18 +218095,18 @@ function toothSeam(c, x, y, L, ang, t, id2) {
   };
   c.save();
   c.translate(0, 0.8);
-  band11(g + 2.6);
+  band12(g + 2.6);
   c.fillStyle = "rgba(36,8,6,.35)";
   c.fill();
   c.restore();
-  band11(g + 2.4);
+  band12(g + 2.4);
   c.fillStyle = "#7a3028";
   c.fill();
-  band11(g);
+  band12(g);
   c.fillStyle = "#2e0907";
   c.fill();
   c.save();
-  band11(g);
+  band12(g);
   c.clip();
   const NT = Math.floor(L / 3.2);
   for (let k = 1; k < NT; k++) {
@@ -217429,7 +218385,7 @@ function makeCache() {
         if (j !== i) addClosed(c, o.pts);
       });
       c.clip("evenodd");
-      lip(c, sh3.pts, 0);
+      lip2(c, sh3.pts, 0);
       c.restore();
     });
     for (const w of WALLS) if (meets2(w.box, x0, y0, x1, y1)) wall4(c, w.base, 0, { Hm: WALL_H, seed: w.seed }, "static");
@@ -217642,7 +218598,7 @@ function createBossEffectsObserver() {
 }
 function createWorldRenderer(canvas, { performanceProbe = null, developmentScene = null, environmentArt = null, actorCollisionProbe = null } = {}) {
   const completionPreparation = createCompletionArtPreparation(canvas), heroLevelUp = createHeroLevelUpV3();
-  let ctx = canvas.getContext("2d"), layout = 0, facing3 = 1, previous = null;
+  let ctx = canvas.getContext("2d"), layout = 0, facing2 = 1, previous = null;
   const nightVfxEnabled = () => environmentArt?.nightLootArt?.enabled?.() !== false, groundItems = createNightGroundItemsV1({ enabled: nightVfxEnabled }), potionDrops = createPotionDropsV1(), snackDrops = createSnackDropsV1(), nightActors = createNightActorReadabilityV1(canvas.ownerDocument, { enabled: nightVfxEnabled });
   const boltOrigins = /* @__PURE__ */ new Map(), combatVfx = createCombatVfx();
   const resourceArt = createResourceDebrisV1({ art: environmentArt?.nightLootArt, presentation: createResourcePresentationV2({ art: environmentArt?.breakableProps }), remnants: environmentArt?.breakableProps }), portalArt = createExtractionPortalPresentationD12_5C(), rewards = createRewardFeedback(canvas);
@@ -217727,8 +218683,8 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     if (performanceProbe) performanceProbe.measure("combatFeedback", () => feedback.update(model, time3));
     else feedback.update(model, time3);
     perfectBlock.update(model, time3);
-    if (previous?.key === key4 && actor.position.x !== previous.x) facing3 = actor.position.x > previous.x ? 1 : -1;
-    else if (previous?.key !== key4) facing3 = 1;
+    if (previous?.key === key4 && actor.position.x !== previous.x) facing2 = actor.position.x > previous.x ? 1 : -1;
+    else if (previous?.key !== key4) facing2 = 1;
     previous = { key: key4, x: actor.position.x, y: actor.position.y };
     const heroPoses = heroFacing.update(model);
     combatVfx.update(model, time3, heroPoses);
@@ -218154,12 +219110,12 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     const bossVisual = aliveBoss ? healthTrails.sample("boss/" + aliveBoss[0], actorHealthRatio(aliveBoss[1]), time3) : null;
     ctx.save();
     placeHudBarV1(ctx, hudSlots);
-    const nightmareBar = drawTripNightmareHudV1(ctx, canvas, model), styledBar7 = !nightmareBar && aliveBoss && drawStyledBossBarV1(ctx, canvas, model, aliveBoss[1], bossVisual, time3);
-    const bigBossBar = nightmareBar || styledBar7 || drawRecoveredBossHudV1(ctx, canvas, model) || drawBrimstoneBossHud(ctx, canvas, model) || drawAegisBossHud(ctx, canvas, model) || drawArachnidTreantBossHudD12_5A(ctx, canvas, model);
+    const nightmareBar = drawTripNightmareHudV1(ctx, canvas, model), styledBar8 = !nightmareBar && aliveBoss && drawStyledBossBarV1(ctx, canvas, model, aliveBoss[1], bossVisual, time3);
+    const bigBossBar = nightmareBar || styledBar8 || drawRecoveredBossHudV1(ctx, canvas, model) || drawBrimstoneBossHud(ctx, canvas, model) || drawAegisBossHud(ctx, canvas, model) || drawArachnidTreantBossHudD12_5A(ctx, canvas, model);
     drawTreasuryBossHudV2(ctx, canvas, model);
     const minorBar = !bigBossBar && minorBossBar.draw(ctx, canvas, model, actor, healthTrails, time3);
     if (bigBossBar) minorBossBar.reset();
-    if (aliveBoss && !styledBar7) drawBossHealthEchoV3(ctx, canvas, aliveBoss[1], bossVisual, time3);
+    if (aliveBoss && !styledBar8) drawBossHealthEchoV3(ctx, canvas, aliveBoss[1], bossVisual, time3);
     ctx.restore();
     bossBarUp = Boolean(bigBossBar || minorBar);
     const interaction = interactionExitV2(model);
@@ -219080,9 +220036,9 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       if (!review) {
         review = doc.createElement("details");
         review.id = "rpg-review-tools";
-        const title9 = doc.createElement("summary");
-        title9.textContent = "Playtest & diagnostics";
-        review.append(title9);
+        const title10 = doc.createElement("summary");
+        title10.textContent = "Playtest & diagnostics";
+        review.append(title10);
         disclosure.append(review);
       }
       let actions = doc.getElementById("rpg-menu-actions");
@@ -219100,9 +220056,9 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       if (!campaign) {
         campaign = doc.createElement("details");
         campaign.id = "rpg-campaign-options";
-        const title9 = doc.createElement("summary");
-        title9.textContent = "Campaign options";
-        campaign.append(title9);
+        const title10 = doc.createElement("summary");
+        title10.textContent = "Campaign options";
+        campaign.append(title10);
         disclosure.insertBefore(campaign, review);
       }
       for (const id2 of ["start-new-campaign", "reset-local-world-data"]) {
@@ -220407,9 +221363,9 @@ function createPagedWorldAuthorityD9({ initialState, publication, task, measure:
       ready();
       return fn(authority);
     },
-    developerRelocateToWorld: (playerId, position4, facing3) => {
+    developerRelocateToWorld: (playerId, position4, facing2) => {
       ready();
-      return authority.developerRelocateToWorld(playerId, position4, facing3);
+      return authority.developerRelocateToWorld(playerId, position4, facing2);
     },
     commitCut,
     reconcile
@@ -221076,7 +222032,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, requ
 async function prepareD9OriginMigration(state2, { sha256 }) {
   validateActivityState(state2);
   requireContract(!state2.d9World, "World already migrated");
-  const m = manifestForState(state2), collision = compileBoundOverworld(state2).collision, hash73 = bytesToHex(await hashBytes(utf8(canonicalStringify(m)), sha256)), overlay = originEgress(m, collision, economicResources(state2, m));
+  const m = manifestForState(state2), collision = compileBoundOverworld(state2).collision, hash74 = bytesToHex(await hashBytes(utf8(canonicalStringify(m)), sha256)), overlay = originEgress(m, collision, economicResources(state2, m));
   const positions = {};
   for (const a of Object.values(state2.entitiesById)) if (a.residency.spaceInstanceId === state2.overworldInstanceId) positions[a.entityId] = legacyWorldPosition(a.position);
   const next = copyWire(state2);
@@ -221091,7 +222047,7 @@ async function prepareD9OriginMigration(state2, { sha256 }) {
     aliases[id2] = { chunkX: String(ch.origin.x / D9_PROFILE.chunkWidth), chunkY: String(ch.origin.y / D9_PROFILE.chunkHeight) };
   }
   const frames = [{ id: 0, chunkX: "0", chunkY: "0", offsetX: 0, offsetY: 0, playerIds: [], originBounds: { width: m.dimensions.width / D9_PROFILE.chunkWidth, height: m.dimensions.height / D9_PROFILE.chunkHeight } }];
-  next.d9World = { version: D9_ROOT_VERSION, profile: copyWire(D9_PROFILE), origin: { manifestHash: hash73, width: m.dimensions.width, height: m.dimensions.height, chunkAliases: aliases, egress: copyWire(overlay), resources: copyWire(economicResources(state2, m)) }, positions, frame: { chunkX: "0", chunkY: "0" }, regionIndex: null, discoveryIndex: null, deadlineIndex: null, migration: { version: "origin-migration-d9-v1", tick: state2.tick, sourceSaveRevision: state2.campaign.saveRevision }, runtime: { revision: 0, frames: copyWire(frames), chunks: [], groups: [], resources: [] }, episodes: {}, functionalSitesById: {}, siteReservationsById: {} };
+  next.d9World = { version: D9_ROOT_VERSION, profile: copyWire(D9_PROFILE), origin: { manifestHash: hash74, width: m.dimensions.width, height: m.dimensions.height, chunkAliases: aliases, egress: copyWire(overlay), resources: copyWire(economicResources(state2, m)) }, positions, frame: { chunkX: "0", chunkY: "0" }, regionIndex: null, discoveryIndex: null, deadlineIndex: null, migration: { version: "origin-migration-d9-v1", tick: state2.tick, sourceSaveRevision: state2.campaign.saveRevision }, runtime: { revision: 0, frames: copyWire(frames), chunks: [], groups: [], resources: [] }, episodes: {}, functionalSitesById: {}, siteReservationsById: {} };
   next.spacesByInstanceId[next.overworldInstanceId].collision = { version: D9_COLLISION_VERSION, tileSize: 32, width: 20480, height: 3328, origin: copyWire(applyOriginEgress(collision, overlay)), frames: copyWire(frames), pages: [] };
   next.d9World.runtimePolicy = D9_RUNTIME_POLICY.version;
   next.d9World.navigation = emptyNavigationD9();
@@ -221110,7 +222066,7 @@ async function prepareD9OriginMigration(state2, { sha256 }) {
     }
     next.d9World.navigation.pending.push(...rows.values());
   }
-  next.d9World.content = historicalSiteContentD9(m, hash73);
+  next.d9World.content = historicalSiteContentD9(m, hash74);
   next.d9World.paging = emptyWorldPagingD9(next.session.playerIds);
   next.d9World.ownershipIndex = null;
   next.d9World.groundIndex = null;
@@ -222445,11 +223401,11 @@ function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstC
     close.className = "ub-close";
     close.textContent = "\xD7";
     close.setAttribute("aria-label", "Not now");
-    const title9 = doc.createElement("strong");
-    title9.textContent = "New version ready";
+    const title10 = doc.createElement("strong");
+    title10.textContent = "New version ready";
     const sub = doc.createElement("span");
     sub.textContent = "Tap to update";
-    go.append(title9, sub);
+    go.append(title10, sub);
     banner8.append(go, close);
     close.addEventListener("click", () => {
       if (go.disabled) return;
@@ -222633,9 +223589,9 @@ function openWorldRefreshV1({ document: doc, environment: env, begin: begin2, bl
   root6.setAttribute("role", "dialog");
   root6.setAttribute("aria-modal", "true");
   root6.setAttribute("aria-label", "World update");
-  const card = el3("div", "wr-card"), title9 = el3("h2", null, "World update"), body6 = el3("div"), acts = el3("div", "wr-acts");
+  const card = el3("div", "wr-card"), title10 = el3("h2", null, "World update"), body6 = el3("div"), acts = el3("div", "wr-acts");
   body6.style.cssText = "display:flex;flex-direction:column;gap:10px";
-  card.append(title9, body6, acts);
+  card.append(title10, body6, acts);
   root6.append(card);
   doc.body.append(root6);
   let job = null, closed2 = false, timer = null;
@@ -224337,23 +225293,23 @@ var qrcode = function(typeNumber, errorCorrectionLevel) {
     qrHtml += "</table>";
     return qrHtml;
   };
-  _this.createSvgTag = function(cellSize, margin, alt, title9) {
+  _this.createSvgTag = function(cellSize, margin, alt, title10) {
     let opts = {};
     if (typeof arguments[0] == "object") {
       opts = arguments[0];
       cellSize = opts.cellSize;
       margin = opts.margin;
       alt = opts.alt;
-      title9 = opts.title;
+      title10 = opts.title;
     }
     cellSize = cellSize || 2;
     margin = typeof margin == "undefined" ? cellSize * 4 : margin;
     alt = typeof alt === "string" ? { text: alt } : alt || {};
     alt.text = alt.text || null;
     alt.id = alt.text ? alt.id || "qrcode-description" : null;
-    title9 = typeof title9 === "string" ? { text: title9 } : title9 || {};
-    title9.text = title9.text || null;
-    title9.id = title9.text ? title9.id || "qrcode-title" : null;
+    title10 = typeof title10 === "string" ? { text: title10 } : title10 || {};
+    title10.text = title10.text || null;
+    title10.id = title10.text ? title10.id || "qrcode-title" : null;
     const size = _this.getModuleCount() * cellSize + margin * 2;
     let c, mc, r, mr, qrSvg = "", rect7;
     rect7 = "l" + cellSize + ",0 0," + cellSize + " -" + cellSize + ",0 0,-" + cellSize + "z ";
@@ -224361,9 +225317,9 @@ var qrcode = function(typeNumber, errorCorrectionLevel) {
     qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : "";
     qrSvg += ' viewBox="0 0 ' + size + " " + size + '" ';
     qrSvg += ' preserveAspectRatio="xMinYMin meet"';
-    qrSvg += title9.text || alt.text ? ' role="img" aria-labelledby="' + escapeXml([title9.id, alt.id].join(" ").trim()) + '"' : "";
+    qrSvg += title10.text || alt.text ? ' role="img" aria-labelledby="' + escapeXml([title10.id, alt.id].join(" ").trim()) + '"' : "";
     qrSvg += ">";
-    qrSvg += title9.text ? '<title id="' + escapeXml(title9.id) + '">' + escapeXml(title9.text) + "</title>" : "";
+    qrSvg += title10.text ? '<title id="' + escapeXml(title10.id) + '">' + escapeXml(title10.text) + "</title>" : "";
     qrSvg += alt.text ? '<description id="' + escapeXml(alt.id) + '">' + escapeXml(alt.text) + "</description>" : "";
     qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
     qrSvg += '<path d="';
@@ -226170,11 +227126,11 @@ async function scanQr(environment, host) {
   }, 200);
   return result;
 }
-function shell3(environment, title9, intro) {
+function shell3(environment, title10, intro) {
   const document2 = environment.document, root6 = el(document2, "div", "coop-screen"), card = el(document2, "div", "coop-card");
   root6.setAttribute("role", "dialog");
-  root6.setAttribute("aria-label", title9);
-  card.append(el(document2, "h2", "coop-title", title9), el(document2, "p", "coop-intro", intro));
+  root6.setAttribute("aria-label", title10);
+  card.append(el(document2, "h2", "coop-title", title10), el(document2, "p", "coop-intro", intro));
   root6.append(card);
   document2.body.append(root6);
   const status2 = el(document2, "p", "coop-status");
@@ -226488,8 +227444,8 @@ function mountCoopBarV1({ environment, label: label7, action: action2, onAction 
     }
   };
 }
-function showCoopEndedV1({ environment, title: title9 = "Back home", reason, onHome, again = null }) {
-  const ui = shell3(environment, title9, reason), actions = el(ui.document, "div", "coop-actions");
+function showCoopEndedV1({ environment, title: title10 = "Back home", reason, onHome, again = null }) {
+  const ui = shell3(environment, title10, reason), actions = el(ui.document, "div", "coop-actions");
   actions.append(button(ui.document, again ? "coop-secondary" : "coop-primary", "Back to my world", () => {
     ui.close();
     onHome();
@@ -226536,8 +227492,8 @@ function createFriendsFlowV1({ environment, friends, game, now: now3 = () => Dat
     if (text3 != null) e.textContent = text3;
     return e;
   };
-  function card({ who, title: title9, sub, buttons = [], ms = 0, onTimeout = null, id: id2 = null }) {
-    const c = { who, title: title9, sub, buttons, ms, onTimeout, id: id2, timer: null };
+  function card({ who, title: title10, sub, buttons = [], ms = 0, onTimeout = null, id: id2 = null }) {
+    const c = { who, title: title10, sub, buttons, ms, onTimeout, id: id2, timer: null };
     cards.push(c);
     if (!shown2) next();
     return c;
@@ -228040,8 +228996,8 @@ async function startWorldClient(environment) {
       }
     }
     if (woodlandReview) {
-      const evidence = environment.document.createElement("details"), title9 = environment.document.createElement("summary"), refresh = environment.document.createElement("button"), output = environment.document.createElement("textarea");
-      title9.textContent = "Woodland validation evidence \xB7 read only";
+      const evidence = environment.document.createElement("details"), title10 = environment.document.createElement("summary"), refresh = environment.document.createElement("button"), output = environment.document.createElement("textarea");
+      title10.textContent = "Woodland validation evidence \xB7 read only";
       refresh.textContent = "Refresh Woodland evidence";
       output.id = "woodland-review-json";
       output.readOnly = true;
@@ -228051,7 +229007,7 @@ async function startWorldClient(environment) {
         const m = gameplayPort.getReadModel(), p = m.playersById[m.localPlayerId], a = m.entitiesById[p.entityId];
         output.value = JSON.stringify({ runtime: runtimeFingerprint, tick: m.tick, worldEvents: m.worldEvents, player: { id: m.localPlayerId, position: a.position, space: m.context?.spaceInstanceId, hp: a.hp }, art: environmentArt.resources(), presentation: client.resources(), streaming: session.resources(), performance: performanceProbe?.snapshot(), save: session.gateStatus?.(), scope: "Read-only review snapshot; not an authority mutation" }, null, 2);
       };
-      evidence.append(title9, refresh, output);
+      evidence.append(title10, refresh, output);
       group.append(evidence);
     }
     if (environmentArt.setRouteMode) {

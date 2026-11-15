@@ -20147,7 +20147,20 @@ function validateRecoveredBossV1(state, id2, b) {
   }
   if (b.archive !== void 0) {
     const archive = b.archive;
-    closedRecord(archive, ["version", "charge", "sporesById", "poisonByEntityId", "contactByEntityId", "nextWarrenTick", "sludgeSequence", "collapsedRings"], ["nexusShotsById", "shedEvents", "sheddingVersion", "shedProcessedStep"]);
+    closedRecord(archive, ["version", "charge", "sporesById", "poisonByEntityId", "contactByEntityId", "nextWarrenTick", "sludgeSequence", "collapsedRings"], ["nexusShotsById", "shedEvents", "sheddingVersion", "shedProcessedStep", "ashfangShoves", "ashfangRoarTick"]);
+    if (archive.ashfangRoarTick !== void 0) {
+      requireContract(b.bossDefinitionId === "ashfang", "Invalid Ashfang roar owner");
+      safeInteger(archive.ashfangRoarTick, b.activatedTick, state.tick);
+    }
+    if (archive.ashfangShoves !== void 0) {
+      requireContract(b.bossDefinitionId === "ashfang" && archive.ashfangShoves && typeof archive.ashfangShoves === "object" && Object.keys(archive.ashfangShoves).length <= 8, "Invalid Ashfang shove ledger");
+      for (const v of Object.values(archive.ashfangShoves)) {
+        closedRecord(v, ["from", "to", "startedTick", "durationTicks"]);
+        requireContract(point5(v.from) && point5(v.to), "Invalid Ashfang shove");
+        safeInteger(v.startedTick, b.activatedTick, state.tick);
+        safeInteger(v.durationTicks, 1, 30);
+      }
+    }
     if (archive.sheddingVersion !== void 0) {
       requireContract(b.bossDefinitionId === "corrosive_abomination" && archive.sheddingVersion === 4, "Invalid shedding successor");
       safeInteger(archive.shedProcessedStep, 0, b.chunkStep);
@@ -20166,7 +20179,7 @@ function validateRecoveredBossV1(state, id2, b) {
       safeInteger(event.damageSequence, 1, 16);
       requireContract(Array.isArray(event.spawnedMinionIds) && event.spawnedMinionIds.length === 1 && event.chunkCount === 1 && b.summonEntityIds.includes(event.spawnedMinionIds[0]), "Invalid real shed minion binding");
     }
-    requireContract(Array.isArray(archive.collapsedRings) && archive.collapsedRings.length <= 7 && (!archive.collapsedRings.length || b.bossDefinitionId === "ashfang"), "Archived collapse ledger invalid");
+    requireContract(Array.isArray(archive.collapsedRings) && archive.collapsedRings.length <= (b.bossDefinitionId === "ashfang" ? 4 : 7) && (!archive.collapsedRings.length || b.bossDefinitionId === "ashfang"), "Archived collapse ledger invalid");
     for (const r of archive.collapsedRings) {
       closedRecord(r, ["index", "createdTick", "minColumn", "maxColumn", "minRow", "maxRow", "tileSize", "tiles"]);
       safeInteger(r.index, 0, 7);

@@ -8718,16 +8718,16 @@ function workshopResult(item) {
         name = resolveNewAffix(picked, g.progression.gearClass, definition.spellType ?? null, () => random("class"));
         skill = affixSkill(name, g.progression.gearClass, () => random("skill"));
       }
-      const range = affixRollRange({ ...g, rarityTier: tier, definition }, name), whole = integer.has(name) || name === "lifeHit" || name === "passiveRank";
+      const range2 = affixRollRange({ ...g, rarityTier: tier, definition }, name), whole = integer.has(name) || name === "lifeHit" || name === "passiveRank";
       let value;
       if (V3_FIXED[name]) {
         const x = V3_FIXED[name];
         value = fixedV3Value(name, x.lo + Math.floor(random("value") * (x.hi - x.lo + 1)));
         if (x.step[1] === 1) value = Number(value);
-      } else if (whole && (typeof range.minimum === "string" || typeof range.maximum === "string" || range.minimum?.chunks)) {
-        const lo = progressionBigInt(range.minimum), hi = progressionBigInt(range.maximum);
+      } else if (whole && (typeof range2.minimum === "string" || typeof range2.maximum === "string" || range2.minimum?.chunks)) {
+        const lo = progressionBigInt(range2.minimum), hi = progressionBigInt(range2.maximum);
         value = progressionWire(lo + (hi - lo) * BigInt(Math.floor(random("value") * 1e6)) / 1000000n);
-      } else value = whole ? Math.floor(range.minimum + random("value") * (range.maximum - range.minimum + 1)) : Number((Number(range.minimum) + random("value") * (Number(range.maximum) - Number(range.minimum))).toFixed(4));
+      } else value = whole ? Math.floor(range2.minimum + random("value") * (range2.maximum - range2.minimum + 1)) : Number((Number(range2.minimum) + random("value") * (Number(range2.maximum) - Number(range2.minimum))).toFixed(4));
       adjust(definition, old.key, old.value, 0);
       adjust(definition, name, 0, value);
       affixes[step.line] = skill ? { key: name, value, skill } : { key: name, value };
@@ -11014,8 +11014,8 @@ function townStationsV1(t) {
     return null;
   };
   const RING3 = [[0, 0], [1, 0], [-1, 0], [0, 1], [1, 1], [-1, 1], [0, -1], [2, 0], [-2, 0], [2, 1], [-2, 1], [0, 2]];
-  const add = (role, p, facing, building, extra) => {
-    if (p) out.push({ role, x: o.x + p[0], y: o.y + p[1], facing, building: building ?? null, ...extra });
+  const add = (role, p, facing2, building, extra) => {
+    if (p) out.push({ role, x: o.x + p[0], y: o.y + p[1], facing: facing2, building: building ?? null, ...extra });
   };
   const st = F("stalls");
   if (roles.includes("general") && st?.stalls?.length) {
@@ -11089,11 +11089,11 @@ function generatedTownChunkBlockers(towns, cx, cy) {
   for (const t of towns) {
     const o = t.origin, [W6, H6] = t.core;
     if (x + 32 <= o.x || x >= o.x + W6 || y + 26 <= o.y || y >= o.y + H6) continue;
-    const clip = (bx, by, bw, bh) => ({ x: Math.max(x, bx) - x, y: Math.max(y, by) - y, width: Math.min(x + 32, bx + bw) - Math.max(x, bx), height: Math.min(y + 26, by + bh) - Math.max(y, by) });
-    out.push({ id: t.id + ":clearing:" + cx + "," + cy, kind: "civilian-clearing", ...clip(o.x, o.y, W6, H6), detail: "" });
+    const clip2 = (bx, by, bw, bh) => ({ x: Math.max(x, bx) - x, y: Math.max(y, by) - y, width: Math.min(x + 32, bx + bw) - Math.max(x, bx), height: Math.min(y + 26, by + bh) - Math.max(y, by) });
+    out.push({ id: t.id + ":clearing:" + cx + "," + cy, kind: "civilian-clearing", ...clip2(o.x, o.y, W6, H6), detail: "" });
     for (const b0 of townTemplateV1(t).buildings) {
       const b = townSolidRectV1(t, b0);
-      if (b.x + o.x < x + 32 && b.x + b.w + o.x > x && b.y + o.y < y + 26 && b.y + b.h + o.y > y) out.push({ id: t.id + ":" + b0.id, kind: "civilian-building", ...clip(b.x + o.x, b.y + o.y, b.w, b.h), detail: b0.label });
+      if (b.x + o.x < x + 32 && b.x + b.w + o.x > x && b.y + o.y < y + 26 && b.y + b.h + o.y > y) out.push({ id: t.id + ":" + b0.id, kind: "civilian-building", ...clip2(b.x + o.x, b.y + o.y, b.w, b.h), detail: b0.label });
     }
   }
   return out;
@@ -15474,7 +15474,7 @@ function createPlannedTerrain(p) {
     }
   }
   const parentWater = p.version === PLANNED_WATER_VERSION ? createLocalWaterGeometry(p, macro, shoreline, riverSegments) : null, waterGeometry = p.hydrologyPlan ? createHydrologyGeometryV1(p.hydrologyPlan, parentWater) : parentWater;
-  const segmentDistance = (x, y, a, b) => {
+  const segmentDistance2 = (x, y, a, b) => {
     const dx = b.x - a.x, dy = b.y - a.y, u = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / (dx * dx + dy * dy || 1)));
     return PM.hypot(x - a.x - u * dx, y - a.y - u * dy);
   };
@@ -15486,7 +15486,7 @@ function createPlannedTerrain(p) {
     const biome = p.biomeIds[(softBiome ? softBiome(x, y, mx, my, c) : c[2]) - 1].replace("biome:", ""), code = BIOME_CODES[biome], inland = waterGeometry?.inland(x, y);
     if (inland?.water) return { walkable: false, kind: inland.kind, biome: code, landmassId: landmass[c[1]].id, band: c[3] };
     if (!waterGeometry && c[4]) return { walkable: false, kind: "lake", biome: code, landmassId: landmass[c[1]].id, band: c[3] };
-    for (const [a, b, w] of (!waterGeometry ? riverSegments.get(mx + "," + my) : null) ?? []) if (segmentDistance(x + 0.5, y + 0.5, a, b) <= w) return { walkable: false, kind: "river", biome: code, landmassId: landmass[c[1]].id, band: c[3] };
+    for (const [a, b, w] of (!waterGeometry ? riverSegments.get(mx + "," + my) : null) ?? []) if (segmentDistance2(x + 0.5, y + 0.5, a, b) <= w) return { walkable: false, kind: "river", biome: code, landmassId: landmass[c[1]].id, band: c[3] };
     const lx = x - mx * 64, ly = y - my * 52, oldCoastal = !macro(mx - 1, my) && lx < 3 || !macro(mx + 1, my) && lx >= 61 || !macro(mx, my - 1) && ly < 3 || !macro(mx, my + 1) && ly >= 49;
     return { walkable: true, bank: inland?.bank ?? false, kind: (shoreline ? coast?.shore : oldCoastal) ? "shore" : "land", shoreClassId: coast?.classId ?? null, biome: code, biomeId: "biome:" + biome, landmassId: landmass[c[1]].id, band: c[3], slope: c[8], geology: c[9], elevation: c[10] };
   }
@@ -16428,9 +16428,9 @@ var packSizesForBindingV1 = (b) => {
   return Boolean(m) && Number(m[1]) >= 22;
 };
 function packSizeRangeV1(level) {
-  let range = PACK_SIZES_V1[0];
-  for (const row2 of PACK_SIZES_V1) if (level >= row2[0]) range = row2;
-  return [range[1], range[2]];
+  let range2 = PACK_SIZES_V1[0];
+  for (const row2 of PACK_SIZES_V1) if (level >= row2[0]) range2 = row2;
+  return [range2[1], range2[2]];
 }
 var packLevelOffsetV1 = (entityId) => SPAWN_LEVELS_V1.packOffsets[hash2("spawn-levels-v1/pack/" + entityId) % SPAWN_LEVELS_V1.packOffsets.length];
 var memberLevelOffsetV1 = (state, entityId) => !usesSpawnLevelsV1(state) || state.bossCombat?.bossesByEntityId?.[entityId] || state.bossCombat?.summonsByEntityId?.[entityId] || state.eliteCombat?.elitesByEntityId?.[entityId] ? 0 : packLevelOffsetV1(entityId);
@@ -17270,7 +17270,7 @@ function buildRecipe(seed, family2, tier, index2, seeded2 = false) {
   const floorCount = multiroomFloorCountV1(tier, seeded2), minimumDepth = multiroomMinimumRoomEdgesV1(tier, seeded2);
   requireContract(["cave", "fort", "ruin", "crypt"].includes(family2) && floorCount && index2 >= 0 && index2 < floorCount, "Unknown multiroom input");
   for (let attempt = 0, attempts = multiroomMaximumAttemptsV1(tier, seeded2); attempt < attempts; attempt++) {
-    const roll2 = rng2(MULTIROOM_VERSION + "/" + seed + "/" + family2 + "/" + tier + "/" + index2 + "/" + attempt), range = multiroomRoomRangeV1(tier, seeded2), count2 = range[0] + roll2(range[1] - range[0] + 1), nodes = [{ x: roll2(4), y: roll2(2) }], edges = [];
+    const roll2 = rng2(MULTIROOM_VERSION + "/" + seed + "/" + family2 + "/" + tier + "/" + index2 + "/" + attempt), range2 = multiroomRoomRangeV1(tier, seeded2), count2 = range2[0] + roll2(range2[1] - range2[0] + 1), nodes = [{ x: roll2(4), y: roll2(2) }], edges = [];
     while (nodes.length < count2) {
       const frontier = [];
       for (let a = 0; a < nodes.length; a++) for (const [dx, dy] of dirs2) {
@@ -17646,6 +17646,75 @@ function archivedCombatProfile(kind2) {
   return ARCHIVED_FIGHT_PROFILES[kind2] ?? null;
 }
 
+// src/simulation/archived_boss_attack_geometry_v1.js
+var clip = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+var range = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+var facing = (from, to) => to.x < from.x ? -1 : 1;
+function segmentDistance(p, a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y, length2 = dx * dx + dy * dy;
+  if (length2 === 0) return range(p, a);
+  const t = clip(((p.x - a.x) * dx + (p.y - a.y) * dy) / length2);
+  return Math.hypot(p.x - (a.x + dx * t), p.y - (a.y + dy * t));
+}
+function originalFireCone(origin2, target, person, rangeLimit = 110, halfAngle = 0.8, hull = 9) {
+  const dx = person.x - origin2.x, dy = person.y - origin2.y, d = Math.hypot(dx, dy);
+  if (d > rangeLimit + hull) return false;
+  const s = facing(origin2, target), dot = dx * s;
+  if (dot < -hull) return false;
+  if (d <= hull) return true;
+  const angular = Math.atan2(Math.abs(dy), dot);
+  return angular <= halfAngle + Math.asin(Math.min(1, hull / d));
+}
+function originalCinderRushEndpoint(collision2, origin2, target, radius = 28) {
+  const dx = target.x - origin2.x, dy = target.y - origin2.y, d = Math.hypot(dx, dy) || 1;
+  const nx = dx / d, ny = dy / d, max = Math.min(220, d + 64);
+  let end = { x: origin2.x, y: origin2.y };
+  for (let length = 4; length <= max; length += 4) {
+    const next = { x: origin2.x + nx * length, y: origin2.y + ny * length };
+    if (!sweptPathClear(collision2, origin2, next, radius)) break;
+    end = next;
+  }
+  return end;
+}
+function sweptPathClear(collision2, from, to, radius = 12) {
+  if (!collision2 || collidesWithTiles(collision2, from.x, from.y, radius) || collidesWithTiles(collision2, to.x, to.y, radius)) return false;
+  const d = range(from, to), steps = Math.max(1, Math.ceil(d / Math.max(3, collision2.tileSize / 6)));
+  for (let i = 1; i < steps; i++) {
+    const p = { x: from.x + (to.x - from.x) * i / steps, y: from.y + (to.y - from.y) * i / steps };
+    if (collidesWithTiles(collision2, p.x, p.y, radius)) return false;
+  }
+  return true;
+}
+function originalArenaRing(collision2, home, index2) {
+  if (!Number.isInteger(index2) || index2 < 0 || index2 > 7) return null;
+  const s = collision2.tileSize, cols = collision2.width, rows3 = collision2.height;
+  const centerX = Math.floor(home.x / s), centerY = Math.floor(home.y / s);
+  const half = Math.min(9, Math.floor((Math.min(cols, rows3) - 4) / 2));
+  const minColumn = Math.max(0, centerX - half + 2 + index2), maxColumn = Math.min(cols - 1, centerX + half - 2 - index2);
+  const minRow = Math.max(0, centerY - half + 2 + index2), maxRow = Math.min(rows3 - 1, centerY + half - 2 - index2);
+  if (minColumn >= maxColumn || minRow >= maxRow) return null;
+  const ring = { index: index2, minColumn, maxColumn, minRow, maxRow, tileSize: s };
+  const tiles3 = originalRingTiles(ring).filter((p) => !collidesWithTiles(collision2, p.x + s / 2, p.y + s / 2, s / 5));
+  return tiles3.length ? { ...ring, tiles: tiles3 } : null;
+}
+function originalRingTiles(r) {
+  const out = [], s = r.tileSize;
+  for (let col = r.minColumn; col <= r.maxColumn; col++) {
+    out.push({ column: col, row: r.minRow, x: col * s, y: r.minRow * s, size: s });
+    out.push({ column: col, row: r.maxRow, x: col * s, y: r.maxRow * s, size: s });
+  }
+  for (let row2 = r.minRow + 1; row2 < r.maxRow; row2++) {
+    out.push({ column: r.minColumn, row: row2, x: r.minColumn * s, y: row2 * s, size: s });
+    out.push({ column: r.maxColumn, row: row2, x: r.maxColumn * s, y: row2 * s, size: s });
+  }
+  return out;
+}
+function onOriginalRing(r, p) {
+  if (!r?.tiles?.length) return false;
+  const col = Math.floor(p.x / r.tileSize), row2 = Math.floor(p.y / r.tileSize);
+  return r.tiles.some((tile) => tile.column === col && tile.row === row2);
+}
+
 // src/shared/contracts/recovered_boss_v1.js
 var RECOVERED_SUMMON_VERSION = "recovered-boss-summon-v1";
 var point4 = (p) => Boolean(p && Number.isFinite(p.x) && Number.isFinite(p.y));
@@ -17804,7 +17873,20 @@ function validateRecoveredBossV1(state, id, b) {
   }
   if (b.archive !== void 0) {
     const archive = b.archive;
-    closedRecord(archive, ["version", "charge", "sporesById", "poisonByEntityId", "contactByEntityId", "nextWarrenTick", "sludgeSequence", "collapsedRings"], ["nexusShotsById", "shedEvents", "sheddingVersion", "shedProcessedStep"]);
+    closedRecord(archive, ["version", "charge", "sporesById", "poisonByEntityId", "contactByEntityId", "nextWarrenTick", "sludgeSequence", "collapsedRings"], ["nexusShotsById", "shedEvents", "sheddingVersion", "shedProcessedStep", "ashfangShoves", "ashfangRoarTick"]);
+    if (archive.ashfangRoarTick !== void 0) {
+      requireContract(b.bossDefinitionId === "ashfang", "Invalid Ashfang roar owner");
+      safeInteger(archive.ashfangRoarTick, b.activatedTick, state.tick);
+    }
+    if (archive.ashfangShoves !== void 0) {
+      requireContract(b.bossDefinitionId === "ashfang" && archive.ashfangShoves && typeof archive.ashfangShoves === "object" && Object.keys(archive.ashfangShoves).length <= 8, "Invalid Ashfang shove ledger");
+      for (const v of Object.values(archive.ashfangShoves)) {
+        closedRecord(v, ["from", "to", "startedTick", "durationTicks"]);
+        requireContract(point4(v.from) && point4(v.to), "Invalid Ashfang shove");
+        safeInteger(v.startedTick, b.activatedTick, state.tick);
+        safeInteger(v.durationTicks, 1, 30);
+      }
+    }
     if (archive.sheddingVersion !== void 0) {
       requireContract(b.bossDefinitionId === "corrosive_abomination" && archive.sheddingVersion === 4, "Invalid shedding successor");
       safeInteger(archive.shedProcessedStep, 0, b.chunkStep);
@@ -17823,7 +17905,7 @@ function validateRecoveredBossV1(state, id, b) {
       safeInteger(event.damageSequence, 1, 16);
       requireContract(Array.isArray(event.spawnedMinionIds) && event.spawnedMinionIds.length === 1 && event.chunkCount === 1 && b.summonEntityIds.includes(event.spawnedMinionIds[0]), "Invalid real shed minion binding");
     }
-    requireContract(Array.isArray(archive.collapsedRings) && archive.collapsedRings.length <= 7 && (!archive.collapsedRings.length || b.bossDefinitionId === "ashfang"), "Archived collapse ledger invalid");
+    requireContract(Array.isArray(archive.collapsedRings) && archive.collapsedRings.length <= (b.bossDefinitionId === "ashfang" ? 4 : 7) && (!archive.collapsedRings.length || b.bossDefinitionId === "ashfang"), "Archived collapse ledger invalid");
     for (const r of archive.collapsedRings) {
       closedRecord(r, ["index", "createdTick", "minColumn", "maxColumn", "minRow", "maxRow", "tileSize", "tiles"]);
       safeInteger(r.index, 0, 7);
@@ -17943,10 +18025,26 @@ function projectRecoveredBossV1(b, state) {
     pendingAction: b.actionState === "telegraphing" ? { ability: b.activeAbility, targetEntityId: b.targetEntityId, targetPosition: copyWire(b.targetPosition), startedTick: b.telegraphStartedTick, resolvesTick: b.resolvesTick } : null
   });
 }
+function nextAshfangRing(state, b) {
+  const c = state.spacesByInstanceId?.[b.spaceInstanceId]?.collision;
+  const r = c ? originalArenaRing(c, b.homePosition, b.archive.collapsedRings.length) : null;
+  return r ? copyWire(r) : null;
+}
 function projectRecoveredHazardsV1(state, spaceId) {
   const bosses = Object.values(state.bossCombat?.bossesByEntityId ?? {}).filter((b) => recoveredBossRecord(b) && b.spaceInstanceId === spaceId && state.entitiesById[b.entityId]?.alive);
   return {
-    recoveredTelegraphs: bosses.filter((b) => b.actionState === "telegraphing").map((b) => ({ bossId: b.bossId, bossDefinitionId: b.bossDefinitionId, ability: b.activeAbility, position: copyWire(b.targetPosition), originPosition: copyWire(state.entitiesById[b.entityId].position), sequence: b.abilitySequence, selectionSeed: b.selectionSeed, startedTick: b.telegraphStartedTick, resolvesTick: b.resolvesTick })),
+    recoveredTelegraphs: bosses.filter((b) => b.actionState === "telegraphing").map((b) => ({
+      bossId: b.bossId,
+      bossDefinitionId: b.bossDefinitionId,
+      ability: b.activeAbility,
+      position: copyWire(b.targetPosition),
+      originPosition: copyWire(state.entitiesById[b.entityId].position),
+      sequence: b.abilitySequence,
+      selectionSeed: b.selectionSeed,
+      startedTick: b.telegraphStartedTick,
+      resolvesTick: b.resolvesTick,
+      ...b.archive && b.bossDefinitionId === "ashfang" && b.activeAbility === "arena_collapse" ? { ring: nextAshfangRing(state, b) } : {}
+    })),
     recoveredPools: bosses.flatMap((b) => b.pools.map((p) => ({ ...copyWire(p), bossId: b.bossId, bossDefinitionId: b.bossDefinitionId }))),
     recoveredNexusShots: bosses.flatMap((b) => Object.values(b.archive?.nexusShotsById ?? {}).map((s) => ({ ...copyWire(s), bossId: b.bossId, bossDefinitionId: b.bossDefinitionId }))),
     recoveredSpores: bosses.flatMap((b) => Object.values(b.archive?.sporesById ?? {}).map((s) => ({ ...copyWire(s), bossId: b.bossId, bossDefinitionId: b.bossDefinitionId }))),
@@ -20903,8 +21001,8 @@ var standardCocoonFamilies = Object.freeze(["sprout", "slime", "sprout"]);
 function standardBossPlacement(site, accept = null) {
   const { finalFloor, endRoom, reward, arenaAnchor } = geometry(site), tileSize = finalFloor.collision.tileSize, raw = roomCells(finalFloor, endRoom), entropy = entropyFor(site), bossHull = ARACHNID_TREANT_PROFILE.hullRadius, transitions = Object.values(finalFloor.transitions ?? {}).filter(Boolean).map((row2) => row2.anchor), decorations3 = (finalFloor.visual?.decorations ?? []).map((row2) => ({ x: row2.x * tileSize, y: row2.y * tileSize })), reserved = [finalFloor.entrance, ...transitions], bossCandidates = raw.filter((cell) => {
     const p = center(finalFloor, cell), combat = raw.filter((other) => {
-      const q = center(finalFloor, other), range = distance2(p, q);
-      return range >= 70 && range <= 132 && !collidesWithTiles(finalFloor.collision, q.x, q.y, 9) && reachableWithin(raw, cell, other);
+      const q = center(finalFloor, other), range2 = distance2(p, q);
+      return range2 >= 70 && range2 <= 132 && !collidesWithTiles(finalFloor.collision, q.x, q.y, 9) && reachableWithin(raw, cell, other);
     });
     return !collidesWithTiles(finalFloor.collision, p.x, p.y, bossHull) && distance2(p, reward.position) >= bossHull + 42 && reserved.every((anchor) => distance2(p, anchor) >= bossHull + 24) && decorations3.every((anchor) => distance2(p, anchor) >= bossHull + 24) && combat.length >= 6;
   });
@@ -25305,8 +25403,8 @@ function validateHistory(state) {
     if (summary.lastAuthorityOrder >= summary.firstAuthorityOrder) ranges.push(summary);
   }
   ranges.sort((a, b) => a.firstAuthorityOrder - b.firstAuthorityOrder);
-  ranges.forEach((range, n) => requireContract(
-    n === 0 || range.firstAuthorityOrder > ranges[n - 1].lastAuthorityOrder,
+  ranges.forEach((range2, n) => requireContract(
+    n === 0 || range2.firstAuthorityOrder > ranges[n - 1].lastAuthorityOrder,
     "History session intervals overlap"
   ));
   requireContract(h.sessionsById[state.session.sessionId]?.lastAuthorityOrder === state.lastAppliedAuthorityOrder, "Current session/global watermark mismatch");
@@ -25545,8 +25643,8 @@ function validateMultiplayerState(value, world) {
 }
 function sessionForAuthorityOrder(world, order) {
   if (world.history) return Object.keys(world.history.sessionsById).find((sid) => {
-    const range = world.history.sessionsById[sid];
-    return order >= range.firstAuthorityOrder && order <= range.lastAuthorityOrder;
+    const range2 = world.history.sessionsById[sid];
+    return order >= range2.firstAuthorityOrder && order <= range2.lastAuthorityOrder;
   });
   for (const prior of world.multiplayer?.priorSessions ?? []) {
     if (order <= prior.lastAuthorityOrder) return prior.sessionId;
@@ -27124,7 +27222,7 @@ function createPageTransaction({ root: root2 = null, readPage, sha256 }) {
     for (const k of keys2) children[k[depth]] = await update(children[k[depth]], k, values[k], depth + 1);
     return put2({ version: D9_PAGE_VERSION, kind: "branch", children });
   }
-  async function range({ after = null, through = "f".repeat(64), limit = 64 } = {}) {
+  async function range2({ after = null, through = "f".repeat(64), limit = 64 } = {}) {
     requireContract((after === null || /^[a-f0-9]{64}$/.test(after)) && /^[a-f0-9]{64}$/.test(through) && Number.isSafeInteger(limit) && limit >= 1 && limit <= 128, "Invalid page range");
     const entries = [];
     async function visit(id, prefix) {
@@ -27159,7 +27257,7 @@ function createPageTransaction({ root: root2 = null, readPage, sha256 }) {
     visit(current);
     return out;
   }
-  return { get, range, async set(key5, value) {
+  return { get, range: range2, async set(key5, value) {
     requireContract(/^[a-f0-9]{64}$/.test(key5), "Page key requires full digest");
     current = await update(current, key5, value, 0);
     return current;
@@ -30458,8 +30556,8 @@ function createWorldSimulation(initialState = createEmptyWorldState()) {
       commandReceipt.result = { status: "applied", entityId: actor.entityId };
     } else if (command.kind === "movement.setIntent" && actor.alive) {
       next.space.entitiesById[actor.entityId].movementIntent = copyWire(command.payload);
-      const facing = next.primary?.actorsById[actor.entityId], length = Math.hypot(command.payload.x, command.payload.y);
-      if (facing && length > 0) facing.facing = { x: command.payload.x / length, y: command.payload.y / length };
+      const facing2 = next.primary?.actorsById[actor.entityId], length = Math.hypot(command.payload.x, command.payload.y);
+      if (facing2 && length > 0) facing2.facing = { x: command.payload.x / length, y: command.payload.y / length };
       commandReceipt.result = { status: "applied", entityId: actor.entityId };
     } else commandReceipt.result = { status: "rejected", reason: actor.alive ? "attackUnavailable" : "actorUnavailable" };
     next.appliedCommandsById[command.commandId] = commandReceipt;
@@ -31993,6 +32091,13 @@ export {
   CRYPT_POPULATION_TIERS,
   useSeededReservationsV1,
   archivedCombatProfile,
+  range,
+  segmentDistance,
+  originalFireCone,
+  originalCinderRushEndpoint,
+  sweptPathClear,
+  originalArenaRing,
+  onOriginalRing,
   recoveredBossRecord,
   BRIMSTONE_ID,
   BRIMSTONE,
