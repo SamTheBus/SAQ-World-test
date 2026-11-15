@@ -166828,6 +166828,48 @@ function createInventoryPresentation({ document: document2, environment, readMod
     refresh(readModel());
     closeButton.focus();
   }
+  let pointsBadge = null, pointsFor = null, pointsPage = "stats";
+  function paintPoints(local8) {
+    const d8 = local8?.d8 ?? null, host = document2.getElementById("world-hud-vitals");
+    if (!host) return;
+    if (d8 === pointsFor && pointsBadge?.parentNode === host) return;
+    pointsFor = d8;
+    let ap = 0, pts2 = 0;
+    try {
+      ap = Number(pointBalances(d8).attributeUnspent) || 0;
+      if (d8?.heroClass) pts2 = Number(classTreePoints(d8).unspent) || 0;
+    } catch {
+    }
+    if (!pointsBadge) {
+      pointsBadge = document2.createElement("button");
+      pointsBadge.type = "button";
+      pointsBadge.id = "world-points-badge";
+      pointsBadge.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openPoints();
+      });
+    }
+    if (pointsBadge.parentNode !== host) host.append(pointsBadge);
+    const n = ap + pts2;
+    pointsBadge.hidden = !n;
+    if (!n) return;
+    pointsPage = ap ? "stats" : "progression";
+    pointsBadge.textContent = "+" + n;
+    pointsBadge.setAttribute("aria-label", [ap ? ap + " stat " + (ap === 1 ? "point" : "points") : "", pts2 ? pts2 + " skill " + (pts2 === 1 ? "point" : "points") : ""].filter(Boolean).join(" and ") + " to spend");
+  }
+  function openPoints() {
+    const m = readModel();
+    if (open3 || !m.inventory || !alive(m)) return;
+    clearInput();
+    forgeSession = false;
+    section = pointsPage;
+    open3 = true;
+    inspect = false;
+    error = "";
+    key4 = null;
+    refresh(readModel());
+    closeButton.focus();
+  }
   function openQuests() {
     const m = readModel();
     if (!questsPage || !m.inventory) return false;
@@ -167011,6 +167053,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       pickup.textContent = actionLabel;
       pickup.setAttribute("aria-label", action2.kind === "loot.pickup" ? actionLabel.replace("Pick up:", "Pick up") : actionLabel);
     }
+    paintPoints(local8);
     const identity2 = `${m.context.campaignId}/${m.localPlayerId}`;
     if (observed?.identity === identity2) {
       const added2 = Object.values(inv.itemsById).find((i) => !observed.ids.has(i.itemId));
@@ -189857,7 +189900,7 @@ function drawFriendDownV1(c, canvas, model, cam, time3, callTop = null) {
 var HUD_FIXED_V1 = Object.freeze(["#world-hud-vitals", "#world-hud-title", "#quest-tracker", "#world-event-stack-v4", "#local-world-controls", ".chart-mini", ".world-mini", "#woodland-clue-v3-8"]);
 var HUD_CONTROLS_V1 = Object.freeze([".skill-wheel-ring", ".skill-slot", "#primary-attack", "#carried-rations"]);
 var HUD_COMPASS_V1 = Object.freeze([".chart-mini", ".world-mini"]);
-var HUD_LAYOUT_V1 = Object.freeze({ gap: 10, barTop: 12, barHeight: 50, barWidth: 380, core: 200, barMinScale: 0.6, measureMs: 250, toastLeft: 12, toastWidth: 240, upright: 600, notice: 44, heroLine: 0.46, oneCard: 24, cardHeight: 47, chipHeight: 28, cardGap: 4, menuSize: 38, menuReach: 0.72 });
+var HUD_LAYOUT_V1 = Object.freeze({ gap: 10, barTop: 12, barHeight: 50, barWidth: 380, core: 200, barMinScale: 0.6, measureMs: 250, toastLeft: 12, toastWidth: 240, upright: 600, notice: 44, heroLine: 0.46, oneCard: 24, cardHeight: 47, chipHeight: 28, cardGap: 4, menuSize: 38, menuClear: 1 });
 function hudPlaceNameV1(label7) {
   return typeof label7 === "string" ? label7.split(" \xB7 ").filter((part3) => !/^Band \d+$/.test(part3.trim())).join(" \xB7 ") : "";
 }
@@ -189888,8 +189931,8 @@ function hudControlsTopV1(rects, left, right, height) {
 }
 function hudMenuSpotV1(compass, size = HUD_LAYOUT_V1.menuSize) {
   if (!compass || compass.width < 40) return null;
-  const r = compass.width / 2 - 3, cx = compass.left + compass.width / 2, cy2 = compass.top + compass.width / 2 - 2, k = HUD_LAYOUT_V1.menuReach;
-  return { x: Math.round(cx + r * k - size / 2), y: Math.round(cy2 + r * k - size / 2) };
+  const r = compass.width / 2, cx = compass.left + r, cy2 = compass.top + r, dx = Math.max(0, r - size), dy = Math.sqrt(Math.max(0, (r + HUD_LAYOUT_V1.menuClear) ** 2 - dx * dx));
+  return { x: Math.round(cx + r - size), y: Math.round(cy2 + dy) };
 }
 function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft = HUD_LAYOUT_V1.toastLeft, toastRight = HUD_LAYOUT_V1.toastLeft + HUD_LAYOUT_V1.toastWidth, controls = [], laneBottom = null }) {
   const { gap: gap2, barTop, barHeight, barWidth, core: core5, barMinScale, heroLine: heroLine2, oneCard } = HUD_LAYOUT_V1, cx = width2 / 2, full = Math.min(barWidth, width2 - 28);
