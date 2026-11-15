@@ -10872,6 +10872,28 @@ var boxHit = (p, w, b, m) => {
   const g = w * T10 / 2 + m;
   return x1 * T10 + g > b.x0 && x0 * T10 - g < b.x1 && y1 * T10 + g > b.y0 && y0 * T10 - g < b.y1;
 };
+var paveToneSets = /* @__PURE__ */ new Map();
+function paveTones(pave) {
+  let s = paveToneSets.get(pave);
+  if (!s) {
+    s = { body: [], lit: [], low: tone(pave, -0.2) };
+    for (let n = 0; n < 9; n++) {
+      const tn2 = (n - 4) * 0.02;
+      s.body.push(tone(pave, tn2));
+      s.lit.push(tone(pave, 0.22 + tn2));
+    }
+    paveToneSets.set(pave, s);
+  }
+  return s;
+}
+var paveKept = null;
+function paveScratch(w, h) {
+  if (!paveKept || paveKept[0].width !== w || paveKept[0].height !== h) {
+    const a = canvasOf(w, h), b = canvasOf(w, h);
+    paveKept = a && b ? [a, b] : null;
+  }
+  return paveKept;
+}
 function cityPaving(c, all, plazas, b, biome) {
   const dz = biome === "desert", fz = biome === "frostland", uz = biome === "upland" && UPQ.pave === "granite", tz = biome === "tropical", vz = biome === "volcanic";
   PAVE = dz ? DESERT_PAVE : fz ? SNOW_PAVE : uz ? UP_PAVE : tz ? TR_PAVE : vz ? VO_PAVE : "#bbb19c";
@@ -10906,25 +10928,40 @@ function cityPaving(c, all, plazas, b, biome) {
   stage2(GUT, -6);
   stage2(tone(PAVE, -0.36), -10);
   {
-    const cv = c.canvas, M4 = c.getTransform(), mk = canvasOf(cv.width, cv.height), st = canvasOf(cv.width, cv.height);
-    if (mk && st) {
-      const m = mk.getContext("2d"), s = st.getContext("2d");
-      m.setTransform(M4);
-      s.setTransform(M4);
+    const cv = c.canvas, M4 = c.getTransform(), scratch2 = paveScratch(cv.width, cv.height);
+    if (scratch2) {
+      const [mk, st] = scratch2, m = mk.getContext("2d"), s = st.getContext("2d");
+      for (const g of [m, s]) {
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        g.globalCompositeOperation = "source-over";
+        g.clearRect(0, 0, cv.width, cv.height);
+        g.setTransform(M4);
+      }
       m.fillStyle = m.strokeStyle = "#fff";
       shapes2(m, -11);
-      const x0 = b.x0 - 20, y0 = b.y0 - 20, x1 = b.x1 + 20, y1 = b.y1 + 20;
+      const near5 = [];
+      for (const [p, w] of list) {
+        const g = w * T10 / 2 + 8;
+        for (let i = 1; i < p.length; i++) near5.push(Math.min(p[i - 1][0], p[i][0]) * T10 - g, Math.min(p[i - 1][1], p[i][1]) * T10 - g, Math.max(p[i - 1][0], p[i][0]) * T10 + g, Math.max(p[i - 1][1], p[i][1]) * T10 + g);
+      }
+      for (const q2 of SQ) near5.push(q2.x - 8, q2.y - 8, q2.x + q2.w + 8, q2.y + q2.h + 8);
+      const shows = (x, y) => {
+        for (let k = 0; k < near5.length; k += 4) if (x >= near5[k] && x <= near5[k + 2] && y >= near5[k + 1] && y <= near5[k + 3]) return true;
+        return false;
+      };
+      const x0 = b.x0 - 20, y0 = b.y0 - 20, x1 = b.x1 + 20, y1 = b.y1 + 20, tones = paveTones(PAVE);
       for (let y = Math.floor(y0 / 9) * 9; y < y1; y += 9) {
         const j = Math.round(y / 9) & 1;
         for (let x = Math.floor(x0 / 10) * 10 - j * 5; x < x1; x += 10) {
-          const h = hash9(x, y), sw = 7.4 + h % 5 * 0.35, sh3 = 6.6 + (h >>> 3) % 4 * 0.3, tn2 = ((h >>> 6) % 9 - 4) * 0.02;
-          s.fillStyle = tone(PAVE, tn2);
+          if (!shows(x, y)) continue;
+          const h = hash9(x, y), sw = 7.4 + h % 5 * 0.35, sh3 = 6.6 + (h >>> 3) % 4 * 0.3, n = (h >>> 6) % 9;
+          s.fillStyle = tones.body[n];
           s.beginPath();
           s.roundRect(x - sw / 2, y - sh3 / 2, sw, sh3, 2.2);
           s.fill();
-          s.fillStyle = tone(PAVE, 0.22 + tn2);
+          s.fillStyle = tones.lit[n];
           s.fillRect(x - sw / 2 + 1.3, y - sh3 / 2 + 0.9, sw * 0.55, 1.2);
-          s.fillStyle = tone(PAVE, -0.2);
+          s.fillStyle = tones.low;
           s.fillRect(x - sw / 2 + 1.1, y + sh3 / 2 - 1.3, sw - 2.2, 1);
         }
       }
