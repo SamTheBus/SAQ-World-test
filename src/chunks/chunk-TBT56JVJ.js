@@ -6469,7 +6469,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     null,
     "overlord_iron_vault",
     "volcanic",
-    "When a movement skill lands (Dash, Blink, Lunge, Shadowstep, Shield Charge or Skyfall Leap), the ground quakes: a ring of lava cracks bursts around you for {0} of your Attack and knocks enemies back. Once every 4 s.",
+    "When a movement skill lands (Dash, Blink, Lunge, Shadowstep, Shield Charge or Skyfall Leap), the ground quakes: a ring of lava cracks bursts around you for {0} of your Attack, sets enemies burning and knocks them back. Once every 4 s.",
     "Every step a small eruption."
   ),
   // Shield Warden (Upland): its lodestone, its thrown spirit shield, its circling shields and its plate (Sammy 2026-11-13,
@@ -6705,7 +6705,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     null,
     "sunsting",
     "desert",
-    "Your critical hits poison the enemy for {0} of the hit over 4 s.",
+    "Your critical hits poison the enemy for {0} of the hit over 4 s (longer with Ailment duration).",
     "The sting is still in them."
   ),
   trophy(
@@ -6773,7 +6773,7 @@ var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
 var UNIQUE_MIN_RARITY = 2;
 var UNIQUE_TIERS = freezeWire({
   "gravecleaver": { lines: ["mainDmg", "fireDmg", "critDamage", "critChance", "eliteDmg"], stars: [80, 100, 120, 150], unit: "pct" },
-  "wightfang": { lines: ["offDmg", "critChance", "parry", "controlDur", "eliteDmg"], stars: [60, 75, 90, 120], unit: "ticks" },
+  "wightfang": { lines: ["offDmg", "critChance", "parry", "controlDur", "eliteDmg"], stars: [54, 66, 78, 90], unit: "ticks" },
   "crownflame-scepter": { lines: ["mainDmg", "fireDmg", "bonusAreaRadius", "critChance", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
   "barrowshroud": { lines: ["maxHpPct", "defPct", "lifeKill", "atkPct", "cdr"], stars: [18e3, 14400, 10800, 7200], unit: "mins" },
   "sunshield": { lines: ["block", "offDmg", "cdr", "passiveRank", "counterDmg"], stars: [2, 3, 3, 4], unit: "count" },
@@ -6819,19 +6819,19 @@ var UNIQUE_TIERS = freezeWire({
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
 var UNIQUE_LINES_V3 = freezeWire({
-  "sunshield": { always: "block", pool: ["skillDmg:shield_bash", "areaDmg", "ailmentDur", "ailingDmg", "perfectDmg", "defCdr"], leg: ["maxPip"] },
-  "pharaoh-khopesh": { always: "moveCdr", pool: ["mainDmg", "skillDmg:lunge", "ailingDmg", "ailmentDur", "critDamage", "eliteDmg"], leg: ["killCdr"] },
+  "sunshield": { always: "block", pool: ["skillDmg:shield_bash", "rangedDmg", "ailmentDur", "ailingDmg", "perfectDmg", "defCdr"], leg: ["maxPip"] },
+  "pharaoh-khopesh": { always: "moveCdr", pool: ["mainDmg", "areaDmg", "ailingDmg", "ailmentDur", "critDamage", "eliteDmg"], leg: ["killCdr"] },
   "undying-sun-staff": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "bonusAreaRadius", "critChance", "areaDmg", "eliteDmg"], leg: ["killCdr"] },
   "eye-of-the-sun": { always: "ailmentDur", pool: ["atkPct", "critChance", "ailingDmg", "areaDmg", "eliteDmg", "lifeHit"], leg: ["maxPip"] },
   // Treant set (Sammy 2026-11-12): Barkheart's +1 goes to the Bastion branch.
-  "barkheart": { always: "perfectWindow", pool: ["block", "counterDmg", "defCdr", "eliteDr", "areaDmg", "perfectCdr"], leg: ["branchRank:bastion"] },
+  "barkheart": { always: "perfectWindow", pool: ["block", "counterDmg", "defCdr", "eliteDr", "offDmg", "perfectCdr"], leg: ["branchRank:bastion"] },
   "rootfang": { always: "exposeTime", pool: ["ccDmg", "ailmentDur", "controlDur", "classDmg", "critChance", "exposeDmg"], leg: ["maxPip"] },
   "silkspinner": { always: "rangedDmg", pool: ["mainDmg", "critChance", "activeSpd", "controlDur", "ccDmg", "eliteDmg"], leg: ["killCdr"] },
-  "cocoonsilk": { always: "ccDmg", pool: ["atkPct", "critChance", "lifeHit", "closeDmg", "keepPip", "cdr", "sigDmg"], leg: [] },
+  "cocoonsilk": { always: "ccDmg", pool: ["atkPct", "critChance", "lifeHit", "closeDmg", "keepPip", "areaDmg", "sigDmg"], leg: [] },
   // Brimstone set (Sammy 2026-11-12).
   "slagmaul": { always: "fireDmg", pool: ["mainDmg", "areaDmg", "closeDmg", "ailmentDur", "ailingDmg", "str"], leg: ["maxPip"] },
   "ventcutter": { always: "critDamage", pool: ["critChance", "fireDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
-  "coreheart": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
+  "coreheart": { always: "fireDmg", pool: ["rangedDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
   // Barrow King set (set page AJnYRRRF..., Sammy 2026-11-14).
   "gravecleaver": { always: "areaDmg", pool: ["mainDmg", "fireDmg", "critDamage", "ailingDmg", "eliteDmg", "maxHpPct"], leg: ["branchRank:breaker"] },
@@ -6839,16 +6839,16 @@ var UNIQUE_LINES_V3 = freezeWire({
   "crownflame-scepter": { always: "fireDmg", pool: ["mainDmg", "bonusAreaRadius", "critChance", "activeSpd", "areaDmg", "eliteDmg"], leg: ["maxPip"] },
   "barrowshroud": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
   "lodestone-aegis": { always: "areaDmg", pool: ["block", "offDmg", "controlDur", "cdr", "eliteDr", "perfectCdr"], leg: ["branchRank:bastion"] },
-  "oathcutter": { always: "rangedDmg", pool: ["offDmg", "critChance", "parry", "classDmg", "ailmentDur", "eliteDmg"], leg: ["killCdr"] },
-  "wardlight-scepter": { always: "mainDmg", pool: ["critChance", "activeSpd", "areaDmg", "maxHpPct", "eliteDr", "eliteDmg"], leg: ["maxPip"] },
+  "oathcutter": { always: "rangedDmg", pool: ["offDmg", "critChance", "parry", "skillDmg:flurry", "critDamage", "eliteDmg"], leg: ["killCdr"] },
+  "wardlight-scepter": { always: "mainDmg", pool: ["critChance", "closeDmg", "areaDmg", "maxHpPct", "eliteDr", "eliteDmg"], leg: ["maxPip"] },
   "wardenplate": { always: "eliteDr", pool: ["maxHpPct", "defPct", "mainAttr", "lifeKill", "areaDr", "hitCdr", "lowDmg"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
-  "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "classDmg", "eliteDmg"], leg: ["killCdr"] },
+  "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
   "waking-eye-tome": { always: "critChance", pool: ["offDmg", "lightningDmg", "critDamage", "rangedDmg", "weaveDmg", "eliteDmg"], leg: ["maxPip"] },
   "eyestalk-crown": { always: "eliteDmg", pool: ["maxHpPct", "critChance", "cdr", "controlDur", "ailmentDur", "bonusAreaRadius", "startPips"], leg: [] },
   // Nightmare Frog set (lines page, Sammy 2026-11-12).
-  "croakhammer": { always: "farDmg", pool: ["mainDmg", "str", "shockDmg", "critDamage", "controlDur", "eliteDmg"], leg: ["killCdr"] },
+  "croakhammer": { always: "areaDmg", pool: ["mainDmg", "str", "shockDmg", "critDamage", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
   "lashtongue-saber": { always: "closeDmg", pool: ["mainDmg", "dex", "critChance", "critDamage", "exposeDmg", "moveCdr"], leg: ["killCdr"] },
   "frogspawn-wand": { always: "ccDmg", pool: ["mainDmg", "int", "activeSpd", "critChance", "controlDur", "bonusAreaRadius"], leg: ["killCdr"] },
   "boilback-cloak": { always: "hitCdr", pool: ["maxHpPct", "defPct", "atkPct", "lifeKill", "closeDmg", "eliteDr", "areaDmg"], leg: [] },
@@ -6862,7 +6862,7 @@ var UNIQUE_LINES_V3 = freezeWire({
   "rimecoil-hood": { always: "controlDur", pool: ["maxHpPct", "defPct", "ccDmg", "eliteDr", "cdr", "stunDr", "lifeHit"], leg: [] },
   "mirewail-veil": { always: "moveSpeed", pool: ["critChance", "lifeKill", "defPct", "moveCdr", "fullDmg", "eliteDr"], leg: ["killCdr"] },
   "goldcarapace-band": { always: "eliteDr", pool: ["defPct", "maxHpPct", "str", "lifeHit", "eliteDmg", "fullDmg", "stunDr"], leg: [] },
-  "briarfang-thornmantle": { always: "closeDmg", pool: ["maxHpPct", "defPct", "str", "atkPct", "lifeKill", "areaDr", "hitCdr"], leg: [] },
+  "briarfang-thornmantle": { always: "closeDmg", pool: ["maxHpPct", "defPct", "counterDmg", "eliteDr", "lifeKill", "areaDr", "hitCdr"], leg: [] },
   "emberjaw-fang": { always: "ailingDmg", pool: ["fireDmg", "atkPct", "critChance", "lifeHit", "ailmentDur", "maxHpPct", "areaDmg"], leg: [] }
 });
 var UNIQUE_SIGNATURE_LINE = 0;
