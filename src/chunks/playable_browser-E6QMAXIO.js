@@ -189808,7 +189808,7 @@ function drawFriendDownV1(c, canvas, model, cam, time3, callTop = null) {
 }
 
 // src/client/hud_layout_v1.js
-var HUD_FIXED_V1 = Object.freeze(["#world-hud-vitals", "#world-hud-title", "#quest-tracker", "#local-world-controls", ".chart-mini", ".world-mini", "#woodland-clue-v3-8"]);
+var HUD_FIXED_V1 = Object.freeze(["#world-hud-vitals", "#world-hud-title", "#quest-tracker", "#world-event-stack-v4", "#local-world-controls", ".chart-mini", ".world-mini", "#woodland-clue-v3-8"]);
 var HUD_CONTROLS_V1 = Object.freeze([".skill-wheel-ring", ".skill-slot", "#primary-attack", "#carried-rations"]);
 var HUD_COMPASS_V1 = Object.freeze([".chart-mini", ".world-mini"]);
 var HUD_LAYOUT_V1 = Object.freeze({ gap: 10, barTop: 12, barHeight: 50, barWidth: 380, core: 200, barMinScale: 0.6, measureMs: 250, toastLeft: 12, toastWidth: 240, upright: 600, notice: 44, heroLine: 0.46, oneCard: 24, cardHeight: 47, chipHeight: 28, cardGap: 4, menuSize: 38, menuReach: 0.72 });
@@ -189819,6 +189819,10 @@ function hudPlaceSpotV1(vitals, bar2) {
   if (!vitals || vitals.width < 40) return null;
   const x = Math.round(bar2 && bar2.width > 0 ? bar2.left - 14 : vitals.left + vitals.width * 0.2);
   return { x, y: Math.round(vitals.bottom - 3), w: Math.max(80, Math.round(vitals.right - 6 - x)) };
+}
+function hudStackTopV1(title10, vitals, parentTop = 0) {
+  const under = title10 && title10.width > 2 && title10.height > 2 ? title10.bottom : vitals && vitals.width > 2 ? vitals.bottom : null;
+  return under == null ? null : Math.round(under - parentTop + 6);
 }
 function hudClearBelowV1(rects, left, right, height) {
   let bottom = 0;
@@ -189872,7 +189876,7 @@ function placeHudBarV1(c, slots2) {
 }
 function createHudLayoutV1(canvas) {
   const doc = canvas?.ownerDocument, view3 = doc?.defaultView;
-  let last = -1e9, lastBoss = null, slots2 = { barTop: HUD_LAYOUT_V1.barTop, barShift: 0, barScale: 1, barCenter: 0, callTop: null, toastTop: null, toastMax: null, upright: false }, written = "", spotKey = "", placeKey = "", laneKey = "";
+  let stackKey = "", last = -1e9, lastBoss = null, slots2 = { barTop: HUD_LAYOUT_V1.barTop, barShift: 0, barScale: 1, barCenter: 0, callTop: null, toastTop: null, toastMax: null, upright: false }, written = "", spotKey = "", placeKey = "", laneKey = "";
   const visible3 = (el3) => !el3.closest("[hidden]");
   function measure2(bossShown) {
     const boxes2 = (list) => {
@@ -189905,6 +189909,14 @@ function createHudLayoutV1(canvas) {
         b.style.setProperty("--hud-place-w", place4.w + "px");
         b.dataset.hudPlace = "attached";
       } else delete b.dataset.hudPlace;
+    }
+    {
+      const stack = doc.getElementById("world-event-stack-v4"), title10 = doc.getElementById("world-hud-title"), top = stack && place4 ? hudStackTopV1(title10 && visible3(title10) ? title10.getBoundingClientRect() : null, vit.getBoundingClientRect(), stack.offsetParent?.getBoundingClientRect().top ?? 0) : null, skey = top == null ? "" : String(top);
+      if (skey !== stackKey) {
+        stackKey = skey;
+        if (top == null) b.style.removeProperty("--hud-stack-top");
+        else b.style.setProperty("--hud-stack-top", top + "px");
+      }
     }
     const rects = boxes2(HUD_FIXED_V1), controls = boxes2(HUD_CONTROLS_V1);
     const lane2 = doc.querySelector(".toast-lane-v1"), cv = canvas.getBoundingClientRect();

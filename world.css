@@ -2002,3 +2002,5 @@ html body[data-hud-place=attached] #space-label{display:block;max-width:100%;fon
  body[data-hud-layout] .toast-lane-v1 .toast-v1 .toast-text{flex-direction:row;align-items:baseline;gap:5px;white-space:nowrap;min-width:0}
  body[data-hud-layout] .toast-lane-v1 .toast-v1 .toast-text strong{font-size:12px;flex:none;max-width:min(190px,44vw)}body[data-hud-layout] .toast-lane-v1 .toast-v1 .toast-sub{font-size:10.5px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}}
 body[data-hud-layout] .fr-toast,body[data-hud-layout] .m2-notice,body[data-hud-layout] .m2-banner,body[data-hud-layout] #world-level-up,body[data-hud-layout] #world-loot-notice,body[data-hud-layout] #world-refresh-notice-v1{top:var(--hud-call-top)!important}
+/* The quest card and the event cards start under the place name, which hangs from the health panel. */
+body[data-hud-place=attached] #world-event-stack-v4{top:var(--hud-stack-top,76px)!important}
