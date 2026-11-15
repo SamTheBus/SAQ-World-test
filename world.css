@@ -2004,3 +2004,7 @@ html body[data-hud-place=attached] #space-label{display:block;max-width:100%;fon
 body[data-hud-layout] .fr-toast,body[data-hud-layout] .m2-notice,body[data-hud-layout] .m2-banner,body[data-hud-layout] #world-level-up,body[data-hud-layout] #world-loot-notice,body[data-hud-layout] #world-refresh-notice-v1{top:var(--hud-call-top)!important}
 /* The quest card and the event cards start under the place name, which hangs from the health panel. */
 body[data-hud-place=attached] #world-event-stack-v4{top:var(--hud-stack-top,76px)!important}
+/* Place name (Sammy 2026-11-15: too solid, and 'make the location look different from quests'; mockup 9RaSRGox... round 3):
+   bold lettering like a map label on a soft dark strip with a gold rule under it, not a slate panel. */
+body[data-hud-place=attached] #world-hud-title{background:#0f171ea6!important;border:0!important;border-bottom:2px solid #f0c862!important;box-shadow:none!important;border-radius:0 0 6px 6px!important;padding:6px 10px 3px!important;text-shadow:-1px 0 0 #0b1015,1px 0 0 #0b1015,0 -1px 0 #0b1015,0 2px 0 #0b1015,0 0 4px #0b1015}
+body[data-hud-place=attached] #world-hud-title *{letter-spacing:.03em;color:#fff3d2!important;font-weight:700!important}

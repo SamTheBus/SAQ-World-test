@@ -148488,15 +148488,29 @@ var CSS2 = `
 #quest-talk .qx-acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
 #quest-talk .qx-acts .qx-pay{margin-right:auto;white-space:nowrap}
 @media (max-width:560px){#quest-talk .qx-acts .qx-pay{flex-basis:100%}#quest-talk .qx-acts button{flex:1 1 0;min-width:0;padding-left:6px;padding-right:6px}}
-#quest-tracker{pointer-events:auto;display:grid;grid-template-columns:28px 1fr;gap:2px 8px;align-items:center;width:min(280px,56vw);padding:7px 11px 8px 8px;border-radius:10px;border:2px solid #0b1015;background:linear-gradient(#34434ef2,#1d2a34f2);box-shadow:inset 0 0 0 1px #d4b98acc,0 3px 0 #070b10,0 5px 10px #0005;color:#efe3ca;text-align:left;font:12px/1.3 "Baloo 2",system-ui,sans-serif;cursor:pointer}
+/* Lighter look (Sammy 2026-11-15: 'it looks too solid'; mockup 9RaSRGox... round 3, 'Yes, build it'): dark see-through
+   glass with a thin gold edge, no dark outline or hard shadow, a bare gold icon, and outlined text so it reads on
+   bright ground. The arrow folds the card to a pill with its icon and distance or progress line ('make the quests
+   collapsible'); folded or not is remembered. Under an event card (.qx-under) it is that card's last line, never folded. */
+#quest-tracker{position:relative;pointer-events:auto;display:grid;grid-template-columns:28px 1fr;gap:2px 8px;align-items:center;width:min(280px,56vw);padding:7px 11px 8px 8px;border-radius:10px;border:1px solid #d4b98ab3;background:#121b23c2;box-shadow:none;color:#efe3ca;text-align:left;font:12px/1.3 "Baloo 2",system-ui,sans-serif;text-shadow:0 1px 0 #0b1015,0 0 4px #0b1015;cursor:pointer}
+#quest-tracker .qx-fold{position:absolute;right:0;top:0;width:36px;height:34px;display:block;overflow:visible;-webkit-line-clamp:unset}
+#quest-tracker .qx-fold::after{content:"";position:absolute;right:12px;top:12px;width:7px;height:7px;border-left:2px solid #d4b98a;border-top:2px solid #d4b98a;transform:rotate(45deg);filter:drop-shadow(0 1px 0 #0b1015)}
+#quest-tracker:not(.qx-under) strong{padding-right:22px}
+#quest-tracker.qx-under .qx-fold{display:none}
+#quest-tracker.qx-folded:not(.qx-under){width:auto;max-width:min(280px,56vw);display:inline-flex;align-items:center;gap:7px;padding:4px 34px 4px 7px;border-radius:999px}
+#quest-tracker.qx-folded:not(.qx-under) strong,#quest-tracker.qx-folded:not(.qx-under) .qx-tstep{display:none}
+#quest-tracker.qx-folded.qx-bare:not(.qx-under) strong{display:block;padding-right:0;max-width:170px}
+#quest-tracker.qx-folded:not(.qx-under) .qx-tico{width:22px;height:22px}
+#quest-tracker.qx-folded:not(.qx-under) .qx-fold{height:100%}
+#quest-tracker.qx-folded:not(.qx-under) .qx-fold::after{top:50%;margin-top:-7px;transform:rotate(225deg)}
 #quest-tracker[hidden]{display:none}
-#quest-tracker .qx-tico{grid-row:span 3;width:28px;height:28px;border-radius:7px;background:#0b1015;color:#f0c862;box-shadow:inset 0 0 0 1px #d4b98a88;display:grid;place-items:center}
+#quest-tracker .qx-tico{grid-row:span 3;width:28px;height:28px;border-radius:7px;color:#f0c862;display:grid;place-items:center;filter:drop-shadow(0 1px 0 #0b1015) drop-shadow(0 0 2px #0b1015)}
 #quest-tracker .qx-tico svg{width:17px;height:17px}
 #quest-tracker strong{font:15px/1.15 Georgia,serif;font-variant:small-caps;color:#f6e7c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #quest-tracker strong>i{font-style:normal}
 #quest-tracker span{color:#b9c0bf;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #quest-tracker.has-dist span.qx-tstep{-webkit-line-clamp:1}
-#quest-tracker.is-ready{box-shadow:inset 0 0 0 2px #f0c862,0 0 0 2px #f0c86266,0 3px 0 #070b10}
+#quest-tracker.is-ready{border-color:#f0c862;box-shadow:inset 0 0 0 1px #f0c862,0 0 0 2px #f0c86255}
 #quest-tracker.is-ready span{color:#9fd88a;font-weight:700}
 #quest-tracker.qx-fixed{position:absolute;z-index:7;left:12px;top:120px}
 @media(max-width:600px){#quest-tracker{width:min(230px,54vw);padding:5px 9px 6px 6px}#quest-tracker strong{font-size:14px}}
@@ -148986,7 +149000,38 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   tDist.hidden = true;
   tProg.hidden = true;
   tracker.append(tIco, tTitle, tStep, tDist, tProg);
-  tracker.onclick = () => openLog();
+  const foldStore = { get() {
+    try {
+      return env.localStorage?.getItem("saq-quest-fold") === "1";
+    } catch {
+      return false;
+    }
+  }, set(v) {
+    try {
+      if (v) env.localStorage?.setItem("saq-quest-fold", "1");
+      else env.localStorage?.removeItem("saq-quest-fold");
+    } catch {
+    }
+  } };
+  let folded = foldStore.get();
+  const tFold = el3("span", null, "qx-fold");
+  tFold.setAttribute("role", "button");
+  tracker.append(tFold);
+  const paintFold = () => {
+    tracker.classList.toggle("qx-folded", folded);
+    tFold.setAttribute("aria-label", folded ? "Open the quest card" : "Fold the quest card");
+    tFold.setAttribute("aria-expanded", String(!folded));
+  };
+  paintFold();
+  tracker.onclick = (e) => {
+    if (e?.target?.closest?.(".qx-fold")) {
+      folded = !folded;
+      foldStore.set(folded);
+      paintFold();
+      return;
+    }
+    openLog();
+  };
   const eventCard = () => {
     const e = doc.getElementById("world-event-hud-v4");
     return e && !e.hidden ? e : null;
@@ -149066,6 +149111,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     }
     tDist.hidden = !dist4;
     tracker.classList.toggle("has-dist", Boolean(dist4));
+    tracker.classList.toggle("qx-bare", !counting && !dist4);
     if (dist4) {
       tDist.classList.toggle("here", Boolean(dist4.here));
       tDist.replaceChildren(...dist4.here ? [] : [arrowTo(dist4.deg)], el3("b", dist4.text));
