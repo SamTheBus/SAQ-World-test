@@ -1101,7 +1101,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-52KACC3P.js";
+} from "./chunk-CXGFP2E2.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -112887,10 +112887,10 @@ var OFF_FAMILY = {
   "tome-tempest": "tome"
 };
 var ROBES = /* @__PURE__ */ new Set(["robe", "apprentice-robe"]);
-var HATS = /* @__PURE__ */ new Set(["hat", "cowl", "bandana", "leather-cap", "feathered-cap", "wide-brim-hat", "circlet", "moon-hat", "backwards-cap", "eyestalk-crown"]);
+var HATS = /* @__PURE__ */ new Set(["hat", "cowl", "bandana", "skullcap", "head-wrap", "slouch-cap", "pilfer-cap", "leather-cap", "feathered-cap", "wide-brim-hat", "circlet", "moon-hat", "backwards-cap", "eyestalk-crown"]);
 var HOOD_FACE = /* @__PURE__ */ new Set(["hood", "bandit-hood"]);
 var COIF_FACE = /* @__PURE__ */ new Set(["coif", "kettle-hat", "nasal-helm", "barbute", "burgonet"]);
-var OPEN_HOOD_FACE = /* @__PURE__ */ new Set(["scout-hood", "mage-hood", "rimecoil-hood"]);
+var OPEN_HOOD_FACE = /* @__PURE__ */ new Set(["scout-hood", "plate-hood", "mage-hood", "rimecoil-hood"]);
 var HAIR_SHOWS = /* @__PURE__ */ new Set(["circlet", "eyestalk-crown"]);
 function kit(spec) {
   const k = KITS3[spec.cls] ?? KITS3.knight, g = spec.gear ?? {}, look = (slot, fallback) => g[slot] ? g[slot].kind ?? fallback : null;
@@ -116713,7 +116713,7 @@ function cocoonsilkIcon(c, A2) {
 var GLOVES = { cocoonsilk: CS.silk, gauntlets: P14.plateDark, gloves: P14.strap, wraps: M.blueDark, "sunsting-grips": TROPHY.amber };
 function hand3(c, w, S15) {
   const g = w.gloves;
-  if (KG_HAND[g]) KG_HAND[g](c, w);
+  if (KG_HAND[g]) KG_HAND[g](c, w, S15);
   else if (g === "cocoonsilk") cocoonHand(c, w, S15, 0);
   else if (g === "gauntlets" || !g && w.body === "plate") R3(c, 8.2, -2.8, 4.4, 5.6, P14.plateDark, { split: 0.6 });
   else if (g === "gloves") R3(c, 8, -2.6, 4.2, 5.2, P14.strap, { split: 0.6, lw: 1.2 });
@@ -118154,6 +118154,958 @@ KG_HELM.burgonet = (c, A2, face5) => {
   kgStud(c, -4.4, -11.4);
   gem2(c, -5.6, -7.6, 1.6, A2.gem);
 };
+var RG = {
+  jerkin: { b: "#5e3d26", d: "#472d1c", l: "#7a5236" },
+  vest: { b: "#3e4247", d: "#2f3236", l: "#575c63" },
+  shirt: { b: "#7d8087", d: "#64666c", l: "#9a9ca3" },
+  soft: { b: "#45484e", d: "#33363b", l: "#5e626a" },
+  wine: { b: "#6e2f2a", d: "#53231f", l: "#8a3d36" },
+  lam: { b: "#6b4a2e", d: "#4f3520", l: "#8f6942" },
+  dark: { b: "#4a3222", d: "#36241a", l: "#62452f" },
+  brass: "#e2b64e",
+  brassD: "#8a6420",
+  steel: { b: "#5b6366", d: "#454c4f", l: "#8a9396" }
+};
+function rgLaces(c, x0, x1, y0, y1, col2, step3 = 1.8) {
+  c.save();
+  c.strokeStyle = tint(col2);
+  c.lineWidth = 0.6;
+  c.beginPath();
+  for (let y = y0; y < y1 - 0.4; y += step3) {
+    c.moveTo(x0, y);
+    c.lineTo(x1, y + step3 * 0.66);
+    c.moveTo(x1, y);
+    c.lineTo(x0, y + step3 * 0.66);
+  }
+  c.stroke();
+  c.restore();
+}
+function rgPlates(c, x0, x1, y, h, pal2, off) {
+  for (let x = x0 + (off ? -1.1 : 0); x < x1; x += 2.2) {
+    const a = Math.max(x, x0), b = Math.min(x + 2.2, x1);
+    if (b - a < 0.4) continue;
+    R3(c, a, y, b - a, h, pal2, { flat: true, lw: 0.6 });
+    px3(c, a + 0.3, y + 0.3, Math.max(0.2, b - a - 0.6), 0.4, pal2.l);
+  }
+}
+Object.assign(GLOVES, { "fingerless-gloves": P14.strap, "bracer-gloves": P14.strap, "studded-gloves": P14.strap, "knuckle-gloves": P14.strap });
+var rgAcc = (w) => accOf(w.g.gloves);
+Object.assign(BOOT_SHAFT, { "wrapped-boots": 7.4, "buckled-boots": 7.4, "footpad-boots": 10, "laced-boots": 10 });
+function rgStitch(c, x0, y0, x1, y1, col2 = "#00000033") {
+  c.save();
+  c.strokeStyle = tint(col2);
+  c.lineWidth = 0.35;
+  c.setLineDash([0.7, 0.6]);
+  c.beginPath();
+  c.moveTo(x0, y0);
+  c.lineTo(x1, y1);
+  c.stroke();
+  c.restore();
+}
+function rgBuckle(c, x, y) {
+  R3(c, x, y, 2.6, 2.4, { b: RG.brass, d: RG.brassD }, { flat: true, lw: 0.9 });
+  px3(c, x + 0.7, y + 0.7, 1.2, 1, P14.strap.b);
+  px3(c, x + 0.3, y + 0.3, 0.6, 0.4, "#fff2b0");
+}
+KG_BODY.doublet = (c, A2, acc2) => {
+  const D2 = M.doublet;
+  R3(c, -8, 0, 14, 12.6, D2);
+  px3(c, -7.4, 0.6, 0.6, 8.6, D2.l);
+  R3(c, -7.6, 11, 13.2, 1.8, D2, { flat: true, lw: 1 });
+  px3(c, -7.3, 12.1, 12.6, 0.5, A2.c);
+  c.save();
+  c.beginPath();
+  c.rect(-8, 0, 14, 9.2);
+  c.clip();
+  c.lineWidth = 0.9;
+  c.strokeStyle = tint(P14.strap.d);
+  c.beginPath();
+  for (let y = 1.6; y < 8; y += 1.8) {
+    c.moveTo(-1.4, y);
+    c.lineTo(1.6, y + 1.2);
+    c.moveTo(1.6, y);
+    c.lineTo(-1.4, y + 1.2);
+  }
+  c.stroke();
+  c.globalAlpha = 0.45;
+  c.lineWidth = 0.35;
+  c.strokeStyle = tint(D2.l);
+  c.setLineDash([0.8, 0.5]);
+  c.beginPath();
+  for (let x = -7.4; x < 6; x += 3.4) {
+    c.moveTo(x, 0);
+    c.lineTo(x + 4.6, 9.2);
+    c.moveTo(x + 4.6, 0);
+    c.lineTo(x, 9.2);
+  }
+  c.stroke();
+  c.restore();
+  R3(c, -6.8, -1, 11.2, 2.2, P14.strap, { flat: true, lw: 1.1 });
+  rgStitch(c, -6.4, 0.6, 4, 0.6, "#ffffff33");
+  R3(c, -8.4, 9.2, 14.8, 2.2, P14.strap, { flat: true, lw: 1.3 });
+  rgBuckle(c, -1.9, 9.1);
+  R3(c, 2.4, 9.6, 3, 3.4, P14.leather, { flat: true, lw: 1 });
+  R3(c, 2.2, 9.4, 3.4, 1.4, P14.strap, { flat: true, lw: 0.8 });
+  rgStitch(c, 2.7, 12.4, 5.1, 12.4, "#00000055");
+  px3(c, 3.3, 10.4, 1.2, 1, A2.c);
+  gem2(c, -6.6, 10.3, 1.3, A2.gem);
+};
+KG_SLEEVE.doublet = (c) => {
+  R3(c, 0, -2.2, 8.4, 4.4, M.doublet, { split: 0.7 });
+  for (const x of [1.6, 3.4]) px3(c, x, -2.2, 0.4, 4.4, M.doublet.l);
+  R3(c, 5.4, -2.6, 3.2, 5.2, P14.strap, { flat: true, lw: 1.1 });
+  rgStitch(c, 5.9, -2.2, 5.9, 2.2, "#ffffff30");
+};
+KG_PAUL.doublet = (c, A2, far) => {
+  const x = far ? -9.2 : 2.6, y = far ? -0.4 : -1;
+  R3(c, x, y, 5.4, 3.4, M.doublet, { split: 0.6, lw: 1.2 });
+  px3(c, x + 0.4, y + 0.4, 4.6, 0.5, M.doublet.l);
+  for (const dx of [1.6, 3.4]) px3(c, x + dx, y + 0.4, 0.4, 2.6, "#00000030");
+};
+KG_BODY.jerkin = (c, A2, acc2) => {
+  const J = RG.jerkin;
+  R3(c, -8, 0, 14, 12.6, J);
+  px3(c, -7.4, 0.6, 0.6, 8.4, J.l);
+  G3(c, [-1.8, 0, 2, 0, 1.1, 9, -0.9, 9], P14.linen, { flat: true, lw: 0.9 });
+  px3(c, -0.6, 0.8, 0.5, 7.6, P14.linen.l);
+  rgLaces(c, -1.1, 1.3, 1.2, 8.6, P14.strap.d);
+  for (let y = 1.4; y < 8.6; y += 1.8) {
+    px3(c, -2.2, y, 0.6, 0.6, RG.brass);
+    px3(c, 1.9, y, 0.6, 0.6, RG.brass);
+  }
+  for (const x of [-7.8, -4.1, -0.4, 3.3]) {
+    R3(c, x, 11, 3.3, 2.8, J, { split: 0.6, lw: 1 });
+    px3(c, x + 0.3, 11.3, 2.7, 0.4, J.l);
+    px3(c, x + 0.3, 13.1, 2.7, 0.6, A2.c);
+    rgStitch(c, x + 0.5, 12.6, x + 2.8, 12.6, "#00000050");
+  }
+  R3(c, -8.4, 9.2, 14.8, 2, P14.strap, { flat: true, lw: 1.2 });
+  rgBuckle(c, -0.6, 9);
+  gem2(c, 1.25, 12.3, 1.1, A2.gem);
+  R3(c, -6.8, -1, 11.2, 2, J, { flat: true, lw: 1.1 });
+  px3(c, -6.4, -0.6, 10.4, 0.5, J.l);
+};
+KG_SLEEVE.jerkin = (c) => {
+  R3(c, 0, -2.4, 8.2, 4.8, P14.linen, { split: 0.7 });
+  px3(c, 0.4, -2, 4.8, 0.5, P14.linen.l);
+  for (const x of [2, 3.8]) px3(c, x, -2.4, 0.4, 4.8, "#00000022");
+  R3(c, 5.8, -2.6, 2.4, 5.2, RG.jerkin, { flat: true, lw: 1 });
+  px3(c, 6.1, -2.3, 0.5, 4.6, RG.jerkin.l);
+};
+KG_PAUL.jerkin = (c, A2, far) => {
+  const x = far ? -9.4 : 2.6, y = far ? -0.6 : -1;
+  R3(c, x, y, 5.4, 3.4, RG.jerkin, { split: 0.6, lw: 1.2 });
+  px3(c, x + 0.4, y + 0.4, 4.6, 0.5, RG.jerkin.l);
+  rgStitch(c, x + 0.4, y + 2.5, x + 5, y + 2.5, "#00000060");
+};
+KG_BODY["cutpurse-vest"] = (c, A2, acc2) => {
+  const V = RG.vest;
+  R3(c, -8, 0, 14, 12.6, V);
+  px3(c, -7.4, 0.6, 0.6, 8.2, V.l);
+  G3(c, [-1.4, 0, 1.6, 0, 0.9, 9, -0.7, 9], RG.shirt, { flat: true, lw: 0.9 });
+  px3(c, -0.5, 0.8, 0.5, 7.6, RG.shirt.l);
+  rgStitch(c, 2.2, 0.6, 1.6, 8.8, "#ffffff30");
+  for (const y of [2.6, 4.8, 7]) {
+    px3(c, 1.5, y, 0.8, 0.8, RG.brass);
+    px3(c, 1.5, y, 0.4, 0.4, "#fff2b0");
+  }
+  px3(c, -7.6, 12, 13.2, 0.5, A2.c);
+  R3(c, -8.4, 9, 14.8, 2.1, P14.strap, { flat: true, lw: 1.2 });
+  rgBuckle(c, -5, 8.9);
+  R3(c, -1.8, 10.2, 2.6, 2.8, P14.leather, { split: 0.6, lw: 1 });
+  R3(c, -1.9, 10, 2.8, 1.2, P14.strap, { flat: true, lw: 0.7 });
+  px3(c, -0.8, 10.8, 0.6, 0.6, RG.brass);
+  px3(c, -1.5, 12.3, 2, 0.5, A2.c);
+  R3(c, 1.4, 10.2, 3, 3.2, P14.leather, { split: 0.6, lw: 1 });
+  R3(c, 1.3, 10, 3.2, 1.3, P14.strap, { flat: true, lw: 0.7 });
+  px3(c, 1.7, 12.7, 2.4, 0.5, A2.c);
+  gem2(c, 2.9, 11.1, 1.1, A2.gem);
+  px3(c, 5, 8.4, 0.9, 1.2, P14.strap.b);
+  px3(c, 4.8, 8, 1.3, 0.6, RG.steel.l);
+  G3(c, [4.8, 10.4, 5.9, 10.2, 6.8, 14.2, 5.6, 14.4], P14.strap, { flat: true, lw: 0.9 });
+  px3(c, 5.2, 10.6, 0.4, 3, "#ffffff22");
+  R3(c, -6.8, -1, 11.2, 2, RG.shirt, { flat: true, lw: 1.1 });
+  px3(c, -6.4, -0.6, 10.4, 0.5, RG.shirt.l);
+};
+KG_SLEEVE["cutpurse-vest"] = (c) => {
+  R3(c, 0, -2.2, 8.4, 4.4, RG.shirt, { split: 0.7 });
+  px3(c, 0.4, -1.8, 4.8, 0.5, RG.shirt.l);
+  for (const x of [2.4, 4]) px3(c, x, -2.2, 0.4, 4.4, "#00000022");
+  R3(c, 5.4, -2.6, 3.2, 5.2, RG.vest, { flat: true, lw: 1.1 });
+  px3(c, 5.7, -2.3, 0.5, 4.6, RG.vest.l);
+  rgStitch(c, 6.6, -2.2, 6.6, 2.2, "#ffffff30");
+};
+KG_PAUL["cutpurse-vest"] = (c, A2, far) => {
+  const x = far ? -9.4 : 2.6, y = far ? -0.6 : -1;
+  R3(c, x, y, 5.4, 3.2, RG.vest, { split: 0.6, lw: 1.2 });
+  px3(c, x + 0.4, y + 0.4, 4.6, 0.5, RG.vest.l);
+  rgStitch(c, x + 0.4, y + 2.4, x + 5, y + 2.4, "#ffffff30");
+};
+var RG_CAP = { b: "#3f3631", d: "#2e2724", l: "#594d46" };
+KG_HELM.skullcap = (c, A2, face5, sway = 0) => {
+  G3(c, [-11.2, -11.6, -11, -14.4, -8.6, -16.6, -3, -17.6, 3.4, -17.2, 7.4, -15.2, 8.8, -12.6, 8.8, -11.6], RG_CAP, { split: 0.66, lw: 1.3 });
+  c.save();
+  c.strokeStyle = tint(RG_CAP.l);
+  c.lineWidth = 0.4;
+  c.beginPath();
+  for (const x of [-7, -3, 1, 5]) {
+    c.moveTo(x, -12.4);
+    c.lineTo(x + (x < 0 ? -0.6 : 0.6), -16);
+  }
+  c.stroke();
+  c.restore();
+  R3(c, -11.4, -12.6, 20.4, 2.4, RG_CAP, { flat: true, lw: 1.2 });
+  px3(c, -11, -12.2, 19.6, 0.5, RG_CAP.l);
+  for (let x = -10; x < 8.6; x += 1.4) px3(c, x, -11.6, 0.35, 1.2, "#00000040");
+  px3(c, -9.6, -12, 1.6, 1.4, A2.c);
+};
+var RG_WRAP = { b: "#3c4652", d: "#2b323b", l: "#566371" };
+var RG_HEM = { b: "#b9c4ca", d: "#8d989f", l: "#e2e9ec" };
+KG_HELM["head-wrap"] = (c, A2, face5, sway = 0) => {
+  const W21 = RG_WRAP, s = sway * 0.6;
+  G3(c, [-12.4, -11.6, -16.8 + s, -14.4, -16 + s, -11.8, -12.6, -10.4], W21, { split: 0.6, lw: 1 });
+  G3(c, [-12.4, -10.6, -16 + s, -8.2, -14.4, -7, -12, -9.4], W21, { split: 0.6, lw: 1 });
+  G3(c, [-11.4, -8.4, -12.1, -12.6, -11.4, -15.8, -9, -18.4, -6.2, -19.6, -4.8, -22.2, -2.8, -20, 0.4, -20.4, 3.4, -20, 6, -18.8, 8, -16.8, 9.3, -14, 9.4, -10.4, -3, -10.4], W21, { split: 0.6, lw: 1.3 });
+  c.save();
+  c.strokeStyle = tint(W21.d);
+  c.lineWidth = 0.6;
+  c.beginPath();
+  c.moveTo(-4.6, -20.4);
+  c.quadraticCurveTo(-5.4, -17.4, -3.6, -15);
+  c.moveTo(-2.8, -19.6);
+  c.quadraticCurveTo(-0.2, -17.6, -0.8, -14.6);
+  c.moveTo(2.2, -19.6);
+  c.quadraticCurveTo(4.8, -17.6, 3.4, -13.4);
+  c.moveTo(6.4, -18);
+  c.quadraticCurveTo(7.6, -15.6, 6.8, -13.2);
+  c.moveTo(-10.8, -12.6);
+  c.quadraticCurveTo(-8.4, -14.2, -7.2, -11.6);
+  c.moveTo(-9.6, -16.6);
+  c.quadraticCurveTo(-7.4, -15.6, -6.6, -13.6);
+  c.stroke();
+  c.strokeStyle = tint(W21.l);
+  c.lineWidth = 0.8;
+  c.beginPath();
+  c.moveTo(-11.1, -13);
+  c.quadraticCurveTo(-10.4, -16.8, -6.6, -18.8);
+  c.moveTo(-1.6, -19.6);
+  c.quadraticCurveTo(0.6, -19.8, 2.2, -19.2);
+  c.moveTo(-4.4, -21.2);
+  c.lineTo(-3.6, -20.2);
+  c.stroke();
+  c.restore();
+  G3(c, [-11.7, -10, -3, -12.2, 9.5, -12.2, 9.5, -10, -3, -10, -11.4, -7.8], RG_HEM, { split: 0.5, lw: 1.1 });
+  px3(c, -2.6, -11.8, 11.8, 0.5, RG_HEM.l);
+  R3(c, -14.2, -12.6, 3.2, 3.2, W21, { split: 0.55, lw: 1.1 });
+  px3(c, -13.7, -12.1, 1.2, 0.6, W21.l);
+  px3(c, -13.6, -10.5, 2, 0.8, A2.c);
+};
+var RG_SLOUCH = { b: "#7a5f36", d: "#5a4527", l: "#9c7c4a" };
+var RG_CORD = { b: "#b39556", d: "#6e5832" };
+KG_HELM["slouch-cap"] = (c, A2, face5, sway = 0) => {
+  const S15 = RG_SLOUCH, s = sway * 0.6, O15 = "#14110d";
+  px3(c, -1.4, -10.2, 10.6, 1, "#00000038");
+  G3(c, [-13.2, -9.4, -15.4 + s, -5.6, -14.6 + s, -4.6, -12.2 + s, -4.8, -12, -9.2], RG_HEM, { split: 0.5, lw: 1 });
+  c.save();
+  c.strokeStyle = tint(RG_HEM.d);
+  c.lineWidth = 0.4;
+  c.beginPath();
+  for (const k of [0.3, 0.55, 0.8]) {
+    c.moveTo(-12.6 - k * 0.6, -8.6);
+    c.lineTo(-12.4 - k * 2.6 + s, -5);
+  }
+  c.stroke();
+  c.restore();
+  R3(c, -13.6, -9.8, 2, 1, { b: A2.c, d: O15 }, { flat: true, lw: 0.6 });
+  G3(c, [-11.8, -9.4, -12.6, -13, -13.8, -15.8, -13.4, -18.6, -11, -20.8, -7.4, -21.8, -3.4, -21.2, 0.8, -20.2, 5, -18.8, 8, -16.8, 9.4, -14.2, 9.4, -12, -3, -12], S15, { split: 0.6, lw: 1.3 });
+  G3(c, [-13.6, -16, -11.6, -15.4, -10.4, -13.4, -12.6, -13.2], { b: S15.d, d: "#3e2f1a" }, { flat: true, lw: 0.6 });
+  c.save();
+  c.lineCap = "round";
+  c.strokeStyle = tint(S15.d);
+  c.lineWidth = 0.7;
+  c.beginPath();
+  c.moveTo(-8.6, -21.4);
+  c.bezierCurveTo(-7.6, -18.6, -9.6, -16.2, -11.8, -15.4);
+  c.moveTo(-2.2, -20.6);
+  c.quadraticCurveTo(-3.2, -17.6, -1.6, -15);
+  c.moveTo(4, -19);
+  c.quadraticCurveTo(4.4, -16.6, 3.2, -14.6);
+  c.stroke();
+  c.strokeStyle = tint(S15.l);
+  c.lineWidth = 0.9;
+  c.beginPath();
+  c.moveTo(-12.9, -18.2);
+  c.quadraticCurveTo(-11.4, -20.4, -8.2, -21.2);
+  c.moveTo(-6, -20.4);
+  c.quadraticCurveTo(-0.6, -20, 4.6, -18);
+  c.stroke();
+  c.fillStyle = tint(S15.l);
+  c.beginPath();
+  c.ellipse(-4.4, -18.8, 1.6, 0.7, -0.12, 0, Math.PI * 2);
+  c.fill();
+  c.restore();
+  G3(c, [-4.6, -11.2, -2.4, -13, 9.3, -13, 9.5, -10.2, -3, -10.2], RG_HEM, { split: 0.5, lw: 1.1 });
+  px3(c, -2, -12.6, 11, 0.6, RG_HEM.l);
+  px3(c, -1.6, -10.9, 10.8, 0.5, "#00000030");
+  c.save();
+  c.lineCap = "round";
+  c.beginPath();
+  c.moveTo(8.2, -16.2);
+  c.bezierCurveTo(3, -18.4, -5, -16.2, -11, -10.6);
+  c.strokeStyle = O15;
+  c.lineWidth = 2.4;
+  c.stroke();
+  c.strokeStyle = tint(RG_CORD.b);
+  c.lineWidth = 1.3;
+  c.stroke();
+  c.setLineDash([0.5, 0.9]);
+  c.strokeStyle = tint(RG_CORD.d);
+  c.lineWidth = 1.3;
+  c.stroke();
+  c.restore();
+  c.save();
+  c.strokeStyle = O15;
+  c.lineWidth = 1.7;
+  c.beginPath();
+  c.arc(-11.6, -10.4, 1.4, 0, Math.PI * 2);
+  c.stroke();
+  c.strokeStyle = tint(RG.brass);
+  c.lineWidth = 0.8;
+  c.stroke();
+  c.restore();
+  px3(c, -12.4, -11.4, 0.6, 0.5, "#fff2b0");
+};
+function rgRivet(c, x, y) {
+  px3(c, x - 0.5, y - 0.5, 1, 1, RG.brassD);
+  px3(c, x - 0.4, y - 0.45, 0.6, 0.5, RG.brass);
+  px3(c, x - 0.3, y - 0.35, 0.25, 0.2, "#fff2b0");
+}
+KG_BODY.leather = (c, A2, acc2) => {
+  const L = P14.leather;
+  R3(c, -8, 0, 14, 12.6, L);
+  px3(c, -7.4, 0.6, 0.6, 9, L.l);
+  px3(c, 5.1, 0.8, 0.5, 8.6, "#00000026");
+  rgStitch(c, -7.4, 11.6, 5.4, 11.6, "#00000055");
+  for (const x of [-6.6, -4.2, -1.8, 0.6, 3, 5]) rgRivet(c, x, 12.1);
+  R3(c, -1.6, 4.4, 2.6, 2.6, acc2, { flat: true, lw: 1 });
+  px3(c, -1.3, 4.7, 2, 0.5, "#ffffff40");
+  G3(c, [-8, 1.6, -6.4, 0, 6, 10, 6, 12, 4.6, 12.6], P14.strap, { flat: true, lw: 1.1 });
+  c.save();
+  c.strokeStyle = tint("#7a5232");
+  c.lineWidth = 0.45;
+  c.beginPath();
+  c.moveTo(-6.6, 0.6);
+  c.lineTo(5.6, 10.4);
+  c.stroke();
+  c.restore();
+  for (const k of [0.2, 0.38, 0.56, 0.74, 0.9]) rgRivet(c, -6.9 + k * 12, 1.2 + k * 9.8);
+  R3(c, -8.4, 9.4, 14.8, 2.4, P14.strap, { flat: true, lw: 1.3 });
+  px3(c, -8, 9.8, 14, 0.5, "#7a5232");
+  rgBuckle(c, -5.4, 9.4);
+  R3(c, 1.6, 9.2, 2.4, 3, acc2, { flat: true, lw: 1 });
+  px3(c, 1.9, 9.5, 1.8, 0.5, "#ffffff40");
+  R3(c, -7.2, -1.2, 12.4, 2.8, P14.teal, { lw: 1.2 });
+  px3(c, -6.8, -0.8, 11.6, 0.5, P14.teal.l);
+  for (const x of [-4, -0.6, 2.6]) px3(c, x, -0.6, 0.4, 1.8, "#00000030");
+};
+KG_SLEEVE.leather = (c) => {
+  R3(c, 0, -2.2, 8.4, 4.4, P14.mask, { split: 0.7 });
+  px3(c, 0.4, -1.8, 4, 0.5, "#4a5262");
+  R3(c, 4.8, -2.6, 3.8, 5.2, P14.leather, { flat: true, lw: 1.1 });
+  px3(c, 5.1, -2.3, 0.5, 4.6, P14.leather.l);
+  rgRivet(c, 6.9, -1.2);
+  rgRivet(c, 6.9, 1.2);
+};
+KG_PAUL.leather = (c, A2, far) => {
+  const x = far ? -9.4 : 2.6, y = far ? -0.6 : -1;
+  R3(c, x, y, far ? 5.6 : 5.4, 3.6, P14.leather, { split: 0.6, lw: 1.2 });
+  px3(c, x + 0.4, y + 0.4, 4.6, 0.5, P14.leather.l);
+  rgStitch(c, x + 0.4, y + 2.7, x + 5, y + 2.7, "#00000055");
+  rgRivet(c, x + 1.4, y + 1.6);
+  rgRivet(c, x + 4, y + 1.6);
+};
+KG_BODY.brigandine = (c, A2, acc2) => {
+  const W21 = RG.wine;
+  for (const x0 of [-7.6, -0.6]) {
+    R3(c, x0, 11, 6.4, 3, P14.leather, { split: 0.6, lw: 1 });
+    px3(c, x0 + 0.3, 11.3, 5.8, 0.4, P14.leather.l);
+    px3(c, x0 + 0.3, 13.2, 5.8, 0.6, A2.c);
+    rgStitch(c, x0 + 0.4, 12.8, x0 + 6, 12.8, "#00000055");
+  }
+  for (const x of [-6.2, -3.2, 0.6, 3.6]) rgRivet(c, x, 12.1);
+  R3(c, -8, 0, 14, 12.6, W21);
+  px3(c, -7.4, 0.6, 0.6, 8.4, W21.l);
+  for (const y of [1.8, 4, 6.2, 8.2]) {
+    px3(c, -7.6, y - 1.1, 13.2, 0.5, "#ffffff12");
+    px3(c, -7.6, y + 0.8, 13.2, 0.4, "#00000026");
+  }
+  px3(c, -0.5, 0.6, 0.6, 8.6, W21.d);
+  px3(c, 0.1, 0.6, 0.3, 8.6, W21.l);
+  for (const y of [1.8, 4, 6.2, 8.2]) for (const x of [-6.6, -4.2, -1.8, 1.3, 3.7]) if (!(y === 6.2 && x === 1.3)) rgRivet(c, x, y);
+  R3(c, -8.4, 9.2, 14.8, 2.1, P14.strap, { flat: true, lw: 1.2 });
+  px3(c, -8, 9.6, 14, 0.4, "#7a5232");
+  R3(c, -1.6, 8.8, 2.8, 2.8, acc2, { flat: true, lw: 1.1 });
+  px3(c, -1.3, 9.1, 2.2, 0.5, "#ffffff40");
+  gem2(c, 1.3, 6.2, 1.2, A2.gem);
+  R3(c, -6.8, -1, 11.2, 2, P14.strap, { flat: true, lw: 1.1 });
+  px3(c, -6.4, -0.6, 10.4, 0.4, "#7a5232");
+};
+KG_SLEEVE.brigandine = (c) => {
+  R3(c, 0, -2.2, 8.4, 4.4, RG.wine, { split: 0.7 });
+  px3(c, 0.4, -1.8, 4.6, 0.5, RG.wine.l);
+  rgRivet(c, 2, -0.8);
+  rgRivet(c, 4.2, 0.8);
+  R3(c, 5.4, -2.6, 3.2, 5.2, P14.strap, { flat: true, lw: 1.1 });
+  rgStitch(c, 5.9, -2.2, 5.9, 2.2, "#ffffff30");
+};
+KG_PAUL.brigandine = (c, A2, far) => {
+  const x = far ? -9.6 : 2.4, y = far ? -0.8 : -1.3;
+  R3(c, x, y, 5.8, 3.8, P14.leather, { split: 0.6, lw: 1.2 });
+  px3(c, x + 0.4, y + 0.4, 5, 0.5, P14.leather.l);
+  rgRivet(c, x + 1.6, y + 1.6);
+  rgRivet(c, x + 4, y + 1.6);
+  px3(c, x, y + 3, 5.8, 0.7, A2.c);
+};
+function rgLaceRow(c, x0, x1, y, h, off) {
+  for (let x = x0 + (off ? -1.1 : 0) + 2.2; x < x1 - 0.3; x += 2.2) {
+    if (x <= x0 + 0.3) continue;
+    px3(c, x - 0.25, y + h * 0.3, 0.5, 0.5, "#c9a46a");
+    px3(c, x - 0.25, y + h * 0.62, 0.5, 0.5, "#c9a46a");
+  }
+}
+KG_BODY.lamellar = (c, A2, acc2) => {
+  R3(c, -8, 0, 14, 12.6, RG.dark);
+  for (const [i, y] of [0.3, 3.4, 6.5].entries()) {
+    rgPlates(c, -8, 6, y, 3.2, RG.lam, i % 2);
+    rgLaceRow(c, -8, 6, y, 3.2, i % 2);
+    px3(c, -7.6, y + 3, 13.2, 0.4, "#00000040");
+  }
+  rgPlates(c, -7.8, 5.8, 11.1, 2.8, RG.lam, 1);
+  rgLaceRow(c, -7.8, 5.8, 11.1, 2.8, 1);
+  px3(c, -7.6, 13.5, 13.2, 0.5, A2.c);
+  px3(c, -7.4, 0.6, 0.5, 8.6, "#ffffff1c");
+  R3(c, -8.4, 9.6, 14.8, 1.8, P14.teal, { flat: true, lw: 1.2 });
+  px3(c, -8, 9.9, 14, 0.4, P14.teal.l);
+  G3(c, [-3.8, 10.8, -5.2, 14.2, -4, 14.4, -3, 11.2], P14.teal, { flat: true, lw: 0.8 });
+  G3(c, [-3, 10.8, -2.6, 14, -1.6, 13.8, -2.4, 10.8], P14.teal, { flat: true, lw: 0.8 });
+  R3(c, -4.4, 9.3, 2.4, 2.4, P14.teal, { flat: true, lw: 1 });
+  px3(c, -4, 9.6, 1.6, 0.5, P14.teal.l);
+  R3(c, -1.6, 9.3, 2.4, 2.4, acc2, { flat: true, lw: 1 });
+  px3(c, -1.3, 9.6, 1.8, 0.5, "#ffffff40");
+  gem2(c, 2.4, 10.5, 1.1, A2.gem);
+  R3(c, -6.8, -1, 11.2, 2, RG.dark, { flat: true, lw: 1.1 });
+  px3(c, -6.4, -0.6, 10.4, 0.4, RG.dark.l);
+};
+KG_SLEEVE.lamellar = (c) => {
+  R3(c, 0, -2.2, 8.4, 4.4, P14.mask, { split: 0.7 });
+  for (const x of [0.4, 2.4]) {
+    R3(c, x, -2.6, 2.2, 5.2, RG.lam, { flat: true, lw: 0.7 });
+    px3(c, x + 0.3, -2.3, 1.6, 0.4, RG.lam.l);
+    px3(c, x + 0.85, -0.8, 0.5, 0.5, "#c9a46a");
+    px3(c, x + 0.85, 0.8, 0.5, 0.5, "#c9a46a");
+  }
+  R3(c, 5.4, -2.6, 3.2, 5.2, RG.dark, { flat: true, lw: 1.1 });
+  px3(c, 5.7, -2.3, 0.5, 4.6, RG.dark.l);
+};
+KG_PAUL.lamellar = (c, A2, far) => {
+  const x = far ? -9.8 : 2.2, y = far ? -1 : -1.6;
+  R3(c, x, y + 2, 6.2, 2.8, RG.lam, { flat: true, lw: 1 });
+  rgPlates(c, x, x + 6.2, y + 2, 2.8, RG.lam, 1);
+  rgLaceRow(c, x, x + 6.2, y + 2, 2.8, 1);
+  R3(c, x + 0.2, y, 5.8, 2.6, RG.lam, { flat: true, lw: 1.1 });
+  rgPlates(c, x + 0.2, x + 6, y, 2.6, RG.lam, 0);
+  rgLaceRow(c, x + 0.2, x + 6, y, 2.6, 0);
+  px3(c, x + 0.2, y + 2.4, 5.8, 0.4, "#00000040");
+  px3(c, x, y + 4.2, 6.2, 0.6, A2.c);
+};
+var RG_GL = "#7a5232";
+function rgFist(c, A2) {
+  R3(c, 8, -2.6, 4.2, 5.2, P14.strap, { split: 0.6, lw: 1.2 });
+  px3(c, 8.3, -2.3, 3.6, 0.5, RG_GL);
+  px3(c, 11.7, -2.2, 0.45, 4.4, RG_GL);
+  px3(c, 10.4, -0.9, 1.5, 0.35, "#00000055");
+  px3(c, 10.4, 0.7, 1.5, 0.35, "#00000055");
+  rgStitch(c, 8.7, -1.4, 8.7, 1.6, "#ffffff30");
+}
+KG_HAND.gloves = (c, w) => {
+  const A2 = rgAcc(w);
+  R3(c, 6.8, -3, 1.7, 6, P14.leather, { flat: true, lw: 1 });
+  px3(c, 7, -2.8, 0.4, 5.6, P14.leather.l);
+  px3(c, 7.7, -3, 0.45, 6, A2.c);
+  rgFist(c, A2);
+};
+KG_HAND["fingerless-gloves"] = (c, w, S15) => {
+  const sk = S15 ?? skinPal("light"), A2 = rgAcc(w);
+  R3(c, 10.4, -2.3, 2, 4.6, sk, { split: 0.6, lw: 1 });
+  for (const y of [-1.2, 0.4]) px3(c, 10.6, y, 1.6, 0.4, "#00000030");
+  px3(c, 11.6, -2, 0.4, 4, "#ffffff30");
+  R3(c, 7.2, -2.8, 3.6, 5.6, P14.strap, { split: 0.6, lw: 1.2 });
+  px3(c, 7.5, -2.5, 3, 0.5, RG_GL);
+  px3(c, 7.4, -2.6, 0.6, 5.2, A2.c);
+  R3(c, 8.4, -0.7, 2.6, 1.4, P14.leather, { flat: true, lw: 0.8 });
+  px3(c, 9.5, -0.4, 0.8, 0.8, RG.brassD);
+  px3(c, 9.6, -0.35, 0.45, 0.45, RG.brass);
+};
+KG_HAND["bracer-gloves"] = (c, w) => {
+  const A2 = rgAcc(w);
+  R3(c, 4.6, -3, 3.8, 6, P14.leather, { flat: true, lw: 1 });
+  px3(c, 4.9, -2.8, 3.2, 0.5, P14.leather.l);
+  rgLaces(c, 5.2, 7.8, -2.4, 2.6, P14.strap.d, 1.5);
+  for (let y = -2.2; y < 2.6; y += 1.5) {
+    px3(c, 4.95, y, 0.5, 0.5, RG.brass);
+    px3(c, 7.85, y, 0.5, 0.5, RG.brass);
+  }
+  rgStitch(c, 4.9, 2.5, 8.1, 2.5, "#00000055");
+  px3(c, 4.6, -3, 0.7, 6, A2.c);
+  rgFist(c, A2);
+};
+function rgGloveIconBase(c, cuffCol) {
+  kgGlove(c, P14.strap, cuffCol);
+  px3(c, -2.4, -4.4, 4.4, 0.5, RG_GL);
+  px3(c, 2, -4.2, 0.45, 5.6, RG_GL);
+  rgStitch(c, -2.2, -2.6, -2.2, 1.2, "#ffffff30");
+}
+KG_GLOVE_ICON.gloves = (c, A2) => {
+  rgGloveIconBase(c, P14.leather);
+  px3(c, -2.8, 2.2, 5.4, 0.5, P14.leather.l);
+  px3(c, -3.2, 3.3, 6.2, 0.7, A2.c);
+};
+KG_GLOVE_ICON["fingerless-gloves"] = (c, A2) => {
+  const sk = skinPal("light");
+  kgGlove(c, P14.strap, P14.leather);
+  R3(c, -2.8, -4.8, 5.4, 1.8, sk, { flat: true, lw: 0.9 });
+  for (const fx of [-1.4, 0, 1.3]) px3(c, fx, -4.8, 0.5, 1.8, "#00000030");
+  px3(c, -2.4, -2.8, 4.4, 0.5, RG_GL);
+  R3(c, -2.8, -1.6, 5.4, 1.6, P14.leather, { flat: true, lw: 0.8 });
+  px3(c, -0.4, -1.2, 0.9, 0.9, RG.brassD);
+  px3(c, -0.3, -1.15, 0.5, 0.5, RG.brass);
+  px3(c, -3.2, 3.3, 6.2, 0.7, A2.c);
+};
+KG_GLOVE_ICON["bracer-gloves"] = (c, A2) => {
+  rgGloveIconBase(c, P14.leather);
+  R3(c, -3.6, 1.4, 7, 4.6, P14.leather, { flat: true, lw: 1.1 });
+  px3(c, -3.2, 1.8, 6.2, 0.5, P14.leather.l);
+  rgLaces(c, -2.4, 1.8, 1.9, 5.6, P14.strap.d, 1.4);
+  for (let y = 2; y < 5.4; y += 1.4) {
+    px3(c, -3, y, 0.55, 0.55, RG.brass);
+    px3(c, 2.6, y, 0.55, 0.55, RG.brass);
+  }
+  px3(c, -3.4, 5.2, 6.6, 0.6, A2.c);
+};
+function rgCuff(c, A2, col2 = P14.leather) {
+  R3(c, 6.8, -3, 1.8, 6, col2, { flat: true, lw: 1 });
+  px3(c, 7, -2.8, 0.4, 5.6, col2.l ?? RG_GL);
+  px3(c, 7.8, -3, 0.45, 6, A2.c);
+}
+KG_HAND["studded-gloves"] = (c, w) => {
+  const A2 = rgAcc(w);
+  rgCuff(c, A2);
+  rgRivet(c, 7.3, -1.8);
+  rgRivet(c, 7.3, 1.8);
+  rgFist(c, A2);
+  for (const [x, y] of [[9.4, -1.2], [11, -1.2], [9.4, 1], [11, 1]]) rgRivet(c, x, y);
+};
+KG_HAND["knuckle-gloves"] = (c, w) => {
+  const A2 = rgAcc(w);
+  rgCuff(c, A2);
+  rgFist(c, A2);
+  R3(c, 10.8, -3, 1.9, 6, RG.steel, { flat: true, lw: 1 });
+  px3(c, 11, -2.8, 0.45, 5.6, RG.steel.l);
+  px3(c, 12.2, -2.7, 0.3, 5.4, "#00000040");
+  for (const y of [-1.6, 0.2, 1.9]) rgRivet(c, 11.75, y);
+};
+KG_GLOVE_ICON["studded-gloves"] = (c, A2) => {
+  rgGloveIconBase(c, P14.leather);
+  for (const [x, y] of [[-1.4, -2.6], [0.9, -2.6], [-1.4, -0.4], [0.9, -0.4]]) rgRivet(c, x, y);
+  rgRivet(c, -2.2, 3);
+  rgRivet(c, 2, 3);
+  px3(c, -1.2, 3.3, 2.6, 0.7, A2.c);
+};
+KG_GLOVE_ICON["knuckle-gloves"] = (c, A2) => {
+  rgGloveIconBase(c, P14.leather);
+  R3(c, -3.2, -4, 6.2, 1.8, RG.steel, { flat: true, lw: 1 });
+  px3(c, -2.9, -3.8, 5.6, 0.45, RG.steel.l);
+  for (const x of [-2, -0.2, 1.6]) rgRivet(c, x + 0.3, -3.1);
+  px3(c, -3.2, 3.3, 6.2, 0.7, A2.c);
+};
+var rgFootSole = (c) => {
+  px3(c, -1.6, 19.2, 6, 0.7, "#2a1f17");
+  px3(c, -2, 19.4, 2.2, 0.6, "#1f1712");
+};
+KG_BOOT.boots = (c, A2) => {
+  R3(c, -2, 15.8, 6.8, 4.2, P14.strap, { split: 0.72 });
+  px3(c, 2.6, 17, 1.8, 0.4, P14.leather.b);
+  rgStitch(c, 0.4, 16.8, 0.4, 19, "#ffffff26");
+  rgFootSole(c);
+  R3(c, -2.3, 15.2, 7.4, 1.6, P14.leather, { flat: true, lw: 1.1 });
+  px3(c, -2, 15.45, 6.8, 0.4, P14.leather.l);
+  rgStitch(c, -2, 16.3, 4.8, 16.3, "#00000055");
+  px3(c, 4.1, 16.6, 0.5, 1.2, P14.strap.d);
+  px3(c, 4.7, 16.6, 0.5, 1, P14.strap.d);
+  px3(c, 3.2, 17.4, 1.2, 1.2, A2.c);
+};
+KG_BOOT["wrapped-boots"] = (c, A2) => {
+  R3(c, -2, 16.8, 6.8, 3.2, P14.strap, { split: 0.72 });
+  px3(c, 2.6, 17.8, 1.8, 0.4, P14.leather.b);
+  rgFootSole(c);
+  R3(c, -2.2, 13.4, 4.8, 3.8, P14.linen, { flat: true, lw: 1 });
+  c.save();
+  c.beginPath();
+  c.rect(-2.2, 13.4, 4.8, 3.8);
+  c.clip();
+  c.strokeStyle = tint(P14.linen.d);
+  c.lineWidth = 0.45;
+  c.beginPath();
+  for (let y = 12.6; y < 18; y += 1.2) {
+    c.moveTo(-2.4, y + 1.4);
+    c.lineTo(2.8, y);
+  }
+  c.stroke();
+  c.strokeStyle = tint(P14.linen.l ?? "#f3e6cc");
+  c.lineWidth = 0.35;
+  c.beginPath();
+  for (let y = 12.2; y < 18; y += 1.2) {
+    c.moveTo(-2.4, y + 1.4);
+    c.lineTo(2.8, y);
+  }
+  c.stroke();
+  c.restore();
+  rgLaces(c, -2, 2.4, 13.8, 17, P14.strap.b, 1.6);
+  px3(c, 2.4, 14.2, 0.9, 0.9, P14.strap.b);
+  px3(c, 3.1, 14.8, 0.4, 1.6, P14.strap.b);
+  px3(c, 3.6, 14.6, 0.4, 1.3, P14.strap.b);
+  px3(c, 2.6, 17.6, 1.2, 1.2, A2.c);
+};
+KG_BOOT["buckled-boots"] = (c, A2) => {
+  R3(c, -2, 15.8, 6.8, 4.2, P14.leather, { split: 0.72 });
+  px3(c, -1.6, 16.6, 0.5, 2.4, P14.leather.l);
+  px3(c, 2.8, 17, 1.8, 0.4, P14.leather.l);
+  rgFootSole(c);
+  R3(c, -2.4, 15, 5.8, 1.8, P14.strap, { flat: true, lw: 1.1 });
+  px3(c, -2.1, 15.3, 5.2, 0.5, A2.c);
+  R3(c, 1.6, 16.6, 1.2, 3.4, P14.strap, { flat: true, lw: 0.7 });
+  R3(c, 1.2, 17.3, 2, 1.6, { b: RG.brass, d: RG.brassD }, { flat: true, lw: 0.6 });
+  px3(c, 1.6, 17.7, 1.2, 0.8, P14.strap.b);
+  px3(c, 1.4, 17.45, 0.5, 0.3, "#fff2b0");
+  px3(c, 2.9, 18.1, 1.9, 0.6, P14.strap.d);
+  px3(c, 4, 17.9, 0.6, 0.9, RG.brass);
+};
+var rgHeel = (c) => {
+  kgSole(c);
+  R3(c, -2.6, -0.4, 2.8, 1.6, { b: "#2a1f17" }, { flat: true, lw: 0.9 });
+};
+KG_BOOT_ICON.boots = (c, A2) => {
+  kgShaft(c, 7.4, P14.strap, P14.leather);
+  px3(c, -2.5, -7.9, 4.6, 0.4, P14.leather.l);
+  px3(c, 2.6, -3, 2.4, 0.4, P14.leather.b);
+  rgStitch(c, -2.4, -6.8, 2, -6.8, "#00000055");
+  rgStitch(c, -0.2, -5.6, -0.2, -0.6, "#ffffff26");
+  px3(c, 2.2, -6.4, 0.5, 1.6, P14.strap.d);
+  px3(c, 2.9, -6.4, 0.5, 1.3, P14.strap.d);
+  px3(c, -0.4, -7.9, 1.2, 1, A2.c);
+  rgHeel(c);
+};
+KG_BOOT_ICON["wrapped-boots"] = (c, A2) => {
+  kgShaft(c, 7.4, P14.strap, P14.linen);
+  px3(c, 2.6, -3, 2.4, 0.4, P14.leather.b);
+  R3(c, -2.4, -7.4, 4.4, 4.4, P14.linen, { flat: true, lw: 1 });
+  c.save();
+  c.beginPath();
+  c.rect(-2.4, -7.4, 4.4, 4.4);
+  c.clip();
+  c.strokeStyle = tint(P14.linen.d);
+  c.lineWidth = 0.45;
+  c.beginPath();
+  for (let y = -8.2; y < -2; y += 1.2) {
+    c.moveTo(-2.6, y + 1.4);
+    c.lineTo(2.2, y);
+  }
+  c.stroke();
+  c.restore();
+  rgLaces(c, -2.2, 1.8, -7, -3.4, P14.strap.b, 1.6);
+  px3(c, 1.8, -7, 0.9, 0.9, P14.strap.b);
+  px3(c, 2.6, -6.4, 0.4, 1.6, P14.strap.b);
+  px3(c, 3.1, -6.6, 0.4, 1.3, P14.strap.b);
+  px3(c, 2.6, -2.6, 1.2, 1.2, A2.c);
+  rgHeel(c);
+};
+KG_BOOT_ICON["buckled-boots"] = (c, A2) => {
+  kgShaft(c, 7.4, P14.leather, P14.strap);
+  px3(c, -1.9, -6.6, 0.5, 5.6, P14.leather.l);
+  px3(c, 2.6, -3, 2.4, 0.4, P14.leather.l);
+  px3(c, -2.4, -7.6, 4.4, 0.5, A2.c);
+  R3(c, 0.4, -6.6, 1.2, 6.6, P14.strap, { flat: true, lw: 0.7 });
+  R3(c, 0, -4.8, 2, 1.6, { b: RG.brass, d: RG.brassD }, { flat: true, lw: 0.6 });
+  px3(c, 0.4, -4.4, 1.2, 0.8, P14.strap.b);
+  px3(c, 0.2, -4.6, 0.5, 0.3, "#fff2b0");
+  px3(c, 1.8, -2.2, 3, 0.6, P14.strap.d);
+  px3(c, 3.8, -2.4, 0.6, 0.9, RG.brass);
+  rgHeel(c);
+};
+KG_BOOT.tall = (c, A2) => {
+  R3(c, -2, 14.4, 6.8, 5.6, P14.leather, { split: 0.72 });
+  px3(c, -1.6, 15.4, 0.5, 3.8, P14.leather.l);
+  px3(c, 2.8, 17, 1.8, 0.4, P14.leather.l);
+  rgFootSole(c);
+  R3(c, -2.3, 13.6, 7.4, 1.8, P14.leatherLight, { flat: true, lw: 1.1 });
+  px3(c, -2, 13.85, 6.8, 0.4, "#c98d55");
+  rgStitch(c, -2, 15, 4.8, 15, "#00000055");
+  rgRivet(c, -1, 14.5);
+  rgRivet(c, 3.8, 14.5);
+  px3(c, -1.9, 17.4, 4.6, 0.8, P14.strap.b);
+  rgRivet(c, -0.6, 17.8);
+  rgRivet(c, 1.4, 17.8);
+  px3(c, 0.6, 15.6, 1.4, 1.2, A2.c);
+};
+KG_BOOT["footpad-boots"] = (c, A2) => {
+  px3(c, -1.4, 11.6, 1.2, 2.6, P14.strap.b);
+  px3(c, -1.2, 11.8, 0.4, 2.2, "#7a5232");
+  px3(c, -1.7, 11, 1.8, 0.8, RG.steel.l);
+  px3(c, -1.1, 10.5, 0.6, 0.6, RG.brass);
+  R3(c, -2, 14.4, 6.8, 5.6, RG.soft, { split: 0.72 });
+  px3(c, -1.6, 14.8, 0.5, 4.4, RG.soft.l);
+  px3(c, 2.8, 17.4, 1.8, 0.4, RG.soft.l);
+  rgStitch(c, 0.8, 15.4, 0.8, 19, "#ffffff22");
+  rgFootSole(c);
+  R3(c, -2.4, 13.4, 6.4, 1.8, RG.soft, { flat: true, lw: 1 });
+  px3(c, -2.1, 13.7, 5.8, 0.5, RG.soft.l);
+  R3(c, -2.1, 17.2, 6.9, 1.1, P14.strap, { flat: true, lw: 0.8 });
+  R3(c, -0.6, 17, 1.4, 1.5, { b: RG.steel.b, d: RG.steel.d }, { flat: true, lw: 0.5 });
+  px3(c, -0.4, 17.15, 0.4, 0.3, RG.steel.l);
+  px3(c, 2.6, 17.2, 1.2, 1.1, A2.c);
+};
+KG_BOOT["laced-boots"] = (c, A2) => {
+  R3(c, -2, 14.4, 6.8, 5.6, RG.dark, { split: 0.72 });
+  px3(c, -1.6, 15.4, 0.5, 3.8, RG.dark.l);
+  rgLaces(c, 1.6, 3.6, 14.8, 18, P14.linen.d, 1.6);
+  for (let y = 15; y < 18.2; y += 1.6) {
+    px3(c, 1.3, y, 0.5, 0.5, RG.brass);
+    px3(c, 3.5, y, 0.5, 0.5, RG.brass);
+  }
+  R3(c, 2.8, 18, 2.2, 2, RG.dark, { flat: true, lw: 0.8 });
+  px3(c, 3, 18.2, 1.6, 0.4, RG.dark.l);
+  rgFootSole(c);
+  R3(c, -2.3, 13.6, 6, 1.6, P14.strap, { flat: true, lw: 1 });
+  px3(c, -2, 14, 5.4, 0.5, A2.c);
+  G3(c, [2, 14.6, 1, 13.8, 1.2, 15.2], { b: P14.linen.d }, { flat: true, lw: 0.5 });
+  G3(c, [2.6, 14.6, 3.6, 13.8, 3.4, 15.2], { b: P14.linen.d }, { flat: true, lw: 0.5 });
+};
+KG_BOOT_ICON.tall = (c, A2) => {
+  kgShaft(c, 10, P14.leather, P14.leatherLight);
+  px3(c, -1.9, -9.4, 0.5, 8.4, P14.leather.l);
+  px3(c, 2.6, -3, 2.4, 0.4, P14.leather.l);
+  px3(c, -2.5, -10.5, 4.6, 0.4, "#c98d55");
+  rgStitch(c, -2.4, -9.4, 2, -9.4, "#00000055");
+  rgRivet(c, -1.6, -10);
+  rgRivet(c, 1.4, -10);
+  px3(c, -2.4, -4.6, 4.4, 0.8, P14.strap.b);
+  rgRivet(c, -1.2, -4.2);
+  rgRivet(c, 0.8, -4.2);
+  px3(c, -0.4, -7.6, 1.4, 1.2, A2.c);
+  rgHeel(c);
+};
+KG_BOOT_ICON["footpad-boots"] = (c, A2) => {
+  px3(c, -1.8, -13, 1.2, 3, P14.strap.b);
+  px3(c, -1.6, -12.8, 0.4, 2.6, "#7a5232");
+  px3(c, -2.1, -13.6, 1.8, 0.8, RG.steel.l);
+  px3(c, -1.5, -14.2, 0.6, 0.6, RG.brass);
+  kgShaft(c, 10, RG.soft, RG.soft);
+  px3(c, -1.8, -9.6, 0.5, 8.6, RG.soft.l);
+  px3(c, 2.6, -3, 2.4, 0.4, RG.soft.l);
+  rgStitch(c, 0.4, -8.6, 0.4, -0.6, "#ffffff22");
+  R3(c, -2.6, -4.6, 4.8, 1.1, P14.strap, { flat: true, lw: 0.8 });
+  R3(c, -1.2, -4.8, 1.4, 1.5, { b: RG.steel.b, d: RG.steel.d }, { flat: true, lw: 0.5 });
+  px3(c, 0.6, -4.6, 1.2, 1.1, A2.c);
+  rgHeel(c);
+};
+KG_BOOT_ICON["laced-boots"] = (c, A2) => {
+  kgShaft(c, 10, RG.dark, P14.strap);
+  px3(c, -1.9, -9.4, 0.5, 8.4, RG.dark.l);
+  rgLaces(c, 0.2, 1.8, -9.6, -3.8, P14.linen.d, 1.6);
+  for (let y = -9.4; y < -4; y += 1.6) {
+    px3(c, -0.1, y, 0.5, 0.5, RG.brass);
+    px3(c, 1.7, y, 0.5, 0.5, RG.brass);
+  }
+  G3(c, [0.9, -10.2, -0.2, -11.2, 0, -9.6], { b: P14.linen.d }, { flat: true, lw: 0.5 });
+  G3(c, [1.3, -10.2, 2.4, -11.2, 2.2, -9.6], { b: P14.linen.d }, { flat: true, lw: 0.5 });
+  R3(c, 3.6, -2.6, 2.4, 2.6, RG.dark, { flat: true, lw: 0.8 });
+  px3(c, -2.4, -10.4, 4.4, 0.5, A2.c);
+  rgHeel(c);
+};
+var RG_CUFF = { b: "#a26b39", d: "#7d5129", l: "#c2884f" };
+KG_HAND["cuffed-gloves"] = (c, w) => {
+  const A2 = rgAcc(w);
+  G3(c, [4.8, -3.5, 8.4, -3, 8.4, 3, 4.8, 3.5], RG_CUFF, { split: 0.6, lw: 1.1 });
+  px3(c, 5.2, -3.1, 2.9, 0.5, RG_CUFF.l);
+  rgStitch(c, 6, -2.8, 6, 2.8, "#00000055");
+  px3(c, 4.8, -3.5, 0.7, 7, A2.c);
+  R3(c, 8, -2.6, 4.2, 5.2, RG_CUFF, { split: 0.6, lw: 1.2 });
+  px3(c, 8.3, -2.3, 3.6, 0.5, RG_CUFF.l);
+  px3(c, 11.7, -2.2, 0.45, 4.4, RG_CUFF.l);
+  px3(c, 10.4, -0.9, 1.5, 0.35, "#00000055");
+  px3(c, 10.4, 0.7, 1.5, 0.35, "#00000055");
+};
+KG_GLOVE_ICON["cuffed-gloves"] = (c, A2) => {
+  G3(c, [-2.8, 1.8, -2.8, -4, -2.2, -4.8, 2, -4.8, 2.6, -4, 2.6, -0.8, 4.2, -2.4, 5, -1.6, 2.6, 1.8], RG_CUFF, { split: 0.6, lw: 1.2 });
+  for (const fx of [-1.4, 0, 1.3]) px3(c, fx, -4.8, 0.5, 2.2, "#00000059");
+  px3(c, -2.4, -4.4, 4.4, 0.5, RG_CUFF.l);
+  G3(c, [-3, 1.4, 3, 1.4, 3.8, 5.4, -3.8, 5.4], RG_CUFF, { split: 0.6, lw: 1.1 });
+  px3(c, -3.3, 4.8, 6.6, 0.6, A2.c);
+  rgStitch(c, 0, 2, 0, 5, "#00000055");
+  px3(c, -2.6, 1.8, 5.2, 0.45, RG_CUFF.l);
+};
+function rgHoodCloth(c, H8, folds2 = true) {
+  px3(c, -9.6, -13.4, 0.6, 13, H8.l);
+  px3(c, -9.4, -13.6, 16.8, 0.5, H8.l);
+  px3(c, -10, 0.2, 18, 0.6, "#00000033");
+  if (folds2) {
+    c.save();
+    c.strokeStyle = "#00000030";
+    c.lineWidth = 0.5;
+    c.beginPath();
+    c.moveTo(-7.2, -12.6);
+    c.quadraticCurveTo(-6.6, -9.6, -7.4, -6.6);
+    c.moveTo(-4.6, -6);
+    c.quadraticCurveTo(-4, -3.4, -4.6, -0.6);
+    c.stroke();
+    c.restore();
+  }
+}
+function rgOpeningRim(c, H8) {
+  px3(c, -2.2, -10.4, 1, 9.6, H8.d);
+  px3(c, -1.2, -1, 8.6, 0.5, "#00000040");
+}
+function rgMask2(c) {
+  G3(c, [-1.2, -5.4, 2.6, -5.9, 4.6, -5.9, 7.4, -5.4, 7.4, -0.8, -1.2, -0.8], P14.mask, { lw: 1.2, flat: true });
+  px3(c, -0.8, -5.1, 3.2, 0.4, "#4a5262");
+  px3(c, 4.8, -5.5, 2.2, 0.4, "#4a5262");
+  c.save();
+  c.strokeStyle = "#00000045";
+  c.lineWidth = 0.4;
+  c.beginPath();
+  c.moveTo(3.6, -5.6);
+  c.lineTo(3.6, -1);
+  c.moveTo(0.6, -3.2);
+  c.quadraticCurveTo(1.8, -2.6, 2.8, -3.4);
+  c.moveTo(4.6, -3.4);
+  c.quadraticCurveTo(5.6, -2.6, 6.6, -3.2);
+  c.stroke();
+  c.restore();
+}
+KG_HELM.hood = (c, A2, face5, sway = 0) => {
+  const H8 = P14.hood, s = sway * 0.5;
+  G3(c, [-6.4, -14, -11, -18.6, -15.8 + s, -19.2, -14.2 + s, -16.8, -10, -11.4], H8, { split: 0.55, lw: 1.3 });
+  c.save();
+  c.strokeStyle = tint(H8.l);
+  c.lineWidth = 0.7;
+  c.beginPath();
+  c.moveTo(-7.4, -14.4);
+  c.quadraticCurveTo(-11.4, -18, -15 + s, -18.6);
+  c.stroke();
+  c.restore();
+  R3(c, -10, -14, 18, 15, H8, { split: 0.75 });
+  rgHoodCloth(c, H8);
+  const after = face5 ? face5(c) : R3(c, -1.2, -10.4, 8.6, 9.6, { b: OPENING }, { lw: 1.2, flat: true });
+  rgOpeningRim(c, H8);
+  rgMask2(c);
+  px3(c, -1.2, -11.6, 8.6, 1.2, A2.c);
+  px3(c, -1, -11.5, 8.2, 0.35, "#ffffff40");
+  after?.();
+};
+var RG_STEEL = { b: "#b7bfc8", d: "#868f99", l: "#e9edf1" };
+var RG_INKH = { b: "#2c2b31", d: "#1f1e23", l: "#46454e" };
+KG_HELM["plate-hood"] = (c, A2, face5, sway = 0) => {
+  const H8 = RG_INKH, s = sway * 0.8, T121 = { b: "#3a3940", d: "#29282e", l: "#55545c" };
+  G3(c, [-10.6, -11.4, -14.6 + s, -10, -15.4 + s, -8.4, -10.8, -10], T121, { flat: true, lw: 1 });
+  G3(c, [-10.6, -10.6, -13.4 + s * 0.7, -6, -12 + s * 0.7, -5.6, -10.2, -9.6], T121, { flat: true, lw: 1 });
+  R3(c, -10, -14, 18, 15, H8, { split: 0.75 });
+  rgHoodCloth(c, H8);
+  if (face5) face5(c);
+  else R3(c, -1.2, -10.4, 8.6, 9.6, { b: OPENING }, { lw: 1.2, flat: true });
+  rgOpeningRim(c, H8);
+  R3(c, -10, -12, 7.4, 1.8, T121, { flat: true, lw: 1 });
+  R3(c, -11.4, -12.6, 2.2, 2.8, T121, { flat: true, lw: 1 });
+  R3(c, -2.8, -12.6, 11, 3.4, RG_STEEL, { split: 0.78, lw: 1.2 });
+  px3(c, -2.2, -12, 9.8, 0.5, RG_STEEL.l);
+  px3(c, -2.1, -11.4, 0.9, 0.9, "#4b525a");
+  px3(c, 6.9, -11.4, 0.9, 0.9, "#4b525a");
+  c.save();
+  c.strokeStyle = "#5d656e";
+  c.lineWidth = 0.45;
+  c.beginPath();
+  c.moveTo(0.6, -11.9);
+  c.lineTo(5.4, -11.9);
+  c.moveTo(0.6, -9.9);
+  c.lineTo(5.4, -9.9);
+  c.stroke();
+  c.restore();
+  gem2(c, 3, -10.9, 1.6, A2.c);
+};
+var RG_PILF = { b: "#2f5fb8", d: "#1f428a", l: "#5a88d8" };
+var RG_PCORD = { b: "#eef0f2", d: "#b9bec4", l: "#ffffff" };
+function rgSoft(c, path15, H8, split = 0.64) {
+  c.fillStyle = tint(H8.b);
+  c.fill(path15);
+  c.save();
+  c.clip(path15);
+  c.fillStyle = tint(H8.d);
+  c.fillRect(-20 + 30 * split, -40, 40, 60);
+  c.restore();
+  c.lineWidth = 1.3;
+  c.lineJoin = "round";
+  c.strokeStyle = K6;
+  c.stroke(path15);
+}
+function rgPilferDeco(c, A2, s, H8, moon = [-2.6, -16.8], ms = 1) {
+  const O15 = "#14110d";
+  const cord = (pts2) => {
+    c.save();
+    c.lineCap = "round";
+    c.lineJoin = "round";
+    c.beginPath();
+    c.moveTo(pts2[0], pts2[1]);
+    for (let i = 2; i < pts2.length; i += 2) c.lineTo(pts2[i], pts2[i + 1]);
+    c.strokeStyle = K6;
+    c.lineWidth = 2;
+    c.stroke();
+    c.strokeStyle = tint(RG_PCORD.b);
+    c.lineWidth = 1;
+    c.stroke();
+    c.restore();
+  };
+  c.save();
+  c.translate(moon[0], moon[1]);
+  c.scale(ms, ms);
+  c.translate(2.6, 16.8);
+  G3(c, [-0.06, -15.88, -0.56, -15.04, -1.32, -14.42, -2.25, -14.12, -3.23, -14.17, -4.13, -14.57, -4.82, -15.26, -5.22, -16.16, -5.28, -17.13, -4.98, -18.07, -4.37, -18.84, -3.53, -19.33, -2.57, -19.5, -2.99, -19.11, -3.29, -18.63, -3.47, -18.09, -3.49, -17.51, -3.37, -16.96, -3.11, -16.45, -2.73, -16.02, -2.25, -15.71, -1.7, -15.54, -1.13, -15.51, -0.57, -15.62], RG_PCORD, { flat: true, lw: 0.8 });
+  c.restore();
+  cord([-10.6, -14.4, 8.6, -11]);
+  cord([-10.6, -11.2, 8.6, -14.2]);
+  cord([-11.2, -12.6, -13.4 + s * 0.7, -9.6]);
+  R3(c, -12.2, -14, 2.2, 2.2, { b: A2.c, d: O15 }, { flat: true, lw: 0.8 });
+}
+function rgPilferTails(c, H8, s) {
+  G3(c, [-11, -13.2, -15.6 + s, -15.2, -15 + s, -13.4, -16.2 + s, -11.6, -11, -11.4], H8, { split: 0.5, lw: 1 });
+}
+KG_HELM["pilfer-cap"] = (c, A2, face5, sway = 0) => {
+  const H8 = RG_PILF, s = sway * 0.8;
+  px3(c, -1.4, -9.4, 10.6, 0.9, "#00000038");
+  rgPilferTails(c, H8, s);
+  G3(c, [-7.4, -18.6, -11.4 + s * 0.6, -18.6, -13.4 + s, -16.8, -12.6 + s, -16, -10.4, -16.4], H8, { split: 0.5, lw: 1.1 });
+  rgSoft(c, new Path2D("M -10.6 -6.4 L -10.6 -14.2 Q -10.4 -18.6 -6.2 -18.8 L 4.2 -18.8 Q 8.4 -18.6 8.6 -14.2 L 8.6 -10.2 L -5.4 -10.2 L -5.4 -7.6 L -6.8 -6.4 Z"), H8);
+  c.save();
+  c.lineCap = "round";
+  c.strokeStyle = tint(H8.l);
+  c.lineWidth = 0.8;
+  c.beginPath();
+  c.moveTo(-9.8, -13.8);
+  c.quadraticCurveTo(-9.6, -17.8, -6.2, -17.9);
+  c.lineTo(4, -17.9);
+  c.stroke();
+  c.restore();
+  rgPilferDeco(c, A2, s, H8, [-1.4, -16.2], 0.76);
+};
+GLOVES["cuffed-gloves"] = RG_CUFF;
 function bootIcon(c, kind, A2) {
   if (KG_BOOT_ICON[kind]) {
     KG_BOOT_ICON[kind](c, A2);
@@ -118307,7 +119259,14 @@ function drawBlockyHero(c, spec, pose3 = {}) {
     const hoodFace = () => {
       R3(c, -1.2, -10.4, 8.6, 9.6, S15, { lw: 1.2, flat: true });
       fringe4();
-      return () => eyes(c, blink, -8.6);
+      return () => {
+        c.save();
+        c.beginPath();
+        c.rect(-1.2, -10.4, 8.6, 4.5);
+        c.clip();
+        eyes(c, blink, -8.6);
+        c.restore();
+      };
     };
     const openHoodFace = () => {
       R3(c, -1.2, -10.4, 8.6, 9.6, S15, { lw: 1.2, flat: true });
@@ -118455,6 +119414,11 @@ function drawItemIcon(c, item2, size = 48) {
     if (item2.slot === "helmet") {
       const tall = kind === "hat" || kind === "cowl", wrap3 = kind === "bandana";
       if (kind === "eyestalk-crown") fit2(-1.2, -17.4, 23.5);
+      else if (kind === "skullcap") fit2(-1.2, -14, 24);
+      else if (kind === "head-wrap") fit2(-3.2, -13.6, 26);
+      else if (kind === "slouch-cap") fit2(-1.6, -14.6, 27);
+      else if (kind === "pilfer-cap") fit2(-2.6, -12.8, 23.5);
+      else if (kind === "plate-hood") fit2(-2.6, -9.4, 25);
       else fit2(wrap3 ? -3.3 : -1.4, tall ? -21 : wrap3 ? -12 : -10, tall ? 24 : wrap3 ? 26 : 23);
       helmetPiece(c, kind, A2, red, 0, null);
     } else if (item2.slot === "body") {
@@ -144676,10 +145640,36 @@ CAPE_ICONS["boilback-cloak"] = boilbackIcon;
 var ART3 = { main: WEAPONS2, gloves: GLOVES2, boots: BOOTS, helmet: HELMETS, body: BODIES, ring: RINGS, cape: CAPE_ICONS };
 var HERO_DRAWN = Object.freeze({
   main: /* @__PURE__ */ new Set(["gravecleaver", "crownflame-scepter", "silkspinner", "slagmaul", "ventcutter", "coreheart", "wardlight-scepter", "croakhammer", "lashtongue-saber", "frogspawn-wand"]),
-  gloves: /* @__PURE__ */ new Set(["cocoonsilk", "gauntlets", "mail-gloves", "riveted-gloves", "lobster-gauntlets", "spiked-gauntlets"]),
-  helmet: /* @__PURE__ */ new Set(["eyestalk-crown", "coif", "kettle-hat", "nasal-helm", "helm", "barbute", "burgonet"]),
-  body: /* @__PURE__ */ new Set(["hauberk", "surcoat-mail", "banded-mail", "plate", "breastplate", "fluted-plate"]),
-  boots: /* @__PURE__ */ new Set(["knight-boots", "mail-boots", "shin-boots", "sabatons", "pointed-sabatons", "spurred-sabatons"])
+  gloves: /* @__PURE__ */ new Set([
+    "cocoonsilk",
+    "gauntlets",
+    "mail-gloves",
+    "riveted-gloves",
+    "lobster-gauntlets",
+    "spiked-gauntlets",
+    "gloves",
+    "fingerless-gloves",
+    "cuffed-gloves",
+    "studded-gloves",
+    "knuckle-gloves",
+    "bracer-gloves"
+  ]),
+  helmet: /* @__PURE__ */ new Set(["eyestalk-crown", "coif", "kettle-hat", "nasal-helm", "helm", "barbute", "burgonet", "skullcap", "head-wrap", "slouch-cap", "hood", "pilfer-cap", "plate-hood"]),
+  body: /* @__PURE__ */ new Set(["hauberk", "surcoat-mail", "banded-mail", "plate", "breastplate", "fluted-plate", "doublet", "jerkin", "cutpurse-vest", "leather", "brigandine", "lamellar"]),
+  boots: /* @__PURE__ */ new Set([
+    "knight-boots",
+    "mail-boots",
+    "shin-boots",
+    "sabatons",
+    "pointed-sabatons",
+    "spurred-sabatons",
+    "boots",
+    "wrapped-boots",
+    "buckled-boots",
+    "tall",
+    "footpad-boots",
+    "laced-boots"
+  ])
 });
 var hasObjectIcon = (item2) => Boolean(ART3[item2?.slot]?.[item2.kind] || HERO_DRAWN[item2?.slot]?.has(item2?.kind));
 function drawObjectIcon(c, item2, size = 48) {

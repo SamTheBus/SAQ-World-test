@@ -15084,7 +15084,7 @@ var CLASS_GEAR = Object.freeze({
     offhand: "dagger",
     weapon: ["Rapier", "Saber", "Scimitar"],
     subweapon: ["Main-Gauche", "Stiletto", "Kris"],
-    sets: [set("Bandana", "Leather Armor", "Leather Gloves", "Leather Boots"), set("Hood", "Studded Armor", "Studded Gloves", "Studded Boots")]
+    sets: [set("Skullcap", "Leather Armor", "Leather Gloves", "Leather Boots"), set("Hood", "Studded Armor", "Studded Gloves", "Studded Boots")]
   }),
   mage: Object.freeze({
     offhand: "tome",
@@ -17738,7 +17738,7 @@ var CLASS_KIT_EQUIPMENT = Object.freeze([
   ["kit-knight-gauntlets", "Chain Gloves", "gloves", 0, 3, 0, null],
   ["kit-knight-treads", "Chain Boots", "boots", 0, 0, 1, null],
   ["kit-rogue-saber", "Footpad\u2019s Saber", "weapon", 1, 0, 0, "iron"],
-  ["kit-rogue-bandana", "Bandana", "helmet", 0, 5, 0, null],
+  ["kit-rogue-bandana", "Skullcap", "helmet", 0, 5, 0, null],
   ["kit-rogue-doublet", "Leather Armor", "overall", 0, 10, 1, null],
   ["kit-rogue-gloves", "Leather Gloves", "gloves", 0, 3, 0, null],
   ["kit-rogue-boots", "Leather Boots", "boots", 0, 0, 1, null],
@@ -25123,7 +25123,7 @@ var BY_DEFINITION = Object.freeze({
   "kit-knight-gauntlets": "gauntlets",
   "kit-knight-treads": "boots",
   "kit-rogue-saber": "saber",
-  "kit-rogue-bandana": "bandana",
+  "kit-rogue-bandana": "skullcap",
   "kit-rogue-doublet": "doublet",
   "kit-rogue-gloves": "gloves",
   "kit-rogue-boots": "boots",
@@ -25188,13 +25188,14 @@ var BY_NOUN = Object.freeze({
   "Plate Armor": "plate",
   Gauntlets: "gauntlets",
   "Plate Boots": "sabatons",
-  Bandana: "bandana",
+  Skullcap: "skullcap",
+  Bandana: "skullcap",
   "Leather Armor": "doublet",
   "Leather Gloves": "gloves",
-  "Leather Boots": "boots",
+  "Leather Boots": "leather-boots",
   Hood: "hood",
   "Studded Armor": "leather",
-  "Studded Gloves": "gloves",
+  "Studded Gloves": "studded-gloves",
   "Studded Boots": "tall",
   Cowl: "cowl",
   "Cloth Robe": "apprentice-robe",
@@ -25212,7 +25213,7 @@ var BY_NOUN = Object.freeze({
   "Silk Wraps": "wraps",
   "Silk Slippers": "slippers"
 });
-var OVERALL_LEGS = Object.freeze({ plate: "greaves", breastplate: "greaves", "fluted-plate": "greaves", hauberk: "chausses", "surcoat-mail": "chausses", "banded-mail": "chausses", doublet: "breeches", leather: "trousers", "mossback-pelt": "pelt", wardenplate: "warden-greaves" });
+var OVERALL_LEGS = Object.freeze({ plate: "greaves", breastplate: "greaves", "fluted-plate": "greaves", hauberk: "chausses", "surcoat-mail": "chausses", "banded-mail": "chausses", doublet: "breeches", jerkin: "breeches", "cutpurse-vest": "breeches", leather: "trousers", brigandine: "trousers", lamellar: "trousers", "mossback-pelt": "pelt", wardenplate: "warden-greaves" });
 var TOME_LOOKS = Object.freeze({ fire: "tome-fire", lightning: "tome-storm", frost: "tome-frost" });
 var LOOK_POOLS = Object.freeze({
   sword: Object.freeze(["sword", "broadsword", "leaf-sword"]),
@@ -25226,7 +25227,6 @@ var LOOK_POOLS = Object.freeze({
   staff: Object.freeze(["staff", "crook-staff", "gnarled-staff"]),
   helm: Object.freeze(["helm", "barbute", "burgonet"]),
   coif: Object.freeze(["coif", "kettle-hat", "nasal-helm"]),
-  bandana: Object.freeze(["bandana", "leather-cap", "feathered-cap"]),
   // Knight armor (class gear looks v1). Chain Gloves and Chain Boots have types of their own, so the Gauntlets and the Rogue's boots keep theirs.
   hauberk: Object.freeze(["hauberk", "surcoat-mail", "banded-mail"]),
   plate: Object.freeze(["plate", "breastplate", "fluted-plate"]),
@@ -25234,10 +25234,18 @@ var LOOK_POOLS = Object.freeze({
   gauntlets: Object.freeze(["gauntlets", "lobster-gauntlets", "spiked-gauntlets"]),
   "knight-boots": Object.freeze(["knight-boots", "mail-boots", "shin-boots"]),
   sabatons: Object.freeze(["sabatons", "pointed-sabatons", "spurred-sabatons"]),
+  // Rogue armor (class gear looks v1). Leather Boots and Studded Gloves have types of their own, so the Treads and the Leather Gloves keep theirs.
+  skullcap: Object.freeze(["skullcap", "head-wrap", "slouch-cap"]),
+  doublet: Object.freeze(["doublet", "jerkin", "cutpurse-vest"]),
+  leather: Object.freeze(["leather", "brigandine", "lamellar"]),
+  gloves: Object.freeze(["gloves", "fingerless-gloves", "cuffed-gloves"]),
+  "studded-gloves": Object.freeze(["studded-gloves", "knuckle-gloves", "bracer-gloves"]),
+  "leather-boots": Object.freeze(["boots", "wrapped-boots", "buckled-boots"]),
+  tall: Object.freeze(["tall", "footpad-boots", "laced-boots"]),
   cape: Object.freeze(["traveler-cape", "ragged-cape", "magic-cape"]),
   cloak: Object.freeze(["hooded-cloak", "fur-cloak", "scalloped-cloak"]),
   mantle: Object.freeze(["royal-mantle", "capelet", "banner-cape"]),
-  hood: Object.freeze(["hood", "bandit-hood", "scout-hood"]),
+  hood: Object.freeze(["hood", "pilfer-cap", "plate-hood"]),
   hat: Object.freeze(["hat", "wide-brim-hat", "circlet"]),
   cowl: Object.freeze(["cowl", "mage-hood", "moon-hat"]),
   buckler: Object.freeze(["buckler", "targe", "roundel"]),
@@ -25250,7 +25258,8 @@ var LOOK_POOLS = Object.freeze({
   "tome-frost": Object.freeze(["tome-rime", "tome-winter", "tome-tundra"]),
   "tome-storm": Object.freeze(["tome-spark", "tome-thunder", "tome-gale"])
 });
-var ARMOR_TYPE_WAS = Object.freeze({ "mail-gloves": "gauntlets", "knight-boots": "boots" });
+var UNSEEDED_LOOK = Object.freeze({ "leather-boots": "boots" });
+var ARMOR_TYPE_WAS = Object.freeze({ "mail-gloves": "gauntlets", "knight-boots": "boots", "leather-boots": "boots", "studded-gloves": "gloves" });
 var nounLookType = (noun) => BY_NOUN[noun] ?? null;
 
 // src/shared/contracts/forge_stations.js
