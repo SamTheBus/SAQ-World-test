@@ -112491,18 +112491,50 @@ var tint = (col2) => {
   return v;
 };
 var pc = /* @__PURE__ */ new Map();
-function poly11(pts2) {
-  const k = pts2.join(",");
-  let p = pc.get(k);
-  if (!p) {
-    p = new Path2D();
-    p.moveTo(pts2[0], pts2[1]);
-    for (let i = 2; i < pts2.length; i += 2) p.lineTo(pts2[i], pts2[i + 1]);
-    p.closePath();
-    pc.set(k, p);
+var pcSize = 0;
+function polyEntry(pts2) {
+  const n = pts2.length;
+  let h = n;
+  for (let i = 0; i < n; i++) h = Math.imul(h, 31) + Math.round(pts2[i] * 4096) | 0;
+  let bucket2 = pc.get(h);
+  if (bucket2) {
+    for (let j = 0; j < bucket2.length; j++) {
+      const e2 = bucket2[j], q2 = e2.pts;
+      if (q2.length !== n) continue;
+      let same12 = true;
+      for (let i = 0; i < n; i++) {
+        const u = q2[i], v = pts2[i];
+        if (u !== v && (u === u || v === v)) {
+          same12 = false;
+          break;
+        }
+      }
+      if (same12) return e2;
+    }
+  } else {
+    if (pcSize > 6e3) {
+      pc.clear();
+      pcSize = 0;
+    }
+    pc.set(h, bucket2 = []);
   }
-  return p;
+  const p = new Path2D();
+  p.moveTo(pts2[0], pts2[1]);
+  for (let i = 2; i < n; i += 2) p.lineTo(pts2[i], pts2[i + 1]);
+  p.closePath();
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  for (let i = 0; i < n; i += 2) {
+    x0 = Math.min(x0, pts2[i]);
+    x1 = Math.max(x1, pts2[i]);
+    y0 = Math.min(y0, pts2[i + 1]);
+    y1 = Math.max(y1, pts2[i + 1]);
+  }
+  const e = { pts: pts2.slice(), p, x0, x1, y0, y1 };
+  bucket2.push(e);
+  pcSize++;
+  return e;
 }
+var poly11 = (pts2) => polyEntry(pts2).p;
 function R3(c, x, y, w, h, P25, o) {
   o = o || {};
   c.fillStyle = tint(P25.b);
@@ -112524,17 +112556,11 @@ function R3(c, x, y, w, h, P25, o) {
 }
 function G3(c, pts2, P25, o) {
   o = o || {};
-  const p = poly11(pts2);
+  const e = polyEntry(pts2), p = e.p;
   c.fillStyle = tint(P25.b);
   c.fill(p);
   if (!o.flat && P25.d) {
-    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-    for (let i = 0; i < pts2.length; i += 2) {
-      x0 = Math.min(x0, pts2[i]);
-      x1 = Math.max(x1, pts2[i]);
-      y0 = Math.min(y0, pts2[i + 1]);
-      y1 = Math.max(y1, pts2[i + 1]);
-    }
+    const x0 = e.x0, x1 = e.x1, y0 = e.y0, y1 = e.y1;
     const s = o.split ?? 0.66;
     c.save();
     c.clip(p);
