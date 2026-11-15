@@ -19966,7 +19966,7 @@ var ARCHIVED_FIGHT_PROFILES = Object.freeze({
       lifetimeTicks: 900,
       minimumLeap: 55,
       maximumLeap: 75,
-      landingFireLifeTicks: 300
+      landingFireLifeTicks: 180
     }),
     fire: Object.freeze({ radius: 18, chargeLifeTicks: 180, ignitionTicks: 12, hitCadenceTicks: 30, damage: 24 })
   })
