@@ -563,6 +563,7 @@ import {
   eventAtSlotV1,
   eventCacheTileV1,
   eventOrdinal,
+  eventPlanV1,
   fairChestViewV1,
   fairLevelsV1,
   fairPlayOnV1,
@@ -758,6 +759,7 @@ import {
   openDenV1,
   ordinaryEnemyForProfile,
   ordinaryKillXp,
+  ordinaryRosterNativesV1,
   ordinaryTier,
   originManifestForState,
   outgoingCombat,
@@ -1106,7 +1108,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-AYIPL3QP.js";
+} from "./chunk-BUT2I3PK.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -133005,7 +133007,7 @@ function captureWorldStreamStateD9(state2, kind) {
     spacesByInstanceId[id2] = next;
   }
   const capture = {
-    streamCapture: { version: WORLD_STREAM_CAPTURE_D9, kind },
+    streamCapture: { version: WORLD_STREAM_CAPTURE_D9, kind, ...ordinaryRosterNativesV1(state2) ? { natives: true } : {} },
     campaign: { campaignId: state2.campaign.campaignId, seed: copyWire(state2.campaign.seed) },
     session: copyWire(state2.session),
     tick: state2.tick,
@@ -133035,7 +133037,7 @@ function captureOwnedWorldStreamStateV1(state2, kind) {
   }
   const runtime = state2.d9World.runtime, world = { ...state2.d9World, runtime: { ...runtime, frames: copyWire(runtime.frames) } };
   return {
-    streamCapture: { version: WORLD_STREAM_CAPTURE_D9, kind },
+    streamCapture: { version: WORLD_STREAM_CAPTURE_D9, kind, ...ordinaryRosterNativesV1(state2) ? { natives: true } : {} },
     campaign: { campaignId: state2.campaign.campaignId, seed: structuredClone(state2.campaign.seed) },
     session: structuredClone(state2.session),
     tick: state2.tick,
@@ -133059,7 +133061,7 @@ function captureOwnedWorldStreamTextV1(state2, kind) {
     spacesByInstanceId[id2] = strip ? { ...space, collision: { ...collision, origin: { width: 0, height: 0, tiles: [] } } } : space;
   }
   return JSON.stringify({
-    streamCapture: { version: WORLD_STREAM_CAPTURE_D9, kind },
+    streamCapture: { version: WORLD_STREAM_CAPTURE_D9, kind, ...ordinaryRosterNativesV1(state2) ? { natives: true } : {} },
     campaign: { campaignId: state2.campaign.campaignId, seed: state2.campaign.seed },
     session: state2.session,
     tick: state2.tick,
@@ -169108,7 +169110,47 @@ function createSettingsPageV1({ document: doc, environment: env }) {
     const goldBtn = btn("+10,000", "", () => run2(goldBtn, { gold: 1e4 }));
     const devName = name("Developer");
     devName.append(devNote);
-    devSec = section("Developer (test site)", line43(devName), line43(name("Level"), levelActs), line43(name("Unique"), giveActs), line43(name("Gold"), goldBtn));
+    const where = el3("select");
+    where.style.cssText = pick4.style.cssText;
+    where.setAttribute("aria-label", "Travel to");
+    let filled = false;
+    const fillPlaces = () => {
+      if (filled) return;
+      filled = true;
+      let group = null, box6 = null;
+      for (const p of dev.places?.() ?? []) {
+        if (p.group !== group) {
+          group = p.group;
+          box6 = el3("optgroup");
+          box6.label = group;
+          where.append(box6);
+        }
+        const o = el3("option", null, p.label);
+        o.value = p.id;
+        o.dataset.x = String(p.tile.x);
+        o.dataset.y = String(p.tile.y);
+        box6.append(o);
+      }
+    };
+    where.addEventListener("pointerdown", fillPlaces);
+    where.addEventListener("focus", fillPlaces);
+    const goBtn = btn("Go", "", async () => {
+      fillPlaces();
+      const o = where.selectedOptions?.[0];
+      if (!o) return;
+      goBtn.disabled = true;
+      devNote.textContent = "Travelling\u2026";
+      try {
+        await dev.travel({ tile: { x: Number(o.dataset.x), y: Number(o.dataset.y) } });
+        devNote.textContent = "Arrived at " + o.textContent + ".";
+      } catch (e) {
+        devNote.textContent = String(e?.message ?? e);
+      }
+      goBtn.disabled = false;
+    });
+    const goActs = el3("div", "st-acts");
+    goActs.append(where, goBtn);
+    devSec = section("Developer (test site)", line43(devName), line43(name("Level"), levelActs), line43(name("Unique"), giveActs), line43(name("Gold"), goldBtn), line43(name("Travel"), goActs));
   }
   const perfNote = el3("small", null, "");
   const perfName = name("Performance sample");
@@ -222606,6 +222648,19 @@ function devAddGoldV1(passport, amount2) {
   next.gold = addAmount(next.gold, String(amount2));
   return validateHeroPassport(next);
 }
+var EVENT_NAMES = { wayside_shrine: "Wayside Shrine", road_ambush: "Road Ambush", cursed_shrine: "Cursed Shrine", nests: "Nests", raided_camp: "Raided Camp", buried_cache: "Buried Cache", trophy_hunt: "Trophy Hunt", den: "Den" };
+var CLASS_NAMES6 = { "capital-great-hold": "Capital", city: "City", town: "Town", "village-outpost": "Village" };
+function devPlacesV1(settlements, eventPlan, capacities) {
+  const towns2 = (settlements ?? []).filter((s) => s.built && Number.isFinite(s.x) && Number.isFinite(s.y)).map((s) => ({ id: "dev:" + s.id, label: s.label + " (" + (CLASS_NAMES6[s.class] ?? s.class) + ", band " + s.band + ")", group: "Towns", tile: { x: Math.floor(s.x), y: Math.floor(s.y) } })).sort((a, b) => a.label < b.label ? -1 : 1);
+  const at9 = new Map((capacities ?? []).map((c) => [c.eventSlotId, c])), events = [];
+  for (const r of eventPlan ?? []) {
+    const c = at9.get(r.eventSlotId);
+    if (!c?.position) continue;
+    events.push({ id: "dev:" + r.eventSlotId, label: (EVENT_NAMES[r.event] ?? r.event) + " \xB7 " + c.biome + " \xB7 " + r.eventSlotId.slice(-3), group: "Events", tile: { x: Math.floor(c.position.x), y: Math.floor(c.position.y) } });
+  }
+  events.sort((a, b) => a.label < b.label ? -1 : 1);
+  return [...towns2, ...events];
+}
 function devApplyV1(passport, changes) {
   let next = passport;
   for (const c of Array.isArray(changes) ? changes : [changes]) {
@@ -226320,8 +226375,8 @@ var CSS8 = `.fr-toast{position:fixed;left:50%;top:calc(12px + var(--world-safe-t
 .fr-toast button.is-go{border-color:#4f9a66;background:linear-gradient(#2c5a3a,#1a3524);color:#eafff0}
 .fr-toast-bar{grid-column:1/-1;height:3px;border-radius:2px;background:#e9c46a;transform-origin:left;animation:fr-toast-bar linear forwards}
 @keyframes fr-toast-bar{to{transform:scaleX(0)}}`;
-var CLASS_NAMES6 = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
-var heroWords = (h) => h?.name ? [h.name, [CLASS_NAMES6[h.cls], h.level].filter(Boolean).join(" ")].filter(Boolean).join(" \xB7 ") : "";
+var CLASS_NAMES7 = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
+var heroWords = (h) => h?.name ? [h.name, [CLASS_NAMES7[h.cls], h.level].filter(Boolean).join(" ")].filter(Boolean).join(" \xB7 ") : "";
 var nameOf2 = (code2) => String(code2 ?? "A friend").replace(/#\d{4}$/, "");
 function createFriendsFlowV1({ environment, friends, game, now: now3 = () => Date.now() }) {
   const document2 = environment.document;
@@ -227591,6 +227646,15 @@ async function startWorldClient(environment) {
   if (devToolsAllowedV1(environment.location, channel2) && worldBridge && heroId && !coopGuest) environment.__SAQ_DEV_TOOLS_V1__ = Object.freeze({
     uniques: () => devUniquesForV1(session.authority.withAuthority((a) => a.withAuthorityState((s) => ({ d8: { heroClass: s.playersById[opened2.localPlayerId]?.d8?.heroClass } })))),
     level: () => session.authority.withAuthority((a) => a.withAuthorityState((s) => Number(s.playersById[opened2.localPlayerId]?.progression.level ?? 1))),
+    // Travel: the game's own review travel (session.plannedTravel: prepares the land there, moves the hero, saves),
+    // to a town or an event clearing of this world, or to any tile.
+    places: () => plannedReview ? devPlacesV1(session.authority.withAuthority((a) => a.withAuthorityState((s) => (s.d9World?.navigation?.knowledge?.settlements ?? []).map((t) => ({ id: t.id, label: t.label, class: t.class, band: t.band, built: t.built, x: t.x, y: t.y })))), eventPlanV1(plannedReview.asset), plannedReview.asset.wildernessExtension?.eventCapacities) : [],
+    travel: async (place4) => {
+      if (!plannedReview || !session.plannedTravel) throw Error("Travel needs a seeded world");
+      const tile2 = { x: Math.floor(place4.tile.x), y: Math.floor(place4.tile.y) }, id2 = "dev:tile:" + tile2.x + "," + tile2.y;
+      if (!plannedReview.targets.some((t) => t.id === id2)) plannedReview.targets.push({ id: id2, label: "Dev travel", tile: tile2 });
+      return session.plannedTravel(id2);
+    },
     apply: async (changes) => {
       await saveNow();
       const passport = readHeroPassport(deviceStorage, channel2, heroId);

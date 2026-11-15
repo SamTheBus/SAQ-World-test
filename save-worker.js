@@ -19471,8 +19471,21 @@ var rankFor2 = (id2) => ["C", "B", "A", "S"][(parseInt(id2.slice(8), 16) - 1) % 
 var recordFor2 = (s, id2) => s.d9World?.episodes[id2]?.ordinaryRosterV2;
 var completeCatalog = (s) => [...DUNGEON_MOBS_V2_ENEMIES, ...DUNGEON_MOBS_V2_PROFILES].every((p) => same6(s.content?.definitionsById?.[p.contentDefinitionId], p));
 var ready = (s) => completeCatalog(s) || Boolean(s.streamCapture && s.d9World?.ordinaryRosterV2?.version === ORDINARY_ROSTER_V2);
+var catalogNatives = /* @__PURE__ */ new WeakMap();
 var natives = /* @__PURE__ */ new Set([...BIOME_CREATURE_FAMILIES_V1, ...TROPICAL_CREATURE_FAMILIES_V1, ...OPEN_LAND_CREATURE_FAMILIES_V1]);
-var nativeCatalog = (s) => [...BIOME_CREATURES_V1_ENEMIES, ...BIOME_CREATURES_V1_PROFILES, ...TROPICAL_CREATURES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_PROFILES, ...OPEN_LAND_CREATURES_V1_ENEMIES, ...OPEN_LAND_CREATURES_V1_PROFILES].every((p) => same6(s.content?.definitionsById?.[p.contentDefinitionId], p));
+var nativeCatalog = (s) => {
+  if (s.streamCapture) return s.streamCapture.natives === true;
+  const c = s.content;
+  if (!c || typeof c !== "object") return false;
+  const n = c.definitionsById ? Object.keys(c.definitionsById).length : 0;
+  let v = catalogNatives.get(c);
+  if (!v || v.n !== n) {
+    v = { n, has: fullNativeCatalog(s) };
+    catalogNatives.set(c, v);
+  }
+  return v.has;
+};
+var fullNativeCatalog = (s) => [...BIOME_CREATURES_V1_ENEMIES, ...BIOME_CREATURES_V1_PROFILES, ...TROPICAL_CREATURES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_PROFILES, ...OPEN_LAND_CREATURES_V1_ENEMIES, ...OPEN_LAND_CREATURES_V1_PROFILES].every((p) => same6(s.content?.definitionsById?.[p.contentDefinitionId], p));
 var mountain = ["gilded_scuttler", "mimic_shield"];
 var voids = ["void_crawler", "void_spectre", "void_wraith", "rift_drifter"];
 var clockwork = ["clockwork_scarab", "star_weaver", "coin_elemental", "temporal_watcher", "clockwork_drone"];
@@ -19562,6 +19575,7 @@ function selection2(s, g, context) {
   }
   return Object.fromEntries(Object.entries(result).sort(([a], [b]) => a.localeCompare(b)));
 }
+var ordinaryRosterNativesV1 = (s) => nativeCatalog(s);
 function ordinaryRosterV2Definition(s, definition) {
   const row2 = recordFor2(s, definition.groupId);
   if (!row2) return definition;
@@ -35339,7 +35353,7 @@ function captureWorldStreamStateD9(state, kind2) {
     spacesByInstanceId[id2] = next;
   }
   const capture = {
-    streamCapture: { version: WORLD_STREAM_CAPTURE_D9, kind: kind2 },
+    streamCapture: { version: WORLD_STREAM_CAPTURE_D9, kind: kind2, ...ordinaryRosterNativesV1(state) ? { natives: true } : {} },
     campaign: { campaignId: state.campaign.campaignId, seed: copyWire(state.campaign.seed) },
     session: copyWire(state.session),
     tick: state.tick,
@@ -35358,8 +35372,8 @@ function captureWorldStreamStateD9(state, kind2) {
 }
 function checkWorldStreamCaptureShapeD9(state, kind2) {
   closedRecord(state, ["streamCapture", "campaign", "session", "tick", "overworldInstanceId", "d9World", "playersById", "entitiesById", "groupsById", "encounterEconomy", "spacesByInstanceId", "subweaponCombat"], ["hostileCombat", "eliteCombat"]);
-  closedRecord(state.streamCapture, ["version", "kind"]);
-  requireContract(state.streamCapture.version === WORLD_STREAM_CAPTURE_D9 && state.streamCapture.kind === kind2 && KINDS2.has(kind2), "World stream capture version/kind");
+  closedRecord(state.streamCapture, ["version", "kind"], ["natives"]);
+  requireContract((state.streamCapture.natives === void 0 || state.streamCapture.natives === true) && state.streamCapture.version === WORLD_STREAM_CAPTURE_D9 && state.streamCapture.kind === kind2 && KINDS2.has(kind2), "World stream capture version/kind");
   closedRecord(state.campaign, ["campaignId", "seed"]);
   safeInteger(state.tick);
   requireContract(state.session.campaignId === state.campaign.campaignId && state.d9World && state.spacesByInstanceId[state.overworldInstanceId], "World stream capture identity");

@@ -138,6 +138,71 @@ var ROADSIDE_DATABASE = "saq-world-roadside-v1-b45cc8e6";
 var ROADSIDE_POLICY = freezeWire({ "version": "world-roadside-encounters-v2", "parentCombatHash": "a6bd45764908d58d1e1dff8e55e811a0d10876ee0b24ea4b15aa28ea6c94fc59", "parentAccessHash": "48fd65d60a26a6403b36111e0d3622e366c26f6a07709e9d34ff013a013fcdeb", "packChancePercent": 85, "ordinaryPack": [6, 12], "maximumPacksPerChunk": 1, "protectedReservationChunks": "all original settlement/site/faction/future/origin chunks; unchanged", "wildernessSafetyCollarTiles": 8, "previousCollar": "one whole chunk in every direction (32x26 tiles), including unused neighboring ground", "spawnSafetyRadiusTiles": 32, "ferrySafetyRadiusTiles": 32, "eventCapacity": "all reserved event cells plus two-tile shoulder excluded", "routeSafety": "no member on marked road/trail/bridge or its one-tile shoulder", "actorSafety": "existing 384px activation no-spawn radius unchanged", "simulation": "existing 60Hz, 192 active actors, retention, XP, loot, stats and dungeon rosters unchanged", "selection": "domain-separated global chunk hash, maximum 24 center attempts, max 81 member probes per attempt, same-landmass clearance", "scope": "reusable sampler; opted-in Alpha review only; fresh disposable namespace" });
 var hasRoadsideEncounters = (b) => b?.roadsideVersion === ROADSIDE_VERSION && b?.roadsideHash === ROADSIDE_HASH;
 
+// src/shared/content/world_event_plan_v1.js
+var WORLD_EVENT_PLAN_VERSION = "world-event-plan-v1";
+var WORLD_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "raided_camp", "buried_cache", "trophy_hunt", "wayside_shrine", "den"]);
+var WORLD_EVENT_SHARES = freezeWire({
+  pathside: { road_ambush: 55, wayside_shrine: 45 },
+  backcountry: { cursed_shrine: 20, nests: 25, raided_camp: 15, buried_cache: 20, den: 20 },
+  deep_wild: { trophy_hunt: 40, cursed_shrine: 30, den: 30 }
+});
+var SLOT = /^density-v2-event-capacity-[0-9]{3}$/;
+function validateWorldEventPlanV1(plan, clearings) {
+  requireContract(plan?.version === WORLD_EVENT_PLAN_VERSION && Object.keys(plan).sort().join() === "events,version" && Array.isArray(plan.events), "EVENT_PLAN:SHAPE");
+  const rows3 = new Map(plan.events.map((r) => [r?.eventSlotId, r]));
+  requireContract(rows3.size === plan.events.length && rows3.size === clearings.length && clearings.every((c) => rows3.has(c.eventSlotId)), "EVENT_PLAN:SLOTS");
+  const linked = /* @__PURE__ */ new Set();
+  for (const r of plan.events) {
+    const camp = r.event === "raided_camp";
+    requireContract(SLOT.test(r.eventSlotId) && WORLD_EVENT_KINDS.includes(r.event) && Object.keys(r).sort().join() === (camp ? "cacheSlotId,event,eventSlotId" : "event,eventSlotId"), "EVENT_PLAN:ROW");
+    if (camp) requireContract(rows3.get(r.cacheSlotId)?.event === "buried_cache" && !linked.has(r.cacheSlotId) && linked.add(r.cacheSlotId), "EVENT_PLAN:CACHE");
+  }
+  return freezeWire(plan);
+}
+var CLASSIC_SLOTS = {
+  cursed_shrine: [54, 56, 57, 58, 60, 67, 74, 77, 82, 84, 87, 111, 127, 129, 133, 135, 136, 141, 143, 147, 150, 152, 158, 159, 160, 165, 170, 174],
+  nests: [27, 51, 55, 66, 68, 73, 79, 83, 85, 89, 90, 91, 97, 104, 107, 112, 113, 116, 119, 121, 123, 128, 130, 138, 153],
+  road_ambush: [4, 5, 7, 9, 10, 11, 12, 13, 14, 17, 18, 22, 23, 24, 26, 28, 29, 31, 33, 34, 38, 40, 42, 46, 50, 52],
+  raided_camp: [30, 71, 88, 92, 93, 102, 103, 105, 106, 108, 118, 137, 139, 140],
+  buried_cache: [53, 59, 65, 69, 72, 75, 76, 78, 81, 94, 96, 101, 109, 110, 115, 124, 131, 132, 134],
+  trophy_hunt: [144, 145, 148, 154, 156, 157, 161, 163, 166, 167, 168, 169, 173, 175],
+  wayside_shrine: [1, 2, 3, 6, 8, 15, 16, 19, 20, 21, 25, 32, 35, 36, 37, 39, 41, 43, 44, 45, 47, 48, 49],
+  den: [61, 62, 63, 64, 70, 80, 86, 95, 98, 99, 100, 114, 117, 120, 122, 125, 126, 142, 146, 149, 151, 155, 162, 164, 171, 172, 176]
+};
+var CLASSIC_CACHES = { 30: 132, 71: 96, 88: 115, 92: 65, 93: 81, 102: 109, 103: 134, 105: 69, 106: 131, 108: 59, 118: 78, 137: 101, 139: 75, 140: 124 };
+var slotId = (n) => "density-v2-event-capacity-" + String(n).padStart(3, "0");
+var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events: Object.entries(CLASSIC_SLOTS).flatMap(([event, list2]) => list2.map((n) => ({ n, event }))).sort((a, b) => a.n - b.n).map(({ n, event }) => CLASSIC_CACHES[n] ? { eventSlotId: slotId(n), event, cacheSlotId: slotId(CLASSIC_CACHES[n]) } : { eventSlotId: slotId(n), event }) });
+var plans = /* @__PURE__ */ new WeakMap();
+var atSlot = /* @__PURE__ */ new WeakMap();
+function eventPlanV1(asset) {
+  if (!asset || typeof asset !== "object") return Object.freeze([]);
+  let p = plans.get(asset);
+  if (p) return p;
+  const clearings = asset.wildernessExtension?.eventCapacities ?? [];
+  if (asset.eventPlan == null) {
+    const have = new Set(clearings.map((c) => c.eventSlotId));
+    p = Object.freeze(CLASSIC_EVENT_PLAN.events.filter((r) => have.has(r.eventSlotId)));
+  } else p = validateWorldEventPlanV1(asset.eventPlan, clearings).events;
+  plans.set(asset, p);
+  return p;
+}
+var cacheLinks = /* @__PURE__ */ new Map();
+function useEventLinksV1(asset) {
+  const at2 = new Map((asset?.wildernessExtension?.eventCapacities ?? []).map((c) => [c.eventSlotId, c]));
+  cacheLinks = /* @__PURE__ */ new Map();
+  for (const r of eventPlanV1(asset)) {
+    const c = r.cacheSlotId && at2.get(r.cacheSlotId);
+    if (c) cacheLinks.set(r.eventSlotId, { x: Math.floor(c.position.x), y: Math.floor(c.position.y) });
+  }
+}
+var eventCacheTileV1 = (eventSlotId) => cacheLinks.get(eventSlotId) ?? null;
+function eventAtSlotV1(asset, eventSlotId) {
+  const p = eventPlanV1(asset);
+  let m = atSlot.get(p);
+  if (!m) atSlot.set(p, m = new Map(p.map((r) => [r.eventSlotId, r])));
+  return m.get(eventSlotId) ?? null;
+}
+
 // src/shared/content/alderwood_access_v1.js
 var ACCESS_VERSION = "alderwood-first-journey-v1";
 var ACCESS_HASH = "48fd65d60a26a6403b36111e0d3622e366c26f6a07709e9d34ff013a013fcdeb";
@@ -1926,71 +1991,6 @@ function siteEndActorProfileV1(state, group, actor, profile2) {
   if (!profile2 || !group?.siteId) return profile2;
   for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) for (const floor of site.floors ?? []) if (floor.groupId === group.groupId) return siteEndProfileV1(floor, actor.entityId, profile2);
   return profile2;
-}
-
-// src/shared/content/world_event_plan_v1.js
-var WORLD_EVENT_PLAN_VERSION = "world-event-plan-v1";
-var WORLD_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "raided_camp", "buried_cache", "trophy_hunt", "wayside_shrine", "den"]);
-var WORLD_EVENT_SHARES = freezeWire({
-  pathside: { road_ambush: 55, wayside_shrine: 45 },
-  backcountry: { cursed_shrine: 20, nests: 25, raided_camp: 15, buried_cache: 20, den: 20 },
-  deep_wild: { trophy_hunt: 40, cursed_shrine: 30, den: 30 }
-});
-var SLOT = /^density-v2-event-capacity-[0-9]{3}$/;
-function validateWorldEventPlanV1(plan, clearings) {
-  requireContract(plan?.version === WORLD_EVENT_PLAN_VERSION && Object.keys(plan).sort().join() === "events,version" && Array.isArray(plan.events), "EVENT_PLAN:SHAPE");
-  const rows3 = new Map(plan.events.map((r) => [r?.eventSlotId, r]));
-  requireContract(rows3.size === plan.events.length && rows3.size === clearings.length && clearings.every((c) => rows3.has(c.eventSlotId)), "EVENT_PLAN:SLOTS");
-  const linked = /* @__PURE__ */ new Set();
-  for (const r of plan.events) {
-    const camp = r.event === "raided_camp";
-    requireContract(SLOT.test(r.eventSlotId) && WORLD_EVENT_KINDS.includes(r.event) && Object.keys(r).sort().join() === (camp ? "cacheSlotId,event,eventSlotId" : "event,eventSlotId"), "EVENT_PLAN:ROW");
-    if (camp) requireContract(rows3.get(r.cacheSlotId)?.event === "buried_cache" && !linked.has(r.cacheSlotId) && linked.add(r.cacheSlotId), "EVENT_PLAN:CACHE");
-  }
-  return freezeWire(plan);
-}
-var CLASSIC_SLOTS = {
-  cursed_shrine: [54, 56, 57, 58, 60, 67, 74, 77, 82, 84, 87, 111, 127, 129, 133, 135, 136, 141, 143, 147, 150, 152, 158, 159, 160, 165, 170, 174],
-  nests: [27, 51, 55, 66, 68, 73, 79, 83, 85, 89, 90, 91, 97, 104, 107, 112, 113, 116, 119, 121, 123, 128, 130, 138, 153],
-  road_ambush: [4, 5, 7, 9, 10, 11, 12, 13, 14, 17, 18, 22, 23, 24, 26, 28, 29, 31, 33, 34, 38, 40, 42, 46, 50, 52],
-  raided_camp: [30, 71, 88, 92, 93, 102, 103, 105, 106, 108, 118, 137, 139, 140],
-  buried_cache: [53, 59, 65, 69, 72, 75, 76, 78, 81, 94, 96, 101, 109, 110, 115, 124, 131, 132, 134],
-  trophy_hunt: [144, 145, 148, 154, 156, 157, 161, 163, 166, 167, 168, 169, 173, 175],
-  wayside_shrine: [1, 2, 3, 6, 8, 15, 16, 19, 20, 21, 25, 32, 35, 36, 37, 39, 41, 43, 44, 45, 47, 48, 49],
-  den: [61, 62, 63, 64, 70, 80, 86, 95, 98, 99, 100, 114, 117, 120, 122, 125, 126, 142, 146, 149, 151, 155, 162, 164, 171, 172, 176]
-};
-var CLASSIC_CACHES = { 30: 132, 71: 96, 88: 115, 92: 65, 93: 81, 102: 109, 103: 134, 105: 69, 106: 131, 108: 59, 118: 78, 137: 101, 139: 75, 140: 124 };
-var slotId = (n) => "density-v2-event-capacity-" + String(n).padStart(3, "0");
-var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events: Object.entries(CLASSIC_SLOTS).flatMap(([event, list2]) => list2.map((n) => ({ n, event }))).sort((a, b) => a.n - b.n).map(({ n, event }) => CLASSIC_CACHES[n] ? { eventSlotId: slotId(n), event, cacheSlotId: slotId(CLASSIC_CACHES[n]) } : { eventSlotId: slotId(n), event }) });
-var plans = /* @__PURE__ */ new WeakMap();
-var atSlot = /* @__PURE__ */ new WeakMap();
-function eventPlanV1(asset) {
-  if (!asset || typeof asset !== "object") return Object.freeze([]);
-  let p = plans.get(asset);
-  if (p) return p;
-  const clearings = asset.wildernessExtension?.eventCapacities ?? [];
-  if (asset.eventPlan == null) {
-    const have = new Set(clearings.map((c) => c.eventSlotId));
-    p = Object.freeze(CLASSIC_EVENT_PLAN.events.filter((r) => have.has(r.eventSlotId)));
-  } else p = validateWorldEventPlanV1(asset.eventPlan, clearings).events;
-  plans.set(asset, p);
-  return p;
-}
-var cacheLinks = /* @__PURE__ */ new Map();
-function useEventLinksV1(asset) {
-  const at2 = new Map((asset?.wildernessExtension?.eventCapacities ?? []).map((c) => [c.eventSlotId, c]));
-  cacheLinks = /* @__PURE__ */ new Map();
-  for (const r of eventPlanV1(asset)) {
-    const c = r.cacheSlotId && at2.get(r.cacheSlotId);
-    if (c) cacheLinks.set(r.eventSlotId, { x: Math.floor(c.position.x), y: Math.floor(c.position.y) });
-  }
-}
-var eventCacheTileV1 = (eventSlotId) => cacheLinks.get(eventSlotId) ?? null;
-function eventAtSlotV1(asset, eventSlotId) {
-  const p = eventPlanV1(asset);
-  let m = atSlot.get(p);
-  if (!m) atSlot.set(p, m = new Map(p.map((r) => [r.eventSlotId, r])));
-  return m.get(eventSlotId) ?? null;
 }
 
 // src/shared/content/upland_summits_v1.js
@@ -9420,8 +9420,21 @@ var rankFor2 = (id) => ["C", "B", "A", "S"][(parseInt(id.slice(8), 16) - 1) % 4]
 var recordFor2 = (s, id) => s.d9World?.episodes[id]?.ordinaryRosterV2;
 var completeCatalog = (s) => [...DUNGEON_MOBS_V2_ENEMIES, ...DUNGEON_MOBS_V2_PROFILES].every((p) => same3(s.content?.definitionsById?.[p.contentDefinitionId], p));
 var ready = (s) => completeCatalog(s) || Boolean(s.streamCapture && s.d9World?.ordinaryRosterV2?.version === ORDINARY_ROSTER_V2);
+var catalogNatives = /* @__PURE__ */ new WeakMap();
 var natives = /* @__PURE__ */ new Set([...BIOME_CREATURE_FAMILIES_V1, ...TROPICAL_CREATURE_FAMILIES_V1, ...OPEN_LAND_CREATURE_FAMILIES_V1]);
-var nativeCatalog = (s) => [...BIOME_CREATURES_V1_ENEMIES, ...BIOME_CREATURES_V1_PROFILES, ...TROPICAL_CREATURES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_PROFILES, ...OPEN_LAND_CREATURES_V1_ENEMIES, ...OPEN_LAND_CREATURES_V1_PROFILES].every((p) => same3(s.content?.definitionsById?.[p.contentDefinitionId], p));
+var nativeCatalog = (s) => {
+  if (s.streamCapture) return s.streamCapture.natives === true;
+  const c = s.content;
+  if (!c || typeof c !== "object") return false;
+  const n = c.definitionsById ? Object.keys(c.definitionsById).length : 0;
+  let v = catalogNatives.get(c);
+  if (!v || v.n !== n) {
+    v = { n, has: fullNativeCatalog(s) };
+    catalogNatives.set(c, v);
+  }
+  return v.has;
+};
+var fullNativeCatalog = (s) => [...BIOME_CREATURES_V1_ENEMIES, ...BIOME_CREATURES_V1_PROFILES, ...TROPICAL_CREATURES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_PROFILES, ...OPEN_LAND_CREATURES_V1_ENEMIES, ...OPEN_LAND_CREATURES_V1_PROFILES].every((p) => same3(s.content?.definitionsById?.[p.contentDefinitionId], p));
 var mountain = ["gilded_scuttler", "mimic_shield"];
 var voids = ["void_crawler", "void_spectre", "void_wraith", "rift_drifter"];
 var clockwork = ["clockwork_scarab", "star_weaver", "coin_elemental", "temporal_watcher", "clockwork_drone"];
@@ -9511,6 +9524,7 @@ function selection2(s, g, context) {
   }
   return Object.fromEntries(Object.entries(result).sort(([a], [b]) => a.localeCompare(b)));
 }
+var ordinaryRosterNativesV1 = (s) => nativeCatalog(s);
 function ordinaryRosterV2Definition(s, definition) {
   const row2 = recordFor2(s, definition.groupId);
   if (!row2) return definition;
@@ -31423,6 +31437,7 @@ export {
   eventOrdinal,
   sporeOrdinal,
   worldEventProtectionV1,
+  eventPlanV1,
   useEventLinksV1,
   eventCacheTileV1,
   eventAtSlotV1,
@@ -31708,6 +31723,7 @@ export {
   livingFusedMimics,
   aegisTowerHalfAngle,
   projectAegisMimic,
+  ordinaryRosterNativesV1,
   adoptOrdinaryRostersV2,
   validateOrdinaryRosterV2State,
   firstInvalidActorGeometryD9,
