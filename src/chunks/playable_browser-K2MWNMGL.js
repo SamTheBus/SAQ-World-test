@@ -120202,6 +120202,10 @@ Object.assign(KG_HELM, {
   },
   "jester-cap"(c, A2, face5, sway = 0) {
     const H8 = P14.purple, D2 = { b: "#5b2c6f", d: "#4a235a", l: "#7d3c98" }, s = sway * 0.6;
+    c.save();
+    c.translate(-1, -11.4);
+    c.scale(0.9, 0.85);
+    c.translate(1, 11.4);
     const t = s * 0.7, near5 = new Path2D();
     near5.moveTo(-5.6, -21);
     near5.bezierCurveTo(-4.6, -24.4, 2.8, -24.8, 3.6, -20.4);
@@ -120316,6 +120320,7 @@ Object.assign(KG_HELM, {
     mgGemSet(c, -1.2, -12.5, 1.7);
     gem2(c, -1.2, -12.5, 1.35, A2.gem);
     mgJBell(c, -17.2 + s, -13.2, 1.55, MG.gold.b);
+    c.restore();
   }
 });
 function bootIcon(c, kind, A2) {
@@ -120630,7 +120635,7 @@ function drawItemIcon(c, item2, size = 48) {
       else if (kind === "cowl") fit2(-1.4, -20.4, 27.5);
       else if (kind === "moon-hat") fit2(-1.4, -21.4, 27.5);
       else if (kind === "sage-band") fit2(-3.4, -9.4, 25);
-      else if (kind === "jester-cap") fit2(-3.8, -16.4, 31);
+      else if (kind === "jester-cap") fit2(-4, -15.8, 28.5);
       else if (kind === "circlet") fit2(-0.6, -12.6, 21);
       else if (kind === "head-wrap") fit2(-3.2, -13.6, 26);
       else if (kind === "slouch-cap") fit2(-1.6, -14.6, 27);
