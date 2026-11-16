@@ -6573,6 +6573,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "Enemies that hit you up close catch fire from your antlers, burning for {0} of your Attack over 3 s.",
     "Shed every autumn. Still smoldering."
   ),
+  // Hollowglass (code id marcus; Sammy 2026-11-16, the set page and all four passes approved): its Looking Glass copy,
+  // its Mirror Step mirrors, its Shard Barrage fan, and its copy turned around to fight for you.
+  unique(
+    "twinpane",
+    "Twinpane",
+    "subweapon",
+    "shield",
+    "Kite Shield",
+    "knight",
+    "marcus",
+    "grassland",
+    "Shield Bash calls up a glass copy of you beside you. A moment later the copy bashes too, hitting everything in front of it for {0} of your Attack, then shatters.",
+    "Two faces. Both yours."
+  ),
+  unique(
+    "silverstep",
+    "Silverstep",
+    "subweapon",
+    "dagger",
+    "Kris",
+    "rogue",
+    "marcus",
+    "grassland",
+    "Dash leaves mirror copies along your path, up to three. A moment after you pass, each one shatters, hitting the enemies near it for {0} of your Attack. Once every 3 s.",
+    "It was never where you struck."
+  ),
+  unique(
+    "splinterglass-wand",
+    "Splinterglass Wand",
+    "weapon",
+    null,
+    "Wand",
+    "mage",
+    "marcus",
+    "grassland",
+    "Every 4th Cast also fires a fan of five glass shards. Each one hits the first enemy it touches for {0} of your Attack and bounces off walls up to twice. With a tome, the shards take its element: Fire burns, Frost chills, Lightning shocks.",
+    "Every angle is a way in."
+  ),
+  unique(
+    "glassveil",
+    "Glassveil",
+    "cape",
+    null,
+    "Cape",
+    null,
+    "marcus",
+    "grassland",
+    "When a hit drops you below half Health, your reflection steps out of the cape and fights beside you for 8 s with your class\u2019s starting skills, dealing {0} of your damage. Then it shatters. Once every 40 s.",
+    "Turn around. You are already there."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -6849,6 +6899,11 @@ var UNIQUE_TIERS = freezeWire({
   "emberhare": { lines: ["mainDmg", "critChance", "poisonDmg", "dex", "eliteDmg"], stars: [240, 210, 180, 120], unit: "ticks" },
   "kindleheart-tome": { lines: ["offDmg", "int", "fireDmg", "bonusAreaRadius", "eliteDmg"], stars: [600, 480, 360, 240], unit: "ticks" },
   "emberantler-crown": { lines: ["maxHpPct", "defPct", "fireDmg", "lifeHit", "cdr"], stars: [60, 80, 100, 130], unit: "pct" },
+  // Hollowglass (v3 lines below; these five are the v2 fallback).
+  "twinpane": { lines: ["block", "offDmg", "critChance", "cdr", "eliteDmg"], stars: [50, 65, 80, 100], unit: "pct" },
+  "silverstep": { lines: ["offDmg", "critChance", "dex", "moveSpeed", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
+  "splinterglass-wand": { lines: ["mainDmg", "int", "critChance", "activeSpd", "eliteDmg"], stars: [40, 55, 70, 90], unit: "pct" },
+  "glassveil": { lines: ["maxHpPct", "defPct", "atkPct", "lifeKill", "cdr"], stars: [35, 45, 55, 70], unit: "pct" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
@@ -6903,6 +6958,12 @@ var UNIQUE_LINES_V3 = freezeWire({
   "emberhare": { always: "ailingDmg", pool: ["mainDmg", "critChance", "poisonDmg", "ailmentDur", "mainAttr", "eliteDmg"], leg: ["killCdr"] },
   "kindleheart-tome": { always: "fireDmg", pool: ["offDmg", "mainAttr", "bonusAreaRadius", "areaDmg", "closeDmg", "eliteDr"], leg: ["maxPip"] },
   "emberantler-crown": { always: "ailmentDur", pool: ["maxHpPct", "defPct", "counterDmg", "eliteDr", "lifeHit", "stunDr", "fireDmg"], leg: [] },
+  // Hollowglass set (Sammy 2026-11-16). The Twinpane copy's bash is a Shield Bash; the Silverstep shatter and the
+  // Splinterglass shards follow the unique damage rule (off-hand area, main-hand ranged).
+  "twinpane": { always: "skillDmg:shield_bash", pool: ["block", "offDmg", "areaDmg", "counterDmg", "defCdr", "eliteDmg"], leg: ["maxPip"] },
+  "silverstep": { always: "areaDmg", pool: ["offDmg", "critChance", "critDamage", "moveCdr", "mainAttr", "eliteDmg"], leg: ["killCdr"] },
+  "splinterglass-wand": { always: "rangedDmg", pool: ["mainDmg", "critChance", "activeSpd", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
+  "glassveil": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -6972,7 +7033,7 @@ function uniqueEffectText(unique2, tier) {
 var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
 var uniquesFrom = (source10, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source10 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
 var trophyFromV1 = (biome) => Object.values(UNIQUE_ITEMS).find((u) => u.trophy && u.biome === biome)?.from ?? null;
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus"]);
 function nightmareUniqueV1(cls, pick6, source10 = "nightmare_sporecrown") {
   const own3 = cls ? uniquesFrom(source10, cls) : [], mine = own3.find((id) => UNIQUE_ITEMS[id].cls === cls), any = own3.find((id) => UNIQUE_ITEMS[id].cls === null);
   if (!mine) return null;

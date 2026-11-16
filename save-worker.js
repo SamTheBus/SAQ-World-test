@@ -15530,6 +15530,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "Enemies that hit you up close catch fire from your antlers, burning for {0} of your Attack over 3 s.",
     "Shed every autumn. Still smoldering."
   ),
+  // Hollowglass (code id marcus; Sammy 2026-11-16, the set page and all four passes approved): its Looking Glass copy,
+  // its Mirror Step mirrors, its Shard Barrage fan, and its copy turned around to fight for you.
+  unique(
+    "twinpane",
+    "Twinpane",
+    "subweapon",
+    "shield",
+    "Kite Shield",
+    "knight",
+    "marcus",
+    "grassland",
+    "Shield Bash calls up a glass copy of you beside you. A moment later the copy bashes too, hitting everything in front of it for {0} of your Attack, then shatters.",
+    "Two faces. Both yours."
+  ),
+  unique(
+    "silverstep",
+    "Silverstep",
+    "subweapon",
+    "dagger",
+    "Kris",
+    "rogue",
+    "marcus",
+    "grassland",
+    "Dash leaves mirror copies along your path, up to three. A moment after you pass, each one shatters, hitting the enemies near it for {0} of your Attack. Once every 3 s.",
+    "It was never where you struck."
+  ),
+  unique(
+    "splinterglass-wand",
+    "Splinterglass Wand",
+    "weapon",
+    null,
+    "Wand",
+    "mage",
+    "marcus",
+    "grassland",
+    "Every 4th Cast also fires a fan of five glass shards. Each one hits the first enemy it touches for {0} of your Attack and bounces off walls up to twice. With a tome, the shards take its element: Fire burns, Frost chills, Lightning shocks.",
+    "Every angle is a way in."
+  ),
+  unique(
+    "glassveil",
+    "Glassveil",
+    "cape",
+    null,
+    "Cape",
+    null,
+    "marcus",
+    "grassland",
+    "When a hit drops you below half Health, your reflection steps out of the cape and fights beside you for 8 s with your class\u2019s starting skills, dealing {0} of your damage. Then it shatters. Once every 40 s.",
+    "Turn around. You are already there."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -15806,6 +15856,11 @@ var UNIQUE_TIERS = freezeWire({
   "emberhare": { lines: ["mainDmg", "critChance", "poisonDmg", "dex", "eliteDmg"], stars: [240, 210, 180, 120], unit: "ticks" },
   "kindleheart-tome": { lines: ["offDmg", "int", "fireDmg", "bonusAreaRadius", "eliteDmg"], stars: [600, 480, 360, 240], unit: "ticks" },
   "emberantler-crown": { lines: ["maxHpPct", "defPct", "fireDmg", "lifeHit", "cdr"], stars: [60, 80, 100, 130], unit: "pct" },
+  // Hollowglass (v3 lines below; these five are the v2 fallback).
+  "twinpane": { lines: ["block", "offDmg", "critChance", "cdr", "eliteDmg"], stars: [50, 65, 80, 100], unit: "pct" },
+  "silverstep": { lines: ["offDmg", "critChance", "dex", "moveSpeed", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
+  "splinterglass-wand": { lines: ["mainDmg", "int", "critChance", "activeSpd", "eliteDmg"], stars: [40, 55, 70, 90], unit: "pct" },
+  "glassveil": { lines: ["maxHpPct", "defPct", "atkPct", "lifeKill", "cdr"], stars: [35, 45, 55, 70], unit: "pct" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
@@ -15860,6 +15915,12 @@ var UNIQUE_LINES_V3 = freezeWire({
   "emberhare": { always: "ailingDmg", pool: ["mainDmg", "critChance", "poisonDmg", "ailmentDur", "mainAttr", "eliteDmg"], leg: ["killCdr"] },
   "kindleheart-tome": { always: "fireDmg", pool: ["offDmg", "mainAttr", "bonusAreaRadius", "areaDmg", "closeDmg", "eliteDr"], leg: ["maxPip"] },
   "emberantler-crown": { always: "ailmentDur", pool: ["maxHpPct", "defPct", "counterDmg", "eliteDr", "lifeHit", "stunDr", "fireDmg"], leg: [] },
+  // Hollowglass set (Sammy 2026-11-16). The Twinpane copy's bash is a Shield Bash; the Silverstep shatter and the
+  // Splinterglass shards follow the unique damage rule (off-hand area, main-hand ranged).
+  "twinpane": { always: "skillDmg:shield_bash", pool: ["block", "offDmg", "areaDmg", "counterDmg", "defCdr", "eliteDmg"], leg: ["maxPip"] },
+  "silverstep": { always: "areaDmg", pool: ["offDmg", "critChance", "critDamage", "moveCdr", "mainAttr", "eliteDmg"], leg: ["killCdr"] },
+  "splinterglass-wand": { always: "rangedDmg", pool: ["mainDmg", "critChance", "activeSpd", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
+  "glassveil": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -15910,7 +15971,7 @@ function uniqueLineKeyV3(id2, affix) {
   return affix.key;
 }
 var NTH = Object.freeze({ 2: "second", 3: "third", 4: "fourth", 5: "fifth" });
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus"]);
 var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.25, named: 0.1, world: 2e-3 });
 
 // src/shared/content/smart_offhand_v1.js
@@ -27394,6 +27455,19 @@ var KINDLE_TICKS = 170;
 var KINDLE_EVERY_MAX = 600;
 var ANTLER_TICKS = 42;
 var HARE_LIFE = HARE_WAKE + HARE_HOPS * (HARE_HOP + HARE_REST);
+var PANE_TICKS = 88;
+var SS_EVERY = 180;
+var SS_STOPS = 3;
+var SS_BURST = 24;
+var SS_RING = 36;
+var SS_RISE_MAX = 120;
+var SPL_EVERY = 4;
+var SPL_SHARDS = 5;
+var SPL_BOUNCES = 2;
+var SPL_LIFE = 70;
+var GV_TICKS = 480;
+var GV_EVERY = 2400;
+var GV_POP = 40;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
@@ -27425,7 +27499,7 @@ var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
-var LIVE = ["scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["pane", "ssCd", "mirrors", "splN", "splinters", "gvCd", "glass", "glassPop", "scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 var ZIP_TICKS = 120;
 var PERF_READY_TICKS = 180;
 function prune(combat) {
@@ -27943,6 +28017,47 @@ function validateClassSkillState(s, combat, actor) {
       closedRecord(k.kindle, ["x", "y", "ticks"]);
       requireContract(pos2(k.kindle), "Invalid starburst");
       safeInteger(k.kindle.ticks, 1, KINDLE_TICKS);
+    }
+    for (const [key9, max2] of [["ssCd", SS_EVERY], ["splN", SPL_EVERY - 1], ["gvCd", GV_EVERY]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
+    if (k.pane !== void 0) {
+      const p = k.pane;
+      closedRecord(p, ["x", "y", "ax", "ay", "age"]);
+      requireContract(pos2(p) && Math.abs(Math.hypot(p.ax, p.ay) - 1) < 1e-6 && actor.alive, "Invalid glass copy");
+      safeInteger(p.age, 0, PANE_TICKS - 1);
+    }
+    if (k.mirrors !== void 0) {
+      requireContract(Array.isArray(k.mirrors) && k.mirrors.length >= 1 && k.mirrors.length <= SS_STOPS, "Invalid mirrors");
+      for (const m of k.mirrors) {
+        closedRecord(m, ["x", "y", "rise", "age"]);
+        requireContract(pos2(m), "Invalid mirror");
+        safeInteger(m.rise, 0, SS_RISE_MAX);
+        safeInteger(m.age, 0, m.rise + SS_BURST + SS_RING - 1);
+      }
+    }
+    if (k.splinters !== void 0) {
+      requireContract(Array.isArray(k.splinters) && k.splinters.length >= 1 && k.splinters.length <= SPL_SHARDS * 2, "Invalid glass shards");
+      for (const q of k.splinters) {
+        closedRecord(q, ["n", "x", "y", "vx", "vy", "b", "age"], ["el"]);
+        tomeEl(q);
+        requireContract(pos2(q) && Number.isFinite(q.vx) && Number.isFinite(q.vy), "Invalid glass shard");
+        safeInteger(q.n, 0, 1e9);
+        safeInteger(q.b, 0, SPL_BOUNCES);
+        safeInteger(q.age, 0, SPL_LIFE - 1);
+      }
+    }
+    if (k.glass !== void 0) {
+      const g = k.glass;
+      closedRecord(g, ["x", "y", "ticks", "act", "age", "ax", "ay", "n", "tx", "ty"], ["el"]);
+      tomeEl(g);
+      requireContract(pos2(g) && [g.ax, g.ay, g.tx, g.ty].every(Number.isFinite) && ["", "bash", "combo", "cast", "flurry"].includes(g.act) && actor.alive, "Invalid reflection");
+      safeInteger(g.ticks, 1, GV_TICKS);
+      safeInteger(g.age, 0, GV_TICKS);
+      safeInteger(g.n, 0, 1e6);
+    }
+    if (k.glassPop !== void 0) {
+      closedRecord(k.glassPop, ["x", "y", "ticks"]);
+      requireContract(pos2(k.glassPop), "Invalid shattered reflection");
+      safeInteger(k.glassPop.ticks, 1, GV_POP);
     }
     for (const [key9, max2] of [["oathCd", OATH_EVERY], ["plate", PLATE_TICKS], ["plateCd", PLATE_EVERY]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
     if (k.lode !== void 0) {
