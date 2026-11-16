@@ -6522,6 +6522,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "When a hit drops you below 40% Health, a ring of spirit shields slams down around you: it knocks the enemies near you back, and you take {0} less damage for 4 s. Once every 30 s.",
     "It held the fort gate for a hundred years."
   ),
+  // Cinderhart (Woodland): his Fire Charge furrow, his ember bunnies, his scorched starburst and his antlers (Sammy
+  // 2026-11-15/16, the set page and all four passes approved; the Emberhare poisons, as the Khopesh and Ventcutter do).
+  unique(
+    "cinderhorn",
+    "Cinderhorn",
+    "subweapon",
+    "shield",
+    "Tower Shield",
+    "knight",
+    "cinderhart",
+    "woodland",
+    "Shield Charge tears a burning furrow behind you. A moment later the whole furrow flares up, hitting every enemy in it for {0} of your Attack. Then it keeps burning for 3 s, setting enemies who stand in it burning. Shield Charge's own hits become Fire.",
+    "The forest still remembers the road it burned."
+  ),
+  unique(
+    "emberhare",
+    "Emberhare",
+    "weapon",
+    null,
+    "Rapier",
+    "rogue",
+    "cinderhart",
+    "woodland",
+    "Once every {0}, a hit with your main hand wakes an ember bunny out of the ground beside the enemy, up to 3 at a time. It hops at the nearest enemies four times. Every landing hits the enemies under it for 70% of your Attack and leaves a patch of smoldering cinders whose gray-green smoke poisons for 3 s. Then it bursts into embers.",
+    "Every warren has a fire at the bottom."
+  ),
+  unique(
+    "kindleheart-tome",
+    "Kindleheart Tome",
+    "subweapon",
+    "tome",
+    "Fire Tome",
+    "mage",
+    "cinderhart",
+    "woodland",
+    "When an enemy comes within 2 tiles of you, the tome flares: a scorched starburst blasts out around you and its rim leaps into flame. It hits every enemy near you for 150% of your Attack, knocks them back (not bosses) and sets them burning. Once every {0}.",
+    "Some fires only wake when cornered."
+  ),
+  unique(
+    "emberantler-crown",
+    "Emberantler Crown",
+    "helmet",
+    null,
+    "Backwards Cap",
+    null,
+    "cinderhart",
+    "woodland",
+    "Enemies that hit you up close catch fire from your antlers, burning for {0} of your Attack over 3 s.",
+    "Shed every autumn. Still smoldering."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -6793,6 +6843,11 @@ var UNIQUE_TIERS = freezeWire({
   "oathcutter": { lines: ["offDmg", "critChance", "parry", "cdr", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
   "wardlight-scepter": { lines: ["mainDmg", "critChance", "activeSpd", "maxHpPct", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
   "wardenplate": { lines: ["maxHpPct", "defPct", "lifeKill", "cdr", "atkPct"], stars: [30, 40, 50, 65], unit: "pct" },
+  // Cinderhart (v3 lines below; these five are the v2 fallback). The Emberhare's and the Kindleheart's stars are their waits.
+  "cinderhorn": { lines: ["block", "offDmg", "fireDmg", "cdr", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
+  "emberhare": { lines: ["mainDmg", "critChance", "poisonDmg", "dex", "eliteDmg"], stars: [240, 210, 180, 120], unit: "ticks" },
+  "kindleheart-tome": { lines: ["offDmg", "int", "fireDmg", "bonusAreaRadius", "eliteDmg"], stars: [600, 480, 360, 240], unit: "ticks" },
+  "emberantler-crown": { lines: ["maxHpPct", "defPct", "fireDmg", "lifeHit", "cdr"], stars: [60, 80, 100, 130], unit: "pct" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
@@ -6842,6 +6897,11 @@ var UNIQUE_LINES_V3 = freezeWire({
   "oathcutter": { always: "rangedDmg", pool: ["offDmg", "critChance", "parry", "skillDmg:flurry", "critDamage", "eliteDmg"], leg: ["killCdr"] },
   "wardlight-scepter": { always: "mainDmg", pool: ["critChance", "closeDmg", "areaDmg", "maxHpPct", "eliteDr", "eliteDmg"], leg: ["maxPip"] },
   "wardenplate": { always: "eliteDr", pool: ["maxHpPct", "defPct", "mainAttr", "lifeKill", "areaDr", "hitCdr", "lowDmg"], leg: [] },
+  // Cinderhart set (Sammy 2026-11-15/16): the Cinderhorn's +1 goes to the Breaker branch.
+  "cinderhorn": { always: "areaDmg", pool: ["mainDmg", "skillDmg:shield_charge", "fireDmg", "moveCdr", "ailingDmg", "eliteDmg"], leg: ["branchRank:breaker"] },
+  "emberhare": { always: "ailingDmg", pool: ["mainDmg", "critChance", "poisonDmg", "ailmentDur", "mainAttr", "eliteDmg"], leg: ["killCdr"] },
+  "kindleheart-tome": { always: "fireDmg", pool: ["offDmg", "mainAttr", "bonusAreaRadius", "areaDmg", "closeDmg", "eliteDr"], leg: ["maxPip"] },
+  "emberantler-crown": { always: "ailmentDur", pool: ["maxHpPct", "defPct", "counterDmg", "eliteDr", "lifeHit", "stunDr", "fireDmg"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -6911,7 +6971,7 @@ function uniqueEffectText(unique2, tier) {
 var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
 var uniquesFrom = (source10, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source10 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
 var trophyFromV1 = (biome) => Object.values(UNIQUE_ITEMS).find((u) => u.trophy && u.biome === biome)?.from ?? null;
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart"]);
 function nightmareUniqueV1(cls, pick6, source10 = "nightmare_sporecrown") {
   const own3 = cls ? uniquesFrom(source10, cls) : [], mine = own3.find((id) => UNIQUE_ITEMS[id].cls === cls), any = own3.find((id) => UNIQUE_ITEMS[id].cls === null);
   if (!mine) return null;

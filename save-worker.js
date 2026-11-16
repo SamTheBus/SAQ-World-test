@@ -15479,6 +15479,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "When a hit drops you below 40% Health, a ring of spirit shields slams down around you: it knocks the enemies near you back, and you take {0} less damage for 4 s. Once every 30 s.",
     "It held the fort gate for a hundred years."
   ),
+  // Cinderhart (Woodland): his Fire Charge furrow, his ember bunnies, his scorched starburst and his antlers (Sammy
+  // 2026-11-15/16, the set page and all four passes approved; the Emberhare poisons, as the Khopesh and Ventcutter do).
+  unique(
+    "cinderhorn",
+    "Cinderhorn",
+    "subweapon",
+    "shield",
+    "Tower Shield",
+    "knight",
+    "cinderhart",
+    "woodland",
+    "Shield Charge tears a burning furrow behind you. A moment later the whole furrow flares up, hitting every enemy in it for {0} of your Attack. Then it keeps burning for 3 s, setting enemies who stand in it burning. Shield Charge's own hits become Fire.",
+    "The forest still remembers the road it burned."
+  ),
+  unique(
+    "emberhare",
+    "Emberhare",
+    "weapon",
+    null,
+    "Rapier",
+    "rogue",
+    "cinderhart",
+    "woodland",
+    "Once every {0}, a hit with your main hand wakes an ember bunny out of the ground beside the enemy, up to 3 at a time. It hops at the nearest enemies four times. Every landing hits the enemies under it for 70% of your Attack and leaves a patch of smoldering cinders whose gray-green smoke poisons for 3 s. Then it bursts into embers.",
+    "Every warren has a fire at the bottom."
+  ),
+  unique(
+    "kindleheart-tome",
+    "Kindleheart Tome",
+    "subweapon",
+    "tome",
+    "Fire Tome",
+    "mage",
+    "cinderhart",
+    "woodland",
+    "When an enemy comes within 2 tiles of you, the tome flares: a scorched starburst blasts out around you and its rim leaps into flame. It hits every enemy near you for 150% of your Attack, knocks them back (not bosses) and sets them burning. Once every {0}.",
+    "Some fires only wake when cornered."
+  ),
+  unique(
+    "emberantler-crown",
+    "Emberantler Crown",
+    "helmet",
+    null,
+    "Backwards Cap",
+    null,
+    "cinderhart",
+    "woodland",
+    "Enemies that hit you up close catch fire from your antlers, burning for {0} of your Attack over 3 s.",
+    "Shed every autumn. Still smoldering."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -15750,6 +15800,11 @@ var UNIQUE_TIERS = freezeWire({
   "oathcutter": { lines: ["offDmg", "critChance", "parry", "cdr", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
   "wardlight-scepter": { lines: ["mainDmg", "critChance", "activeSpd", "maxHpPct", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
   "wardenplate": { lines: ["maxHpPct", "defPct", "lifeKill", "cdr", "atkPct"], stars: [30, 40, 50, 65], unit: "pct" },
+  // Cinderhart (v3 lines below; these five are the v2 fallback). The Emberhare's and the Kindleheart's stars are their waits.
+  "cinderhorn": { lines: ["block", "offDmg", "fireDmg", "cdr", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
+  "emberhare": { lines: ["mainDmg", "critChance", "poisonDmg", "dex", "eliteDmg"], stars: [240, 210, 180, 120], unit: "ticks" },
+  "kindleheart-tome": { lines: ["offDmg", "int", "fireDmg", "bonusAreaRadius", "eliteDmg"], stars: [600, 480, 360, 240], unit: "ticks" },
+  "emberantler-crown": { lines: ["maxHpPct", "defPct", "fireDmg", "lifeHit", "cdr"], stars: [60, 80, 100, 130], unit: "pct" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
@@ -15799,6 +15854,11 @@ var UNIQUE_LINES_V3 = freezeWire({
   "oathcutter": { always: "rangedDmg", pool: ["offDmg", "critChance", "parry", "skillDmg:flurry", "critDamage", "eliteDmg"], leg: ["killCdr"] },
   "wardlight-scepter": { always: "mainDmg", pool: ["critChance", "closeDmg", "areaDmg", "maxHpPct", "eliteDr", "eliteDmg"], leg: ["maxPip"] },
   "wardenplate": { always: "eliteDr", pool: ["maxHpPct", "defPct", "mainAttr", "lifeKill", "areaDr", "hitCdr", "lowDmg"], leg: [] },
+  // Cinderhart set (Sammy 2026-11-15/16): the Cinderhorn's +1 goes to the Breaker branch.
+  "cinderhorn": { always: "areaDmg", pool: ["mainDmg", "skillDmg:shield_charge", "fireDmg", "moveCdr", "ailingDmg", "eliteDmg"], leg: ["branchRank:breaker"] },
+  "emberhare": { always: "ailingDmg", pool: ["mainDmg", "critChance", "poisonDmg", "ailmentDur", "mainAttr", "eliteDmg"], leg: ["killCdr"] },
+  "kindleheart-tome": { always: "fireDmg", pool: ["offDmg", "mainAttr", "bonusAreaRadius", "areaDmg", "closeDmg", "eliteDr"], leg: ["maxPip"] },
+  "emberantler-crown": { always: "ailmentDur", pool: ["maxHpPct", "defPct", "counterDmg", "eliteDr", "lifeHit", "stunDr", "fireDmg"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -15849,7 +15909,7 @@ function uniqueLineKeyV3(id2, affix) {
   return affix.key;
 }
 var NTH = Object.freeze({ 2: "second", 3: "third", 4: "fourth", 5: "fifth" });
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart"]);
 var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.25, named: 0.1, world: 2e-3 });
 
 // src/shared/content/smart_offhand_v1.js
@@ -27216,6 +27276,21 @@ var HOP_POP_TICKS = 96;
 var BOIL_EVERY = 240;
 var BOIL_MAX = 3;
 var BOIL_POP_TICKS = 96;
+var SCORCH_WAIT = 24;
+var SCORCH_BURN = 180;
+var HARE_MAX = 3;
+var HARE_EVERY_MAX = 240;
+var HARE_WAKE = 18;
+var HARE_HOP = 25;
+var HARE_REST = 14;
+var HARE_HOPS = 4;
+var HARE_POP_TICKS = 24;
+var CINDER_TICKS = 180;
+var CINDER_MAX = 12;
+var KINDLE_TICKS = 170;
+var KINDLE_EVERY_MAX = 600;
+var ANTLER_TICKS = 42;
+var HARE_LIFE = HARE_WAKE + HARE_HOPS * (HARE_HOP + HARE_REST);
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
@@ -27247,7 +27322,7 @@ var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
-var LIVE = ["zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 var ZIP_TICKS = 120;
 var PERF_READY_TICKS = 180;
 function prune(combat) {
@@ -27727,6 +27802,44 @@ function validateClassSkillState(s, combat, actor) {
       requireContract(pos2(k.strip) && Number.isFinite(k.strip.x2) && Number.isFinite(k.strip.y2) && actor.alive, "Invalid strip");
       safeInteger(k.strip.ticks, 1, STRIP_TICKS);
       safeInteger(k.strip.next, 1, UQ_PULSE_TICKS);
+    }
+    for (const [key9, max2] of [["hareCd", HARE_EVERY_MAX], ["kindleCd", KINDLE_EVERY_MAX], ["antler", ANTLER_TICKS]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
+    if (k.scorch !== void 0) {
+      closedRecord(k.scorch, ["x", "y", "x2", "y2", "ticks", "next"]);
+      requireContract(pos2(k.scorch) && Number.isFinite(k.scorch.x2) && Number.isFinite(k.scorch.y2), "Invalid burning furrow");
+      safeInteger(k.scorch.ticks, 1, SCORCH_WAIT + SCORCH_BURN);
+      safeInteger(k.scorch.next, 1, UQ_PULSE_TICKS);
+    }
+    if (k.hares !== void 0) {
+      requireContract(Array.isArray(k.hares) && k.hares.length >= 1 && k.hares.length <= HARE_MAX, "Invalid ember bunnies");
+      for (const h of k.hares) {
+        closedRecord(h, ["n", "bx", "by", "fx", "fy", "tx", "ty", "age", "last"]);
+        requireContract([h.bx, h.by, h.fx, h.fy, h.tx, h.ty].every(Number.isFinite) && (h.last === "" || id2(h.last)), "Invalid ember bunny");
+        safeInteger(h.n, 0, 1e9);
+        safeInteger(h.age, 0, HARE_LIFE);
+      }
+    }
+    if (k.harePops !== void 0) {
+      requireContract(Array.isArray(k.harePops) && k.harePops.length >= 1 && k.harePops.length <= HARE_MAX * 2, "Invalid ember bursts");
+      for (const q of k.harePops) {
+        closedRecord(q, ["x", "y", "ticks"]);
+        requireContract(pos2(q), "Invalid ember burst");
+        safeInteger(q.ticks, 1, HARE_POP_TICKS);
+      }
+    }
+    if (k.cinders !== void 0) {
+      requireContract(Array.isArray(k.cinders) && k.cinders.length >= 1 && k.cinders.length <= CINDER_MAX, "Invalid cinders");
+      for (const q of k.cinders) {
+        closedRecord(q, ["x", "y", "ticks", "next"]);
+        requireContract(pos2(q), "Invalid cinder patch");
+        safeInteger(q.ticks, 1, CINDER_TICKS);
+        safeInteger(q.next, 1, UQ_PULSE_TICKS);
+      }
+    }
+    if (k.kindle !== void 0) {
+      closedRecord(k.kindle, ["x", "y", "ticks"]);
+      requireContract(pos2(k.kindle), "Invalid starburst");
+      safeInteger(k.kindle.ticks, 1, KINDLE_TICKS);
     }
     for (const [key9, max2] of [["oathCd", OATH_EVERY], ["plate", PLATE_TICKS], ["plateCd", PLATE_EVERY]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
     if (k.lode !== void 0) {
