@@ -2593,14 +2593,15 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   marcus: Object.freeze({
     id: "marcus",
-    label: "GOLDSPUR THE OUTLAW",
+    label: "HOLLOWGLASS",
     site: "repeatable-slot:fort:grassland:standard:040",
     family: "fort",
     biome: "grassland",
-    color: "#ffb968",
-    secondary: "#bd4d39",
-    adds: 0,
-    attacks: Object.freeze({ coin_barrage: 65, gold_rush: 55, gilded_lasso: 55, inversion: 80, molten_shield: 240 })
+    color: "#bfe6ff",
+    secondary: "#2a3a64",
+    adds: 2,
+    summonKind: "reflection",
+    attacks: Object.freeze({ coin_barrage: 65, gold_rush: 55, gilded_lasso: 90, inversion: 80, molten_shield: 240 })
   }),
   ashfang: Object.freeze({
     id: "ashfang",
@@ -20054,6 +20055,68 @@ function archivedCombatProfile(kind2) {
   return ARCHIVED_FIGHT_PROFILES[kind2] ?? null;
 }
 
+// src/shared/content/hollowglass_v1.js
+var LOOKING_GLASS_V1 = Object.freeze({
+  mirrorOffset: 44,
+  // the mirror rises this far beside you (on the side away from the boss)
+  pullRadius: 84,
+  // the mirror pulls anyone within this far of it during the wind-up
+  pullSpeed: 1.3,
+  // px per tick: slower than walking, so you can walk (or dash) out
+  catchRadius: 30,
+  // still this close when the wind-up ends: caught
+  holdTicks: 36,
+  // inside the glass (0.6 s)
+  spitDistance: 44,
+  // thrown this far out of the mirror
+  damageScale: 12
+  // tenths of the boss's Attack (1.2x)
+});
+var REFLECTION_V1 = Object.freeze({
+  lifeTicks: 1200,
+  // shatters after 20 s if nobody breaks it
+  formTicks: 40,
+  // forms in the glass and steps out before it does anything
+  followDistance: 30,
+  moveSpeed: 1.5,
+  hitEveryTicks: 60,
+  hitReach: 40,
+  hitScale: 10,
+  // tenths of the reflection's own Attack for a plain swing
+  firstSkillTicks: 90,
+  skillEveryTicks: 360,
+  warnTicks: 60
+  // every skill shows its shape on the floor for 1 s first
+});
+var REFLECTION_SKILLS_V1 = Object.freeze({
+  shield_bash: { shape: "cone", r: 56, half: 0.8, scale: 15 },
+  cast: { shape: "lane", len: 220, w: 16, scale: 15 },
+  flurry: { shape: "cone", r: 44, half: 0.6, scale: 15 },
+  combo: { shape: "cone", r: 42, half: 0.9, scale: 12 },
+  earth_breaker: { shape: "ring", r: 72, scale: 15 },
+  shield_charge: { shape: "lane", len: 140, w: 26, scale: 15 },
+  shield_throw: { shape: "lane", len: 200, w: 18, scale: 14 },
+  skyfall_leap: { shape: "spot", r: 60, scale: 16 },
+  retribution: { shape: "ring", r: 64, scale: 15 },
+  aegis_pulse: { shape: "ring", r: 64, scale: 14 },
+  lunge: { shape: "lane", len: 100, w: 22, scale: 15 },
+  toxic_fan: { shape: "cone", r: 70, half: 0.7, scale: 14 },
+  whirling_blades: { shape: "ring", r: 54, scale: 15 },
+  rupture: { shape: "ring", r: 60, scale: 15 },
+  thousand_cuts: { shape: "spot", r: 30, scale: 16 },
+  shadowstep: { shape: "spot", r: 34, scale: 16 },
+  noxious_bloom: { shape: "spot", r: 56, scale: 14 },
+  ball_lightning: { shape: "lane", len: 220, w: 20, scale: 14 },
+  firebloom: { shape: "spot", r: 50, scale: 15 },
+  flashfreeze: { shape: "ring", r: 72, scale: 14 },
+  flame_wall: { shape: "lane", len: 120, w: 22, scale: 14 },
+  static_field: { shape: "ring", r: 72, scale: 14 },
+  glacial_burst: { shape: "ring", r: 80, scale: 15 },
+  meteor: { shape: "spot", r: 60, scale: 16 },
+  thunderfall: { shape: "spot", r: 52, scale: 16 }
+});
+var REFLECTION_SIGNATURE_V1 = Object.freeze({ knight: "shield_bash", mage: "cast", rogue: "flurry" });
+
 // src/shared/contracts/recovered_boss_v1.js
 var RECOVERED_SUMMON_VERSION = "recovered-boss-summon-v1";
 var point5 = (p) => Boolean(p && Number.isFinite(p.x) && Number.isFinite(p.y));
@@ -20156,7 +20219,7 @@ function validateRecoveredBossV1(state, id2, b) {
     "statusesByEntityId",
     "lastTrailPosition",
     "lastAction"
-  ], ["coinShots", "archive", "goldRush", "beamSweep"]);
+  ], ["coinShots", "archive", "goldRush", "beamSweep", "lookingGlass", "reflections"]);
   const spec = recoveredBossForId(b.bossDefinitionId), actor = state.entitiesById[id2], group = state.groupsById[b.groupId], c = state.spacesByInstanceId[b.spaceInstanceId]?.collision;
   requireContract(spec && b.version === RECOVERED_BOSS_VERSION && b.entityId === id2 && /^boss:[a-f0-9]{32}$/.test(b.bossId) && actor?.team === "hostile" && actor.contentDefinitionId === ARACHNID_TREANT_PROFILE.contentDefinitionId && group?.entityIds.includes(id2) && group.siteId === b.siteId && actor.residency.spaceInstanceId === b.spaceInstanceId && actor.residency.residencyRevision === b.sourceResidencyRevision && c && point5(b.homePosition) && !collidesWithTiles(c, b.homePosition.x, b.homePosition.y, ARACHNID_TREANT_PROFILE.hullRadius), "Recovered boss identity invalid");
   requireContract([1, 2].includes(b.phase) && b.phase2Triggered === (b.phase === 2) && states.includes(b.actionState), "Recovered boss phase invalid");
@@ -20187,6 +20250,45 @@ function validateRecoveredBossV1(state, id2, b) {
     }
   }
   if (b.actionState === "dashing") requireContract(b.bossDefinitionId === "marcus" && b.goldRush, "Missing Marcus Gold Rush path");
+  if (b.lookingGlass !== void 0) {
+    const g = b.lookingGlass;
+    requireContract(b.bossDefinitionId === "marcus" && g && typeof g === "object", "Only Hollowglass holds heroes in a Looking Glass");
+    closedRecord(g, ["mirror", "startedTick", "held"]);
+    requireContract(point5(g.mirror) && Array.isArray(g.held) && g.held.length >= 1 && g.held.length <= 4, "Invalid Looking Glass");
+    safeInteger(g.startedTick, b.activatedTick, state.tick);
+    for (const h of g.held) {
+      closedRecord(h, ["entityId", "releaseTick"]);
+      requireContract(state.entitiesById[h.entityId]?.team === "party", "Looking Glass holds a non-hero");
+      safeInteger(h.releaseTick, state.tick, state.tick + 60);
+    }
+  }
+  if (b.reflections !== void 0) {
+    requireContract(b.bossDefinitionId === "marcus" && b.reflections && typeof b.reflections === "object" && Object.keys(b.reflections).length >= 1 && Object.keys(b.reflections).length <= spec.adds, "Invalid Hollowglass reflections");
+    for (const [rid, r] of Object.entries(b.reflections)) {
+      const s = state.bossCombat.summonsByEntityId[rid];
+      requireContract(b.summonEntityIds.includes(rid) && s?.kind === "reflection" && s.stage === "hatched" && state.entitiesById[rid]?.alive, "Reflection is not a living add");
+      closedRecord(r, ["heroId", "heroClass", "skills", "skillCycle", "endsTick", "nextHitTick", "nextSkillTick", "swingTick", "cast", "lastCast"]);
+      requireContract(typeof r.heroId === "string" && ["knight", "mage", "rogue"].includes(r.heroClass) && Array.isArray(r.skills) && r.skills.length >= 2 && r.skills.length <= 3 && r.skills.every((k) => Object.hasOwn(REFLECTION_SKILLS_V1, k)), "Invalid reflection skills");
+      safeInteger(r.skillCycle, 0);
+      safeInteger(r.endsTick, state.tick, state.tick + REFLECTION_V1.lifeTicks);
+      safeInteger(r.nextHitTick, 0, state.tick + 600);
+      safeInteger(r.nextSkillTick, 0, state.tick + 600);
+      if (r.swingTick !== null) safeInteger(r.swingTick, b.activatedTick, state.tick);
+      for (const k of [r.cast, r.lastCast]) if (k !== null) {
+        requireContract(Object.hasOwn(REFLECTION_SKILLS_V1, k.skill) && point5(k.from) && point5(k.aim), "Invalid reflection skill cast");
+      }
+      if (r.cast) {
+        closedRecord(r.cast, ["skill", "from", "aim", "startedTick", "resolvesTick"]);
+        safeInteger(r.cast.startedTick, b.activatedTick, state.tick);
+        safeInteger(r.cast.resolvesTick, state.tick, r.cast.startedTick + REFLECTION_V1.warnTicks);
+      }
+      if (r.lastCast) {
+        closedRecord(r.lastCast, ["skill", "from", "aim", "resolvedTick", "hitEntityIds"]);
+        safeInteger(r.lastCast.resolvedTick, b.activatedTick, state.tick);
+        requireContract(Array.isArray(r.lastCast.hitEntityIds) && r.lastCast.hitEntityIds.length <= 8, "Invalid reflection hit record");
+      }
+    }
+  }
   if (b.beamSweep !== void 0) {
     const r = b.beamSweep;
     requireContract(b.bossDefinitionId === "sun_pharaoh" && r && typeof r === "object", "Only the Sun Pharaoh sweeps a Solar Beam");
@@ -20316,7 +20418,7 @@ function validateRecoveredBossV1(state, id2, b) {
 function validateRecoveredSummonV1(state, id2, s, b) {
   closedRecord(s, ["version", "entityId", "bossId", "groupId", "ordinal", "homePosition", "kind", "stage", "activatedTick", "hatchTick", "defeatedTick"]);
   const a = state.entitiesById[id2], g = state.groupsById[s.groupId];
-  requireContract(s.version === RECOVERED_SUMMON_VERSION && s.entityId === id2 && b?.bossId === s.bossId && b.summonEntityIds[s.ordinal] === id2 && s.groupId === b.groupId && a?.team === "hostile" && g?.entityIds.includes(id2) && point5(s.homePosition) && ["slime", "slag", "hologram", "bunny", "wight", "scarab"].includes(s.kind) && ["dormant", "hatched", "defeated"].includes(s.stage), "Recovered boss add invalid");
+  requireContract(s.version === RECOVERED_SUMMON_VERSION && s.entityId === id2 && b?.bossId === s.bossId && b.summonEntityIds[s.ordinal] === id2 && s.groupId === b.groupId && a?.team === "hostile" && g?.entityIds.includes(id2) && point5(s.homePosition) && ["slime", "slag", "hologram", "bunny", "wight", "scarab", "reflection"].includes(s.kind) && ["dormant", "hatched", "defeated"].includes(s.stage), "Recovered boss add invalid");
   if (s.stage === "dormant") requireContract(a.alive && s.activatedTick === null && s.hatchTick === null && s.defeatedTick === null, "Dormant recovered add invalid");
   else {
     safeInteger(s.activatedTick, b.activatedTick, state.tick);

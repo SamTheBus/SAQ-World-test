@@ -553,14 +553,15 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   marcus: Object.freeze({
     id: "marcus",
-    label: "GOLDSPUR THE OUTLAW",
+    label: "HOLLOWGLASS",
     site: "repeatable-slot:fort:grassland:standard:040",
     family: "fort",
     biome: "grassland",
-    color: "#ffb968",
-    secondary: "#bd4d39",
-    adds: 0,
-    attacks: Object.freeze({ coin_barrage: 65, gold_rush: 55, gilded_lasso: 55, inversion: 80, molten_shield: 240 })
+    color: "#bfe6ff",
+    secondary: "#2a3a64",
+    adds: 2,
+    summonKind: "reflection",
+    attacks: Object.freeze({ coin_barrage: 65, gold_rush: 55, gilded_lasso: 90, inversion: 80, molten_shield: 240 })
   }),
   ashfang: Object.freeze({
     id: "ashfang",
