@@ -2030,4 +2030,8 @@ body[data-hud-menu=ring] .chart-mini,body[data-hud-menu=ring] .world-mini{margin
 #rpg-interaction-alt-v1 strong{font:700 15px/1.1 var(--rpg-ui,system-ui)}
 /* Mass salvage v1: its way in from the Bag's filter row and from the Smith's Salvage tab. */
 #world-inventory .gx-bagmeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}#world-inventory .gx-bagmeta .gx-salvage{margin-left:auto;min-height:34px;padding:0 12px;border:1px solid #c9a35a;border-radius:99px;background:#1a2530;color:#ffe2a0;font:700 12px var(--rpg-ui,system-ui);cursor:pointer;touch-action:manipulation}
-.tn-many{align-self:flex-start;min-height:40px;padding:0 14px;border:1px solid #c9a35a;border-radius:10px;background:#1a2530;color:#ffe2a0;font:700 13px var(--rpg-ui,system-ui);cursor:pointer}
+.tn-many{align-self:flex-start;flex:none;min-height:34px;padding:0 12px;border:1px solid #c9a35a;border-radius:10px;background:#1a2530;color:#ffe2a0;font:700 13px var(--rpg-ui,system-ui);cursor:pointer}
+/* Salvage toasts v1: pop-ups stay in view above the Smith's screens and the mass salvage screen (Sammy 2026-11-15: "It can appear above the smithing ui"). */
+html body:has(#mass-salvage-v1) .toast-lane-v1.toast-lane-v1{z-index:140!important;visibility:visible!important}
+html body .toast-lane-v1.toast-lane-v1:popover-open{right:auto;bottom:auto;margin:0;padding:0;border:0;background:none;color:inherit;overflow:visible;visibility:visible!important}
+.toast-lane-v1 .toast-v1[data-key^="scrap/"] .toast-count{display:none}

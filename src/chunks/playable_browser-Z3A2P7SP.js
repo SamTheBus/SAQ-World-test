@@ -129571,7 +129571,23 @@ function laneFor(doc) {
     card.addEventListener("pointerup", end);
     card.addEventListener("pointercancel", end);
   }
+  function place4() {
+    if (typeof root6.showPopover !== "function") return;
+    try {
+      const modal = doc.querySelector("dialog:modal"), up2 = root6.matches(":popover-open");
+      if (modal) {
+        if (up2) root6.hidePopover();
+        root6.setAttribute("popover", "manual");
+        root6.showPopover();
+      } else if (root6.hasAttribute("popover")) {
+        if (up2) root6.hidePopover();
+        root6.removeAttribute("popover");
+      }
+    } catch {
+    }
+  }
   function show({ kind = "loot", title: title10, sub = "", accent = null, image = null, key: key4 = null, ms = DEFAULT_MS }) {
+    place4();
     const id2 = key4 ?? kind + "/" + title10, prior = cards.get(id2);
     if (prior) {
       const n = Number(prior.dataset.count || 1) + 1;
@@ -151842,8 +151858,9 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     } else if (f?.offer) {
       who.append(el3("p", f.offer.note, "qx-say"), rewardPanel(f.offer.gold, f.offer.xp, f.offer.gear, { diff: f.offer.difficulty, grow: true }));
       btn("Shop", () => {
+        const id2 = talkNpc;
         close(talk);
-        openShop(n);
+        openShop({ serviceNpcId: id2 });
       }, true);
       btn("Not now", () => close(talk), true);
       const take = btn("Accept", () => act("take", f.offer.id, () => {
@@ -151855,8 +151872,9 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     } else {
       who.append(el3("p", a ? a.step + "." : "Good to see you.", "qx-say"));
       btn("Shop", () => {
+        const id2 = talkNpc;
         close(talk);
-        openShop(n);
+        openShop({ serviceNpcId: id2 });
       }, true);
       btn("Close", () => close(talk), true);
     }
@@ -169564,6 +169582,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
   } };
   const closeButton = document2.getElementById("world-bag-close"), list = document2.getElementById("world-items"), slots2 = document2.getElementById("world-equipment"), status2 = document2.getElementById("world-inventory-status"), comparison = document2.getElementById("world-comparison");
   let forgeSession = false, salvagePending = null;
+  const SCRAP_KINDS = ["Common Scrap", "Uncommon Scrap", "Rare Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"], scrapRuns = {};
   const massSalvage = createMassSalvageV1({ document: document2, environment, readModel, send: (payload) => {
     const m = readModel();
     if (!m.inventory || !alive(m) || m.persistence.phase !== "encounter") throw Error("Not now: finish what your hero is doing first.");
@@ -170040,6 +170059,16 @@ function createInventoryPresentation({ document: document2, environment, readMod
         toastV1(document2, { kind: "soul", title: "Monster Soul", sub: `+${gained} \xB7 ${inv.economy?.materials["Monster Soul"] ?? 0} carried`, key: "soul" });
         toastUntil = time3 + 1600;
       }
+      {
+        const got = inv.d7?.credits ?? {}, had = observed.scrapCredits ?? {};
+        for (const k of SCRAP_KINDS) {
+          const n = (got[k] ?? 0) - (had[k] ?? 0);
+          if (n <= 0) continue;
+          const run2 = scrapRuns[k] && time3 < scrapRuns[k].until ? scrapRuns[k].n + n : n;
+          scrapRuns[k] = { n: run2, until: time3 + 3200 };
+          toastV1(document2, { kind: "loot", title: k, sub: `+${run2} \xB7 ${inv.economy?.materials[k] ?? run2} carried`, image: SALVAGE_MATERIAL_ART[k], accent: RARITY_COLORS[SCRAP_KINDS.indexOf(k)], key: "scrap/" + k, ms: 3200 });
+        }
+      }
       if (Object.keys(inv.rewardsByEntityId ?? {}).length > (observed.rewards ?? 0)) for (const k of ["Overlord's Sigil", "Wakestone", "Astral Essence"]) {
         const n = (inv.economy?.materials[k] ?? 0) - (observed.drops?.[k] ?? 0);
         if (n > 0) {
@@ -170048,7 +170077,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
         }
       }
     }
-    if (observed?.identity !== identity2 || observed.revision !== inv.revision) observed = { identity: identity2, revision: inv.revision, gold: inv.gold, souls: inv.economy?.materials["Monster Soul"] ?? 0, rewards: Object.keys(inv.rewardsByEntityId ?? {}).length, drops: Object.fromEntries(["Overlord's Sigil", "Wakestone", "Astral Essence"].map((k) => [k, inv.economy?.materials[k] ?? 0])), ids: new Set(Object.keys(inv.itemsById)) };
+    if (observed?.identity !== identity2 || observed.revision !== inv.revision) observed = { identity: identity2, revision: inv.revision, gold: inv.gold, souls: inv.economy?.materials["Monster Soul"] ?? 0, rewards: Object.keys(inv.rewardsByEntityId ?? {}).length, drops: Object.fromEntries(["Overlord's Sigil", "Wakestone", "Astral Essence"].map((k) => [k, inv.economy?.materials[k] ?? 0])), scrapCredits: { ...inv.d7?.credits ?? {} }, ids: new Set(Object.keys(inv.itemsById)) };
     document2.getElementById("world-loot-notice").hidden = open3 || !alive(m) || time3 >= toastUntil;
     progressionView.refresh(m, open3 && section === "progression", open3 && section === "stats");
     progressionButton.setAttribute("aria-pressed", String(section === "progression"));
@@ -171786,7 +171815,10 @@ function createSettlementServicesMenu2(options) {
         return;
       }
       if (mode === "shatter") {
-        const many = button3("Salvage several at once", () => doc.dispatchEvent(new Event(MASS_SALVAGE_OPEN_EVENT)), "mass-salvage", "tn-many");
+        const many = button3("Salvage several at once", () => {
+          close();
+          doc.dispatchEvent(new Event(MASS_SALVAGE_OPEN_EVENT));
+        }, "mass-salvage", "tn-many");
         body6.append(many);
       }
       const strip = el3("div", void 0, "tn-strip");
