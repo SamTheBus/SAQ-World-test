@@ -57067,8 +57067,8 @@ function glassFill(c, x, y, w, h, lit2) {
   c.closePath();
   c.fill();
 }
-function sash(c, x, y, w, h, trim3, shut, lit2) {
-  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim3]], 1.1);
+function sash(c, x, y, w, h, trim4, shut, lit2) {
+  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim4]], 1.1);
   prop2(c, [[rect4(x, y, w, h), "#e8e4dc"]], 0.8);
   clip5(c, rect4(x + 2, y + 2, w - 4, h - 4), () => glassFill(c, x, y, w, h, lit2));
   c.fillStyle = "#f4f1ea";
@@ -57080,9 +57080,9 @@ function sash(c, x, y, w, h, trim3, shut, lit2) {
     c.fillStyle = tone66(shut, -0.2);
     for (let q2 = y + 3; q2 < y + h; q2 += 4) c.fillRect(sx + 2, q2, w * 0.48 - 4, 1.3);
   }
-  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone66(trim3, 0.06)]], 0.8);
+  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone66(trim4, 0.06)]], 0.8);
   ledge(c, x - 6, y + h + 3.4, w + 12, 2.6);
-  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim3]], 0.8);
+  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim4]], 0.8);
   ledge(c, x - 2, y - 10, w + 4, 2.6);
 }
 function leaded(c, x, y, w, h, frame4, lights, lit2) {
@@ -57705,8 +57705,8 @@ function glassFill2(c, x, y, w, h, lit2) {
   c.closePath();
   c.fill();
 }
-function sash2(c, x, y, w, h, trim3, shut, lit2) {
-  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim3]], 1.1);
+function sash2(c, x, y, w, h, trim4, shut, lit2) {
+  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim4]], 1.1);
   prop2(c, [[rect4(x, y, w, h), "#e8e4dc"]], 0.8);
   clip7(c, rect4(x + 2, y + 2, w - 4, h - 4), () => glassFill2(c, x, y, w, h, lit2));
   c.fillStyle = "#f4f1ea";
@@ -57718,9 +57718,9 @@ function sash2(c, x, y, w, h, trim3, shut, lit2) {
     c.fillStyle = tone67(shut, -0.2);
     for (let q2 = y + 3; q2 < y + h; q2 += 4) c.fillRect(sx + 2, q2, w * 0.48 - 4, 1.3);
   }
-  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone67(trim3, 0.06)]], 0.8);
+  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone67(trim4, 0.06)]], 0.8);
   ledge2(c, x - 6, y + h + 3.4, w + 12, 2.6);
-  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim3]], 0.8);
+  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim4]], 0.8);
   ledge2(c, x - 2, y - 10, w + 4, 2.6);
 }
 function leaded2(c, x, y, w, h, frame4, lights, lit2) {
@@ -58351,8 +58351,8 @@ function glassFill3(c, x, y, w, h, lit2) {
   c.closePath();
   c.fill();
 }
-function sash3(c, x, y, w, h, trim3, shut, lit2) {
-  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim3]], 1.1);
+function sash3(c, x, y, w, h, trim4, shut, lit2) {
+  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim4]], 1.1);
   prop2(c, [[rect4(x, y, w, h), "#e8e4dc"]], 0.8);
   clip3(c, rect4(x + 2, y + 2, w - 4, h - 4), () => glassFill3(c, x, y, w, h, lit2));
   c.fillStyle = "#f4f1ea";
@@ -58364,8 +58364,8 @@ function sash3(c, x, y, w, h, trim3, shut, lit2) {
     c.fillStyle = tone68(shut, -0.2);
     for (let q2 = y + 3; q2 < y + h; q2 += 4) c.fillRect(sx + 2, q2, w * 0.48 - 4, 1.3);
   }
-  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone68(trim3, 0.06)]], 0.8);
-  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim3]], 0.8);
+  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone68(trim4, 0.06)]], 0.8);
+  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim4]], 0.8);
 }
 function leaded3(c, x, y, w, h, frame4, lights, lit2) {
   prop2(c, [[rect4(x - 3, y - 3, w + 6, h + 6), frame4]], 1.1);
@@ -58945,8 +58945,8 @@ function glassFill4(c, x, y, w, h, lit2) {
   c.closePath();
   c.fill();
 }
-function sash4(c, x, y, w, h, trim3, shut, lit2) {
-  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim3]], 1.1);
+function sash4(c, x, y, w, h, trim4, shut, lit2) {
+  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim4]], 1.1);
   prop2(c, [[rect4(x, y, w, h), "#e8e4dc"]], 0.8);
   clip9(c, rect4(x + 2, y + 2, w - 4, h - 4), () => glassFill4(c, x, y, w, h, lit2));
   c.fillStyle = "#f4f1ea";
@@ -58958,8 +58958,8 @@ function sash4(c, x, y, w, h, trim3, shut, lit2) {
     c.fillStyle = tone69(shut, -0.2);
     for (let q2 = y + 3; q2 < y + h; q2 += 4) c.fillRect(sx + 2, q2, w * 0.48 - 4, 1.3);
   }
-  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone69(trim3, 0.06)]], 0.8);
-  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim3]], 0.8);
+  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone69(trim4, 0.06)]], 0.8);
+  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim4]], 0.8);
 }
 function leaded4(c, x, y, w, h, frame4, lights, lit2) {
   prop2(c, [[rect4(x - 3, y - 3, w + 6, h + 6), frame4]], 1.1);
@@ -59506,8 +59506,8 @@ function glassFill5(c, x, y, w, h, lit2) {
   c.closePath();
   c.fill();
 }
-function sash5(c, x, y, w, h, trim3, shut, lit2) {
-  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim3]], 1.1);
+function sash5(c, x, y, w, h, trim4, shut, lit2) {
+  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim4]], 1.1);
   prop2(c, [[rect4(x, y, w, h), "#e8e4dc"]], 0.8);
   clip10(c, rect4(x + 2, y + 2, w - 4, h - 4), () => glassFill5(c, x, y, w, h, lit2));
   c.fillStyle = "#f4f1ea";
@@ -59519,8 +59519,8 @@ function sash5(c, x, y, w, h, trim3, shut, lit2) {
     c.fillStyle = tone70(shut, -0.2);
     for (let q2 = y + 3; q2 < y + h; q2 += 4) c.fillRect(sx + 2, q2, w * 0.48 - 4, 1.3);
   }
-  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone70(trim3, 0.06)]], 0.8);
-  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim3]], 0.8);
+  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone70(trim4, 0.06)]], 0.8);
+  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim4]], 0.8);
 }
 function leaded5(c, x, y, w, h, frame4, lights, lit2) {
   prop2(c, [[rect4(x - 3, y - 3, w + 6, h + 6), frame4]], 1.1);
@@ -60065,8 +60065,8 @@ function glassFill6(c, x, y, w, h, lit2) {
   c.closePath();
   c.fill();
 }
-function sash6(c, x, y, w, h, trim3, shut, lit2) {
-  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim3]], 1.1);
+function sash6(c, x, y, w, h, trim4, shut, lit2) {
+  prop2(c, [[rect4(x - 4, y - 4, w + 8, h + 8), trim4]], 1.1);
   prop2(c, [[rect4(x, y, w, h), "#e8e4dc"]], 0.8);
   clip3(c, rect4(x + 2, y + 2, w - 4, h - 4), () => glassFill6(c, x, y, w, h, lit2));
   c.fillStyle = "#f4f1ea";
@@ -60078,8 +60078,8 @@ function sash6(c, x, y, w, h, trim3, shut, lit2) {
     c.fillStyle = tone71(shut, -0.2);
     for (let q2 = y + 3; q2 < y + h; q2 += 4) c.fillRect(sx + 2, q2, w * 0.48 - 4, 1.3);
   }
-  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone71(trim3, 0.06)]], 0.8);
-  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim3]], 0.8);
+  prop2(c, [[rect4(x - 6, y + h + 3, w + 12, 4), tone71(trim4, 0.06)]], 0.8);
+  prop2(c, [[poly3([[x - 5, y - 4], [x + w + 5, y - 4], [x + w + 2, y - 10], [x - 2, y - 10]]), trim4]], 0.8);
 }
 function leaded6(c, x, y, w, h, frame4, lights, lit2) {
   prop2(c, [[rect4(x - 3, y - 3, w + 6, h + 6), frame4]], 1.1);
@@ -117020,13 +117020,13 @@ function helmetPiece(c, kind, A2, red, sway, face5) {
     px3(c, -10.4, -12.8, 1.2, 1.2, A2.c);
   } else HELMET_LOOKS[kind]?.(c, A2, face5, sway);
 }
-function mailHood(c, A2, face5, trim3) {
+function mailHood(c, A2, face5, trim4) {
   R3(c, -10.4, -14.8, 18.8, 16.6, M.mail, { split: 0.74 });
   mailRows(c, -10.4, -14.8, 18.8, 16.6);
   if (face5) face5(c);
   else R3(c, -1.4, -10.6, 8.8, 10.2, { b: OPENING }, { lw: 1.2, flat: true });
   px3(c, -10.4, -2.4, 9, 1, A2.c);
-  if (trim3) gem2(c, -6, -8, 1.4, A2.gem);
+  if (trim4) gem2(c, -6, -8, 1.4, A2.gem);
 }
 var CAP_RED = { b: "#b8473c", d: "#8f362e", l: "#d3655a" };
 var SHADOW = { b: "#3a3f4b", d: "#2a2e37", l: "#4c5260" };
@@ -118206,7 +118206,7 @@ Object.assign(KG_BOOT_ICON, {
   }
 });
 var KG_HELM = {};
-function kgHood(c, A2, face5, trim3) {
+function kgHood(c, A2, face5, trim4) {
   R3(c, -10.4, -14.8, 18.8, 16.6, M.mail, { split: 0.74 });
   kgMail(c, -10.4, -14.8, 18.8, 16.6);
   if (face5) face5(c);
@@ -118218,7 +118218,7 @@ function kgHood(c, A2, face5, trim3) {
   c.restore();
   kgHem(c, -10.4, 8.4, 1.8, M.mail);
   px3(c, -10.4, -2.4, 9, 1, A2.c);
-  if (trim3) {
+  if (trim4) {
     px3(c, -3.6, -2.8, 1.6, 1.8, P14.helm.d);
     px3(c, -3.3, -2.5, 1, 1.2, P14.helm.l);
     gem2(c, -6, -8, 1.4, A2.gem);
@@ -151091,7 +151091,7 @@ function chain(c, x0, y0, x1, y1, col2 = "#8d8a96", r = 2.4) {
     c.restore();
   }
 }
-function chest(c, x, y, w, h, open3, wood3 = "#7a4a2a", band12 = "#3e3a45", trim3 = "#e2b54e") {
+function chest(c, x, y, w, h, open3, wood3 = "#7a4a2a", band12 = "#3e3a45", trim4 = "#e2b54e") {
   const W21 = ramp4(wood3), lidH = h * 0.5, body6 = poly12([[x - w / 2, y], [x + w / 2, y], [x + w / 2, y - h], [x - w / 2, y - h]]);
   shadow68(c, x + 2, y + 1, w * 0.62, w * 0.16, 0.35);
   if (open3) {
@@ -151126,9 +151126,9 @@ function chest(c, x, y, w, h, open3, wood3 = "#7a4a2a", band12 = "#3e3a45", trim
     for (const bx of [-0.32, 0.32]) c.fillRect(x + bx * w - 1.6, y - h - lidH, 3.2, lidH);
     c.restore();
   }
-  c.fillStyle = trim3;
+  c.fillStyle = trim4;
   for (const sx of [-1, 1]) c.fillRect(x + sx * w / 2 - (sx > 0 ? 3 : 0), y - 3, 3, 3);
-  prop4(c, [[poly12([[x - 2.6, y - h + 1], [x + 2.6, y - h + 1], [x + 2.6, y - h + 6], [x - 2.6, y - h + 6]]), trim3]], 1);
+  prop4(c, [[poly12([[x - 2.6, y - h + 1], [x + 2.6, y - h + 1], [x + 2.6, y - h + 6], [x - 2.6, y - h + 6]]), trim4]], 1);
 }
 var STONE27 = ramp4("#7b7486", "#141022", "#fff1dc");
 var FLAG7 = { desert: "#d9b98a", frostland: "#b9c8d6", wetland: "#8f9a86", tropical: "#a9a58a", volcanic: "#5d5552", upland: "#9a978c" };
@@ -161388,6 +161388,8 @@ var CSS3 = `
 #world-inventory[data-section=bestiary] #world-bag-browse,#world-inventory[data-section=bestiary] #world-materials-view,#world-inventory[data-section=bestiary] #world-forge-view,#world-inventory[data-section=bestiary] #world-bag-stats{display:none}
 #world-inventory .bestiary-v1{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto;padding:10px 12px 14px;color:#e9e4d8;overscroll-behavior:contain}
 .bestiary-v1[hidden]{display:none!important}
+/* Rows keep their own height and the page scrolls. The tab row scrolls sideways, so it could be squeezed to nothing on a long page and the set bonus slid over it (Sammy 2026-11-15). */
+.bestiary-v1>*{flex:none}
 .bestiary-v1 .bv-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .bestiary-v1 .bv-pill{display:flex;align-items:center;gap:5px;font:600 12px/1 system-ui,sans-serif;border:1px solid #344457;border-radius:99px;padding:6px 10px;color:#d7dde4;white-space:nowrap;background:#121a24}
 .bestiary-v1 .bv-pill canvas{width:16px;height:16px}
@@ -164704,7 +164706,8 @@ var ARROW_DOWN = '<svg width="9" height="9" viewBox="0 0 12 12" aria-hidden="tru
 function characterStatGroupsV3(model) {
   const p = model.playersById[model.localPlayerId], s = p.stats, f = s.familyProperties ?? {}, groups = [];
   const value2 = (v) => v === void 0 ? "\u2014" : statText(v, true), pct3 = (v) => v === void 0 ? "\u2014" : statText(statScale(v, 100), true) + "%", mult = (v) => v === void 0 ? "\u2014" : statText(v, true) + "\xD7";
-  const group = (title10, rows) => groups.push({ title: title10, rows: rows.filter((r) => r[1] !== void 0).map(([label7, v, format = value2]) => ({ label: label7, value: format(v) })) });
+  const tidy = (t) => t.replace(/\d[\d,]*\.\d{3,}/, (m) => String(Math.round(Number(m.replace(/,/g, "")) * 100) / 100));
+  const group = (title10, rows) => groups.push({ title: title10, rows: rows.filter((r) => r[1] !== void 0).map(([label7, v, format = value2]) => ({ label: label7, value: tidy(format(v)) })) });
   group("Combat", [
     ["Attack", s.attack],
     ["Defense", s.defense],
@@ -164743,7 +164746,38 @@ function characterStatGroupsV3(model) {
     ["Spell power", f.tomePower, mult],
     ["Effective INT", s.lateInt]
   ]);
+  for (const g of gearStatGroupsV1(p.inventory?.equipped ? p : { ...p, inventory: model.inventory })) groups.push(g);
   return groups;
+}
+var GEAR_GROUPS = [
+  ["Damage", [["mainDmg"], ["offDmg"], ["fireDmg"], ["frostDmg"], ["lightningDmg"], ["bleedDmg"], ["poisonDmg"], ["shockDmg"], ["counterDmg"], ["eliteDmg"], ["ccDmg"], ["ailingDmg"], ["heldDmg"], ["closeDmg"], ["farDmg"], ["fullDmg"], ["lowDmg"]]],
+  ["Skills", [["rangedDmg"], ["areaDmg"], ["finisherDmg"], ["controlDur"], ["ailmentDur"], ["moveCdr"], ["defCdr"], ["hitCdr", "s", "Defensive cooldowns when hit", "\u2212"], ["killCdr", "s", "All cooldowns per kill", "\u2212"]]],
+  ["Survival", [["lifeHit", "n"], ["lifeKill"], ["potionHeal"], ["eliteDr"], ["areaDr"], ["stunDr"]]],
+  ["Pips", [["maxPip", "n", "Max pips"], ["startPips", "n", "Pips at the start of a fight"], ["keepPip", "%", "Chance to keep a pip when you spend"]]],
+  ["Knight", [["perfectDmg"], ["perfectWindow", "s"], ["perfectCdr", "s", "Movement and Defensive cooldowns on a perfect block", "\u2212"]]],
+  ["Rogue", [["exposeDmg"], ["exposeTime", "s", "Expose lasts longer"], ["exposeCdr", "s", "Movement and Defensive cooldowns when you Expose", "\u2212"]]],
+  ["Mage", [["weaveDmg"], ["blinkDmg"], ["blinkCdr", "s", "Other cooldowns on a Blink", "\u2212"], ["shatterDmg"], ["shatterEase", "%", "Less Attack needed to Shatter"], ["shatterCdr", "s", "All cooldowns on a Shatter", "\u2212"]]]
+];
+var trim2 = (n) => String(Math.round(n * 100) / 100);
+function gearStatGroupsV1(player) {
+  let t;
+  try {
+    t = gearAffixTotalsV2(player);
+  } catch {
+    return [];
+  }
+  if (!t?.any) return [];
+  const show = (v, unit17, sign4 = "+") => sign4 + (unit17 === "s" ? trim2(v / 60) + " s" : unit17 === "n" ? String(v) : trim2(v / 100) + "%"), out4 = [];
+  for (const [title10, lines2] of GEAR_GROUPS) {
+    const rows = lines2.filter(([k]) => t[k] > 0).map(([k, unit17 = "%", label7, sign4]) => ({ label: label7 ?? lineLabel("fx:" + k), value: show(t[k], unit17, sign4), icon: "fx:" + k }));
+    if (title10 === "Skills") {
+      for (const [id2, v] of Object.entries(t.skills).sort()) if (v > 0) rows.push({ label: lineLabel("fx:skillDmg:" + id2), value: show(v, "%"), icon: "fx:skillDmg" });
+      for (const [id2, v] of Object.entries(t.ranks).sort()) if (v > 0) rows.push({ label: lineLabel("fx:passiveRank:" + id2) + " rank", value: "+" + v, icon: "fx:passiveRank" });
+      for (const [id2, v] of Object.entries(t.branches).sort()) if (v > 0) rows.push({ label: "Ranks " + lineLabel("fx:branchRank:" + id2), value: "+" + v, icon: "fx:branchRank" });
+    }
+    if (rows.length) out4.push({ title: title10, rows });
+  }
+  return out4;
 }
 var BRUSH = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4l6 6-8 8H6v-6z"/><path d="M11 7l6 6"/></svg>';
 var KEY_STATS = [["Attack", "attack", "Attack"], ["Defense", "defense", "Defense"], ["Maximum health", "maxHp", "Max HP"], ["Critical chance", "critChance", "Crit"]];
@@ -164858,8 +164892,8 @@ function createCharacterStatsV3({ document: doc }) {
         if (!rows.length) return;
         groups.append(el3("h4", g.title, "sx-title"));
         for (const r of rows) {
-          const row2 = el3("div", "", "sx-row"), gain = then ? statGain(r.value, then[gi]?.rows.find((x) => x.label === r.label)?.value) : "";
-          row2.append(icon2(ROW_ICONS[r.label] ?? "", 14), el3("span", r.label, "sx-label"));
+          const row2 = el3("div", "", "sx-row" + (r.icon ? " sx-long" : "")), gain = then ? statGain(r.value, then.find((x) => x.title === g.title)?.rows.find((x) => x.label === r.label)?.value) : "";
+          row2.append(icon2(ROW_ICONS[r.label] ?? r.icon ?? "", 14), el3("span", r.label, "sx-label"));
           if (gain) row2.append(el3("span", gain, "sx-gain"));
           row2.append(el3("b", r.value, "sx-value"));
           groups.append(row2);
@@ -167356,7 +167390,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       card.setAttribute("aria-label", g.title);
       card.append(element("h4", g.title, "gx-cardtitle"));
       for (const r of rows) {
-        const row2 = element("div", "", "gx-statrow"), name = markup(element("span"), statIcon(STAT_ROW_ICONS[r.label] ?? "", 14));
+        const row2 = element("div", "", "gx-statrow"), name = markup(element("span"), statIcon(STAT_ROW_ICONS[r.label] ?? r.icon ?? "", 14));
         name.append(r.label);
         row2.append(name, element("b", r.value));
         card.append(row2);
@@ -192294,7 +192328,7 @@ var pages = /* @__PURE__ */ new Map();
 var pageStats = { made: 0, maxMs: 0, pixels: 0 };
 var keepAtLeast = 0;
 var lastCentre = null;
-function trim2() {
+function trim3() {
   let n = 0;
   for (const p of pages.values()) if (p) n++;
   while (pages.size && (pageStats.pixels > PIXELS2 && n > keepAtLeast || pages.size > 4096)) {
@@ -192348,7 +192382,7 @@ function pageFor(t, which, layer2, px7, py, s, budget) {
   }
   pages.set(key4, cv);
   pageStats.pixels += cv.width * cv.height;
-  trim2();
+  trim3();
   pageStats.made++;
   pageStats.maxMs = Math.max(pageStats.maxMs, (globalThis.performance?.now?.() ?? 0) - started);
   return cv;
@@ -223908,6 +223942,22 @@ function devGiveUniqueV1(passport, id2, { stars: stars2 = 4, equip = true, level
   }
   return validateHeroPassport(next);
 }
+function devGiveGearSetV1(passport, { tier: tier2 = 4, level = null } = {}) {
+  const cls = heroClassOf(passport.d8)?.id ?? null;
+  if (!cls) throw Error("Pick a class first");
+  if (!Number.isInteger(tier2) || tier2 < 0 || tier2 > 5) throw Error("Tier must be 0 to 5");
+  const next = copy3(passport), at9 = level ?? Math.max(1, Number(next.progression.level) || 1), used = new Set(next.items.map((i) => i.key));
+  let n = 0;
+  for (const [family, slot] of [...Object.entries(SLOT), ["ring", "ring2"]]) {
+    while (used.has("gear:" + n)) n++;
+    const key4 = "gear:" + n;
+    used.add(key4);
+    const g = generateGear("dev-tools/set/" + slot + "/" + n, { ...rewardProgressionD9(at9, "dev-tools:set:" + slot), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", gearClass: cls, wardrobe: WARDROBE_V1, affixes: AFFIXES_V3 }, { tier: tier2, family });
+    next.items.push(copy3({ key: key4, kind: "gear", definitionId: g.definition.definitionId, generated: g }));
+    next.equipped[slot] = key4;
+  }
+  return validateHeroPassport(next);
+}
 function devAddGoldV1(passport, amount2) {
   if (!Number.isInteger(amount2) || amount2 < 1 || amount2 > 1e9) throw Error("Gold must be 1 to 1,000,000,000");
   const next = copy3(passport);
@@ -223932,6 +223982,7 @@ function devApplyV1(passport, changes) {
   for (const c of Array.isArray(changes) ? changes : [changes]) {
     if (c?.level !== void 0) next = devSetLevelV1(next, c.level);
     if (c?.unique !== void 0) next = devGiveUniqueV1(next, c.unique, { stars: c.stars ?? 4, equip: c.equip ?? true });
+    if (c?.gearSet !== void 0) next = devGiveGearSetV1(next, typeof c.gearSet === "object" ? c.gearSet : {});
     if (c?.gold !== void 0) next = devAddGoldV1(next, c.gold);
   }
   return next;

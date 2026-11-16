@@ -1727,6 +1727,8 @@ body #world-hud-vitals.bag-crest{pointer-events:auto;cursor:pointer}
 #world-inventory .sx-row{display:flex;align-items:center;gap:7px;min-height:30px;border-bottom:1px solid #1e2832;min-width:0}
 #world-inventory .sx-label{flex:1;min-width:0;color:#aeb5b6;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #world-inventory .sx-row .sx-gain{margin-left:0}
+/* Gear totals (2026-11-15): long names, so each takes the full width and may wrap. */
+#world-inventory .sx-row.sx-long{grid-column:1/-1}#world-inventory .sx-row{padding:4px 0}#world-inventory .sx-row .sx-label{white-space:normal;line-height:1.2}
 #world-inventory .sx-value{color:#eee7d9;font:700 13px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
 /* Short landscape phones: a smaller hero so the card fits without scrolling. */
 @media(orientation:landscape) and (max-height:560px){
