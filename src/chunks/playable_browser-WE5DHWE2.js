@@ -171127,6 +171127,171 @@ function createDungeonMapV1({ document: doc, environment: env, store: store2, re
   return api;
 }
 
+// src/client/hud_layout_v1.js
+var HUD_FIXED_V1 = Object.freeze(["#world-hud-vitals", "#world-hud-title", "#quest-tracker", "#world-event-stack-v4", "#local-world-controls", ".chart-mini", ".world-mini", "#woodland-clue-v3-8"]);
+var HUD_CONTROLS_V1 = Object.freeze([".skill-wheel-ring", ".skill-slot", "#primary-attack", "#carried-rations"]);
+var HUD_COMPASS_V1 = Object.freeze([".chart-mini", ".world-mini"]);
+var HUD_LAYOUT_V1 = Object.freeze({ gap: 10, barTop: 12, barHeight: 50, barWidth: 380, core: 200, barMinScale: 0.6, measureMs: 250, toastLeft: 12, toastWidth: 240, upright: 600, notice: 44, heroLine: 0.46, oneCard: 24, cardHeight: 47, chipHeight: 28, cardGap: 4, menuSize: 38, menuClear: 1 });
+function hudPlaceNameV1(label7) {
+  return typeof label7 === "string" ? label7.split(" \xB7 ").filter((part3) => !/^Band \d+$/.test(part3.trim())).join(" \xB7 ") : "";
+}
+function hudPlaceSpotV1(vitals, bar2) {
+  if (!vitals || vitals.width < 40) return null;
+  const x = Math.round(bar2 && bar2.width > 0 ? bar2.left - 14 : vitals.left + vitals.width * 0.2);
+  return { x, y: Math.round(vitals.bottom - 3), w: Math.max(80, Math.round(vitals.right - 6 - x)) };
+}
+function hudStackTopV1(title10, vitals, parentTop = 0) {
+  const under = title10 && title10.width > 2 && title10.height > 2 ? title10.bottom : vitals && vitals.width > 2 ? vitals.bottom : null;
+  return under == null ? null : Math.round(under - parentTop + 6);
+}
+function hudClearBelowV1(rects, left, right, height) {
+  let bottom = 0;
+  for (const r of rects) {
+    if (!r || r.width < 2 || r.height < 2 || r.top > height * 0.5 || r.right <= left || r.left >= right) continue;
+    bottom = Math.max(bottom, r.bottom);
+  }
+  return bottom;
+}
+function hudControlsTopV1(rects, left, right, height) {
+  let top = null;
+  for (const r of rects) {
+    if (!r || r.width < 2 || r.height < 2 || r.top < height * 0.5 || r.right <= left || r.left >= right) continue;
+    top = top == null ? r.top : Math.min(top, r.top);
+  }
+  return top;
+}
+function hudZoomSpotsV1(cx, cy2, R11, { size = 24, rim: rim2 = 11.5, clockHalf = 40 } = {}) {
+  const h = size / 2, rho = R11 + rim2 + h + 1, low = Math.acos(Math.max(-1, Math.min(-Math.SQRT1_2, -(clockHalf + 2 + h) / rho))), high = low + (size + 2) / rho, at9 = (a) => ({ x: cx + Math.cos(a) * rho - h, y: cy2 + Math.sin(a) * rho - h });
+  return { zoomIn: at9(high), zoomOut: at9(low) };
+}
+function hudMenuSpotV1(compass, size = HUD_LAYOUT_V1.menuSize) {
+  if (!compass || compass.width < 40) return null;
+  const r = compass.width / 2, cx = compass.left + r, cy2 = compass.top + r, d = (r + size / 2 + HUD_LAYOUT_V1.menuClear) * Math.SQRT1_2;
+  return { x: Math.round(cx + d - size / 2), y: Math.round(cy2 + d - size / 2) };
+}
+function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft = HUD_LAYOUT_V1.toastLeft, toastRight = HUD_LAYOUT_V1.toastLeft + HUD_LAYOUT_V1.toastWidth, controls = [], laneBottom = null }) {
+  const { gap: gap2, barTop, barHeight, barWidth, core: core5, barMinScale, heroLine: heroLine2, oneCard } = HUD_LAYOUT_V1, cx = width2 / 2, full = Math.min(barWidth, width2 - 28);
+  const middle = hudClearBelowV1(rects, cx - core5 / 2, cx + core5 / 2, height), bar2 = middle > 0 ? Math.round(middle + gap2) : barTop;
+  let room = full / 2;
+  for (const r of rects) {
+    if (!r || r.width < 2 || r.height < 2 || r.top > height * 0.5 || r.bottom <= bar2 || r.top >= bar2 + barHeight) continue;
+    if (r.right <= cx) room = Math.min(room, cx - r.right - gap2);
+    else if (r.left >= cx) room = Math.min(room, r.left - cx - gap2);
+  }
+  const barScale = Math.max(barMinScale, Math.min(1, 2 * room / full)), w = full * barScale, left = cx - w / 2, right = cx + w / 2, barBottom = Math.round(bar2 + barHeight * barScale);
+  let callTop = bossShown ? barBottom + gap2 : bar2;
+  const upright = width2 <= HUD_LAYOUT_V1.upright;
+  let toastTop = Math.round(hudClearBelowV1(rects, toastLeft, toastRight, height) + gap2);
+  const shares = bossShown && toastRight > left && toastLeft < right, aboveBar = shares && toastTop < bar2;
+  if (shares && !aboveBar) toastTop = Math.max(toastTop, barBottom + gap2);
+  const below = hudControlsTopV1(controls, toastLeft, toastRight, height), floor = Math.min(below == null ? height : below - gap2, upright ? height * heroLine2 : height, aboveBar ? bar2 - gap2 : height);
+  const toastMax = floor < height ? Math.max(oneCard, Math.round(floor - toastTop)) : null;
+  if (upright && !bossShown && laneBottom != null) callTop = Math.max(callTop, Math.round(laneBottom + gap2));
+  return { barTop: bar2, barShift: bar2 - barTop, barScale, barCenter: cx, callTop, toastTop, toastMax, upright };
+}
+function placeHudBarV1(c, slots2) {
+  if (!slots2?.barScale || slots2.barScale === 1) {
+    c.translate(0, slots2?.barShift ?? 0);
+    return;
+  }
+  c.translate(slots2.barCenter, slots2.barTop);
+  c.scale(slots2.barScale, slots2.barScale);
+  c.translate(-slots2.barCenter, -HUD_LAYOUT_V1.barTop);
+}
+function createHudLayoutV1(canvas) {
+  const doc = canvas?.ownerDocument, view3 = doc?.defaultView;
+  let stackWKey = "", stackKey = "", last = -1e9, lastBoss = null, slots2 = { barTop: HUD_LAYOUT_V1.barTop, barShift: 0, barScale: 1, barCenter: 0, callTop: null, toastTop: null, toastMax: null, upright: false }, written = "", spotKey = "", placeKey = "", laneKey = "";
+  const visible3 = (el3) => !el3.closest("[hidden]");
+  function measure2(bossShown) {
+    const boxes2 = (list) => {
+      const out4 = [];
+      for (const sel of list) for (const el3 of doc.querySelectorAll(sel)) {
+        if (visible3(el3)) out4.push(el3.getBoundingClientRect());
+      }
+      return out4;
+    };
+    const compass = boxes2(HUD_COMPASS_V1).find((r) => r.width >= 40), spot2 = hudMenuSpotV1(compass), b = doc.body, key4 = spot2 ? spot2.x + "|" + spot2.y : "";
+    const menu = spot2 && doc.getElementById("local-world-controls");
+    if (menu && menu.parentElement !== b) {
+      menu.dataset.gameplayHud = "";
+      b.append(menu);
+    }
+    if (key4 !== spotKey) {
+      spotKey = key4;
+      if (spot2) {
+        b.style.setProperty("--hud-menu-x", spot2.x + "px");
+        b.style.setProperty("--hud-menu-y", spot2.y + "px");
+        b.dataset.hudMenu = "ring";
+      } else delete b.dataset.hudMenu;
+    }
+    const vit = doc.getElementById("world-hud-vitals"), place4 = vit && visible3(vit) ? hudPlaceSpotV1(vit.getBoundingClientRect(), doc.getElementById("world-hp-bar")?.getBoundingClientRect()) : null, pkey = place4 ? place4.x + "|" + place4.y + "|" + place4.w : "";
+    if (pkey !== placeKey) {
+      placeKey = pkey;
+      if (place4) {
+        b.style.setProperty("--hud-place-x", place4.x + "px");
+        b.style.setProperty("--hud-place-y", place4.y + "px");
+        b.style.setProperty("--hud-place-w", place4.w + "px");
+        b.dataset.hudPlace = "attached";
+      } else delete b.dataset.hudPlace;
+    }
+    {
+      const stack = doc.getElementById("world-event-stack-v4"), title10 = doc.getElementById("world-hud-title"), top = stack && place4 ? hudStackTopV1(title10 && visible3(title10) ? title10.getBoundingClientRect() : null, vit.getBoundingClientRect(), stack.offsetParent?.getBoundingClientRect().top ?? 0) : null, skey = top == null ? "" : String(top);
+      if (skey !== stackKey) {
+        stackKey = skey;
+        if (top == null) b.style.removeProperty("--hud-stack-top");
+        else b.style.setProperty("--hud-stack-top", top + "px");
+      }
+      const edge = stack && compass ? Math.min(compass.left, ...boxes2([".m2-zoom"]).map((r) => r.left)) : null, wkey = edge == null ? "" : Math.max(150, Math.round(edge - 6 - stack.getBoundingClientRect().left)) + "px";
+      if (wkey !== stackWKey) {
+        stackWKey = wkey;
+        if (wkey) b.style.setProperty("--hud-stack-w", wkey);
+        else b.style.removeProperty("--hud-stack-w");
+      }
+    }
+    const rects = boxes2(HUD_FIXED_V1), controls = boxes2(HUD_CONTROLS_V1);
+    const lane2 = doc.querySelector(".toast-lane-v1"), cv = canvas.getBoundingClientRect();
+    if (lane2) {
+      const w = compass ? Math.max(160, Math.round(compass.left - HUD_LAYOUT_V1.gap - lane2.getBoundingClientRect().left)) + "px" : "";
+      if (w !== laneKey) {
+        laneKey = w;
+        if (w) b.style.setProperty("--hud-lane-w", w);
+        else b.style.removeProperty("--hud-lane-w");
+      }
+    }
+    const lr = lane2?.getBoundingClientRect(), cards = lane2?.querySelectorAll(".toast-v1"), shown2 = cards ? [...cards].filter((c) => c.offsetParent !== null && c.getBoundingClientRect().height > 0) : [], laneBottom = shown2.length ? Math.max(...shown2.map((c) => c.getBoundingClientRect().bottom)) : null;
+    const toastLeft = lr && lr.width > 0 ? lr.left : HUD_LAYOUT_V1.toastLeft, toastRight = lr && lr.width > 0 ? lr.right : toastLeft + HUD_LAYOUT_V1.toastWidth;
+    const local8 = (list) => list.map((r) => ({ left: r.left - cv.left, right: r.right - cv.left, top: r.top - cv.top, bottom: r.bottom - cv.top, width: r.width, height: r.height }));
+    const s = hudSlotsV1(local8(rects), { width: cv.width || canvas.width, height: cv.height || canvas.height, bossShown, toastLeft: toastLeft - cv.left, toastRight: toastRight - cv.left, controls: local8(controls), laneBottom: laneBottom == null ? null : laneBottom - cv.top });
+    const phone = Boolean(view3.matchMedia?.("(max-width: 600px), (max-height: 500px)")?.matches), card = lane2?.querySelector(".toast-v1")?.getBoundingClientRect().height || (phone ? HUD_LAYOUT_V1.chipHeight : HUD_LAYOUT_V1.cardHeight);
+    const fit2 = s.toastMax == null ? 3 : Math.max(1, Math.min(3, Math.floor((s.toastMax + HUD_LAYOUT_V1.cardGap) / (card + HUD_LAYOUT_V1.cardGap))));
+    slots2 = s;
+    const css2 = `${Math.round(s.callTop + cv.top)}px|${Math.round(s.toastTop + cv.top)}px|${fit2}`;
+    if (css2 !== written) {
+      written = css2;
+      const [call, toast, many] = css2.split("|");
+      b.style.setProperty("--hud-call-top", call);
+      b.style.setProperty("--hud-toast-top", toast);
+      b.dataset.hudLayout = "v1";
+      b.dataset.hudToastFit = many;
+    }
+  }
+  return Object.freeze({
+    update(time3, bossShown) {
+      if (!doc?.body || !view3) return slots2;
+      if (bossShown !== lastBoss || time3 - last >= HUD_LAYOUT_V1.measureMs || time3 < last) {
+        last = time3;
+        lastBoss = bossShown;
+        try {
+          measure2(Boolean(bossShown));
+        } catch {
+        }
+      }
+      return slots2;
+    },
+    slots: () => slots2
+  });
+}
+
 // src/client/atlas_map_v2.js
 var KNEEL_MS = 3e3;
 var CLEAR_PX = 256;
@@ -171525,8 +171690,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       small.height = Math.round(H8 * ratio);
       small.style.width = W21 + "px";
       small.style.height = H8 + "px";
-      const at9 = (a) => [cx + Math.cos(a) * (R11 + 3) - 12, cy2 + Math.sin(a) * (R11 + 3) - 12];
-      const [ix, iy] = at9(Math.PI * 0.8), [ox, oy] = at9(Math.PI * 0.64);
+      const z = hudZoomSpotsV1(cx, cy2, R11), ix = z.zoomIn.x, iy = z.zoomIn.y, ox = z.zoomOut.x, oy = z.zoomOut.y;
       zoomIn.style.left = ix + "px";
       zoomIn.style.top = iy + "px";
       zoomOut.style.left = ox + "px";
@@ -171553,8 +171717,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       small.height = Math.round(H8 * ratio);
       small.style.width = W21 + "px";
       small.style.height = H8 + "px";
-      const at10 = (a) => [cx + Math.cos(a) * (R11 + 3) - 12, cy2 + Math.sin(a) * (R11 + 3) - 12];
-      const [ix, iy] = at10(Math.PI * 0.8), [ox, oy] = at10(Math.PI * 0.64);
+      const z = hudZoomSpotsV1(cx, cy2, R11), ix = z.zoomIn.x, iy = z.zoomIn.y, ox = z.zoomOut.x, oy = z.zoomOut.y;
       zoomIn.style.left = ix + "px";
       zoomIn.style.top = iy + "px";
       zoomOut.style.left = ox + "px";
@@ -189929,161 +190092,6 @@ function drawFriendDownV1(c, canvas, model, cam, time3, callTop = null) {
     callText(c, 0, uy > 0.6 ? -16 : 16, tagOf(actor), 6.5, "#ffffff", "#ffe2a0", 2.4);
     c.restore();
   }
-}
-
-// src/client/hud_layout_v1.js
-var HUD_FIXED_V1 = Object.freeze(["#world-hud-vitals", "#world-hud-title", "#quest-tracker", "#world-event-stack-v4", "#local-world-controls", ".chart-mini", ".world-mini", "#woodland-clue-v3-8"]);
-var HUD_CONTROLS_V1 = Object.freeze([".skill-wheel-ring", ".skill-slot", "#primary-attack", "#carried-rations"]);
-var HUD_COMPASS_V1 = Object.freeze([".chart-mini", ".world-mini"]);
-var HUD_LAYOUT_V1 = Object.freeze({ gap: 10, barTop: 12, barHeight: 50, barWidth: 380, core: 200, barMinScale: 0.6, measureMs: 250, toastLeft: 12, toastWidth: 240, upright: 600, notice: 44, heroLine: 0.46, oneCard: 24, cardHeight: 47, chipHeight: 28, cardGap: 4, menuSize: 38, menuClear: 1 });
-function hudPlaceNameV1(label7) {
-  return typeof label7 === "string" ? label7.split(" \xB7 ").filter((part3) => !/^Band \d+$/.test(part3.trim())).join(" \xB7 ") : "";
-}
-function hudPlaceSpotV1(vitals, bar2) {
-  if (!vitals || vitals.width < 40) return null;
-  const x = Math.round(bar2 && bar2.width > 0 ? bar2.left - 14 : vitals.left + vitals.width * 0.2);
-  return { x, y: Math.round(vitals.bottom - 3), w: Math.max(80, Math.round(vitals.right - 6 - x)) };
-}
-function hudStackTopV1(title10, vitals, parentTop = 0) {
-  const under = title10 && title10.width > 2 && title10.height > 2 ? title10.bottom : vitals && vitals.width > 2 ? vitals.bottom : null;
-  return under == null ? null : Math.round(under - parentTop + 6);
-}
-function hudClearBelowV1(rects, left, right, height) {
-  let bottom = 0;
-  for (const r of rects) {
-    if (!r || r.width < 2 || r.height < 2 || r.top > height * 0.5 || r.right <= left || r.left >= right) continue;
-    bottom = Math.max(bottom, r.bottom);
-  }
-  return bottom;
-}
-function hudControlsTopV1(rects, left, right, height) {
-  let top = null;
-  for (const r of rects) {
-    if (!r || r.width < 2 || r.height < 2 || r.top < height * 0.5 || r.right <= left || r.left >= right) continue;
-    top = top == null ? r.top : Math.min(top, r.top);
-  }
-  return top;
-}
-function hudMenuSpotV1(compass, size = HUD_LAYOUT_V1.menuSize) {
-  if (!compass || compass.width < 40) return null;
-  const r = compass.width / 2, cx = compass.left + r, cy2 = compass.top + r, d = (r + size / 2 + HUD_LAYOUT_V1.menuClear) * Math.SQRT1_2;
-  return { x: Math.round(cx + d - size / 2), y: Math.round(cy2 + d - size / 2) };
-}
-function hudSlotsV1(rects, { width: width2, height, bossShown = false, toastLeft = HUD_LAYOUT_V1.toastLeft, toastRight = HUD_LAYOUT_V1.toastLeft + HUD_LAYOUT_V1.toastWidth, controls = [], laneBottom = null }) {
-  const { gap: gap2, barTop, barHeight, barWidth, core: core5, barMinScale, heroLine: heroLine2, oneCard } = HUD_LAYOUT_V1, cx = width2 / 2, full = Math.min(barWidth, width2 - 28);
-  const middle = hudClearBelowV1(rects, cx - core5 / 2, cx + core5 / 2, height), bar2 = middle > 0 ? Math.round(middle + gap2) : barTop;
-  let room = full / 2;
-  for (const r of rects) {
-    if (!r || r.width < 2 || r.height < 2 || r.top > height * 0.5 || r.bottom <= bar2 || r.top >= bar2 + barHeight) continue;
-    if (r.right <= cx) room = Math.min(room, cx - r.right - gap2);
-    else if (r.left >= cx) room = Math.min(room, r.left - cx - gap2);
-  }
-  const barScale = Math.max(barMinScale, Math.min(1, 2 * room / full)), w = full * barScale, left = cx - w / 2, right = cx + w / 2, barBottom = Math.round(bar2 + barHeight * barScale);
-  let callTop = bossShown ? barBottom + gap2 : bar2;
-  const upright = width2 <= HUD_LAYOUT_V1.upright;
-  let toastTop = Math.round(hudClearBelowV1(rects, toastLeft, toastRight, height) + gap2);
-  const shares = bossShown && toastRight > left && toastLeft < right, aboveBar = shares && toastTop < bar2;
-  if (shares && !aboveBar) toastTop = Math.max(toastTop, barBottom + gap2);
-  const below = hudControlsTopV1(controls, toastLeft, toastRight, height), floor = Math.min(below == null ? height : below - gap2, upright ? height * heroLine2 : height, aboveBar ? bar2 - gap2 : height);
-  const toastMax = floor < height ? Math.max(oneCard, Math.round(floor - toastTop)) : null;
-  if (upright && !bossShown && laneBottom != null) callTop = Math.max(callTop, Math.round(laneBottom + gap2));
-  return { barTop: bar2, barShift: bar2 - barTop, barScale, barCenter: cx, callTop, toastTop, toastMax, upright };
-}
-function placeHudBarV1(c, slots2) {
-  if (!slots2?.barScale || slots2.barScale === 1) {
-    c.translate(0, slots2?.barShift ?? 0);
-    return;
-  }
-  c.translate(slots2.barCenter, slots2.barTop);
-  c.scale(slots2.barScale, slots2.barScale);
-  c.translate(-slots2.barCenter, -HUD_LAYOUT_V1.barTop);
-}
-function createHudLayoutV1(canvas) {
-  const doc = canvas?.ownerDocument, view3 = doc?.defaultView;
-  let stackKey = "", last = -1e9, lastBoss = null, slots2 = { barTop: HUD_LAYOUT_V1.barTop, barShift: 0, barScale: 1, barCenter: 0, callTop: null, toastTop: null, toastMax: null, upright: false }, written = "", spotKey = "", placeKey = "", laneKey = "";
-  const visible3 = (el3) => !el3.closest("[hidden]");
-  function measure2(bossShown) {
-    const boxes2 = (list) => {
-      const out4 = [];
-      for (const sel of list) for (const el3 of doc.querySelectorAll(sel)) {
-        if (visible3(el3)) out4.push(el3.getBoundingClientRect());
-      }
-      return out4;
-    };
-    const compass = boxes2(HUD_COMPASS_V1).find((r) => r.width >= 40), spot2 = hudMenuSpotV1(compass), b = doc.body, key4 = spot2 ? spot2.x + "|" + spot2.y : "";
-    const menu = spot2 && doc.getElementById("local-world-controls");
-    if (menu && menu.parentElement !== b) {
-      menu.dataset.gameplayHud = "";
-      b.append(menu);
-    }
-    if (key4 !== spotKey) {
-      spotKey = key4;
-      if (spot2) {
-        b.style.setProperty("--hud-menu-x", spot2.x + "px");
-        b.style.setProperty("--hud-menu-y", spot2.y + "px");
-        b.dataset.hudMenu = "ring";
-      } else delete b.dataset.hudMenu;
-    }
-    const vit = doc.getElementById("world-hud-vitals"), place4 = vit && visible3(vit) ? hudPlaceSpotV1(vit.getBoundingClientRect(), doc.getElementById("world-hp-bar")?.getBoundingClientRect()) : null, pkey = place4 ? place4.x + "|" + place4.y + "|" + place4.w : "";
-    if (pkey !== placeKey) {
-      placeKey = pkey;
-      if (place4) {
-        b.style.setProperty("--hud-place-x", place4.x + "px");
-        b.style.setProperty("--hud-place-y", place4.y + "px");
-        b.style.setProperty("--hud-place-w", place4.w + "px");
-        b.dataset.hudPlace = "attached";
-      } else delete b.dataset.hudPlace;
-    }
-    {
-      const stack = doc.getElementById("world-event-stack-v4"), title10 = doc.getElementById("world-hud-title"), top = stack && place4 ? hudStackTopV1(title10 && visible3(title10) ? title10.getBoundingClientRect() : null, vit.getBoundingClientRect(), stack.offsetParent?.getBoundingClientRect().top ?? 0) : null, skey = top == null ? "" : String(top);
-      if (skey !== stackKey) {
-        stackKey = skey;
-        if (top == null) b.style.removeProperty("--hud-stack-top");
-        else b.style.setProperty("--hud-stack-top", top + "px");
-      }
-    }
-    const rects = boxes2(HUD_FIXED_V1), controls = boxes2(HUD_CONTROLS_V1);
-    const lane2 = doc.querySelector(".toast-lane-v1"), cv = canvas.getBoundingClientRect();
-    if (lane2) {
-      const w = compass ? Math.max(160, Math.round(compass.left - HUD_LAYOUT_V1.gap - lane2.getBoundingClientRect().left)) + "px" : "";
-      if (w !== laneKey) {
-        laneKey = w;
-        if (w) b.style.setProperty("--hud-lane-w", w);
-        else b.style.removeProperty("--hud-lane-w");
-      }
-    }
-    const lr = lane2?.getBoundingClientRect(), cards = lane2?.querySelectorAll(".toast-v1"), shown2 = cards ? [...cards].filter((c) => c.offsetParent !== null && c.getBoundingClientRect().height > 0) : [], laneBottom = shown2.length ? Math.max(...shown2.map((c) => c.getBoundingClientRect().bottom)) : null;
-    const toastLeft = lr && lr.width > 0 ? lr.left : HUD_LAYOUT_V1.toastLeft, toastRight = lr && lr.width > 0 ? lr.right : toastLeft + HUD_LAYOUT_V1.toastWidth;
-    const local8 = (list) => list.map((r) => ({ left: r.left - cv.left, right: r.right - cv.left, top: r.top - cv.top, bottom: r.bottom - cv.top, width: r.width, height: r.height }));
-    const s = hudSlotsV1(local8(rects), { width: cv.width || canvas.width, height: cv.height || canvas.height, bossShown, toastLeft: toastLeft - cv.left, toastRight: toastRight - cv.left, controls: local8(controls), laneBottom: laneBottom == null ? null : laneBottom - cv.top });
-    const phone = Boolean(view3.matchMedia?.("(max-width: 600px), (max-height: 500px)")?.matches), card = lane2?.querySelector(".toast-v1")?.getBoundingClientRect().height || (phone ? HUD_LAYOUT_V1.chipHeight : HUD_LAYOUT_V1.cardHeight);
-    const fit2 = s.toastMax == null ? 3 : Math.max(1, Math.min(3, Math.floor((s.toastMax + HUD_LAYOUT_V1.cardGap) / (card + HUD_LAYOUT_V1.cardGap))));
-    slots2 = s;
-    const css2 = `${Math.round(s.callTop + cv.top)}px|${Math.round(s.toastTop + cv.top)}px|${fit2}`;
-    if (css2 !== written) {
-      written = css2;
-      const [call, toast, many] = css2.split("|");
-      b.style.setProperty("--hud-call-top", call);
-      b.style.setProperty("--hud-toast-top", toast);
-      b.dataset.hudLayout = "v1";
-      b.dataset.hudToastFit = many;
-    }
-  }
-  return Object.freeze({
-    update(time3, bossShown) {
-      if (!doc?.body || !view3) return slots2;
-      if (bossShown !== lastBoss || time3 - last >= HUD_LAYOUT_V1.measureMs || time3 < last) {
-        last = time3;
-        lastBoss = bossShown;
-        try {
-          measure2(Boolean(bossShown));
-        } catch {
-        }
-      }
-      return slots2;
-    },
-    slots: () => slots2
-  });
 }
 
 // src/client/wilderness_event_pilot_presentation_v3_7.js
