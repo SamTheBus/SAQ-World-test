@@ -130890,7 +130890,10 @@ function advanceShrineV1(s, r, g, d, { activeActors, hardActors, nearby }) {
         if (collidesWithTiles(c, p.x, p.y, a.hullRadius) || !openLine3(c, d.anchor, p, a.hullRadius) || Object.values(s.playersById).some((player) => {
           const b = s.entitiesById[player.entityId];
           return b.alive && b.residency.spaceInstanceId === g.spaceInstanceId && Math.hypot(b.position.x - p.x, b.position.y - p.y) < SHRINE_POLICY.playerClearance;
-        }) || g.entityIds.some((id2, i) => r.stages[i].phase === "hatched" && s.entitiesById[id2].alive && Math.hypot(s.entitiesById[id2].position.x - p.x, s.entitiesById[id2].position.y - p.y) < a.hullRadius + (s.entitiesById[id2].hullRadius ?? 10) + 4)) continue;
+        }) || g.entityIds.some((id2, i) => (
+          /* the pack holds every planned event's creatures (41 since Dens); the shrine's own are the first SHRINE_MEMBERS, and reading a stage past them stopped the game the moment a seal was broken (Sammy 2026-11-16) */
+          r.stages[i]?.phase === "hatched" && s.entitiesById[id2].alive && Math.hypot(s.entitiesById[id2].position.x - p.x, s.entitiesById[id2].position.y - p.y) < a.hullRadius + (s.entitiesById[id2].hullRadius ?? 10) + 4
+        ))) continue;
         point14 = { ...p };
         break;
       }
