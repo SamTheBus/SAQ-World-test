@@ -17840,6 +17840,17 @@ var REFLECTION_SKILLS_V1 = Object.freeze({
   meteor: { shape: "spot", r: 60, scale: 16 },
   thunderfall: { shape: "spot", r: 52, scale: 16 }
 });
+var MIRROR_STEP_V1 = Object.freeze({ side: 120, tallSide: 44, lead: 120, past: 40 });
+function hollowglassStepNodesV1(origin2, target) {
+  if (![origin2?.x, origin2?.y, target?.x, target?.y].every(Number.isFinite)) throw new TypeError("Invalid Mirror Step points");
+  const dx = target.x - origin2.x, dy = target.y - origin2.y, d = Math.hypot(dx, dy), ux = d > 1 ? dx / d : 1, uy = d > 1 ? dy / d : 0, nx = uy, ny = -ux;
+  const M = MIRROR_STEP_V1, R = M.side + M.tallSide * Math.abs(ny), a = Math.min(d * 0.45, M.lead);
+  return [
+    { x: target.x - ux * a + nx * R, y: target.y - uy * a + ny * R },
+    { x: target.x + ux * M.past - nx * R, y: target.y + uy * M.past - ny * R },
+    { x: target.x, y: target.y }
+  ];
+}
 var REFLECTION_SIGNATURE_V1 = Object.freeze({ knight: "shield_bash", mage: "cast", rogue: "flurry" });
 function reflectionSkillHitsV1(skill, from, aim, p, pad = 0) {
   const s = REFLECTION_SKILLS_V1[skill];
@@ -32323,6 +32334,7 @@ export {
   LOOKING_GLASS_V1,
   REFLECTION_V1,
   REFLECTION_SKILLS_V1,
+  hollowglassStepNodesV1,
   REFLECTION_SIGNATURE_V1,
   reflectionSkillHitsV1,
   recoveredBossRecord,

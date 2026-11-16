@@ -36,9 +36,9 @@ function prefetchArt() {
 }
 var inspection = document.getElementById("world-boundary-status");
 if (inspection) {
-  import("../chunks/world_browser-A6SHLIJV.js").then(({ mountWorldBoundary }) => mountWorldBoundary(inspection)).catch(reportStartupFailure);
+  import("../chunks/world_browser-XZ7637D5.js").then(({ mountWorldBoundary }) => mountWorldBoundary(inspection)).catch(reportStartupFailure);
 } else {
-  import("../chunks/playable_browser-BOU2GIEO.js").then(({ startWorldClient }) => {
+  import("../chunks/playable_browser-UZ2HA6JZ.js").then(({ startWorldClient }) => {
     window.__SAQ_STARTUP_LOADING_V1__?.stage(1, "Reading the world map\u2026");
     prefetchArt();
     return startWorldClient(window);

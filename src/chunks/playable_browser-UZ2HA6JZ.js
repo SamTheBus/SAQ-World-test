@@ -649,6 +649,7 @@ import {
   heroRank,
   historicalSiteContentD9,
   hollowOrdinal,
+  hollowglassStepNodesV1,
   hornPostPointV1,
   hostileHazardIdD12_4J,
   hostileMeleeMotionD11_2,
@@ -1124,7 +1125,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-O63GWE2B.js";
+} from "./chunk-CXU7N7MQ.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -144530,7 +144531,7 @@ function createRecoveredBossCombatV1(state2, { applyDirectDamage, eligible: elig
       endsTick: state2.tick + MARCUS_GOLD_RUSH_TOTAL_TICKS,
       originPosition: origin,
       targetPosition: copyWire(target),
-      nodes: originalMarcusDashNodes(origin, target),
+      nodes: (b.bossDefinitionId === "marcus" ? hollowglassStepNodesV1 : originalMarcusDashNodes)(origin, target),
       legIndex: 0,
       legFrom: copyWire(origin),
       hitEntityIds: []
@@ -192291,7 +192292,7 @@ function createStepMemory() {
 }
 function rememberStep(mem, { cast: cast2, rush, bossPos, tick }) {
   if (cast2) {
-    mem.nodes = originalMarcusDashNodes(cast2.origin, cast2.target);
+    mem.nodes = hollowglassStepNodesV1(cast2.origin, cast2.target);
     mem.origin = { ...cast2.origin };
     mem.castStart = cast2.startedTick;
     mem.castEnd = cast2.resolvesTick;

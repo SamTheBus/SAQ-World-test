@@ -20115,6 +20115,7 @@ var REFLECTION_SKILLS_V1 = Object.freeze({
   meteor: { shape: "spot", r: 60, scale: 16 },
   thunderfall: { shape: "spot", r: 52, scale: 16 }
 });
+var MIRROR_STEP_V1 = Object.freeze({ side: 120, tallSide: 44, lead: 120, past: 40 });
 var REFLECTION_SIGNATURE_V1 = Object.freeze({ knight: "shield_bash", mage: "cast", rogue: "flurry" });
 
 // src/shared/contracts/recovered_boss_v1.js
