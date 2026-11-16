@@ -127036,6 +127036,28 @@ function boardOffersV1(view3, seed2, settlementId, day) {
   }
   return out4;
 }
+var BOUNTY_POLICY = freezeWire({ level: 10, count: 3, firstNote: 5 });
+function bountyOffersV1(view3, seed2, settlementId, day) {
+  const town = view3.settlements.find((s) => s.id === settlementId);
+  if (!town) return [];
+  const land = view3.land?.get(town.id) ?? landOf(view3, town), named2 = view3.sites.filter((s) => huntSpecV1(s)?.named), same12 = named2.filter((s) => !land || !s.landmassId || s.landmassId === land);
+  const far = (s) => Math.hypot(s.x - town.x, s.y - town.y);
+  return (same12.length ? same12 : named2).sort((a, b) => far(a) - far(b) || a.siteId.localeCompare(b.siteId)).slice(0, BOUNTY_POLICY.count).map((t, i) => ({
+    id: boardOfferIdV1(settlementId, day, BOUNTY_POLICY.firstNote + i),
+    source: "board",
+    giver: settlementId,
+    settlementId,
+    kind: "hunt",
+    target: t.siteId,
+    tx: Math.floor(t.x),
+    ty: Math.floor(t.y),
+    band: t.band ?? 1,
+    difficulty: "hard",
+    gearGroup: "any",
+    bounty: true,
+    named: huntSpecV1(t).named
+  }));
+}
 function folkOfferV1(view3, seed2, npc, npcsOfTown) {
   const town = view3.settlements.find((s) => s.id === npc.settlementId);
   if (!town) return null;
@@ -132234,6 +132256,17 @@ function boardOffersForV1(state2, settlementId) {
   }
   return offerCache.get(key4);
 }
+var bountyCache = /* @__PURE__ */ new Map();
+function bountyOffersForV1(state2, settlementId) {
+  const day = questDayV1(state2.tick), key4 = state2.d9World.plannedWorld.assetHash + "|" + worldRevisionV1() + "|" + settlementId + "|" + day;
+  if (!bountyCache.has(key4)) {
+    if (bountyCache.size > 64) bountyCache = /* @__PURE__ */ new Map();
+    bountyCache.set(key4, bountyOffersV1(viewAt(state2, firstTickOfDay(state2.tick)), state2.d9World.plannedWorld.assetHash, settlementId, day));
+  }
+  return bountyCache.get(key4);
+}
+var bountyOpenV1 = (player) => questLevelV1(player?.progression?.level ?? 1) >= BOUNTY_POLICY.level;
+var bountyDrops = (named2) => Object.values(UNIQUE_ITEMS).filter((u) => u.from === named2).map((u) => u.name);
 var townNpcs = (settlementId) => generatedTownNpcsV1().filter((n) => n.settlementId === settlementId);
 var folkCache = { key: null, rows: /* @__PURE__ */ new Map() };
 function folkOfferForV1(state2, npcId) {
@@ -132273,7 +132306,7 @@ function findOffer(state2, questId) {
   if (questId.startsWith("qf:")) return folkOfferForV1(state2, questId.slice(3));
   const m = /^qb:([a-z-]+:[0-9]{2}):([0-9]+):([0-9])$/.exec(questId);
   if (!m || Number(m[2]) !== questDayV1(state2.tick)) return null;
-  return boardOffersForV1(state2, "settlement-slot:" + m[1]).find((o) => o.id === questId) ?? null;
+  return (Number(m[3]) >= BOUNTY_POLICY.firstNote ? bountyOffersForV1 : boardOffersForV1)(state2, "settlement-slot:" + m[1]).find((o) => o.id === questId) ?? null;
 }
 function questActionProblemV1(state2, player, payload) {
   if (!hasQuestsV1(state2)) return "Quests are not in this world";
@@ -132285,6 +132318,7 @@ function questActionProblemV1(state2, player, payload) {
     if (log2.active.length >= QUEST_POLICY.activeLimit) return "Your quest log is full (" + QUEST_POLICY.activeLimit + "). Finish or drop one first.";
     const o = findOffer(state2, payload.questId);
     if (!o) return "That quest is gone";
+    if (o.bounty && !bountyOpenV1(player)) return "Bounties open at level " + BOUNTY_POLICY.level;
     if (o.source === "board") {
       if (log2.boardDone[o.id] !== void 0) return "You already did this note today";
       if (!nearBoard(state2, actor, o.giver)) return "Walk up to the notice board";
@@ -132516,7 +132550,8 @@ function projectQuestsV1(state2, player, actor, serviceNpcs = []) {
       if (!p || Math.hypot(p.x - actor.position.x, p.y - actor.position.y) > 1400) continue;
       const offers = boardOffersForV1(state2, s.id).map((o) => offerShown(state2, o, player, log2.active.some((r) => r.id === o.id) ? "taken" : log2.boardDone[o.id] !== void 0 ? "done" : "open"));
       const handIns = log2.active.filter((r) => r.source === "board" && r.giver === s.id && r.status === "ready").map((r) => r.id), deliveries = log2.active.filter((r) => r.kind === "carry" && r.status === "active" && r.target === s.id).map((r) => r.id);
-      out4.boards.push({ settlementId: s.id, name: s.label, x: p.x, y: p.y, offers, handIns, deliveries, mark: handIns.length || deliveries.length ? "?" : offers.some((o) => o.state === "open") ? "!" : null });
+      const open3 = bountyOpenV1(player), bounties = open3 ? bountyOffersForV1(state2, s.id).map((o) => ({ ...offerShown(state2, o, player, log2.active.some((r) => r.id === o.id) ? "taken" : log2.boardDone[o.id] !== void 0 ? "done" : "open"), bounty: true, drops: bountyDrops(o.named) })) : [];
+      out4.boards.push({ settlementId: s.id, name: s.label, x: p.x, y: p.y, offers, bounties, bountyLevel: BOUNTY_POLICY.level, bountiesOpen: open3, handIns, deliveries, mark: handIns.length || deliveries.length ? "?" : offers.some((o) => o.state === "open") || bounties.some((o) => o.state === "open") ? "!" : null });
     }
   }
   for (const n of serviceNpcs) {
@@ -151463,6 +151498,16 @@ var CSS3 = `
    Reward panel with the mystery gear piece and its rarity odds, and a full-width Take button. */
 .qb-how{flex:none;display:flex;flex-wrap:wrap;gap:4px 8px;padding:7px 14px;background:#2e1f15;color:#e8d6ac;font-size:12.5px;font-weight:600;line-height:1.3}
 .qb-how i{font-style:normal;color:#d6ad44}
+.qb-tabs{flex:none;display:flex;gap:6px;padding:8px 12px 0;background:#3a2a1c}
+.qb-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;min-height:40px;margin:0;padding:0 10px;border:2px solid #2e1f15;border-bottom:0;border-radius:8px 8px 0 0;background:#5a4230;color:#e8d6ac;font:700 14px "Baloo 2",system-ui,sans-serif;cursor:pointer;touch-action:manipulation}
+.qb-tab[aria-pressed=true]{background:#b98b5a;color:#2a1d12}
+.qb-tab small{font:600 11px system-ui,sans-serif;opacity:.8}
+.qb-tab .qb-new{font:800 10px/15px system-ui,sans-serif;font-style:normal;letter-spacing:.05em;text-transform:uppercase;padding:0 6px;border-radius:99px;background:#ffd45c;color:#2a1d12}
+.qb-lede{margin:0;padding:7px 10px;border-radius:6px;background:#f6eedbcc;color:#3a2a1c;font-size:13px;line-height:1.35}
+.qb-card.is-bounty{border-top:4px solid #a2341f}
+.qb-drops{display:flex;flex-direction:column;gap:1px;padding:6px 8px;border-radius:5px;background:#e9d9b4;font-size:13px;line-height:1.3}
+.qb-drops em{font-style:normal;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7a5a2e}
+.qb-drops b{color:#8a2f12}
 .qb-diff{position:absolute;right:12px;top:12px;padding:2px 9px;border-radius:999px;border:1.5px solid currentColor;font-size:11px;font-weight:800;line-height:1.4;letter-spacing:.08em;text-transform:uppercase;pointer-events:none}
 .qb-diff.easy{color:#2f7a3a;background:#e3f2dc}.qb-diff.normal{color:#9a6a12;background:#fbeccc}.qb-diff.hard{color:#a8322d;background:#f8dcd6}
 .qb-card.has-diff .qb-kind{padding-right:84px}
@@ -151742,7 +151787,19 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     return d;
   }
   const board2 = dialog("quest-board"), talk = dialog("quest-talk"), log2 = dialog("quest-log"), prize = dialog("quest-reward");
-  let boardId = null, talkNpc = null, busy = false, notice = "", bad = false, lastKey = "";
+  let boardId = null, talkNpc = null, busy = false, notice = "", bad = false, lastKey = "", boardTab = "notes";
+  const flag2 = (key4) => ({ get() {
+    try {
+      return env.localStorage?.getItem(key4) === "1";
+    } catch {
+      return false;
+    }
+  }, set() {
+    try {
+      env.localStorage?.setItem(key4, "1");
+    } catch {
+    }
+  } }), bountySeen = flag2("saq-bounties-seen-v1"), bountyTold = flag2("saq-bounties-told-v1");
   const store2 = { get() {
     try {
       return env.localStorage?.getItem("saq-quest-track") ?? null;
@@ -151825,6 +151882,24 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     }
     sheet2.append(head19, how, body6);
     board2.append(sheet2);
+    {
+      const tabs = el3("div", null, "qb-tabs"), tab = (id2, label7) => {
+        const t2 = el3("button", label7, "qb-tab");
+        t2.type = "button";
+        t2.dataset.tab = id2;
+        t2.setAttribute("aria-pressed", String(boardTab === id2));
+        t2.onclick = () => {
+          boardTab = id2;
+          if (id2 === "bounties" && b?.bountiesOpen) bountySeen.set();
+          drawBoard();
+        };
+        return t2;
+      }, bt = tab("bounties", "Bounties");
+      if (b && !b.bountiesOpen) bt.append(el3("small", "Level " + b.bountyLevel));
+      else if (b && !bountySeen.get()) bt.append(el3("i", "New", "qb-new"));
+      tabs.append(tab("notes", "Notes"), bt);
+      sheet2.insertBefore(tabs, body6);
+    }
     board2.setAttribute("aria-label", (b?.name ? b.name + " " : "") + "notice board");
     if (!b) {
       body6.append(el3("p", "Walk up to the notice board to read it.", "qb-empty"));
@@ -151891,10 +151966,14 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       go.classList.add("qb-take");
       c.append(rewardPanel(a.gold, a.xp, a.gear, { diff: a.difficulty }), go);
     }
-    if (!b.offers.length && !b.deliveries.length && !b.handIns.length) body6.append(el3("p", "No notes left today. New ones go up at dawn.", "qb-empty"));
-    for (const o of b.offers) {
-      const open3 = o.state !== "taken" && o.state !== "done", c = card(o.kind, KIND_LABEL[o.kind], o.title, o.note, o.state === "taken" ? " is-taken" : o.state === "done" ? " is-done" : " has-diff");
+    const offerCard = (o, label7) => {
+      const open3 = o.state !== "taken" && o.state !== "done", c = card(o.kind, label7, o.title, o.note, (o.state === "taken" ? " is-taken" : o.state === "done" ? " is-done" : " has-diff") + (o.bounty ? " is-bounty" : ""));
       if (o.where && !open3) c.append(where(o.where));
+      if (o.drops?.length) {
+        const d = el3("p", null, "qb-drops");
+        d.append(el3("em", "Can drop"), el3("b", o.drops.join(", ")));
+        c.append(d);
+      }
       if (o.state === "taken") {
         stamp7(c, "Taken", "taken");
         const on = cur?.id === o.id;
@@ -151908,14 +151987,25 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       } else {
         if (o.difficulty) c.prepend(el3("span", DIFF_LABEL[o.difficulty], "qb-diff " + o.difficulty));
         c.append(steps7(o), rewardPanel(o.gold, o.xp, o.gear, { grow: true }));
-        const go = button3("Take this quest", () => act("take", o.id, () => {
+        const go = button3(o.bounty ? "Take this bounty" : "Take this quest", () => act("take", o.id, () => {
           setTrack(o.id);
-          toastV1(doc, { kind: "event", title: "Quest taken", sub: o.title });
+          toastV1(doc, { kind: "event", title: o.bounty ? "Bounty taken" : "Quest taken", sub: o.title });
         }));
         go.classList.add("qb-take");
         go.disabled = busy || full;
         c.append(go);
       }
+    };
+    if (boardTab === "bounties") {
+      if (!b.bountiesOpen) body6.append(el3("p", "Bounties open at level " + b.bountyLevel + ". Each one leads you to a named enemy, and named enemies drop items found nowhere else.", "qb-empty"));
+      else if (!b.bounties.length) body6.append(el3("p", "No named enemy is known near this town.", "qb-empty"));
+      else {
+        body6.append(el3("p", "A bounty marks the lair of a named enemy on your map. A lair fills again after you leave it, so a bounty can be taken again tomorrow.", "qb-lede"));
+        for (const o of b.bounties) offerCard(o, "Bounty");
+      }
+    } else {
+      if (!b.offers.length && !b.deliveries.length && !b.handIns.length) body6.append(el3("p", "No notes left today. New ones go up at dawn.", "qb-empty"));
+      for (const o of b.offers) offerCard(o, KIND_LABEL[o.kind]);
     }
     if (full) body6.append(el3("p", "Your quest log is full (" + q2.limit + "). Finish or drop one to take more.", "qb-note"));
   }
@@ -152366,6 +152456,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       clearInput();
       boardId = exit?.questBoardId ?? null;
       notice = "";
+      boardTab = "notes";
       drawBoard();
       if (!board2.open) board2.showModal();
     },
@@ -152402,6 +152493,10 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
         map()?.trackQuest?.(null);
         return;
       }
+      if (!bountyTold.get() && q2.boards.some((b) => b.bountiesOpen)) {
+        bountyTold.set();
+        toastV1(doc, { kind: "event", title: "Bounties are posted", sub: "New tab on the notice board", key: "bounties", ms: 8e3 });
+      }
       const now3 = new Map(q2.active.map((a) => [a.id, a.status]));
       if (primed) {
         for (const a of q2.active) if (a.status === "ready" && lastStatuses.get(a.id) === "active") toastV1(doc, { kind: "event", title: "Quest ready to hand in", sub: a.title });
@@ -152430,14 +152525,25 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
 }
 function drawQuestMarkV1(c, x, y, mark, t = 0) {
   if (!mark) return;
-  const bob = Math.sin(t * 3) * 2.5;
+  const p = t * 1.15 % 1, hop = p < 0.62 ? Math.sin(p / 0.62 * Math.PI) : 0, land = p >= 0.62 && p < 0.78 ? Math.sin((p - 0.62) / 0.16 * Math.PI) : 0, bob = -hop * 9;
   c.save();
-  c.translate(x, y + bob);
+  c.translate(x, y);
+  {
+    const g2 = c.createRadialGradient(0, -12, 0, 0, -12, 26);
+    g2.addColorStop(0, "rgba(255,214,92," + (0.34 + 0.16 * hop) + ")");
+    g2.addColorStop(1, "rgba(255,214,92,0)");
+    c.fillStyle = g2;
+    c.beginPath();
+    c.arc(0, -12, 26, 0, Math.PI * 2);
+    c.fill();
+  }
+  c.translate(0, bob);
+  c.scale(1 + 0.1 * land, 1 - 0.12 * land);
   c.textAlign = "center";
   c.textBaseline = "alphabetic";
-  c.font = "900 30px Georgia,serif";
+  c.font = "900 34px Georgia,serif";
   c.lineJoin = "round";
-  c.lineWidth = 6;
+  c.lineWidth = 7;
   c.strokeStyle = "#2a1d12";
   c.strokeText(mark, 0, 0);
   const g = c.createLinearGradient(0, -24, 0, 2);
@@ -195065,9 +195171,8 @@ var phase = (id2) => {
   return (h >>> 0) / 4294967296;
 };
 var now2 = () => (globalThis.performance?.now?.() ?? 0) / 1e3;
-function nameTag(c, n, x, tag2, mark) {
+function nameTag(c, n, x, tag2) {
   const role = SHORT[n.role] ?? n.roleLabel ?? "";
-  if (mark) drawQuestMarkV1(c, x, tag2 - 60, mark, now2() + phase(n.id) * 6);
   c.save();
   c.textAlign = "center";
   c.font = "bold 12px system-ui";
@@ -195084,16 +195189,29 @@ function nameTag(c, n, x, tag2, mark) {
 }
 function civilianDepthItems(model, viewport) {
   const folk = model.quests?.folk ?? {}, inView2 = (p) => p.x > viewport.x - 80 && p.x < viewport.x + viewport.width + 80 && p.y > viewport.y - 120 && p.y < viewport.y + viewport.height + 80;
-  const boards4 = (model.space?.overworld === false ? [] : model.quests?.boards ?? []).filter((b) => b.mark && inView2(b)).map((b) => depthItem({ id: "quest-board-mark:" + b.settlementId, anchorX: b.x, anchorY: b.y + 4e3, draw: (c) => drawQuestMarkV1(c, b.x, b.y - 58, b.mark, now2()) }));
-  return [...boards4, ...(model.serviceNpcs ?? []).filter((n) => n.position.x > viewport.x - 80 && n.position.x < viewport.x + viewport.width + 80 && n.position.y > viewport.y - 80 && n.position.y < viewport.y + viewport.height + 80).flatMap((n) => {
+  return [...(model.serviceNpcs ?? []).filter((n) => n.position.x > viewport.x - 80 && n.position.x < viewport.x + viewport.width + 80 && n.position.y > viewport.y - 80 && n.position.y < viewport.y + viewport.height + 80).flatMap((n) => {
     const x = n.position.x + (n.dx ?? 0), y = n.position.y, outside3 = n.space === "exterior", behind = outside3 && n.role === "general" && (n.reach ?? 0) > 20, feet = y + 12 - (behind ? 15 : 0), tag2 = feet - (behind ? 40 : 0);
     const figure = depthItem({ id: n.id, anchorX: n.position.x, anchorY: y + 12, draw: (c) => {
       const t = (now2() / (LOOP[n.role] ?? 4) + phase(n.id)) % 1;
       drawShopkeeperV1(c, n.role, shopkeeperCastV1(n), x, feet, t, n.facing ?? -1);
-      if (outside3) nameTag(c, n, x, tag2, folk[n.id]?.mark);
+      if (outside3) nameTag(c, n, x, tag2);
     } });
-    return outside3 ? [figure] : [figure, depthItem({ id: n.id + "/name", anchorX: n.position.x, anchorY: y + 4e3, draw: (c) => nameTag(c, n, x, tag2, folk[n.id]?.mark) })];
+    return outside3 ? [figure] : [figure, depthItem({ id: n.id + "/name", anchorX: n.position.x, anchorY: y + 4e3, draw: (c) => nameTag(c, n, x, tag2) })];
   })];
+}
+function drawQuestMarksOverV1(c, model, viewport) {
+  const q2 = model.quests;
+  if (!q2) return;
+  const inView2 = (p) => p.x > viewport.x - 80 && p.x < viewport.x + viewport.width + 80 && p.y > viewport.y - 120 && p.y < viewport.y + viewport.height + 140;
+  if (model.space?.overworld !== false) {
+    for (const b of q2.boards ?? []) if (b.mark && inView2(b)) drawQuestMarkV1(c, b.x, b.y - 58, b.mark, now2());
+  }
+  for (const n of model.serviceNpcs ?? []) {
+    const mark = q2.folk?.[n.id]?.mark;
+    if (!mark || !inView2(n.position)) continue;
+    const x = n.position.x + (n.dx ?? 0), behind = n.space === "exterior" && n.role === "general" && (n.reach ?? 0) > 20, tag2 = n.position.y + 12 - (behind ? 55 : 0);
+    drawQuestMarkV1(c, x, tag2 - 60, mark, now2() + phase(n.id) * 6);
+  }
 }
 
 // src/client/ferry_presentation_v1.js
@@ -221845,6 +221963,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       drawEnvironmentLabels(ctx, model.space);
       drawWoodlandPilotEventLabels(ctx, model, viewport);
     }
+    drawQuestMarksOverV1(ctx, model, viewport);
     drawTripHellOverV1(ctx, visualModel, time3);
     drawTripCallsV1(ctx, visualModel, time3);
     drawTripImpCallsV1(ctx, visualModel, time3);

@@ -5063,6 +5063,7 @@ function useQuestWorldV1(asset) {
   }
   clearings = out2;
 }
+var BOUNTY_POLICY = freezeWire({ level: 10, count: 3, firstNote: 5 });
 
 // src/shared/generation/portable_math_v1.js
 var view = new DataView(new ArrayBuffer(8));
