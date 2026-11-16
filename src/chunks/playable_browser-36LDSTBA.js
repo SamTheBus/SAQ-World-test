@@ -1504,7 +1504,7 @@ function createActorMotionPresentationV1({ collisionProbe = null, now: now3 = ()
       if (discontinuity) snaps++;
     }
   }
-  function observeLight(tick, time3, read2) {
+  function observeLight(tick, time3, read3) {
     if (scope === null || !Number.isFinite(time3) || !Number.isFinite(tick) || time3 < lastCallAt || time3 - lastCallAt >= P.stallResetMs || tick < lastTick) return false;
     lastCallAt = time3;
     observations2++;
@@ -1514,7 +1514,7 @@ function createActorMotionPresentationV1({ collisionProbe = null, now: now3 = ()
     }
     lastTick = tick;
     for (const [id2, r] of records) {
-      const a = read2(id2);
+      const a = read3(id2);
       if (!a || !Number.isFinite(a.x) || !Number.isFinite(a.y)) continue;
       const sample2 = { tick, x: a.x, y: a.y };
       if (r.current.tick === tick && same(r.current, sample2) && r.alive === a.alive) continue;
@@ -129436,14 +129436,14 @@ function startWorldBuildV1({ environment, seed: seed2, save, workerUrl = worldMa
   });
   result.catch(() => {
   });
-  function read2() {
+  function read3() {
     if (stored) return { fraction: 1, stage: WORLD_BUILD_STAGES.length, failed: null };
     let done3 = 0;
     for (let i = 0; i < stage2; i++) done3 += WORLD_BUILD_STAGES[i].share;
     const current = WORLD_BUILD_STAGES[stage2], part3 = current ? Math.min(0.9, (now3() - stageStarted) / (current.share * total)) : 0;
     return { fraction: Math.min(0.99, done3 + (current?.share ?? 0) * part3), stage: stage2, failed };
   }
-  return Object.freeze({ seed: seed2, result, read: read2, onChange(f) {
+  return Object.freeze({ seed: seed2, result, read: read3, onChange(f) {
     listeners.add(f);
     return () => listeners.delete(f);
   }, cancel() {
@@ -147469,7 +147469,7 @@ function createSiteTruthReuseV1(resolve) {
   resolve ??= (state2) => resolveSiteTruthD12_4C(state2, { includeFinaleDiagnostics: false });
   const entries = /* @__PURE__ */ new WeakMap();
   let hits2 = 0, misses = 0, residencyRefreshes = 0, semanticSerializations = 0, keyCharacters = 0;
-  const read2 = (state2) => {
+  const read3 = (state2) => {
     const origin = originManifestForState(state2), { chunks: rows, ...semantic } = dependencies(state2), key4 = refreshable ? null : JSON.stringify(semantic), residencyKey = JSON.stringify(rows), prior = entries.get(state2);
     if (!refreshable) semanticSerializations++;
     if (prior && prior.content === state2.content && prior.origin === origin && (refreshable ? siteTruthJsonEqualV1(semantic, prior.snapshot.node) : prior.key === key4)) {
@@ -147494,8 +147494,8 @@ function createSiteTruthReuseV1(resolve) {
     misses++;
     return value2;
   };
-  read2.inspect = () => ({ version: SITE_TRUTH_REUSE_V1, hits: hits2, misses, residencyRefreshes, semanticSerializations, keyCharacters, weakStateKeys: true, viewsPerState: 1, finaleDiagnosticsCached: false });
-  return read2;
+  read3.inspect = () => ({ version: SITE_TRUTH_REUSE_V1, hits: hits2, misses, residencyRefreshes, semanticSerializations, keyCharacters, weakStateKeys: true, viewsPerState: 1, finaleDiagnosticsCached: false });
+  return read3;
 }
 var sharedSiteTruthReuseV1 = createSiteTruthReuseV1();
 
@@ -147517,7 +147517,7 @@ function createSiteAnchorProjectionCacheV1(project2 = projectToLocalFrameD9) {
     }
     return Object.freeze(rows);
   }
-  function read2(siteTruth, frames) {
+  function read3(siteTruth, frames) {
     const owned2 = isOwnedSiteTruthProjectionV1(siteTruth);
     const inputs = owned2 ? frameCaptureInputs(frames) : null;
     if (!inputs) {
@@ -147534,8 +147534,8 @@ function createSiteAnchorProjectionCacheV1(project2 = projectToLocalFrameD9) {
     misses++;
     return rows;
   }
-  read2.inspect = () => ({ version: SITE_ANCHOR_PROJECTION_CACHE_V1, hits: hits2, misses, bypasses, projections, retainedViews: Number(prior !== null) });
-  return read2;
+  read3.inspect = () => ({ version: SITE_ANCHOR_PROJECTION_CACHE_V1, hits: hits2, misses, bypasses, projections, retainedViews: Number(prior !== null) });
+  return read3;
 }
 
 // src/host/activity_client_port.js
@@ -147591,10 +147591,10 @@ function staticProjectionV1(address3, frames) {
   return spot2;
 }
 var sharedTruth = null;
-function sharedSiteTruthV1(state2, read2, maxAge, force) {
+function sharedSiteTruthV1(state2, read3, maxAge, force) {
   const d = state2.campaign.overworld.discovery, key4 = `${state2.d9World.runtime.revision}/${d.discoveredSiteIds.length}`, t = sharedTruth;
   if (!force && t && t.state === state2 && t.key === key4 && state2.tick >= t.tick && state2.tick - t.tick < maxAge) return t;
-  sharedTruth = { state: state2, key: key4, tick: state2.tick, view: read2(state2) };
+  sharedTruth = { state: state2, key: key4, tick: state2.tick, view: read3(state2) };
   return sharedTruth;
 }
 function createActivityClientPort({ authority, localPlayerId, measure: measure2 = (_n, fn) => fn() }) {
@@ -169004,7 +169004,7 @@ function parseBackupCodeV1(text3) {
   return m ? { id: m[1].toLowerCase(), secret: m[2].toLowerCase() } : null;
 }
 function createFriendsClientV1({ server, storage, key: key4 = FRIENDS_KEY, fetch = globalThis.fetch?.bind(globalThis), now: now3 = () => Date.now(), setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis), clearTimeout: clearTimeout2 = globalThis.clearTimeout.bind(globalThis), document: document2 = null }) {
-  const read2 = () => {
+  const read3 = () => {
     try {
       const v = JSON.parse(storage?.getItem(key4) ?? "null");
       return v && typeof v === "object" ? v : {};
@@ -169018,7 +169018,7 @@ function createFriendsClientV1({ server, storage, key: key4 = FRIENDS_KEY, fetch
     } catch {
     }
   };
-  let me = read2(), last = null, error = "", timer = null, running2 = false, syncing = null, presenceOf = () => null;
+  let me = read3(), last = null, error = "", timer = null, running2 = false, syncing = null, presenceOf = () => null;
   const listeners = /* @__PURE__ */ new Set(), noteListeners = /* @__PURE__ */ new Set(), paces = /* @__PURE__ */ new Map();
   const signedIn = () => Boolean(me.id && me.secret);
   const tell = () => {
@@ -172360,7 +172360,12 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   const perfActs = el3("div", "st-acts");
   perfActs.append(perfToggle, perfDownload);
   const perfLine = line43(perfName, perfActs);
-  const gameSec = section("Game", updateLine, worldLine, line43(saveName, saveBtn), line43(campName, campActs), perfLine);
+  const lastNote = el3("small", null, ""), lastName = name("Last session");
+  lastName.append(lastNote);
+  const lastActs = el3("div", "st-acts");
+  lastActs.append(btn("Download", "ghost", () => byId("world-last-session-download")?.click()));
+  const lastLine = line43(lastName, lastActs);
+  const gameSec = section("Game", updateLine, worldLine, line43(saveName, saveBtn), line43(campName, campActs), perfLine, lastLine);
   root6.append(
     section("Sound", line43(name("Music", null, true), music.r, music.v), line43(name("Sound effects", null, true), effects2.r, effects2.v), line43(name("Mute all"), mute)),
     section("Controls", line43(name("Movement"), seg8), line43(name("Left-handed", "Attack, skills and Potion swap to the left"), left)),
@@ -172380,6 +172385,11 @@ function createSettingsPageV1({ document: doc, environment: env }) {
     const mode = modeSelect()?.value ?? "joystick";
     joystick.setAttribute("aria-pressed", String(mode === "joystick"));
     cursor.setAttribute("aria-pressed", String(mode === "cursor"));
+    {
+      const last = byId("world-last-session-download");
+      lastLine.hidden = !last;
+      if (last) lastNote.textContent = last.dataset.line ?? "";
+    }
     const sample = byId("world-perf-sample");
     perfLine.hidden = !sample;
     if (sample) {
@@ -176733,7 +176743,7 @@ function createFrameSamples() {
     }
     last = time3;
   }
-  function read2(time3) {
+  function read3(time3) {
     let sum2 = 0, n = 0, worst = 0;
     for (let j = 0; j < count2; j++) {
       const i = (index - 1 - j + 2048) % 2048, age = time3 - times2[i];
@@ -176746,7 +176756,7 @@ function createFrameSamples() {
     }
     return { fps: sum2 ? 1e3 * n / sum2 : 0, frameMs: count2 ? durations[(index + 2047) % 2048] : 0, worstMs: worst };
   }
-  return { observe, read: read2, reset };
+  return { observe, read: read3, reset };
 }
 
 // src/client/diagnostic_overlays.js
@@ -207156,7 +207166,7 @@ function createWalletDisplay() {
     running2 = false;
     initialized = true;
   }
-  function read2(time3) {
+  function read3(time3) {
     if (!running2) return value2;
     const t = Math.max(0, Math.min(1, (time3 - started) / 420));
     if (t === 1) {
@@ -207175,16 +207185,16 @@ function createWalletDisplay() {
     value2 = digits;
     return value2;
   }
-  return Object.freeze({ read: read2, observe(a, time3, { reset = false, pending = false } = {}) {
+  return Object.freeze({ read: read3, observe(a, time3, { reset = false, pending = false } = {}) {
     if (!initialized || reset || compareAmount(a, authority) < 0) {
       snap2(a);
       return;
     }
-    read2(time3);
+    read3(time3);
     if (a !== authority && !pending) snap2(a);
     else authority = a;
   }, settle(time3) {
-    read2(time3);
+    read3(time3);
     from = value2;
     target = authority;
     started = time3;
@@ -222911,7 +222921,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     prepare: () => renderer.prepare(port.getReadModel(), environment.performance.now(), input),
     resetActorPresentation: renderer.resetActors,
     /* a tick inside a drawn frame's batch: only the heroes' positions, no screen view */
-    observeHeroes: (tick, read2) => renderer.observeActorsLight(tick, environment.performance.now(), read2),
+    observeHeroes: (tick, read3) => renderer.observeActorsLight(tick, environment.performance.now(), read3),
     pollInput: () => {
       const model = port.getReadModel();
       renderer.observeActors(model, environment.performance.now());
@@ -223269,6 +223279,129 @@ function createDiagnosticDownloadD9({ environment, document: document2, runtimeI
   return Object.freeze({ download, copy: copy4 });
 }
 
+// src/client/session_blackbox_v1.js
+var BLACKBOX_KEY = "saq-blackbox-v1";
+var BLACKBOX_LAST_KEY = "saq-blackbox-last-v1";
+var BLACKBOX_VERSION = "session-blackbox-v1";
+var parse2 = (text3) => {
+  try {
+    const v = JSON.parse(text3 ?? "null");
+    return v && v.version === BLACKBOX_VERSION ? v : null;
+  } catch {
+    return null;
+  }
+};
+var read2 = (storage, key4) => {
+  try {
+    return parse2(storage?.getItem(key4));
+  } catch {
+    return null;
+  }
+};
+function readLastSessionV1(storage, channel2 = "") {
+  return read2(storage, channel2 + BLACKBOX_LAST_KEY);
+}
+function lastSessionLineV1(last, format = (t) => new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })) {
+  if (!last) return "No earlier session on this device.";
+  const mins = Math.max(0, Math.floor((last.at - last.startedAt) / 6e4)), span3 = mins < 1 ? "under a minute" : mins + " min";
+  return (last.ended === "unexpected" ? "Ended without warning at " : "Closed at ") + format(last.at) + " after " + span3 + " of play";
+}
+function startBlackboxV1({ environment: env, storage, channel: channel2 = "", readSnapshot, build: build2 = "", everyMs = 15e3, now: now3 = () => Date.now() }) {
+  const key4 = channel2 + BLACKBOX_KEY, lastKey = channel2 + BLACKBOX_LAST_KEY;
+  const prior = read2(storage, key4);
+  let last = readLastSessionV1(storage, channel2);
+  if (prior) {
+    last = { ...prior, ended: prior.clean ? "closed" : "unexpected" };
+    try {
+      storage?.setItem(lastKey, JSON.stringify(last));
+    } catch {
+      try {
+        storage?.setItem(lastKey, JSON.stringify({ ...last, snapshot: null }));
+      } catch {
+      }
+    }
+  }
+  const record2 = { version: BLACKBOX_VERSION, build: build2, startedAt: now3(), at: now3(), clean: false, exit: null, writes: 0, errors: [], notes: [], snapshot: null };
+  const write4 = () => {
+    record2.at = now3();
+    record2.writes++;
+    let text3;
+    try {
+      text3 = JSON.stringify(record2);
+    } catch {
+      return false;
+    }
+    try {
+      storage?.setItem(key4, text3);
+      return true;
+    } catch {
+      try {
+        storage?.setItem(key4, JSON.stringify({ ...record2, snapshot: null }));
+        return true;
+      } catch {
+        return false;
+      }
+    }
+  };
+  const flush = () => {
+    try {
+      record2.snapshot = readSnapshot?.() ?? null;
+    } catch (e) {
+      record2.snapshot = { error: String(e?.message ?? e) };
+    }
+    return write4();
+  };
+  const push = (list, entry2) => {
+    list.push({ at: now3(), ...entry2 });
+    if (list.length > 12) list.shift();
+  };
+  const note2 = (text3) => {
+    push(record2.notes, { text: String(text3).slice(0, 200) });
+    write4();
+  };
+  const doc = env.document, hidden = () => doc?.visibilityState === "hidden";
+  const closing = (why) => () => {
+    record2.clean = true;
+    record2.exit = why;
+    write4();
+  };
+  const onHide = closing("pagehide"), onVisibility = () => {
+    if (hidden()) {
+      record2.clean = true;
+      record2.exit = "hidden";
+    } else {
+      record2.clean = false;
+      record2.exit = null;
+    }
+    write4();
+  };
+  const onError = (e) => {
+    push(record2.errors, { message: String(e?.message ?? e?.reason?.message ?? e?.reason ?? "error").slice(0, 300), source: e?.filename ? String(e.filename).split("/").pop() + ":" + e.lineno : void 0 });
+    write4();
+  };
+  env.addEventListener?.("pagehide", onHide);
+  doc?.addEventListener?.("visibilitychange", onVisibility);
+  env.addEventListener?.("error", onError);
+  env.addEventListener?.("unhandledrejection", onError);
+  write4();
+  const timer = env.setInterval?.(() => {
+    if (!hidden()) flush();
+  }, everyMs) ?? null;
+  return Object.freeze({
+    last,
+    note: note2,
+    flush,
+    record: () => record2,
+    stop() {
+      if (timer !== null) env.clearInterval?.(timer);
+      env.removeEventListener?.("pagehide", onHide);
+      doc?.removeEventListener?.("visibilitychange", onVisibility);
+      env.removeEventListener?.("error", onError);
+      env.removeEventListener?.("unhandledrejection", onError);
+    }
+  });
+}
+
 // src/client/activity_save_bridge.js
 function createActivitySaveBridge(worker, { record: record2 = () => {
 }, now: now3 = null, expectedDatabaseName = null } = {}) {
@@ -223506,7 +223639,7 @@ var chunkDeltaKeyD9 = (address3, sha256) => pageDigest({ version: "world-chunk-k
 function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.dirtyPages, now: now3 = () => Date.now() }) {
   const staged = /* @__PURE__ */ new Map(), stagedAt = /* @__PURE__ */ new Map(), ownedRows = /* @__PURE__ */ new WeakSet();
   let rowValidations = 0, checkpointReuses = 0;
-  const read2 = async (id2) => staged.get(id2)?.value ?? readPage(id2);
+  const read3 = async (id2) => staged.get(id2)?.value ?? readPage(id2);
   const ownRow = (p) => {
     const row2 = freezeWire(p);
     if (row2 && typeof row2 === "object") ownedRows.add(row2);
@@ -223532,21 +223665,21 @@ function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.d
   }
   async function readChunk(root6, address3) {
     if (!root6) return null;
-    const tx = createPageTransaction({ root: root6, readPage: read2, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address3, sha256));
+    const tx = createPageTransaction({ root: root6, readPage: read3, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address3, sha256));
     if (!ref) return null;
     requireContract(ref.version === "world-page-ref-d9-v1", "Chunk index reference version");
-    const doc = await read2(ref.pageId);
+    const doc = await read3(ref.pageId);
     requireContract(doc && await pageDigest(doc, sha256) === ref.pageId && doc.kind === "chunk-delta", "Missing/corrupt chunk delta");
     requireContract(doc.payload.chunkX === address3.chunkX && doc.payload.chunkY === address3.chunkY, "Chunk delta address mismatch");
     return copyWire(doc.payload);
   }
   async function prepareChunk(root6, delta3) {
-    const doc = worldDocument("chunk-delta", delta3), pageId = await pageDigest(doc, sha256), tx = createPageTransaction({ root: root6, readPage: read2, sha256 });
+    const doc = worldDocument("chunk-delta", delta3), pageId = await pageDigest(doc, sha256), tx = createPageTransaction({ root: root6, readPage: read3, sha256 });
     await tx.set(await chunkDeltaKeyD9(delta3, sha256), { version: "world-page-ref-d9-v1", pageId });
     return { expectedRoot: root6, root: tx.root(), pages: [{ id: pageId, value: doc }, ...tx.pages()] };
   }
   return {
-    readPage: read2,
+    readPage: read3,
     readChunk,
     prepareChunk,
     stage: stage2,
@@ -223728,7 +223861,7 @@ function captureGroundCoverageQueryV1(state2) {
 }
 async function prepareGroundCoverageQueryV1(query, { readPage, sha256, stagedPages = [], yieldTask = () => new Promise((resolve) => setTimeout(resolve, 0)) }) {
   const staged = new Map(stagedPages.map((p) => [p.id, p.value])), reads = /* @__PURE__ */ new Map();
-  const read2 = (id2) => {
+  const read3 = (id2) => {
     if (!reads.has(id2)) {
       if (reads.size >= 1024) {
         const e = new Error("Optional ground query page-work limit");
@@ -223746,7 +223879,7 @@ async function prepareGroundCoverageQueryV1(query, { readPage, sha256, stagedPag
   requireContract(query.root === state2.d9World.groundIndex, "Ground query root mismatch");
   for (const p of Object.values(state2.playersById)) {
     const window2 = groundOccupancyWindowD9(state2, p, D9_RUNTIME_POLICY.occupancyRadius);
-    const rows = await readParticipantGroundWindowD9(state2, p, { readPage: read2, sha256, radius: D9_RUNTIME_POLICY.occupancyRadius, center: window2.center });
+    const rows = await readParticipantGroundWindowD9(state2, p, { readPage: read3, sha256, radius: D9_RUNTIME_POLICY.occupancyRadius, center: window2.center });
     const points2 = [];
     for (let i = 0; i < rows.length; i += 128) points2.push(rows.slice(i, i + 128).map((row2) => copyWire(row2.row.location.position)));
     coverage.push({ playerId: p.playerId, spaceInstanceId: state2.entitiesById[p.entityId].residency.spaceInstanceId, ...window2, radius: D9_RUNTIME_POLICY.occupancyRadius, points: points2 });
@@ -228217,7 +228350,7 @@ qrcode.stringToBytes = function(s) {
 qrcode.createStringToBytes = function(unicodeData, numChars) {
   const unicodeMap = (function() {
     const bin = base64DecodeInputStream(unicodeData);
-    const read2 = function() {
+    const read3 = function() {
       const b = bin.read();
       if (b == -1) throw "eof";
       return b;
@@ -228227,9 +228360,9 @@ qrcode.createStringToBytes = function(unicodeData, numChars) {
     while (true) {
       const b0 = bin.read();
       if (b0 == -1) break;
-      const b1 = read2();
-      const b2 = read2();
-      const b3 = read2();
+      const b1 = read3();
+      const b2 = read3();
+      const b3 = read3();
       const k = String.fromCharCode(b0 << 8 | b1);
       const v = b2 << 8 | b3;
       unicodeMap2[k] = v;
@@ -230409,7 +230542,7 @@ var minus = (a, b) => {
 };
 var any = (f) => GROUPS.some((g) => Object.keys(f[g]).length);
 function createPartyPlayV1({ environment, storage, channel: channel2, worldId, session, readModel, showCard, heroName = null }) {
-  const read2 = () => partyById(storage, channel2, worldId), update = (fn) => updatePartyWorld(storage, channel2, worldId, fn);
+  const read3 = () => partyById(storage, channel2, worldId), update = (fn) => updatePartyWorld(storage, channel2, worldId, fn);
   async function apply3(change) {
     for (let i = 0; i < 120; i++) {
       const r = await session.coop.partyFacts(change);
@@ -230430,7 +230563,7 @@ function createPartyPlayV1({ environment, storage, channel: channel2, worldId, s
     return f;
   }
   function openCard(review = false) {
-    const w = read2();
+    const w = read3();
     if (card || !w || !(offerCount(w) || review && offerCount(w, "skipped"))) return false;
     card = showCard({
       world: w,
@@ -230454,7 +230587,7 @@ function createPartyPlayV1({ environment, storage, channel: channel2, worldId, s
     // Once the world is up: things done together go in, then the card shows if friends left anything.
     async begin() {
       if (heroName) update((w) => noteMemberV1(w, heroName));
-      const t = read2()?.together;
+      const t = read3()?.together;
       if (t && any(t)) {
         try {
           await apply3({ add: { finds: Object.keys(t.finds), clears: Object.keys(t.clears) } });
@@ -230484,18 +230617,18 @@ function createPartyPlayV1({ environment, storage, channel: channel2, worldId, s
     },
     review: () => openCard(true),
     async undo() {
-      const w = read2();
+      const w = read3();
       if (!w?.last) return false;
       await apply3({ remove: w.last.added });
       update((x) => noteUndoneV1(x));
       observe();
       return true;
     },
-    info: read2
+    info: read3
   });
 }
 function createPartyGuestV1({ storage, channel: channel2, worldId, readModel, hostName, send }) {
-  const read2 = () => partyById(storage, channel2, worldId), update = (fn) => updatePartyWorld(storage, channel2, worldId, fn);
+  const read3 = () => partyById(storage, channel2, worldId), update = (fn) => updatePartyWorld(storage, channel2, worldId, fn);
   let base3 = null, sent = false;
   return Object.freeze({
     observe() {
@@ -230503,7 +230636,7 @@ function createPartyGuestV1({ storage, channel: channel2, worldId, readModel, ho
       if (!f) return;
       if (!sent) {
         sent = true;
-        const mine2 = read2()?.mine;
+        const mine2 = read3()?.mine;
         if (mine2) send({ t: "facts", id: worldId, facts: mine2 });
       }
       if (!base3) {
@@ -231146,6 +231279,30 @@ async function startWorldClient(environment) {
   };
   const performanceSnapshot = () => ({ runtimeId: runtimeFingerprint.manifestRuntimeId ?? runtimeId, runtimeFingerprint, browserLoop: loopHealth.inspect(), authorityDelivery: authorityDelivery?.inspect() ?? null, capturedAt: (/* @__PURE__ */ new Date()).toISOString(), captureContext: capturePerformanceContextV1(environment, { batteryPresentation }), case: proofCase, ...performanceProbe?.snapshot() ?? {}, fatalIncident: session.fatalDiagnostic?.() ?? null, activity: inspect(() => session.resources?.() ?? null), presentation: inspect(() => client?.resources?.() ?? null) });
   const diagnosticDownload = createDiagnosticDownloadD9({ environment, document: environment.document, runtimeId, readPayload: performanceSnapshot });
+  {
+    let blackbox = null;
+    try {
+      blackbox = startBlackboxV1({ environment, storage: deviceStorage, channel: channel2, readSnapshot: performanceSnapshot, build: runtimeId });
+    } catch {
+    }
+    if (blackbox?.last) {
+      const b = environment.document.createElement("button");
+      b.type = "button";
+      b.id = "world-last-session-download";
+      b.hidden = true;
+      b.dataset.line = lastSessionLineV1(blackbox.last);
+      b.dataset.ended = blackbox.last.ended;
+      const lastDownload = createDiagnosticDownloadD9({ environment, document: environment.document, runtimeId: blackbox.last.build || runtimeId, readPayload: () => blackbox.last });
+      b.onclick = () => lastDownload.download("last-session");
+      environment.document.body.append(b);
+      if (blackbox.last.ended === "unexpected") environment.setTimeout(() => {
+        try {
+          toastV1(environment.document, { kind: "event", title: "Your browser reloaded the game", sub: "A record is in Settings", key: "blackbox", ms: 8e3 });
+        } catch {
+        }
+      }, 6e3);
+    }
+  }
   const fatalDownload = environment.document.getElementById("world-gate-download");
   if (fatalDownload) fatalDownload.onclick = () => diagnosticDownload.download("fatal");
   const fatalCopy = environment.document.getElementById("world-gate-copy");
