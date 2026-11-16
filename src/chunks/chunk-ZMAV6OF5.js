@@ -24014,6 +24014,7 @@ function validateSiteRunEpisodesD13B(state) {
   }
   return true;
 }
+var siteClearIsSavedV1 = (record, lastSavedTick) => Boolean(record && record.status === "cleared" && record.clearedTick !== null && record.clearedTick !== void 0 && Number(lastSavedTick) >= Number(record.clearedTick));
 function validateSiteRunEpisodeProgressD13B(before, after) {
   if (before.campaign.siteRunEpisodesById === void 0) return true;
   const older = before.campaign.siteRunEpisodesById, newer = after.campaign.siteRunEpisodesById;
@@ -24027,7 +24028,7 @@ function validateSiteRunEpisodeProgressD13B(before, after) {
       if (record.startedTick !== null) requireContract(next.startedTick === record.startedTick, "Site episode start changed");
       if (record.clearedTick !== null) requireContract(next.clearedTick === record.clearedTick, "Site episode clearance changed");
     } else {
-      requireContract(next.episode === record.episode + 1 && record.status === "cleared" && next.status === "unstarted" && next.episodeSeed === deriveSiteRunEpisodeSeedD13B(worldSeedHex(after), siteId2, next.episode), "Invalid site reset advancement");
+      requireContract(next.episode === record.episode + 1 && record.status === "cleared" && next.episodeSeed === deriveSiteRunEpisodeSeedD13B(worldSeedHex(after), siteId2, next.episode), "Invalid site reset advancement");
       requireContract(next.lastReset?.fromEpisode === record.episode && next.lastReset?.toEpisode === next.episode && next.lastReset.resetTick >= before.tick, "Site reset lacks authority receipt");
       const receipt = next.completionHistory.at(-1);
       requireContract(receipt?.episode === record.episode && receipt.previousCommitment === chainHead(record) && receipt.commitment === next.lastReset.retiredReceiptCommitment, "Site reset history chain drift");
@@ -32352,6 +32353,7 @@ export {
   resolveSiteRunEpisodeD13B,
   siteResetTransitionsD13C,
   validateSiteRunEpisodesD13B,
+  siteClearIsSavedV1,
   validateSiteRunEpisodeProgressD13B,
   siteEnterPointV1,
   functionalSitesD10,

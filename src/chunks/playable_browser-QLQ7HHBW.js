@@ -921,6 +921,7 @@ import {
   shopkeeperCastV1,
   signedAddress,
   siteBossDoorV1,
+  siteClearIsSavedV1,
   siteClearXpV2,
   siteEndRoleV1,
   siteEndSpecV1,
@@ -1117,7 +1118,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-UH6AJRMA.js";
+} from "./chunk-ZMAV6OF5.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -227491,15 +227492,27 @@ async function createLocalEndlessSessionD9(options) {
     if (siteResetting) return;
     siteResetting = true;
     try {
+      let unsaved = false;
       const siteId = authority.withAuthority((a) => a.withAuthorityState((s) => {
-        for (const id2 of Object.keys(s.d9World?.functionalSitesById ?? {})) if (resolveSiteRunEpisodeD13B(s, id2)?.status === "cleared" && siteResetEligibilityD13C(s, id2, { transitioningPlayerIds: transitioningPlayersForSiteD13C(authority.readGateway(), id2) }).eligible) return id2;
+        for (const id2 of Object.keys(s.d9World?.functionalSitesById ?? {})) {
+          const record2 = resolveSiteRunEpisodeD13B(s, id2);
+          if (record2?.status !== "cleared" || !siteResetEligibilityD13C(s, id2, { transitioningPlayerIds: transitioningPlayersForSiteD13C(authority.readGateway(), id2) }).eligible) continue;
+          if (durabilityFailed || !siteClearIsSavedV1(record2, lastSavedTick)) {
+            unsaved = true;
+            continue;
+          }
+          return id2;
+        }
         return null;
       }));
-      if (!siteId) return;
+      if (!siteId) {
+        if (unsaved && !durabilityFailed && savePhase === "idle") void save();
+        return;
+      }
       await stream.settled();
       if (functionalCommands.busy() || authority.getStatus().phase !== "ready") return;
       const snapshot = authority.withAuthority((a) => a.withAuthorityState(copyWire)), transitioningPlayerIds = transitioningPlayersForSiteD13C(authority.readGateway(), siteId);
-      if (!siteResetEligibilityD13C(snapshot, siteId, { transitioningPlayerIds }).eligible) return;
+      if (!siteResetEligibilityD13C(snapshot, siteId, { transitioningPlayerIds }).eligible || durabilityFailed || savePhase !== "idle" || !siteClearIsSavedV1(resolveSiteRunEpisodeD13B(snapshot, siteId), lastSavedTick)) return;
       const plan = await prepareSiteResetD13C(snapshot, siteId, { sha256, transitioningPlayerIds, playerId: localPlayerId });
       const landed2 = authority.withReadyAuthority((a) => {
         let ok = false;

@@ -23655,7 +23655,7 @@ function validateSiteRunEpisodeProgressD13B(before, after) {
       if (record2.startedTick !== null) requireContract(next.startedTick === record2.startedTick, "Site episode start changed");
       if (record2.clearedTick !== null) requireContract(next.clearedTick === record2.clearedTick, "Site episode clearance changed");
     } else {
-      requireContract(next.episode === record2.episode + 1 && record2.status === "cleared" && next.status === "unstarted" && next.episodeSeed === deriveSiteRunEpisodeSeedD13B(worldSeedHex(after), siteId2, next.episode), "Invalid site reset advancement");
+      requireContract(next.episode === record2.episode + 1 && record2.status === "cleared" && next.episodeSeed === deriveSiteRunEpisodeSeedD13B(worldSeedHex(after), siteId2, next.episode), "Invalid site reset advancement");
       requireContract(next.lastReset?.fromEpisode === record2.episode && next.lastReset?.toEpisode === next.episode && next.lastReset.resetTick >= before.tick, "Site reset lacks authority receipt");
       const receipt = next.completionHistory.at(-1);
       requireContract(receipt?.episode === record2.episode && receipt.previousCommitment === chainHead(record2) && receipt.commitment === next.lastReset.retiredReceiptCommitment, "Site reset history chain drift");
