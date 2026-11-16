@@ -23427,7 +23427,7 @@ function validateSalvage(p, s, validateCommand2) {
     requireContract(item.itemId === id && item.ownerPlayerId === p.playerId && item.sourceEntityId !== null && !inv.itemsById[id] && !inv.renewal.groundBySourceId[item.sourceEntityId], "Salvage terminal ownership");
     requireContract(!Object.values(inv.subweapons.claims).some((c) => c.sourceEntityId === item.sourceEntityId), "Provision salvaged");
     if (servicePurchase(p, item.sourceEntityId)) validateServiceItem(s, p, item);
-    else if (item.generated) validateGeneratedGear(item.generated, gearSeed(s, p, item.sourceEntityId), item.generated.contentDepth);
+    else if (item.generated && r.origin?.carried === void 0) validateGeneratedGear(item.generated, gearSeed(s, p, item.sourceEntityId), item.generated.contentDepth);
     if (r.reward) requireContract(r.reward.sourceEntityId === item.sourceEntityId && r.reward.claimed && r.reward.definitionId === item.definitionId && same17(r.reward.generated ?? null, item.generated ?? null) && r.reward.pickup?.authorityOrder < r.authorityOrder, "Salvage reward ancestry");
     const quote = salvageQuote(p, item);
     requireContract(same17(r.materials, quote.materials) && (r.command.kind === "service.modify" && r.command.payload.operation === "shatter" || r.command.payload.fingerprint === quote.fingerprint) && r.command.payload.itemId === id, "Salvage quote mismatch");
