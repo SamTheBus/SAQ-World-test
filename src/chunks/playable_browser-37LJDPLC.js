@@ -1116,7 +1116,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-RVQEYKGT.js";
+} from "./chunk-UYVT4RMG.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -111767,7 +111767,7 @@ var STILL_TICKS = 60;
 var MAX_THROW_TARGETS = 5;
 var RIPOSTE_TICKS = 90;
 var KEEN_TICKS = 300;
-var EVADE_TICKS = 120;
+var EVADE_TICKS = 180;
 var SMOKE_TICKS = 240;
 var SMOKE_MAX = 420;
 var WALL_TICKS = 300;
@@ -111819,7 +111819,7 @@ var CUT_GAP_TICKS = 5;
 var MAX_CUTS = 16;
 var FLOWER_TICKS = 300;
 var ECHO_TICKS = 30;
-var STEPPED_TICKS = 120;
+var STEPPED_TICKS = 180;
 var METEOR_FALL_TICKS = 60;
 var METEOR_FALL_MAX = 80;
 var METEOR_GROUND_TICKS = 240;
