@@ -222650,7 +222650,7 @@ function transitioningPlayersForSiteD13C(gateway, siteId) {
   return [...new Set(players)].sort();
 }
 function siteResetEligibilityD13C(state2, siteId, { transitioningPlayerIds = [] } = {}) {
-  const site = state2.d9World?.functionalSitesById?.[siteId] ?? null, reservation = state2.d9World?.siteReservationsById?.[siteId] ?? null, episode = resolveSiteRunEpisodeD13B(state2, siteId), occupants = site ? siteOccupantsD13C(state2, siteId, { connectedOnly: false }) : [], reasons = [];
+  const site = state2.d9World?.functionalSitesById?.[siteId] ?? null, reservation = state2.d9World?.siteReservationsById?.[siteId] ?? null, episode = resolveSiteRunEpisodeD13B(state2, siteId), occupants = site ? siteOccupantsD13C(state2, siteId, { connectedOnly: false, interiorOnly: true }) : [], reasons = [];
   if (!siteSupportsResetD13C(state2, siteId)) reasons.push(!site && reservation?.packageId === "woodland-cave-family" ? "site-not-activated" : "site-family-not-resettable");
   if (!episode) reasons.push("episode-unavailable");
   else if (episode.status !== "cleared") reasons.push(`episode-${episode.status}`);
