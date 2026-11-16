@@ -138298,6 +138298,29 @@ function seatComparable(s, kept, party4, room) {
     for (const e of Object.values(w.episodes ?? {})) e.snapshot?.participants?.sort((x, y) => canonicalStringify(x).localeCompare(canonicalStringify(y)));
   }
   for (const g of Object.values(c.encounterEconomy?.groups ?? {})) for (const r of Object.values(g.usedResources ?? {})) if (r.playerIds) r.playerIds = r.playerIds.map(mark).sort();
+  if (w?.worldEvents) {
+    const ply = (v) => typeof v === "string" && /^ply:/.test(v), walk = (v) => {
+      if (Array.isArray(v)) {
+        for (let i = 0; i < v.length; i++) {
+          if (ply(v[i])) v[i] = mark(v[i]);
+          else if (v[i] && typeof v[i] === "object") walk(v[i]);
+        }
+        if (v.length && v.every((x) => typeof x === "string")) v.sort();
+        return;
+      }
+      if (!v || typeof v !== "object") return;
+      for (const k of Object.keys(v)) {
+        const x = v[k];
+        if (ply(x)) v[k] = mark(x);
+        else if (x && typeof x === "object") walk(x);
+        if (ply(k) && !keep8(k)) {
+          v["?"] = v[k];
+          delete v[k];
+        }
+      }
+    };
+    walk(w.worldEvents);
+  }
   only(c.encounterEconomy?.outingsByPlayer);
   only(c.playerRespawnsById);
   only(c.playerRevivesById);
