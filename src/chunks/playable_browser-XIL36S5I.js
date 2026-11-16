@@ -166404,12 +166404,24 @@ function createFriendsViewV1({ document: document2, environment, friends, action
     b.append(h);
     return b;
   };
+  let inputs = [], waiting = false;
+  const typing = () => {
+    const a = document2.activeElement;
+    return Boolean(a) && inputs.includes(a);
+  };
+  const later = environment?.setTimeout ? (f, ms) => environment.setTimeout(f, ms) : (f, ms) => setTimeout(f, ms);
+  root6.addEventListener("focusout", () => {
+    if (waiting) later(() => {
+      if (waiting && !typing()) render();
+    }, 400);
+  });
   const input = (placeholder, max = 24) => {
     const i = el3("input");
     i.placeholder = placeholder;
     i.maxLength = max;
     i.autocomplete = "off";
     i.spellcheck = false;
+    inputs.push(i);
     return i;
   };
   const avatar = (name, cls = "") => el3("div", "fr-av" + (cls ? " " + cls : ""), (name || "?").slice(0, 1).toUpperCase());
@@ -166453,9 +166465,16 @@ function createFriendsViewV1({ document: document2, environment, friends, action
   }
   function render(force = false) {
     if (!shown2) return;
+    if (!force && typing()) {
+      waiting = true;
+      return;
+    }
+    waiting = false;
     const me = friends.me(), st = friends.state(), k = JSON.stringify([me, st, friends.mode(), friends.recent(), busy, status2, showBackup, removing, renaming, actions?.busy?.() ?? null]);
     if (!force && k === key4) return;
     key4 = k;
+    const typed = force ? null : new Map(inputs.filter((i) => i.value).map((i) => [i.placeholder, i.value]));
+    inputs = [];
     const cols = el3("div", "fr-cols"), left = el3("div", "fr-cols"), right = el3("div", "fr-cols");
     left.style.gridTemplateColumns = right.style.gridTemplateColumns = "1fr";
     const out4 = [];
@@ -166556,6 +166575,9 @@ function createFriendsViewV1({ document: document2, environment, friends, action
     const s = el3("p", "fr-status", status2 || (me && st.error ? st.error : ""));
     s.setAttribute("aria-live", "polite");
     root6.replaceChildren(s, ...out4);
+    if (typed) {
+      for (const i of inputs) if (typed.has(i.placeholder)) i.value = typed.get(i.placeholder);
+    }
   }
   const off = friends.subscribe(() => render());
   return Object.freeze({
