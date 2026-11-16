@@ -6286,7 +6286,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "barrow_king",
     "grassland",
-    "Once every 4 s, the third hit of your combo is a Grave Cleave: the ground splits all around you and earth slabs heave up, hitting every enemy near you for {0} of your Attack and setting them burning with ghostfire.",
+    "Once every 4 s, the third hit of your combo is a Grave Cleave: the ground splits all around you and earth slabs heave up, hitting every enemy near you for {0} of your Attack.",
     "Kneel. The barrow is patient."
   ),
   unique(
@@ -6310,7 +6310,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "barrow_king",
     "grassland",
-    "Once every 4 s, Cast also throws the Crown Flame: the King's fire skull arcs onto the nearest enemy ahead and bursts for {0} of your Attack, leaving the grave earth there burning for 3 s.",
+    "Once every 4 s, Cast also throws the Crown Flame: the King's fire skull arcs onto the nearest enemy ahead and bursts for {0} of your Attack, leaving the grave earth there burning for 3 s. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
     "The crown burns colder than gold."
   ),
   unique(
@@ -6335,7 +6335,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "sun_pharaoh",
     "desert",
-    "Each block with Guard stores sunlight, up to {0}. Shield Bash releases it as a beam that burns everything in a line.",
+    "Each block with Guard stores sunlight, up to {0}. Shield Bash sends it back as a beam that hits everything in a line.",
     "Look upon it. Then look away."
   ),
   unique(
@@ -6347,7 +6347,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "sun_pharaoh",
     "desert",
-    "Dash and Lunge leave a trail of sunfire behind you for {0}. Enemies who cross it burn.",
+    "Dash and Lunge leave a trail of scorpion venom behind you for {0}. Enemies who cross it are poisoned.",
     "Every step, a sunrise."
   ),
   unique(
@@ -6359,7 +6359,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "sun_pharaoh",
     "desert",
-    "Every {0} Cast calls Sunfall: three suns strike around the target.",
+    "Every {0} Cast calls Sunfall: three suns strike around the target and set enemies burning. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
     "Noon, three times over."
   ),
   unique(
@@ -6408,7 +6408,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "arachnid_treant",
     "tropical",
-    "Every 4th Cast lobs a silk glob too. It bursts for {0} of your Attack and leaves a web for 3 s that slows enemies in it by 60% (not bosses).",
+    "Every 4th Cast lobs a silk glob too. It bursts for {0} of your Attack and leaves a web for 3 s that slows enemies in it by 60% (not bosses). With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
     "Spun in the dark between its roots."
   ),
   unique(
@@ -6445,7 +6445,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "overlord_iron_vault",
     "volcanic",
-    "Every 4th crit plants a vent under the enemy. It boils for 1 s, then erupts in a cross of lava that hits every enemy along its arms for {0} of your Attack and sets them burning.",
+    "Every 4th crit plants a vent under the enemy. It boils for 1 s, then erupts in a cross of sulfur gas that hits every enemy along its arms for {0} of your Attack and poisons them.",
     "Cut deep enough and the ground bleeds too."
   ),
   unique(
@@ -6457,7 +6457,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "overlord_iron_vault",
     "volcanic",
-    "Blink primes the wand: your next Cast within 3 s becomes a Core Blast, a lance of molten fire through every enemy in a line for {0} of your Attack. It leaves a burning strip on the ground for 2 s.",
+    "Blink primes the wand: your next Cast within 3 s becomes a Core Blast, a lance of molten fire through every enemy in a line for {0} of your Attack. It leaves a burning strip on the ground for 2 s. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
     "A coal from its chest, still burning."
   ),
   unique(
@@ -6507,7 +6507,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "aegis_goliath",
     "upland",
-    "Three spirit shields circle you. Each one takes a hit meant for you, then breaks in a burst of spirit light that hits the enemies near you for {0} of your Attack. A broken shield comes back after 6 s.",
+    "Three spirit shields circle you. Each one takes a hit meant for you, then breaks in a burst of spirit light that hits the enemies near you for {0} of your Attack. A broken shield comes back after 6 s. With a tome, each shield takes one of its elements: Fire burns, Frost chills, Lightning shocks.",
     "Three oaths, still sworn."
   ),
   unique(
@@ -6607,7 +6607,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "nightmare_frog",
     null,
-    "Every 4th Cast lobs a frog-spawn egg instead. A moment later it hatches into an Eyehopper that hops at the nearest enemy and pops for {0} of your Attack, giving it heavy legs (30% slower) for 2 s.",
+    "Every 4th Cast lobs a frog-spawn egg instead. A moment later it hatches into an Eyehopper that hops at the nearest enemy and pops for {0} of your Attack, giving it heavy legs (30% slower) for 2 s. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
     "They all love you. They all burst."
   ),
   unique(
@@ -6819,8 +6819,8 @@ var UNIQUE_TIERS = freezeWire({
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
 var UNIQUE_LINES_V3 = freezeWire({
-  "sunshield": { always: "block", pool: ["skillDmg:shield_bash", "rangedDmg", "ailmentDur", "ailingDmg", "perfectDmg", "defCdr"], leg: ["maxPip"] },
-  "pharaoh-khopesh": { always: "moveCdr", pool: ["mainDmg", "areaDmg", "ailingDmg", "ailmentDur", "critDamage", "eliteDmg"], leg: ["killCdr"] },
+  "sunshield": { always: "block", pool: ["skillDmg:shield_bash", "rangedDmg", "counterDmg", "ailingDmg", "perfectDmg", "defCdr"], leg: ["maxPip"] },
+  "pharaoh-khopesh": { always: "moveCdr", pool: ["poisonDmg", "areaDmg", "ailingDmg", "ailmentDur", "critDamage", "eliteDmg"], leg: ["killCdr"] },
   "undying-sun-staff": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "bonusAreaRadius", "critChance", "areaDmg", "eliteDmg"], leg: ["killCdr"] },
   "eye-of-the-sun": { always: "ailmentDur", pool: ["atkPct", "critChance", "ailingDmg", "areaDmg", "eliteDmg", "lifeHit"], leg: ["maxPip"] },
   // Treant set (Sammy 2026-11-12): Barkheart's +1 goes to the Bastion branch.
@@ -6830,11 +6830,11 @@ var UNIQUE_LINES_V3 = freezeWire({
   "cocoonsilk": { always: "ccDmg", pool: ["atkPct", "critChance", "lifeHit", "closeDmg", "keepPip", "areaDmg", "sigDmg"], leg: [] },
   // Brimstone set (Sammy 2026-11-12).
   "slagmaul": { always: "fireDmg", pool: ["mainDmg", "areaDmg", "closeDmg", "ailmentDur", "ailingDmg", "str"], leg: ["maxPip"] },
-  "ventcutter": { always: "critDamage", pool: ["critChance", "fireDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
+  "ventcutter": { always: "critDamage", pool: ["critChance", "poisonDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
   "coreheart": { always: "fireDmg", pool: ["rangedDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
   // Barrow King set (set page AJnYRRRF..., Sammy 2026-11-14).
-  "gravecleaver": { always: "areaDmg", pool: ["mainDmg", "fireDmg", "critDamage", "ailingDmg", "eliteDmg", "maxHpPct"], leg: ["branchRank:breaker"] },
+  "gravecleaver": { always: "areaDmg", pool: ["mainDmg", "shockDmg", "critDamage", "ailingDmg", "eliteDmg", "maxHpPct"], leg: ["branchRank:breaker"] },
   "wightfang": { always: "controlDur", pool: ["offDmg", "critChance", "ailmentDur", "ailingDmg", "parry", "eliteDmg"], leg: ["killCdr"] },
   "crownflame-scepter": { always: "fireDmg", pool: ["mainDmg", "bonusAreaRadius", "critChance", "activeSpd", "areaDmg", "eliteDmg"], leg: ["maxPip"] },
   "barrowshroud": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },

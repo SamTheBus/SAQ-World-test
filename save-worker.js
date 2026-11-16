@@ -15238,7 +15238,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "barrow_king",
     "grassland",
-    "Once every 4 s, the third hit of your combo is a Grave Cleave: the ground splits all around you and earth slabs heave up, hitting every enemy near you for {0} of your Attack and setting them burning with ghostfire.",
+    "Once every 4 s, the third hit of your combo is a Grave Cleave: the ground splits all around you and earth slabs heave up, hitting every enemy near you for {0} of your Attack.",
     "Kneel. The barrow is patient."
   ),
   unique(
@@ -15262,7 +15262,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "barrow_king",
     "grassland",
-    "Once every 4 s, Cast also throws the Crown Flame: the King's fire skull arcs onto the nearest enemy ahead and bursts for {0} of your Attack, leaving the grave earth there burning for 3 s.",
+    "Once every 4 s, Cast also throws the Crown Flame: the King's fire skull arcs onto the nearest enemy ahead and bursts for {0} of your Attack, leaving the grave earth there burning for 3 s. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
     "The crown burns colder than gold."
   ),
   unique(
@@ -15287,7 +15287,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "sun_pharaoh",
     "desert",
-    "Each block with Guard stores sunlight, up to {0}. Shield Bash releases it as a beam that burns everything in a line.",
+    "Each block with Guard stores sunlight, up to {0}. Shield Bash sends it back as a beam that hits everything in a line.",
     "Look upon it. Then look away."
   ),
   unique(
@@ -15299,7 +15299,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "sun_pharaoh",
     "desert",
-    "Dash and Lunge leave a trail of sunfire behind you for {0}. Enemies who cross it burn.",
+    "Dash and Lunge leave a trail of scorpion venom behind you for {0}. Enemies who cross it are poisoned.",
     "Every step, a sunrise."
   ),
   unique(
@@ -15311,7 +15311,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "sun_pharaoh",
     "desert",
-    "Every {0} Cast calls Sunfall: three suns strike around the target.",
+    "Every {0} Cast calls Sunfall: three suns strike around the target and set enemies burning. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
     "Noon, three times over."
   ),
   unique(
@@ -15360,7 +15360,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "arachnid_treant",
     "tropical",
-    "Every 4th Cast lobs a silk glob too. It bursts for {0} of your Attack and leaves a web for 3 s that slows enemies in it by 60% (not bosses).",
+    "Every 4th Cast lobs a silk glob too. It bursts for {0} of your Attack and leaves a web for 3 s that slows enemies in it by 60% (not bosses). With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
     "Spun in the dark between its roots."
   ),
   unique(
@@ -15397,7 +15397,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "overlord_iron_vault",
     "volcanic",
-    "Every 4th crit plants a vent under the enemy. It boils for 1 s, then erupts in a cross of lava that hits every enemy along its arms for {0} of your Attack and sets them burning.",
+    "Every 4th crit plants a vent under the enemy. It boils for 1 s, then erupts in a cross of sulfur gas that hits every enemy along its arms for {0} of your Attack and poisons them.",
     "Cut deep enough and the ground bleeds too."
   ),
   unique(
@@ -15409,7 +15409,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "overlord_iron_vault",
     "volcanic",
-    "Blink primes the wand: your next Cast within 3 s becomes a Core Blast, a lance of molten fire through every enemy in a line for {0} of your Attack. It leaves a burning strip on the ground for 2 s.",
+    "Blink primes the wand: your next Cast within 3 s becomes a Core Blast, a lance of molten fire through every enemy in a line for {0} of your Attack. It leaves a burning strip on the ground for 2 s. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
     "A coal from its chest, still burning."
   ),
   unique(
@@ -15459,7 +15459,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "aegis_goliath",
     "upland",
-    "Three spirit shields circle you. Each one takes a hit meant for you, then breaks in a burst of spirit light that hits the enemies near you for {0} of your Attack. A broken shield comes back after 6 s.",
+    "Three spirit shields circle you. Each one takes a hit meant for you, then breaks in a burst of spirit light that hits the enemies near you for {0} of your Attack. A broken shield comes back after 6 s. With a tome, each shield takes one of its elements: Fire burns, Frost chills, Lightning shocks.",
     "Three oaths, still sworn."
   ),
   unique(
@@ -15559,7 +15559,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "nightmare_frog",
     null,
-    "Every 4th Cast lobs a frog-spawn egg instead. A moment later it hatches into an Eyehopper that hops at the nearest enemy and pops for {0} of your Attack, giving it heavy legs (30% slower) for 2 s.",
+    "Every 4th Cast lobs a frog-spawn egg instead. A moment later it hatches into an Eyehopper that hops at the nearest enemy and pops for {0} of your Attack, giving it heavy legs (30% slower) for 2 s. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
     "They all love you. They all burst."
   ),
   unique(
@@ -15771,8 +15771,8 @@ var UNIQUE_TIERS = freezeWire({
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
 var UNIQUE_LINES_V3 = freezeWire({
-  "sunshield": { always: "block", pool: ["skillDmg:shield_bash", "rangedDmg", "ailmentDur", "ailingDmg", "perfectDmg", "defCdr"], leg: ["maxPip"] },
-  "pharaoh-khopesh": { always: "moveCdr", pool: ["mainDmg", "areaDmg", "ailingDmg", "ailmentDur", "critDamage", "eliteDmg"], leg: ["killCdr"] },
+  "sunshield": { always: "block", pool: ["skillDmg:shield_bash", "rangedDmg", "counterDmg", "ailingDmg", "perfectDmg", "defCdr"], leg: ["maxPip"] },
+  "pharaoh-khopesh": { always: "moveCdr", pool: ["poisonDmg", "areaDmg", "ailingDmg", "ailmentDur", "critDamage", "eliteDmg"], leg: ["killCdr"] },
   "undying-sun-staff": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "bonusAreaRadius", "critChance", "areaDmg", "eliteDmg"], leg: ["killCdr"] },
   "eye-of-the-sun": { always: "ailmentDur", pool: ["atkPct", "critChance", "ailingDmg", "areaDmg", "eliteDmg", "lifeHit"], leg: ["maxPip"] },
   // Treant set (Sammy 2026-11-12): Barkheart's +1 goes to the Bastion branch.
@@ -15782,11 +15782,11 @@ var UNIQUE_LINES_V3 = freezeWire({
   "cocoonsilk": { always: "ccDmg", pool: ["atkPct", "critChance", "lifeHit", "closeDmg", "keepPip", "areaDmg", "sigDmg"], leg: [] },
   // Brimstone set (Sammy 2026-11-12).
   "slagmaul": { always: "fireDmg", pool: ["mainDmg", "areaDmg", "closeDmg", "ailmentDur", "ailingDmg", "str"], leg: ["maxPip"] },
-  "ventcutter": { always: "critDamage", pool: ["critChance", "fireDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
+  "ventcutter": { always: "critDamage", pool: ["critChance", "poisonDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
   "coreheart": { always: "fireDmg", pool: ["rangedDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
   // Barrow King set (set page AJnYRRRF..., Sammy 2026-11-14).
-  "gravecleaver": { always: "areaDmg", pool: ["mainDmg", "fireDmg", "critDamage", "ailingDmg", "eliteDmg", "maxHpPct"], leg: ["branchRank:breaker"] },
+  "gravecleaver": { always: "areaDmg", pool: ["mainDmg", "shockDmg", "critDamage", "ailingDmg", "eliteDmg", "maxHpPct"], leg: ["branchRank:breaker"] },
   "wightfang": { always: "controlDur", pool: ["offDmg", "critChance", "ailmentDur", "ailingDmg", "parry", "eliteDmg"], leg: ["killCdr"] },
   "crownflame-scepter": { always: "fireDmg", pool: ["mainDmg", "bonusAreaRadius", "critChance", "activeSpd", "areaDmg", "eliteDmg"], leg: ["maxPip"] },
   "barrowshroud": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
@@ -27240,6 +27240,8 @@ var FREE_TICKS = 180;
 var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
+var TOME_EL = ["fire", "frost", "lightning"];
+var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
 var LIVE = ["cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function prune(combat) {
   const k = combat.skills;
@@ -27267,13 +27269,14 @@ function validateClassSkillState(s, combat, actor) {
   if (k.enGarde !== void 0) safeInteger(k.enGarde, 1, EN_GARDE_TICKS);
   if (k.rush !== void 0) safeInteger(k.rush, 1, RUSH_TICKS);
   if (k.trail !== void 0) {
-    closedRecord(k.trail, ["x", "y", "x2", "y2", "ticks", "next"], ["fire", "frost", "spark"]);
-    requireContract(["x", "y", "x2", "y2"].every((key9) => Number.isFinite(k.trail[key9])) && ["fire", "frost", "spark"].every((key9) => k.trail[key9] === void 0 || k.trail[key9] === true) && actor.alive, "Invalid trail");
+    closedRecord(k.trail, ["x", "y", "x2", "y2", "ticks", "next"], ["fire", "frost", "spark", "venom"]);
+    requireContract(["x", "y", "x2", "y2"].every((key9) => Number.isFinite(k.trail[key9])) && ["fire", "frost", "spark", "venom"].every((key9) => k.trail[key9] === void 0 || k.trail[key9] === true) && actor.alive, "Invalid trail");
     safeInteger(k.trail.ticks, 1, TRAIL_MAX_TICKS);
     safeInteger(k.trail.next, 1, TRAIL_PULSE_TICKS);
   }
   if (k.pool !== void 0) {
-    closedRecord(k.pool, ["x", "y", "ticks", "next"]);
+    closedRecord(k.pool, ["x", "y", "ticks", "next"], ["el"]);
+    tomeEl(k.pool);
     requireContract(Number.isFinite(k.pool.x) && Number.isFinite(k.pool.y) && actor.alive, "Invalid pool");
     safeInteger(k.pool.ticks, 1, POOL_MAX_TICKS);
     safeInteger(k.pool.next, 1, POOL_PULSE_TICKS);
@@ -27307,7 +27310,8 @@ function validateClassSkillState(s, combat, actor) {
     safeInteger(k.sunBeam.power, 1, SUN_MAX);
   }
   if (k.staffSuns !== void 0) {
-    closedRecord(k.staffSuns, ["x", "y", "seed", "ticks"]);
+    closedRecord(k.staffSuns, ["x", "y", "seed", "ticks"], ["el"]);
+    tomeEl(k.staffSuns);
     requireContract(pos(k.staffSuns) && actor.alive, "Invalid Undying Sun suns");
     safeInteger(k.staffSuns.seed, 0);
     safeInteger(k.staffSuns.ticks, 1, STAFF_SUNS_TICKS);
@@ -27643,7 +27647,8 @@ function validateClassSkillState(s, combat, actor) {
     if (k.hoppers !== void 0) {
       requireContract(Array.isArray(k.hoppers) && k.hoppers.length >= 1 && k.hoppers.length <= HOPPER_MAX, "Invalid Eyehoppers");
       for (const h of k.hoppers) {
-        closedRecord(h, ["n", "fx", "fy", "x", "y", "age", "target", "pop"]);
+        closedRecord(h, ["n", "fx", "fy", "x", "y", "age", "target", "pop"], ["el"]);
+        tomeEl(h);
         requireContract(pos2(h) && Number.isFinite(h.fx) && Number.isFinite(h.fy) && (h.target === "" || id2(h.target)), "Invalid Eyehopper");
         safeInteger(h.n, 0, 1e9);
         safeInteger(h.age, 0, HOP_LIFE + HOP_SWELL);
@@ -27653,7 +27658,8 @@ function validateClassSkillState(s, combat, actor) {
     if (k.hopPops !== void 0) {
       requireContract(Array.isArray(k.hopPops) && k.hopPops.length >= 1 && k.hopPops.length <= HOPPER_MAX * 2, "Invalid Eyehopper pops");
       for (const q of k.hopPops) {
-        closedRecord(q, ["x", "y", "ticks"]);
+        closedRecord(q, ["x", "y", "ticks"], ["el"]);
+        tomeEl(q);
         requireContract(pos2(q), "Invalid Eyehopper pop");
         safeInteger(q.ticks, 1, HOP_POP_TICKS);
       }
@@ -27681,7 +27687,8 @@ function validateClassSkillState(s, combat, actor) {
       safeInteger(k.quake.ticks, 1, QUAKE_TICKS);
     }
     if (k.web !== void 0) {
-      closedRecord(k.web, ["x", "y", "ticks", "next"]);
+      closedRecord(k.web, ["x", "y", "ticks", "next"], ["el"]);
+      tomeEl(k.web);
       requireContract(pos2(k.web) && actor.alive, "Invalid web");
       safeInteger(k.web.ticks, 1, WEB_TICKS);
       safeInteger(k.web.next, 1, UQ_PULSE_TICKS);
@@ -27706,7 +27713,8 @@ function validateClassSkillState(s, combat, actor) {
       }
     }
     if (k.strip !== void 0) {
-      closedRecord(k.strip, ["x", "y", "x2", "y2", "ticks", "next"]);
+      closedRecord(k.strip, ["x", "y", "x2", "y2", "ticks", "next"], ["el"]);
+      tomeEl(k.strip);
       requireContract(pos2(k.strip) && Number.isFinite(k.strip.x2) && Number.isFinite(k.strip.y2) && actor.alive, "Invalid strip");
       safeInteger(k.strip.ticks, 1, STRIP_TICKS);
       safeInteger(k.strip.next, 1, UQ_PULSE_TICKS);
@@ -27732,7 +27740,8 @@ function validateClassSkillState(s, combat, actor) {
       for (const t of k.wardOut) safeInteger(t, 1, WARD_BACK);
     }
     if (k.wardHit !== void 0) {
-      closedRecord(k.wardHit, ["x", "y", "dx", "dy", "ticks"]);
+      closedRecord(k.wardHit, ["x", "y", "dx", "dy", "ticks"], ["el"]);
+      tomeEl(k.wardHit);
       requireContract(pos2(k.wardHit) && Number.isFinite(k.wardHit.dx) && Number.isFinite(k.wardHit.dy), "Invalid shield burst");
       safeInteger(k.wardHit.ticks, 1, WARD_HIT_TICKS);
     }
@@ -27750,12 +27759,14 @@ function validateClassSkillState(s, combat, actor) {
       safeInteger(g.ticks, 1, GRAVE_RISE + g.hold + GRAVE_SINK);
     }
     if (k.skull !== void 0) {
-      closedRecord(k.skull, ["x", "y", "tx", "ty", "ticks"]);
+      closedRecord(k.skull, ["x", "y", "tx", "ty", "ticks"], ["el"]);
+      tomeEl(k.skull);
       requireContract(pos2(k.skull) && Number.isFinite(k.skull.tx) && Number.isFinite(k.skull.ty), "Invalid crown flame");
       safeInteger(k.skull.ticks, 1, SKULL_FLIGHT);
     }
     for (const [key9, max2] of [["skullHit", SKULL_SHOW], ["sunk", SHROUD_SINK], ["risen", SHROUD_SHOW]]) if (k[key9] !== void 0) {
-      closedRecord(k[key9], ["x", "y", "ticks"]);
+      closedRecord(k[key9], ["x", "y", "ticks"], key9 === "skullHit" ? ["el"] : []);
+      tomeEl(k[key9]);
       requireContract(pos2(k[key9]), "Invalid " + key9);
       safeInteger(k[key9].ticks, 1, max2);
     }
@@ -29352,7 +29363,7 @@ function validateSubweaponCombat(s) {
     closedRecord(e, ["id", "sourceId", "targetId", "spaceInstanceId", "kind", "stacks", "nextTick", "expiresTick", ...integer2 ? ["attack", "rulesVersion"] : ["damage"]], ["sourceItem", "toxicRank"]);
     if (e.toxicRank !== void 0) validateInteger(e.toxicRank);
     if (e.sourceItem !== void 0) validateDamageSourceItem(e.sourceItem);
-    requireContract(e.id === id2 && c.actors[e.sourceId] && combatTargetV4(s, e.targetId)?.alive && ["bleed", "burn", "sting"].includes(e.kind), "Periodic ownership");
+    requireContract(e.id === id2 && c.actors[e.sourceId] && combatTargetV4(s, e.targetId)?.alive && ["bleed", "burn", "sting", "shock"].includes(e.kind), "Periodic ownership");
     safeInteger(e.stacks, 1, e.kind === "bleed" ? 5 : 1);
     safeInteger(e.nextTick, s.tick + 1, s.tick + 60);
     safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "bleed" ? 1350 : 540));
