@@ -23846,10 +23846,29 @@ function siteRunEpisodeObservationRequiredD13B(state) {
   }
   return false;
 }
+function salvageLeftBehindGearV1(state, groupIds) {
+  const groups = new Set(groupIds);
+  let count2 = 0;
+  for (const player of Object.values(state.playersById)) {
+    const inv = player.inventory;
+    if (!inv?.d7) continue;
+    for (const reward of Object.values(inv.rewardsByEntityId ?? {})) {
+      const source10 = reward.episodeSource;
+      if (!source10 || !groups.has(source10.groupId) || reward.claimed || !reward.generated || reward.autoSalvageEligibleTick == null) continue;
+      if (reward.autoSalvageEligibleTick > state.tick) reward.autoSalvageEligibleTick = state.tick;
+      inv.d7.autoSalvaged ??= {};
+      autoSalvageReward(state, player, reward, { groupId: source10.groupId, episode: source10.episode, sourceEntityId: reward.sourceEntityId, ...source10.progression ? { progression: copyWire(source10.progression) } : {} });
+      count2++;
+    }
+  }
+  return count2;
+}
 function advanceSiteRunEpisodeD13C(state, siteId2, { resetId, resetTick, newGroupIds, newEntityIds }) {
   const record = ensureSiteRunEpisodeD13B(state, siteId2);
   requireContract(siteSupportsResetD13C(state, siteId2) && record.status === "cleared", "Only the cleared current procedural Cave episode may reset");
-  const retiredGroupIds = currentGroupIds(state, siteId2).sort(), retiredEntityIds = retiredGroupIds.flatMap((id) => state.groupsById[id]?.entityIds ?? []).sort(), receipt = completionReceipt(state, siteId2, record, resetTick, { groupIds: retiredGroupIds, entityIds: retiredEntityIds });
+  const retiredGroupIds = currentGroupIds(state, siteId2).sort();
+  salvageLeftBehindGearV1(state, retiredGroupIds);
+  const retiredEntityIds = retiredGroupIds.flatMap((id) => state.groupsById[id]?.entityIds ?? []).sort(), receipt = completionReceipt(state, siteId2, record, resetTick, { groupIds: retiredGroupIds, entityIds: retiredEntityIds });
   retireEpisodeRewardRowsD13C2(state, receipt);
   appendReceipt(record, receipt);
   const fromEpisode = record.episode, toEpisode = safeInteger(fromEpisode + 1, 2);
