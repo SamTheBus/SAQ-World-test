@@ -165575,6 +165575,9 @@ var CSS5 = `
 #world-inventory[data-section=settings] #world-bag-browse,#world-inventory[data-section=settings] #world-materials-view,#world-inventory[data-section=settings] #world-forge-view,#world-inventory[data-section=settings] #world-bag-summary,#world-inventory[data-section=settings] #world-bag-stats{display:none!important}
 body #world-inventory.rpg-menu[data-group=world]:not([data-section=hub]) button.rm-railbtn{display:grid!important}
 body #world-inventory.rpg-menu[data-section=hub] button.rm-railbtn{display:none!important}
+/* Hero pages get their own button back to the Menu; on world pages the rail button already is one. */
+body #world-inventory.rpg-menu[data-group] button.rm-railbtn.rm-homebtn.rm-homebtn{display:none!important}
+body #world-inventory.rpg-menu[data-group=hero]:not([data-section=forge]) button.rm-railbtn.rm-homebtn.rm-homebtn{display:grid!important}
 .mh{flex:1;min-width:0;min-height:0;overflow:auto;display:flex;padding:16px 18px;box-sizing:border-box;background:radial-gradient(120% 100% at 50% 0%,#1d2a35 0%,#131b23 55%,#0d1319 100%)}
 .mh[hidden]{display:none}
 .mh-wrap{margin:auto;width:100%;max-width:960px;display:grid;grid-template-columns:minmax(220px,290px) minmax(0,1fr);gap:14px;align-items:stretch}
@@ -170744,6 +170747,15 @@ function createInventoryPresentation({ document: document2, environment, readMod
   railButton.setAttribute("aria-label", "Show page names");
   railButton.innerHTML = MENU_ICONS.menu;
   heading.prepend(railButton);
+  const homeButton = button3("", () => {
+    panel.classList.remove("rail-open");
+    go("hub");
+  });
+  homeButton.id = "world-menu-home";
+  homeButton.className = "rm-railbtn rm-homebtn";
+  homeButton.setAttribute("aria-label", "Back to Menu");
+  homeButton.innerHTML = MENU_HUB_ICONS.home.replace("<svg ", '<svg class="rm-icon" ');
+  railButton.after(homeButton);
   heading.insertBefore(document2.getElementById("world-bag-summary"), closeButton);
   const who = element("div", "", "rm-who");
   nav.prepend(who);
