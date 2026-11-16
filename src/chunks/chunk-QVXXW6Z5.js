@@ -14125,7 +14125,11 @@ var bounded = (map, limit) => {
   if (map.size >= limit) map.clear();
   return map;
 };
-function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, siteChunk = null, events = [], terraces = false, volcanoes = false, sites: sites6 = [], towns = [], keepOut = null }) {
+var hedgerowsForBinding = (b) => {
+  const m = /^world-maker-v1\.(\d+)$/.exec(b?.worldMaker ?? "");
+  return !(Boolean(m) && Number(m[1]) >= 23);
+};
+function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, siteChunk = null, events = [], terraces = false, volcanoes = false, sites: sites6 = [], towns = [], keepOut = null, hedgerows = true }) {
   const S = createStandField(seedDigest), K = S.K, W6 = terrain2.widthTiles;
   const elevations = asset.cellRows.flatMap((r) => r.cells.map((c) => c[10])).sort((p, q) => p - q);
   const rank = (v) => {
@@ -14472,7 +14476,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
       else if (b = bushAt(x, y)) {
         const stone = ["r", "s", "d", "l"].includes(e.biome) && (b.h >>> 12) % 3 === 0;
         block2(stone ? "stone" : "bush", b.edge ? "edge" : "", x + "," + y, stone);
-      } else if (p.hedges && (h = hedgeAt(x, y))) block2("hedge", "", h);
+      } else if (hedgerows && p.hedges && (h = hedgeAt(x, y))) block2("hedge", "", h);
       else {
         const c = S.coverAt(x, y), boost = zone >= ZONE.FOREST ? 0.05 : zone === ZONE.OPEN ? 0 : -0.05;
         out.cover = Boolean(p.cover && !trail && c + boost > p.coverAt);
@@ -31963,6 +31967,7 @@ export {
   readStandsCell,
   standsPiece,
   createStandField,
+  hedgerowsForBinding,
   createForestStandsV2,
   ENCHANTER_TOWER_V1,
   shopkeeperCastV1,

@@ -6479,7 +6479,11 @@ var bounded = (map, limit) => {
   if (map.size >= limit) map.clear();
   return map;
 };
-function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, siteChunk = null, events = [], terraces = false, volcanoes = false, sites: sites6 = [], towns = [], keepOut = null }) {
+var hedgerowsForBinding = (b) => {
+  const m = /^world-maker-v1\.(\d+)$/.exec(b?.worldMaker ?? "");
+  return !(Boolean(m) && Number(m[1]) >= 23);
+};
+function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, siteChunk = null, events = [], terraces = false, volcanoes = false, sites: sites6 = [], towns = [], keepOut = null, hedgerows = true }) {
   const S2 = createStandField(seedDigest), K = S2.K, W9 = terrain2.widthTiles;
   const elevations = asset.cellRows.flatMap((r) => r.cells.map((c) => c[10])).sort((p, q) => p - q);
   const rank = (v) => {
@@ -6826,7 +6830,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
       else if (b = bushAt(x, y)) {
         const stone = ["r", "s", "d", "l"].includes(e.biome) && (b.h >>> 12) % 3 === 0;
         block2(stone ? "stone" : "bush", b.edge ? "edge" : "", x + "," + y, stone);
-      } else if (p.hedges && (h = hedgeAt(x, y))) block2("hedge", "", h);
+      } else if (hedgerows && p.hedges && (h = hedgeAt(x, y))) block2("hedge", "", h);
       else {
         const c = S2.coverAt(x, y), boost = zone >= ZONE.FOREST ? 0.05 : zone === ZONE.OPEN ? 0 : -0.05;
         out2.cover = Boolean(p.cover && !trail && c + boost > p.coverAt);
@@ -13733,7 +13737,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
   const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain: terrain2, routeAt, clearAt: standsClear, protectedChunk: (cx, cy) => protection.at(cx * 32, cy * 26), siteChunk: terraceSiteGuardForBinding(binding) ? (cx, cy) => {
     const k = cx + "," + cy;
     return ruinByChunk.has(k) || fortByChunk.has(k) || caveByChunk.has(k);
-  } : null, events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding), sites: volcanicSites, towns: siteVolcanoes ? (asset.generatedTowns?.towns ?? []).filter((t) => t.biome === "volcanic").map((t) => ({ ...t, bounds: townBoundsV1(t) })) : [], keepOut: landings ? (x, y) => landings.clearAt(x, y) : null }) : null;
+  } : null, events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding), sites: volcanicSites, towns: siteVolcanoes ? (asset.generatedTowns?.towns ?? []).filter((t) => t.biome === "volcanic").map((t) => ({ ...t, bounds: townBoundsV1(t) })) : [], keepOut: landings ? (x, y) => landings.clearAt(x, y) : null, hedgerows: hedgerowsForBinding(binding) }) : null;
   if (stands?.volcanoes && volcanicSites.length) {
     const byId2 = new Map([...forts, ...ruins].map((e) => [e.reservation.id, e]));
     for (const [id2, { add, remove }] of stands.volcanoes.siteTrails()) {

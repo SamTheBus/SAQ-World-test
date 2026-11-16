@@ -7659,7 +7659,7 @@ var slotId = (n) => "density-v2-event-capacity-" + String(n).padStart(3, "0");
 var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events: Object.entries(CLASSIC_SLOTS).flatMap(([event, list]) => list.map((n) => ({ n, event }))).sort((a, b) => a.n - b.n).map(({ n, event }) => CLASSIC_CACHES[n] ? { eventSlotId: slotId(n), event, cacheSlotId: slotId(CLASSIC_CACHES[n]) } : { eventSlotId: slotId(n), event }) });
 
 // src/shared/generation/world_maker_v1/version.js
-var WORLD_MAKER_VERSION = "world-maker-v1.22";
+var WORLD_MAKER_VERSION = "world-maker-v1.23";
 
 // src/shared/generation/world_maker_v1/make.js
 var TW4 = W * 64;

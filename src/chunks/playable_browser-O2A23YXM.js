@@ -639,6 +639,7 @@ import {
   hash32,
   hashBytes,
   hashReward,
+  hedgerowsForBinding,
   heroClassOf,
   heroLookOf,
   heroRank,
@@ -1116,7 +1117,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-UYVT4RMG.js";
+} from "./chunk-QVXXW6Z5.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -128482,7 +128483,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
   const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain, routeAt, clearAt: standsClear, protectedChunk: (cx, cy2) => protection.at(cx * 32, cy2 * 26), siteChunk: terraceSiteGuardForBinding(binding) ? (cx, cy2) => {
     const k = cx + "," + cy2;
     return ruinByChunk.has(k) || fortByChunk.has(k) || caveByChunk.has(k);
-  } : null, events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding), sites: volcanicSites, towns: siteVolcanoes ? (asset.generatedTowns?.towns ?? []).filter((t) => t.biome === "volcanic").map((t) => ({ ...t, bounds: townBoundsV1(t) })) : [], keepOut: landings ? (x, y) => landings.clearAt(x, y) : null }) : null;
+  } : null, events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding), sites: volcanicSites, towns: siteVolcanoes ? (asset.generatedTowns?.towns ?? []).filter((t) => t.biome === "volcanic").map((t) => ({ ...t, bounds: townBoundsV1(t) })) : [], keepOut: landings ? (x, y) => landings.clearAt(x, y) : null, hedgerows: hedgerowsForBinding(binding) }) : null;
   if (stands?.volcanoes && volcanicSites.length) {
     const byId = new Map([...forts2, ...ruins].map((e) => [e.reservation.id, e]));
     for (const [id2, { add: add2, remove }] of stands.volcanoes.siteTrails()) {
@@ -226748,7 +226749,7 @@ function showWorldRefreshNoticeV1({ document: doc, onOpen, onDismiss }) {
 }
 
 // src/shared/generation/world_maker_v1/version.js
-var WORLD_MAKER_VERSION = "world-maker-v1.22";
+var WORLD_MAKER_VERSION = "world-maker-v1.23";
 
 // src/client/dev_tools_v1.js
 var DEV_LEVEL_MAX = MAX_PLAYER_LEVEL;
