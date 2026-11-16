@@ -138072,6 +138072,32 @@ function seatWorldRows(state2, pid, templatePid) {
   const outings = state2.encounterEconomy?.outingsByPlayer;
   if (outings) outings[pid] = copyWire(outings[templatePid] ?? { earnedOutside: false, wasInTown: true });
 }
+function renameEventPlayerV1(ledger, oldPid, playerId) {
+  const walk = (v) => {
+    if (Array.isArray(v)) {
+      let hit2 = false;
+      for (let i = 0; i < v.length; i++) {
+        if (v[i] === oldPid) {
+          v[i] = playerId;
+          hit2 = true;
+        } else if (v[i] && typeof v[i] === "object") walk(v[i]);
+      }
+      if (hit2 && v.every((x) => typeof x === "string")) v.sort();
+      return;
+    }
+    if (!v || typeof v !== "object") return;
+    if (Object.hasOwn(v, oldPid)) {
+      v[playerId] = v[oldPid];
+      delete v[oldPid];
+    }
+    for (const [k, x] of Object.entries(v)) {
+      if (x === oldPid) v[k] = playerId;
+      else if (x && typeof x === "object") walk(x);
+    }
+  };
+  walk(ledger);
+  return ledger;
+}
 function renewSeat(state2, oldPid, { keepQuests = false } = {}) {
   const p = state2.playersById[oldPid], playerId = mint2(state2, "ply");
   delete state2.playersById[oldPid];
@@ -138130,6 +138156,7 @@ function renewSeat(state2, oldPid, { keepQuests = false } = {}) {
   }
   renewTripHellSeatV1(state2, oldPid, playerId);
   renewArenaFallenSeatV1(state2, oldPid, playerId);
+  renameEventPlayerV1(state2.d9World?.worldEvents, oldPid, playerId);
   const quests = state2.d9World?.quests?.byPlayer;
   if (quests?.[oldPid]) {
     if (keepQuests) quests[playerId] = quests[oldPid];
