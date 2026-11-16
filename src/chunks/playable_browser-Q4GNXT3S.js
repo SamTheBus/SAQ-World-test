@@ -112006,8 +112006,10 @@ var pipCostFor = (id2, ranks) => pipCostOf(id2) + (id2 === "cast" && ranks?.over
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
-var TIMED = ["sharp", "woven", "hitCd", "killCd", "perfCd", "guardUp", "mist", "veil", "gold", "surge", "enGarde", "rush", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow", "wrapCd", "core", "treadCd", "sporeCd", "eyeCd", "crownCd", "oathCd", "plate", "plateCd", "cleaveCd", "skullCd", "shroudCd", "lashCd"];
-var LIVE = ["cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var TIMED = ["sharp", "woven", "hitCd", "killCd", "perfCd", "guardUp", "mist", "veil", "gold", "surge", "enGarde", "rush", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow", "wrapCd", "core", "treadCd", "sporeCd", "eyeCd", "crownCd", "oathCd", "plate", "plateCd", "cleaveCd", "skullCd", "shroudCd", "lashCd", "zip", "perfReady"];
+var LIVE = ["zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var ZIP_TICKS = 120;
+var PERF_READY_TICKS = 180;
 function skillCooldown(combat, skillId) {
   return combat?.skills?.cooldowns?.[skillId] ?? 0;
 }
@@ -112173,6 +112175,8 @@ function validateClassSkillState(s, combat, actor) {
   if (k.parry !== void 0) safeInteger(k.parry, 1, PARRY_WINDOW_TICKS);
   if (k.counter !== void 0) safeInteger(k.counter, 1, COUNTER_WINDOW_MAX);
   if (k.surge !== void 0) safeInteger(k.surge, 1, SURGE_TICKS);
+  if (k.zip !== void 0) safeInteger(k.zip, 1, ZIP_TICKS);
+  if (k.perfReady !== void 0) safeInteger(k.perfReady, 1, PERF_READY_TICKS);
   if (k.enGarde !== void 0) safeInteger(k.enGarde, 1, EN_GARDE_TICKS);
   if (k.rush !== void 0) safeInteger(k.rush, 1, RUSH_TICKS);
   if (k.trail !== void 0) {
@@ -133115,7 +133119,8 @@ function incomingSubweaponHit({ combat, stats: stats3, raw, boss = false, actor 
   if (parryReady) spendParryWindow(combat);
   const guarded = activeGuard || parryReady || compareCombat(chance, 0) > 0 && combatRoll(combat, multiplyCombat(chance, (boss ? 65 : 100) * (combat.fatigue ? 50 : 100), 1e4));
   if (!guarded) return mossTakes(combat, aegisTakes(combat, { damage: combatInteger(net2), absorbed, defense: null, counter: null }));
-  const perfect = activeGuard && knight && combat.skills?.guardUp > 0;
+  const readied = family === "shield" && knight && combat.skills?.perfReady > 0, perfect = knight && (activeGuard && combat.skills?.guardUp > 0 || readied);
+  if (readied) clearSkillState(combat, "perfReady");
   if (activeGuard && !perfect) spendGuard(combat.guard, net2, steady);
   combat.fatigue = 30;
   if (family === "shield" && knight) reduceSkillCooldown(combat, "shield_bash", BLOCK_BASH_REFUND_TICKS);
@@ -136411,6 +136416,7 @@ function createMasteryAwards(state2) {
 }
 
 // src/shared/contracts/offhand_touches_v1.js
+var UNIQUE_TOUCHES = Object.freeze({ zipTicks: 120, zipSpeed: 15, readyTicks: 180, stunTicks: 30, critBonus: 10, bleedPower: -50 });
 var KINDS7 = Object.freeze({ buckler: "buckler", kite: "kite", heater: "kite", tower: "tower", "main-gauche": "main-gauche", stiletto: "stiletto", kris: "kris", "tome-fire": "fire", "tome-frost": "frost", "tome-storm": "storm" });
 var OFFHAND_KINDS = Object.freeze([...new Set(Object.values(KINDS7))]);
 var OFFHAND_TOUCHES = Object.freeze({
@@ -136459,12 +136465,12 @@ function offhandKind(player) {
   return ELEMENT_KIND[els[(cursor + els.length - 1) % els.length]] ?? null;
 }
 var OFFHAND_TOUCH_TEXT = Object.freeze({
-  buckler: Object.freeze({ name: "Buckler", lines: Object.freeze(["Movement skills recharge 15% faster", "Perfect block window +0.1 s"]) }),
-  kite: Object.freeze({ name: "Kite Shield", lines: Object.freeze(["Defensive skills recharge 15% faster", "Every third block gives 1 extra Grit"]) }),
-  tower: Object.freeze({ name: "Tower Shield", lines: Object.freeze(["All your stuns last 20% longer", "Stunning 3 or more at once gives 1 extra Grit"]) }),
-  "main-gauche": Object.freeze({ name: "Main-Gauche", lines: Object.freeze(["Riposte and parries cut back 50% harder", "A parry gives 3 Combo instead of 2"]) }),
-  stiletto: Object.freeze({ name: "Stiletto", lines: Object.freeze(["All your crits deal 10% more", "Crits give Combo up to 3 times a second instead of 2"]) }),
-  kris: Object.freeze({ name: "Kris", lines: Object.freeze(["All your Bleeds last 25% longer", "Killing a Bleeding enemy gives 1 Combo"]) }),
+  buckler: Object.freeze({ name: "Buckler", lines: Object.freeze(["Movement skills recharge 15% faster", "Perfect block window +0.1 s", "Your weapon unique gives a 2 s burst of speed"]) }),
+  kite: Object.freeze({ name: "Kite Shield", lines: Object.freeze(["Defensive skills recharge 15% faster", "Every third block gives 1 extra Grit", "Your weapon unique readies a perfect block"]) }),
+  tower: Object.freeze({ name: "Tower Shield", lines: Object.freeze(["All your stuns last 20% longer", "Stunning 3 or more at once gives 1 extra Grit", "Your weapon unique stuns"]) }),
+  "main-gauche": Object.freeze({ name: "Main-Gauche", lines: Object.freeze(["Riposte and parries cut back 50% harder", "A parry gives 3 Combo instead of 2", "Your weapon unique readies a parry"]) }),
+  stiletto: Object.freeze({ name: "Stiletto", lines: Object.freeze(["All your crits deal 10% more", "Crits give Combo up to 3 times a second instead of 2", "Your weapon unique gets +10% crit chance"]) }),
+  kris: Object.freeze({ name: "Kris", lines: Object.freeze(["All your Bleeds last 25% longer", "Killing a Bleeding enemy gives 1 Combo", "Your weapon unique lightly Bleeds"]) }),
   fire: Object.freeze({ name: "Fire Tome", lines: Object.freeze(["All your burns last 25% longer", "Killing a burning enemy gives 1 Arcana"]) }),
   frost: Object.freeze({ name: "Frost Tome", lines: Object.freeze(["All your chills and freezes last 25% longer", "A freeze gives 3 Arcana instead of 2"]) }),
   storm: Object.freeze({ name: "Storm Tome", lines: Object.freeze(["Cast's lightning jumps to 1 more enemy", "Lightning hitting 4 or more enemies gives 1 extra Arcana"]) })
@@ -138948,6 +138954,24 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     else if (el3 === "frost") frost(a, t, false);
     else if (el3 === "lightning") shock2(a, t, sourceItem);
   };
+  function weaponFired(a) {
+    const combat = c.actors[a.entityId];
+    if (!combat || !a.alive) return;
+    const kind = offhandKind(owner(a));
+    if (kind === "buckler") classSkillsRecord(combat).zip = UNIQUE_TOUCHES.zipTicks;
+    else if (kind === "kite") classSkillsRecord(combat).perfReady = UNIQUE_TOUCHES.readyTicks;
+    else if (kind === "main-gauche") openParryWindow(combat);
+  }
+  function weaponHit(tagSpec, a, t, amount2, mechanic, options) {
+    const kind = offhandKind(owner(a)), opts = kind === "stiletto" ? { ...options, critBonus: combatAmount(UNIQUE_TOUCHES.critBonus, 100) } : options, out4 = tagged(tagSpec, damage, a, t, amount2, mechanic, null, opts);
+    weaponTouch(a, t, kind);
+    return out4;
+  }
+  function weaponTouch(a, t, kind = offhandKind(owner(a))) {
+    if (!t.alive || isPodCombatTargetV4(t)) return;
+    if (kind === "tower" && canStun(a) && !definition2(t).isBoss) stun(a, t, stunTicks(a, UNIQUE_TOUCHES.stunTicks));
+    else if (kind === "kris") bleed(a, t, getStats(a.entityId), UNIQUE_TOUCHES.bleedPower);
+  }
   const around3 = (a, p, radius) => effects2.nearby(a, { position: p }, radius + 40).filter((t) => t.alive && Math.hypot(t.position.x - p.x, t.position.y - p.y) <= radius + (t.hullRadius ?? 0));
   const ordinary = (t) => {
     const d = definition2(t);
@@ -140084,7 +140108,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       trail3.next = TRAIL_PULSE_TICKS;
       const r = rank(a, "cinder_step"), stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
       if (r) for (const t of alongPath(a, { x: trail3.x, y: trail3.y }, { x: trail3.x2, y: trail3.y2 })) damage(a, t, multiplyCombat(stats3.attack, T116.cinderStep.attack[0] * r, T116.cinderStep.attack[1]), "fire", null, { sourceItem, trigger: "proc" });
-      if (wears(a, "pharaoh-khopesh")) for (const t of alongPath(a, { x: trail3.x, y: trail3.y }, { x: trail3.x2, y: trail3.y2 })) poison(a, t, stats3);
+      if (wears(a, "pharaoh-khopesh")) for (const t of alongPath(a, { x: trail3.x, y: trail3.y }, { x: trail3.x2, y: trail3.y2 })) {
+        poison(a, t, stats3);
+        weaponTouch(a, t);
+      }
       const fr = rank(a, "frost_step");
       if (fr && canStun(a)) {
         for (const t of alongPath(a, { x: trail3.x, y: trail3.y }, { x: trail3.x2, y: trail3.y2 })) if (!isPodCombatTargetV4(t) && !Object.values(c.controls ?? {}).some((e) => e.sourceId === a.entityId && e.targetId === t.entityId && e.expiresTick > s.tick)) applyFrostControl(s, a, t, stats3, 240 + 24 * rank(a, "cold_snap"), T116.frostStep.boost * fr);
@@ -140102,6 +140129,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (!ticks) return;
     const to = pathEnd(a, combat.dash);
     classSkillsRecord(combat).trail = { x: a.position.x, y: a.position.y, x2: to.x, y2: to.y, ticks, next: 1, venom: true };
+    weaponFired(a);
   }
   function stepPool(a, combat) {
     const pool4 = combat.skills?.pool;
@@ -140123,7 +140151,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const d = unit5(aim2), stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "main"), k = classSkillsRecord(combat);
     k.cleaveCd = CLEAVE_EVERY;
     k.cleave = { x: a.position.x, y: a.position.y, sx: a.position.x + d.x * 24, sy: a.position.y + d.y * 24, ticks: CLEAVE_SHOW };
-    for (const t of around3(a, a.position, CLEAVE_RADIUS * effects2.area(a))) tagged(TAGS.weaponSlam, damage, a, t, multiplyCombat(stats3.attack, share, 100), "main", null, { sourceItem, trigger: "proc" });
+    weaponFired(a);
+    for (const t of around3(a, a.position, CLEAVE_RADIUS * effects2.area(a))) weaponHit(TAGS.weaponSlam, a, t, multiplyCombat(stats3.attack, share, 100), "main", { sourceItem, trigger: "proc" });
   }
   function openGrave(a, target) {
     const combat = c.actors[a.entityId], share = a.alive && combat && !combat.skills?.grave ? worn(a, "wightfang") : null;
@@ -140381,7 +140410,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const share = a.alive ? worn(a, "slagmaul") : null, combat = c.actors[a.entityId];
     if (!share || !combat) return;
     const d = unit5(aim2), stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "main"), f = { x: a.position.x, y: a.position.y, dx: d.x, dy: d.y, ticks: FURROW_TICKS, next: UQ_PULSE_TICKS };
-    for (const t of around3(a, a.position, FURROW_REACH)) if (inFurrow(f, t)) tagged(TAGS.weaponSlam, damage, a, t, multiplyCombat(stats3.attack, share, 100), "fire", null, { sourceItem, trigger: "proc" });
+    weaponFired(a);
+    for (const t of around3(a, a.position, FURROW_REACH)) if (inFurrow(f, t)) weaponHit(TAGS.weaponSlam, a, t, multiplyCombat(stats3.attack, share, 100), "fire", { sourceItem, trigger: "proc" });
     classSkillsRecord(combat).furrow = f;
   }
   function stepFurrow(a, combat) {
@@ -140425,11 +140455,12 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       if (!share) continue;
       const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "main");
       venting = true;
+      weaponFired(a);
       try {
         for (const t of around3(a, v, VENT_ARM)) {
           const dx = Math.abs(t.position.x - v.x), dy = Math.abs(t.position.y - v.y), r = t.hullRadius ?? 0;
           if (dy <= VENT_HALF + r && dx <= VENT_ARM + r || dx <= VENT_HALF + r && dy <= VENT_ARM + r) {
-            tagged(TAGS.weaponArea, damage, a, t, multiplyCombat(stats3.attack, share, 100), "poison", null, { sourceItem, trigger: "proc" });
+            weaponHit(TAGS.weaponArea, a, t, multiplyCombat(stats3.attack, share, 100), "poison", { sourceItem, trigger: "proc" });
             poison(a, t, stats3);
           }
         }
@@ -141064,6 +141095,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
     delete k.croakN;
     k.croak = { x: a.position.x, y: a.position.y, ticks: CROAK_TICKS, hit: [] };
+    weaponFired(a);
   }
   function stepCroak(a, combat) {
     const r = combat.skills?.croak;
@@ -141077,7 +141109,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     for (const t of around3(a, r, reach)) {
       if (r.hit.includes(t.entityId)) continue;
       r.hit.push(t.entityId);
-      tagged(TAGS.weaponSlam, damage, a, t, multiplyCombat(stats3.attack, share, 100), "main", null, { sourceItem, trigger: "proc" });
+      weaponHit(TAGS.weaponSlam, a, t, multiplyCombat(stats3.attack, share, 100), "main", { sourceItem, trigger: "proc" });
       if (t.alive && !unmoved(t)) {
         const dx = t.position.x - r.x, dy = t.position.y - r.y, l = Math.hypot(dx, dy) || 1, d = eliteOrBoss(t) ? CROAK_ELITE_SHOVE : CROAK_SHOVE, x = t.position.x + dx / l * d, y = t.position.y + dy / l * d;
         if (!collidesWithTiles(space(t), x, y, t.hullRadius)) t.position = { x, y };
@@ -141092,6 +141124,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const k = classSkillsRecord(combat);
     k.lashCd = LASH_EVERY;
     k.lash = { target: t.entityId, ticks: LASH_TICKS };
+    weaponFired(a);
   }
   function stepLash(a, combat) {
     const r = combat.skills?.lash;
@@ -141104,7 +141137,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (age > LASH_REEL && age <= LASH_HIT && !unmoved(t)) pull(a, t, Math.max(0, distance12(a, t) - (a.hullRadius ?? 0) - (t.hullRadius ?? 0) - 4) / (LASH_HIT - age + 1));
     if (age === LASH_HIT) {
       const share = worn(a, "lashtongue-saber");
-      if (share) tagged(TAGS.weapon, damage, a, t, multiplyCombat(getStats(a.entityId).attack, share, 100), "main", null, { sourceItem: damageSourceItem(owner(a), "main"), trigger: "proc" });
+      if (share) weaponHit(TAGS.weapon, a, t, multiplyCombat(getStats(a.entityId).attack, share, 100), "main", { sourceItem: damageSourceItem(owner(a), "main"), trigger: "proc" });
     }
     if (--r.ticks <= 0) clearSkillState(combat, "lash");
   }
@@ -141744,7 +141777,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (!p) return 1;
     if (c.actors[entityId2]?.skills?.sunk) return 0;
     const surge = c.actors[entityId2]?.skills?.surge, plating = (classRank(p.d8, "heavy_plating") ? 0.9 : 1) * (classRank(p.d8, "ice_fortress") && s.entitiesById[entityId2] && hasBarrier(s.entitiesById[entityId2]) ? T116.fortressSpeed : 1);
-    return surge ? plating * (1 + (4 * classRank(p.d8, "momentum") + 5 * classRank(p.d8, "light_step")) / 100) : plating;
+    const zip = c.actors[entityId2]?.skills?.zip ? 1 + UNIQUE_TOUCHES.zipSpeed / 100 : 1;
+    return (surge ? plating * (1 + (4 * classRank(p.d8, "momentum") + 5 * classRank(p.d8, "light_step")) / 100) : plating) * zip;
   }
   function pathEnd(a, d) {
     const col2 = space(a), r = a.hullRadius ?? 4;
@@ -141803,6 +141837,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     {
       const sunTicks = worn(a, "pharaoh-khopesh") ?? 0, fire2 = rank(a, "cinder_step") > 0, venom = sunTicks > 0, frost2 = rank(a, "frost_step") > 0, spark2 = rank(a, "static_step") > 0, ticks = Math.max(rank(a, "cinder_step") || frost2 || spark2 ? TRAIL_TICKS : 0, sunTicks);
       if (ticks) classSkillsRecord(combat).trail = { x: from.x, y: from.y, x2: to.x, y2: to.y, ticks, next: 1, ...fire2 ? { fire: true } : {}, ...frost2 ? { frost: true } : {}, ...spark2 ? { spark: true } : {}, ...venom ? { venom: true } : {} };
+      if (venom) weaponFired(a);
     }
     if (rank(a, "afterimage")) {
       const k = classSkillsRecord(combat);

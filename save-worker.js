@@ -27242,7 +27242,9 @@ var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
-var LIVE = ["cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var ZIP_TICKS = 120;
+var PERF_READY_TICKS = 180;
 function prune(combat) {
   const k = combat.skills;
   if (k && !Object.keys(k.cooldowns).length && !LIVE.some((key9) => k[key9])) delete combat.skills;
@@ -27266,6 +27268,8 @@ function validateClassSkillState(s, combat, actor) {
   if (k.parry !== void 0) safeInteger(k.parry, 1, PARRY_WINDOW_TICKS);
   if (k.counter !== void 0) safeInteger(k.counter, 1, COUNTER_WINDOW_MAX);
   if (k.surge !== void 0) safeInteger(k.surge, 1, SURGE_TICKS);
+  if (k.zip !== void 0) safeInteger(k.zip, 1, ZIP_TICKS);
+  if (k.perfReady !== void 0) safeInteger(k.perfReady, 1, PERF_READY_TICKS);
   if (k.enGarde !== void 0) safeInteger(k.enGarde, 1, EN_GARDE_TICKS);
   if (k.rush !== void 0) safeInteger(k.rush, 1, RUSH_TICKS);
   if (k.trail !== void 0) {
