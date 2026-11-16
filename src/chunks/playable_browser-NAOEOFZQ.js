@@ -120971,6 +120971,10 @@ function write(storage, channel2, record2) {
     return false;
   }
 }
+function chooseHero(storage, channel2, slot) {
+  const r = readHeroSlots(storage, channel2);
+  return r.heroes.some((h) => h.slot === slot) && write(storage, channel2, { ...r, active: slot });
+}
 function addHero(storage, channel2) {
   const r = readHeroSlots(storage, channel2);
   let slot = 1;
@@ -121024,6 +121028,129 @@ function createHeroRosterWriter({ storage, channel: channel2 = "", slot = 1, vis
       if (storage) update(visiting ? {} : { world: null });
     }
   });
+}
+
+// src/client/hero_select_v1.js
+var HERO_SELECT_SEEN_KEY = "saq-hero-select-v1";
+var CLASS_NAMES = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
+var made = (h) => Boolean(h.name || h.hero);
+function heroSelectChoicesV1(record2) {
+  const heroes2 = record2.heroes.filter(made);
+  if (!heroes2.length) return null;
+  const name = (h) => h.name || "Unnamed hero", owner = (slot) => record2.heroes.find((x) => x.slot === slot);
+  const rows = heroes2.map((h) => {
+    const w = heroWorld(h), host = w !== h.slot ? owner(w) : null, cls = h.hero?.cls ? CLASS_NAMES[h.hero.cls] : null;
+    return { slot: h.slot, name: name(h), line: cls ? `Level ${h.level} ${cls}` : "No class yet", world: host && made(host) ? `In ${name(host)}\u2019s world` : w !== h.slot ? "In a shared world" : h.world ? `Seed ${h.world.seed}` : "Classic world", last: h.slot === record2.active, hero: h.hero };
+  });
+  rows.sort((a, b) => Number(b.last) - Number(a.last) || a.slot - b.slot);
+  const unfinished = record2.heroes.find((h) => !made(h));
+  return { heroes: rows, newHero: Boolean(unfinished) || record2.heroes.length < HERO_SLOT_LIMIT, unfinishedSlot: unfinished?.slot ?? null };
+}
+var CSS2 = `
+#hero-select-v1{position:fixed;inset:0;z-index:2600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;box-sizing:border-box;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:#080c13d9;color:#efe3ca;font:14px/1.35 var(--rpg-ui,"Segoe UI",system-ui,sans-serif);overflow:auto;-webkit-tap-highlight-color:transparent}
+#hero-select-v1 h2{margin:0;font:700 24px/1.1 Georgia,serif;color:#ffe2a0;text-shadow:0 2px 0 #05080c;text-align:center}
+#hero-select-v1 .hs-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;width:min(100%,580px)}
+#hero-select-v1 button{appearance:none;position:relative;display:flex;align-items:center;gap:12px;min-height:84px;margin:0;padding:8px 14px 8px 8px;border:1.5px solid #4a5a65;border-radius:14px;background:linear-gradient(180deg,#1d2736,#121a26);color:inherit;font:inherit;text-align:left;cursor:pointer;touch-action:manipulation;box-shadow:0 4px 0 #05080c}
+#hero-select-v1 button.is-last{border-color:#c9a35a}
+#hero-select-v1 button:active{transform:translateY(2px);box-shadow:0 2px 0 #05080c}
+#hero-select-v1 button:focus-visible{outline:2px solid #ffe2a0;outline-offset:2px}
+#hero-select-v1 canvas{flex:none;width:62px;height:68px;border-radius:10px;background:radial-gradient(circle at 50% 62%,#2a3a4c,#141c27 72%)}
+#hero-select-v1 .hs-who{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+#hero-select-v1 .hs-who strong{font:700 17px/1.15 Georgia,serif;color:#f6e7c0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#hero-select-v1 .hs-who span{font-size:13px;color:#d7dde4}
+#hero-select-v1 .hs-who small{font-size:12px;color:#93a0a6}
+#hero-select-v1 .hs-tag{position:absolute;top:9px;right:11px;padding:2px 7px;border-radius:99px;background:#c9a35a;color:#231704;font:800 10px/14px var(--rpg-ui,system-ui);letter-spacing:.06em;text-transform:uppercase}
+#hero-select-v1 button.hs-new{min-height:56px;justify-content:center;border-style:dashed;background:#121a26b3;color:#d7dde4;font-weight:700;box-shadow:none}
+`;
+function showHeroSelectV1({ document: doc, environment: env, choices }) {
+  if (!doc.getElementById("hero-select-v1-css")) {
+    const st = doc.createElement("style");
+    st.id = "hero-select-v1-css";
+    st.textContent = CSS2;
+    doc.head.append(st);
+  }
+  const el3 = (tag2, cls, text3) => {
+    const e = doc.createElement(tag2);
+    if (cls) e.className = cls;
+    if (text3 != null) e.textContent = text3;
+    return e;
+  };
+  const root6 = el3("section");
+  root6.id = "hero-select-v1";
+  root6.setAttribute("role", "dialog");
+  root6.setAttribute("aria-modal", "true");
+  root6.setAttribute("aria-label", "Choose a hero");
+  const list = el3("div", "hs-list"), portraits = [];
+  root6.append(el3("h2", null, "Who is playing?"), list);
+  return new Promise((resolve) => {
+    const done3 = (answer) => {
+      root6.remove();
+      resolve(answer);
+    };
+    for (const h of choices.heroes) {
+      const b = el3("button", h.last ? "is-last" : null), canvas = el3("canvas"), who = el3("div", "hs-who");
+      b.type = "button";
+      b.dataset.slot = String(h.slot);
+      canvas.setAttribute("aria-hidden", "true");
+      who.append(el3("strong", null, h.name), el3("span", null, h.line), el3("small", null, h.world));
+      b.append(canvas, who);
+      if (h.last) b.append(el3("span", "hs-tag", "Last played"));
+      b.addEventListener("click", () => done3({ slot: h.slot }));
+      list.append(b);
+      portraits.push([canvas, h.hero]);
+    }
+    if (choices.newHero) {
+      const b = el3("button", "hs-new", "+ New hero");
+      b.type = "button";
+      b.addEventListener("click", () => done3({ create: true }));
+      list.append(b);
+    }
+    doc.body.append(root6);
+    list.firstChild?.focus?.();
+    const paint3 = () => {
+      for (const [canvas, hero] of portraits) {
+        const r = canvas.getBoundingClientRect();
+        if (!r.width || !hero) continue;
+        const dpr = Math.min(3, env.devicePixelRatio || 1);
+        canvas.width = Math.round(r.width * dpr);
+        canvas.height = Math.round(r.height * dpr);
+        const c = canvas.getContext("2d"), s = r.height / 60;
+        c.setTransform(dpr, 0, 0, dpr, 0, 0);
+        c.translate(r.width * 0.42, r.height * 0.62);
+        c.scale(s, s);
+        try {
+          drawBlockyHero(c, hero, { t: 0, still: true });
+        } catch {
+        }
+      }
+    };
+    (env.requestAnimationFrame ?? ((f) => f())).call(env, paint3);
+  });
+}
+async function heroSelectAtStartV1({ environment: env, storage, channel: channel2 = "", show = showHeroSelectV1 }) {
+  let session = null;
+  try {
+    session = env.sessionStorage;
+  } catch {
+  }
+  let seen5 = false;
+  try {
+    seen5 = session?.getItem(HERO_SELECT_SEEN_KEY) === "1";
+  } catch {
+  }
+  try {
+    session?.setItem(HERO_SELECT_SEEN_KEY, "1");
+  } catch {
+  }
+  if (seen5 || !storage) return "skipped";
+  const choices = heroSelectChoicesV1(readHeroSlots(storage, channel2));
+  if (!choices) return "skipped";
+  const pick4 = await show({ document: env.document, environment: env, choices });
+  if (pick4?.create) {
+    if (choices.unfinishedSlot != null ? chooseHero(storage, channel2, choices.unfinishedSlot) : addHero(storage, channel2) !== null) return "created";
+    return "skipped";
+  }
+  return pick4 && chooseHero(storage, channel2, pick4.slot) ? "played" : "skipped";
 }
 
 // src/shared/content/trip_hell_v1.js
@@ -148371,7 +148498,7 @@ var GEAR_GROUP = {
   armor: (cls) => ["A piece of armor", "Rolled from helmets, armor, " + (cls ? "gloves and " : "") + "boots when you get your reward"],
   accessories: (cls) => ["An accessory", "Rolled from rings" + (cls ? " and capes" : "") + " when you get your reward"]
 };
-var CSS2 = `
+var CSS3 = `
 .qx-dlg{padding:0;border:0;background:transparent;color:#2a1d12;max-width:calc(100vw - 16px);font:15px/1.4 "Baloo 2",system-ui,sans-serif}
 .qx-dlg::backdrop{background:#0009}
 #quest-reward .qx-sheet{width:min(340px,calc(100vw - 32px));align-items:center;text-align:center;padding:18px 16px 16px;gap:10px;animation:qz-pop .32s cubic-bezier(.2,1.4,.4,1)}
@@ -148612,7 +148739,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
 }, openShop = () => {
 }, map = () => null, openLogHook = null }) {
   const env = doc.defaultView ?? globalThis, style = doc.createElement("style");
-  style.textContent = CSS2;
+  style.textContent = CSS3;
   doc.head.append(style);
   const el3 = (tag2, text3, cls) => {
     const e = doc.createElement(tag2);
@@ -161384,7 +161511,7 @@ function drawGroundCardV1(c, r, tick) {
 }
 
 // src/client/bestiary_view_v1.js
-var CSS3 = `
+var CSS4 = `
 #world-inventory[data-section=bestiary] #world-bag-browse,#world-inventory[data-section=bestiary] #world-materials-view,#world-inventory[data-section=bestiary] #world-forge-view,#world-inventory[data-section=bestiary] #world-bag-stats{display:none}
 #world-inventory .bestiary-v1{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto;padding:10px 12px 14px;color:#e9e4d8;overscroll-behavior:contain}
 .bestiary-v1[hidden]{display:none!important}
@@ -161443,7 +161570,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
   if (!document2.getElementById("bestiary-v1-css")) {
     const st = document2.createElement("style");
     st.id = "bestiary-v1-css";
-    st.textContent = CSS3;
+    st.textContent = CSS4;
     document2.head.append(st);
   }
   let group = "woodland", selected = null, key4 = null, album = null, gold = "0", busy = false;
@@ -161680,7 +161807,7 @@ var MENU_HUB_ICONS = Object.freeze({
   settings: icon('<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="6.6"/><path d="M12 2.6v2.8M12 18.6v2.8M2.6 12h2.8M18.6 12h2.8M5.4 5.4l2 2M16.6 16.6l2 2M5.4 18.6l2-2M16.6 7.4l2-2"/>'),
   home: icon('<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>')
 });
-var CSS4 = `
+var CSS5 = `
 #world-inventory[data-group=hero] .rm-page[data-group=world],#world-inventory[data-group=world] .rm-page[data-group=hero]{display:none!important}
 #world-inventory[data-group=world] .rm-who{display:none!important}
 #world-inventory[data-section=hub] .bag-section-tabs{display:none!important}
@@ -161707,7 +161834,7 @@ function createMenuHubV1({ document: doc, tiles: tiles9 }) {
   if (!doc.getElementById("menu-hub-v1-css")) {
     const st = doc.createElement("style");
     st.id = "menu-hub-v1-css";
-    st.textContent = CSS4;
+    st.textContent = CSS5;
     doc.head.append(st);
   }
   const root6 = doc.createElement("div");
@@ -161977,7 +162104,7 @@ function factNames(rows) {
 }
 
 // src/client/hero_slots_view_v1.js
-var CLASS_NAMES = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
+var CLASS_NAMES2 = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
 function createHeroSlotsView({ document: document2, environment, heroSlots }) {
   const root6 = document2.createElement("section");
   root6.id = "world-heroes-view";
@@ -162026,21 +162153,21 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
   }
   function render() {
     const { active: active2, heroes: heroes2 } = heroSlots.list(), grid = el3("div", "hero-slots-grid"), portraits = [];
-    const label7 = (h) => h.name || (h.slot === active2 ? "Your hero" : "Unnamed hero"), made = (h) => Boolean(h.name || h.hero), worldOf2 = (h) => h.plays ?? h.slot;
+    const label7 = (h) => h.name || (h.slot === active2 ? "Your hero" : "Unnamed hero"), made2 = (h) => Boolean(h.name || h.hero), worldOf2 = (h) => h.plays ?? h.slot;
     const tell = (h) => {
-      const twins = heroes2.filter((x) => x.slot !== h.slot && made(x) && label7(x) === label7(h));
+      const twins = heroes2.filter((x) => x.slot !== h.slot && made2(x) && label7(x) === label7(h));
       if (!twins.length) return label7(h);
-      const cls = h.hero?.cls ? CLASS_NAMES[h.hero.cls] : null, same12 = twins.filter((x) => (x.hero?.cls ?? null) === (h.hero?.cls ?? null));
+      const cls = h.hero?.cls ? CLASS_NAMES2[h.hero.cls] : null, same12 = twins.filter((x) => (x.hero?.cls ?? null) === (h.hero?.cls ?? null));
       return (cls ? `${label7(h)} the ${cls}` : `${label7(h)} (no class yet)`) + (same12.length ? ` \xB7 level ${h.level}` : "");
     };
-    const owner = (slot) => heroes2.find((x) => x.slot === slot), worldsFor = (h) => [h.slot, ...heroes2.filter((x) => x.slot !== h.slot && made(x)).map((x) => x.slot)];
+    const owner = (slot) => heroes2.find((x) => x.slot === slot), worldsFor = (h) => [h.slot, ...heroes2.filter((x) => x.slot !== h.slot && made2(x)).map((x) => x.slot)];
     const parties = heroSlots.partyWorlds?.() ?? [], copies = parties.filter((w) => !w.own), sharedOwn = (slot) => parties.some((w) => w.own && w.slot === slot), story = Boolean(heroSlots.storyDone?.());
     for (const h of heroes2) {
       const card = el3("article", "hero-slot" + (h.slot === active2 ? " is-active" : "")), canvas = el3("canvas", "hero-slot-portrait"), info2 = el3("div", "hero-slot-info"), actions = el3("div", "hero-slot-actions");
       card.dataset.slot = String(h.slot);
       canvas.setAttribute("aria-hidden", "true");
       const name = label7(h), world = worldOf2(h), visiting = world !== h.slot && owner(world);
-      info2.append(el3("strong", "hero-slot-name", name), el3("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
+      info2.append(el3("strong", "hero-slot-name", name), el3("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES2[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
       if (visiting) info2.append(el3("small", "hero-slot-world is-visiting", `In ${tell(visiting)}\u2019s world`));
       else if (h.name || h.hero) info2.append(el3("small", "hero-slot-world" + (h.world ? " is-seeded" : ""), h.world ? `World seed ${h.world.seed}` : "Classic world"));
       const choices = worldsFor(h).filter((slot) => h.slot !== active2 || slot !== world), shared = copies.filter((w) => h.slot !== active2 || w.slot !== world), choose = () => {
@@ -162077,7 +162204,7 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
             continue;
           }
           const b = button3(slot === h.slot ? "Their own world" : `${tell(o)}\u2019s world`, () => act("play", () => heroSlots.play(h.slot, slot)), slot === world ? "is-current" : "");
-          const where = (sharedOwn(slot) ? "Shared \xB7 " : "") + (o?.world ? `Seed ${o.world.seed}` : "Classic world"), people = heroes2.filter((x) => x.slot !== h.slot && worldOf2(x) === slot && made(x)).map(tell);
+          const where = (sharedOwn(slot) ? "Shared \xB7 " : "") + (o?.world ? `Seed ${o.world.seed}` : "Classic world"), people = heroes2.filter((x) => x.slot !== h.slot && worldOf2(x) === slot && made2(x)).map(tell);
           b.append(el3("small", "", people.length ? `${where} \xB7 ${people.join(", ")} here` : where));
           pick4.append(b);
         }
@@ -166334,8 +166461,8 @@ function presenceFromModelV1(model) {
 }
 
 // src/client/friends_view_v1.js
-var CLASS_NAMES2 = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
-var CSS5 = `#world-inventory[data-section=friends] #world-bag-browse,#world-inventory[data-section=friends] #world-materials-view,#world-inventory[data-section=friends] #world-forge-view,#world-inventory[data-section=friends] #world-bag-summary,#world-inventory[data-section=friends] #world-bag-stats{display:none}
+var CLASS_NAMES3 = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
+var CSS6 = `#world-inventory[data-section=friends] #world-bag-browse,#world-inventory[data-section=friends] #world-materials-view,#world-inventory[data-section=friends] #world-forge-view,#world-inventory[data-section=friends] #world-bag-summary,#world-inventory[data-section=friends] #world-bag-stats{display:none}
 #world-inventory .friends-page{grid-column:1/-1;display:grid;gap:12px;align-content:start;min-height:0;overflow:auto;padding:10px 12px 18px;color:var(--rpg-ivory,#f4e7c4);overscroll-behavior:contain}
 #world-inventory .friends-page[hidden]{display:none}
 .fr-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px;align-items:start}
@@ -166383,7 +166510,7 @@ function ago(ms) {
   const d = Math.round(h / 24);
   return d < 2 ? "yesterday" : d < 14 ? `${d} days ago` : "a while ago";
 }
-var heroLine = (h) => h?.name ? ` \xB7 ${h.name}${h.cls || h.level ? ` (${[CLASS_NAMES2[h.cls], h.level].filter(Boolean).join(" ")})` : ""}` : "";
+var heroLine = (h) => h?.name ? ` \xB7 ${h.name}${h.cls || h.level ? ` (${[CLASS_NAMES3[h.cls], h.level].filter(Boolean).join(" ")})` : ""}` : "";
 function createFriendsViewV1({ document: document2, environment, friends, actions = null }) {
   const root6 = document2.createElement("section");
   root6.id = "world-friends-view";
@@ -166392,7 +166519,7 @@ function createFriendsViewV1({ document: document2, environment, friends, action
   if (!document2.getElementById("friends-v1-css")) {
     const s = document2.createElement("style");
     s.id = "friends-v1-css";
-    s.textContent = CSS5;
+    s.textContent = CSS6;
     document2.head.append(s);
   }
   let shown2 = false, busy = null, status2 = "", showBackup = false, removing = null, renaming = false, key4 = null;
@@ -167917,14 +168044,14 @@ function createInventoryPresentation({ document: document2, environment, readMod
 // src/client/interaction_hud_v2.js
 var PICKUP_CONTEXT_V2 = "rpg-context:pickup";
 var REVIVE_CONTEXT_V2 = "rpg-context:revive:";
-var CLASS_NAMES3 = Object.freeze({ shield: "Knight", dagger: "Rogue", tome: "Mage" });
+var CLASS_NAMES4 = Object.freeze({ shield: "Knight", dagger: "Rogue", tome: "Mage" });
 function reviveChoice(model, actor) {
   for (const [pid, p] of Object.entries(model.playersById ?? {})) {
     if (pid === model.localPlayerId) continue;
     const t = model.entitiesById?.[p.entityId];
     if (t && !t.alive && t.position && Math.hypot(t.position.x - actor.position.x, t.position.y - actor.position.y) <= REVIVE_REACH - 4) return {
       exitId: REVIVE_CONTEXT_V2 + pid,
-      label: t.heroLook?.look?.name ? `Revive ${t.heroLook.look.name}` : `Revive the ${CLASS_NAMES3[t.subType] ?? "hero"}`,
+      label: t.heroLook?.look?.name ? `Revive ${t.heroLook.look.name}` : `Revive the ${CLASS_NAMES4[t.subType] ?? "hero"}`,
       /* the friend's hero name (Sammy 2026-11-13), the class if it has none */
       kind: model.revive?.holding?.playerId === pid ? `Reviving \xB7 ${Math.floor(model.revive.holding.progress * 100)}%` : "Hold to revive"
     };
@@ -169116,7 +169243,7 @@ function readSettingsV1(storage) {
   s.effects = Math.max(0, Math.min(100, Math.round(s.effects)));
   return s;
 }
-var CSS6 = `
+var CSS7 = `
 .st{flex:1;min-width:0;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px;align-content:start;padding:16px 20px;box-sizing:border-box;color:#e9dfc8;font:14px/1.35 var(--rpg-ui,"Segoe UI",system-ui,sans-serif)}
 .st[hidden]{display:none}
 .st-sec{border:1px solid #33424e;border-radius:14px;background:linear-gradient(180deg,#212f3a,#18232d);padding:12px 16px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -169177,7 +169304,7 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   if (!doc.getElementById("settings-v1-css")) {
     const st = doc.createElement("style");
     st.id = "settings-v1-css";
-    st.textContent = CSS6;
+    st.textContent = CSS7;
     doc.head.append(st);
   }
   const el3 = (tag2, cls, text3) => {
@@ -174023,7 +174150,7 @@ function loadTitleFont(doc) {
 }
 var xpText = (v) => formatLarge(integerWire(v));
 var DEATH_RINGS = Object.freeze({ boss: "#e8c37a", elite: "#ffa45a", other: "#b8c0c6" });
-var CLASS_NAMES4 = Object.freeze({ shield: "Knight", dagger: "Rogue", tome: "Mage" });
+var CLASS_NAMES5 = Object.freeze({ shield: "Knight", dagger: "Rogue", tome: "Mage" });
 var TICK_MOVES = Object.freeze({ burn: "Burn", bleed: "Bleed", poison: "Poison", bloom: "Spore bloom" });
 var title = (s) => String(s ?? "").toLowerCase().replace(/[_-]+/g, " ").replace(/(^|\s)([a-z])/g, (m, a, b) => a + b.toUpperCase()).trim();
 function deathKillerV1(a) {
@@ -174212,7 +174339,7 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
     const by = model.revive?.by, friend = by && model.entitiesById[model.playersById[by.playerId]?.entityId];
     show("world-death-revive", Boolean(by));
     if (by) {
-      set("world-death-revive-text", `${friend?.heroLook?.look?.name || `The ${CLASS_NAMES4[friend?.subType] ?? "hero"}`} is reviving you \xB7 ${(by.progress * 3).toFixed(1)} / 3 s`);
+      set("world-death-revive-text", `${friend?.heroLook?.look?.name || `The ${CLASS_NAMES5[friend?.subType] ?? "hero"}`} is reviving you \xB7 ${(by.progress * 3).toFixed(1)} / 3 s`);
       el3("world-death-revive-bar")?.style?.setProperty?.("width", `${Math.round(by.progress * 100)}%`);
     }
     const disabled = !model.recovery.canRespawn || model.persistence.phase !== "encounter";
@@ -190028,11 +190155,11 @@ var INK62 = "#11151a";
 var TAU207 = Math.PI * 2;
 var CALL_MS = 3200;
 var CLASS = { shield: "knight", dagger: "rogue", tome: "mage" };
-var CLASS_NAMES5 = { shield: "Knight", dagger: "Rogue", tome: "Mage" };
+var CLASS_NAMES6 = { shield: "Knight", dagger: "Rogue", tome: "Mage" };
 var boing3 = (k) => k <= 0 ? 0 : k >= 1 ? 1 : 1 + Math.sin(k * Math.PI * 2.5) * (1 - k) * 0.45;
 var clamp65 = (v, a, b) => Math.max(a, Math.min(b, v));
-var nameOf = (a) => a?.heroLook?.look?.name || `The ${CLASS_NAMES5[a?.subType] ?? "hero"}`;
-var tagOf = (a) => a?.heroLook?.look?.name || CLASS_NAMES5[a?.subType] || "Friend";
+var nameOf = (a) => a?.heroLook?.look?.name || `The ${CLASS_NAMES6[a?.subType] ?? "hero"}`;
+var tagOf = (a) => a?.heroLook?.look?.name || CLASS_NAMES6[a?.subType] || "Friend";
 var seen3 = /* @__PURE__ */ new Map();
 function friendsDownV1(model) {
   const out4 = [];
@@ -223667,8 +223794,8 @@ var makerNumber = (text3) => {
   return m ? Number(m[1]) : null;
 };
 function refreshOfferedV1(plannedWorld, currentMaker) {
-  const made = makerNumber(plannedWorld?.worldMaker), now3 = makerNumber(currentMaker);
-  return made !== null && now3 !== null && made < now3;
+  const made2 = makerNumber(plannedWorld?.worldMaker), now3 = makerNumber(currentMaker);
+  return made2 !== null && now3 !== null && made2 < now3;
 }
 var SITE2 = /^site:/;
 var TOWN = /^settlement-slot:/;
@@ -223742,7 +223869,7 @@ function clearRefreshV1(storage, key4) {
 }
 
 // src/client/world_refresh_view_v1.js
-var CSS7 = `
+var CSS8 = `
 #world-refresh-v1{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:16px;background:#060a10cc;box-sizing:border-box;font:14px/1.4 var(--rpg-ui,"Segoe UI",system-ui,sans-serif);color:#e9dfc8}
 #world-refresh-v1 .wr-card{width:min(460px,100%);max-height:100%;overflow:auto;box-sizing:border-box;border:1.5px solid #c9a35a;border-radius:14px;background:linear-gradient(180deg,#1d2736,#121a26);box-shadow:0 10px 30px #000b;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
 #world-refresh-v1 h2{margin:0;font:700 18px Georgia,serif;color:#ffe2a0}
@@ -223767,7 +223894,7 @@ var css = (doc) => {
   if (!doc.getElementById("world-refresh-v1-css")) {
     const st = doc.createElement("style");
     st.id = "world-refresh-v1-css";
-    st.textContent = CSS7;
+    st.textContent = CSS8;
     doc.head.append(st);
   }
 };
@@ -223965,9 +224092,9 @@ function devAddGoldV1(passport, amount2) {
   return validateHeroPassport(next);
 }
 var EVENT_NAMES = { wayside_shrine: "Wayside Shrine", road_ambush: "Road Ambush", cursed_shrine: "Cursed Shrine", nests: "Nests", raided_camp: "Raided Camp", buried_cache: "Buried Cache", trophy_hunt: "Trophy Hunt", den: "Den" };
-var CLASS_NAMES6 = { "capital-great-hold": "Capital", city: "City", town: "Town", "village-outpost": "Village" };
+var CLASS_NAMES7 = { "capital-great-hold": "Capital", city: "City", town: "Town", "village-outpost": "Village" };
 function devPlacesV1(settlements, eventPlan, capacities) {
-  const towns2 = (settlements ?? []).filter((s) => s.built && Number.isFinite(s.x) && Number.isFinite(s.y)).map((s) => ({ id: "dev:" + s.id, label: s.label + " (" + (CLASS_NAMES6[s.class] ?? s.class) + ", band " + s.band + ")", group: "Towns", tile: { x: Math.floor(s.x), y: Math.floor(s.y) } })).sort((a, b) => a.label < b.label ? -1 : 1);
+  const towns2 = (settlements ?? []).filter((s) => s.built && Number.isFinite(s.x) && Number.isFinite(s.y)).map((s) => ({ id: "dev:" + s.id, label: s.label + " (" + (CLASS_NAMES7[s.class] ?? s.class) + ", band " + s.band + ")", group: "Towns", tile: { x: Math.floor(s.x), y: Math.floor(s.y) } })).sort((a, b) => a.label < b.label ? -1 : 1);
   const at9 = new Map((capacities ?? []).map((c) => [c.eventSlotId, c])), events = [];
   for (const r of eventPlan ?? []) {
     const c = at9.get(r.eventSlotId);
@@ -227682,7 +227809,7 @@ var ASK_MS = 3e4;
 var WAIT_MS = 9e4;
 var INVITE_MS = 18e4;
 var GATHER_MS = 150;
-var CSS8 = `.fr-toast{position:fixed;left:50%;top:calc(12px + var(--world-safe-top,0px));z-index:60;transform:translateX(-50%);display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;width:min(420px,calc(100vw - 32px));padding:12px 14px;border:1px solid #6d5a3c;border-radius:14px;background:linear-gradient(#1f2a33,#151d25);box-shadow:0 8px 28px #0008;color:#f4e7c4;font:13px/1.4 var(--rpg-ui,system-ui)}
+var CSS9 = `.fr-toast{position:fixed;left:50%;top:calc(12px + var(--world-safe-top,0px));z-index:60;transform:translateX(-50%);display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;width:min(420px,calc(100vw - 32px));padding:12px 14px;border:1px solid #6d5a3c;border-radius:14px;background:linear-gradient(#1f2a33,#151d25);box-shadow:0 8px 28px #0008;color:#f4e7c4;font:13px/1.4 var(--rpg-ui,system-ui)}
 .fr-toast-av{grid-row:span 2;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#2c3b47;font:700 16px var(--rpg-title,serif)}
 .fr-toast p{margin:0;font-weight:600}.fr-toast small{color:#93a0a6}
 .fr-toast-acts{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
@@ -227692,15 +227819,15 @@ var CSS8 = `.fr-toast{position:fixed;left:50%;top:calc(12px + var(--world-safe-t
 .fr-toast button.is-go{border-color:#4f9a66;background:linear-gradient(#2c5a3a,#1a3524);color:#eafff0}
 .fr-toast-bar{grid-column:1/-1;height:3px;border-radius:2px;background:#e9c46a;transform-origin:left;animation:fr-toast-bar linear forwards}
 @keyframes fr-toast-bar{to{transform:scaleX(0)}}`;
-var CLASS_NAMES7 = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
-var heroWords = (h) => h?.name ? [h.name, [CLASS_NAMES7[h.cls], h.level].filter(Boolean).join(" ")].filter(Boolean).join(" \xB7 ") : "";
+var CLASS_NAMES8 = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
+var heroWords = (h) => h?.name ? [h.name, [CLASS_NAMES8[h.cls], h.level].filter(Boolean).join(" ")].filter(Boolean).join(" \xB7 ") : "";
 var nameOf2 = (code2) => String(code2 ?? "A friend").replace(/#\d{4}$/, "");
 function createFriendsFlowV1({ environment, friends, game, now: now3 = () => Date.now() }) {
   const document2 = environment.document;
   if (!document2.getElementById("friends-flow-v1-css")) {
     const s = document2.createElement("style");
     s.id = "friends-flow-v1-css";
-    s.textContent = CSS8;
+    s.textContent = CSS9;
     document2.head.append(s);
   }
   const invited = /* @__PURE__ */ new Map(), cards = [];
@@ -228228,6 +228355,10 @@ async function startWorldClient(environment) {
     deviceStorage = environment.localStorage;
   } catch {
   }
+  try {
+    await heroSelectAtStartV1({ environment, storage: deviceStorage, channel: saveChannelPrefix(environment.location) });
+  } catch {
+  }
   const channel2 = saveChannelPrefix(environment.location), heroRecord = ensureHeroIds(deviceStorage, channel2, () => "hero:" + Array.from(environment.crypto.getRandomValues(new Uint8Array(8)), (v) => v.toString(16).padStart(2, "0")).join("")), heroSlot = heroRecord.active, heroEntry = heroRecord.heroes.find((h) => h.slot === heroSlot), heroId = heroEntry?.heroId ?? null;
   let coopIntent = heroId ? readCoopIntentV1(environment) : null;
   writeCoopIntentV1(environment, null);
@@ -228418,9 +228549,9 @@ async function startWorldClient(environment) {
         }
       }
       if (!launch.resume && !requested && !FORGE_REVIEW_BUILD && proofCase === "A" && plannedOpening.assetId === "alpha") {
-        const made = await newWorldFlowV1({ environment, save: (text3) => builtWorlds.put(text3) });
-        startingHero = made.hero;
-        requested = made.world?.hash ?? null;
+        const made2 = await newWorldFlowV1({ environment, save: (text3) => builtWorlds.put(text3) });
+        startingHero = made2.hero;
+        requested = made2.world?.hash ?? null;
       }
       builtWorld = await builtWorlds.forStart({ resume: launch.resume, requested });
       if (builtWorld) plannedReview = await plannedOpening.open({ hash: builtWorld.hash, commitments: builtWorld.commitments, read: builtWorlds.read });
