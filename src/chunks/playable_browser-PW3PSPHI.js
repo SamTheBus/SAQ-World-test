@@ -1116,7 +1116,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-FXNUE4YM.js";
+} from "./chunk-RVQEYKGT.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -111756,6 +111756,7 @@ var ORB_TICKS = 240;
 var ORB_ZAP_TICKS = 30;
 var MAX_ORBS = 2;
 var RUSH_TICKS = 180;
+var HIT_AND_RUN_TICKS = 180;
 var TRAIL_TICKS = 120;
 var TRAIL_PULSE_TICKS = 30;
 var RAM_TICKS = 32;
@@ -141552,7 +141553,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const blood = rank(source3, "blood_for_blood");
     if (blood && source3.alive && marks2.ticking(target, "bleed")) heal(source3, getStats(source3.entityId), 5 * blood, 1e3);
     const run2 = rank(source3, "hit_and_run");
-    if (run2 && (combat.skills?.rush ?? 0) > RUSH_TICKS - 60) out4 = pct3(out4, 6 * run2);
+    if (run2 && (combat.skills?.rush ?? 0) > RUSH_TICKS - HIT_AND_RUN_TICKS) out4 = pct3(out4, 6 * run2);
     if (rank(source3, "fencers_grace")) out4 = pct3(out4, critical ? 40 : -20);
     if (rank(source3, "focus")) {
       const k = classSkillsRecord(combat);
