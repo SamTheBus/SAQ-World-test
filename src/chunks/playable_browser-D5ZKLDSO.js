@@ -211564,6 +211564,15 @@ function chooseTextPath(anchor2, size, occupied, reserved, view3, sequence, scal
 var SKILL_HIT = Object.freeze({ flashMs: 130, recoilMs: 280, sparksMs: 240, holdMs: 55, push: 12, critPush: 15, squash: 0.16, heavySquash: 0.07 });
 var BASIC_MECHANICS = /* @__PURE__ */ new Set(["main", "offhand", "hostile"]);
 var hitLifeV1 = (r) => r?.skill ? SKILL_HIT.recoilMs : HIT_FEEDBACK.recoilMs;
+var HIT_SHAKE = Object.freeze({ ms: 170, skill: 1.8, skillCrit: 3.2, crit: 1.2 });
+var hitShakeAmountV1 = ({ skill, crit }) => skill && crit ? HIT_SHAKE.skillCrit : skill ? HIT_SHAKE.skill : crit ? HIT_SHAKE.crit : 0;
+function hitShakeOffsetV1(shake, time3) {
+  if (!shake) return null;
+  const age = time3 - shake.born;
+  if (age < 0 || age >= HIT_SHAKE.ms) return null;
+  const k = (1 - age / HIT_SHAKE.ms) ** 2 * Math.cos(age / HIT_SHAKE.ms * Math.PI * 3) * shake.amount;
+  return { x: shake.direction.x * k, y: shake.direction.y * k };
+}
 var HIT_FEEDBACK = Object.freeze({ flashMs: 100, recoilMs: 180, sparksMs: 170, placementMs: 120, numberMs: 750, maxNumbers: 128, maxPerTarget: 128, maxReactions: 32 });
 var IMPACT_LIGHT = Object.freeze({ fire: ["#ff8a3d", 46, 520, 0.6], lightning: ["#ffe45c", 44, 420, 0.6], frost: ["#8fd8ff", 40, 480, 0.45], quake: ["#ff9d5c", 38, 500, 0.35], bash: ["#73bedc", 36, 300, 0.4] });
 var numberFont = (px7) => `800 ${px7}px "Baloo 2", system-ui, sans-serif`;
@@ -211633,7 +211642,14 @@ function createCombatFeedback() {
   let domain = null, context = null, cursor = 0, numbers = [], impacts2 = [], peak = 0, lastModel = null, lastLayout = [], lastReserved = [];
   const reactions = /* @__PURE__ */ new Map(), primaries = /* @__PURE__ */ new Map(), ticks = /* @__PURE__ */ new Map();
   const guessed = /* @__PURE__ */ new Map();
-  let guessedKey = -Infinity;
+  let guessedKey = -Infinity, shaking = null;
+  const calm = (() => {
+    try {
+      return Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+    } catch {
+      return false;
+    }
+  })();
   let rainbow = false;
   const rainbowFill = (ctx, x, w, seq, t) => {
     const g = ctx.createLinearGradient(x, 0, x + Math.max(1, w), 0);
@@ -211696,6 +211712,10 @@ function createCombatFeedback() {
       else {
         const skill = !player && e.kind === "combat.damageApplied" && !e.payload.defenseKind && !BASIC_MECHANICS.has(e.payload.mechanic) && e.payload.trigger !== "periodic" && !COMBAT_TEXT_TICKS.has(e.payload.mechanic) && !e.payload.sourceItem;
         boundedSet(reactions, e.subject.entityId, { born: time3, direction: direction3, position: position4, heavy: heavy2, player, defended: Boolean(e.payload.defenseKind), skill, crit: e.payload.critical === true });
+        if (!calm && !player && e.source.entityId === ownId && e.kind === "combat.damageApplied" && e.payload.trigger !== "periodic" && !COMBAT_TEXT_TICKS.has(e.payload.mechanic)) {
+          const amount2 = hitShakeAmountV1({ skill, crit: e.payload.critical === true });
+          if (amount2 && !(hitShakeOffsetV1(shaking, time3) && shaking.amount > amount2)) shaking = { born: time3, amount: amount2, direction: length > 1e-3 ? direction3 : { x: 1, y: 0 } };
+        }
       }
       const same12 = numbers.filter((n) => n.targetId === e.subject.entityId);
       if (same12.length >= HIT_FEEDBACK.maxPerTarget) numbers = numbers.filter((n) => n !== same12[0]);
@@ -211918,7 +211938,9 @@ function createCombatFeedback() {
     }
     ctx.restore();
   }
+  const shake = (time3) => hitShakeOffsetV1(shaking, time3);
   return Object.freeze({
+    shake,
     rebase(project2) {
       for (const n of /* @__PURE__ */ new Set([...numbers, ...impacts2, ...reactions.values()])) {
         n.position = project2(n.position);
@@ -222934,9 +222956,10 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     const visualActor = selectedActor(visualModel), cam = camera.update(visualModel, canvas.width, canvas.height, time3);
     ctx.fillStyle = "#080d16";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const hitShake = feedback.shake(time3);
     ctx.save();
     ctx.scale(cam.zoom, cam.zoom);
-    ctx.translate(-cam.x + tripShakeV1(model, time3), -cam.y);
+    ctx.translate(-cam.x + tripShakeV1(model, time3) + (hitShake?.x ?? 0), -cam.y + (hitShake?.y ?? 0));
     const frame4 = dayNight.begin(model), unified = frame4.enabled;
     lighting.beginFrame(frame4);
     const margin = 64, viewport = { x: cam.x - margin, y: cam.y - margin, width: canvas.width / cam.zoom + margin * 2, height: canvas.height / cam.zoom + margin * 2, displayBounds: { x: cam.x, y: cam.y, width: canvas.width / cam.zoom, height: canvas.height / cam.zoom } }, lightView = { x: cam.x, y: cam.y, width: canvas.width / cam.zoom, height: canvas.height / cam.zoom }, depthItems2 = [];
@@ -224863,7 +224886,64 @@ function createDiagnosticDownloadD9({ environment, document: document2, runtimeI
 // src/client/session_blackbox_v1.js
 var BLACKBOX_KEY = "saq-blackbox-v1";
 var BLACKBOX_LAST_KEY = "saq-blackbox-last-v1";
+var BLACKBOX_BEAT_KEY = "saq-blackbox-beat-v1";
 var BLACKBOX_VERSION = "session-blackbox-v1";
+var BLACKBOX_TREND_ROWS = 180;
+function watchCanvasesV1(doc) {
+  if (!doc?.createElement || typeof WeakRef !== "function") return () => null;
+  if (doc.__saqCanvasCensusV1) return doc.__saqCanvasCensusV1;
+  const refs = [], original = doc.createElement;
+  let made2 = 0;
+  doc.createElement = function(tag2, ...rest2) {
+    const el3 = original.call(this, tag2, ...rest2);
+    try {
+      if (typeof tag2 === "string" && tag2.toLowerCase() === "canvas") {
+        made2++;
+        refs.push(new WeakRef(el3));
+      }
+    } catch {
+    }
+    return el3;
+  };
+  const read3 = () => {
+    let alive = 0, bytes = 0, big = 0, keep8 = 0;
+    for (let i = 0; i < refs.length; i++) {
+      const c = refs[i].deref();
+      if (!c) continue;
+      refs[keep8++] = refs[i];
+      alive++;
+      const b = c.width * c.height * 4;
+      bytes += b;
+      if (b >= 4194304) big++;
+    }
+    refs.length = keep8;
+    return { made: made2, alive, mb: Math.round(bytes / 104857.6) / 10, big };
+  };
+  try {
+    Object.defineProperty(doc, "__saqCanvasCensusV1", { value: read3, configurable: true });
+  } catch {
+  }
+  return read3;
+}
+function trendPicksV1(snapshot) {
+  const p = snapshot?.presentation, a = snapshot?.activity, out4 = {};
+  if (!snapshot) return out4;
+  const put3 = (k, v) => {
+    if (typeof v === "number" && Number.isFinite(v)) out4[k] = Math.round(v * 10) / 10;
+  };
+  put3("pages", p?.overworldRasterPages);
+  put3("evict", p?.overworldRasterEvictions);
+  put3("pagesMade", p?.overworldRasterCanvasesCreated);
+  put3("envMb", (p?.environmentRetainedCanvasBytes ?? NaN) / 1048576);
+  put3("drawn", p?.renderedEntities);
+  put3("pinned", a?.d9Streaming?.pinnedCount);
+  put3("loose", a?.d9Streaming?.evictableCount);
+  put3("chunks", a?.simulatedChunks);
+  put3("actors", a?.canonicalActors);
+  put3("resets", snapshot?.gauges?.authorityResetCount);
+  put3("long", snapshot?.longFrameCount);
+  return out4;
+}
 var parse2 = (text3) => {
   try {
     const v = JSON.parse(text3 ?? "null");
@@ -224887,10 +224967,22 @@ function lastSessionLineV1(last, format = (t) => new Date(t).toLocaleTimeString(
   const mins = Math.max(0, Math.floor((last.at - last.startedAt) / 6e4)), span3 = mins < 1 ? "under a minute" : mins + " min";
   return (last.ended === "unexpected" ? "Ended without warning at " : "Closed at ") + format(last.at) + " after " + span3 + " of play";
 }
-function startBlackboxV1({ environment: env, storage, channel: channel2 = "", readSnapshot, build: build2 = "", everyMs = 15e3, now: now3 = () => Date.now() }) {
-  const key4 = channel2 + BLACKBOX_KEY, lastKey = channel2 + BLACKBOX_LAST_KEY;
+function startBlackboxV1({ environment: env, storage, channel: channel2 = "", readSnapshot, build: build2 = "", everyMs = 15e3, beatMs = 5e3, now: now3 = () => Date.now() }) {
+  const key4 = channel2 + BLACKBOX_KEY, lastKey = channel2 + BLACKBOX_LAST_KEY, beatKey = channel2 + BLACKBOX_BEAT_KEY;
   const prior = read2(storage, key4);
   let last = readLastSessionV1(storage, channel2);
+  if (prior) {
+    const beat2 = read2(storage, beatKey);
+    if (beat2 && beat2.startedAt === prior.startedAt && Array.isArray(beat2.rows)) {
+      const from = prior.trend?.length ? prior.trend[prior.trend.length - 1].s : -1;
+      prior.trend = [...prior.trend ?? [], ...beat2.rows.filter((r) => r.s > from)].slice(-BLACKBOX_TREND_ROWS);
+      if (!prior.clean) prior.at = Math.max(prior.at, beat2.at ?? 0);
+    }
+  }
+  try {
+    storage?.removeItem?.(beatKey);
+  } catch {
+  }
   if (prior) {
     last = { ...prior, ended: prior.clean ? "closed" : "unexpected" };
     try {
@@ -224902,7 +224994,7 @@ function startBlackboxV1({ environment: env, storage, channel: channel2 = "", re
       }
     }
   }
-  const record2 = { version: BLACKBOX_VERSION, build: build2, startedAt: now3(), at: now3(), clean: false, exit: null, writes: 0, errors: [], notes: [], snapshot: null };
+  const record2 = { version: BLACKBOX_VERSION, build: build2, startedAt: now3(), at: now3(), clean: false, exit: null, writes: 0, errors: [], notes: [], trend: [], storage: null, snapshot: null };
   const write4 = () => {
     record2.at = now3();
     record2.writes++;
@@ -224924,12 +225016,71 @@ function startBlackboxV1({ environment: env, storage, channel: channel2 = "", re
       }
     }
   };
+  const census = watchCanvasesV1(env.document);
+  let frames = 0, worst = 0, lastFrame = 0, rowAt = now3(), fresh = [], raf = null;
+  const onFrame = (t) => {
+    if (lastFrame) {
+      const gap2 = t - lastFrame;
+      if (gap2 > worst) worst = gap2;
+    }
+    lastFrame = t;
+    frames++;
+    raf = env.requestAnimationFrame?.(onFrame) ?? null;
+  };
+  raf = env.requestAnimationFrame?.(onFrame) ?? null;
+  function row2(picks) {
+    const t = now3(), span3 = Math.max(1, t - rowAt) / 1e3, c = census(), mem = env.performance?.memory, r = { s: Math.round((t - record2.startedAt) / 1e3) };
+    if (raf !== null) {
+      r.fps = Math.round(frames / span3);
+      r.worst = Math.round(worst);
+    }
+    if (c) {
+      r.cv = c.alive;
+      r.cvMb = c.mb;
+      r.cvMade = c.made;
+      r.cvBig = c.big;
+    }
+    if (mem?.usedJSHeapSize) r.heapMb = Math.round(mem.usedJSHeapSize / 1048576);
+    try {
+      const n = env.document?.getElementsByTagName?.("*")?.length;
+      if (typeof n === "number") r.dom = n;
+    } catch {
+    }
+    frames = 0;
+    worst = 0;
+    rowAt = t;
+    Object.assign(r, picks);
+    record2.trend.push(r);
+    if (record2.trend.length > BLACKBOX_TREND_ROWS) record2.trend.shift();
+    return r;
+  }
+  const askStorage = () => {
+    try {
+      env.navigator?.storage?.estimate?.().then((e) => {
+        record2.storage = { usedMb: Math.round((e.usage ?? 0) / 1048576), quotaMb: Math.round((e.quota ?? 0) / 1048576) };
+      }, () => {
+      });
+    } catch {
+    }
+  };
+  askStorage();
+  const beat = () => {
+    fresh.push(row2());
+    if (fresh.length > 12) fresh.shift();
+    try {
+      storage?.setItem(beatKey, JSON.stringify({ version: BLACKBOX_VERSION, startedAt: record2.startedAt, at: now3(), rows: fresh }));
+    } catch {
+    }
+  };
   const flush = () => {
     try {
       record2.snapshot = readSnapshot?.() ?? null;
     } catch (e) {
       record2.snapshot = { error: String(e?.message ?? e) };
     }
+    row2(trendPicksV1(record2.snapshot));
+    fresh = [];
+    if (record2.writes % 4 === 0) askStorage();
     return write4();
   };
   const push = (list, entry2) => {
@@ -224965,9 +225116,14 @@ function startBlackboxV1({ environment: env, storage, channel: channel2 = "", re
   env.addEventListener?.("error", onError);
   env.addEventListener?.("unhandledrejection", onError);
   write4();
+  let bigAt = now3();
   const timer = env.setInterval?.(() => {
-    if (!hidden()) flush();
-  }, everyMs) ?? null;
+    if (hidden()) return;
+    if (now3() - bigAt >= everyMs - 250) {
+      bigAt = now3();
+      flush();
+    } else beat();
+  }, Math.min(beatMs, everyMs)) ?? null;
   return Object.freeze({
     last,
     note: note2,
@@ -224975,6 +225131,7 @@ function startBlackboxV1({ environment: env, storage, channel: channel2 = "", re
     record: () => record2,
     stop() {
       if (timer !== null) env.clearInterval?.(timer);
+      if (raf !== null) env.cancelAnimationFrame?.(raf);
       env.removeEventListener?.("pagehide", onHide);
       doc?.removeEventListener?.("visibilitychange", onVisibility);
       env.removeEventListener?.("error", onError);
