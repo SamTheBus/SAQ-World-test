@@ -2023,3 +2023,8 @@ body[data-hud-menu=ring] .chart-mini,body[data-hud-menu=ring] .world-mini{margin
 .coop-bar{box-sizing:border-box;max-width:calc(100vw - 20px - var(--world-safe-left,0px) - var(--world-safe-right,0px))}
 .coop-bar-text{min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.3}
 .coop-bar button{flex:none}
+/* Boss skip v1: the second way through, above the prompt (interaction_hud_v2.js). */
+#rpg-interaction-alt-v1{position:absolute;z-index:9;display:flex;flex-direction:column;gap:2px;min-height:44px;margin:0;padding:6px 14px;border:2px solid #101820;border-radius:8px;background:linear-gradient(100deg,#4a3a17f5,#2a2110ee);box-shadow:inset 0 0 0 1px #e2b85a,0 3px 0 #10182080;color:#ffe9b0;text-align:left;cursor:pointer;touch-action:manipulation;user-select:none;font-family:var(--rpg-ui,system-ui)}
+#rpg-interaction-alt-v1[hidden]{display:none!important}
+#rpg-interaction-alt-v1 small{font:600 10px/1 var(--rpg-ui,system-ui);letter-spacing:.06em;text-transform:uppercase;color:#d9c08a}
+#rpg-interaction-alt-v1 strong{font:700 15px/1.1 var(--rpg-ui,system-ui)}

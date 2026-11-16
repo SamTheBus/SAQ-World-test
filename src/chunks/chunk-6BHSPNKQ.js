@@ -5311,7 +5311,7 @@ function validateCommand(command) {
   } else if (command.kind === "site.transition") {
     closedRecord(command.payload, ["siteId", "direction"], ["transitionId", "extractionId"]);
     requireContract(/^loc:[a-f0-9]{32}$/.test(command.payload.siteId) || /^site:[a-f0-9]{32}$/.test(command.payload.siteId), "Invalid site transition identity");
-    requireContract(["enter", "exit", "up", "down", "extract"].includes(command.payload.direction), "Invalid site transition direction");
+    requireContract(["enter", "boss", "exit", "up", "down", "extract"].includes(command.payload.direction), "Invalid site transition direction");
     if (["up", "down"].includes(command.payload.direction)) requireContract(typeof command.payload.transitionId === "string" && command.payload.transitionId.length <= 180 && command.payload.extractionId === void 0, "Missing floor transition identity");
     else if (command.payload.direction === "extract") requireContract(typeof command.payload.extractionId === "string" && command.payload.extractionId.length <= 180 && command.payload.transitionId === void 0, "Missing extraction identity");
     else requireContract(command.payload.transitionId === void 0 && command.payload.extractionId === void 0, "Unexpected site transition identity");
@@ -23554,6 +23554,10 @@ function currentGroupIds(state, siteId2) {
 function currentClearTick(state, siteId2) {
   if (siteSupportsResetD13C(state, siteId2)) {
     const ids = currentGroupIds(state, siteId2), groups = ids.map((id) => state.groupsById[id]);
+    if (ids.length > 1 && state.campaign.siteRunEpisodesById?.[siteId2]?.episode > 1) {
+      const last = ids.at(-1);
+      return state.groupsById[last]?.cleared ? state.encounterEconomy?.groups?.[last]?.clearedTick ?? state.tick : null;
+    }
     if (!ids.length || groups.some((group) => !group?.cleared)) return null;
     return Math.max(...ids.map((id) => state.encounterEconomy?.groups?.[id]?.clearedTick ?? state.tick));
   }
@@ -24069,6 +24073,12 @@ function eligibleFunctionalSocketD10(state, socket) {
 function findRuntimeSiteSocketD9(state, siteId2) {
   return state.d9World.runtime.chunks.flatMap((c) => c.sites ?? []).find((s) => s.siteId === siteId2) ?? null;
 }
+function siteBossDoorV1(site) {
+  if (!site || site.conqueredTick == null || !Array.isArray(site.floors) || site.floors.length < 2) return null;
+  const last = site.floors.at(-1), down = site.floors.at(-2).transitions?.down;
+  if (!down?.targetAnchor || down.spaceInstanceId !== last.spaceInstanceId) return null;
+  return { spaceInstanceId: last.spaceInstanceId, destination: down.targetAnchor, floorIndex: site.floors.length - 1 };
+}
 function functionalSiteTransitionTargetD9(state, actor, payload) {
   const f3 = state.d9World?.functionalSitesById?.[payload.siteId];
   if (!f3 || !actor.alive || state.primary.actorsById[actor.entityId]?.current) return null;
@@ -24080,13 +24090,20 @@ function functionalSiteTransitionTargetD9(state, actor, payload) {
       anchor2 = siteEnterPointV1(f3.packageId, projectToLocalFrameD9(f3.socket.entrance, state.d9World.runtime.frames));
       destination2 = f3.floors[0].entrance;
       targetSpace = f3.floors[0].spaceInstanceId;
+    } else if (payload.direction === "boss") {
+      const landing = siteBossDoorV1(f3);
+      if (!landing) return null;
+      source11 = state.overworldInstanceId;
+      anchor2 = siteEnterPointV1(f3.packageId, projectToLocalFrameD9(f3.socket.entrance, state.d9World.runtime.frames));
+      destination2 = landing.destination;
+      targetSpace = landing.spaceInstanceId;
     } else {
       const floor = functionalSiteFloorForSpaceD12(f3, actor.residency.spaceInstanceId);
       if (!floor) return null;
       if (payload.direction === "exit") {
-        if (floor.index !== 0) return null;
+        if (floor.index !== 0 && !(floor.index === f3.floors.length - 1 && siteBossDoorV1(f3) && floor.transitions?.up?.anchor)) return null;
         source11 = floor.spaceInstanceId;
-        anchor2 = floor.entrance;
+        anchor2 = floor.index === 0 ? floor.entrance : floor.transitions.up.anchor;
         destination2 = projectToLocalFrameD9(f3.socket.entrance, state.d9World.runtime.frames);
         targetSpace = state.overworldInstanceId;
       } else if (payload.direction === "extract") {
@@ -24205,7 +24222,7 @@ function validateFunctionalSiteStateD9(state) {
       }
       if (siteSupportsResetD13C(state, f3.siteId)) {
         const run = resolveSiteRunEpisodeD13B(state, f3.siteId), retired = (run?.historyArchive?.archivedEpisodes ?? 0) + (run?.completionHistory?.length ?? 0);
-        requireContract(Boolean(run) && run.status === "cleared" === cleared && f3.conqueredTick !== null === (retired > 0 || run.status === "cleared"), "Resettable Cave completion drift");
+        requireContract(Boolean(run) && run.status === "cleared" === (run.episode > 1 ? Boolean(state.groupsById[f3.floors.at(-1).groupId]?.cleared) : cleared) && f3.conqueredTick !== null === (retired > 0 || run.status === "cleared"), "Resettable Cave completion drift");
       } else requireContract(f3.conqueredTick !== null === cleared, "Generated cave completion drift");
       continue;
     }
@@ -32265,6 +32282,7 @@ export {
   validateFunctionalSiteD9,
   eligibleFunctionalSocketD10,
   findRuntimeSiteSocketD9,
+  siteBossDoorV1,
   functionalSiteTransitionTargetD9,
   admitFunctionalSiteD9,
   validateFunctionalSiteStateD9,

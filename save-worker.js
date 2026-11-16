@@ -23247,6 +23247,10 @@ function currentGroupIds(state, siteId2) {
 function currentClearTick(state, siteId2) {
   if (siteSupportsResetD13C(state, siteId2)) {
     const ids = currentGroupIds(state, siteId2), groups = ids.map((id2) => state.groupsById[id2]);
+    if (ids.length > 1 && state.campaign.siteRunEpisodesById?.[siteId2]?.episode > 1) {
+      const last = ids.at(-1);
+      return state.groupsById[last]?.cleared ? state.encounterEconomy?.groups?.[last]?.clearedTick ?? state.tick : null;
+    }
     if (!ids.length || groups.some((group) => !group?.cleared)) return null;
     return Math.max(...ids.map((id2) => state.encounterEconomy?.groups?.[id2]?.clearedTick ?? state.tick));
   }
@@ -23730,7 +23734,7 @@ function validateFunctionalSiteStateD9(state) {
       }
       if (siteSupportsResetD13C(state, f3.siteId)) {
         const run = resolveSiteRunEpisodeD13B(state, f3.siteId), retired = (run?.historyArchive?.archivedEpisodes ?? 0) + (run?.completionHistory?.length ?? 0);
-        requireContract(Boolean(run) && run.status === "cleared" === cleared && f3.conqueredTick !== null === (retired > 0 || run.status === "cleared"), "Resettable Cave completion drift");
+        requireContract(Boolean(run) && run.status === "cleared" === (run.episode > 1 ? Boolean(state.groupsById[f3.floors.at(-1).groupId]?.cleared) : cleared) && f3.conqueredTick !== null === (retired > 0 || run.status === "cleared"), "Resettable Cave completion drift");
       } else requireContract(f3.conqueredTick !== null === cleared, "Generated cave completion drift");
       continue;
     }
@@ -26355,7 +26359,7 @@ function validateCommand(command) {
   } else if (command.kind === "site.transition") {
     closedRecord(command.payload, ["siteId", "direction"], ["transitionId", "extractionId"]);
     requireContract(/^loc:[a-f0-9]{32}$/.test(command.payload.siteId) || /^site:[a-f0-9]{32}$/.test(command.payload.siteId), "Invalid site transition identity");
-    requireContract(["enter", "exit", "up", "down", "extract"].includes(command.payload.direction), "Invalid site transition direction");
+    requireContract(["enter", "boss", "exit", "up", "down", "extract"].includes(command.payload.direction), "Invalid site transition direction");
     if (["up", "down"].includes(command.payload.direction)) requireContract(typeof command.payload.transitionId === "string" && command.payload.transitionId.length <= 180 && command.payload.extractionId === void 0, "Missing floor transition identity");
     else if (command.payload.direction === "extract") requireContract(typeof command.payload.extractionId === "string" && command.payload.extractionId.length <= 180 && command.payload.transitionId === void 0, "Missing extraction identity");
     else requireContract(command.payload.transitionId === void 0 && command.payload.extractionId === void 0, "Unexpected site transition identity");

@@ -919,6 +919,7 @@ import {
   settlementV1,
   shopkeeperCastV1,
   signedAddress,
+  siteBossDoorV1,
   siteClearXpV2,
   siteEndRoleV1,
   siteEndSpecV1,
@@ -1115,7 +1116,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-TBT56JVJ.js";
+} from "./chunk-6BHSPNKQ.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -143302,7 +143303,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
         if (primary && length > 0) primary.facing = { x: command.payload.x / length, y: command.payload.y / length };
       } else if (target) {
         const functional = state2.d9World?.functionalSitesById?.[command.payload.siteId];
-        if (command.payload.direction === "enter" && isGeneratedInteriorFamily(functional) && !functional.discoveredByPlayerIds.includes(command.playerId)) {
+        if (["enter", "boss"].includes(command.payload.direction) && isGeneratedInteriorFamily(functional) && !functional.discoveredByPlayerIds.includes(command.playerId)) {
           functional.discoveredByPlayerIds = functional.discoveredByPlayerIds.filter((pid) => state2.playersById[pid]);
           functional.discoveredByPlayerIds.push(command.playerId);
           functional.discoveredByPlayerIds.sort();
@@ -145042,7 +145043,8 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                 const transition2 = functionalFloor.transitions[direction3];
                 if (!transition2) continue;
                 const payload = { siteId: functional.siteId, direction: direction3, transitionId: transition2.transitionId }, anchor2 = transition2.anchor;
-                exits.push({ exitId: `site-${direction3}:${transition2.transitionId}`, siteAction: payload, siteKind: functional.siteKind, ...functionalFloor.graph?.navigation?.arrivalFacing !== void 0 ? { stairFacing: functionalFloor.graph.navigation[direction3 === "up" ? "arrivalFacing" : "onwardFacing"] } : {}, x: anchor2.x, y: anchor2.y, radius: SITE_INTERACTION_RADIUS, available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)), label: transition2.label ?? (direction3 === "down" ? "Descend" : "Ascend") });
+                exits.push({ exitId: `site-${direction3}:${transition2.transitionId}`, siteAction: payload, siteKind: functional.siteKind, .../* boss skip v1: out from the last floor's stairs */
+                direction3 === "up" && functionalFloor.index === functional.floors.length - 1 && siteBossDoorV1(functional) && functionalSiteTransitionTargetD9(state2, local8, { siteId: functional.siteId, direction: "exit" }) ? { altAction: { siteAction: { siteId: functional.siteId, direction: "exit" }, label: functional.siteKind === "procedural-fort" ? "Leave Fort" : functional.siteKind === "procedural-ruin" ? "Leave Ruin" : functional.siteKind === "procedural-crypt" ? "Leave Crypt" : "Leave Cave", kind: "Back outside" } } : {}, ...functionalFloor.graph?.navigation?.arrivalFacing !== void 0 ? { stairFacing: functionalFloor.graph.navigation[direction3 === "up" ? "arrivalFacing" : "onwardFacing"] } : {}, x: anchor2.x, y: anchor2.y, radius: SITE_INTERACTION_RADIUS, available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)), label: transition2.label ?? (direction3 === "down" ? "Descend" : "Ascend") });
               }
               const extraction = projectSmallCaveFinaleExtractionD13D_C(state2, functional, functionalFloor) ?? projectStandardCaveBossExtractionD13D_E(state2, functional, functionalFloor) ?? projectLargeCaveFinaleExtractionD13D_G(state2, functional, functionalFloor) ?? projectArachnidTreantExtractionD12_5C(state2, functional, functionalFloor);
               if (extraction?.visible) {
@@ -145059,7 +145061,8 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
               const bound = state2.d9World.functionalSitesById[truth.siteId], keep8 = bound?.siteKind === "woodland-fort" || truth.packageId === "procedural-fort-family";
               if (Math.hypot(anchor2.x - local8.position.x, anchor2.y - local8.position.y) > 900) continue;
               const payload = { siteId: truth.siteId, direction: "enter" }, available = bound ? Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)) : local8.alive && !state2.primary.actorsById[local8.entityId].current && Math.hypot(anchor2.x - local8.position.x, anchor2.y - local8.position.y) <= SITE_INTERACTION_RADIUS;
-              exits.push({ exitId: `site-enter:${truth.siteId}`, siteAction: payload, siteKind: keep8 ? "woodland-fort-keep" : truth.packageId === "procedural-ruin-family" ? "procedural-ruin" : truth.siteType, ...truth.packageId === "procedural-fort-family" ? { proceduralFort: true } : {}, ...["procedural-ruin-family", "procedural-crypt-family"].includes(truth.packageId) ? { proceduralRuin: true } : {}, x: anchor2.x, y: anchor2.y, radius: SITE_INTERACTION_RADIUS, available, label: bound?.siteKind === "woodland-fort" ? "Enter Keep" : bound ? `Enter ${truth.label}` : `Enter ${truth.label}` });
+              exits.push({ exitId: `site-enter:${truth.siteId}`, siteAction: payload, .../* boss skip v1: a site beaten before also opens onto its last floor */
+              available && bound && siteBossDoorV1(bound) ? { altAction: { siteAction: { siteId: truth.siteId, direction: "boss" }, label: "Boss door", kind: "Straight to the last floor" } } : {}, siteKind: keep8 ? "woodland-fort-keep" : truth.packageId === "procedural-ruin-family" ? "procedural-ruin" : truth.siteType, ...truth.packageId === "procedural-fort-family" ? { proceduralFort: true } : {}, ...["procedural-ruin-family", "procedural-crypt-family"].includes(truth.packageId) ? { proceduralRuin: true } : {}, x: anchor2.x, y: anchor2.y, radius: SITE_INTERACTION_RADIUS, available, label: bound?.siteKind === "woodland-fort" ? "Enter Keep" : bound ? `Enter ${truth.label}` : `Enter ${truth.label}` });
             }
           }
         }
@@ -168064,7 +168067,7 @@ function interactionChoiceV2(model) {
   const revive = reviveChoice(model, actor);
   if (revive) return revive;
   const exit = interactionExitV2(model);
-  if (exit && !(exit.questSpot && pickupChoice(model))) return { exitId: exit.exitId, label: exit.label ?? "Use passage", kind: interactionKindV2(exit) };
+  if (exit && !(exit.questSpot && pickupChoice(model))) return { exitId: exit.exitId, label: exit.label ?? "Use passage", kind: interactionKindV2(exit), ...exit.altAction ? { alt: { label: exit.altAction.label, kind: exit.altAction.kind ?? "" } } : {} };
   return pickupChoice(model);
 }
 function pickupChoice(model) {
@@ -168098,9 +168101,43 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
     const chosen = interactionChoiceV2(readModel());
     if (chosen) activate(chosen.exitId);
   } });
+  const alt = doc.createElement("button"), altKind = doc.createElement("small"), altLabel = doc.createElement("strong");
+  alt.type = "button";
+  alt.id = "rpg-interaction-alt-v1";
+  alt.hidden = true;
+  alt.dataset.gameplayHud = "";
+  alt.append(altKind, altLabel);
+  const holder = doc.getElementById("world-view").parentElement;
+  holder.append(alt);
+  let altKey = "";
+  alt.addEventListener?.("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isBlocked() || alt.hidden) return;
+    const chosen = interactionChoiceV2(readModel());
+    if (chosen?.alt) activate(chosen.exitId, true);
+  });
+  const place4 = () => {
+    const r = button3.getBoundingClientRect?.(), p = holder.getBoundingClientRect?.();
+    if (!r || !p) return;
+    alt.style.left = Math.round(r.left - p.left) + "px";
+    alt.style.top = Math.round(r.top - p.top - (alt.offsetHeight || 44) - 8) + "px";
+  };
   function refresh(model, visible3 = true) {
     const target = visible3 && !isBlocked() ? interactionChoiceV2(model) : null;
     button3.hidden = !target;
+    const a = target?.alt ?? null;
+    alt.hidden = !a;
+    if (a) {
+      const k = target.exitId + "|" + a.label;
+      if (k !== altKey) {
+        altKey = k;
+        altKind.textContent = a.kind;
+        altLabel.textContent = a.label;
+        alt.setAttribute("aria-label", a.label);
+      }
+      place4();
+    } else altKey = "";
     if (!target) {
       previous = "";
       return false;
@@ -168119,6 +168156,7 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
     input.destroy();
     button3.removeEventListener("keydown", stopRepeatedKey);
     button3.remove();
+    alt.remove();
     delete doc.body.dataset.rpgInteraction;
   } });
 }
@@ -219741,7 +219779,7 @@ function createWorldInput({ canvas, environment, renderer, profile, adapter, rea
     const rect7 = canvas.getBoundingClientRect();
     return { x: (event.clientX - rect7.left) * canvas.width / rect7.width, y: (event.clientY - rect7.top) * canvas.height / rect7.height };
   }
-  function action2(exitId) {
+  function action2(exitId, alt = false) {
     if (isBlocked() || !exitId || !selectedActor(readModel()).alive) return false;
     clear2();
     try {
@@ -219761,7 +219799,7 @@ function createWorldInput({ canvas, environment, renderer, profile, adapter, rea
         if (selected.available) openFerry(selected);
       } else if (selected?.forgeAction) {
         if (selected.available) openForge();
-      } else if (selected?.siteAction) result = adapter.issue("site.transition", selected.siteAction);
+      } else if (selected?.siteAction) result = adapter.issue("site.transition", alt && selected.altAction ? selected.altAction.siteAction : selected.siteAction);
       else result = adapter.issue("space.travel", { exitId });
       if (result?.then) result.catch((error) => reportError(error.message));
     } catch (error) {
@@ -220244,7 +220282,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     },
     now: () => environment.performance.now()
   });
-  const activateContext = (exitId) => {
+  const activateContext = (exitId, alt = false) => {
     if (gameplayInputBlocked()) return;
     if (exitId === PICKUP_CONTEXT_V2) doc.getElementById("world-pickup").click();
     else if (exitId.startsWith(REVIVE_CONTEXT_V2)) {
@@ -220252,7 +220290,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
         adapter.issue("player.revive", { targetPlayerId: exitId.slice(REVIVE_CONTEXT_V2.length), holding: true }, readModel());
       } catch {
       }
-    } else input.activate(exitId);
+    } else input.activate(exitId, alt);
   };
   const reviveRelease = (e) => {
     if (e.code !== "KeyE") return;
@@ -222618,7 +222656,7 @@ function siteResetEligibilityD13C(state2, siteId, { transitioningPlayerIds = [] 
   else if (episode.status !== "cleared") reasons.push(`episode-${episode.status}`);
   if (occupants.length) reasons.push("site-occupied");
   if (transitioningPlayerIds.length) reasons.push("site-transitioning");
-  if (Array.isArray(site?.floors) && site.floors.some((floor) => !state2.groupsById[floor.groupId]?.cleared)) reasons.push("encounter-not-cleared");
+  if (Array.isArray(site?.floors) && (episode?.episode > 1 ? !state2.groupsById[site.floors.at(-1).groupId]?.cleared : site.floors.some((floor) => !state2.groupsById[floor.groupId]?.cleared))) reasons.push("encounter-not-cleared");
   return freezeWire({ version: SITE_RESET_D13C, siteId, eligible: reasons.length === 0, reasons, occupantPlayerIds: occupants, transitioningPlayerIds: [...transitioningPlayerIds], episode: episode?.episode ?? null, status: episode?.status ?? null });
 }
 async function prepareSiteResetD13C(state2, siteId, { sha256, transitioningPlayerIds = [], playerId = state2.session.playerIds[0] }) {
@@ -223284,6 +223322,48 @@ async function createLocalEndlessSessionD9(options) {
       void stream.pump();
     }
   };
+  const SITE_RESET_CHECK_MS = 2e3;
+  let lastSiteResetCheckAt = -Infinity, siteResetting = false, siteResets = 0, siteResetError = null;
+  async function autoResetSites() {
+    if (siteResetting) return;
+    siteResetting = true;
+    try {
+      const siteId = authority.withAuthority((a) => a.withAuthorityState((s) => {
+        for (const id2 of Object.keys(s.d9World?.functionalSitesById ?? {})) if (resolveSiteRunEpisodeD13B(s, id2)?.status === "cleared" && siteResetEligibilityD13C(s, id2, { transitioningPlayerIds: transitioningPlayersForSiteD13C(authority.readGateway(), id2) }).eligible) return id2;
+        return null;
+      }));
+      if (!siteId) return;
+      await stream.settled();
+      if (functionalCommands.busy() || authority.getStatus().phase !== "ready") return;
+      const snapshot = authority.withAuthority((a) => a.withAuthorityState(copyWire)), transitioningPlayerIds = transitioningPlayersForSiteD13C(authority.readGateway(), siteId);
+      if (!siteResetEligibilityD13C(snapshot, siteId, { transitioningPlayerIds }).eligible) return;
+      const plan = await prepareSiteResetD13C(snapshot, siteId, { sha256, transitioningPlayerIds, playerId: localPlayerId });
+      const landed2 = authority.withReadyAuthority((a) => {
+        let ok = false;
+        a.withAuthorityState((s) => {
+          const live = transitioningPlayersForSiteD13C(authority.readGateway(), siteId);
+          if (!siteResetEligibilityD13C(s, siteId, { transitioningPlayerIds: live }).eligible) return;
+          try {
+            commitSiteResetD13C(s, plan, { transitioningPlayerIds: live });
+            ok = true;
+          } catch (error) {
+            if (!/Stale site reset plan|Site reset changed before commit/.test(error.message)) throw error;
+          }
+        });
+        if (ok) a.refreshWorldResidency();
+        return ok;
+      });
+      if (landed2) {
+        siteResets++;
+        siteResetError = null;
+        void save();
+      }
+    } catch (error) {
+      siteResetError = error.message;
+    } finally {
+      siteResetting = false;
+    }
+  }
   let groundPreparation = null, groundPreparationError = null, groundPreparationOffers = 0, groundPreparationCompletions = 0;
   const groundPreparationHistory = [];
   const groundPrefetch = createGroundCoveragePrefetchV1({ canRun: () => typeof store2.worldPages?.readPage === "function" && !reviewTravelPending && !groundPreparation && !groundPreparationError && !fatalInvariant && !functionalCommands.busy() && !ferryPending && !respawnPending && !servicePending && authority.getStatus().phase === "ready", needsRefresh: () => authority.withAuthority((a) => a.withAuthorityState(participantGroundCoverageRefreshDueD9)), settleStream: async () => {
@@ -223374,6 +223454,10 @@ async function createLocalEndlessSessionD9(options) {
       if (!saving && at9 - lastSaveAttemptAt >= wait2) void save();
     }
     groundPrefetch.offer();
+    if (!reviewTravelPending && !groundPreparation && authorityPhase === "ready" && savePhase === "idle" && !functionalCommands.busy() && !navigatorBusy && at9 - lastSiteResetCheckAt >= SITE_RESET_CHECK_MS) {
+      lastSiteResetCheckAt = at9;
+      void autoResetSites();
+    }
     if (!reviewTravelPending && !groundPreparation && authorityPhase === "ready" && savePhase !== "waiting-stream" && savePhase !== "preparing" && !functionalCommands.busy() && at9 - lastStreamServiceAt >= STREAM_SERVICE_MS) {
       const anchor2 = streamAnchor();
       if (anchor2 !== lastStreamAnchor || !stream.quiet?.() || at9 - lastStreamServiceAt >= STREAM_IDLE_SERVICE_MS) {
@@ -223586,7 +223670,7 @@ async function createLocalEndlessSessionD9(options) {
       }
       return true;
     },
-    resources: () => authority.withAuthority((a) => ({ ...a.resources(), ...clientPort.resources(), groundPreparation: groundPreparationStatus(), d9Streaming: stream.inspect(), d9Pages: pages2.resources(), d9Save: { pending: Boolean(saving), phase: savePhase, error: lastError, durabilityFailed, fatalInvariant, lastSuccessfulCommitTick: lastSavedTick, lastSuccessfulCommitAgeMs: Math.max(0, now3() - lastSuccessfulCommitAt), failedCuts, retriedCuts }, d9Worker: worker.inspect?.() ?? null })),
+    resources: () => authority.withAuthority((a) => ({ ...a.resources(), ...clientPort.resources(), groundPreparation: groundPreparationStatus(), d9Streaming: stream.inspect(), d9Pages: pages2.resources(), siteReset: { count: siteResets, error: siteResetError }, d9Save: { pending: Boolean(saving), phase: savePhase, error: lastError, durabilityFailed, fatalInvariant, lastSuccessfulCommitTick: lastSavedTick, lastSuccessfulCommitAgeMs: Math.max(0, now3() - lastSuccessfulCommitAt), failedCuts, retriedCuts }, d9Worker: worker.inspect?.() ?? null })),
     destroy() {
       stream.close();
     }
