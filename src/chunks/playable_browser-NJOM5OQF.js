@@ -214372,14 +214372,24 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
         break;
       }
       if (victim === void 0) break;
+      freeRaster(fallbacks.get(victim)?.raster);
       fallbacks.delete(victim);
       pathStats.environmentFallbackEvictions++;
+    }
+  }
+  function freeRaster(raster) {
+    try {
+      if (raster) {
+        raster.width = 0;
+        raster.height = 0;
+      }
+    } catch {
     }
   }
   function releaseRaster(raster) {
     if (!raster) return;
     rasterPool.push(raster);
-    while (rasterPool.length > RECENT) rasterPool.shift();
+    while (rasterPool.length > RECENT) freeRaster(rasterPool.shift());
   }
   function clear2(reason = "manual") {
     stopAhead();
@@ -214400,6 +214410,9 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     if (activeJob) releaseRaster(activeJob.raster);
     activeJob = null;
     layoutJob = null;
+    for (const e of pages2.values()) freeRaster(e.raster);
+    for (const e of fallbacks.values()) freeRaster(e.raster);
+    for (const c of rasterPool) freeRaster(c);
     pages2.clear();
     fallbacks.clear();
     rasterPool.length = 0;
@@ -214572,6 +214585,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     if (repaired) rasterCompletenessRepairs += repaired;
     const replaced = pages2.get(id2);
     touch2(pages2, id2, { raster: job.raster, signature: sig, visual: currentVisual, visualGeneration, rasterGeneration: ++rasterGeneration, result });
+    freeRaster(fallbacks.get(id2)?.raster);
     fallbacks.delete(id2);
     if (replaced?.raster && replaced.raster !== job.raster) {
       releaseRaster(replaced.raster);
