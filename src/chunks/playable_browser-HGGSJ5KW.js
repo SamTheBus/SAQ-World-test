@@ -161648,7 +161648,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     return c;
   }
   const pages2 = () => group === "bosses" ? BOSS_PAGE_IDS.map((id2) => ({ id: id2, boss: true, name: BOSS_PAGE_NAMES[id2] })) : BESTIARY_CARDS.filter((c) => c[2] === group).map((c) => ({ id: c[0], boss: false, name: c[1] }));
-  const tierOf = (p) => {
+  const tierOf2 = (p) => {
     const t = (p.boss ? album.bossTiers : album.tiers)[p.id];
     return Number.isInteger(t) ? t : -1;
   };
@@ -161691,15 +161691,15 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     }
     for (const p2 of list) {
       const i = el3("i");
-      i.style.background = tierColor(tierOf(p2));
+      i.style.background = tierColor(tierOf2(p2));
       pips.append(i);
     }
     set.append(t, pips);
     root6.append(set);
     const grid = el3("div", "bv-grid");
-    if (!selected || !list.some((p2) => p2.id === selected)) selected = (list.find((p2) => tierOf(p2) >= 0) ?? list[0]).id;
+    if (!selected || !list.some((p2) => p2.id === selected)) selected = (list.find((p2) => tierOf2(p2) >= 0) ?? list[0]).id;
     for (const p2 of list) {
-      const tr = tierOf(p2), known2 = tr >= 0, b = el3("button", "bv-tile");
+      const tr = tierOf2(p2), known2 = tr >= 0, b = el3("button", "bv-tile");
       b.type = "button";
       b.setAttribute("aria-pressed", String(p2.id === selected));
       const f = el3("div", "bv-frame");
@@ -161721,7 +161721,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     if (p) root6.append(detail(p));
   }
   function detail(p) {
-    const tr = tierOf(p), known2 = tr >= 0, box6 = el3("div", "bv-detail"), info2 = el3("div");
+    const tr = tierOf2(p), known2 = tr >= 0, box6 = el3("div", "bv-detail"), info2 = el3("div");
     box6.append(known2 ? cardCanvas(p.id, p.boss) : (() => {
       const c = p.boss ? bossCrest(p.id, false, 84) : portrait(p.id, false, 84);
       c.className = "card";
@@ -166062,6 +166062,288 @@ function createProgressionPresentation({ document: document2, readModel, issue }
   } };
 }
 
+// src/client/mass_salvage_v1.js
+var MASS_SALVAGE_OPEN_EVENT = "saq-mass-salvage-open";
+var tierOf = (item2) => {
+  try {
+    return workshopResult(item2).tier ?? itemDefinition(item2)?.rarityTier ?? 0;
+  } catch {
+    return itemDefinition(item2)?.rarityTier ?? 0;
+  }
+};
+function massSalvageItemsV1(model) {
+  const inv = model?.inventory;
+  if (!inv?.itemsById || !inv.d7) return [];
+  const worn = new Set(Object.values(inv.equipped ?? {})), provisions = new Set(Object.values(inv.subweapons?.claims ?? {}).map((c) => c.sourceEntityId));
+  const rows = [];
+  for (const item2 of Object.values(inv.itemsById)) {
+    if (!item2.generated || item2.sourceEntityId === null || item2.definitionId === "worn-sword" || worn.has(item2.itemId) || provisions.has(item2.sourceEntityId)) continue;
+    const d = itemDefinition(item2);
+    if (!d || d.unique || item2.generated.definition?.unique) continue;
+    rows.push({ item: item2, tier: tierOf(item2), name: displayName(d) });
+  }
+  return rows.sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name) || a.item.itemId.localeCompare(b.item.itemId));
+}
+function massSalvageYieldV1(player, rows) {
+  const total = {};
+  for (const r of rows) {
+    let q2;
+    try {
+      q2 = salvageQuote(player, r.item);
+    } catch {
+      continue;
+    }
+    for (const [k, n] of Object.entries(q2.materials ?? {})) total[k] = (total[k] ?? 0) + n;
+  }
+  return total;
+}
+function createMassSalvageQueueV1({ send, now: now3 = () => Date.now(), patienceMs = 4e3 }) {
+  let ids4 = [], waiting = null, done3 = 0, failed = null, total = 0;
+  return {
+    start(list) {
+      ids4 = [...list];
+      total = ids4.length;
+      done3 = 0;
+      failed = null;
+      waiting = null;
+    },
+    busy: () => ids4.length > 0 || waiting !== null,
+    progress: () => ({ done: done3, total, failed }),
+    stop() {
+      ids4 = [];
+      waiting = null;
+    },
+    step(model, player) {
+      const inv = model?.inventory;
+      if (!inv) return;
+      if (waiting) {
+        if (!inv.itemsById[waiting.itemId]) {
+          done3++;
+          waiting = null;
+        } else if (now3() - waiting.at > patienceMs) {
+          failed = "The game would not salvage " + waiting.name + ".";
+          ids4 = [];
+          waiting = null;
+          return;
+        } else return;
+      }
+      while (ids4.length) {
+        const id2 = ids4.shift(), item2 = inv.itemsById[id2];
+        if (!item2) continue;
+        let quote;
+        try {
+          quote = salvageQuote(player, item2);
+        } catch (e) {
+          failed = e.message;
+          ids4 = [];
+          return;
+        }
+        try {
+          send({ itemId: id2, fingerprint: quote.fingerprint, inventoryRevision: inv.revision });
+        } catch (e) {
+          failed = e.message;
+          ids4 = [];
+          return;
+        }
+        waiting = { itemId: id2, at: now3(), name: displayName(itemDefinition(item2)) };
+        return;
+      }
+    }
+  };
+}
+var CSS6 = `
+#mass-salvage-v1{position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:calc(10px + env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));background:#060a10cc;color:#e9dfc8;font:14px/1.35 var(--rpg-ui,"Segoe UI",system-ui,sans-serif);-webkit-tap-highlight-color:transparent}
+#mass-salvage-v1 .ms-card{display:flex;flex-direction:column;gap:10px;width:min(560px,100%);max-height:100%;box-sizing:border-box;padding:14px;border:1.5px solid #c9a35a;border-radius:14px;background:linear-gradient(180deg,#1d2736,#121a26);box-shadow:0 10px 30px #000b}
+#mass-salvage-v1 .ms-head{display:flex;align-items:center;gap:10px}
+#mass-salvage-v1 h2{flex:1;margin:0;font:700 19px Georgia,serif;color:#ffe2a0}
+#mass-salvage-v1 button{appearance:none;margin:0;font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+#mass-salvage-v1 .ms-x{width:40px;height:40px;border:1px solid #3a4652;border-radius:10px;background:#121a24;font:600 20px/1 system-ui}
+#mass-salvage-v1 .ms-picks{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;flex:none}
+#mass-salvage-v1 .ms-picks button{flex:none;display:flex;align-items:center;gap:6px;min-height:36px;padding:0 11px;border:1px solid #344457;border-radius:99px;background:#121a24;font:600 12px/1 system-ui;color:#d7dde4;white-space:nowrap}
+#mass-salvage-v1 .ms-picks button i{width:9px;height:9px;border-radius:50%;background:var(--rk)}
+#mass-salvage-v1 .ms-picks button[aria-pressed=true]{background:#2a3a4c;border-color:var(--rk)}
+#mass-salvage-v1 .ms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;overflow:auto;min-height:72px;padding:2px;overscroll-behavior:contain}
+#mass-salvage-v1 .ms-tile{position:relative;aspect-ratio:1;min-height:0;padding:0;border:2px solid var(--rk);border-radius:10px;background:#18222e;display:grid;place-items:center;overflow:hidden}
+#mass-salvage-v1 .ms-tile img{width:78%;height:78%;object-fit:contain;image-rendering:pixelated}
+#mass-salvage-v1 .ms-tile[aria-pressed=true]{background:#3a2a12;box-shadow:0 0 0 2px #121a24,0 0 0 4px #e9c46a}
+#mass-salvage-v1 .ms-tile[aria-pressed=true]::after{content:"\u2713";position:absolute;right:3px;top:1px;font:800 14px/1 system-ui;color:#ffe2a0;text-shadow:0 1px 0 #000}
+#mass-salvage-v1 .ms-empty{margin:0;padding:18px 8px;text-align:center;color:#9aa6b2}
+#mass-salvage-v1 .ms-yield{display:flex;flex-wrap:wrap;gap:6px 12px;min-height:20px;font-size:13px;color:#d7dde4;flex:none}
+#mass-salvage-v1 .ms-yield b{color:#ffe2a0}
+#mass-salvage-v1 .ms-note{margin:0;font-size:12px;color:#f0c9a8;flex:none}
+#mass-salvage-v1 .ms-go{flex:none;min-height:48px;border:1px solid #0b1015;border-radius:12px;background:linear-gradient(180deg,#f6d77d,#d9ab45);color:#1b1406;font:800 15px var(--rpg-ui,system-ui)}
+#mass-salvage-v1 .ms-go.is-sure{background:linear-gradient(180deg,#f08a6a,#c9512f);color:#fff5ec}
+#mass-salvage-v1 .ms-go:disabled{background:#26303b;border-color:#3a4756;color:#8794a1;cursor:default}
+`;
+function createMassSalvageV1({ document: doc, environment: env, readModel, send }) {
+  const el3 = (tag2, cls, text3) => {
+    const e = doc.createElement(tag2);
+    if (cls) e.className = cls;
+    if (text3 != null) e.textContent = text3;
+    return e;
+  };
+  const queue = createMassSalvageQueueV1({ send, now: () => env.performance?.now?.() ?? Date.now() });
+  let root6 = null, picked = /* @__PURE__ */ new Set(), sure = false, key4 = "", note2 = "", sureTimer = null;
+  const local8 = (m) => m.playersById?.[m.localPlayerId];
+  function close() {
+    if (!root6) return;
+    queue.stop();
+    root6.remove();
+    root6 = null;
+    picked = /* @__PURE__ */ new Set();
+    sure = false;
+    key4 = "";
+    note2 = "";
+    if (sureTimer !== null) {
+      env.clearTimeout(sureTimer);
+      sureTimer = null;
+    }
+  }
+  function render(m) {
+    if (!root6) return;
+    const rows = massSalvageItemsV1(m), have = new Set(rows.map((r) => r.item.itemId));
+    for (const id2 of [...picked]) if (!have.has(id2)) picked.delete(id2);
+    const busy = queue.busy(), p = queue.progress(), chosen = rows.filter((r) => picked.has(r.item.itemId)), k = [rows.map((r) => r.item.itemId).join(","), [...picked].sort().join(","), sure, busy, p.done, p.failed ?? "", note2].join("|");
+    if (k === key4) return;
+    key4 = k;
+    const card = root6.firstChild, head19 = el3("div", "ms-head"), x = el3("button", "ms-x", "\xD7");
+    x.type = "button";
+    x.setAttribute("aria-label", "Close");
+    x.addEventListener("click", close);
+    head19.append(el3("h2", null, "Salvage gear"), x);
+    const picks = el3("div", "ms-picks"), tiers = [...new Set(rows.map((r) => r.tier))].sort((a, b) => a - b);
+    for (const t of tiers) {
+      const of = rows.filter((r) => r.tier === t), all = of.every((r) => picked.has(r.item.itemId)), b = el3("button");
+      b.type = "button";
+      b.style.setProperty("--rk", RARITY_COLORS[t] ?? "#fff");
+      b.append(el3("i"), "All " + (RARITY_NAMES[t] ?? "gear") + " (" + of.length + ")");
+      b.setAttribute("aria-pressed", String(all));
+      b.disabled = busy;
+      b.addEventListener("click", () => {
+        for (const r of of) {
+          if (all) picked.delete(r.item.itemId);
+          else picked.add(r.item.itemId);
+        }
+        sure = false;
+        render(readModel());
+      });
+      picks.append(b);
+    }
+    if (picked.size) {
+      const b = el3("button", null, "Clear");
+      b.type = "button";
+      b.disabled = busy;
+      b.addEventListener("click", () => {
+        picked = /* @__PURE__ */ new Set();
+        sure = false;
+        render(readModel());
+      });
+      picks.append(b);
+    }
+    const grid = el3("div", "ms-grid");
+    for (const r of rows) {
+      const b = el3("button", "ms-tile"), img = doc.createElement("img");
+      b.type = "button";
+      b.dataset.item = r.item.itemId;
+      b.style.setProperty("--rk", RARITY_COLORS[r.tier] ?? "#fff");
+      img.alt = "";
+      try {
+        img.src = itemIconUrl(r.item, doc);
+      } catch {
+      }
+      b.append(img);
+      b.setAttribute("aria-pressed", String(picked.has(r.item.itemId)));
+      b.setAttribute("aria-label", r.name + ", " + (RARITY_NAMES[r.tier] ?? ""));
+      b.title = r.name;
+      b.disabled = busy;
+      b.addEventListener("click", () => {
+        if (picked.has(r.item.itemId)) picked.delete(r.item.itemId);
+        else picked.add(r.item.itemId);
+        sure = false;
+        render(readModel());
+      });
+      grid.append(b);
+    }
+    const yieldRow = el3("div", "ms-yield"), total = massSalvageYieldV1(local8(m), chosen);
+    if (chosen.length) {
+      yieldRow.append("You get: ");
+      for (const [name, n] of Object.entries(total)) {
+        const s = el3("span");
+        s.append(el3("b", null, String(n)), " " + name);
+        yieldRow.append(s);
+      }
+    } else yieldRow.append(rows.length ? "Tap gear to pick it, or use a quick pick above. Worn gear and uniques are never listed." : "");
+    const go = el3("button", "ms-go" + (sure ? " is-sure" : ""), busy ? "Salvaging " + Math.min(p.total, p.done + 1) + " of " + p.total + "\u2026" : sure ? "Tap again: destroy " + chosen.length + " for good" : "Salvage " + chosen.length + (chosen.length === 1 ? " item" : " items"));
+    go.type = "button";
+    go.disabled = busy || !chosen.length;
+    go.addEventListener("click", () => {
+      if (!sure) {
+        sure = true;
+        if (sureTimer !== null) env.clearTimeout(sureTimer);
+        sureTimer = env.setTimeout(() => {
+          sureTimer = null;
+          if (sure) {
+            sure = false;
+            render(readModel());
+          }
+        }, 5e3);
+        render(readModel());
+        return;
+      }
+      sure = false;
+      note2 = "";
+      queue.start(chosen.map((r) => r.item.itemId));
+      const now3 = readModel();
+      queue.step(now3, local8(now3));
+      render(readModel());
+    });
+    const parts = [head19, picks, rows.length ? grid : el3("p", "ms-empty", "No spare gear to salvage."), yieldRow];
+    if (p.failed || note2) parts.push(el3("p", "ms-note", p.failed ?? note2));
+    parts.push(go);
+    card.replaceChildren(...parts);
+  }
+  function open3() {
+    const m = readModel();
+    if (!m?.inventory) return false;
+    if (root6) return true;
+    if (!doc.getElementById("mass-salvage-v1-css")) {
+      const st = doc.createElement("style");
+      st.id = "mass-salvage-v1-css";
+      st.textContent = CSS6;
+      doc.head.append(st);
+    }
+    root6 = el3("section");
+    root6.id = "mass-salvage-v1";
+    root6.setAttribute("role", "dialog");
+    root6.setAttribute("aria-modal", "true");
+    root6.setAttribute("aria-label", "Salvage gear");
+    root6.append(el3("div", "ms-card"));
+    root6.addEventListener("click", (e) => {
+      if (e.target === root6 && !queue.busy()) close();
+    });
+    doc.body.append(root6);
+    key4 = "";
+    render(m);
+    return true;
+  }
+  function refresh(m) {
+    if (!root6) return;
+    if (queue.busy()) {
+      const was = queue.progress().done;
+      queue.step(m, local8(m));
+      const p = queue.progress();
+      if (!queue.busy() && !p.failed && p.done > was) note2 = "Salvaged " + p.done + (p.done === 1 ? " item." : " items.");
+    }
+    render(m);
+  }
+  const onOpen = () => open3();
+  doc.addEventListener?.(MASS_SALVAGE_OPEN_EVENT, onOpen);
+  return Object.freeze({ open: open3, close, refresh, isOpen: () => Boolean(root6), destroy() {
+    close();
+    doc.removeEventListener?.(MASS_SALVAGE_OPEN_EVENT, onOpen);
+  } });
+}
+
 // src/client/salvage_material_art.js
 var SALVAGE_MATERIAL_ART = { "Monster Soul": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g_ms_999%22%20x1%3D%220%25%22%20y1%3D%22100%25%22%20x2%3D%220%25%22%20y2%3D%220%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%232d3436%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23636e72%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M16%203%20C16%203%2C%206%2015%2C%206%2022%20C6%2027%2C%2010.5%2030%2C%2016%2030%20C21.5%2030%2C%2026%2027%2C%2026%2022%20C26%2015%2C%2016%203%2C%2016%203%20Z%22%20fill%3D%22url(%23g_ms_999)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M11%2019%20L14%2017%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M21%2019%20L18%2017%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fsvg%3E", "Common Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f4f5f6%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23b4bac2%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23585e66%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Uncommon Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23a8f0bf%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%2334b866%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23145c31%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Rare Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23b3dcff%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%233a8fd6%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23173f73%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Epic Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e2bdfa%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%239757c2%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%234a1f63%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6.5%2019%20L25.5%2018%22%20stroke%3D%22%23f0c862%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Legendary Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffd8a0%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23e07b22%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237d3a08%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6.5%2019%20L25.5%2018%22%20stroke%3D%22%23f0c862%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M27%201.0999999999999996%20L27%208.9%20M23.1%205%20L30.9%205%22%20stroke%3D%22%23fff6cf%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Mythic Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffb4a8%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23de4636%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237a1810%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6.5%2019%20L25.5%2018%22%20stroke%3D%22%23f0c862%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M27%201.0999999999999996%20L27%208.9%20M23.1%205%20L30.9%205%22%20stroke%3D%22%23fff6cf%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M4.5%203.8499999999999996%20L4.5%2010.15%20M1.3499999999999996%207%20L7.65%207%22%20stroke%3D%22%23fff6cf%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Overlord's Sigil": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22tealA%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%237ff0d6%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23138a73%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M16%203%20L19%205.5%20L23%204.5%20L24%208.5%20L28%2010%20L26.5%2014%20L29%2017%20L26%2020%20L27%2024%20L23%2024.5%20L21%2028%20L17%2026.5%20L13.5%2029%20L11%2025.5%20L7%2025.5%20L7%2021.5%20L3.5%2019%20L6%2015.5%20L4%2011.5%20L8%2010%20L8.5%206%20L12.5%206%20Z%22%20fill%3D%22url(%23tealA)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216.5%22%20r%3D%227%22%20fill%3D%22none%22%20stroke%3D%22%230b4f43%22%20stroke-width%3D%221.6%22%2F%3E%3Cpath%20d%3D%22M12%2019%20L12.5%2014%20L14.5%2016%20L16%2012.5%20L17.5%2016%20L19.5%2014%20L20%2019%20Z%22%20fill%3D%22%23f0c862%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M9%209.5%20L12%208%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Wakestone": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22eriGlow%22%20cx%3D%22.5%22%20cy%3D%22.5%22%20r%3D%22.5%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e9b6ff%22%20stop-opacity%3D%22.9%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23b05cf0%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%22eri%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f0c4ff%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23b05cf0%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235a1d8c%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2214%22%20fill%3D%22url(%23eriGlow)%22%2F%3E%3Cpath%20d%3D%22M16%203%20L22%2016%20L16%2029%20L10%2016%20Z%22%20fill%3D%22url(%23eri)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M10%2016%20L22%2016%20M16%203%20L16%2029%22%20stroke%3D%22%233d1260%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M14%208%20L12.5%2014%22%20stroke%3D%22rgba(255%2C255%2C255%2C.85)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M5%209%20L5%2013%20M3%2011%20L7%2011%20M26%2020%20L26%2024%20M24%2022%20L28%2022%22%20stroke%3D%22%23f3d2ff%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Astral Essence": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22ast%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%239fe8ff%22%2F%3E%3Cstop%20offset%3D%22.55%22%20stop-color%3D%22%236d6af0%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%233b1e9c%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M20%203%20C12%204%206%2010%206%2017%20C6%2024%2012%2029%2019%2029%20C22%2029%2025%2028%2027%2026%20C19%2026%2013%2021%2013%2015%20C13%209%2016%205%2020%203%20Z%22%20fill%3D%22url(%23ast)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M22%209%20L23%2012%20L26%2013%20L23%2014%20L22%2017%20L21%2014%20L18%2013%20L21%2012%20Z%22%20fill%3D%22%23fff%22%20stroke%3D%22%23000%22%20stroke-width%3D%221%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2226%22%20cy%3D%2220%22%20r%3D%221%22%20fill%3D%22%23dff%22%2F%3E%3Cpath%20d%3D%22M10%2012%20L8.5%2017%22%20stroke%3D%22rgba(255%2C255%2C255%2C.7)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Starshard": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22starA%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff6c8%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e3a21a%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M16%202%20L19.5%2012.5%20L30%2016%20L19.5%2019.5%20L16%2030%20L12.5%2019.5%20L2%2016%20L12.5%2012.5%20Z%22%20fill%3D%22url(%23starA)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M16%206%20L16%2026%20M6%2016%20L26%2016%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.1%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%222.4%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E" };
 
@@ -166465,7 +166747,7 @@ function presenceFromModelV1(model) {
 
 // src/client/friends_view_v1.js
 var CLASS_NAMES3 = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
-var CSS6 = `#world-inventory[data-section=friends] #world-bag-browse,#world-inventory[data-section=friends] #world-materials-view,#world-inventory[data-section=friends] #world-forge-view,#world-inventory[data-section=friends] #world-bag-summary,#world-inventory[data-section=friends] #world-bag-stats{display:none}
+var CSS7 = `#world-inventory[data-section=friends] #world-bag-browse,#world-inventory[data-section=friends] #world-materials-view,#world-inventory[data-section=friends] #world-forge-view,#world-inventory[data-section=friends] #world-bag-summary,#world-inventory[data-section=friends] #world-bag-stats{display:none}
 #world-inventory .friends-page{grid-column:1/-1;display:grid;gap:12px;align-content:start;min-height:0;overflow:auto;padding:10px 12px 18px;color:var(--rpg-ivory,#f4e7c4);overscroll-behavior:contain}
 #world-inventory .friends-page[hidden]{display:none}
 .fr-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px;align-items:start}
@@ -166522,7 +166804,7 @@ function createFriendsViewV1({ document: document2, environment, friends, action
   if (!document2.getElementById("friends-v1-css")) {
     const s = document2.createElement("style");
     s.id = "friends-v1-css";
-    s.textContent = CSS6;
+    s.textContent = CSS7;
     document2.head.append(s);
   }
   let shown2 = false, busy = null, status2 = "", showBackup = false, removing = null, renaming = false, key4 = null;
@@ -166823,6 +167105,11 @@ function createInventoryPresentation({ document: document2, environment, readMod
   } };
   const closeButton = document2.getElementById("world-bag-close"), list = document2.getElementById("world-items"), slots2 = document2.getElementById("world-equipment"), status2 = document2.getElementById("world-inventory-status"), comparison = document2.getElementById("world-comparison");
   let forgeSession = false, salvagePending = null;
+  const massSalvage = createMassSalvageV1({ document: document2, environment, readModel, send: (payload) => {
+    const m = readModel();
+    if (!m.inventory || !alive(m) || m.persistence.phase !== "encounter") throw Error("Not now: finish what your hero is doing first.");
+    return adapter.issue("gear.salvage", payload, m);
+  } });
   const rarity = (d) => `${RARITY_NAMES[d.rarityTier ?? 0]} \xB7 ${d.rarityTier ?? 0}\u2605`;
   const tint2 = (e, d) => {
     e.style.setProperty("--rarity", RARITY_COLORS[d.rarityTier ?? 0]);
@@ -167275,6 +167562,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       pickup.setAttribute("aria-label", action2.kind === "loot.pickup" ? actionLabel.replace("Pick up:", "Pick up") : actionLabel);
     }
     paintPoints(local8);
+    massSalvage.refresh(m);
     const identity2 = `${m.context.campaignId}/${m.localPlayerId}`;
     if (observed?.identity === identity2) {
       const added2 = Object.values(inv.itemsById).find((i) => !observed.ids.has(i.itemId));
@@ -167560,6 +167848,12 @@ function createInventoryPresentation({ document: document2, environment, readMod
       const legend = element("span", "", "gx-legend");
       legend.append(markup(element("span", "", "gx-up is-inline"), UP_BADGE), document2.createTextNode("better than worn"));
       meta.append(legend);
+    }
+    {
+      const b = button3("Salvage several", () => massSalvage.open());
+      b.className = "gx-salvage";
+      b.dataset.action = "mass-salvage";
+      meta.append(b);
     }
     const grid = element("div", "", "gx-grid");
     for (const item2 of shown2) {
@@ -168619,7 +168913,7 @@ function createSettlementServicesMenu2(options) {
   const markup = (e, html) => {
     e.innerHTML = html;
     return e;
-  }, coin4 = () => el3("i", void 0, "tn-coin"), tierOf = (d) => d?.rarityTier ?? 0;
+  }, coin4 = () => el3("i", void 0, "tn-coin"), tierOf2 = (d) => d?.rarityTier ?? 0;
   const mat = (k) => {
     if (SALVAGE_MATERIAL_ART[k]) {
       const img = el3("img", void 0, "tn-mat-art");
@@ -168645,9 +168939,9 @@ function createSettlementServicesMenu2(options) {
   const sectionsOf = (item2) => itemSections(itemDefinition(item2), item2.generated);
   function tile2(item2, badge2) {
     const d = itemDefinition(item2), t = el3("div", void 0, "tn-tile");
-    t.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
+    t.style.setProperty("--r", RARITY_COLORS[tierOf2(d)]);
     t.append(image(item2, d?.slot));
-    if (tierOf(d)) t.append(el3("span", tierOf(d) + "\u2605", "tn-st"));
+    if (tierOf2(d)) t.append(el3("span", tierOf2(d) + "\u2605", "tn-st"));
     const lv = item2?.generated?.itemPower;
     if (lv != null) t.append(el3("span", "Lv " + statText(lv), "tn-lv"));
     if (badge2) t.append(markup(el3("span", void 0, "tn-badge is-" + badge2), badge2 === "up" ? UP : badge2 === "pick" ? CHECK : LOCK));
@@ -168659,7 +168953,7 @@ function createSettlementServicesMenu2(options) {
     if (id2) b.dataset.serviceAction = id2;
     b.disabled = busy;
     b.onclick = fn;
-    b.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
+    b.style.setProperty("--r", RARITY_COLORS[tierOf2(d)]);
     b.append(tile2(item2, badge2));
     if (named2) b.append(el3("span", displayName(d), "tn-nm"));
     if (label7) b.append(el3("span", label7, "tn-pr is-sold"));
@@ -168688,22 +168982,22 @@ function createSettlementServicesMenu2(options) {
   function itemHead(item2, sub) {
     const d = itemDefinition(item2), h = el3("div", void 0, "tn-ihead"), info2 = el3("div");
     info2.style.minWidth = "0";
-    info2.append(el3("h4", displayName(d), "tn-iname"), el3("div", sub ?? [RARITY_NAMES[tierOf(d)], tierOf(d) + "\u2605", slotName(d.slot === "ring" ? "ring1" : d.slot), item2.generated?.itemPower != null ? "Lv " + statText(item2.generated.itemPower) : null].filter(Boolean).join(" \xB7 "), "tn-isub"));
-    h.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
+    info2.append(el3("h4", displayName(d), "tn-iname"), el3("div", sub ?? [RARITY_NAMES[tierOf2(d)], tierOf2(d) + "\u2605", slotName(d.slot === "ring" ? "ring1" : d.slot), item2.generated?.itemPower != null ? "Lv " + statText(item2.generated.itemPower) : null].filter(Boolean).join(" \xB7 "), "tn-isub"));
+    h.style.setProperty("--r", RARITY_COLORS[tierOf2(d)]);
     h.append(tile2(item2), info2);
     return h;
   }
   function itemSheet(item2, inv, foot2, notes = []) {
     const d = itemDefinition(item2), w = wornFor(inv, d), sec4 = sectionsOf(item2), cmp = w ? compareSections(sec4, [sectionsOf(w)]) : { base: sec4.base.map((l) => ({ ...l, mark: "new" })), affixes: sec4.affixes.map((l) => ({ ...l, mark: "new" })) };
     const s = el3("div", void 0, "tn-sheet");
-    s.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
+    s.style.setProperty("--r", RARITY_COLORS[tierOf2(d)]);
     s.setAttribute("role", "dialog");
     s.setAttribute("aria-label", displayName(d));
     const sc2 = el3("div", void 0, "tn-sheetscroll");
     sc2.append(itemHead(item2));
     if (w) {
       const c = el3("div", void 0, "tn-cmp"), n = el3("b", displayName(itemDefinition(w)));
-      n.style.color = RARITY_COLORS[tierOf(itemDefinition(w))];
+      n.style.color = RARITY_COLORS[tierOf2(itemDefinition(w))];
       c.append("Arrows compare with your worn ", n);
       sc2.append(c);
     } else sc2.append(el3("div", "Your " + slotName(d.slot === "ring" ? "ring1" : d.slot) + " slot is empty", "tn-cmp"));
@@ -168908,7 +169202,7 @@ function createSettlementServicesMenu2(options) {
       for (const id2 of [...picks]) if (!sellable.some((x) => x.i.itemId === id2)) picks.delete(id2);
       const pickTier = (t) => {
         picks.clear();
-        for (const x of sellable) if (tierOf(itemDefinition(x.i)) === t) picks.add(x.i.itemId);
+        for (const x of sellable) if (tierOf2(itemDefinition(x.i)) === t) picks.add(x.i.itemId);
         confirm = null;
         redraw();
       };
@@ -169031,6 +169325,10 @@ function createSettlementServicesMenu2(options) {
       if (!items2.length) {
         body6.append(el3("p", mode === "rebind" ? "Bring a shield, dagger or Tome of your class to change its kind here. Uniques keep theirs." : "Bring gear with stars (drops or shop gear) to work on it here.", "tn-empty"));
         return;
+      }
+      if (mode === "shatter") {
+        const many = button3("Salvage several at once", () => doc.dispatchEvent(new Event(MASS_SALVAGE_OPEN_EVENT)), "mass-salvage", "tn-many");
+        body6.append(many);
       }
       const strip = el3("div", void 0, "tn-strip");
       for (const i2 of items2) {
@@ -169281,7 +169579,7 @@ function readSettingsV1(storage) {
   s.effects = Math.max(0, Math.min(100, Math.round(s.effects)));
   return s;
 }
-var CSS7 = `
+var CSS8 = `
 .st{flex:1;min-width:0;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px;align-content:start;padding:16px 20px;box-sizing:border-box;color:#e9dfc8;font:14px/1.35 var(--rpg-ui,"Segoe UI",system-ui,sans-serif)}
 .st[hidden]{display:none}
 .st-sec{border:1px solid #33424e;border-radius:14px;background:linear-gradient(180deg,#212f3a,#18232d);padding:12px 16px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -169342,7 +169640,7 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   if (!doc.getElementById("settings-v1-css")) {
     const st = doc.createElement("style");
     st.id = "settings-v1-css";
-    st.textContent = CSS7;
+    st.textContent = CSS8;
     doc.head.append(st);
   }
   const el3 = (tag2, cls, text3) => {
@@ -223953,7 +224251,7 @@ function clearRefreshV1(storage, key4) {
 }
 
 // src/client/world_refresh_view_v1.js
-var CSS8 = `
+var CSS9 = `
 #world-refresh-v1{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:16px;background:#060a10cc;box-sizing:border-box;font:14px/1.4 var(--rpg-ui,"Segoe UI",system-ui,sans-serif);color:#e9dfc8}
 #world-refresh-v1 .wr-card{width:min(460px,100%);max-height:100%;overflow:auto;box-sizing:border-box;border:1.5px solid #c9a35a;border-radius:14px;background:linear-gradient(180deg,#1d2736,#121a26);box-shadow:0 10px 30px #000b;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
 #world-refresh-v1 h2{margin:0;font:700 18px Georgia,serif;color:#ffe2a0}
@@ -223978,7 +224276,7 @@ var css = (doc) => {
   if (!doc.getElementById("world-refresh-v1-css")) {
     const st = doc.createElement("style");
     st.id = "world-refresh-v1-css";
-    st.textContent = CSS8;
+    st.textContent = CSS9;
     doc.head.append(st);
   }
 };
@@ -227893,7 +228191,7 @@ var ASK_MS = 3e4;
 var WAIT_MS = 9e4;
 var INVITE_MS = 18e4;
 var GATHER_MS = 150;
-var CSS9 = `.fr-toast{position:fixed;left:50%;top:calc(12px + var(--world-safe-top,0px));z-index:60;transform:translateX(-50%);display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;width:min(420px,calc(100vw - 32px));padding:12px 14px;border:1px solid #6d5a3c;border-radius:14px;background:linear-gradient(#1f2a33,#151d25);box-shadow:0 8px 28px #0008;color:#f4e7c4;font:13px/1.4 var(--rpg-ui,system-ui)}
+var CSS10 = `.fr-toast{position:fixed;left:50%;top:calc(12px + var(--world-safe-top,0px));z-index:60;transform:translateX(-50%);display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;width:min(420px,calc(100vw - 32px));padding:12px 14px;border:1px solid #6d5a3c;border-radius:14px;background:linear-gradient(#1f2a33,#151d25);box-shadow:0 8px 28px #0008;color:#f4e7c4;font:13px/1.4 var(--rpg-ui,system-ui)}
 .fr-toast-av{grid-row:span 2;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#2c3b47;font:700 16px var(--rpg-title,serif)}
 .fr-toast p{margin:0;font-weight:600}.fr-toast small{color:#93a0a6}
 .fr-toast-acts{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
@@ -227911,7 +228209,7 @@ function createFriendsFlowV1({ environment, friends, game, now: now3 = () => Dat
   if (!document2.getElementById("friends-flow-v1-css")) {
     const s = document2.createElement("style");
     s.id = "friends-flow-v1-css";
-    s.textContent = CSS9;
+    s.textContent = CSS10;
     document2.head.append(s);
   }
   const invited = /* @__PURE__ */ new Map(), cards = [];

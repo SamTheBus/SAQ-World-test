@@ -2028,3 +2028,6 @@ body[data-hud-menu=ring] .chart-mini,body[data-hud-menu=ring] .world-mini{margin
 #rpg-interaction-alt-v1[hidden]{display:none!important}
 #rpg-interaction-alt-v1 small{font:600 10px/1 var(--rpg-ui,system-ui);letter-spacing:.06em;text-transform:uppercase;color:#d9c08a}
 #rpg-interaction-alt-v1 strong{font:700 15px/1.1 var(--rpg-ui,system-ui)}
+/* Mass salvage v1: its way in from the Bag's filter row and from the Smith's Salvage tab. */
+#world-inventory .gx-bagmeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}#world-inventory .gx-bagmeta .gx-salvage{margin-left:auto;min-height:34px;padding:0 12px;border:1px solid #c9a35a;border-radius:99px;background:#1a2530;color:#ffe2a0;font:700 12px var(--rpg-ui,system-ui);cursor:pointer;touch-action:manipulation}
+.tn-many{align-self:flex-start;min-height:40px;padding:0 14px;border:1px solid #c9a35a;border-radius:10px;background:#1a2530;color:#ffe2a0;font:700 13px var(--rpg-ui,system-ui);cursor:pointer}
