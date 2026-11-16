@@ -164801,6 +164801,7 @@ var icon = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" strok
 var MENU_HUB_ICONS = Object.freeze({
   map: icon('<path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/>'),
   settings: icon('<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="6.6"/><path d="M12 2.6v2.8M12 18.6v2.8M2.6 12h2.8M18.6 12h2.8M5.4 5.4l2 2M16.6 16.6l2 2M5.4 18.6l2-2M16.6 7.4l2-2"/>'),
+  player: icon('<circle cx="12" cy="8" r="3.6"/><path d="M4.8 20.2c.9-4 3.7-6 7.2-6s6.3 2 7.2 6"/>'),
   home: icon('<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>')
 });
 var CSS5 = `
@@ -164811,58 +164812,86 @@ var CSS5 = `
 #world-inventory[data-section=settings] #world-bag-browse,#world-inventory[data-section=settings] #world-materials-view,#world-inventory[data-section=settings] #world-forge-view,#world-inventory[data-section=settings] #world-bag-summary,#world-inventory[data-section=settings] #world-bag-stats{display:none!important}
 body #world-inventory.rpg-menu[data-group=world]:not([data-section=hub]) button.rm-railbtn{display:grid!important}
 body #world-inventory.rpg-menu[data-section=hub] button.rm-railbtn{display:none!important}
-.mh{flex:1;min-width:0;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;padding:18px 22px;box-sizing:border-box}
+.mh{flex:1;min-width:0;min-height:0;overflow:auto;display:flex;padding:16px 18px;box-sizing:border-box;background:radial-gradient(120% 100% at 50% 0%,#1d2a35 0%,#131b23 55%,#0d1319 100%)}
 .mh[hidden]{display:none}
-.mh-grid{width:100%;max-width:980px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:14px}
-#world-inventory .mh button.mh-tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:0;height:auto;padding:22px 8px 18px;border-radius:14px;border:1px solid #34444f;background:linear-gradient(180deg,#26343f,#1a2530);box-shadow:inset 0 1px 0 #ffffff10,0 3px 0 #070b10;color:#e9dfc8;font:700 13px var(--rpg-ui,"Segoe UI",sans-serif);letter-spacing:.09em;text-transform:uppercase;cursor:pointer;text-align:center}
+.mh-wrap{margin:auto;width:100%;max-width:960px;display:grid;grid-template-columns:minmax(220px,290px) minmax(0,1fr);gap:14px;align-items:stretch}
+.mh-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:12px;min-width:0}
+#world-inventory .mh button.mh-tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-width:0;min-height:0;height:auto;margin:0;padding:18px 10px 16px;border-radius:14px;border:1px solid #06090d;background:linear-gradient(180deg,#2e3d4a 0%,#202c37 48%,#18222b 100%);box-shadow:inset 0 0 0 1px #c9a35a70,inset 0 2px 0 0 #ffffff12,0 4px 0 #06090d,0 12px 20px #0008;color:#f6ecd4;text-align:center;text-transform:none;letter-spacing:0;cursor:pointer;transition:transform .08s ease,box-shadow .08s ease,filter .12s ease}
 #world-inventory .mh button.mh-tile[hidden]{display:none}
-#world-inventory .mh button.mh-tile:hover{border-color:#d4b98a88}
-#world-inventory .mh button.mh-tile:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #ffffff10,0 1px 0 #070b10}
-.mh-ic{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 38% 26%,#4c5d68,#25343f 60%,#17242e);border:1px solid #0b1015;box-shadow:inset 0 0 0 1px #d4b98a66;flex:none}
-.mh-ic svg{width:34px;height:34px}
-.mh-tile small{font:600 11px var(--rpg-ui,"Segoe UI",sans-serif);letter-spacing:.02em;text-transform:none;color:#a9b4b6}
-.mh-badge{position:absolute;top:8px;right:8px;min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:#f0c862;color:#1b1406;font:800 12px/20px var(--rpg-ui,"Segoe UI",sans-serif);letter-spacing:0}
+#world-inventory .mh button.mh-tile::before{content:"";position:absolute;inset:6px;border-radius:9px;border:1px solid #c9a35a30;pointer-events:none;background:radial-gradient(circle,#edd08a 0 1.6px,#0000 2.2px) 0 0/9px 9px no-repeat,radial-gradient(circle,#edd08a 0 1.6px,#0000 2.2px) 100% 0/9px 9px no-repeat,radial-gradient(circle,#edd08a 0 1.6px,#0000 2.2px) 0 100%/9px 9px no-repeat,radial-gradient(circle,#edd08a 0 1.6px,#0000 2.2px) 100% 100%/9px 9px no-repeat}
+#world-inventory .mh button.mh-tile::after{content:"";position:absolute;left:18%;right:18%;top:0;height:2px;border-radius:0 0 2px 2px;background:linear-gradient(90deg,#0000,#f1d48e,#0000);pointer-events:none}
+#world-inventory .mh button.mh-tile:hover{filter:brightness(1.1)}
+#world-inventory .mh button.mh-tile:focus-visible{outline:2px solid #f6dc9a;outline-offset:2px}
+#world-inventory .mh button.mh-tile:active{transform:translateY(3px);box-shadow:inset 0 0 0 1px #c9a35a70,inset 0 2px 0 0 #ffffff12,0 1px 0 #06090d,0 4px 8px #0008}
+.mh-ic{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;flex:none;box-sizing:border-box;border:2px solid #0000;background:radial-gradient(circle at 40% 28%,#51677a,#27384a 58%,#141e28) padding-box,linear-gradient(155deg,#fbe6ad,#a67828 48%,#f0cf85 78%,#8a6120) border-box;box-shadow:0 0 0 1px #06090d,0 3px 0 #06090d;color:#fbe9bd}
+.mh-ic svg{width:30px;height:30px}
+.mh-name{font:700 17px/1.15 Georgia,"Times New Roman",serif;letter-spacing:.03em;color:#fbeecb;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mh-tile small{font:600 12px/1.2 var(--rpg-ui,"Segoe UI",system-ui,sans-serif);color:#9fb0b8;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mh-badge{position:absolute;top:10px;right:10px;min-width:22px;height:22px;padding:0 7px;box-sizing:border-box;border-radius:11px;border:1px solid #6b4a12;background:linear-gradient(180deg,#ffe29a,#e2ad45);box-shadow:0 2px 0 #06090d;color:#221703;font:800 12px/20px var(--rpg-ui,"Segoe UI",system-ui,sans-serif);letter-spacing:0;white-space:nowrap}
 .mh-badge:empty{display:none}
-@media(max-height:500px) and (min-width:601px){.mh{padding:10px 14px}.mh-grid{gap:10px}#world-inventory .mh button.mh-tile{padding:16px 6px 14px;gap:6px;font-size:12px}.mh-ic{width:52px;height:52px}.mh-ic svg{width:28px;height:28px}.mh-tile small{font-size:10px}}
-@media(max-width:600px){.mh{align-items:flex-start;padding:14px}.mh-grid{grid-auto-flow:row;grid-template-columns:1fr;gap:10px}#world-inventory .mh button.mh-tile{flex-direction:row;justify-content:flex-start;padding:12px 16px;gap:16px;text-align:left}.mh-tile small{margin-left:auto;padding-right:22px}.mh-ic{width:52px;height:52px}.mh-badge{top:50%;margin-top:-10px;right:12px}}
+/* The Player card: the hero in a brass frame, name and level, and what is inside. */
+#world-inventory .mh button.mh-hero{gap:6px;padding:18px 14px 16px;background:linear-gradient(180deg,#3a4856 0%,#253340 40%,#18222b 100%)}
+.mh-frame{position:relative;width:132px;height:132px;flex:none;box-sizing:border-box;border-radius:50%;border:3px solid #0000;background:radial-gradient(circle at 50% 34%,#55708a,#2a3d50 55%,#121b24) padding-box,linear-gradient(155deg,#fbe6ad,#a67828 45%,#f0cf85 75%,#8a6120) border-box;box-shadow:0 0 0 1px #06090d,0 4px 0 #06090d;overflow:hidden;display:grid;place-items:center}
+.mh-portrait{width:150px;height:147px;image-rendering:pixelated;flex:none;margin-top:10px}
+.mh-level{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%)}
+.mh-who{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;max-width:100%}
+.mh-kicker{font:800 10px/1 var(--rpg-ui,"Segoe UI",system-ui,sans-serif);letter-spacing:.22em;text-transform:uppercase;color:#e9c676}
+.mh-hero .mh-name{font-size:22px}
+.mh-hero small{font-size:13px;color:#c5d0d4}
+.mh-hint{margin-top:5px;padding:5px 11px;border-radius:99px;border:1px solid #c9a35a55;background:#0d131980;font:700 11px/1 var(--rpg-ui,"Segoe UI",system-ui,sans-serif);letter-spacing:.04em;color:#e3d3a8;white-space:nowrap}
+@media(max-height:500px) and (min-width:601px){.mh{padding:10px 14px}.mh-wrap{gap:10px;grid-template-columns:minmax(190px,240px) minmax(0,1fr)}.mh-grid{gap:9px}#world-inventory .mh button.mh-tile{padding:11px 8px 10px;gap:4px}.mh-ic{width:46px;height:46px}.mh-ic svg{width:24px;height:24px}.mh-name{font-size:15px}.mh-tile small{font-size:11px}#world-inventory .mh button.mh-hero{padding:12px 10px 10px}.mh-frame{width:104px;height:104px}.mh-portrait{width:120px;height:118px;margin-top:8px}.mh-hero .mh-name{font-size:19px}.mh-hint{margin-top:3px}}
+@media(max-width:600px){.mh{padding:14px}.mh-wrap{grid-template-columns:1fr;gap:12px}.mh-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#world-inventory .mh button.mh-tile{padding:16px 8px 14px}#world-inventory .mh button.mh-hero{flex-direction:row;justify-content:flex-start;gap:16px;padding:16px 18px;text-align:left}.mh-frame{width:104px;height:104px}.mh-portrait{width:120px;height:118px;margin-top:8px}.mh-who{align-items:flex-start}}
 `;
-function createMenuHubV1({ document: doc, tiles: tiles9 }) {
+function createMenuHubV1({ document: doc, tiles: tiles9, portrait }) {
   if (!doc.getElementById("menu-hub-v1-css")) {
     const st = doc.createElement("style");
     st.id = "menu-hub-v1-css";
     st.textContent = CSS5;
     doc.head.append(st);
   }
-  const root6 = doc.createElement("div");
-  root6.className = "mh";
+  const el3 = (tag2, cls, text3) => {
+    const e = doc.createElement(tag2);
+    if (cls) e.className = cls;
+    if (text3) e.textContent = text3;
+    return e;
+  };
+  const root6 = el3("div", "mh");
   root6.id = "world-menu-hub";
   root6.hidden = true;
-  const grid = doc.createElement("div");
-  grid.className = "mh-grid";
-  root6.append(grid);
+  const wrap3 = el3("div", "mh-wrap"), grid = el3("div", "mh-grid");
+  root6.append(wrap3);
   const parts = /* @__PURE__ */ new Map();
   for (const t of tiles9) {
-    const b = doc.createElement("button");
+    const b = el3("button", "mh-tile" + (t.hero ? " mh-hero" : ""));
     b.type = "button";
-    b.className = "mh-tile";
     b.dataset.tile = t.id;
-    const ic = doc.createElement("span");
-    ic.className = "mh-ic";
-    ic.innerHTML = t.icon;
-    const name = doc.createElement("span");
-    name.textContent = t.name;
-    const sub = doc.createElement("small");
-    const badge2 = doc.createElement("span");
-    badge2.className = "mh-badge";
-    b.append(ic, name, sub, badge2);
+    const sub = el3("small"), badge2 = el3("span", "mh-badge"), part3 = { b, sub, badge: badge2, name: t.name };
+    if (t.hero) {
+      const frame4 = el3("span", "mh-frame"), canvas = el3("canvas", "mh-portrait");
+      canvas.width = 200;
+      canvas.height = 196;
+      canvas.setAttribute("aria-hidden", "true");
+      frame4.append(canvas);
+      const who = el3("span", "mh-who"), title10 = el3("span", "mh-name", t.name);
+      who.append(el3("span", "mh-kicker", t.name), title10, sub);
+      if (t.hint) who.append(el3("span", "mh-hint", t.hint));
+      b.append(frame4, who, badge2);
+      wrap3.append(b);
+      Object.assign(part3, { canvas, title: title10, lookKey: null });
+    } else {
+      const ic = el3("span", "mh-ic");
+      ic.innerHTML = t.icon;
+      b.append(ic, el3("span", "mh-name", t.name), sub, badge2);
+      grid.append(b);
+    }
     b.addEventListener("click", t.pick);
-    grid.append(b);
-    parts.set(t.id, { b, sub, badge: badge2, name: t.name });
+    parts.set(t.id, part3);
   }
+  wrap3.append(grid);
   let last = "";
   return Object.freeze({
     root: root6,
-    // info: {id:{sub,badge,hidden}}
+    // info: {id:{sub,badge,hidden}}; the hero tile also takes {title,look}.
     paint(info2) {
       const key4 = JSON.stringify(info2);
       if (key4 === last) return;
@@ -164872,7 +164901,18 @@ function createMenuHubV1({ document: doc, tiles: tiles9 }) {
         p.b.hidden = Boolean(i.hidden);
         p.sub.textContent = i.sub ?? "";
         p.badge.textContent = i.badge ?? "";
-        p.b.setAttribute("aria-label", p.name + (i.sub ? ", " + i.sub : "") + (i.badge ? ", new" : ""));
+        if (p.canvas) {
+          p.title.textContent = i.title || p.name;
+          const lk = JSON.stringify(i.look ?? null);
+          if (lk !== p.lookKey) {
+            p.lookKey = lk;
+            try {
+              portrait?.(p.canvas, i.look);
+            } catch {
+            }
+          }
+        }
+        p.b.setAttribute("aria-label", p.name + (i.title ? ", " + i.title : "") + (i.sub ? ", " + i.sub : "") + (i.badge ? ", " + i.badge : ""));
       }
     },
     refresh(visible3) {
@@ -169753,7 +169793,8 @@ function contextActionLabelForModel(model, action2 = contextActionForModel(model
   return resource.eventPod ? "Destroy spore pod" : resource.denHoard ? "Search the hoard" : resource.kind === "chest" ? model.space?.site?.siteKind === "woodland-cave" ? "Open Chest" : "Open chest" : resource.art === "camp_crate" ? "Break the crate" : resource.art === "barrel" ? "Break barrel" : resource.art === "urn" ? "Break urn" : "Break pot";
 }
 var MENU_PAGES = [["equipment", "Gear"], ["bag", "Bag"], ["etc", "Etc"], ["materials", "Materials"], ["bestiary", "Bestiary"], ["stats", "Stats"], ["progression", "Skills"], ["quests", "Quests"], ["friends", "Friends"], ["heroes", "Heroes"], ["settings", "Settings"]];
-var MENU_TITLES = { equipment: "Gear", bag: "Bag", materials: "Materials" };
+var MENU_TITLES = { equipment: "Gear", bag: "Bag", materials: "Bag" };
+var BAG_SUBTABS = [["bag", "Items"], ["etc", "Etc"], ["materials", "Materials"]];
 var SEEN_KEY = "saq-world-seen-items-v1:";
 var menuIcon = (d) => `<svg class="rm-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 var MENU_ICONS = Object.freeze({
@@ -169898,7 +169939,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     key4 = null;
     refresh(readModel());
   }
-  const hub = createMenuHubV1({ document: document2, tiles: [{ id: "bag", name: "Bag", icon: plainIcon(MENU_ICONS.bag), pick: () => toggle() }, { id: "quests", name: "Quests", icon: plainIcon(MENU_ICONS.quests), pick: () => questsButton.click() }, { id: "map", name: "Map", icon: MENU_HUB_ICONS.map, pick: () => {
+  const hub = createMenuHubV1({ document: document2, portrait: drawHeroPortrait, tiles: [{ id: "player", hero: true, name: "Player", hint: "Gear \xB7 Bag \xB7 Stats \xB7 Skills", pick: () => toggle() }, { id: "quests", name: "Quests", icon: plainIcon(MENU_ICONS.quests), pick: () => questsButton.click() }, { id: "map", name: "Map", icon: MENU_HUB_ICONS.map, pick: () => {
     close();
     environment.setTimeout(() => openMap?.(), 80);
   } }, { id: "bestiary", name: "Bestiary", icon: plainIcon(MENU_ICONS.bestiary), pick: () => go("bestiary") }, { id: "friends", name: "Friends", icon: plainIcon(MENU_ICONS.friends), pick: () => go("friends") }, { id: "heroes", name: "Heroes", icon: plainIcon(MENU_ICONS.heroes), pick: () => go("heroes") }, { id: "settings", name: "Settings", icon: MENU_HUB_ICONS.settings, pick: () => go("settings") }] });
@@ -169918,7 +169959,13 @@ function createInventoryPresentation({ document: document2, environment, readMod
     } catch {
     }
     const fresh = parseInt(document2.getElementById("world-bag-tab")?.querySelector(".rm-badge")?.textContent ?? "", 10) || 0;
-    hub.paint({ bag: { sub: "Gear \xB7 items \xB7 stats", badge: fresh ? String(fresh) : "" }, quests: { sub: active2.length ? active2.length + " active" : "None yet", badge: done3 ? "!" : "" }, map: { sub: "The whole world" }, bestiary: { sub: "Monster cards" }, friends: friendsSub(), heroes: { sub: heroes2 === 1 ? "1 hero" : heroes2 + " heroes", hidden: !heroesView }, settings: { sub: "Sound \xB7 controls", hidden: !settingsPage } });
+    const me = m.playersById?.[m.localPlayerId], look = m.entitiesById?.[me?.entityId]?.heroLook;
+    let points2 = 0;
+    try {
+      points2 = (Number(pointBalances(me.d8).attributeUnspent) || 0) + (me.d8?.heroClass ? Number(classTreePoints(me.d8).unspent) : 0);
+    } catch {
+    }
+    hub.paint({ player: { title: look?.look?.name || "Your hero", sub: "Level " + (me?.progression?.level ?? 1) + " \xB7 " + (HERO_CLASSES[me?.d8?.heroClass]?.name ?? "No class yet"), look, badge: points2 > 0 ? points2 + (points2 === 1 ? " point" : " points") : fresh ? fresh + " new" : "" }, quests: { sub: active2.length ? active2.length + " active" : "None yet", badge: done3 ? "!" : "" }, map: { sub: "The whole world" }, bestiary: { sub: "Monster cards" }, friends: friendsSub(), heroes: { sub: heroes2 === 1 ? "1 hero" : heroes2 + " heroes", hidden: !heroesView }, settings: { sub: "Sound \xB7 controls", hidden: !settingsPage } });
   }
   const nav = panel.querySelector(".bag-section-tabs"), heading = panel.querySelector(".bag-heading");
   panel.classList.add("rpg-menu");
@@ -169946,6 +169993,28 @@ function createInventoryPresentation({ document: document2, environment, readMod
     b.append(element("span", name, "rm-label"), element("span", "", "rm-badge"));
     b.setAttribute("aria-label", name);
     b.addEventListener("click", () => panel.classList.remove("rail-open"));
+  }
+  const subTabs = element("div", "", "rm-sub");
+  subTabs.id = "world-bag-subtabs";
+  subTabs.setAttribute("role", "tablist");
+  subTabs.hidden = true;
+  nav.before(subTabs);
+  const subButtons = BAG_SUBTABS.map(([id2, name]) => {
+    const b = button3(name, () => document2.getElementById(`world-${id2}-tab`)?.click());
+    b.className = "rm-subtab";
+    b.dataset.sub = id2;
+    b.setAttribute("role", "tab");
+    subTabs.append(b);
+    return [id2, b];
+  });
+  function paintSub() {
+    const inBag = BAG_SUBTABS.some(([id2]) => id2 === section);
+    subTabs.hidden = !inBag;
+    for (const [id2, b] of subButtons) {
+      b.hidden = !document2.getElementById(`world-${id2}-tab`);
+      b.setAttribute("aria-selected", String(section === id2));
+    }
+    if (inBag) document2.getElementById("world-bag-tab").setAttribute("aria-pressed", "true");
   }
   const forge = createForgePresentation({ document: document2, issue, invalidate: () => {
     key4 = null;
@@ -170310,8 +170379,9 @@ function createInventoryPresentation({ document: document2, environment, readMod
       panel.dataset.section = section;
       panel.classList.remove("is-inspecting");
       comparison.hidden = true;
-      document2.getElementById("world-bag-title").textContent = section === "stats" ? "Stats" : section === "heroes" ? "Heroes" : section === "friends" ? "Friends" : section === "bestiary" ? "Bestiary" : section === "quests" ? "Quests" : section === "etc" ? "Etc" : section === "hub" ? "Menu" : section === "settings" ? "Settings" : "Skills";
+      document2.getElementById("world-bag-title").textContent = section === "stats" ? "Stats" : section === "heroes" ? "Heroes" : section === "friends" ? "Friends" : section === "bestiary" ? "Bestiary" : section === "quests" ? "Quests" : section === "etc" ? "Bag" : section === "hub" ? "Menu" : section === "settings" ? "Settings" : "Skills";
       for (const id2 of ["equipment", "bag", "materials"]) document2.getElementById(`world-${id2}-tab`).setAttribute("aria-pressed", "false");
+      paintSub();
       status2.textContent = error;
       return;
     }
@@ -170342,6 +170412,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     document2.getElementById("world-equipment-tab").setAttribute("aria-pressed", String(section === "equipment"));
     document2.getElementById("world-bag-tab").setAttribute("aria-pressed", String(section === "bag"));
     for (const name of ["materials"]) document2.getElementById(`world-${name}-tab`).setAttribute("aria-pressed", String(section === name));
+    paintSub();
     const previousAction = comparison.contains(document2.activeElement) ? document2.activeElement.dataset.action : null, sheetScroll = comparison.dataset.itemId === selected ? comparison.querySelector(".gx-sheetscroll")?.scrollTop ?? 0 : 0;
     comparison.replaceChildren();
     comparison.hidden = !inspect;

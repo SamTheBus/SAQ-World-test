@@ -2035,3 +2035,10 @@ body[data-hud-menu=ring] .chart-mini,body[data-hud-menu=ring] .world-mini{margin
 html body:has(#mass-salvage-v1) .toast-lane-v1.toast-lane-v1{z-index:140!important;visibility:visible!important}
 html body .toast-lane-v1.toast-lane-v1:popover-open{right:auto;bottom:auto;margin:0;padding:0;border:0;background:none;color:inherit;overflow:visible;visibility:visible!important}
 .toast-lane-v1 .toast-v1[data-key^="scrap/"] .toast-count{display:none}
+/* Bag subtabs (2026-11-16): Etc and Materials sit under Bag, so the rail hides their own buttons. */
+body #world-inventory.rpg-menu #world-etc-tab,body #world-inventory.rpg-menu #world-materials-tab{display:none!important}
+body #world-inventory.rpg-menu>.rm-sub{grid-area:info;display:flex;gap:6px;margin:0;padding:8px 10px 0;min-width:0}
+body #world-inventory.rpg-menu>.rm-sub[hidden]{display:none}
+body #world-inventory.rpg-menu button.rm-subtab{flex:1 1 0;max-width:170px;min-width:0;min-height:0;height:36px;margin:0;padding:0 10px;border-radius:10px;border:1px solid #33404d;background:#151d26;box-shadow:none;color:#aeb5b6;font:700 13px/1 system-ui,sans-serif;letter-spacing:.02em;text-transform:none;cursor:pointer}
+body #world-inventory.rpg-menu button.rm-subtab[hidden]{display:none}
+body #world-inventory.rpg-menu button.rm-subtab[aria-selected=true]{border-color:#c9a35a;background:#2a2412;color:#f0c862;box-shadow:inset 0 -3px 0 #f0c862}
