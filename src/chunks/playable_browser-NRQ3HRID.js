@@ -221147,8 +221147,10 @@ function applyWorldTransferPatchD9(state2, patch) {
     else delete parent[key4];
   }
   for (const p of patch.placements) {
-    state2.encounterEconomy.groups[p.groupId].startedTick = state2.tick;
-    if (p.renewal) state2.d9World.episodes[p.groupId].renewalReceipt.renewedTick = state2.tick;
+    const economy = state2.encounterEconomy.groups[p.groupId], episode = state2.d9World.episodes[p.groupId];
+    economy.startedTick = state2.tick;
+    if (p.renewal) episode.renewalReceipt.renewedTick = state2.tick;
+    for (const key4 of ["ordinaryRoster", "ordinaryRosterV2"]) if (episode[key4]?.adoptedEpisode === economy.episode) episode[key4].adoptedTick = state2.tick;
   }
   captureWorldPositionsD9(state2);
   return true;
