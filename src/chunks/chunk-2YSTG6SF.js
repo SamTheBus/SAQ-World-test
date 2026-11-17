@@ -6623,6 +6623,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "When a hit drops you below half Health, your reflection steps out of the cape and fights beside you for 8 s with your class\u2019s starting skills, dealing {0} of your damage. Then it shatters. Once every 40 s.",
     "Turn around. You are already there."
   ),
+  // Hourglass Wraith (code id chronos_arbitrator; Sammy 2026-11-16, the set page and all four passes approved): its Slam's
+  // falling glass, its Echo Strike ghost, its Time Field clock turned to ice, and its Rewind turned on your cooldowns.
+  unique(
+    "hourfall",
+    "Hourfall",
+    "weapon",
+    null,
+    "Battleaxe",
+    "knight",
+    "chronos_arbitrator",
+    "upland",
+    "Earth-Breaker also drops a glass hourglass onto the toughest enemy it hit. A ring of sand shows where it will land, and a moment later it smashes down, hitting every enemy in the ring for {0} of your Attack.",
+    "Every grain lands somewhere."
+  ),
+  unique(
+    "second-hand",
+    "Second Hand",
+    "weapon",
+    null,
+    "Rapier",
+    "rogue",
+    "chronos_arbitrator",
+    "upland",
+    "Whirling Blades leaves a sand echo of you where you spun. A moment later the echo spins too, cutting everything in the same ring three times for {0} of your Attack each.",
+    "Strike once. It ticks twice."
+  ),
+  unique(
+    "stillhour-tome",
+    "Stillhour Tome",
+    "subweapon",
+    "tome",
+    "Frost Tome",
+    "mage",
+    "chronos_arbitrator",
+    "upland",
+    "Flashfreeze leaves a frozen clock on the floor under you for 4 s. Enemies inside stay Chilled and attack 1.67x slower, and anything it froze stays frozen {0} longer.",
+    "Ten to two, forever."
+  ),
+  unique(
+    "turnback-band",
+    "Turnback Band",
+    "ring",
+    null,
+    "Band Ring",
+    null,
+    "chronos_arbitrator",
+    "upland",
+    "Using a skill flips the band\u2019s little hourglass. A moment later the sand runs back and that skill\u2019s cooldown resets, so you can use it again. Once every {0}.",
+    "Again. And again."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -6904,6 +6954,11 @@ var UNIQUE_TIERS = freezeWire({
   "silverstep": { lines: ["offDmg", "critChance", "dex", "moveSpeed", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
   "splinterglass-wand": { lines: ["mainDmg", "int", "critChance", "activeSpd", "eliteDmg"], stars: [40, 55, 70, 90], unit: "pct" },
   "glassveil": { lines: ["maxHpPct", "defPct", "atkPct", "lifeKill", "cdr"], stars: [35, 45, 55, 70], unit: "pct" },
+  // Hourglass Wraith (v3 lines below; these five are the v2 fallback).
+  "hourfall": { lines: ["mainDmg", "str", "critChance", "critDamage", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
+  "second-hand": { lines: ["mainDmg", "dex", "critChance", "critDamage", "eliteDmg"], stars: [30, 40, 50, 65], unit: "pct" },
+  "stillhour-tome": { lines: ["offDmg", "int", "frostDmg", "cdr", "eliteDmg"], stars: [40, 50, 60, 75], unit: "ticks" },
+  "turnback-band": { lines: ["atkPct", "maxHpPct", "cdr", "critChance", "defPct"], stars: [1440, 1320, 1200, 1080], unit: "ticks" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
@@ -6964,6 +7019,12 @@ var UNIQUE_LINES_V3 = freezeWire({
   "silverstep": { always: "areaDmg", pool: ["offDmg", "critChance", "critDamage", "moveCdr", "mainAttr", "eliteDmg"], leg: ["killCdr"] },
   "splinterglass-wand": { always: "rangedDmg", pool: ["mainDmg", "critChance", "activeSpd", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "glassveil": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
+  // Hourglass Wraith set (Sammy 2026-11-16). Under the unique damage rule the hourglass is Earth-Breaker damage (a
+  // Shockwave, Area) and the echo's spin is Whirling Blades damage (Area); no Main hand or Off-hand line feeds them.
+  "hourfall": { always: "skillDmg:earth_breaker", pool: ["areaDmg", "str", "critChance", "critDamage", "shockDmg", "eliteDmg"], leg: ["killCdr"] },
+  "second-hand": { always: "skillDmg:whirling_blades", pool: ["areaDmg", "dex", "critChance", "critDamage", "closeDmg", "eliteDmg"], leg: ["killCdr"] },
+  "stillhour-tome": { always: "controlDur", pool: ["offDmg", "int", "frostDmg", "ccDmg", "cdr", "eliteDr"], leg: ["maxPip"] },
+  "turnback-band": { always: "cdr", pool: ["atkPct", "maxHpPct", "defPct", "critChance", "lifeHit", "eliteDmg", "stunDr"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -7033,7 +7094,7 @@ function uniqueEffectText(unique2, tier) {
 var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
 var uniquesFrom = (source10, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source10 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
 var trophyFromV1 = (biome) => Object.values(UNIQUE_ITEMS).find((u) => u.trophy && u.biome === biome)?.from ?? null;
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator"]);
 function nightmareUniqueV1(cls, pick6, source10 = "nightmare_sporecrown") {
   const own3 = cls ? uniquesFrom(source10, cls) : [], mine = own3.find((id) => UNIQUE_ITEMS[id].cls === cls), any = own3.find((id) => UNIQUE_ITEMS[id].cls === null);
   if (!mine) return null;

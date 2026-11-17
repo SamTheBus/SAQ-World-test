@@ -1104,6 +1104,9 @@ body #world-xp{color:#bfe6f0}
 .skill-wheel-pip.fresh::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 6px var(--class);opacity:0;animation:skill-pip-ring .45s ease-out}
 @keyframes skill-pip-pop{0%{transform:var(--at) scale(1.3)}100%{transform:var(--at) scale(1)}}
 @keyframes skill-pip-ring{0%{opacity:.75}100%{opacity:0}}
+.skill-wheel-v1 .skill-slot-sweep[data-sand=true]{background:#e2c27ab8}
+.skill-wheel-v1 .skill-slot[data-turned=true]::after{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 0 3px #fbecc2,inset 0 0 14px #ffd86b;z-index:3;pointer-events:none;animation:skill-turned .3s ease-out both}
+@keyframes skill-turned{0%{opacity:0}30%{opacity:1}100%{opacity:.55}}
 .skill-wheel-v1 .skill-slot[data-fin=true]{box-shadow:0 0 0 3px #f4cf6a,0 0 18px #f4cf6acc,inset 0 0 0 2px var(--class),inset 0 -6px 10px #0006,0 3px 0 #070b10}
 .skill-wheel-done{position:absolute;z-index:9;display:grid;place-items:center;align-content:center;margin:0;padding:0;border-radius:50%;border:3px solid #0b1015;background:radial-gradient(circle at 38% 28%,#f8dc86,#c98d1d 72%);color:#1f1404;font:800 11px var(--rpg-ui);letter-spacing:.04em;box-shadow:0 0 0 2px #ffe39a,0 6px 16px #0008;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .skill-wheel-done[hidden]{display:none}

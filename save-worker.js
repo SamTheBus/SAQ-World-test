@@ -15580,6 +15580,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "When a hit drops you below half Health, your reflection steps out of the cape and fights beside you for 8 s with your class\u2019s starting skills, dealing {0} of your damage. Then it shatters. Once every 40 s.",
     "Turn around. You are already there."
   ),
+  // Hourglass Wraith (code id chronos_arbitrator; Sammy 2026-11-16, the set page and all four passes approved): its Slam's
+  // falling glass, its Echo Strike ghost, its Time Field clock turned to ice, and its Rewind turned on your cooldowns.
+  unique(
+    "hourfall",
+    "Hourfall",
+    "weapon",
+    null,
+    "Battleaxe",
+    "knight",
+    "chronos_arbitrator",
+    "upland",
+    "Earth-Breaker also drops a glass hourglass onto the toughest enemy it hit. A ring of sand shows where it will land, and a moment later it smashes down, hitting every enemy in the ring for {0} of your Attack.",
+    "Every grain lands somewhere."
+  ),
+  unique(
+    "second-hand",
+    "Second Hand",
+    "weapon",
+    null,
+    "Rapier",
+    "rogue",
+    "chronos_arbitrator",
+    "upland",
+    "Whirling Blades leaves a sand echo of you where you spun. A moment later the echo spins too, cutting everything in the same ring three times for {0} of your Attack each.",
+    "Strike once. It ticks twice."
+  ),
+  unique(
+    "stillhour-tome",
+    "Stillhour Tome",
+    "subweapon",
+    "tome",
+    "Frost Tome",
+    "mage",
+    "chronos_arbitrator",
+    "upland",
+    "Flashfreeze leaves a frozen clock on the floor under you for 4 s. Enemies inside stay Chilled and attack 1.67x slower, and anything it froze stays frozen {0} longer.",
+    "Ten to two, forever."
+  ),
+  unique(
+    "turnback-band",
+    "Turnback Band",
+    "ring",
+    null,
+    "Band Ring",
+    null,
+    "chronos_arbitrator",
+    "upland",
+    "Using a skill flips the band\u2019s little hourglass. A moment later the sand runs back and that skill\u2019s cooldown resets, so you can use it again. Once every {0}.",
+    "Again. And again."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -15861,6 +15911,11 @@ var UNIQUE_TIERS = freezeWire({
   "silverstep": { lines: ["offDmg", "critChance", "dex", "moveSpeed", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
   "splinterglass-wand": { lines: ["mainDmg", "int", "critChance", "activeSpd", "eliteDmg"], stars: [40, 55, 70, 90], unit: "pct" },
   "glassveil": { lines: ["maxHpPct", "defPct", "atkPct", "lifeKill", "cdr"], stars: [35, 45, 55, 70], unit: "pct" },
+  // Hourglass Wraith (v3 lines below; these five are the v2 fallback).
+  "hourfall": { lines: ["mainDmg", "str", "critChance", "critDamage", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
+  "second-hand": { lines: ["mainDmg", "dex", "critChance", "critDamage", "eliteDmg"], stars: [30, 40, 50, 65], unit: "pct" },
+  "stillhour-tome": { lines: ["offDmg", "int", "frostDmg", "cdr", "eliteDmg"], stars: [40, 50, 60, 75], unit: "ticks" },
+  "turnback-band": { lines: ["atkPct", "maxHpPct", "cdr", "critChance", "defPct"], stars: [1440, 1320, 1200, 1080], unit: "ticks" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
@@ -15921,6 +15976,12 @@ var UNIQUE_LINES_V3 = freezeWire({
   "silverstep": { always: "areaDmg", pool: ["offDmg", "critChance", "critDamage", "moveCdr", "mainAttr", "eliteDmg"], leg: ["killCdr"] },
   "splinterglass-wand": { always: "rangedDmg", pool: ["mainDmg", "critChance", "activeSpd", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "glassveil": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
+  // Hourglass Wraith set (Sammy 2026-11-16). Under the unique damage rule the hourglass is Earth-Breaker damage (a
+  // Shockwave, Area) and the echo's spin is Whirling Blades damage (Area); no Main hand or Off-hand line feeds them.
+  "hourfall": { always: "skillDmg:earth_breaker", pool: ["areaDmg", "str", "critChance", "critDamage", "shockDmg", "eliteDmg"], leg: ["killCdr"] },
+  "second-hand": { always: "skillDmg:whirling_blades", pool: ["areaDmg", "dex", "critChance", "critDamage", "closeDmg", "eliteDmg"], leg: ["killCdr"] },
+  "stillhour-tome": { always: "controlDur", pool: ["offDmg", "int", "frostDmg", "ccDmg", "cdr", "eliteDr"], leg: ["maxPip"] },
+  "turnback-band": { always: "cdr", pool: ["atkPct", "maxHpPct", "defPct", "critChance", "lifeHit", "eliteDmg", "stunDr"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -15971,7 +16032,7 @@ function uniqueLineKeyV3(id2, affix) {
   return affix.key;
 }
 var NTH = Object.freeze({ 2: "second", 3: "third", 4: "fourth", 5: "fifth" });
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator"]);
 var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.25, named: 0.1, world: 2e-3 });
 
 // src/shared/content/smart_offhand_v1.js
@@ -27481,6 +27542,11 @@ var SPL_LIFE = 70;
 var GV_TICKS = 480;
 var GV_EVERY = 2400;
 var GV_POP = 40;
+var HF_TICKS = 132;
+var SH_TICKS = 115;
+var CLOCK_TICKS = 240;
+var TB_SHOW = 80;
+var TB_EVERY_MAX = 1440;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
@@ -27512,7 +27578,7 @@ var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
-var LIVE = ["pane", "ssCd", "mirrors", "splN", "splinters", "gvCd", "glass", "glassPop", "scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["hfGlass", "shEcho", "clock", "tbCd", "turn", "pane", "ssCd", "mirrors", "splN", "splinters", "gvCd", "glass", "glassPop", "scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 var ZIP_TICKS = 120;
 var PERF_READY_TICKS = 180;
 function prune(combat) {
@@ -28071,6 +28137,30 @@ function validateClassSkillState(s, combat, actor) {
       closedRecord(k.glassPop, ["x", "y", "ticks"]);
       requireContract(pos2(k.glassPop), "Invalid shattered reflection");
       safeInteger(k.glassPop.ticks, 1, GV_POP);
+    }
+    if (k.tbCd !== void 0) safeInteger(k.tbCd, 1, TB_EVERY_MAX);
+    if (k.hfGlass !== void 0) {
+      const g = k.hfGlass;
+      closedRecord(g, ["x", "y", "target", "age"]);
+      requireContract(pos2(g) && typeof g.target === "string" && g.target.length <= 240, "Invalid hourglass");
+      safeInteger(g.age, 0, HF_TICKS - 1);
+    }
+    if (k.shEcho !== void 0) {
+      const e = k.shEcho;
+      closedRecord(e, ["x", "y", "r", "age"]);
+      requireContract(pos2(e), "Invalid sand echo");
+      safeInteger(e.r, 1, 400);
+      safeInteger(e.age, 0, SH_TICKS - 1);
+    }
+    if (k.clock !== void 0) {
+      closedRecord(k.clock, ["x", "y", "age"]);
+      requireContract(pos2(k.clock), "Invalid frozen clock");
+      safeInteger(k.clock.age, 0, CLOCK_TICKS - 1);
+    }
+    if (k.turn !== void 0) {
+      closedRecord(k.turn, ["skill", "age"]);
+      requireContract(CLASS_SKILL_IDS.includes(k.turn.skill), "Invalid turn back");
+      safeInteger(k.turn.age, 0, TB_SHOW - 1);
     }
     for (const [key9, max2] of [["oathCd", OATH_EVERY], ["plate", PLATE_TICKS], ["plateCd", PLATE_EVERY]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
     if (k.lode !== void 0) {
