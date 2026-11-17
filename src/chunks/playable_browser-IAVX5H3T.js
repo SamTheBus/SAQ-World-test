@@ -195060,7 +195060,8 @@ var pics = /* @__PURE__ */ new Map();
 function heroCanvas(key4) {
   let cv = pics.get(key4);
   if (!cv) {
-    cv = document.createElement("canvas");
+    cv = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(160, 180) : globalThis.document?.createElement?.("canvas");
+    if (!cv) return null;
     cv.width = 160;
     cv.height = 180;
     pics.set(key4, cv);
@@ -195068,7 +195069,8 @@ function heroCanvas(key4) {
   return cv;
 }
 function heroSprite(key4, hero, pose3, tint3) {
-  const cv = heroCanvas(key4), c = cv.getContext("2d");
+  const cv = heroCanvas(key4), c = cv?.getContext?.("2d");
+  if (!c) return null;
   c.setTransform(1, 0, 0, 1, 0, 0);
   c.globalCompositeOperation = "source-over";
   c.clearRect(0, 0, 160, 180);
@@ -195089,6 +195091,7 @@ function heroSprite(key4, hero, pose3, tint3) {
 }
 function drawHeroPic(c, key4, hero, x, y, { facing: facing2 = 1, pose: pose3 = { t: 0 }, tint: tint3 = null, alpha = 1, scale = 1, rot: rot2 = 0, eyes: eyes2 = 0 } = {}) {
   const cv = heroSprite(key4, hero, pose3, tint3);
+  if (!cv) return;
   c.save();
   c.translate(x, y - 8);
   c.rotate(rot2);
@@ -195108,6 +195111,7 @@ function drawHeroPic(c, key4, hero, x, y, { facing: facing2 = 1, pose: pose3 = {
 var SOLE2 = 21;
 function drawHeroReflection(c, key4, hero, facing2, tick, alpha) {
   const cv = heroSprite(key4, hero, { t: tick / 60 }, "rgba(150,205,245,.55)");
+  if (!cv) return;
   c.save();
   c.translate(hero.position.x, hero.position.y - 8 + 0.8 * (SOLE2 - 1.2));
   c.scale(0.8 * facing2, -0.72 * 0.8);
