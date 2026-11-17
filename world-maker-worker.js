@@ -520,7 +520,7 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   chronos_arbitrator: Object.freeze({
     id: "chronos_arbitrator",
-    label: "CHRONOS ARBITRATOR",
+    label: "HOURGLASS WRAITH",
     site: "repeatable-slot:ruin:upland:standard:049",
     family: "ruin",
     biome: "upland",

@@ -2560,7 +2560,7 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   chronos_arbitrator: Object.freeze({
     id: "chronos_arbitrator",
-    label: "CHRONOS ARBITRATOR",
+    label: "HOURGLASS WRAITH",
     site: "repeatable-slot:ruin:upland:standard:049",
     family: "ruin",
     biome: "upland",
@@ -20281,7 +20281,7 @@ function validateRecoveredBossV1(state, id2, b) {
     "statusesByEntityId",
     "lastTrailPosition",
     "lastAction"
-  ], ["coinShots", "archive", "goldRush", "beamSweep", "lookingGlass", "reflections"]);
+  ], ["coinShots", "archive", "goldRush", "beamSweep", "lookingGlass", "reflections", "echo"]);
   const spec = recoveredBossForId(b.bossDefinitionId), actor = state.entitiesById[id2], group = state.groupsById[b.groupId], c = state.spacesByInstanceId[b.spaceInstanceId]?.collision;
   requireContract(spec && b.version === RECOVERED_BOSS_VERSION && b.entityId === id2 && /^boss:[a-f0-9]{32}$/.test(b.bossId) && actor?.team === "hostile" && actor.contentDefinitionId === ARACHNID_TREANT_PROFILE.contentDefinitionId && group?.entityIds.includes(id2) && group.siteId === b.siteId && actor.residency.spaceInstanceId === b.spaceInstanceId && actor.residency.residencyRevision === b.sourceResidencyRevision && c && point5(b.homePosition) && !collidesWithTiles(c, b.homePosition.x, b.homePosition.y, ARACHNID_TREANT_PROFILE.hullRadius), "Recovered boss identity invalid");
   requireContract([1, 2].includes(b.phase) && b.phase2Triggered === (b.phase === 2) && states.includes(b.actionState), "Recovered boss phase invalid");
@@ -20349,6 +20349,19 @@ function validateRecoveredBossV1(state, id2, b) {
         safeInteger(r.lastCast.resolvedTick, b.activatedTick, state.tick);
         requireContract(Array.isArray(r.lastCast.hitEntityIds) && r.lastCast.hitEntityIds.length <= 8, "Invalid reflection hit record");
       }
+    }
+  }
+  if (b.echo !== void 0) {
+    const e = b.echo;
+    requireContract(b.bossDefinitionId === "chronos_arbitrator" && e && typeof e === "object", "Only the Hourglass Wraith sends an Echo Strike");
+    closedRecord(e, ["targetEntityId", "ghostPosition", "formTick", "lockTick", "resolvesTick", "lockedPosition", "resolvedTick", "hitEntityIds"]);
+    requireContract(typeof e.targetEntityId === "string" && (e.ghostPosition === null || point5(e.ghostPosition)) && (e.lockedPosition === null || point5(e.lockedPosition)) && Array.isArray(e.hitEntityIds) && e.hitEntityIds.length <= 8, "Invalid Echo Strike");
+    safeInteger(e.formTick, b.activatedTick);
+    safeInteger(e.lockTick, e.formTick);
+    safeInteger(e.resolvesTick, e.lockTick);
+    if (e.resolvedTick !== null) {
+      safeInteger(e.resolvedTick, e.resolvesTick, state.tick);
+      requireContract(e.lockedPosition !== null, "Echo landed without a spot");
     }
   }
   if (b.beamSweep !== void 0) {
@@ -20456,7 +20469,7 @@ function validateRecoveredBossV1(state, id2, b) {
       safeInteger(last, 0, state.tick);
     }
   }
-  requireContract(Array.isArray(b.pools) && b.pools.length <= (b.bossDefinitionId === "cinderhart" ? 64 : b.archive && b.bossDefinitionId === "corrosive_abomination" ? 96 : 20) && point5(b.lastTrailPosition), "Recovered boss hazard budget invalid");
+  requireContract(Array.isArray(b.pools) && b.pools.length <= (b.bossDefinitionId === "cinderhart" ? 64 : b.bossDefinitionId === "chronos_arbitrator" ? 32 : b.archive && b.bossDefinitionId === "corrosive_abomination" ? 96 : 20) && point5(b.lastTrailPosition), "Recovered boss hazard budget invalid");
   for (const p of b.pools) {
     closedRecord(p, ["id", "kind", "position", "radius", "createdTick", "expiresTick", "nextDamageTick"]);
     requireContract(typeof p.id === "string" && p.id.startsWith(b.bossId + ":pool:") && ["acid", "slag", "fire", "void", "time", "collapse", "molten", "gold", "prism", "ghostfire", "sunfire"].includes(p.kind) && point5(p.position) && Number.isFinite(p.radius) && p.radius >= 8 && p.radius <= 300, "Recovered boss pool invalid");
