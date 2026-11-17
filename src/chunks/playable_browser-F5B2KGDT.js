@@ -117697,55 +117697,48 @@ var CAPES = {
   }, front: (c, A2) => collar(c, A2, CAPE_CLOTH.banner) }
 };
 function sword2(c, A2) {
-  R3(c, 10.6, -1.5, 1.9, 3, accPal(A2), { flat: true, lw: 1.2 });
-  R3(c, 12.4, -1.1, 4, 2.2, P14.leather, { flat: true, lw: 1.2 });
+  lkPommel(c, A2, 12.4);
+  lkGrip(c, 12.4, 16);
   R3(c, 16, -3.8, 2.2, 7.6, accPal(A2), { flat: true, lw: 1.3 });
+  px3(c, 16.3, -3.4, 0.6, 6.8, mix22(A2.c, "#ffffff", 0.3));
   G3(c, [18.2, -1.7, 31, -1.7, 34.4, 0, 31, 1.7, 18.2, 1.7], P14.blade, { bottom: true, split: 0.5, lw: 1.4 });
   px3(c, 19, -0.35, 11.5, 0.7, "#00000040");
   gem2(c, 17.1, 0, 1.6, A2.gem);
 }
 function saber(c, A2) {
-  R3(c, 12.4, -1.1, 4, 2.2, P14.leather, { flat: true, lw: 1.2 });
+  lkPommel(c, A2, 12.4, 1.7);
+  lkGrip(c, 12.4, 16, 2.4);
   R3(c, 16, -3, 2, 6, accPal(A2), { flat: true, lw: 1.2 });
   G3(c, [18, -1.6, 29, -2.8, 34.6, -5.8, 31.6, -0.4, 18, 1.6], P14.blade, { bottom: true, split: 0.5, lw: 1.4 });
   gem2(c, 17, 0, 1.4, A2.gem);
 }
-function axe(c, A2) {
-  R3(c, 10.6, -1.2, 1.6, 2.4, accPal(A2), { flat: true, lw: 1.1 });
-  R3(c, 12.2, -1, 19.6, 2, M.oak, { flat: true, lw: 1.2 });
-  R3(c, 22.4, -1.5, 1.4, 3, accPal(A2), { flat: true, lw: 1 });
-  G3(c, [25, 1, 30.4, 1, 33.4, 2.6, 35, 6.4, 34.4, 10.2, 31.6, 11.6, 29.4, 8.8, 27.2, 5, 25, 3.6], M.steel, { lw: 1.3 });
-  px3(c, 32.6, 4.4, 1, 5.4, M.steel.l);
-  R3(c, 24.6, -2.2, 6, 3.2, M.darkSteel, { flat: true, lw: 1.1 });
-  gem2(c, 27.6, 2.4, 1.4, A2.gem);
-}
 function warhammer(c, A2) {
-  R3(c, 10.6, -1.2, 1.6, 2.4, accPal(A2), { flat: true, lw: 1.1 });
-  R3(c, 12.2, -1, 17.4, 2, M.oak, { flat: true, lw: 1.2 });
-  R3(c, 25.2, -1.5, 1.4, 3, accPal(A2), { flat: true, lw: 1 });
+  axHaft(c, A2, 27.4, 25);
   R3(c, 26.8, -5.2, 6.4, 10.4, M.steel, { split: 0.6, lw: 1.4 });
   px3(c, 27.6, -4.4, 4.4, 0.8, M.steel.l);
   G3(c, [28.2, -5.2, 31.8, -5.2, 30, -9.4], M.darkSteel, { flat: true, lw: 1.1 });
   gem2(c, 30, 0, 1.6, A2.gem);
 }
 function rapier(c, A2) {
-  R3(c, 10.6, -1, 1.6, 2, accPal(A2), { flat: true, lw: 1 });
-  R3(c, 12.2, -0.9, 3.8, 1.8, P14.leather, { flat: true, lw: 1.1 });
+  lkPommel(c, A2, 12.4, 1.6);
+  lkGrip(c, 12.4, 16, 2.3);
   G3(c, [15.6, -3.4, 17.2, -3.4, 17.2, 3.8, 13.2, 4.4, 12.8, 3, 15.6, 2.4], accPal(A2), { flat: true, lw: 1 });
   R3(c, 16, -3.6, 1.4, 7.2, accPal(A2), { flat: true, lw: 1 });
   G3(c, [17.4, -1, 36.4, -0.55, 38.6, 0, 36.4, 0.55, 17.4, 1], P14.blade, { flat: true, lw: 1 });
   gem2(c, 16.7, 0, 1.2, A2.gem);
 }
 function scimitar(c, A2) {
-  R3(c, 12.4, -1.1, 3.6, 2.2, P14.leather, { flat: true, lw: 1.2 });
+  lkPommel(c, A2, 12.4, 1.7);
+  lkGrip(c, 12.4, 15.8, 2.4);
   R3(c, 15.8, -2.8, 1.8, 5.6, accPal(A2), { flat: true, lw: 1.2 });
   G3(c, [17.6, -1.6, 25.6, -2.2, 30.6, -4, 34.8, -7.6, 34.4, -2.8, 30.6, 1.4, 22.6, 2.8, 17.6, 2], P14.blade, { bottom: true, split: 0.5, lw: 1.4 });
   gem2(c, 16.7, 0, 1.4, A2.gem);
 }
 function wand(c, A2, t = 0) {
-  R3(c, 11.2, -0.9, 4.4, 1.8, M.oak, { flat: true, lw: 1.1 });
+  lkPommel(c, A2, 11.4, 1.5);
+  lkGrip(c, 11.4, 15.4, 2.2);
   R3(c, 15.4, -1.3, 1.2, 2.6, accPal(A2), { flat: true, lw: 1 });
-  G3(c, [16.6, -0.85, 25.4, -0.55, 25.4, 0.55, 16.6, 0.85], M.willow, { flat: true, lw: 1 });
+  G3(c, [16.6, -0.95, 25.4, -0.6, 25.4, 0.6, 16.6, 0.95], M.willow, { flat: true, lw: 1 });
   const tip = A2.gem ? { b: A2.c, d: A2.d } : { b: "#cfe8f2", d: "#9cc3d3" };
   if (A2.gem) {
     const [r, g, b] = hexRgb2(A2.c);
@@ -117755,13 +117748,16 @@ function wand(c, A2, t = 0) {
 }
 function scepter(c, A2) {
   const gold = { b: "#d4b45a", d: "#a8893e", l: "#ecd38a" };
-  R3(c, 11.2, -1, 4.4, 2, M.oak, { flat: true, lw: 1.1 });
-  R3(c, 15.6, -0.9, 9, 1.8, accPal(A2), { flat: true, lw: 1.1 });
-  R3(c, 24.6, -3.4, 5.6, 6.8, gold, { split: 0.6, lw: 1.3 });
-  R3(c, 26, -5, 2.8, 1.6, gold, { flat: true, lw: 1 });
-  R3(c, 26, 3.4, 2.8, 1.6, gold, { flat: true, lw: 1 });
-  R3(c, 30.2, -1, 1.6, 2, gold, { flat: true, lw: 1 });
-  gem2(c, 27.4, 0, 2.2, A2.gem ?? "#e8eef2");
+  lkPommel(c, A2, 11.4, 1.6);
+  lkGrip(c, 11.4, 15.6, 2.4);
+  R3(c, 15.6, -0.9, 8.4, 1.8, accPal(A2), { flat: true, lw: 1.1 });
+  R3(c, 23.4, -1.7, 1.6, 3.4, gold, { flat: true, lw: 1 });
+  const prong = [24.8, -1.2, 25.2, -4.2, 27.4, -5.8, 30, -5, 31.4, -1.8, 29.4, -1.4, 28.9, -2.3, 27.6, -2.6, 26.8, -2.3, 26.6, -1.2];
+  G3(c, prong, gold, { split: 0.5, lw: 1.1 });
+  G3(c, prong.map((v, k) => k % 2 ? -v : v), gold, { split: 0.5, lw: 1.1 });
+  G3(c, [30.4, -1.3, 31.6, -1.3, 34.2, 0, 31.6, 1.3, 30.4, 1.3], gold, { split: 0.5, lw: 1 });
+  G3(c, [25.6, 0, 28.2, -2.5, 30.6, 0, 28.2, 2.5], stoneOf7(A2, { b: "#e8eef2", d: "#b9c4cc" }), { split: 0.5, lw: 1.1 });
+  px3(c, 27.4, -1.2, 0.8, 0.8, "#ffffffb3");
 }
 function greatsword(c, A2) {
   R3(c, 9.4, -1.6, 2, 3.2, accPal(A2), { flat: true, lw: 1.2 });
@@ -117787,36 +117783,78 @@ function mace(c, A2) {
   gem2(c, 27.6, 0, 1.6, A2.gem);
 }
 function broadsword(c, A2) {
-  R3(c, 10.4, -1.7, 2, 3.4, accPal(A2), { flat: true, lw: 1.2 });
-  R3(c, 12.4, -1.1, 3.6, 2.2, P14.leather, { flat: true, lw: 1.2 });
+  lkPommel(c, A2, 12.4, 2.1);
+  lkGrip(c, 12.4, 16);
   G3(c, [18, -2.1, 31.4, -2.1, 33.6, -0.9, 33.6, 0.9, 31.4, 2.1, 18, 2.1], P14.blade, { bottom: true, split: 0.5, lw: 1.4 });
   px3(c, 18.8, -0.35, 11.6, 0.7, "#00000040");
   G3(c, [16, -1.4, 16.4, -4.4, 18.8, -5.4, 18.2, -3.2, 18.2, 3.2, 18.8, 5.4, 16.4, 4.4, 16, 1.4], accPal(A2), { flat: true, lw: 1.2 });
   gem2(c, 17.1, 0, 1.6, A2.gem);
 }
 function leafSword(c, A2) {
-  R3(c, 9.4, -1.8, 2.8, 3.6, accPal(A2), { flat: true, lw: 1.2 });
+  R3(c, 9.4, -1.9, 2.8, 3.8, accPal(A2), { split: 0.5, lw: 1.2 });
   px3(c, 10.3, -0.6, 1, 1.2, "#1d232b");
-  R3(c, 12.2, -1, 4.2, 2, P14.leather, { flat: true, lw: 1.2 });
+  lkGrip(c, 12.2, 16.4);
   G3(c, [17.8, -1.1, 22, -2.3, 27, -2.6, 31.4, -1.4, 35, 0, 31.4, 1.4, 27, 2.6, 22, 2.3, 17.8, 1.1], P14.blade, { bottom: true, split: 0.5, lw: 1.4 });
   px3(c, 18.8, -0.3, 13, 0.6, "#00000040");
   R3(c, 16.4, -2.8, 1.6, 5.6, accPal(A2), { flat: true, lw: 1.1 });
   gem2(c, 17.2, 0, 1.4, A2.gem);
 }
+var LK_LEATHER = { b: "#5a3a28", d: "#41291c", l: "#7a5238" };
+function lkGrip(c, x0, x1, w = 2.6) {
+  R3(c, x0, -w / 2, x1 - x0, w, LK_LEATHER, { flat: true, lw: 1 });
+  c.save();
+  c.strokeStyle = tint2(LK_LEATHER.d);
+  c.lineWidth = 0.35;
+  c.beginPath();
+  for (let x = x0 + 0.5; x < x1 - 0.3; x += 0.95) c.moveTo(x, w / 2 - 0.05), c.lineTo(x + 0.6, -w / 2 + 0.05);
+  c.stroke();
+  c.restore();
+}
+function lkPommel(c, A2, x, h = 1.9) {
+  G3(c, [x - 2.3, 0, x - 1.4, -h * 0.9, x, -h, x, h, x - 1.4, h * 0.9], accPal(A2), { split: 0.5, lw: 1 });
+}
+var AX_EDGE = { b: "#dfe6ea", d: "#a9b4ba", l: "#ffffff" };
+var AX_OAK = { b: "#8a5a32", d: "#64401f", l: "#a8744a" };
+var AX_LEATHER = { b: "#5a3a28", d: "#41291c", l: "#7a5238" };
+function axHaft(c, A2, end, collar3) {
+  G3(c, [8.4, 0, 9.4, -1.7, 11.6, -1.8, 11.6, 1.8, 9.4, 1.7], accPal(A2), { split: 0.5, lw: 1 });
+  R3(c, 11.6, -1.3, end - 11.6, 2.6, AX_OAK, { split: 0.5, lw: 1.2 });
+  R3(c, 12, -1.45, 5.2, 2.9, AX_LEATHER, { flat: true, lw: 0.9 });
+  c.save();
+  c.strokeStyle = tint2(AX_LEATHER.d);
+  c.lineWidth = 0.35;
+  c.beginPath();
+  for (let x = 12.5; x < 17; x += 0.95) c.moveTo(x, 1.4), c.lineTo(x + 0.6, -1.4);
+  c.stroke();
+  c.restore();
+  R3(c, collar3, -1.75, 1.6, 3.5, accPal(A2), { flat: true, lw: 1 });
+}
+var AX_RIM = [[33, 7.2], [32.5, 8.8], [31.2, 9.9], [29.3, 10.4], [27.4, 10.5], [25.5, 10.4], [23.6, 9.9], [22.3, 8.8], [21.8, 7.2]];
+function axFan(c, s) {
+  const P28 = (pts2) => pts2.flatMap(([x, y]) => [x, s * y]), inner = AX_RIM.map(([x, y]) => [27.4 + (x - 27.4) * 0.84, 2 + (y - 2) * 0.84]);
+  G3(c, P28([[24.4, 1], [30.4, 1], ...AX_RIM]), M.steel, { flat: true, lw: 1.3 });
+  G3(c, P28([[24.4, 1], [30.4, 1], [31.4, 3.4], [27.4, 3.6], [23.4, 3.4]]), { b: M.steel.l }, { flat: true, line: false });
+  G3(c, P28([...AX_RIM, ...inner.reverse()]), AX_EDGE, { flat: true, line: false });
+  G3(c, P28([[24.4, 1], [30.4, 1], ...AX_RIM]), { b: "rgba(0,0,0,0)" }, { flat: true, lw: 1.3 });
+  px3(c, 26.2, s > 0 ? 9.2 : -9.8, 2.4, 0.6, AX_EDGE.l);
+}
+function axe(c, A2) {
+  axHaft(c, A2, 29.6, 19.6);
+  axFan(c, 1);
+  R3(c, 25.4, -3.6, 4, 2, M.darkSteel, { flat: true, lw: 1 });
+  px3(c, 25.8, -3.3, 3.2, 0.5, M.darkSteel.l);
+  R3(c, 25.2, -1.8, 4.4, 3.6, M.darkSteel, { flat: true, lw: 1.1 });
+  gem2(c, 27.4, 0, 1.4, A2.gem);
+}
 function doubleAxe(c, A2) {
-  R3(c, 10.6, -1.2, 1.6, 2.4, accPal(A2), { flat: true, lw: 1.1 });
-  R3(c, 12.2, -1, 20.4, 2, M.oak, { flat: true, lw: 1.2 });
-  R3(c, 21.6, -1.5, 1.4, 3, accPal(A2), { flat: true, lw: 1 });
-  for (const s of [-1, 1]) G3(c, [24.4, s * 1, 30.4, s * 1, 33, s * 7.2, 31, s * 9.6, 27.4, s * 10.2, 23.8, s * 9.6, 21.8, s * 7.2], M.steel, { lw: 1.3 });
-  px3(c, 31.4, -6.8, 1, 4.4, M.steel.l);
-  px3(c, 31.4, 2.4, 1, 4.4, M.steel.l);
+  axHaft(c, A2, 29.6, 19.6);
+  axFan(c, 1);
+  axFan(c, -1);
   R3(c, 25.2, -1.8, 4.4, 3.6, M.darkSteel, { flat: true, lw: 1.1 });
   gem2(c, 27.4, 0, 1.4, A2.gem);
 }
 function broadAxe(c, A2) {
-  R3(c, 10.6, -1.2, 1.6, 2.4, accPal(A2), { flat: true, lw: 1.1 });
-  R3(c, 12.2, -1, 19.6, 2, M.oak, { flat: true, lw: 1.2 });
-  R3(c, 21.8, -1.5, 1.4, 3, accPal(A2), { flat: true, lw: 1 });
+  axHaft(c, A2, 32.4, 19.8);
   G3(c, [24.4, 1, 32.2, 1, 33.6, 10.6, 26.4, 11.6, 26.4, 5.4, 24.4, 3.6], M.steel, { lw: 1.3 });
   px3(c, 27.2, 9.4, 5.8, 1, M.steel.l);
   G3(c, [26, -1, 30, -1, 28, -4.8], M.darkSteel, { flat: true, lw: 1.1 });
@@ -117824,49 +117862,55 @@ function broadAxe(c, A2) {
   gem2(c, 29.6, 4.6, 1.4, A2.gem);
 }
 function maul(c, A2) {
-  R3(c, 10.6, -1.2, 1.6, 2.4, accPal(A2), { flat: true, lw: 1.1 });
-  R3(c, 12.2, -1, 14.8, 2, M.oak, { flat: true, lw: 1.2 });
-  R3(c, 13, -1.3, 4, 2.6, P14.leather, { flat: true, lw: 1.1 });
+  axHaft(c, A2, 26, 23.4);
   R3(c, 25.4, -6.4, 8.8, 12.8, M.steel, { split: 0.6, lw: 1.4 });
   R3(c, 25.4, -6.4, 8.8, 2.2, M.darkSteel, { flat: true, lw: 1.1 });
   R3(c, 25.4, 4.2, 8.8, 2.2, M.darkSteel, { flat: true, lw: 1.1 });
-  R3(c, 23.6, -1.5, 1.8, 3, accPal(A2), { flat: true, lw: 1 });
   gem2(c, 29.8, 0, 1.8, A2.gem);
 }
 function warPick(c, A2) {
-  R3(c, 10.6, -1.2, 1.6, 2.4, accPal(A2), { flat: true, lw: 1.1 });
-  R3(c, 12.2, -1, 18.8, 2, M.oak, { flat: true, lw: 1.2 });
-  R3(c, 24.6, -1.5, 1.4, 3, accPal(A2), { flat: true, lw: 1 });
-  G3(c, [27, 1.6, 30.2, 1.6, 32, 6.4, 33.2, 12, 30.8, 8, 27.6, 5], M.darkSteel, { lw: 1.2 });
-  R3(c, 26.2, -5.8, 4.8, 4, M.steel, { split: 0.6, lw: 1.3 });
-  R3(c, 26.6, -2.2, 4, 4.2, M.steel, { split: 0.6, lw: 1.2 });
-  gem2(c, 28.6, 0, 1.4, A2.gem);
+  axHaft(c, A2, 27, 24);
+  G3(c, [26.8, 2.6, 30.6, 2.6, 32.2, 6.6, 33, 12.4, 30.6, 8.6, 28, 5.4], M.darkSteel, { flat: true, lw: 1.2 });
+  G3(c, [30.6, 2.6, 32.2, 6.6, 33, 12.4, 31.6, 8, 29.6, 4.2], { b: M.darkSteel.l }, { flat: true, line: false });
+  G3(c, [26.8, 2.6, 30.6, 2.6, 32.2, 6.6, 33, 12.4, 30.6, 8.6, 28, 5.4], { b: "rgba(0,0,0,0)" }, { flat: true, lw: 1.2 });
+  R3(c, 26.6, -6.4, 4.4, 3.6, M.steel, { split: 0.6, lw: 1.3 });
+  R3(c, 26, -3, 5.6, 6, M.steel, { split: 0.6, lw: 1.3 });
+  px3(c, 26.6, -2.4, 4.4, 0.6, M.steel.l);
+  gem2(c, 28.8, 0, 1.4, A2.gem);
 }
 function cupRapier(c, A2) {
-  R3(c, 10.6, -1, 1.6, 2, accPal(A2), { flat: true, lw: 1 });
-  R3(c, 12.2, -0.9, 3.8, 1.8, P14.leather, { flat: true, lw: 1.1 });
+  lkPommel(c, A2, 12.4, 1.6);
+  lkGrip(c, 12.4, 16, 2.3);
   G3(c, [17.6, -1, 36.4, -0.55, 38.6, 0, 36.4, 0.55, 17.6, 1], P14.blade, { flat: true, lw: 1 });
   G3(c, [15.6, -3.8, 17, -3.4, 18.2, -2, 18.6, 0, 18.2, 2, 17, 3.4, 15.6, 3.8], accPal(A2), { split: 0.6, lw: 1.1 });
   gem2(c, 16.9, 0, 1.2, A2.gem);
 }
 function estoc(c, A2) {
-  G3(c, [10, -1.3, 11.8, -1.3, 12.4, 0, 11.8, 1.3, 10, 1.3], accPal(A2), { flat: true, lw: 1 });
-  R3(c, 12.4, -0.9, 3.8, 1.8, P14.leather, { flat: true, lw: 1.1 });
+  G3(c, [9.8, -1.5, 11.8, -1.5, 12.4, 0, 11.8, 1.5, 9.8, 1.5], accPal(A2), { split: 0.5, lw: 1 });
+  lkGrip(c, 12.4, 16.2, 2.3);
   G3(c, [17.6, -1.6, 38.8, 0, 17.6, 1.6], P14.blade, { bottom: true, split: 0.5, lw: 1.1 });
   R3(c, 16.2, -3.6, 1.6, 7.2, accPal(A2), { flat: true, lw: 1.1 });
   gem2(c, 17, 0, 1.3, A2.gem);
 }
 function cutlass(c, A2) {
-  R3(c, 12.4, -1.1, 3.8, 2.2, P14.leather, { flat: true, lw: 1.2 });
+  lkPommel(c, A2, 12.4, 1.7);
+  lkGrip(c, 12.4, 16.2, 2.4);
   G3(c, [11.6, 1, 17.8, 1, 17.8, 4.4, 12.8, 4.4, 11.6, 2.8], accPal(A2), { flat: true, lw: 1 });
   G3(c, [17.8, -2, 24.6, -2.6, 29.6, -4.2, 32.6, -6.6, 31.4, -1, 26.6, 2.2, 17.8, 2.2], P14.blade, { bottom: true, split: 0.5, lw: 1.4 });
   R3(c, 16.2, -3.4, 1.8, 6.8, accPal(A2), { flat: true, lw: 1.2 });
   gem2(c, 17.1, 0, 1.4, A2.gem);
 }
 function talwar(c, A2) {
-  R3(c, 10.4, -2.2, 1.4, 4.4, accPal(A2), { flat: true, lw: 1.1 });
+  R3(c, 10.4, -2.2, 1.4, 4.4, accPal(A2), { split: 0.5, lw: 1.1 });
   R3(c, 9.6, -0.6, 0.8, 1.2, accPal(A2), { flat: true, lw: 0.8 });
-  G3(c, [11.8, -0.9, 13.9, -1.3, 16, -0.9, 16, 0.9, 13.9, 1.3, 11.8, 0.9], P14.leather, { flat: true, lw: 1.1 });
+  G3(c, [11.8, -1.1, 13.9, -1.5, 16, -1.1, 16, 1.1, 13.9, 1.5, 11.8, 1.1], LK_LEATHER, { flat: true, lw: 1.1 });
+  c.save();
+  c.strokeStyle = tint2(LK_LEATHER.d);
+  c.lineWidth = 0.35;
+  c.beginPath();
+  for (let x = 12.3; x < 15.6; x += 0.95) c.moveTo(x, 1.2), c.lineTo(x + 0.6, -1.2);
+  c.stroke();
+  c.restore();
   G3(c, [17.6, -1.4, 27, -2.2, 32, -3.8, 35.4, -6.6, 34.2, -2.2, 29.6, 1.2, 17.6, 1.4], P14.blade, { bottom: true, split: 0.5, lw: 1.3 });
   R3(c, 16, -2.8, 1.6, 5.6, accPal(A2), { flat: true, lw: 1.1 });
   R3(c, 15.8, -3.8, 2, 1.2, accPal(A2), { flat: true, lw: 0.9 });
@@ -117874,15 +117918,15 @@ function talwar(c, A2) {
   gem2(c, 16.8, 0, 1.3, A2.gem);
 }
 function shamshir(c, A2) {
-  R3(c, 12.4, -1.1, 3.6, 2.2, P14.leather, { flat: true, lw: 1.2 });
-  R3(c, 11.2, -1.4, 1.2, 2.8, accPal(A2), { flat: true, lw: 1 });
+  lkPommel(c, A2, 12.4, 1.6);
+  lkGrip(c, 12.4, 15.8, 2.3);
   G3(c, [17.4, -1.2, 24, -1.8, 29, -3.6, 32.6, -6.6, 34.8, -10.6, 34.2, -6.4, 31.2, -2.4, 25.6, 0.6, 17.4, 1.2], P14.blade, { bottom: true, split: 0.5, lw: 1.2 });
   R3(c, 15.8, -3, 1.6, 6, accPal(A2), { flat: true, lw: 1.1 });
   gem2(c, 16.6, 0, 1.2, A2.gem);
 }
 function falchion(c, A2) {
-  R3(c, 12.4, -1.1, 3.6, 2.2, P14.leather, { flat: true, lw: 1.2 });
-  R3(c, 11, -1.4, 1.4, 2.8, accPal(A2), { flat: true, lw: 1 });
+  lkPommel(c, A2, 12.4, 1.8);
+  lkGrip(c, 12.4, 15.8, 2.4);
   G3(c, [17.6, -1.6, 30.4, -1.6, 34.6, -3.6, 33.6, 0.8, 29.6, 3.6, 17.6, 2], P14.blade, { bottom: true, split: 0.5, lw: 1.4 });
   px3(c, 18.4, -0.6, 10, 0.7, "#00000040");
   R3(c, 15.8, -3.2, 1.8, 6.4, accPal(A2), { flat: true, lw: 1.2 });
@@ -117896,7 +117940,8 @@ function stoneGlow(c, A2, x, y, r, t, speed = 3) {
   glow6(c, x, y, r, `${cr},${cg},${cb}`, 0.28 + 0.14 * Math.sin(t * speed));
 }
 function branchWand(c, A2, t = 0) {
-  R3(c, 11.2, -1, 4.6, 2, M.oak, { flat: true, lw: 1.1 });
+  lkPommel(c, A2, 11.2, 1.5);
+  lkGrip(c, 11.2, 15.2, 2.2);
   G3(c, [15.6, -0.9, 19.4, -1.1, 22, -1.9, 25.8, -1.3, 25.8, 0.1, 22.2, -0.4, 19.4, 0.9, 15.6, 0.9], M.oak, { flat: true, lw: 1 });
   G3(c, [19.6, -1.2, 20.8, -3.6, 21.8, -3.2, 21, -1.4], M.oak, { flat: true, lw: 0.9 });
   G3(c, [20.8, -3.6, 23.6, -5, 22.8, -3, 21.8, -3.2], LEAF3, { flat: true, lw: 0.9 });
@@ -117905,7 +117950,8 @@ function branchWand(c, A2, t = 0) {
   R3(c, 15.2, -1.3, 1.2, 2.6, accPal(A2), { flat: true, lw: 1 });
 }
 function runeRod(c, A2, t = 0) {
-  R3(c, 11.2, -1, 4.4, 2, P14.strap, { flat: true, lw: 1.1 });
+  lkPommel(c, A2, 11.2, 1.5);
+  lkGrip(c, 11.2, 15.6, 2.2);
   R3(c, 15.6, -0.8, 10, 1.6, M.steel, { flat: true, lw: 1 });
   for (const x of [17.6, 20.6, 23.6]) R3(c, x, -1.2, 1, 2.4, accPal(A2), { flat: true, lw: 0.8 });
   R3(c, 25.4, -1.8, 1.4, 3.6, M.darkSteel, { flat: true, lw: 1 });
@@ -117914,14 +117960,16 @@ function runeRod(c, A2, t = 0) {
 }
 var SCEPTER_GOLD = { b: "#d4b45a", d: "#a8893e", l: "#ecd38a" };
 function orbScepter(c, A2) {
-  R3(c, 11.2, -1, 4.4, 2, M.oak, { flat: true, lw: 1.1 });
+  lkPommel(c, A2, 11.4, 1.6);
+  lkGrip(c, 11.4, 15.6, 2.4);
   R3(c, 15.6, -0.9, 8.4, 1.8, accPal(A2), { flat: true, lw: 1.1 });
   G3(c, [23.6, -1.2, 25, -3.6, 27.4, -3.6, 27.4, 3.6, 25, 3.6, 23.6, 1.2], SCEPTER_GOLD, { split: 0.6, lw: 1.2 });
   G3(c, oct4(27, -3.4, 6.8, 6.8, 2), stoneOf7(A2, { b: "#e8eef2", d: "#b9c4cc" }), { split: 0.6, lw: 1.3 });
   px3(c, 28.4, -2.2, 1.4, 1, "#ffffffb3");
 }
 function crescentScepter(c, A2) {
-  R3(c, 11.2, -1, 4.4, 2, M.oak, { flat: true, lw: 1.1 });
+  lkPommel(c, A2, 11.4, 1.6);
+  lkGrip(c, 11.4, 15.6, 2.4);
   R3(c, 15.6, -0.9, 8.8, 1.8, accPal(A2), { flat: true, lw: 1.1 });
   G3(c, [24.2, -1.2, 26, -4.6, 29, -6.2, 31.8, -5.8, 29.2, -4.4, 27.8, -2.4, 27.6, 0, 27.8, 2.4, 29.2, 4.4, 31.8, 5.8, 29, 6.2, 26, 4.6, 24.2, 1.2], SCEPTER_GOLD, { split: 0.55, lw: 1.2 });
   gem2(c, 30, 0, 2.6, A2.gem ?? "#e8eef2");
@@ -119869,10 +119917,22 @@ var OFFHAND_LOOKS = Object.freeze([
 ].map(([type, kind, name]) => Object.freeze({ type, kind, name, family: SHIELD_LOOKS[kind] ? "shield" : "dagger" })));
 var STAFF_REST = -0.6;
 var STAFF_TIP = -28;
+function lkStaffGrip(c, A2, foot2 = 8.8) {
+  R3(c, -1.45, -2.6, 2.9, 5.6, LK_LEATHER, { flat: true, lw: 1 });
+  c.save();
+  c.strokeStyle = tint2(LK_LEATHER.d);
+  c.lineWidth = 0.35;
+  c.beginPath();
+  for (let y = -2.1; y < 2.8; y += 0.95) c.moveTo(-1.4, y), c.lineTo(1.4, y + 0.6);
+  c.stroke();
+  c.restore();
+  G3(c, [-1.6, foot2 - 1.6, 1.6, foot2 - 1.6, 1.2, foot2 + 0.8, -1.2, foot2 + 0.8], accPal(A2), { split: 0.5, lw: 1 });
+}
 function staff(c, A2, t) {
   const pulse3 = 0.5 + 0.5 * Math.sin(t * 2.6), crystal6 = A2.gem ? { b: A2.c, d: A2.d } : { b: "#b8c4cc", d: "#8d999b" };
-  R3(c, -1.1, -24, 2.2, 32.8, P14.wood, { flat: true, lw: 1.2 });
-  px3(c, -1.1, -20.4, 2.2, 1.2, A2.c);
+  R3(c, -1.3, -24, 2.6, 32.8, P14.wood, { split: 0.5, lw: 1.2 });
+  px3(c, -1.3, -20.4, 2.6, 1.2, A2.c);
+  lkStaffGrip(c, A2);
   if (A2.gem) {
     const [r, g, b] = hexRgb2(A2.c);
     glow6(c, 0, STAFF_TIP, 7 + pulse3 * 2, `${r},${g},${b}`, 0.3 + pulse3 * 0.2);
@@ -119896,9 +119956,10 @@ function arcBand(cx, cy2, r0, r1, a0, a1, n = 12) {
 }
 function crookStaff(c, A2, t) {
   const pulse3 = 0.5 + 0.5 * Math.sin(t * 2.6), stone3 = A2.gem ? { b: A2.c, d: A2.d } : { b: "#b8c4cc", d: "#8d999b" };
-  R3(c, -1.1, -27, 2.2, 35.8, P14.wood, { flat: true, lw: 1.2 });
-  G3(c, arcBand(3.5, -27, 2.4, 4.6, Math.PI, Math.PI * 2.33), P14.wood, { flat: true, lw: 1.2 });
-  px3(c, -1.1, -20.4, 2.2, 1.2, A2.c);
+  R3(c, -1.3, -27, 2.6, 35.8, P14.wood, { split: 0.5, lw: 1.2 });
+  G3(c, arcBand(3.5, -27, 2.4, 4.8, Math.PI, Math.PI * 2.33), P14.wood, { flat: true, lw: 1.2 });
+  px3(c, -1.3, -20.4, 2.6, 1.2, A2.c);
+  lkStaffGrip(c, A2);
   if (A2.gem) {
     const [r, g, b] = hexRgb2(A2.c);
     glow6(c, 3.5, -27, 6 + pulse3 * 2, `${r},${g},${b}`, 0.3 + pulse3 * 0.2);
@@ -119912,10 +119973,11 @@ function gnarledStaff(c, A2, t) {
     glow6(c, 0, STAFF_TIP, 7 + pulse3 * 2, `${r},${g},${b}`, 0.3 + pulse3 * 0.2);
   }
   G3(c, oct4(-2.6, -30.6, 5.2, 5.2, 1.6), stone3, { split: 0.55, lw: 1.3 });
-  G3(c, [-1.3, 8.8, -1.3, -21.6, -3, -24.4, -4.4, -29, -3.4, -32.4, -2.4, -29.4, -1.6, -26.4, 1.6, -26.4, 2.4, -29.4, 3.4, -32.4, 4.4, -29, 3, -24.4, 1.3, -21.6, 1.3, 8.8], P14.wood, { flat: true, lw: 1.2 });
+  G3(c, [-1.5, 8.8, -1.5, -21.6, -3.2, -24.4, -4.6, -29, -3.4, -32.4, -2.4, -29.4, -1.6, -26.4, 1.6, -26.4, 2.4, -29.4, 3.4, -32.4, 4.6, -29, 3.2, -24.4, 1.5, -21.6, 1.5, 8.8], P14.wood, { flat: true, lw: 1.2 });
   px3(c, -0.4, -12, 0.8, 4, "#00000030");
-  px3(c, -1.3, -19.6, 2.6, 1.2, A2.c);
+  px3(c, -1.5, -19.6, 3, 1.2, A2.c);
   px3(c, -1, -29.6, 0.9, 1.6, "#ffffffb3");
+  lkStaffGrip(c, A2);
 }
 var STAFF_SUNS = null;
 var STAFF_RAY = { b: "#ffb52e", d: "#d98a1c", l: "#ffd27a" };
@@ -125431,7 +125493,8 @@ function drawBlockyHero(c, spec, pose3 = {}) {
   FLASH2 = false;
 }
 var LEG_COLORS = { greaves: P14.plate, chausses: M.mail, breeches: M.breeches, trousers: P14.darkPants };
-var WEAPON_SPAN = { "splinterglass-wand": [9.6, 34.6], emberhare: [8.4, 38.6], "pharaoh-khopesh": [8.4, 37.4], gravecleaver: [8.2, 37.6], "crownflame-scepter": [10, 39], "frogspawn-wand": [11.2, 33], "lashtongue-saber": [8.4, 35], croakhammer: [10.6, 37], "wardlight-scepter": [8.6, 35.6], coreheart: [8.2, 32], ventcutter: [7.6, 39.4], slagmaul: [7, 38.6], greatsword: [9.4, 40.6], halberd: [6, 43.4], mace: [10.6, 32.6], sword: [10.6, 34.4], saber: [12.4, 34.6], axe: [10.6, 35], warhammer: [10.6, 33.2], rapier: [10.6, 38.4], scimitar: [12.4, 34.8], wand: [11.2, 29.6], scepter: [11.2, 31.8] };
+var ICON_FIT = { "crescent-scepter": [22, 0, 30], "orb-scepter": [22.4, 0, 29], scepter: [22, 0, 25], falchion: [22.6, -0.6, 26], shamshir: [23, -4, 28], scimitar: [22.8, -2.4, 27], talwar: [22.8, -3.4, 28], cutlass: [21.6, -1.8, 27], saber: [22.6, -3.2, 27] };
+var WEAPON_SPAN = { "crescent-scepter": [9.1, 31.8], "orb-scepter": [9.1, 33.8], "rune-rod": [8.9, 30.2], "branch-wand": [8.9, 30], estoc: [9.8, 38.8], "cup-rapier": [10.1, 38.6], "splinterglass-wand": [9.6, 34.6], emberhare: [8.4, 38.6], "pharaoh-khopesh": [8.4, 37.4], gravecleaver: [8.2, 37.6], "crownflame-scepter": [10, 39], "frogspawn-wand": [11.2, 33], "lashtongue-saber": [8.4, 35], croakhammer: [10.6, 37], "wardlight-scepter": [8.6, 35.6], coreheart: [8.2, 32], ventcutter: [7.6, 39.4], slagmaul: [7, 38.6], greatsword: [9.4, 40.6], halberd: [6, 43.4], mace: [10.6, 32.6], sword: [10.6, 34.4], saber: [12.4, 34.6], axe: [8.4, 33], "double-axe": [8.4, 33], "broad-axe": [8.4, 33.6], warhammer: [8.4, 33.2], maul: [8.4, 34.2], "war-pick": [8.4, 33], rapier: [10.1, 38.6], scimitar: [12.4, 34.8], wand: [9.1, 29.6], scepter: [9.1, 34.2] };
 var HERO_COLORS = Object.freeze({ P: P14, M, ACC });
 function drawItemIcon(c, item2, size = 48) {
   CH_HEAT = 0;
@@ -125466,9 +125529,19 @@ function drawItemIcon(c, item2, size = 48) {
     if (STAVES[kind]) {
       fit2(0, -12, 31, Math.PI / 4);
       STAVES[kind](c, A2, 0);
+    } else if (kind === "warhammer" || kind === "maul" || kind === "war-pick") {
+      fit2(22, kind === "war-pick" ? 2.4 : 0, kind === "maul" ? 29 : 28, -Math.PI / 4);
+      WEAPONS[kind](c, A2, 0);
+    } else if (kind === "axe" || kind === "double-axe" || kind === "broad-axe") {
+      fit2(22.4, kind === "double-axe" ? 0 : 4.4, kind === "double-axe" ? 29 : 27, -Math.PI / 4);
+      WEAPONS[kind](c, A2, 0);
     } else if (kind === "croakhammer") {
       fit2(25.1, -0.6, 25.5, -Math.PI / 4);
       croakhammer(c, A2, 0);
+    } else if (ICON_FIT[kind]) {
+      const [x, y, w] = ICON_FIT[kind];
+      fit2(x, y, w, -Math.PI / 4);
+      WEAPONS[kind](c, A2, 0);
     } else {
       const [a, b] = WEAPON_SPAN[kind] ?? WEAPON_SPAN.sword;
       fit2((a + b) / 2, 0, (b - a) * 0.8, -Math.PI / 4);
@@ -151881,7 +151954,7 @@ function boilbackIcon(c, A2) {
 CAPE_ICONS["boilback-cloak"] = boilbackIcon;
 var ART3 = { main: WEAPONS2, gloves: GLOVES2, boots: BOOTS, helmet: HELMETS, body: BODIES, ring: RINGS, cape: CAPE_ICONS };
 var HERO_DRAWN = Object.freeze({
-  main: /* @__PURE__ */ new Set(["pharaoh-khopesh", "undying-sun-staff", "gravecleaver", "crownflame-scepter", "silkspinner", "slagmaul", "ventcutter", "coreheart", "wardlight-scepter", "croakhammer", "lashtongue-saber", "frogspawn-wand", "emberhare", "splinterglass-wand"]),
+  main: /* @__PURE__ */ new Set(["staff", "crook-staff", "gnarled-staff", "scepter", "orb-scepter", "crescent-scepter", "wand", "branch-wand", "rune-rod", "scimitar", "shamshir", "falchion", "saber", "cutlass", "talwar", "rapier", "cup-rapier", "estoc", "sword", "broadsword", "leaf-sword", "axe", "double-axe", "broad-axe", "warhammer", "maul", "war-pick", "pharaoh-khopesh", "undying-sun-staff", "gravecleaver", "crownflame-scepter", "silkspinner", "slagmaul", "ventcutter", "coreheart", "wardlight-scepter", "croakhammer", "lashtongue-saber", "frogspawn-wand", "emberhare", "splinterglass-wand"]),
   gloves: /* @__PURE__ */ new Set([
     "cocoonsilk",
     "gauntlets",
