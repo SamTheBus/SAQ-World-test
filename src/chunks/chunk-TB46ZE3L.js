@@ -6287,7 +6287,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "barrow_king",
     "grassland",
-    "Once every 4 s, the third hit of your combo is a Grave Cleave: the ground splits all around you and earth slabs heave up, hitting every enemy near you for {0} of your Attack.",
+    "Skyfall Leap lands in a Grave Cleave: the ground splits all around you and earth slabs heave up, hitting every enemy near you for {0} of your Attack.",
     "Kneel. The barrow is patient."
   ),
   unique(
@@ -6311,7 +6311,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "barrow_king",
     "grassland",
-    "Once every 4 s, Cast also throws the Crown Flame: the King's fire skull arcs onto the nearest enemy ahead and bursts for {0} of your Attack, leaving the grave earth there burning for 3 s. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
+    "Firebloom throws the Crown Flame first: the King's fire skull arcs onto the spot and bursts for {0} of your Attack, then the flower blooms where it lands and the grave earth there burns for 3 s.",
     "The crown burns colder than gold."
   ),
   unique(
@@ -6336,7 +6336,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "sun_pharaoh",
     "desert",
-    "Each block with Guard stores sunlight, up to {0}. Shield Bash sends it back as a beam that hits everything in a line.",
+    "Each block with Guard stores sunlight, up to {0}. Shield Throw carries it: each enemy the shield hits sends a beam of sunlight on through the enemies behind it, for 60% of your Attack per stored sun.",
     "Look upon it. Then look away."
   ),
   unique(
@@ -6360,7 +6360,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "sun_pharaoh",
     "desert",
-    "Every {0} Cast calls Sunfall: three suns strike around the target and set enemies burning. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
+    "Meteor becomes Sunfall: three suns strike around the spot instead, hitting each enemy under them for {0} of Meteor's damage and setting them burning.",
     "Noon, three times over."
   ),
   unique(
@@ -6409,7 +6409,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "arachnid_treant",
     "tropical",
-    "Every 4th Cast lobs a silk glob too. It bursts for {0} of your Attack and leaves a web for 3 s that slows enemies in it by 60% (not bosses). With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
+    "Static Field spins a web under it. While the field lasts, enemies in it are 60% slower (not bosses); when it ends, the web snaps for {0} of your Attack and shocks every enemy in it.",
     "Spun in the dark between its roots."
   ),
   unique(
@@ -6434,7 +6434,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "overlord_iron_vault",
     "volcanic",
-    "The third hit of your combo slams down: the ground splits in a cone ahead of you and lava spits up the cracks for {0} of your Attack. The cracks burn for 2 s, burning enemies who stand in them.",
+    "Retribution slams down: the ground splits all around you and lava spits up the cracks for {0} of your Attack. The cracks burn for 2 s, burning enemies who stand in them.",
     "It was a fist once. The rest of him is still in the fort."
   ),
   unique(
@@ -6446,7 +6446,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "overlord_iron_vault",
     "volcanic",
-    "Every 4th crit plants a vent under the enemy. It boils for 1 s, then erupts in a cross of sulfur gas that hits every enemy along its arms for {0} of your Attack and poisons them.",
+    "Rupture plants a vent under every enemy it tears open. Each boils for 1 s, then erupts in a cross of sulfur gas that hits every enemy along its arms for {0} of your Attack and poisons them.",
     "Cut deep enough and the ground bleeds too."
   ),
   unique(
@@ -6508,7 +6508,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "aegis_goliath",
     "upland",
-    "Three spirit shields circle you. Each one takes a hit meant for you, then breaks in a burst of spirit light that hits the enemies near you for {0} of your Attack. A broken shield comes back after 6 s. With a tome, each shield takes one of its elements: Fire burns, Frost chills, Lightning shocks.",
+    "Ice Barrier raises three spirit shields round you for 8 s. Each takes a hit meant for you, then breaks in a burst of frost that hits the enemies near you for {0} of your Attack and chills them.",
     "Three oaths, still sworn."
   ),
   unique(
@@ -6546,7 +6546,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "cinderhart",
     "woodland",
-    "Once every {0}, a hit with your main hand wakes an ember bunny out of the ground beside the enemy, up to 3 at a time. It hops at the nearest enemies four times. Every landing hits the enemies under it for 70% of your Attack and leaves a patch of smoldering cinders whose gray-green smoke poisons for 3 s. Then it bursts into embers.",
+    "Smoke Veil wakes three ember bunnies out of the smoke. Each hops at the nearest enemies four times. Every landing hits the enemies under it for {0} of your Attack and leaves a patch of smoldering cinders whose gray-green smoke poisons for 3 s. Then it bursts into embers.",
     "Every warren has a fire at the bottom."
   ),
   unique(
@@ -6684,7 +6684,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "nightmare_sporecrown",
     null,
-    "Each hit you block with Guard bursts spores from your shield: the enemies near you get heavy legs, 40% slower for {0}. Once every 4 s.",
+    "Your War Banner breathes out spores: enemies near it get heavy legs, 40% slower, and stay slowed for {0} after they leave.",
     "It breathes out every time it is struck."
   ),
   unique(
@@ -6696,7 +6696,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "nightmare_sporecrown",
     null,
-    "Critical hits with your off hand plant a Gazecap in the enemy. When that enemy dies, the Gazecap pops, hitting enemies near it for {0} of your Attack.",
+    "Every knife of Toxic Fan plants a Gazecap in the enemy it hits. When that enemy dies, the Gazecap pops, hitting enemies near it for {0} of your Attack.",
     "Something grows in every wound."
   ),
   unique(
@@ -6708,7 +6708,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "nightmare_sporecrown",
     null,
-    "When a Cast crits, a Waking Eye opens over the target, once every 4 s. It fires three rays, at the target and the two enemies nearest it, each for {0} of your Attack.",
+    "Ball Lightning becomes a Waking Eye: it drifts ahead of you and every half second fires rays at the three enemies nearest it, each for {0} of a Ball Lightning zap.",
     "It never sleeps. Neither will you."
   ),
   unique(
@@ -6720,7 +6720,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     null,
     "nightmare_sporecrown",
     null,
-    "Every 8 s your crown marks the nearest enemy for 4 s. A marked enemy takes {0} more damage from everyone.",
+    "Using a skill makes your crown mark the nearest enemy for 4 s, once every 8 s. A marked enemy takes {0} more damage from everyone.",
     "It sees what you see. Then it sees more."
   ),
   // Nightmare Frog, the boss at the end of a bad Frog Leg trip (trip passes 5d-3-1..5d-3-4, Sammy 2026-11-12/13).
@@ -6734,7 +6734,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "nightmare_frog",
     null,
-    "Every 4th hit with your weapon lets out a croak: a purple ring runs out from you, hitting every enemy it reaches for {0} of your Attack and shoving them back.",
+    "Rallying Cry lets out a croak: a purple ring runs out from you, hitting every enemy it reaches for {0} of your Attack and shoving them back.",
     "Every swing, a little louder."
   ),
   unique(
@@ -6746,7 +6746,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "nightmare_frog",
     null,
-    "Every 6 s, your next weapon attack also lashes an eye-tipped tongue at the farthest enemy within 5 tiles. It is yanked over to you and takes {0} of your Attack.",
+    "Riposte also lashes an eye-tipped tongue at the farthest enemy within 5 tiles. It is yanked over to you and takes {0} of your Attack.",
     "Come here. Closer."
   ),
   unique(
@@ -6923,36 +6923,36 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
 var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
 var UNIQUE_MIN_RARITY = 2;
 var UNIQUE_TIERS = freezeWire({
-  "gravecleaver": { lines: ["mainDmg", "fireDmg", "critDamage", "critChance", "eliteDmg"], stars: [80, 100, 120, 150], unit: "pct" },
+  "gravecleaver": { lines: ["skillDmg:skyfall_leap", "critDamage", "critChance", "str", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
   "wightfang": { lines: ["offDmg", "critChance", "parry", "controlDur", "eliteDmg"], stars: [54, 66, 78, 90], unit: "ticks" },
-  "crownflame-scepter": { lines: ["mainDmg", "fireDmg", "bonusAreaRadius", "critChance", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
+  "crownflame-scepter": { lines: ["skillDmg:firebloom", "fireDmg", "bonusAreaRadius", "critChance", "eliteDmg"], stars: [130, 170, 210, 260], unit: "pct" },
   "barrowshroud": { lines: ["maxHpPct", "defPct", "lifeKill", "atkPct", "cdr"], stars: [18e3, 14400, 10800, 7200], unit: "mins" },
-  "sunshield": { lines: ["block", "offDmg", "cdr", "passiveRank", "counterDmg"], stars: [2, 3, 3, 4], unit: "count" },
+  "sunshield": { lines: ["block", "skillDmg:shield_throw", "cdr", "passiveRank", "critChance"], stars: [2, 3, 3, 4], unit: "count" },
   "pharaoh-khopesh": { lines: ["mainDmg", "skillDmg:lunge", "critDamage", "activeSpd", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
-  "undying-sun-staff": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [5, 4, 3, 2], unit: "nth" },
+  "undying-sun-staff": { lines: ["skillDmg:meteor", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [80, 90, 100, 120], unit: "pct" },
   "eye-of-the-sun": { lines: ["atkPct", "critChance", "eliteDmg", "lifeHit", "maxHpPct"], stars: [[30, 6], [40, 8], [50, 10], [65, 12]], unit: "eye" },
   // Arachnid Treant and Brimstone Colossus (their v3 lines are below; these five are for gear made before v3).
   "barkheart": { lines: ["block", "offDmg", "counterDmg", "cdr", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
   "rootfang": { lines: ["offDmg", "critChance", "bleedDmg", "parry", "eliteDmg"], stars: [16, 20, 25, 32], unit: "pct" },
-  "silkspinner": { lines: ["mainDmg", "critChance", "activeSpd", "bonusAreaRadius", "eliteDmg"], stars: [80, 110, 140, 180], unit: "pct" },
+  "silkspinner": { lines: ["skillDmg:static_field", "critChance", "activeSpd", "bonusAreaRadius", "eliteDmg"], stars: [150, 200, 250, 320], unit: "pct" },
   "cocoonsilk": { lines: ["atkPct", "critChance", "lifeHit", "cdr", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
-  "slagmaul": { lines: ["mainDmg", "fireDmg", "str", "critDamage", "eliteDmg"], stars: [80, 110, 140, 180], unit: "pct" },
-  "ventcutter": { lines: ["mainDmg", "critDamage", "critChance", "dex", "eliteDmg"], stars: [90, 125, 160, 210], unit: "pct" },
+  "slagmaul": { lines: ["skillDmg:retribution", "str", "critDamage", "critChance", "eliteDmg"], stars: [120, 160, 200, 250], unit: "pct" },
+  "ventcutter": { lines: ["skillDmg:rupture", "critDamage", "critChance", "dex", "eliteDmg"], stars: [100, 130, 170, 220], unit: "pct" },
   "coreheart": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [100, 135, 170, 220], unit: "pct" },
   "brimstone-treads": { lines: ["moveSpeed", "atkPct", "critDamage", "eliteDmg", "lifeKill"], stars: [50, 70, 90, 120], unit: "pct" },
   "lodestone-aegis": { lines: ["block", "offDmg", "controlDur", "cdr", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
   "oathcutter": { lines: ["offDmg", "critChance", "parry", "cdr", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
-  "wardlight-scepter": { lines: ["mainDmg", "critChance", "activeSpd", "maxHpPct", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
+  "wardlight-scepter": { lines: ["skillDmg:ice_barrier", "critChance", "activeSpd", "maxHpPct", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
   "wardenplate": { lines: ["maxHpPct", "defPct", "lifeKill", "cdr", "atkPct"], stars: [30, 40, 50, 65], unit: "pct" },
   // Cinderhart (v3 lines below; these five are the v2 fallback). The Emberhare's and the Kindleheart's stars are their waits.
-  "cinderhorn": { lines: ["block", "offDmg", "fireDmg", "cdr", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
-  "emberhare": { lines: ["mainDmg", "critChance", "poisonDmg", "dex", "eliteDmg"], stars: [240, 210, 180, 120], unit: "ticks" },
+  "cinderhorn": { lines: ["block", "skillDmg:shield_charge", "fireDmg", "cdr", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
+  "emberhare": { lines: ["skillDmg:smoke_veil", "critChance", "poisonDmg", "dex", "eliteDmg"], stars: [50, 65, 80, 100], unit: "pct" },
   "kindleheart-tome": { lines: ["offDmg", "int", "fireDmg", "bonusAreaRadius", "eliteDmg"], stars: [600, 480, 360, 240], unit: "ticks" },
   "emberantler-crown": { lines: ["maxHpPct", "defPct", "fireDmg", "lifeHit", "cdr"], stars: [60, 80, 100, 130], unit: "pct" },
   // Hollowglass (v3 lines below; these five are the v2 fallback).
   "twinpane": { lines: ["block", "offDmg", "critChance", "cdr", "eliteDmg"], stars: [50, 65, 80, 100], unit: "pct" },
   "silverstep": { lines: ["offDmg", "critChance", "dex", "moveSpeed", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
-  "splinterglass-wand": { lines: ["mainDmg", "int", "critChance", "activeSpd", "eliteDmg"], stars: [40, 55, 70, 90], unit: "pct" },
+  "splinterglass-wand": { lines: ["offDmg", "int", "critChance", "activeSpd", "eliteDmg"], stars: [40, 55, 70, 90], unit: "pct" },
   "glassveil": { lines: ["maxHpPct", "defPct", "atkPct", "lifeKill", "cdr"], stars: [35, 45, 55, 70], unit: "pct" },
   // Hourglass Wraith (v3 lines below; these five are the v2 fallback).
   "hourfall": { lines: ["mainDmg", "str", "critChance", "critDamage", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
@@ -6961,13 +6961,13 @@ var UNIQUE_TIERS = freezeWire({
   "turnback-band": { lines: ["atkPct", "maxHpPct", "cdr", "critChance", "defPct"], stars: [1440, 1320, 1200, 1080], unit: "ticks" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
-  "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
-  "waking-eye-tome": { lines: ["offDmg", "int", "critChance", "activeSpd", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
+  "gazecap-dirk": { lines: ["skillDmg:toxic_fan", "critChance", "critDamage", "dex", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
+  "waking-eye-tome": { lines: ["skillDmg:ball_lightning", "int", "critChance", "activeSpd", "eliteDmg"], stars: [90, 105, 120, 140], unit: "pct" },
   "eyestalk-crown": { lines: ["maxHpPct", "atkPct", "critChance", "lifeKill", "cdr"], stars: [10, 14, 18, 25], unit: "pct" },
   // Nightmare Frog (v3 lines below; these five are the v2 fallback).
-  "croakhammer": { lines: ["mainDmg", "str", "maxHpPct", "critDamage", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
-  "lashtongue-saber": { lines: ["mainDmg", "dex", "critChance", "critDamage", "eliteDmg"], stars: [100, 140, 180, 240], unit: "pct" },
-  "frogspawn-wand": { lines: ["mainDmg", "int", "activeSpd", "critChance", "eliteDmg"], stars: [80, 110, 140, 180], unit: "pct" },
+  "croakhammer": { lines: ["skillDmg:rallying_cry", "str", "maxHpPct", "critDamage", "eliteDmg"], stars: [150, 200, 250, 320], unit: "pct" },
+  "lashtongue-saber": { lines: ["skillDmg:riposte", "dex", "critChance", "critDamage", "eliteDmg"], stars: [150, 200, 250, 320], unit: "pct" },
+  "frogspawn-wand": { lines: ["offDmg", "int", "activeSpd", "critChance", "eliteDmg"], stars: [80, 110, 140, 180], unit: "pct" },
   "boilback-cloak": { lines: ["maxHpPct", "defPct", "atkPct", "lifeKill", "cdr"], stars: [50, 70, 90, 120], unit: "pct" },
   "bristleback-mantle": { lines: ["maxHpPct", "defPct", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
   "jacks-band": { lines: ["lifeHit", "atkPct", "maxHpPct", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
@@ -6985,39 +6985,39 @@ var UNIQUE_TIERS = freezeWire({
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
 var UNIQUE_LINES_V3 = freezeWire({
-  "sunshield": { always: "block", pool: ["skillDmg:shield_bash", "rangedDmg", "counterDmg", "ailingDmg", "perfectDmg", "defCdr"], leg: ["maxPip"] },
+  "sunshield": { always: "block", pool: ["skillDmg:shield_throw", "rangedDmg", "ailingDmg", "perfectDmg", "defCdr", "critChance"], leg: ["maxPip"] },
   "pharaoh-khopesh": { always: "moveCdr", pool: ["poisonDmg", "areaDmg", "ailingDmg", "ailmentDur", "critDamage", "eliteDmg"], leg: ["killCdr"] },
-  "undying-sun-staff": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "bonusAreaRadius", "critChance", "areaDmg", "eliteDmg"], leg: ["killCdr"] },
+  "undying-sun-staff": { always: "skillDmg:meteor", pool: ["rangedDmg", "finisherDmg", "fireDmg", "bonusAreaRadius", "critChance", "eliteDmg"], leg: ["killCdr"] },
   "eye-of-the-sun": { always: "ailmentDur", pool: ["atkPct", "critChance", "ailingDmg", "areaDmg", "eliteDmg", "lifeHit"], leg: ["maxPip"] },
   // Treant set (Sammy 2026-11-12): Barkheart's +1 goes to the Bastion branch.
   "barkheart": { always: "perfectWindow", pool: ["block", "counterDmg", "defCdr", "eliteDr", "offDmg", "perfectCdr"], leg: ["branchRank:bastion"] },
   "rootfang": { always: "exposeTime", pool: ["ccDmg", "ailmentDur", "controlDur", "classDmg", "critChance", "exposeDmg"], leg: ["maxPip"] },
-  "silkspinner": { always: "rangedDmg", pool: ["mainDmg", "critChance", "activeSpd", "controlDur", "ccDmg", "eliteDmg"], leg: ["killCdr"] },
+  "silkspinner": { always: "skillDmg:static_field", pool: ["areaDmg", "lightningDmg", "critChance", "controlDur", "ccDmg", "eliteDmg"], leg: ["killCdr"] },
   "cocoonsilk": { always: "ccDmg", pool: ["atkPct", "critChance", "lifeHit", "closeDmg", "keepPip", "areaDmg", "sigDmg"], leg: [] },
   // Brimstone set (Sammy 2026-11-12).
-  "slagmaul": { always: "fireDmg", pool: ["mainDmg", "areaDmg", "closeDmg", "ailmentDur", "ailingDmg", "str"], leg: ["maxPip"] },
-  "ventcutter": { always: "critDamage", pool: ["critChance", "poisonDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
+  "slagmaul": { always: "skillDmg:retribution", pool: ["areaDmg", "finisherDmg", "counterDmg", "ailingDmg", "str", "eliteDmg"], leg: ["maxPip"] },
+  "ventcutter": { always: "skillDmg:rupture", pool: ["areaDmg", "finisherDmg", "critChance", "poisonDmg", "ailmentDur", "eliteDmg"], leg: ["killCdr"] },
   "coreheart": { always: "fireDmg", pool: ["rangedDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
   // Barrow King set (set page AJnYRRRF..., Sammy 2026-11-14).
-  "gravecleaver": { always: "areaDmg", pool: ["mainDmg", "shockDmg", "critDamage", "ailingDmg", "eliteDmg", "maxHpPct"], leg: ["branchRank:breaker"] },
+  "gravecleaver": { always: "skillDmg:skyfall_leap", pool: ["areaDmg", "finisherDmg", "critDamage", "ailingDmg", "moveCdr", "eliteDmg"], leg: ["branchRank:breaker"] },
   "wightfang": { always: "controlDur", pool: ["offDmg", "critChance", "ailmentDur", "ailingDmg", "parry", "eliteDmg"], leg: ["killCdr"] },
-  "crownflame-scepter": { always: "fireDmg", pool: ["mainDmg", "bonusAreaRadius", "critChance", "activeSpd", "areaDmg", "eliteDmg"], leg: ["maxPip"] },
+  "crownflame-scepter": { always: "skillDmg:firebloom", pool: ["rangedDmg", "fireDmg", "bonusAreaRadius", "critChance", "activeSpd", "eliteDmg"], leg: ["maxPip"] },
   "barrowshroud": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
   "lodestone-aegis": { always: "areaDmg", pool: ["block", "offDmg", "controlDur", "cdr", "eliteDr", "perfectCdr"], leg: ["branchRank:bastion"] },
-  "oathcutter": { always: "rangedDmg", pool: ["offDmg", "critChance", "parry", "skillDmg:flurry", "critDamage", "eliteDmg"], leg: ["killCdr"] },
-  "wardlight-scepter": { always: "mainDmg", pool: ["critChance", "closeDmg", "areaDmg", "maxHpPct", "eliteDr", "eliteDmg"], leg: ["maxPip"] },
+  "oathcutter": { always: "skillDmg:flurry", pool: ["offDmg", "critChance", "parry", "cdr", "critDamage", "eliteDmg"], leg: ["killCdr"] },
+  "wardlight-scepter": { always: "skillDmg:ice_barrier", pool: ["frostDmg", "critChance", "closeDmg", "maxHpPct", "defCdr", "eliteDr"], leg: ["maxPip"] },
   "wardenplate": { always: "eliteDr", pool: ["maxHpPct", "defPct", "mainAttr", "lifeKill", "areaDr", "hitCdr", "lowDmg"], leg: [] },
   // Cinderhart set (Sammy 2026-11-15/16): the Cinderhorn's +1 goes to the Breaker branch.
-  "cinderhorn": { always: "areaDmg", pool: ["mainDmg", "skillDmg:shield_charge", "fireDmg", "moveCdr", "ailingDmg", "eliteDmg"], leg: ["branchRank:breaker"] },
-  "emberhare": { always: "ailingDmg", pool: ["mainDmg", "critChance", "poisonDmg", "ailmentDur", "mainAttr", "eliteDmg"], leg: ["killCdr"] },
+  "cinderhorn": { always: "skillDmg:shield_charge", pool: ["block", "fireDmg", "moveCdr", "ailingDmg", "critChance", "eliteDmg"], leg: ["branchRank:breaker"] },
+  "emberhare": { always: "skillDmg:smoke_veil", pool: ["critChance", "poisonDmg", "ailmentDur", "ailingDmg", "defCdr", "eliteDmg"], leg: ["killCdr"] },
   "kindleheart-tome": { always: "fireDmg", pool: ["offDmg", "mainAttr", "bonusAreaRadius", "areaDmg", "closeDmg", "eliteDr"], leg: ["maxPip"] },
   "emberantler-crown": { always: "ailmentDur", pool: ["maxHpPct", "defPct", "counterDmg", "eliteDr", "lifeHit", "stunDr", "fireDmg"], leg: [] },
   // Hollowglass set (Sammy 2026-11-16). The Twinpane copy's bash is a Shield Bash; the Silverstep shatter and the
   // Splinterglass shards follow the unique damage rule (off-hand area, main-hand ranged).
   "twinpane": { always: "skillDmg:shield_bash", pool: ["block", "offDmg", "areaDmg", "counterDmg", "defCdr", "eliteDmg"], leg: ["maxPip"] },
   "silverstep": { always: "areaDmg", pool: ["offDmg", "critChance", "critDamage", "moveCdr", "mainAttr", "eliteDmg"], leg: ["killCdr"] },
-  "splinterglass-wand": { always: "rangedDmg", pool: ["mainDmg", "critChance", "activeSpd", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
+  "splinterglass-wand": { always: "rangedDmg", pool: ["offDmg", "critChance", "activeSpd", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "glassveil": { always: "maxHpPct", pool: ["defPct", "lifeKill", "eliteDr", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
   // Hourglass Wraith set (Sammy 2026-11-16). Under the unique damage rule the hourglass is Earth-Breaker damage (a
   // Shockwave, Area) and the echo's spin is Whirling Blades damage (Area); no Main hand or Off-hand line feeds them.
@@ -7027,13 +7027,13 @@ var UNIQUE_LINES_V3 = freezeWire({
   "turnback-band": { always: "cdr", pool: ["atkPct", "maxHpPct", "defPct", "critChance", "lifeHit", "eliteDmg", "stunDr"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
-  "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
-  "waking-eye-tome": { always: "critChance", pool: ["offDmg", "lightningDmg", "critDamage", "rangedDmg", "weaveDmg", "eliteDmg"], leg: ["maxPip"] },
+  "gazecap-dirk": { always: "skillDmg:toxic_fan", pool: ["rangedDmg", "critChance", "critDamage", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
+  "waking-eye-tome": { always: "skillDmg:ball_lightning", pool: ["rangedDmg", "lightningDmg", "critChance", "critDamage", "weaveDmg", "eliteDmg"], leg: ["maxPip"] },
   "eyestalk-crown": { always: "eliteDmg", pool: ["maxHpPct", "critChance", "cdr", "controlDur", "ailmentDur", "bonusAreaRadius", "startPips"], leg: [] },
   // Nightmare Frog set (lines page, Sammy 2026-11-12).
-  "croakhammer": { always: "areaDmg", pool: ["mainDmg", "str", "shockDmg", "critDamage", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
-  "lashtongue-saber": { always: "closeDmg", pool: ["mainDmg", "dex", "critChance", "critDamage", "exposeDmg", "moveCdr"], leg: ["killCdr"] },
-  "frogspawn-wand": { always: "ccDmg", pool: ["mainDmg", "int", "activeSpd", "critChance", "controlDur", "bonusAreaRadius"], leg: ["killCdr"] },
+  "croakhammer": { always: "skillDmg:rallying_cry", pool: ["str", "critChance", "critDamage", "bonusAreaRadius", "defCdr", "eliteDmg"], leg: ["killCdr"] },
+  "lashtongue-saber": { always: "skillDmg:riposte", pool: ["counterDmg", "dex", "critChance", "critDamage", "exposeDmg", "defCdr"], leg: ["killCdr"] },
+  "frogspawn-wand": { always: "ccDmg", pool: ["offDmg", "int", "activeSpd", "critChance", "controlDur", "bonusAreaRadius"], leg: ["killCdr"] },
   "boilback-cloak": { always: "hitCdr", pool: ["maxHpPct", "defPct", "atkPct", "lifeKill", "closeDmg", "eliteDr", "areaDmg"], leg: [] },
   "bristleback-mantle": { always: "stunDr", pool: ["maxHpPct", "defPct", "str", "lifeKill", "closeDmg", "hitCdr", "areaDr"], leg: [] },
   "jacks-band": { always: "lowDmg", pool: ["atkPct", "critChance", "areaDmg", "lifeHit", "maxHpPct", "eliteDmg"], leg: ["killCdr"] },
