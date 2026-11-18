@@ -932,7 +932,6 @@ import {
   signedAddress,
   siteBossDoorV1,
   siteBossDownV1,
-  siteClearIsSavedV1,
   siteClearXpV2,
   siteEndRoleV1,
   siteEndSpecV1,
@@ -944,6 +943,7 @@ import {
   siteResetTransitionsD13C,
   siteRewardKindV1,
   siteRunEpisodeObservationRequiredD13B,
+  siteRunIsSavedV1,
   siteSupportsResetD13C,
   siteTransitionTarget,
   siteVolcanoesForBinding,
@@ -1129,7 +1129,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-FRVGUEMK.js";
+} from "./chunk-UB3766MN.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -233239,7 +233239,7 @@ async function createLocalEndlessSessionD9(options) {
         for (const id2 of Object.keys(s.d9World?.functionalSitesById ?? {})) {
           const record2 = resolveSiteRunEpisodeD13B(s, id2);
           if (record2?.status !== "cleared" || !siteResetEligibilityD13C(s, id2, { transitioningPlayerIds: transitioningPlayersForSiteD13C(authority.readGateway(), id2) }).eligible) continue;
-          if (durabilityFailed || !siteClearIsSavedV1(record2, lastSavedTick)) {
+          if (durabilityFailed || !siteRunIsSavedV1(s, id2, record2, lastSavedTick)) {
             unsaved = true;
             continue;
           }
@@ -233254,7 +233254,7 @@ async function createLocalEndlessSessionD9(options) {
       await stream2.settled();
       if (functionalCommands.busy() || authority.getStatus().phase !== "ready") return;
       const snapshot = authority.withAuthority((a) => a.withAuthorityState(copyWire)), transitioningPlayerIds = transitioningPlayersForSiteD13C(authority.readGateway(), siteId);
-      if (!siteResetEligibilityD13C(snapshot, siteId, { transitioningPlayerIds }).eligible || durabilityFailed || savePhase !== "idle" || !siteClearIsSavedV1(resolveSiteRunEpisodeD13B(snapshot, siteId), lastSavedTick)) return;
+      if (!siteResetEligibilityD13C(snapshot, siteId, { transitioningPlayerIds }).eligible || durabilityFailed || savePhase !== "idle" || !siteRunIsSavedV1(snapshot, siteId, resolveSiteRunEpisodeD13B(snapshot, siteId), lastSavedTick)) return;
       const plan = await prepareSiteResetD13C(snapshot, siteId, { sha256, transitioningPlayerIds, playerId: localPlayerId });
       const landed3 = authority.withReadyAuthority((a) => {
         let ok = false;

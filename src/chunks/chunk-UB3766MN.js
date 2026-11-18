@@ -24352,6 +24352,12 @@ function validateSiteRunEpisodesD13B(state) {
   return true;
 }
 var siteClearIsSavedV1 = (record, lastSavedTick) => Boolean(record && record.status === "cleared" && record.clearedTick !== null && record.clearedTick !== void 0 && Number(lastSavedTick) >= Number(record.clearedTick));
+function siteRunIsSavedV1(state, siteId2, record, lastSavedTick) {
+  if (!siteClearIsSavedV1(record, lastSavedTick)) return false;
+  const groups = new Set(currentGroupIds(state, siteId2)), saved = Number(lastSavedTick);
+  for (const p of Object.values(state.playersById ?? {})) for (const r of Object.values(p.inventory?.rewardsByEntityId ?? {})) if (r.episodeSource && groups.has(r.episodeSource.groupId) && Number(r.defeatedTick) > saved) return false;
+  return true;
+}
 function validateSiteRunEpisodeProgressD13B(before, after) {
   if (before.campaign.siteRunEpisodesById === void 0) return true;
   const older = before.campaign.siteRunEpisodesById, newer = after.campaign.siteRunEpisodesById;
@@ -32703,7 +32709,7 @@ export {
   resolveSiteRunEpisodeD13B,
   siteResetTransitionsD13C,
   validateSiteRunEpisodesD13B,
-  siteClearIsSavedV1,
+  siteRunIsSavedV1,
   validateSiteRunEpisodeProgressD13B,
   siteEnterPointV1,
   functionalSitesD10,
