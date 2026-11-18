@@ -1425,12 +1425,15 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 .cs-tab b{min-width:18px;padding:2px 5px;border-radius:8px;background:var(--tree);color:#0c1219;font:800 11px/1 system-ui,sans-serif}
 .cs-tab b[hidden]{display:none}
 .cs-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
-.cs-tree{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 16px;background:#121a22;border:1px solid #1f2933;border-radius:16px}
+.cs-tree{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 16px;background:radial-gradient(ellipse 85% 55% at 50% 38%,color-mix(in srgb,var(--tree) 15%,#121a22),#0e141b 78%);border:1px solid color-mix(in srgb,var(--tree) 26%,#1f2933);border-radius:16px}
+.cs-emblem{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;color:var(--tree);opacity:.07}
+.cs-emblem svg{position:absolute;left:50%;top:44%;width:330px;height:330px;transform:translate(-50%,-50%)}
+.cs-tree>.cs-tagline,.cs-tree>.cs-grid,.cs-tree>.cs-foot{position:relative}
 .cs-tagline{margin:0;font-size:12px;color:#8e979c;text-align:center;text-wrap:balance}
 .cs-grid{position:relative;left:15px;width:300px;flex:none}
 .cs-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.cs-links line{stroke:#2a3440;stroke-width:3;stroke-linecap:round}
-.cs-links line.lit{stroke:var(--tree)}
+.cs-links line{stroke:color-mix(in srgb,var(--tree) 30%,#1d2630);stroke-width:3;stroke-linecap:round}
+.cs-links line.lit{stroke:var(--tree);stroke-width:3.4;filter:drop-shadow(0 0 4px color-mix(in srgb,var(--tree) 70%,transparent))}
 #world-inventory #world-progression-view .cs-skill{position:absolute;z-index:1;width:78px;min-height:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;border:0;border-radius:0;background:none;color:#cfd5d6;font:600 11px/1.15 system-ui,sans-serif;text-align:center;cursor:pointer;box-shadow:none}
 .cs-tile{position:relative;width:54px;height:54px;flex:none;border-radius:12px;border:2px solid #3a4654;background:#151d26;display:flex;align-items:center;justify-content:center;box-sizing:border-box;color:#aeb5b6}
 .cs-tile svg{width:24px;height:24px}
@@ -1439,7 +1442,7 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 .cs-skill[data-kind=active] .cs-tile .cs-art svg{width:46px;height:46px}
 .cs-skill[data-state=available] .cs-art{opacity:.92}
 .cs-skill[data-state=soon] .cs-art,.cs-skill.closed .cs-art{opacity:.42;filter:grayscale(.75)}
-.cs-name{padding:1px 4px;border-radius:4px;background:#121a22}
+.cs-name{padding:1px 4px;border-radius:4px;text-shadow:0 1px 2px #000,0 0 6px #0b1015}
 .cs-skill[data-kind=active] .cs-tile{border-radius:50%}
 .cs-skill[data-kind=active] .cs-tile::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px dashed var(--tree);opacity:.6}
 .cs-skill[data-kind=capstone] .cs-tile{width:52px;height:52px;margin:2px 0 11px;transform:rotate(45deg)}
@@ -1449,21 +1452,25 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 .cs-skill[data-kind=capstone] .cs-tile:has(.cs-art){width:62px;height:62px;margin:0 0 3px;transform:none;border-radius:14px;border-color:#e9c46a}
 .cs-skill[data-kind=capstone] .cs-tile:has(.cs-art) svg{width:56px;height:56px;transform:none}
 .cs-skill[data-kind=capstone] .cs-tile:has(.cs-art) .cs-rank{transform:none;top:auto;right:-6px;bottom:-6px}
-.cs-skill[data-state=available] .cs-tile{border-color:#8e979c;color:#eee7d9}
-.cs-skill[data-state=learned] .cs-tile,.cs-skill[data-state=maxed] .cs-tile{border-color:var(--tree);background:#1b1f22;color:var(--tree)}
+.cs-skill[data-state=available] .cs-tile{border-color:color-mix(in srgb,var(--tree) 55%,#3a4654);color:#eee7d9}
+.cs-skill[data-state=learned] .cs-tile,.cs-skill[data-state=maxed] .cs-tile{border-color:var(--tree);background:#1b1f22;color:var(--tree);box-shadow:0 0 12px color-mix(in srgb,var(--tree) 45%,transparent),inset 0 0 10px color-mix(in srgb,var(--tree) 22%,transparent)}
 .cs-skill[data-state=learned] .cs-rank{border-color:var(--tree);color:#eee7d9}
 .cs-skill[data-state=maxed] .cs-rank{border-color:var(--tree);background:var(--tree);color:#0c1219}
 .cs-skill[data-state=soon] .cs-tile{border-style:dashed}
 .cs-skill[data-state=soon] .cs-rank{font-size:9px;letter-spacing:.04em;color:#7f8a93}
 #world-inventory #world-progression-view .cs-skill.closed{color:#66717b}
-.cs-skill.closed .cs-tile{border-color:#2a3440;background:#121921;color:#56636f}
+.cs-skill.closed .cs-tile{border-color:color-mix(in srgb,var(--tree) 20%,#2a3440);background:#121921;color:#56636f}
 .cs-skill.closed .cs-rank{border-color:#2a3440;color:#56636f}
 .cs-skill.selected .cs-tile{box-shadow:0 0 0 3px #f2dfaed9}
 .cs-skill.learned .cs-tile{animation:cs-learn .55s ease-out}
 @keyframes cs-learn{from{box-shadow:0 0 0 0 var(--tree)}to{box-shadow:0 0 0 16px transparent}}
-.cs-gate{position:absolute;left:-34px;transform:translateY(-50%);font:700 10px/1 system-ui,sans-serif;color:#8e979c;white-space:nowrap}
-.cs-gate::after{content:" pts"}
-.cs-gate.open{color:#3a4654}
+.cs-gate{position:absolute;left:-30px;right:-6px;height:0;border-top:1px dashed color-mix(in srgb,var(--tree) 22%,#2a3440);pointer-events:none}
+.cs-gate span{position:absolute;left:0;top:-9px;display:flex;align-items:center;gap:3px;padding:2px 6px 2px 4px;border-radius:9px;background:#0f161d;border:1px solid #2a3440;font:800 9px/1 system-ui,sans-serif;letter-spacing:.04em;color:#8e979c;white-space:nowrap}
+.cs-gate svg{width:10px;height:10px}
+.cs-gate.open{border-top-color:color-mix(in srgb,var(--tree) 40%,transparent)}
+.cs-gate.open span{color:var(--tree);border-color:color-mix(in srgb,var(--tree) 45%,#2a3440)}
+.cs-gate.open .cs-lock-shackle{transform:translate(3px,-1.4px) rotate(16deg);transform-origin:8px 6px;transform-box:view-box}
+.cs-capglow{position:absolute;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#e9c46a55,#e9c46a00 70%);pointer-events:none}
 .cs-bubble{position:absolute;left:-36px;right:-6px;z-index:3;display:flex;flex-direction:column;gap:8px;padding:12px 14px 14px;background:#151d26;border:1px solid #2f3a46;border-top:3px solid var(--tree);border-radius:14px;box-shadow:0 14px 32px #000000a6;box-sizing:border-box}
 .cs-bubble[hidden]{display:none}
 .cs-bubble::before{content:"";position:absolute;left:calc(var(--arrow) + 29px);width:14px;height:14px;background:#151d26;transform:rotate(45deg);box-sizing:border-box}
