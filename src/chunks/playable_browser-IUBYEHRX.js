@@ -174162,27 +174162,29 @@ function createSettlementServicesMenu2(options) {
   if (!doc.body.dataset.settlementServices) return createSettlementServicesMenu(options);
   const style = doc.createElement("style");
   style.textContent = `
- #settlement-services{--tn-panel:#10161d;--tn-card:#151d26;--tn-card2:#1b2530;--tn-line:#26313d;--tn-line2:#222c37;--tn-text:#eee7d9;--tn-muted:#aeb5b6;--tn-dim:#7f8a93;--tn-label:#b7a077;--tn-gold:#f0c862;--tn-up:#5fd08a;--tn-down:#ff8a70;--tn-accent:#d9b25f;padding:0;margin:auto;width:min(560px,calc(100vw - 16px));max-width:calc(100vw - 16px);height:min(860px,calc(100dvh - 16px));max-height:calc(100dvh - 16px);background:var(--tn-panel);color:var(--tn-text);border:1px solid #2f3a46;border-radius:22px;font:14px/1.35 system-ui,-apple-system,'Segoe UI',sans-serif;box-shadow:0 20px 90px #000c;overflow:hidden;box-sizing:border-box}
+ #settlement-services{--tn-panel:#10161d;--tn-card:#151d26;--tn-card2:#1b2530;--tn-line:#26313d;--tn-line2:#222c37;--tn-text:#eee7d9;--tn-muted:#aeb5b6;--tn-dim:#7f8a93;--tn-label:#b7a077;--tn-gold:#f0c862;--tn-up:#5fd08a;--tn-down:#ff8a70;--tn-accent:#d9b25f;padding:0;margin:auto;width:min(560px,calc(100vw - 16px));max-width:calc(100vw - 16px);height:min(860px,calc(100dvh - 16px));max-height:calc(100dvh - 16px);background:radial-gradient(120% 50% at 50% -8%,#24303d 0%,#141b23 46%,#0e141a 100%);color:var(--tn-text);border:1px solid #c9a45c40;border-radius:22px;font:14px/1.35 system-ui,-apple-system,'Segoe UI',sans-serif;box-shadow:0 0 0 1px #000,0 20px 90px #000c,inset 0 1px 0 #ffffff12;overflow:hidden;box-sizing:border-box}
+ #settlement-services[data-layout=work]{width:min(980px,calc(100vw - 16px))}
+ #settlement-services .tn-shell::before{content:"";position:absolute;inset:6px;border-radius:16px;border:1px solid #c9a45c1f;pointer-events:none;z-index:0}
  #settlement-services[data-service-kind=inn]{height:fit-content;margin:auto auto calc(8px + env(safe-area-inset-bottom,0px))}#settlement-services[data-service-kind=inn] .tn-shell{height:auto}#settlement-services[data-service-kind=inn] .tn-body{flex:none}#settlement-services[data-service-kind=inn] .tn-btn{flex:none;height:52px}
  #settlement-services::backdrop{background:#0008}#settlement-services *{box-sizing:border-box}
  #settlement-services button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}#settlement-services button:disabled{cursor:default}
  #settlement-services button:focus-visible{outline:2px solid #38bdf8;outline-offset:2px}
  #settlement-services .tn-shell{position:relative;height:100%;display:flex;flex-direction:column;min-height:0}
- #settlement-services .tn-head{display:flex;align-items:center;gap:10px;padding:12px 12px 10px;flex:none}
- #settlement-services .tn-npc{width:46px;height:46px;border-radius:14px;flex:none;display:grid;place-items:center;background:var(--tn-card2);border:1px solid #33404d}#settlement-services .tn-npc svg{width:28px;height:28px}
+ #settlement-services .tn-head{display:flex;align-items:center;gap:14px;padding:16px 16px 12px;flex:none}
+ #settlement-services .tn-npc{width:50px;height:50px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#3a2f1d,#17130c 70%);box-shadow:0 0 0 2px #c9a45c,0 0 0 4px #0b0f14,0 0 0 5px #c9a45c55,0 6px 14px #0008}#settlement-services .tn-npc svg{width:27px;height:27px}
  #settlement-services .tn-tier{display:inline-flex;align-items:center;height:18px;padding:0 7px;margin-left:6px;border-radius:9px;background:var(--tn-card2);border:1px solid #33404d;color:var(--tn-label);font:700 10px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;vertical-align:2px}
  #settlement-services .tn-restock{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:9px 12px;border-radius:14px;background:var(--tn-card);border:1px solid var(--tn-line)}#settlement-services .tn-restock svg{width:20px;height:20px;flex:none}#settlement-services .tn-restock b{display:block;font:700 13px/1.2 system-ui,sans-serif;color:var(--tn-text)}#settlement-services .tn-restock small{font:12px/1.3 system-ui,sans-serif;color:var(--tn-muted)}#settlement-services .tn-restock .tn-when{margin-left:auto;font:700 14px/1 system-ui,sans-serif;color:var(--tn-gold);font-variant-numeric:tabular-nums;white-space:nowrap}
- #settlement-services .tn-who{flex:1;min-width:0}#settlement-services .tn-who h3{margin:0;font:400 19px/1.15 Georgia,'Times New Roman',serif;color:var(--tn-text)}#settlement-services .tn-who small{color:var(--tn-muted);font-size:12px}
- #settlement-services .tn-x{width:44px;height:44px;border-radius:12px;border:1px solid var(--tn-line);background:var(--tn-card);display:grid;place-items:center;flex:none;padding:0}
- #settlement-services .tn-wallet{display:flex;gap:8px;padding:0 12px 10px;flex:none;flex-wrap:wrap}
- #settlement-services .tn-chipv{display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:15px;background:var(--tn-card);border:1px solid var(--tn-line);font:700 13px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums}
+ #settlement-services .tn-who{flex:1;min-width:0}#settlement-services .tn-who h3{margin:0;font:400 22px/1.1 Georgia,'Times New Roman',serif;color:#f6ecd6}#settlement-services .tn-who small{display:block;margin-top:4px;color:var(--tn-label);font:700 10.5px/1 system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+ #settlement-services .tn-x{width:44px;height:44px;border-radius:12px;border:1px solid var(--tn-line);background:#0e141acc;display:grid;place-items:center;flex:none;padding:0}
+ #settlement-services .tn-wallet{display:flex;gap:6px;padding:0 16px 12px;flex:none;flex-wrap:wrap}#settlement-services .tn-wallet .tn-chipv:first-child{border-color:#c9a45c66;color:var(--tn-gold)}
+ #settlement-services .tn-chipv{display:flex;align-items:center;gap:6px;height:30px;padding:0 11px 0 8px;border-radius:15px;background:#0b1015;border:1px solid var(--tn-line2);font:700 13px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums}
  #settlement-services .tn-coin{display:inline-block;width:14px;height:14px;flex:none;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe9a0,#e0a92e 60%,#a06d12);box-shadow:0 0 0 1px #6b4a0c}
  #settlement-services .tn-mat-art{width:18px;height:18px;flex:none;vertical-align:middle}#settlement-services .tn-break{display:flex;align-items:center;gap:8px}#settlement-services .tn-break p{display:flex;align-items:center;gap:4px;margin:2px 0}#settlement-services .tn-mat{display:inline-block;width:14px;height:14px;flex:none;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:radial-gradient(circle at 40% 40%,#e6d4ff,var(--m,#9a6bff) 60%,#2b1a55)}
- #settlement-services .tn-tabs{display:flex;gap:4px;margin:0 12px 10px;padding:4px;background:var(--tn-card);border:1px solid var(--tn-line);border-radius:14px;flex:none;overflow-x:auto;scrollbar-width:none}
- #settlement-services .tn-tab{flex:1 1 0;min-width:0;height:38px;border:0;border-radius:10px;background:none;color:var(--tn-muted);font:700 13px/1 system-ui,sans-serif;padding:0 4px;white-space:nowrap}
- #settlement-services .tn-tab[aria-pressed=true]{background:#26313d;color:var(--tn-text);box-shadow:inset 0 -2px 0 var(--tn-accent)}
- #settlement-services .tn-notice{margin:0 12px 8px;padding:8px 10px;border-radius:10px;background:#151d26;border:1px solid var(--tn-line);font-size:13px;color:var(--tn-muted);flex:none}#settlement-services .tn-notice.is-error{color:#ffb0a0;border-color:#7a3b3b}
- #settlement-services .tn-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;padding:0 12px 12px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:#3a4654 transparent}
+ #settlement-services .tn-tabs{display:flex;gap:2px;margin:0 16px 12px;border-bottom:1px solid var(--tn-line);flex:none;overflow-x:auto;scrollbar-width:none}
+ #settlement-services .tn-tab{position:relative;flex:1 0 auto;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;color:var(--tn-dim);font:700 12px/1 system-ui,sans-serif;padding:8px 8px 10px;white-space:nowrap}#settlement-services .tn-tab svg{width:20px;height:20px;opacity:.7}
+ #settlement-services .tn-tab[aria-pressed=true]{color:#f6ecd6;background:none}#settlement-services .tn-tab[aria-pressed=true] svg{opacity:1}#settlement-services .tn-tab[aria-pressed=true]::after{content:"";position:absolute;left:18%;right:18%;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#c9963a,#f0c862,#c9963a);box-shadow:0 0 10px #f0c86266}
+ #settlement-services .tn-notice{margin:0 16px 8px;padding:8px 10px;border-radius:10px;background:#151d26;border:1px solid var(--tn-line);font-size:13px;color:var(--tn-muted);flex:none}#settlement-services .tn-notice.is-error{color:#ffb0a0;border-color:#7a3b3b}
+ #settlement-services .tn-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;padding:0 16px 14px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:#3a4654 transparent}
  #settlement-services .tn-filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:none}
  #settlement-services .tn-chip{flex:none;height:34px;padding:0 12px;border-radius:17px;border:1px solid #2c3846;background:var(--tn-card);color:var(--tn-muted);font:600 12px/1 system-ui,sans-serif}
  #settlement-services .tn-chip[aria-pressed=true]{background:#2a3542;color:var(--tn-text);border-color:#4a5868}
@@ -174203,10 +174205,10 @@ function createSettlementServicesMenu2(options) {
  #settlement-services .tn-card{background:var(--tn-card);border:1px solid var(--tn-line);border-radius:16px;padding:12px}
  #settlement-services .tn-sect{margin:0 0 6px;font:700 10px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--tn-label)}
  #settlement-services .tn-btn{min-height:48px;border-radius:14px;border:1px solid #3a4654;background:var(--tn-card2);color:var(--tn-text);font:800 15px/1 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 16px}
- #settlement-services .tn-btn.is-gold{flex:1;background:linear-gradient(#f3d27a,#d9a83c);color:#2a1c05;border-color:#f6dc8c}#settlement-services .tn-btn.is-gold .tn-coin{box-shadow:0 0 0 1px #2a1c05}
+ #settlement-services .tn-btn.is-gold{flex:1;background:linear-gradient(#f3d27a,#d6a845 55%,#b88a2f);color:#2a1c05;border-color:#f6dc8f;box-shadow:inset 0 1px 0 #fff8,0 6px 16px #d6a84533}#settlement-services .tn-btn.is-gold small{font-weight:700;opacity:.75}#settlement-services .tn-btn.is-gold .tn-coin{box-shadow:0 0 0 1px #2a1c05}
  #settlement-services .tn-btn.is-small{min-height:42px;flex:none;padding:0 12px}
- #settlement-services .tn-btn:disabled{opacity:.45}
- #settlement-services .tn-foot{display:flex;align-items:center;gap:10px;padding:10px 12px 12px;border-top:1px solid var(--tn-line);flex:none}
+ #settlement-services .tn-btn:disabled{opacity:.45}#settlement-services .tn-btn.is-gold:disabled{opacity:1;filter:saturate(.3) brightness(.62);box-shadow:none}
+ #settlement-services .tn-foot{position:relative;display:flex;align-items:center;gap:12px;padding:12px 16px 16px;border-top:1px solid var(--tn-line2);background:linear-gradient(#0e141a00,#0b0f14);flex:none}#settlement-services .tn-foot>.tn-btn{min-height:50px}#settlement-services .tn-why{max-width:40%;font:600 12px/1.3 system-ui,sans-serif;color:#ffb0a0}
  #settlement-services .tn-sum{flex:1;min-width:0}#settlement-services .tn-sum b{display:block;font:800 16px/1.2 system-ui,sans-serif}#settlement-services .tn-sum small{color:var(--tn-muted);font-size:12px}
  #settlement-services .tn-sheet{position:absolute;left:0;right:0;bottom:0;max-height:86%;display:flex;flex-direction:column;background:var(--tn-card);border-top:3px solid var(--r,#b7a077);border-radius:20px 20px 0 0;box-shadow:0 -20px 60px #000c;z-index:2}
  #settlement-services .tn-sheetscroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px}
@@ -174228,16 +174230,29 @@ function createSettlementServicesMenu2(options) {
  #settlement-services .tn-upg h4{margin:0;font:700 15px/1.2 system-ui,sans-serif}#settlement-services .tn-upg p{margin:2px 0 0;font-size:12px;color:var(--tn-muted)}
  #settlement-services .tn-pips{display:flex;gap:4px;margin-top:6px}#settlement-services .tn-pips i{width:16px;height:5px;border-radius:3px;background:#2c3846}#settlement-services .tn-pips i.on{background:var(--tn-accent)}
  #settlement-services .tn-arrow{color:var(--tn-up);font-weight:800}
- #settlement-services .tn-strip{display:flex;gap:8px;overflow-x:auto;padding:5px 3px;flex:none;scrollbar-width:none}
- #settlement-services .tn-strip .tn-cell{flex:none;width:58px;min-width:58px}#settlement-services .tn-strip .tn-cell .tn-tile{width:58px;height:58px}#settlement-services .tn-strip .tn-tile img{width:42px;height:42px}
- #settlement-services .tn-strip .tn-cell[aria-pressed=true] .tn-tile{box-shadow:0 0 0 3px var(--tn-gold)}
- #settlement-services .tn-radio{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:9px 10px;border-radius:12px;border:1px solid var(--tn-line);background:#111820;margin-bottom:6px;font:600 13px/1.2 system-ui,sans-serif;color:#cfd5d6;text-align:left}
+ /* Town screens v3 (2026-11-18): the gear picker. A sorted grid in two groups beside the item and its action. */
+ #settlement-services .tn-pick{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:16px;background:#0c1117;border:1px solid var(--tn-line2);flex:none;min-width:0}
+ #settlement-services .tn-pickh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}#settlement-services .tn-pickh b{font:800 10.5px/1 system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--tn-label)}#settlement-services .tn-pickh small{color:var(--tn-dim);font-size:11.5px}
+ #settlement-services .tn-pick .tn-filters{flex-wrap:wrap;min-height:30px}#settlement-services .tn-pick .tn-chip{height:30px;padding:0 11px;border-radius:15px;display:flex;align-items:center;gap:6px}#settlement-services .tn-chip em{font-style:normal;color:var(--tn-dim);font-weight:600}#settlement-services .tn-pick .tn-chip[aria-pressed=true]{background:#d9b25f1f;border-color:#d9b25f99;color:#f6ecd6}#settlement-services .tn-pick .tn-chip[aria-pressed=true] em{color:var(--tn-accent)}
+ #settlement-services .tn-gl{display:flex;align-items:center;gap:8px;font:700 11px/1 system-ui,sans-serif;color:var(--tn-muted)}#settlement-services .tn-gl::after{content:"";flex:1;height:1px;background:var(--tn-line2)}#settlement-services .tn-gl span{color:var(--tn-dim);font-weight:600}
+ #settlement-services .tn-pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:8px 6px}
+ #settlement-services .tn-pgrid .tn-tile{width:62px;height:62px;border:0;background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--r) 30%,#141b23),#0f151c 75%);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--r) 80%,#000),inset 0 0 14px color-mix(in srgb,var(--r) 25%,transparent)}#settlement-services .tn-pgrid .tn-tile img{width:46px;height:46px}
+ #settlement-services .tn-pgrid .tn-st,#settlement-services .tn-pgrid .tn-lv{background:none;text-shadow:0 1px 2px #000;font-weight:800}#settlement-services .tn-pgrid .tn-lv{left:0;right:0;text-align:center}
+ #settlement-services .tn-slotn{font:600 10.5px/1 system-ui,sans-serif;color:var(--tn-dim);max-width:66px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ #settlement-services .tn-pgrid .tn-cell[aria-pressed=true] .tn-tile{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--r) 80%,#000),0 0 0 2px #0c1117,0 0 0 4px var(--tn-gold),0 0 18px #f0c86255}#settlement-services .tn-pgrid .tn-cell[aria-pressed=true] .tn-slotn{color:var(--tn-gold)}
+ #settlement-services .tn-side{display:contents}#settlement-services .tn-pickcard{order:-2}#settlement-services .tn-pick{order:-1}
+ #settlement-services .tn-pickcard{background:linear-gradient(135deg,color-mix(in srgb,var(--r) 18%,#151d26),#121920 60%);border:1px solid color-mix(in srgb,var(--r) 45%,var(--tn-line));padding:14px}
+ #settlement-services .tn-pickcard .tn-ihead{gap:14px}#settlement-services .tn-pickcard .tn-ihead .tn-tile{width:80px;height:80px;border-radius:18px}#settlement-services .tn-pickcard .tn-ihead .tn-tile img{width:60px;height:60px}#settlement-services .tn-pickcard .tn-iname{font:700 19px/1.15 Georgia,'Times New Roman',serif}#settlement-services .tn-pickcard .tn-isub{margin-top:4px}
+ #settlement-services .tn-pick{max-height:318px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#3a4654 transparent}
+ @media (max-width:759px){#settlement-services .tn-pick .tn-filters{flex-wrap:nowrap}#settlement-services .tn-tab{box-shadow:none}}
+ @media (min-width:760px){#settlement-services[data-layout=work] .tn-body{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start;overflow:hidden;gap:14px}#settlement-services[data-layout=work] .tn-pick,#settlement-services[data-layout=work] .tn-side{max-height:100%;overflow:auto}#settlement-services[data-layout=work] .tn-body{grid-template-rows:minmax(0,1fr)}#settlement-services[data-layout=work] .tn-side{display:flex;flex-direction:column;gap:12px;min-width:0}#settlement-services[data-layout=work] .tn-pick{order:0}}
+ #settlement-services .tn-radio{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:9px 12px;border-radius:12px;border:1px solid var(--tn-line);background:#111820;margin-bottom:6px;font:600 13px/1.2 system-ui,sans-serif;color:#cfd5d6;text-align:left}
  #settlement-services .tn-radio .tn-dot{width:18px;height:18px;border-radius:50%;border:2px solid #4a5868;flex:none}
- #settlement-services .tn-radio[aria-pressed=true]{border-color:var(--tn-accent);background:#d9b25f14}#settlement-services .tn-radio[aria-pressed=true] .tn-dot{border:5px solid var(--tn-accent)}
+ #settlement-services .tn-radio[aria-pressed=true]{border-color:var(--tn-accent);background:linear-gradient(90deg,#d9b25f1c,#d9b25f08)}#settlement-services .tn-radio[aria-pressed=true] .tn-dot{border:5px solid var(--tn-gold)}
  #settlement-services .tn-radio>span:last-child{display:flex;align-items:center;gap:8px}
- #settlement-services .tn-costs{display:flex;gap:6px;flex-wrap:wrap}
- #settlement-services .tn-cost{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px;border-radius:10px;background:#111820;border:1px solid var(--tn-line2);font:700 13px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums}
- #settlement-services .tn-cost small{color:var(--tn-dim);font-weight:600}#settlement-services .tn-cost.is-short{border-color:#7a3b3b;color:#ffb0a0}
+ #settlement-services .tn-costs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+ #settlement-services .tn-cost{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;align-items:center;padding:9px 12px;border-radius:12px;background:#0c1117;border:1px solid var(--tn-line2);font:800 14px/1.1 system-ui,sans-serif;font-variant-numeric:tabular-nums}#settlement-services .tn-cost>:first-child{grid-row:span 2;width:24px;height:24px}#settlement-services .tn-cost>i.tn-mat{width:18px;height:18px;margin:3px}
+ #settlement-services .tn-cost small{color:var(--tn-up);font:600 11px/1.2 system-ui,sans-serif}#settlement-services .tn-cost.is-short{border-color:#7a3b3b;background:#1a1012}#settlement-services .tn-cost.is-short small{color:#ffb0a0}
  #settlement-services .tn-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}#settlement-services .tn-link{display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:0 12px 0 8px;border:1px solid color-mix(in srgb,var(--tn-gold) 45%,transparent);border-radius:999px;background:color-mix(in srgb,var(--tn-gold) 10%,transparent);font:700 12px/1 system-ui,sans-serif;color:var(--tn-gold)}#settlement-services .tn-link:disabled{opacity:.45}#settlement-services .tn-link img,#settlement-services .tn-link svg{width:16px;height:16px}
  #settlement-services .tn-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
  #settlement-services .tn-slot{background:#111820;border:1px solid var(--tn-line2);border-radius:12px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
@@ -174271,7 +174286,7 @@ function createSettlementServicesMenu2(options) {
     if (cls) e.className = cls;
     return e;
   };
-  let lastPotionCount = null, npcId = null, mode = "gear", selected = null, line45 = 0, materialQuantity = 1, key4 = null, busy = false, notice = "", confirm = null, bad = false, sheet2 = null, filter = "all";
+  let lastPotionCount = null, npcId = null, mode = "gear", selected = null, line45 = 0, materialQuantity = 1, key4 = null, busy = false, notice = "", confirm = null, bad = false, sheet2 = null, filter = "all", pickFilter = "all";
   const picks = /* @__PURE__ */ new Set();
   const close = () => {
     if (busy) return;
@@ -174364,6 +174379,9 @@ function createSettlementServicesMenu2(options) {
     inn: '<svg viewBox="0 0 24 24" fill="none" stroke="#9fd0ff" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M3 18V9M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.6"/></svg>',
     supplies: FLASK(true)
   };
+  const TAB_ICONS = { attune: "M12 19V5M6 11l6-6 6 6", reforge: "M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4", awaken: "M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z", shatter: "M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13", break: "M4 14l5-9 5 9zM12 20l4-7 4 7z", gear: "M5 8h14l-1.4 11H6.4zM9 8a3 3 0 0 1 6 0", enchant: "M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18", purge: "M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z", resonance: "M3.5 12a5 5 0 1 0 10 0a5 5 0 1 0-10 0M10.5 12a5 5 0 1 0 10 0a5 5 0 1 0-10 0", rebind: "M9 15l6-6M10 6l1-1a4 4 0 0 1 6 6l-1 1M14 18l-1 1a4 4 0 0 1-6-6l1-1", augments: "M12 2l3 7h7l-5.5 4.5 2 7.5L12 16.5 5.5 21l2-7.5L2 9h7z", sell: "M12 3v18M17 7H9.5a3 3 0 0 0 0 6h5a3 3 0 0 1 0 6H7", supplies: "M9 3h6M10 3v5l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 17l-5-9V3" };
+  const tabIcon = (id2) => TAB_ICONS[id2] ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + TAB_ICONS[id2] + '"/></svg>' : "";
+  const PICK_ORDER = ["weapon", "subweapon", "helmet", "overall", "top", "bottom", "cape", "gloves", "boots", "ring1", "ring2", "ring", "necklace", "earring", "belt"];
   const MATS = { "Glyph Dust": "#b98cff", "Monster Soul": "#9a6bff", "Wakestone": "#ff6fb5", "Overlord's Sigil": "#ff6b5a", "Astral Essence": "#6fc3ff" };
   const FILTERS = [["all", "All"], ["weapon", "Weapons"], ["offhand", "Offhand"], ["armor", "Armor"], ["ring", "Rings"]];
   const markup = (e, html) => {
@@ -174390,7 +174408,7 @@ function createSettlementServicesMenu2(options) {
     key4 = null;
     refresh(readModel());
   };
-  const slotName = (slot) => (SLOT_NAMES[slot] ?? slot).replace(/ \d$/, "");
+  const slotName = (slot) => (SLOT_NAMES[slot === "ring" ? "ring1" : slot] ?? slot).replace(/ \d$/, "");
   const wornFor = (inv, d) => inv.itemsById[inv.equipped[d.slot === "ring" ? "ring1" : d.slot]];
   const sectionsOf = (item2) => itemSections(itemDefinition(item2), item2.generated);
   function tile2(item2, badge2) {
@@ -174502,15 +174520,21 @@ function createSettlementServicesMenu2(options) {
     box6.append(el3("p", "Cost", "tn-sect"));
     const row2 = el3("div", void 0, "tn-costs"), haveGold = compareAmount(inv.gold, gold) >= 0;
     let afford = haveGold;
-    const g2 = el3("span", void 0, "tn-cost" + (haveGold ? "" : " is-short"));
-    g2.append(coin3(), formatAmount(inv.gold), el3("small", "/ " + formatAmount(gold)));
+    const g2 = el3("span", void 0, "tn-cost" + (haveGold ? "" : " is-short")), short = (a, b) => {
+      try {
+        return formatAmount(String(BigInt(b) - BigInt(a)));
+      } catch {
+        return "";
+      }
+    };
+    g2.append(coin3(), el3("b", formatAmount(gold) + " gold"), el3("small", "You have " + formatAmount(inv.gold) + (haveGold ? "" : " \xB7 need " + short(inv.gold, gold) + " more")));
     g2.title = "You have " + formatAmount(inv.gold) + " of " + formatAmount(gold) + " gold";
     if (gold !== "0") row2.append(g2);
     const buy = [];
     for (const [k, n] of Object.entries(materials2 ?? {})) {
       const have = inv.economy.materials[k] ?? 0, c = el3("span", void 0, "tn-cost" + (have >= n ? "" : " is-short"));
       c.title = k;
-      c.append(mat(k), String(have), el3("small", "/ " + n + " " + k));
+      c.append(mat(k), el3("b", n + " " + k), el3("small", "You have " + have + (have >= n ? "" : " \xB7 need " + (n - have) + " more")));
       c.title = "You have " + have + " of " + n + " " + k;
       row2.append(c);
       if (have < n) {
@@ -174544,6 +174568,7 @@ function createSettlementServicesMenu2(options) {
     const inv = m.inventory, p = { playerId: m.localPlayerId, inventory: inv, progression: m.playersById[m.localPlayerId].progression }, npc = m.serviceNpcs?.find((n) => n.id === npcId);
     const kind = !npc ? "supplies" : npc.role === "enchanter" ? "altar" : npc.services?.includes("attune") ? "forge" : npc.role === "innkeeper" ? "inn" : "shop";
     panel.dataset.serviceKind = kind;
+    panel.dataset.layout = "";
     panel.replaceChildren();
     const shell5 = el3("div", void 0, "tn-shell"), head19 = el3("div", void 0, "tn-head"), face4 = markup(el3("div", void 0, "tn-npc"), FACES3[kind]), who = el3("div", void 0, "tn-who");
     const title12 = el3("h3", npc?.name ?? "Potions");
@@ -174598,14 +174623,17 @@ function createSettlementServicesMenu2(options) {
     shell5.append(wallet);
     const modes = kind === "forge" ? [...[["attune", "Upgrade"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["shatter", "Salvage"], ["break", "Scraps"]].filter(([id2]) => npc.services.includes(id2 === "break" ? "shatter" : id2)), ...npc.stock?.length ? [["gear", "Buy"]] : []] : kind === "altar" ? [["enchant", "Enchant"], ["purge", "Purge"], ["resonance", "Resonance"], ...npc.services?.includes("rebind") ? [["rebind", "Rebind"]] : [], ["augments", "Augments"]] : kind === "shop" ? [["gear", "Buy"], ["sell", "Sell"], ["supplies", "Potions"]] : [["supplies", "Potions"]];
     if (!modes.some(([id2]) => id2 === mode)) mode = modes[0][0];
+    panel.dataset.layout = ["reforge", "awaken", "shatter", "enchant", "purge", "resonance", "rebind"].includes(mode) ? "work" : "";
     if (modes.length > 1) {
       const tabs = el3("nav", void 0, "tn-tabs");
       tabs.setAttribute("aria-label", "Services");
       for (const [id2, label7] of modes) {
-        const b = button3(label7, () => {
+        const b = button3("", () => {
           sheet2 = null;
           change(id2);
         }, "tab:" + id2, "tn-tab");
+        b.innerHTML = tabIcon(id2);
+        b.append(label7);
         b.setAttribute("aria-pressed", String(mode === id2));
         tabs.append(b);
       }
@@ -174616,7 +174644,7 @@ function createSettlementServicesMenu2(options) {
       n.setAttribute("role", "status");
       shell5.append(n);
     }
-    const body6 = el3("div", void 0, "tn-body");
+    let body6 = el3("div", void 0, "tn-body");
     shell5.append(body6);
     const foot2 = el3("div", void 0, "tn-foot");
     if (mode === "gear") {
@@ -174821,6 +174849,57 @@ function createSettlementServicesMenu2(options) {
         body6.append(el3("p", mode === "rebind" ? "Bring a shield, dagger or Tome of your class to change its kind here. Uniques keep theirs." : "Bring gear with stars (drops or shop gear) to work on it here.", "tn-empty"));
         return;
       }
+      const slotOf3 = (i2) => {
+        const e = Object.entries(inv.equipped).find(([, id2]) => id2 === i2.itemId);
+        return e ? e[0] : itemDefinition(i2)?.slot;
+      }, rank = (i2) => {
+        const k = PICK_ORDER.indexOf(slotOf3(i2));
+        return k < 0 ? 99 : k;
+      }, sorted = [...items3].sort((a, b2) => rank(a) - rank(b2) || tierOf2(itemDefinition(b2)) - tierOf2(itemDefinition(a)) || (b2.generated?.itemPower ?? 0) - (a.generated?.itemPower ?? 0));
+      const kinds2 = {};
+      for (const i2 of items3) {
+        const k = bagFilterOf(itemDefinition(i2));
+        kinds2[k] = (kinds2[k] ?? 0) + 1;
+      }
+      if (pickFilter !== "all" && !kinds2[pickFilter]) pickFilter = "all";
+      const pick4 = el3("div", void 0, "tn-pick"), ph = el3("div", void 0, "tn-pickh");
+      ph.append(el3("b", "Your gear"), el3("small", items3.length + (items3.length === 1 ? " item" : " items") + " \xB7 tap one"));
+      pick4.append(ph);
+      if (Object.keys(kinds2).length > 1) {
+        const row2 = chips3(FILTERS.filter(([id2]) => id2 === "all" || kinds2[id2]), pickFilter, (id2) => {
+          pickFilter = id2;
+          redraw();
+        });
+        for (const b2 of row2.children) {
+          const id2 = b2.dataset.serviceAction.slice(5), em = el3("em", String(id2 === "all" ? items3.length : kinds2[id2]));
+          b2.append(" ", em);
+          b2.dataset.serviceAction = "pickchip:" + id2;
+        }
+        pick4.append(row2);
+      }
+      const shown2 = sorted.filter((i2) => pickFilter === "all" || bagFilterOf(itemDefinition(i2)) === pickFilter);
+      for (const [label7, list, sub] of [["Wearing", shown2.filter((i2) => worn.has(i2.itemId)), "stays on while you work"], ["In your bag", shown2.filter((i2) => !worn.has(i2.itemId)), null]]) {
+        if (!list.length) continue;
+        const gl = el3("div", label7, "tn-gl");
+        gl.append(el3("span", "\xB7 " + (sub ?? list.length)));
+        const grid = el3("div", void 0, "tn-pgrid");
+        for (const i2 of list) {
+          const r3 = workshopResult(i2), b2 = cell(i2, { named: false, fn: () => change(mode, i2.itemId), id: "select:" + i2.itemId });
+          b2.append(el3("span", slotName(slotOf3(i2)), "tn-slotn"));
+          b2.setAttribute("aria-pressed", String(i2.itemId === selected));
+          b2.setAttribute("aria-label", displayName(itemDefinition(i2)) + ", " + r3.tier + " stars" + (worn.has(i2.itemId) ? ", worn" : ""));
+          grid.append(b2);
+        }
+        pick4.append(gl, grid);
+      }
+      if (!shown2.some((i2) => i2.itemId === selected) && shown2.length) pick4.append(el3("p", "The item you picked is under another filter.", "tn-hint is-left"));
+      const side = el3("div", void 0, "tn-side"), main = body6;
+      body6 = side;
+      main.append(pick4, side);
+      const i = items3.find((i2) => i2.itemId === selected), r = workshopResult(i), card = el3("div", void 0, "tn-card tn-pickcard");
+      card.style.setProperty("--r", RARITY_COLORS[r.tier] ?? "#3a4654");
+      card.append(itemHead(i, [RARITY_NAMES[r.tier] + " " + slotName(slotOf3(i)), r.tier + "\u2605", worn.has(i.itemId) ? "worn" : null, r.enchants ? r.enchants + " enchant" + (r.enchants > 1 ? "s" : "") : null, r.set ? r.set + " set" : null].filter(Boolean).join(" \xB7 ")));
+      body6.prepend(card);
       if (mode === "shatter") {
         const many = button3("Salvage several at once", () => {
           close();
@@ -174828,22 +174907,6 @@ function createSettlementServicesMenu2(options) {
         }, "mass-salvage", "tn-many");
         body6.append(many);
       }
-      const strip = el3("div", void 0, "tn-strip");
-      for (const i2 of items3) {
-        const r3 = workshopResult(i2), b2 = cell(i2, { named: false, fn: () => change(mode, i2.itemId), id: "select:" + i2.itemId });
-        b2.setAttribute("aria-pressed", String(i2.itemId === selected));
-        b2.setAttribute("aria-label", displayName(itemDefinition(i2)) + ", " + r3.tier + " stars");
-        strip.append(b2);
-      }
-      body6.append(strip);
-      const on = strip.querySelector('[aria-pressed="true"]');
-      if (on) requestAnimationFrame(() => {
-        strip.scrollLeft += on.getBoundingClientRect().left - strip.getBoundingClientRect().left - (strip.clientWidth - on.offsetWidth) / 2;
-      });
-      const i = items3.find((i2) => i2.itemId === selected), r = workshopResult(i), card = el3("div", void 0, "tn-card");
-      card.style.borderTop = "3px solid " + (RARITY_COLORS[r.tier] ?? "#3a4654");
-      card.append(itemHead(i, [RARITY_NAMES[r.tier], r.tier + "\u2605", r.enchants ? r.enchants + " enchant" + (r.enchants > 1 ? "s" : "") : null, r.set ? r.set + " set" : null].filter(Boolean).join(" \xB7 ")));
-      body6.append(card);
       const own = mode === "rebind" ? CLASS_GEAR[i.generated.progression.gearClass].subweapon : null;
       if (own && (!(line45 >= 0 && line45 < own.length) || own[line45] === r.definition.noun)) line45 = own.findIndex((n) => n !== r.definition.noun);
       const sig = mode === "reforge" && r.definition.unique ? UNIQUE_SIGNATURE_LINE : null;
@@ -174928,7 +174991,9 @@ function createSettlementServicesMenu2(options) {
           redraw();
         }
       }, "execute:" + mode, "tn-btn is-gold");
+      if (q2.gold && q2.gold !== "0" && confirm !== i.itemId) b.append(el3("small", "\xB7 " + formatAmount(q2.gold)));
       b.disabled = busy || !afford || Boolean(q2.problem);
+      if (!busy && q2.gold !== void 0 && !afford && !q2.problem) foot2.append(el3("span", compareAmount(inv.gold, q2.gold) < 0 ? "Not enough gold" : "Not enough materials", "tn-why"));
       foot2.append(b);
       shell5.append(foot2);
     }
@@ -174996,7 +175061,7 @@ function createSettlementServicesMenu2(options) {
     supplyButton.dataset.cooling = String(cooling);
     supplyButton.style.setProperty("--potion-cooldown", String(cooling ? belt2.cooldownTicks / belt2.cooldownTotal : 0));
     supplyButton.setAttribute("aria-label", "Drink health potion, " + belt2.count + " of " + belt2.capacity + ", heals " + belt2.healPercent + " percent");
-    const next = JSON.stringify(m.playersById[m.localPlayerId]?.d8?.augmentCraft ?? null) + "/" + (m.playersById[m.localPlayerId]?.d8?.revision ?? "") + "/" + m.localPlayerId + "/" + m.inventory.revision + "/" + m.playersById[m.localPlayerId].progression.level + "/" + npcId + "/" + mode + "/" + selected + "/" + line45 + "/" + materialQuantity + "/" + busy + "/" + notice + "/" + confirm + "/" + sheet2 + "/" + filter + "/" + [...picks].join(",") + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false) + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.stock?.map((q2) => q2.id + (q2.purchased ? "!" : "")).join() ?? "") + "/" + Math.ceil((m.serviceNpcs?.find((n) => n.id === npcId)?.restockTicks ?? 0) / 3600);
+    const next = JSON.stringify(m.playersById[m.localPlayerId]?.d8?.augmentCraft ?? null) + "/" + (m.playersById[m.localPlayerId]?.d8?.revision ?? "") + "/" + m.localPlayerId + "/" + m.inventory.revision + "/" + m.playersById[m.localPlayerId].progression.level + "/" + npcId + "/" + mode + "/" + selected + "/" + line45 + "/" + materialQuantity + "/" + busy + "/" + notice + "/" + confirm + "/" + sheet2 + "/" + filter + "/" + pickFilter + "/" + [...picks].join(",") + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false) + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.stock?.map((q2) => q2.id + (q2.purchased ? "!" : "")).join() ?? "") + "/" + Math.ceil((m.serviceNpcs?.find((n) => n.id === npcId)?.restockTicks ?? 0) / 3600);
     if (panel.open && key4 !== next) {
       const focus = doc.activeElement?.dataset.serviceAction;
       key4 = next;
@@ -175015,6 +175080,7 @@ function createSettlementServicesMenu2(options) {
     confirm = null;
     sheet2 = null;
     filter = "all";
+    pickFilter = "all";
     picks.clear();
     key4 = null;
     panel.showModal();
