@@ -30455,7 +30455,7 @@ function validateEvent(event) {
     validateId("entityId", event.payload.sourceEntityId);
     validateId("entityId", event.payload.targetEntityId);
   } else {
-    closedRecord(event.payload, ["attackActionId", "sourceEntityId", "sourceCharacterId", "targetEntityId", "damage", "resultingHp", "targetAlive"], ["combatVersion", "critical", "mechanic", "defenseKind", "sourceItem", "trigger", "barrierAbsorption", "chainFrom", "meleeContact", "projectileContact", "skillMark"]);
+    closedRecord(event.payload, ["attackActionId", "sourceEntityId", "sourceCharacterId", "targetEntityId", "damage", "resultingHp", "targetAlive"], ["combatVersion", "critical", "mechanic", "defenseKind", "sourceItem", "trigger", "barrierAbsorption", "chainFrom", "meleeContact", "projectileContact", "skillMark", "overkill"]);
     validateId("attackActionId", event.payload.attackActionId);
     validateId("entityId", event.payload.sourceEntityId);
     if (event.payload.sourceCharacterId !== null) validateId("characterId", event.payload.sourceCharacterId);
@@ -30499,6 +30499,10 @@ function validateEvent(event) {
       requireContract(event.payload.trigger === void 0 || event.payload.trigger === null || ["pressure", "reactive", "proc", "periodic", "mastery", "skill"].includes(event.payload.trigger), "Invalid damage trigger");
       validateAmount(event.payload.damage);
       validateAmount(event.payload.resultingHp);
+      if (event.payload.overkill !== void 0) {
+        validateAmount(event.payload.overkill);
+        requireContract(compareCombat(event.payload.overkill, 0) > 0 && !event.payload.targetAlive, "Invalid overkill");
+      }
       requireContract(event.payload.defenseKind == null || ["barrier", "block", "parry"].includes(event.payload.defenseKind), "Invalid defense feedback");
       requireContract(typeof event.payload.critical === "boolean" && ["main", "bash", "quake", "riposte", "offhand", "fire", "lightning", "frost", "bleed", "burn", "poison", "slag", "bloom", "rupture", "shadowflurry", "windrazor", "assassin", "aegis", "shatter", "hostile", "barrier", "block", "parry"].includes(event.payload.mechanic), "Invalid fractional packet attribution");
       requireContract(event.payload.targetAlive === compareCombat(event.payload.resultingHp, 0) > 0, "Fractional event liveness");

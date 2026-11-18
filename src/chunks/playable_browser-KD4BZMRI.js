@@ -1151,7 +1151,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-GCKNJ57I.js";
+} from "./chunk-CYEN6COD.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -147940,7 +147940,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       targetRadius: target.combatRadius
     } : null;
     if (target.team === "party" && target.alive) raw = family.classHooks.lethal(target, raw);
-    const result = resolveCombatDamage(target.hp, raw), defeatPlan = state2.d9World && !result.targetAlive ? progression.prepareDefeat(target, scheduler.config.prepareRadius) : null;
+    const result = resolveCombatDamage(target.hp, raw), overkill = compareCombat(raw, result.damage) > 0 ? combatInteger(subtractCombat(asCombatAmount(raw), asCombatAmount(result.damage))) : null, defeatPlan = state2.d9World && !result.targetAlive ? progression.prepareDefeat(target, scheduler.config.prepareRadius) : null;
     if (pendingPlayerRng) state2.subweaponCombat.actors[source3.entityId].rng = pendingPlayerRng;
     if (pendingForcedTransient) pendingForcedTransient.retaliatoryReady = false;
     if (!periodic && !attribution?.projectileImpact) {
@@ -147999,7 +147999,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       eventId: identity2("evt"),
       eventSequence: ++state2.eventEmission.lastEventSequence,
       kind,
-      payload: kind === "combat.attackStarted" ? { attackActionId, sourceEntityId: source3.entityId, targetEntityId: target.entityId } : { attackActionId, sourceEntityId: source3.entityId, sourceCharacterId: source3.ownerCharacterId, targetEntityId: target.entityId, damage: result.damage, resultingHp: result.resultingHp, targetAlive: result.targetAlive, combatVersion: "combat-integer-v2", barrierAbsorption, sourceItem, ...meleeContact ? { meleeContact } : {}, ...attribution?.projectileContact ? { projectileContact: copyWire(attribution.projectileContact) } : {}, ...attribution?.chainFrom ? { chainFrom: attribution.chainFrom } : {}, ...attribution?.mark ? { skillMark: attribution.mark } : {}, trigger: attribution?.trigger ?? null, critical, defenseKind: defense?.defense ?? null, mechanic: compareCombat(result.damage, 0) === 0 ? defense?.defense ?? "block" : mechanic }
+      payload: kind === "combat.attackStarted" ? { attackActionId, sourceEntityId: source3.entityId, targetEntityId: target.entityId } : { attackActionId, sourceEntityId: source3.entityId, sourceCharacterId: source3.ownerCharacterId, targetEntityId: target.entityId, damage: result.damage, resultingHp: result.resultingHp, targetAlive: result.targetAlive, ...overkill && !result.targetAlive && kind !== "combat.attackStarted" ? { overkill } : {}, combatVersion: "combat-integer-v2", barrierAbsorption, sourceItem, ...meleeContact ? { meleeContact } : {}, ...attribution?.projectileContact ? { projectileContact: copyWire(attribution.projectileContact) } : {}, ...attribution?.chainFrom ? { chainFrom: attribution.chainFrom } : {}, ...attribution?.mark ? { skillMark: attribution.mark } : {}, trigger: attribution?.trigger ?? null, critical, defenseKind: defense?.defense ?? null, mechanic: compareCombat(result.damage, 0) === 0 ? defense?.defense ?? "block" : mechanic }
     }));
     if (defense && !defense.suppressed && target.alive) {
       const p = playerFor(target.entityId), reaction = receiveMasteryDefense(p, target, defense, progression.resolvedStats(target.entityId));
@@ -216968,7 +216968,7 @@ function createCombatFeedback() {
       const same12 = numbers.filter((n) => n.targetId === e.subject.entityId);
       if (same12.length >= HIT_FEEDBACK.maxPerTarget) numbers = numbers.filter((n) => n !== same12[0]);
       if (numbers.length >= HIT_FEEDBACK.maxNumbers) numbers.shift();
-      const damage = e.payload.damage, value2 = formatLarge(combatInteger(damage));
+      const damage = e.payload.overkill ? addCombat(e.payload.damage, e.payload.overkill) : e.payload.damage, value2 = formatLarge(combatInteger(damage));
       const rec = { rainbow: rainbow && !player, sourceId: e.source.entityId, sourcePosition, projectileContact: projectileContact ? { style: projectileContact.style } : null, hostileMelee: contact ? { ...contact, family: source3?.enemyFamily ?? null } : source3?.team === "hostile" && !source3.ranged && !projectileContact && source3.enemyFamily && source3.meleeGeometry && e.payload.trigger !== "periodic" && (e.payload.mechanic === "hostile" || e.kind === "combat.defenseResolved") ? { ...source3.meleeGeometry, family: source3.enemyFamily } : null, earthBreaker: e.payload.mechanic === "bash" && model.combatPresentation?.families[e.source.entityId]?.mastery?.earthBreaker, eventTick: e.tick, eventSequence: e.eventSequence, targetId: e.subject.entityId, born: time3, position: position3, player, heavy: heavy2, direction: direction3, chainFrom: e.payload.chainFrom ?? null, skillMark: e.payload.skillMark ?? null, barrierAbsorption: e.payload.barrierAbsorption ?? null, sourceItem: e.payload.sourceItem ?? null, trigger: e.payload.trigger ?? null, defenseKind: e.payload.defenseKind, mechanic: e.payload.mechanic, critical: e.payload.critical === true, defended: Boolean(e.payload.defenseKind), text: e.kind === "combat.defenseResolved" ? ((k) => k[0].toUpperCase() + k.slice(1))(e.payload.defenseKind ?? "block") : (player ? "-" : "") + value2 };
       if (!player && e.kind === "combat.damageApplied" && !e.payload.defenseKind && !e.payload.barrierAbsorption && (COMBAT_TEXT_TICKS.has(e.payload.mechanic) || e.payload.trigger === "periodic")) {
         const tickKey = e.subject.entityId + "/" + e.payload.mechanic + "/" + e.source.entityId, last = ticks.get(tickKey);
