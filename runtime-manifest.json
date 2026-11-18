@@ -1,6 +1,6 @@
 {
-  "runtimeId": "1ec9ae73fc99df63",
-  "runtimeSha256": "1ec9ae73fc99df638131bf45d3d718b61d8db7cc19d5583a836c626f85b816b9",
+  "runtimeId": "dbea4c40fc2e3e89",
+  "runtimeSha256": "dbea4c40fc2e3e89e986d728ba6df35deaf0d1cd5e4dd751aaae94f18d6b42c0",
   "files": [
     {
       "path": ".nojekyll",
@@ -565,7 +565,7 @@
     {
       "path": "index.html",
       "bytes": 14330,
-      "sha256": "b09ba18e70b8d4daab3aea4ab3b3500f75b7f4ca73c8844f8dd1ff52e9ead506"
+      "sha256": "34306d73a1df9767e7b5962b4d8da207eff0db5464ba0a2b20598822848b71e8"
     },
     {
       "path": "manifest.webmanifest",
@@ -588,9 +588,9 @@
       "sha256": "7db8c23d3d071f10af27f69428fb3f40deb5eeb8a332946192a66dc1e22e73e4"
     },
     {
-      "path": "src/chunks/playable_browser-3FAYAMMO.js",
-      "bytes": 12353853,
-      "sha256": "2d93d2b7ca8b61b39ce41360c634e2c9b19c21ee9dab4e7a1529a58c13f91f7b"
+      "path": "src/chunks/playable_browser-KILYHUOR.js",
+      "bytes": 12386352,
+      "sha256": "94677476efe2d2f8ff99ae96757e7fcb47f9a4cc4dfc34434058603deca2c7b1"
     },
     {
       "path": "src/chunks/world_browser-Y2DNOHK5.js",
@@ -610,7 +610,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "7b087c2e6a8f89d36bb1f34db2421d8b1ecf576f57cdc8812d29b786cd18a3c7"
+      "sha256": "886f5376ac302748fb29ce01e51e8328eb19f9e2af5b457d1ef41fef80d008e9"
     },
     {
       "path": "world-maker-worker.js",
@@ -619,8 +619,8 @@
     },
     {
       "path": "world.css",
-      "bytes": 269972,
-      "sha256": "22b5e880abbf103d57e707ac6f7c994c3a712d577a9271598f3de3d11dcba6a6"
+      "bytes": 270670,
+      "sha256": "f253a4367665c37b8935ccee8196133be9363ba9e47ea7c7fc5603f0f7b868f0"
     }
   ]
 }

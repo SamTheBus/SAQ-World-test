@@ -10870,10 +10870,10 @@ function squareMouths(c, p, streets, paved = false, biome) {
       let k = j;
       while (k + st >= 0 && k + st < P28.length && Math.hypot(P28[k][0] - P28[j][0], P28[k][1] - P28[j][1]) < 48) k += st;
       if (k === j) continue;
-      const O15 = P28[j], Q = P28[k], L0 = Math.hypot(O15[0] - Q[0], O15[1] - Q[1]) || 1;
-      let ux = (O15[0] - Q[0]) / L0, uy = (O15[1] - Q[1]) / L0, ex = null, ey = null;
+      const O16 = P28[j], Q = P28[k], L0 = Math.hypot(O16[0] - Q[0], O16[1] - Q[1]) || 1;
+      let ux = (O16[0] - Q[0]) / L0, uy = (O16[1] - Q[1]) / L0, ex = null, ey = null;
       for (let t = 0; t < 240; t++) {
-        const a = O15[0] + ux * t, b = O15[1] + uy * t;
+        const a = O16[0] + ux * t, b = O16[1] + uy * t;
         if (inside6(a, b)) {
           ex = a;
           ey = b;
@@ -11975,8 +11975,8 @@ function logFill(c, x, y, w, h, col2, r, ends = true) {
     }
   }
 }
-function wallFill(c, O15, x, y, w, h, r, ends = true) {
-  if (O15.walls === "log") logFill(c, x, y, w, h, LOGC, r, ends);
+function wallFill(c, O16, x, y, w, h, r, ends = true) {
+  if (O16.walls === "log") logFill(c, x, y, w, h, LOGC, r, ends);
   else {
     c.fillStyle = PLAST;
     c.fillRect(x, y, w, h);
@@ -11984,7 +11984,7 @@ function wallFill(c, O15, x, y, w, h, r, ends = true) {
     for (let q2 = x; q2 <= x + w; q2 += 52) c.fillRect(q2 - 3, y, 6, h);
   }
 }
-var wallCol = (O15) => O15.walls === "log" ? LOGC : PLAST;
+var wallCol = (O16) => O16.walls === "log" ? LOGC : PLAST;
 function snowLip(c, x0, x1, y, r, th = 8) {
   const p = new Path2D();
   p.moveTo(x0, y - th + 2);
@@ -12094,10 +12094,10 @@ function snowThatch(c, x0, x1, eave, ridge4, r) {
     c.fillRect(x - 1.2, yy + 1, 1, Lc * 0.5);
   }
 }
-function dormer(c, dx, dy, r, O15) {
+function dormer(c, dx, dy, r, O16) {
   const w = 40, f = rect4(dx - w / 2 + 4, dy + 2, w - 8, 20);
-  prop2(c, [[f, wallCol(O15)]], 1.4);
-  clip3(c, f, () => wallFill(c, O15, dx - w / 2 + 4, dy + 2, w - 8, 20, r, false));
+  prop2(c, [[f, wallCol(O16)]], 1.4);
+  clip3(c, f, () => wallFill(c, O16, dx - w / 2 + 4, dy + 2, w - 8, 20, r, false));
   win(c, dx - 8, dy + 6, 16, 13, true, { panes: 2 });
   const rf = poly3([[dx - w / 2 - 4, dy + 6], [dx, dy - 16], [dx + w / 2 + 4, dy + 6]]);
   prop2(c, [[rf, SNOW2]], 1.6);
@@ -12139,8 +12139,8 @@ function porch(c, x0, x1, top, G5, posts, r) {
   drift(c, x1 + 6, G5 + 12, 22, 6);
   return beam6;
 }
-function sigil(c, tx, ty, s, O15) {
-  if (O15.sign === "mug") {
+function sigil(c, tx, ty, s, O16) {
+  if (O16.sign === "mug") {
     prop2(c, [[rr2(tx - 7 * s, ty, 14 * s, 14 * s, 2.4), "#9a6a3e"]], 1);
     c.strokeStyle = OL15;
     c.lineWidth = 1.6;
@@ -12177,13 +12177,13 @@ function sigil(c, tx, ty, s, O15) {
     c.fill();
   }
 }
-function signBoard(c, x, y, w, h, cr, O15) {
+function signBoard(c, x, y, w, h, cr, O16) {
   prop2(c, [[rr2(x - w / 2, y, w, h, 4), cr]], 1.6);
   c.strokeStyle = "#e0b84e";
   c.lineWidth = 1.6;
   c.strokeRect(x - w / 2 + 3.5, y + 3.5, w - 7, h - 7);
   const s = h / 32;
-  sigil(c, x - 2 * s, y + h * (O15.sign === "mug" ? 0.42 : 0.36), s, O15);
+  sigil(c, x - 2 * s, y + h * (O16.sign === "mug" ? 0.42 : 0.36), s, O16);
   for (const k of [-1, 1]) {
     c.fillStyle = "#e0b84e";
     c.beginPath();
@@ -12196,7 +12196,7 @@ function signBoard(c, x, y, w, h, cr, O15) {
     prop2(c, [[poly3([[ix - 2, y + h], [ix + 2, y + h], [ix + 0.3, y + h + L]]), ICE]], 0.6);
   }
 }
-function signPost(c, px7, py, cr, dir, H8, O15) {
+function signPost(c, px7, py, cr, dir, H8, O16) {
   shadow11(c, px7 + 3, py + 1, 9, 3);
   prop2(c, [[rect4(px7 - 4, py - H8, 8, H8), WOOD5]], 1.3);
   c.fillStyle = tone6(WOOD5, 0.2);
@@ -12213,19 +12213,19 @@ function signPost(c, px7, py, cr, dir, H8, O15) {
   c.stroke();
   const sx = px7 + dir * 30;
   for (const k of [-12, 12]) line3(c, [[sx + k, py - H8 + 10], [sx + k, py - H8 + 18]], OL15, 1.2);
-  signBoard(c, sx, py - H8 + 18, 40, 34, cr, O15);
+  signBoard(c, sx, py - H8 + 18, 40, 34, cr, O16);
   drift(c, px7, py + 1, 24, 5);
 }
-function frontInn(c, b, size, r, cr, O15) {
+function frontInn(c, b, size, r, cr, O16) {
   const X = b.x * T12, W21 = b.w * T12, G5 = (b.y + b.h) * T12, Y = b.y * T12, cx = X + W21 / 2, big = size === "city" || size === "capital";
   if (size === "village") {
     const x02 = X + 22, x12 = X + W21 - 22, eave2 = G5 - 82, ridge5 = Y + 72;
     chimney(c, x12 - 74, ridge5 + 16, 34, r);
     const wl = rect4(x02, eave2, x12 - x02, G5 - eave2);
-    prop2(c, [[wl, wallCol(O15)]], 2.4);
+    prop2(c, [[wl, wallCol(O16)]], 2.4);
     clip3(c, wl, () => {
-      wallFill(c, O15, x02, eave2, x12 - x02, G5 - eave2 - 14, r);
-      if (O15.walls !== "log") {
+      wallFill(c, O16, x02, eave2, x12 - x02, G5 - eave2 - 14, r);
+      if (O16.walls !== "log") {
         const bays = Math.round((x12 - x02) / 48), bw = (x12 - x02) / bays;
         c.fillStyle = DARK3;
         c.fillRect(x02, eave2 + 8, x12 - x02, 6);
@@ -12269,7 +12269,7 @@ function frontInn(c, b, size, r, cr, O15) {
       }
     }
     snowThatch(c, x02, x12, eave2, ridge5, r);
-    dormer(c, cx + 46, eave2 - 46, r, O15);
+    dormer(c, cx + 46, eave2 - 46, r, O16);
     {
       const hd = poly3([[cx - 32, G5 - 54], [cx, G5 - 76], [cx + 32, G5 - 54]]);
       prop2(c, [[hd, SHING]], 1.6);
@@ -12297,8 +12297,8 @@ function frontInn(c, b, size, r, cr, O15) {
   for (const dx of [x0 + 92, x1 - 92]) {
     const dy = eave - 56;
     const f = poly3([[dx - 18, dy + 30], [dx - 18, dy + 4], [dx, dy - 10], [dx + 18, dy + 4], [dx + 18, dy + 30]]);
-    prop2(c, [[f, wallCol(O15)]], 1.2);
-    clip3(c, f, () => wallFill(c, O15, dx - 18, dy - 10, 36, 40, r, false));
+    prop2(c, [[f, wallCol(O16)]], 1.2);
+    clip3(c, f, () => wallFill(c, O16, dx - 18, dy - 10, 36, 40, r, false));
     prop2(c, [[poly3([[dx - 24, dy + 7], [dx, dy - 16], [dx + 24, dy + 7]]), SNOW2]], 1.3);
     win(c, dx - 8, dy + 8, 16, 16, false, { panes: 2 });
   }
@@ -12309,13 +12309,13 @@ function frontInn(c, b, size, r, cr, O15) {
   c.lineWidth = 2.2;
   c.stroke(gl);
   const gf = poly3([[cx - gw / 2, eave + 2], [cx, eave - GH + 6], [cx + gw / 2, eave + 2]]);
-  prop2(c, [[gf, wallCol(O15)]], 2);
+  prop2(c, [[gf, wallCol(O16)]], 2);
   clip3(c, gf, () => {
-    wallFill(c, O15, cx - gw / 2, eave - GH, gw, GH + 4, r, false);
+    wallFill(c, O16, cx - gw / 2, eave - GH, gw, GH + 4, r, false);
     c.fillStyle = DARK3;
     c.fillRect(cx - gw / 2, eave - 4, gw, 5);
     c.fillRect(cx - 46, eave - 60, 92, 5);
-    if (O15.walls !== "log") {
+    if (O16.walls !== "log") {
       c.fillRect(cx - 2.5, eave - GH, 5, GH - 58);
       c.strokeStyle = DARK3;
       c.lineWidth = 5;
@@ -12333,9 +12333,9 @@ function frontInn(c, b, size, r, cr, O15) {
   snowCap(c, cx - 4, eave - GH - 10, 8, 3);
   win(c, cx - 9, eave - 84, 18, 16, false, { panes: 2 });
   const uf = rect4(x0, eave, x1 - x0, gEave - eave);
-  prop2(c, [[uf, wallCol(O15)]], 2.4);
+  prop2(c, [[uf, wallCol(O16)]], 2.4);
   clip3(c, uf, () => {
-    wallFill(c, O15, x0, eave, x1 - x0, gEave - eave, r);
+    wallFill(c, O16, x0, eave, x1 - x0, gEave - eave, r);
     c.fillStyle = DARK3;
     c.fillRect(x0, eave, x1 - x0, 6);
     c.fillRect(x0, gEave - 7, x1 - x0, 7);
@@ -12349,7 +12349,7 @@ function frontInn(c, b, size, r, cr, O15) {
     win(c, wx, eave + 16, 36, 40, k === 1 || k === n - 1, { shutters: SHUT, sill: true });
   }
   for (const k of [-16, 16]) line3(c, [[cx + k, eave - 56], [cx + k, eave - 46]], OL15, 1.4);
-  signBoard(c, cx, eave - 46, 74, 40, cr, O15);
+  signBoard(c, cx, eave - 46, 74, 40, cr, O16);
   const gfl = rect4(x0, gEave, x1 - x0, G5 - gEave);
   prop2(c, [[gfl, STONE3]], 2.4);
   clip3(c, gfl, () => {
@@ -12473,7 +12473,7 @@ function frontInn(c, b, size, r, cr, O15) {
   barrel2(c, px0 + 4, G5 + 12);
   keg(c, px1 - 20, G5 + 12);
 }
-function backInn(c, b, size, r, cr, O15) {
+function backInn(c, b, size, r, cr, O16) {
   const X = b.x * T12, W21 = b.w * T12, G5 = (b.y + b.h) * T12, Y = b.y * T12, cx = X + W21 / 2;
   const x0 = X + 16, x1 = X + W21 - 16, two = size !== "village", gEave = G5 - 86, eave = two ? G5 - 168 : G5 - 84, ridge4 = Y + (two ? 40 : 54);
   if (two) {
@@ -12485,9 +12485,9 @@ function backInn(c, b, size, r, cr, O15) {
   }
   if (two) {
     const uf = rect4(x0, eave, x1 - x0, gEave - eave);
-    prop2(c, [[uf, wallCol(O15)]], 2.4);
+    prop2(c, [[uf, wallCol(O16)]], 2.4);
     clip3(c, uf, () => {
-      wallFill(c, O15, x0, eave, x1 - x0, gEave - eave, r);
+      wallFill(c, O16, x0, eave, x1 - x0, gEave - eave, r);
       c.fillStyle = DARK3;
       c.fillRect(x0, eave, x1 - x0, 6);
       c.fillRect(x0, gEave - 7, x1 - x0, 7);
@@ -12506,9 +12506,9 @@ function backInn(c, b, size, r, cr, O15) {
       c.fillRect(x0, G5 - 12, x1 - x0, 12);
     });
   } else {
-    prop2(c, [[gfl, wallCol(O15)]], 2.4);
+    prop2(c, [[gfl, wallCol(O16)]], 2.4);
     clip3(c, gfl, () => {
-      wallFill(c, O15, x0, top, x1 - x0, G5 - top - 14, r);
+      wallFill(c, O16, x0, top, x1 - x0, G5 - top - 14, r);
       c.fillStyle = STONE3;
       c.fillRect(x0, G5 - 14, x1 - x0, 14);
       c.fillStyle = tone6(STONE3, -0.2);
@@ -12563,16 +12563,16 @@ function backInn(c, b, size, r, cr, O15) {
   drift(c, cx, G5 + 3, 40, 5);
 }
 function innItemsSnow(b, size, slot, crest, opt = {}) {
-  const O15 = { ...SNOW_INN_OPT, ...opt }, r = rng3(hash3(b.x, b.y, 71)), G5 = (b.y + b.h) * T12, cr = crest?.banner ?? "#7a2a34", items3 = [{ y: G5 + (b.doorSide === "north" ? 0 : 14), draw: (c) => (b.doorSide === "north" ? backInn : frontInn)(c, b, size, r, cr, O15) }];
+  const O16 = { ...SNOW_INN_OPT, ...opt }, r = rng3(hash3(b.x, b.y, 71)), G5 = (b.y + b.h) * T12, cr = crest?.banner ?? "#7a2a34", items3 = [{ y: G5 + (b.doorSide === "north" ? 0 : 14), draw: (c) => (b.doorSide === "north" ? backInn : frontInn)(c, b, size, r, cr, O16) }];
   if (b.doorSide === "north") {
     const px7 = (b.porch.x + 3) * T12 + 24, py = b.y * T12 - 6;
     items3.push({ y: py, draw: (c) => {
-      signPost(c, px7, py, cr, -1, 118, O15);
+      signPost(c, px7, py, cr, -1, 118, O16);
       lantern2(c, px7 + 10, py - 70);
     } });
   } else if (size === "village") {
     const px7 = b.x * T12 + 10, py = G5 + 22;
-    items3.push({ y: py, draw: (c) => signPost(c, px7, py, cr, -1, 100, O15) });
+    items3.push({ y: py, draw: (c) => signPost(c, px7, py, cr, -1, 100, O16) });
   }
   return items3;
 }
@@ -12605,7 +12605,7 @@ function innGroundSnow(c, E9, opt = {}) {
   });
 }
 function innGardenItemsSnow(E9, b, size = "town", opt = {}) {
-  const O15 = { ...SNOW_INN_OPT, ...opt }, x = E9.x * T12, y = E9.y * T12, w = E9.w * T12, h = E9.h * T12, items3 = [], north = b.doorSide === "north", r = rng3(hash3(x, y, 75));
+  const O16 = { ...SNOW_INN_OPT, ...opt }, x = E9.x * T12, y = E9.y * T12, w = E9.w * T12, h = E9.h * T12, items3 = [], north = b.doorSide === "north", r = rng3(hash3(x, y, 75));
   const rails = (x0, y0, x1, y1) => {
     const L = Math.hypot(x1 - x0, y1 - y0), hz = Math.abs(x1 - x0) > Math.abs(y1 - y0);
     items3.push({ y: Math.max(y0, y1) + (hz ? 0 : 2), draw: (c) => {
@@ -12640,7 +12640,7 @@ function innGardenItemsSnow(E9, b, size = "town", opt = {}) {
     rails(x + 8, y + 14, x + w - 10, y + 14);
   }
   const py0 = y + (north ? h * 0.52 : h * 0.2), py1 = py0 + 86, px0 = x + 26, px1 = x + w - 34, Hh = 66;
-  if (O15.yard === "winter") {
+  if (O16.yard === "winter") {
     items3.push({ y: py0, draw: (c) => {
       for (const a of [px0, px1]) prop2(c, [[rr2(a - 3.5, py0 - Hh, 7, Hh, 2), "#8a6040"]], 1.1);
       const wall5 = rect4(px0, py0 - Hh + 6, px1 - px0, Hh - 14);
@@ -15398,10 +15398,10 @@ function chapel2(c, b, biome) {
   if (!B()) for (const kx of [nx - 12, nx + nw - 6]) prop2(c, [[rect4(kx, ft - 2, 18, 12), tone8(S18, 0.12)]], 1.1);
   if (!B()) for (const bx of [nx, nx + nw]) buttress2(c, bx, G5, ft + 24, 14, S18);
   else for (const bx of [nx, nx + nw]) post2(c, bx, ft - 2, G5);
-  const SW2 = B() ? WOODF : S18;
-  rose2(c, cx, ft - 26, 17, SW2);
-  lancet2(c, cx - 54, G5 - 94, 14, 46, SW2, 1);
-  lancet2(c, cx + 40, G5 - 94, 14, 46, SW2, 2);
+  const SW3 = B() ? WOODF : S18;
+  rose2(c, cx, ft - 26, 17, SW3);
+  lancet2(c, cx - 54, G5 - 94, 14, 46, SW3, 1);
+  lancet2(c, cx + 40, G5 - 94, 14, 46, SW3, 2);
   if (B()) {
     prop2(c, [[poly3([[cx - 30, G5 - 84], [cx, G5 - 108], [cx + 30, G5 - 84], [cx + 26, G5 - 80], [cx, G5 - 100], [cx - 26, G5 - 80]]), BARGE2]], 1.2);
     door2(c, cx, G5 - 12, 40, 62, WOODF, 2);
@@ -30111,8 +30111,8 @@ function ivy8(c, x, y0, y1, r) {
     }
   }
 }
-function towerBody(c, b, r, O15) {
-  const S18 = S0, roof = ROOF4, snowy = O15.roof === "snow", cx = (b.x + b.w / 2) * T34, G5 = (b.y + b.h) * T34 + 8, R14 = 58, ry = 20, H8 = 176, top = G5 - H8, JR = 68, jt = top - 50, sd = hash3(b.x, b.y, 7);
+function towerBody(c, b, r, O16) {
+  const S18 = S0, roof = ROOF4, snowy = O16.roof === "snow", cx = (b.x + b.w / 2) * T34, G5 = (b.y + b.h) * T34 + 8, R14 = 58, ry = 20, H8 = 176, top = G5 - H8, JR = 68, jt = top - 50, sd = hash3(b.x, b.y, 7);
   shadow23(c, cx + 12, G5 + ry, R14 + 26, 18);
   {
     const tx = cx + R14 + 12, tR = 20, tt = top + 98, tb = G5 - 4;
@@ -30128,7 +30128,7 @@ function towerBody(c, b, r, O15) {
   cyl(c, cx, top, G5 - 18, R14, ry, S18, r);
   ring(c, cx, top + 70, R14 + 3, ry + 1, S18, 6);
   rimSnow(c, cx, top + 64, R14 + 3, ry + 1, sd ^ 4, { w: 4, max: 7 });
-  (O15.plant === "winter" ? frostVine : ivy8)(c, cx - R14 + 12, top + 40, G5 - 24, r);
+  (O16.plant === "winter" ? frostVine : ivy8)(c, cx - R14 + 12, top + 40, G5 - 24, r);
   cwin(c, cx, R14, ry, -0.45, top + 92, 30, true);
   cwin(c, cx, R14, ry, 0.5, top + 26, 26, false);
   cwin(c, cx, R14, ry, 0.15, top + 108, 24, false);
@@ -30256,9 +30256,9 @@ function towerBody(c, b, r, O15) {
   }
 }
 function towerItemsSnow(b, opt = {}) {
-  const O15 = { ...SNOW_TOWER_OPT, ...opt }, r = rng3(hash3(b.x, b.y, 101)), cx = (b.x + b.w / 2) * T34, G5 = (b.y + b.h) * T34 + 8, items3 = [{ y: G5 + 12, draw: (c) => towerBody(c, b, r, O15) }];
+  const O16 = { ...SNOW_TOWER_OPT, ...opt }, r = rng3(hash3(b.x, b.y, 101)), cx = (b.x + b.w / 2) * T34, G5 = (b.y + b.h) * T34 + 8, items3 = [{ y: G5 + 12, draw: (c) => towerBody(c, b, r, O16) }];
   for (const [k, dx] of [[0, -44], [1, 44]]) items3.push({ y: G5 + 24, draw: (c) => {
-    if (O15.plant === "winter") firTub(c, cx + dx, G5 + 24, k);
+    if (O16.plant === "winter") firTub(c, cx + dx, G5 + 24, k);
     else {
       lavender(c, cx + dx, G5 + 24);
       snowCap(c, cx + dx - 9, G5 + 10, 18, 2.6);
@@ -30267,8 +30267,8 @@ function towerItemsSnow(b, opt = {}) {
   return items3;
 }
 function runeCourtGroundSnow(c, E9, opt = {}) {
-  const O15 = { ...SNOW_TOWER_OPT, ...opt }, cx = (E9.x + E9.w / 2) * T34, cy2 = (E9.y + E9.h / 2) * T34, rx = E9.w * T34 / 2 - 6, ry = E9.h * T34 / 2 - 4, S18 = S0, r = rng3(hash3(E9.x, E9.y, 103));
-  if (O15.court === "frost") {
+  const O16 = { ...SNOW_TOWER_OPT, ...opt }, cx = (E9.x + E9.w / 2) * T34, cy2 = (E9.y + E9.h / 2) * T34, rx = E9.w * T34 / 2 - 6, ry = E9.h * T34 / 2 - 4, S18 = S0, r = rng3(hash3(E9.x, E9.y, 103));
+  if (O16.court === "frost") {
     prop2(c, [[ell3(cx, cy2, rx, ry), SNOW2]], 1.8);
     c.strokeStyle = SNOW_SHADE;
     c.lineWidth = 3;
@@ -30732,8 +30732,8 @@ function cone2(c, cx, base3, R14, ry, H8, col2, r, reed2, seed2) {
   c.arc(cx - 2, ty - 35, 2, 0, TAU44);
   c.fill();
 }
-function towerBody2(c, b, r, O15) {
-  const S18 = S02, roof = ROOF5, reed2 = O15.roof === "reed", marsh3 = O15.plant === "marsh", cx = (b.x + b.w / 2) * T35, G5 = (b.y + b.h) * T35 + 8, R14 = 58, ry = 20, H8 = 176, top = G5 - H8, JR = 68, jt = top - 50, sd = hash3(b.x, b.y, 7);
+function towerBody2(c, b, r, O16) {
+  const S18 = S02, roof = ROOF5, reed2 = O16.roof === "reed", marsh3 = O16.plant === "marsh", cx = (b.x + b.w / 2) * T35, G5 = (b.y + b.h) * T35 + 8, R14 = 58, ry = 20, H8 = 176, top = G5 - H8, JR = 68, jt = top - 50, sd = hash3(b.x, b.y, 7);
   shadow24(c, cx + 12, G5 + ry, R14 + 26, 18);
   {
     const tx = cx + R14 + 12, tR = 20, tt = top + 98, tb = G5 - 4;
@@ -30866,14 +30866,14 @@ function towerBody2(c, b, r, O15) {
   }
 }
 function towerItemsWet(b, opt = {}) {
-  const O15 = { ...WET_TOWER_OPT, ...opt }, r = rng3(hash3(b.x, b.y, 101)), cx = (b.x + b.w / 2) * T35, G5 = (b.y + b.h) * T35 + 8, items3 = [{ y: G5 + 12, draw: (c) => towerBody2(c, b, r, O15) }];
-  for (const dx of [-44, 44]) items3.push({ y: G5 + 24, draw: (c) => O15.plant === "marsh" ? irisPot(c, cx + dx, G5 + 24) : lavender(c, cx + dx, G5 + 24) });
+  const O16 = { ...WET_TOWER_OPT, ...opt }, r = rng3(hash3(b.x, b.y, 101)), cx = (b.x + b.w / 2) * T35, G5 = (b.y + b.h) * T35 + 8, items3 = [{ y: G5 + 12, draw: (c) => towerBody2(c, b, r, O16) }];
+  for (const dx of [-44, 44]) items3.push({ y: G5 + 24, draw: (c) => O16.plant === "marsh" ? irisPot(c, cx + dx, G5 + 24) : lavender(c, cx + dx, G5 + 24) });
   for (const dx of [-78, 74]) items3.push({ y: G5 + 14, draw: (c) => reedClump(c, cx + dx, G5 + 14, hash3(b.x, dx, 3), 4) });
   return items3;
 }
 function runeCourtGroundWet(c, E9, opt = {}) {
-  const O15 = { ...WET_TOWER_OPT, ...opt }, cx = (E9.x + E9.w / 2) * T35, cy2 = (E9.y + E9.h / 2) * T35, rx = E9.w * T35 / 2 - 6, ry = E9.h * T35 / 2 - 4, S18 = S02, r = rng3(hash3(E9.x, E9.y, 103));
-  if (O15.court === "pool") {
+  const O16 = { ...WET_TOWER_OPT, ...opt }, cx = (E9.x + E9.w / 2) * T35, cy2 = (E9.y + E9.h / 2) * T35, rx = E9.w * T35 / 2 - 6, ry = E9.h * T35 / 2 - 4, S18 = S02, r = rng3(hash3(E9.x, E9.y, 103));
+  if (O16.court === "pool") {
     prop2(c, [[ell3(cx, cy2, rx, ry), "#6f8a3a"]], 1.8);
     const w = ell3(cx, cy2, rx - 4, ry - 3);
     c.fillStyle = "#2f6f68";
@@ -30997,7 +30997,7 @@ function runeCourtGroundWet(c, E9, opt = {}) {
   c.fill();
 }
 function runeCourtItemsWet(E9, opt = {}) {
-  const O15 = { ...WET_TOWER_OPT, ...opt }, cx = (E9.x + E9.w / 2) * T35, cy2 = (E9.y + E9.h / 2) * T35, rx = E9.w * T35 / 2 - 6, ry = E9.h * T35 / 2 - 4, S18 = S02, items3 = [];
+  const O16 = { ...WET_TOWER_OPT, ...opt }, cx = (E9.x + E9.w / 2) * T35, cy2 = (E9.y + E9.h / 2) * T35, rx = E9.w * T35 / 2 - 6, ry = E9.h * T35 / 2 - 4, S18 = S02, items3 = [];
   for (let k = 0; k < 6; k++) {
     const a = -Math.PI / 2 + k * TAU44 / 6 + 0.26;
     if (Math.cos(a) > 0.5 && Math.sin(a) < 0.5) continue;
@@ -31034,7 +31034,7 @@ function runeCourtItemsWet(E9, opt = {}) {
       c.lineTo(sx + 3, sy - 12);
       c.stroke();
       mossCap(c, sx - 7, sy - 32, 14, 2.8);
-      if (O15.court === "pool" && k % 2 === 0) reedClump(c, sx + 12, sy + 2, hash3(sx, sy, 1), 3);
+      if (O16.court === "pool" && k % 2 === 0) reedClump(c, sx + 12, sy + 2, hash3(sx, sy, 1), 3);
     } });
   }
   return items3;
@@ -31352,8 +31352,8 @@ function rowan2(c, x, G5, seed2) {
     }
   }
 }
-function towerBody3(c, b, r, O15) {
-  const harl = O15.walls === "harl", hill = O15.plant === "hill", S18 = harl ? HARL : STONE7, cx = (b.x + b.w / 2) * T36, G5 = (b.y + b.h) * T36 + 8, R14 = 58, ry = 20, H8 = 176, top = G5 - H8, JR = 68, jt = top - 50, sd = hash3(b.x, b.y, 7);
+function towerBody3(c, b, r, O16) {
+  const harl = O16.walls === "harl", hill = O16.plant === "hill", S18 = harl ? HARL : STONE7, cx = (b.x + b.w / 2) * T36, G5 = (b.y + b.h) * T36 + 8, R14 = 58, ry = 20, H8 = 176, top = G5 - H8, JR = 68, jt = top - 50, sd = hash3(b.x, b.y, 7);
   shadow25(c, cx + 12, G5 + ry, R14 + 26, 18);
   {
     const tx = cx + R14 + 12, tR = 20, tt = top + 98, tb = G5 - 4;
@@ -31474,15 +31474,15 @@ function towerBody3(c, b, r, O15) {
   }
 }
 function towerItemsUp(b, opt = {}) {
-  const O15 = { ...UTOWER, ...opt }, r = rng3(hash3(b.x, b.y, 101)), cx = (b.x + b.w / 2) * T36, G5 = (b.y + b.h) * T36 + 8, items3 = [{ y: G5 + 12, draw: (c) => towerBody3(c, b, r, O15) }];
-  for (const dx of [-44, 44]) items3.push({ y: G5 + 24, draw: (c) => O15.plant === "hill" ? heatherTrough(c, cx + dx, G5 + 24, dx > 0 ? 1 : 0) : lavender(c, cx + dx, G5 + 24) });
+  const O16 = { ...UTOWER, ...opt }, r = rng3(hash3(b.x, b.y, 101)), cx = (b.x + b.w / 2) * T36, G5 = (b.y + b.h) * T36 + 8, items3 = [{ y: G5 + 12, draw: (c) => towerBody3(c, b, r, O16) }];
+  for (const dx of [-44, 44]) items3.push({ y: G5 + 24, draw: (c) => O16.plant === "hill" ? heatherTrough(c, cx + dx, G5 + 24, dx > 0 ? 1 : 0) : lavender(c, cx + dx, G5 + 24) });
   for (const [dx, w] of [[-74, 16], [70, 18], [86, 12]]) items3.push({ y: G5 + 12, draw: (c) => heather(c, cx + dx, G5 + 12, hash3(b.x, dx, 3), w) });
-  if (O15.plant === "hill") items3.push({ y: G5 + 16, draw: (c) => rowan2(c, cx - 88, G5 + 16, hash3(b.x, b.y, 5)) });
+  if (O16.plant === "hill") items3.push({ y: G5 + 16, draw: (c) => rowan2(c, cx - 88, G5 + 16, hash3(b.x, b.y, 5)) });
   return items3;
 }
 function runeCourtGroundUp(c, E9, opt = {}) {
-  const O15 = { ...UTOWER, ...opt }, cx = (E9.x + E9.w / 2) * T36, cy2 = (E9.y + E9.h / 2) * T36, rx = E9.w * T36 / 2 - 6, ry = E9.h * T36 / 2 - 4, S18 = GRANITE, r = rng3(hash3(E9.x, E9.y, 103));
-  if (O15.court === "stones") {
+  const O16 = { ...UTOWER, ...opt }, cx = (E9.x + E9.w / 2) * T36, cy2 = (E9.y + E9.h / 2) * T36, rx = E9.w * T36 / 2 - 6, ry = E9.h * T36 / 2 - 4, S18 = GRANITE, r = rng3(hash3(E9.x, E9.y, 103));
+  if (O16.court === "stones") {
     prop2(c, [[ell3(cx, cy2, rx, ry), "#4a5f34"]], 1.8);
     for (let k = 0; k < 34; k++) {
       const a = k / 34 * TAU45 + r() * 0.06, x = cx + Math.cos(a) * (rx - 5), y = cy2 + Math.sin(a) * (ry - 4) + 4;
@@ -31540,7 +31540,7 @@ function runeCourtGroundUp(c, E9, opt = {}) {
       const a = r() * TAU45, q2 = r();
       c.fillRect(cx + Math.cos(a) * (rx - 18) * q2 - 4, cy2 + Math.sin(a) * (ry - 15) * q2 - 2, 8, 4);
     }
-    if (O15.court === "stones") for (let i = 0; i < 14; i++) {
+    if (O16.court === "stones") for (let i = 0; i < 14; i++) {
       const a = r() * TAU45, q2 = 0.45 + r() * 0.55;
       lichenDots2(c, cx + Math.cos(a) * (rx - 18) * q2 - 3, cy2 + Math.sin(a) * (ry - 15) * q2 - 1, 6, 2, 2, r);
     }
@@ -31585,12 +31585,12 @@ function runeCourtGroundUp(c, E9, opt = {}) {
   c.fill();
 }
 function runeCourtItemsUp(E9, opt = {}) {
-  const O15 = { ...UTOWER, ...opt }, cx = (E9.x + E9.w / 2) * T36, cy2 = (E9.y + E9.h / 2) * T36, rx = E9.w * T36 / 2 - 6, ry = E9.h * T36 / 2 - 4, items3 = [];
+  const O16 = { ...UTOWER, ...opt }, cx = (E9.x + E9.w / 2) * T36, cy2 = (E9.y + E9.h / 2) * T36, rx = E9.w * T36 / 2 - 6, ry = E9.h * T36 / 2 - 4, items3 = [];
   for (let k = 0; k < 6; k++) {
     const a = -Math.PI / 2 + k * TAU45 / 6 + 0.26;
     if (Math.cos(a) > 0.5 && Math.sin(a) < 0.5) continue;
     const sx = cx + Math.cos(a) * (rx - 14), sy = cy2 + Math.sin(a) * (ry - 11);
-    if (O15.court === "stones") items3.push({ y: sy, draw: (c) => {
+    if (O16.court === "stones") items3.push({ y: sy, draw: (c) => {
       const r = rng3(hash3(sx, sy, 11)), h = 44 + r() * 8, tl = (r() - 0.5) * 8, S18 = tone32(GRANITE, -0.12);
       shadow25(c, sx + 4, sy + 1, 11, 3.4);
       const p = new Path2D();
@@ -31989,8 +31989,8 @@ function orchidPot(c, x, y, k) {
     }
   }
 }
-function towerBody4(c, b, r, O15) {
-  const harl = O15.walls === "harl", hill = O15.plant === "hill", S18 = harl ? HARL2 : STONE8, cx = (b.x + b.w / 2) * T37, G5 = (b.y + b.h) * T37 + 8, R14 = 58, ry = 20, H8 = 176, top = G5 - H8, JR = 68, jt = top - 50, sd = hash3(b.x, b.y, 7);
+function towerBody4(c, b, r, O16) {
+  const harl = O16.walls === "harl", hill = O16.plant === "hill", S18 = harl ? HARL2 : STONE8, cx = (b.x + b.w / 2) * T37, G5 = (b.y + b.h) * T37 + 8, R14 = 58, ry = 20, H8 = 176, top = G5 - H8, JR = 68, jt = top - 50, sd = hash3(b.x, b.y, 7);
   shadow26(c, cx + 12, G5 + ry, R14 + 26, 18);
   {
     const tx = cx + R14 + 12, tR = 20, tt = top + 98, tb = G5 - 4;
@@ -32114,7 +32114,7 @@ function towerBody4(c, b, r, O15) {
   }
 }
 function towerItemsTrop(b, opt = {}) {
-  const O15 = { ...UTOWER2, ...opt }, r = rng3(hash3(b.x, b.y, 101)), cx = (b.x + b.w / 2) * T37, G5 = (b.y + b.h) * T37 + 8, items3 = [{ y: G5 + 12, draw: (c) => towerBody4(c, b, r, O15) }];
+  const O16 = { ...UTOWER2, ...opt }, r = rng3(hash3(b.x, b.y, 101)), cx = (b.x + b.w / 2) * T37, G5 = (b.y + b.h) * T37 + 8, items3 = [{ y: G5 + 12, draw: (c) => towerBody4(c, b, r, O16) }];
   for (const dx of [-44, 44]) items3.push({ y: G5 + 24, draw: (c) => orchidPot(c, cx + dx, G5 + 24, dx > 0 ? 1 : 0) });
   items3.push({ y: G5 + 12, draw: (c) => {
     const rr3 = rng3(hash3(b.x, b.y, 3));
@@ -32126,8 +32126,8 @@ function towerItemsTrop(b, opt = {}) {
   return items3;
 }
 function runeCourtGroundTrop(c, E9, opt = {}) {
-  const O15 = { ...UTOWER2, ...opt }, cx = (E9.x + E9.w / 2) * T37, cy2 = (E9.y + E9.h / 2) * T37, rx = E9.w * T37 / 2 - 6, ry = E9.h * T37 / 2 - 4, S18 = GRANITE2, r = rng3(hash3(E9.x, E9.y, 103));
-  if (O15.court === "stones") {
+  const O16 = { ...UTOWER2, ...opt }, cx = (E9.x + E9.w / 2) * T37, cy2 = (E9.y + E9.h / 2) * T37, rx = E9.w * T37 / 2 - 6, ry = E9.h * T37 / 2 - 4, S18 = GRANITE2, r = rng3(hash3(E9.x, E9.y, 103));
+  if (O16.court === "stones") {
     prop2(c, [[ell3(cx, cy2, rx, ry), "#3f7a3a"]], 1.8);
     for (let k = 0; k < 44; k++) {
       const a = k / 44 * TAU46 + r() * 0.05, x = cx + Math.cos(a) * (rx - 5), y = cy2 + Math.sin(a) * (ry - 4) + 2;
@@ -32252,7 +32252,7 @@ function runeCourtGroundTrop(c, E9, opt = {}) {
   c.fill();
 }
 function runeCourtItemsTrop(E9, opt = {}) {
-  const O15 = { ...UTOWER2, ...opt }, cx = (E9.x + E9.w / 2) * T37, cy2 = (E9.y + E9.h / 2) * T37, rx = E9.w * T37 / 2 - 6, ry = E9.h * T37 / 2 - 4, items3 = [];
+  const O16 = { ...UTOWER2, ...opt }, cx = (E9.x + E9.w / 2) * T37, cy2 = (E9.y + E9.h / 2) * T37, rx = E9.w * T37 / 2 - 6, ry = E9.h * T37 / 2 - 4, items3 = [];
   for (let k = 0; k < 6; k++) {
     const a = -Math.PI / 2 + k * TAU46 / 6 + 0.26;
     if (Math.cos(a) > 0.5 && Math.sin(a) < 0.5) continue;
@@ -33069,8 +33069,8 @@ function rowan3(c, x, G5, seed2) {
     }
   }
 }
-function towerBody6(c, b, r, O15) {
-  const harl = O15.walls === "harl", hill = O15.plant === "hill", S18 = harl ? HARL3 : STONE9, cx = (b.x + b.w / 2) * T39, G5 = (b.y + b.h) * T39 + 8, R14 = 58, ry = 20, H8 = 176, top = G5 - H8, JR = 68, jt = top - 50, sd = hash3(b.x, b.y, 7);
+function towerBody6(c, b, r, O16) {
+  const harl = O16.walls === "harl", hill = O16.plant === "hill", S18 = harl ? HARL3 : STONE9, cx = (b.x + b.w / 2) * T39, G5 = (b.y + b.h) * T39 + 8, R14 = 58, ry = 20, H8 = 176, top = G5 - H8, JR = 68, jt = top - 50, sd = hash3(b.x, b.y, 7);
   shadow28(c, cx + 12, G5 + ry, R14 + 26, 18);
   {
     const tx = cx + R14 + 12, tR = 20, tt = top + 98, tb = G5 - 4;
@@ -33191,15 +33191,15 @@ function towerBody6(c, b, r, O15) {
   }
 }
 function towerItemsVol(b, opt = {}) {
-  const O15 = { ...UTOWER3, ...opt }, r = rng3(hash3(b.x, b.y, 101)), cx = (b.x + b.w / 2) * T39, G5 = (b.y + b.h) * T39 + 8, items3 = [{ y: G5 + 12, draw: (c) => towerBody6(c, b, r, O15) }];
-  for (const dx of [-44, 44]) items3.push({ y: G5 + 24, draw: (c) => O15.plant === "hill" ? lilyTrough(c, cx + dx, G5 + 24, dx > 0 ? 1 : 0) : lavender(c, cx + dx, G5 + 24) });
+  const O16 = { ...UTOWER3, ...opt }, r = rng3(hash3(b.x, b.y, 101)), cx = (b.x + b.w / 2) * T39, G5 = (b.y + b.h) * T39 + 8, items3 = [{ y: G5 + 12, draw: (c) => towerBody6(c, b, r, O16) }];
+  for (const dx of [-44, 44]) items3.push({ y: G5 + 24, draw: (c) => O16.plant === "hill" ? lilyTrough(c, cx + dx, G5 + 24, dx > 0 ? 1 : 0) : lavender(c, cx + dx, G5 + 24) });
   for (const [dx, w] of [[-74, 16], [70, 18], [86, 12]]) items3.push({ y: G5 + 12, draw: (c) => heather3(c, cx + dx, G5 + 12, hash3(b.x, dx, 3), w) });
-  if (O15.plant === "hill") items3.push({ y: G5 + 16, draw: (c) => rowan3(c, cx - 88, G5 + 16, hash3(b.x, b.y, 5)) });
+  if (O16.plant === "hill") items3.push({ y: G5 + 16, draw: (c) => rowan3(c, cx - 88, G5 + 16, hash3(b.x, b.y, 5)) });
   return items3;
 }
 function runeCourtGroundVol(c, E9, opt = {}) {
-  const O15 = { ...UTOWER3, ...opt }, cx = (E9.x + E9.w / 2) * T39, cy2 = (E9.y + E9.h / 2) * T39, rx = E9.w * T39 / 2 - 6, ry = E9.h * T39 / 2 - 4, S18 = GRANITE3, r = rng3(hash3(E9.x, E9.y, 103));
-  if (O15.court === "stones") {
+  const O16 = { ...UTOWER3, ...opt }, cx = (E9.x + E9.w / 2) * T39, cy2 = (E9.y + E9.h / 2) * T39, rx = E9.w * T39 / 2 - 6, ry = E9.h * T39 / 2 - 4, S18 = GRANITE3, r = rng3(hash3(E9.x, E9.y, 103));
+  if (O16.court === "stones") {
     prop2(c, [[ell3(cx, cy2, rx, ry), "#3a3230"]], 1.8);
     for (let k = 0; k < 22; k++) {
       const a = k / 22 * TAU48 + r() * 0.06, x = cx + Math.cos(a) * (rx - 5), y = cy2 + Math.sin(a) * (ry - 4) + 4;
@@ -33257,7 +33257,7 @@ function runeCourtGroundVol(c, E9, opt = {}) {
       const a = r() * TAU48, q2 = r();
       c.fillRect(cx + Math.cos(a) * (rx - 18) * q2 - 4, cy2 + Math.sin(a) * (ry - 15) * q2 - 2, 8, 4);
     }
-    if (O15.court === "stones") for (let i = 0; i < 14; i++) {
+    if (O16.court === "stones") for (let i = 0; i < 14; i++) {
       const a = r() * TAU48, q2 = 0.45 + r() * 0.55;
       lichenDots4(c, cx + Math.cos(a) * (rx - 18) * q2 - 3, cy2 + Math.sin(a) * (ry - 15) * q2 - 1, 6, 2, 2, r);
     }
@@ -33302,12 +33302,12 @@ function runeCourtGroundVol(c, E9, opt = {}) {
   c.fill();
 }
 function runeCourtItemsVol(E9, opt = {}) {
-  const O15 = { ...UTOWER3, ...opt }, cx = (E9.x + E9.w / 2) * T39, cy2 = (E9.y + E9.h / 2) * T39, rx = E9.w * T39 / 2 - 6, ry = E9.h * T39 / 2 - 4, items3 = [];
+  const O16 = { ...UTOWER3, ...opt }, cx = (E9.x + E9.w / 2) * T39, cy2 = (E9.y + E9.h / 2) * T39, rx = E9.w * T39 / 2 - 6, ry = E9.h * T39 / 2 - 4, items3 = [];
   for (let k = 0; k < 6; k++) {
     const a = -Math.PI / 2 + k * TAU48 / 6 + 0.26;
     if (Math.cos(a) > 0.5 && Math.sin(a) < 0.5) continue;
     const sx = cx + Math.cos(a) * (rx - 14), sy = cy2 + Math.sin(a) * (ry - 11);
-    if (O15.court === "stones") items3.push({ y: sy, draw: (c) => {
+    if (O16.court === "stones") items3.push({ y: sy, draw: (c) => {
       const r = rng3(hash3(sx, sy, 11)), h = 40 + r() * 14, S18 = BASALT4;
       shadow28(c, sx + 4, sy + 1, 12, 3.6);
       const L = [[sx - 10, sy - 3], [sx - 10, sy - h - 3], [sx - 4, sy - h], [sx - 4, sy]], F7 = [[sx - 4, sy], [sx - 4, sy - h], [sx + 4, sy - h], [sx + 4, sy]], Rt = [[sx + 4, sy], [sx + 4, sy - h], [sx + 10, sy - h - 3], [sx + 10, sy - 3]];
@@ -48975,7 +48975,7 @@ function signS(c, x, y) {
   icicles2(c, x + 10, x + 42, y - 48, hash3(x, y, 9), 5);
   drift(c, x + 2, y + 1, 22, 5);
 }
-function leanBackS(c, E9, r, O15) {
+function leanBackS(c, E9, r, O16) {
   const x = E9.x * T67, y = E9.y * T67, w = E9.w * T67, eave = y + 30, floor = y + 112, hx2 = x + 22, hw = 92;
   const bw = rect4(x + 4, eave, w - 8, floor - eave);
   prop2(c, [[bw, LOGC3]], 1.8);
@@ -48985,7 +48985,7 @@ function leanBackS(c, E9, r, O15) {
     c.fillRect(x + 4, eave, w - 8, 10);
   });
   tools(c, x + w - 100, eave + 16);
-  const stone3 = O15.hearth === "stone", HC = stone3 ? STONE16 : BRICK5, ht = floor - 46, hb = rect4(hx2, ht, hw, 46);
+  const stone3 = O16.hearth === "stone", HC = stone3 ? STONE16 : BRICK5, ht = floor - 46, hb = rect4(hx2, ht, hw, 46);
   prop2(c, [[hb, HC]], 2);
   clip3(c, hb, () => stone3 ? fieldstone4(c, hx2, ht, hw, 46, STONE16, r) : bricks2(c, hx2, ht, hw, 46, BRICK5, r));
   prop2(c, [[rect4(hx2 - 4, ht - 6, hw + 8, 7), stone3 ? tone53(STONE16, 0.1) : tone53("#b4ada2", 0.08)]], 1.4);
@@ -49034,7 +49034,7 @@ function leanBackS(c, E9, r, O15) {
   prop2(c, [[ch, HC]], 1.8);
   clip3(c, ch, () => stone3 ? fieldstone4(c, cx - 12, y - 6, 24, ht - 24 - y, STONE16, r) : bricks2(c, cx - 12, y - 6, 24, ht - 24 - y, BRICK5, r));
 }
-function leanFrontS(c, E9, r, O15) {
+function leanFrontS(c, E9, r, O16) {
   const x = E9.x * T67, y = E9.y * T67, w = E9.w * T67, eave = y + 30, front2 = y + 138, hx2 = x + 22, hw = 92, cx = hx2 + hw / 2;
   for (const px7 of [x + 6, x + w - 10]) {
     logPost(c, px7 - 3.5, eave + 4, front2, 7);
@@ -49042,7 +49042,7 @@ function leanFrontS(c, E9, r, O15) {
     drift(c, px7, front2 + 1, 20, 5);
   }
   const rp = poly3([[x - 8, y - 6], [x + w + 6, y - 6], [x + w + 12, eave], [x - 8, eave]]);
-  if (O15.roof === "snow") {
+  if (O16.roof === "snow") {
     prop2(c, [[rp, SNOW2]], 2.4);
     snowFill(c, rp, x - 8, y - 6, x + w + 12, eave, r);
     c.strokeStyle = OL73;
@@ -49079,7 +49079,7 @@ function leanFrontS(c, E9, r, O15) {
     icicles2(c, x - 10, x + w + 14, eave + 6, hash3(x, y, 3), 7);
   }
   garland(c, x + 2, w - 4, eave + 8, "#a8322e");
-  if (O15.hearth === "stone") chimney(c, cx, y - 2, 56, r);
+  if (O16.hearth === "stone") chimney(c, cx, y - 2, 56, r);
   else {
     const top = y - 58, st = rect4(cx - 12, top, 24, y + 2 - top);
     prop2(c, [[st, BRICK5]], 1.8);
@@ -49090,9 +49090,9 @@ function leanFrontS(c, E9, r, O15) {
   }
 }
 function forgeItemsSnow(E9, opt = {}) {
-  const O15 = { ...SNOW_FORGE_OPT, ...opt }, north = O15.gear === "north", x = E9.x * T67, y = E9.y * T67, w = E9.w * T67, h = E9.h * T67, r = rng3(hash3(x, y, 113)), items3 = [];
-  items3.push({ y: y + 104, draw: (c) => leanBackS(c, E9, r, O15) });
-  items3.push({ y: y + 138, draw: (c) => leanFrontS(c, E9, r, O15) });
+  const O16 = { ...SNOW_FORGE_OPT, ...opt }, north = O16.gear === "north", x = E9.x * T67, y = E9.y * T67, w = E9.w * T67, h = E9.h * T67, r = rng3(hash3(x, y, 113)), items3 = [];
+  items3.push({ y: y + 104, draw: (c) => leanBackS(c, E9, r, O16) });
+  items3.push({ y: y + 138, draw: (c) => leanFrontS(c, E9, r, O16) });
   items3.push({ y: y + 214, draw: (c) => anvil(c, x + 134, y + 214) });
   items3.push({ y: y + 176, draw: (c) => north ? troughS(c, x + 188, y + 176) : (trough8(c, x + 188, y + 176), snowCap(c, x - 22 + 188, y - 20 + 176, 10, 3)) });
   items3.push({ y: y + 186, draw: (c) => {
@@ -49497,7 +49497,7 @@ function signW(c, x, y) {
   mossCap(c, x + 9, y - 74, 34, 3);
   reedClump(c, x - 6, y + 1, hash3(x, y, 9), 3);
 }
-function leanBackW(c, E9, r, O15) {
+function leanBackW(c, E9, r, O16) {
   const x = E9.x * T68, y = E9.y * T68, w = E9.w * T68, eave = y + 30, floor = y + 112, hx2 = x + 22, hw = 92;
   const bw = rect4(x + 4, eave, w - 8, floor - eave);
   prop2(c, [[bw, PLANK3]], 1.8);
@@ -49507,7 +49507,7 @@ function leanBackW(c, E9, r, O15) {
     c.fillRect(x + 4, eave, w - 8, 10);
   });
   tools(c, x + w - 100, eave + 16);
-  const stone3 = O15.hearth === "stone", HC = stone3 ? STONE17 : BRICK6, ht = floor - 46, hb = rect4(hx2, ht, hw, 46);
+  const stone3 = O16.hearth === "stone", HC = stone3 ? STONE17 : BRICK6, ht = floor - 46, hb = rect4(hx2, ht, hw, 46);
   prop2(c, [[hb, HC]], 2);
   clip3(c, hb, () => stone3 ? riverStone(c, hx2, ht, hw, 46, STONE17, r) : bricks2(c, hx2, ht, hw, 46, BRICK6, r));
   prop2(c, [[rect4(hx2 - 4, ht - 6, hw + 8, 7), stone3 ? tone54(STONE17, 0.1) : tone54("#b4ada2", 0.08)]], 1.4);
@@ -49532,7 +49532,7 @@ function leanBackW(c, E9, r, O15) {
     c.fillStyle = "#5a3a24";
     for (let q2 = bx + 4; q2 < bx + 28; q2 += 6) c.fillRect(q2, by - 10, 1.4, 10);
   }
-  if (O15.gear === "marsh") {
+  if (O16.gear === "marsh") {
     const hx22 = x + w - 118, hy = eave + 40;
     c.fillStyle = "#4a3826";
     c.fillRect(hx22 - 4, hy - 6, 30, 4);
@@ -49555,9 +49555,9 @@ function leanBackW(c, E9, r, O15) {
   prop2(c, [[ch, HC]], 1.8);
   clip3(c, ch, () => stone3 ? riverStone(c, cx - 12, y - 6, 24, ht - 24 - y, STONE17, r) : bricks2(c, cx - 12, y - 6, 24, ht - 24 - y, BRICK6, r));
 }
-function leanFrontW(c, E9, r, O15) {
+function leanFrontW(c, E9, r, O16) {
   const x = E9.x * T68, y = E9.y * T68, w = E9.w * T68, eave = y + 30, front2 = y + 138, hx2 = x + 22, hw = 92, cx = hx2 + hw / 2;
-  const reed2 = O15.roof === "reed";
+  const reed2 = O16.roof === "reed";
   for (const px7 of [x + 6, x + w - 10]) {
     if (reed2) {
       willowPole(c, px7, eave + 4, front2);
@@ -49569,7 +49569,7 @@ function leanFrontW(c, E9, r, O15) {
       prop2(c, [[poly3([[px7 - 12, eave + 6], [px7 + 12, eave + 6], [px7 + 3, eave + 16], [px7 - 3, eave + 16]]), WOOD35]], 0.8);
     }
   }
-  const stone3 = O15.hearth === "stone", top = y - 58, st = rect4(cx - 12, top, 24, y + 2 - top);
+  const stone3 = O16.hearth === "stone", top = y - 58, st = rect4(cx - 12, top, 24, y + 2 - top);
   prop2(c, [[st, stone3 ? STONE17 : BRICK6]], 1.8);
   clip3(c, st, () => stone3 ? riverStone(c, cx - 12, top, 24, y + 2 - top, STONE17, r) : bricks2(c, cx - 12, top, 24, y + 2 - top, BRICK6, r));
   prop2(c, [[rect4(cx - 15, top - 5, 30, 6), tone54(stone3 ? STONE17 : BRICK6, 0.16)]], 1.2);
@@ -49633,9 +49633,9 @@ function leanFrontW(c, E9, r, O15) {
   }
 }
 function forgeItemsWet(E9, opt = {}) {
-  const O15 = { ...WET_FORGE_OPT, ...opt }, marsh3 = O15.gear === "marsh", x = E9.x * T68, y = E9.y * T68, w = E9.w * T68, h = E9.h * T68, r = rng3(hash3(x, y, 113)), items3 = [];
-  items3.push({ y: y + 104, draw: (c) => leanBackW(c, E9, r, O15) });
-  items3.push({ y: y + 138, draw: (c) => leanFrontW(c, E9, r, O15) });
+  const O16 = { ...WET_FORGE_OPT, ...opt }, marsh3 = O16.gear === "marsh", x = E9.x * T68, y = E9.y * T68, w = E9.w * T68, h = E9.h * T68, r = rng3(hash3(x, y, 113)), items3 = [];
+  items3.push({ y: y + 104, draw: (c) => leanBackW(c, E9, r, O16) });
+  items3.push({ y: y + 138, draw: (c) => leanFrontW(c, E9, r, O16) });
   items3.push({ y: y + 214, draw: (c) => anvil(c, x + 134, y + 214) });
   items3.push({ y: y + 176, draw: (c) => marsh3 ? troughW(c, x + 188, y + 176) : trough8(c, x + 188, y + 176) });
   items3.push({ y: y + 186, draw: (c) => {
@@ -68425,8 +68425,8 @@ function townPiecesV1(t) {
     if (court) add2("rune-court", () => runeCourtItems(court, biome), around(court, 30, 30, 60, 20));
   }
   for (const [k, f] of t.features.filter((f2) => f2.type === "forge" && f2.pad).entries()) add2("forge:" + k, () => forgeItems2(f.pad, biome), around(f.pad, 80, 110, 180, 70));
-  const plazas = t.features.filter((f) => f.type === "plaza"), art = townArtSizeV1(t);
-  for (const [k, f] of plazas.entries()) add2("square:" + k, () => plazaFurniture(f, biome, art), around(f, 80, 80, 120, 70));
+  const plazas = t.features.filter((f) => f.type === "plaza"), art2 = townArtSizeV1(t);
+  for (const [k, f] of plazas.entries()) add2("square:" + k, () => plazaFurniture(f, biome, art2), around(f, 80, 80, 120, 70));
   for (const [k, f] of townFountainArtV1(t).entries()) {
     const dy = FOUNTAIN_FOOT[f.size];
     add2("fountain:" + k, () => [{ y: f.y + dy, draw: (c) => fountain2(c, f.x, f.y, biome, f.size) }], { x0: f.x - 160, y0: f.y - 130, x1: f.x + 160, y1: f.y + 110 });
@@ -68437,7 +68437,7 @@ function townPiecesV1(t) {
       add2("stall:" + k, fishStall(s, biome, slot), reg);
       return;
     }
-    add2("stall:" + k, biome === "volcanic" ? art === "village" ? () => stallVVol(s.x, s.y, k, slot) : () => stallVol(s.x, s.y, k, slot, "south") : biome === "tropical" ? art === "village" ? () => stallVTrop(s.x, s.y, k, slot) : () => stallTrop(s.x, s.y, k, slot, "south") : biome === "upland" && !(art === "village" && USTQ.village === "grass") ? art === "village" ? () => stallVUp(s.x, s.y, k, slot) : () => stallUp(s.x, s.y, k, slot, "south") : biome === "wetland" && !(art === "village" && WSTQ.village === "grass") ? art === "village" ? () => stallVWet(s.x, s.y, k, slot) : () => stallWet(s.x, s.y, k, slot, "south") : biome === "frostland" ? art === "village" ? () => stallVSnow(s.x, s.y, k, slot) : () => stallSnow(s.x, s.y, k, slot, "south", { mix: true }) : biome === "desert" ? art === "village" ? () => stallVDesert(s.x, s.y, k, slot) : () => stallDesert(s.x, s.y, k, slot) : art === "village" ? () => stallV(s.x, s.y, biome, k, slot) : () => stall22(s.x, s.y, biome, k, slot), reg);
+    add2("stall:" + k, biome === "volcanic" ? art2 === "village" ? () => stallVVol(s.x, s.y, k, slot) : () => stallVol(s.x, s.y, k, slot, "south") : biome === "tropical" ? art2 === "village" ? () => stallVTrop(s.x, s.y, k, slot) : () => stallTrop(s.x, s.y, k, slot, "south") : biome === "upland" && !(art2 === "village" && USTQ.village === "grass") ? art2 === "village" ? () => stallVUp(s.x, s.y, k, slot) : () => stallUp(s.x, s.y, k, slot, "south") : biome === "wetland" && !(art2 === "village" && WSTQ.village === "grass") ? art2 === "village" ? () => stallVWet(s.x, s.y, k, slot) : () => stallWet(s.x, s.y, k, slot, "south") : biome === "frostland" ? art2 === "village" ? () => stallVSnow(s.x, s.y, k, slot) : () => stallSnow(s.x, s.y, k, slot, "south", { mix: true }) : biome === "desert" ? art2 === "village" ? () => stallVDesert(s.x, s.y, k, slot) : () => stallDesert(s.x, s.y, k, slot) : art2 === "village" ? () => stallV(s.x, s.y, biome, k, slot) : () => stall22(s.x, s.y, biome, k, slot), reg);
     const pz = plazas[0];
     if (pz && zone && k !== Math.floor((f.stalls.length - 1) / 2)) {
       const y = pz.y + pz.h - 3;
@@ -68458,7 +68458,7 @@ function townPiecesV1(t) {
     const F7 = { ...f, r: f.r - 0.7 }, x = f.x * T102, y = f.y * T102, R14 = F7.r * T102;
     add2("monument:" + k, () => monumentItems26(F7, biome, slot), { x0: x - R14 - 80, y0: y - R14 - 240, x1: x + R14 + 80, y1: y + R14 + 80 });
   }
-  for (const [k, f] of t.features.filter((f2) => f2.type === "wall").entries()) add2("wall:" + k, () => wallItems23(f, biome, townWallStreetsV1(t), 0, art, slot), (it) => it.bb ? grow(it.bb, 40) : { x0: -1e4, y0: -1e4, x1: 1e5, y1: 1e5 }, true);
+  for (const [k, f] of t.features.filter((f2) => f2.type === "wall").entries()) add2("wall:" + k, () => wallItems23(f, biome, townWallStreetsV1(t), 0, art2, slot), (it) => it.bb ? grow(it.bb, 40) : { x0: -1e4, y0: -1e4, x1: 1e5, y1: 1e5 }, true);
   for (const [k, f] of t.features.filter((f2) => f2.type === "field").entries()) add2("field:" + k, () => fieldItems(f, biome, { top: 1, left: 1, right: 1, bottom: 1 }), around(f, 60, 60, 90, 40));
   t.places.forEach(([, R14, kind], k) => {
     if (kind === "garden") add2("plot:" + k, () => plotItems(R14, biome), around(R14, 70, 70, 100, 70));
@@ -68469,7 +68469,7 @@ function townPiecesV1(t) {
   if (castle) {
     const k = castle.keep, X = k.x * T102, Y = k.y * T102, W21 = k.w * T102, G5 = (k.y + k.h) * T102;
     add2("castle", () => castleItems6(castle, biome, slot, 0), { x0: X - 140, y0: Y - 460, x1: X + W21 + 140, y1: G5 + 160 });
-    add2("castle-wall", () => wallItems23(castle, biome, townWallStreetsV1(t), 0, art, slot), (it) => it.bb ? grow(it.bb, 40) : { x0: -1e4, y0: -1e4, x1: 1e5, y1: 1e5 }, true);
+    add2("castle-wall", () => wallItems23(castle, biome, townWallStreetsV1(t), 0, art2, slot), (it) => it.bb ? grow(it.bb, 40) : { x0: -1e4, y0: -1e4, x1: 1e5, y1: 1e5 }, true);
     townCastleYewsV1(castle).forEach((y, i) => add2("yew:" + i, () => [{ y: y.y, draw: (c) => (biome === "desert" ? yewDesert : biome === "frostland" ? yewSnow2 : biome === "wetland" ? yewWet : biome === "upland" ? yewUp2 : biome === "tropical" ? yewTrop2 : biome === "volcanic" ? yewVol2 : yew4)(c, y.x, y.y) }], { x0: y.x - 40, y0: y.y - 70, x1: y.x + 40, y1: y.y + 20 }));
   }
   for (const [k, g2] of t.features.filter((f) => f.type === "manor" && f.garden && !f.building).map((f) => f.garden).entries()) add2("garden:" + k, () => formalGardenItems6(g2, biome), around(g2, 40, 40, 90, 40));
@@ -69004,7 +69004,7 @@ async function createNightLootArtV1(env, prior, options = {}) {
     error = e.message;
   }
   const loadMs = env.performance.now() - start;
-  const art = Object.freeze({
+  const art2 = Object.freeze({
     enabled: () => enabled,
     setEnabled(value2) {
       if (typeof value2 !== "boolean") throw TypeError("VFX comparison must be boolean");
@@ -69027,7 +69027,7 @@ async function createNightLootArtV1(env, prior, options = {}) {
     },
     resources: () => ({ version: NIGHT_LOOT_ART_VERSION, enabled, ready: Boolean(data), error, downloads: data ? 1 : 0, downloadBytes: data?.downloadBytes ?? 0, retainedBytes: data?.retainedBytes ?? 0, sourceTransientBytes: data?.sourceTransientBytes ?? 0, sourceSha256: data?.sourceSha256 ?? null, sprites: data?.sprites.length ?? 0, loadMs })
   });
-  return Object.freeze({ ...prior, nightLootArt: art, resources: () => ({ ...prior.resources(), nightLootArt: art.resources() }) });
+  return Object.freeze({ ...prior, nightLootArt: art2, resources: () => ({ ...prior.resources(), nightLootArt: art2.resources() }) });
 }
 
 // src/shared/content/spore_outbreak_v3.js
@@ -69098,7 +69098,7 @@ async function createSporeArtV1(env, prior, { root: root6 = new URL("../../asset
   } catch (e) {
     error = e.message;
   }
-  const art = { paint(ctx, key4, x, y, width2) {
+  const art2 = { paint(ctx, key4, x, y, width2) {
     const image = sprites7.get(key4);
     if (!image) return false;
     const h = width2 * image.height / image.width;
@@ -69106,9 +69106,9 @@ async function createSporeArtV1(env, prior, { root: root6 = new URL("../../asset
     painted5++;
     return true;
   }, resources: () => ({ version: "spore-outbreak-art-v1", ready: !error && sprites7.size === 3, error, downloadBytes: bytes, retainedBytes, sprites: sprites7.size, painted: painted5 }) };
-  return { ...prior, sporeArt: art, resources: () => ({ ...prior.resources(), sporeArt: art.resources() }) };
+  return { ...prior, sporeArt: art2, resources: () => ({ ...prior.resources(), sporeArt: art2.resources() }) };
 }
-function sporeDepthItems(model, viewport, art) {
+function sporeDepthItems(model, viewport, art2) {
   const out4 = [], visible3 = (p) => p.x >= viewport.x - 120 && p.y >= viewport.y - 120 && p.x <= viewport.x + viewport.width + 120 && p.y <= viewport.y + viewport.height + 120;
   for (const e of model.worldEvents ?? []) {
     if (e.kind !== "spore") continue;
@@ -69126,9 +69126,9 @@ function sporeDepthItems(model, viewport, art) {
           ctx.save();
           ctx.translate(x, y + 10);
           ctx.scale(1, 0.35);
-          art?.paint(ctx, "spore-pod-open", 0, 0, width2 * 0.8);
+          art2?.paint(ctx, "spore-pod-open", 0, 0, width2 * 0.8);
           ctx.restore();
-        } else if (!art?.paint(ctx, key4, x, y + 10, width2)) {
+        } else if (!art2?.paint(ctx, key4, x, y + 10, width2)) {
           ctx.fillStyle = pod3.used ? "#695443" : "#df4e4e";
           ctx.strokeStyle = "#203a2a";
           ctx.lineWidth = 2;
@@ -69156,11 +69156,11 @@ function sporeDepthItems(model, viewport, art) {
           }
           ctx.restore();
         }
-        if (hit2 && art && !pod3.used) {
+        if (hit2 && art2 && !pod3.used) {
           ctx.save();
           ctx.globalCompositeOperation = "screen";
           ctx.globalAlpha = 0.75 * impact2;
-          art.paint(ctx, key4, x, y + 10, width2);
+          art2.paint(ctx, key4, x, y + 10, width2);
           ctx.restore();
         }
         if (active2) {
@@ -69245,7 +69245,7 @@ function sporeDepthItems(model, viewport, art) {
           ctx.ellipse(p.x, p.y + 3, 15, 7, 0, 0, Math.PI * 2);
           ctx.stroke();
           ctx.globalAlpha = 1;
-          if (art?.paint(ctx, "fungal-clump", p.x, p.y + 4, 18 + Math.min(1, age / growth) * 17)) {
+          if (art2?.paint(ctx, "fungal-clump", p.x, p.y + 4, 18 + Math.min(1, age / growth) * 17)) {
             ctx.restore();
             return;
           }
@@ -69347,9 +69347,9 @@ function hollowPlantPlacements(space, event) {
   cache10.set(key4, Object.freeze(out4.map(Object.freeze)));
   return cache10.get(key4);
 }
-function hollowGroundCoverDepthItems(model, event, art) {
-  if (!art) return [];
-  return hollowPlantPlacements(model.space, event).map((p) => depthItem({ id: event.groupId + "/ground-cover/" + p.index, anchorX: p.x, anchorY: p.y, draw: (ctx) => art.paint(ctx, p.id, p.x, p.y, p.width) }));
+function hollowGroundCoverDepthItems(model, event, art2) {
+  if (!art2) return [];
+  return hollowPlantPlacements(model.space, event).map((p) => depthItem({ id: event.groupId + "/ground-cover/" + p.index, anchorX: p.x, anchorY: p.y, draw: (ctx) => art2.paint(ctx, p.id, p.x, p.y, p.width) }));
 }
 
 // src/client/hidden_hollow_art_v1.js
@@ -69390,25 +69390,25 @@ async function createHollowArtV1(env, prior, { root: root6 = new URL("../../asse
     error = e.message;
   }
   const groundCover = await createHollowGroundCoverV1(env);
-  const art = { groundCover, paint(ctx, key4, x, y, width2) {
+  const art2 = { groundCover, paint(ctx, key4, x, y, width2) {
     const image = sprites7.get(key4);
     if (!image) return false;
     ctx.drawImage(image, x - width2 / 2, y - width2 * image.height / image.width, width2, width2 * image.height / image.width);
     painted5++;
     return true;
   }, resources: () => ({ version: "hidden-hollow-art-v1", ready: !error && sprites7.size === 1, error, downloadBytes: bytes, retainedBytes, sprites: sprites7.size, painted: painted5, groundCover: groundCover.resources() }) };
-  return { ...prior, hollowArt: art, resources: () => ({ ...prior.resources(), hollowArt: art.resources() }) };
+  return { ...prior, hollowArt: art2, resources: () => ({ ...prior.resources(), hollowArt: art2.resources() }) };
 }
-function hollowDepthItems(model, viewport, art) {
+function hollowDepthItems(model, viewport, art2) {
   const out4 = [];
   for (const e of hollowLandmarks(model)) {
     if (e.kind !== "hollow") continue;
     const { x, y } = e.position;
     if (x < viewport.x - 220 || y < viewport.y - 160 || x > viewport.x + viewport.width + 220 || y > viewport.y + viewport.height + 160) continue;
-    out4.push(...hollowGroundCoverDepthItems(model, e, art?.groundCover));
+    out4.push(...hollowGroundCoverDepthItems(model, e, art2?.groundCover));
     out4.push(depthItem({ id: e.groupId + "/hollow", anchorX: x, anchorY: y - 48, draw(ctx) {
       ctx.save();
-      if (!art?.paint(ctx, "hidden-hollow", x, y - 16, 300)) {
+      if (!art2?.paint(ctx, "hidden-hollow", x, y - 16, 300)) {
         ctx.fillStyle = "#785844";
         ctx.strokeStyle = "#253b32";
         ctx.lineWidth = 3;
@@ -69522,7 +69522,7 @@ async function createBreakablePropArtV1(env, prior, options = {}) {
     paintedStates[key4] = (paintedStates[key4] ?? 0) + 1;
     return true;
   }
-  const art = Object.freeze({
+  const art2 = Object.freeze({
     enabled: () => enabled,
     setEnabled(value2) {
       if (typeof value2 !== "boolean") throw TypeError("Prop art comparison must be boolean");
@@ -69546,7 +69546,7 @@ async function createBreakablePropArtV1(env, prior, options = {}) {
     },
     resources: () => ({ version: BREAKABLE_PROP_ART_VERSION, enabled, ready: Boolean(data), error, sprites: data?.sprites.size ?? 0, downloads: data ? 1 : 0, downloadBytes: data?.downloadBytes ?? 0, retainedBytes: data?.retainedBytes ?? 0, sourceTransientBytes: data?.sourceTransientBytes ?? 0, sourceSha256: data?.sourceSha256 ?? null, loadMs, paintedStates: { ...paintedStates }, limits: BREAKABLE_PROP_LIMITS, collision: "unchanged", crackedState: "Deterministic cosmetic wear; no additional health or hit stage", remnants: "Cosmetic only, same 4.5s lifetime as existing debris; no replay on reopen" })
   });
-  return Object.freeze({ ...prior, breakableProps: art, resources: () => ({ ...prior.resources(), breakableProps: art.resources() }) });
+  return Object.freeze({ ...prior, breakableProps: art2, resources: () => ({ ...prior.resources(), breakableProps: art2.resources() }) });
 }
 
 // src/client/browser_loop_health.js
@@ -72274,8 +72274,8 @@ function weapon(c, m, motion, cx, cy2, separate, flash2) {
   c.restore();
 }
 function drawAnimatedArmorV4(c, m, time3, seed2) {
-  const art = animatedArmorMotionV4(m, time3, seed2), { weight: weight2, strike, walk, cycle, death, step: step3, shift: shift4, leftLift, rightLift } = art;
-  const cx = m.x + m.w / 2, base3 = m.y + m.h - 1, torsoX = cx + shift4 + death * 8, torsoY = base3 - 15 - art.bob + death * 13, flash2 = m.flashTimer > 0, separate = (flash2 ? 2.2 : 0) + death * 2;
+  const art2 = animatedArmorMotionV4(m, time3, seed2), { weight: weight2, strike, walk, cycle, death, step: step3, shift: shift4, leftLift, rightLift } = art2;
+  const cx = m.x + m.w / 2, base3 = m.y + m.h - 1, torsoX = cx + shift4 + death * 8, torsoY = base3 - 15 - art2.bob + death * 13, flash2 = m.flashTimer > 0, separate = (flash2 ? 2.2 : 0) + death * 2;
   const iron = color3(flash2, "#647b8d"), light2 = color3(flash2, "#a6becb"), dark = color3(flash2, "#364654"), spirit = "#9de8bd";
   c.save();
   c.lineJoin = "round";
@@ -72355,9 +72355,9 @@ function drawAnimatedArmorV4(c, m, time3, seed2) {
   if (!flash2) {
     polygon4(c, [[torsoX - 19 - separate, torsoY - 7], [torsoX - 14 - separate, torsoY - 10], [torsoX - 10 - separate, torsoY - 8], [torsoX - 14 - separate, torsoY - 6]], light2, false);
   }
-  weapon(c, m, art, torsoX, torsoY, separate, flash2);
+  weapon(c, m, art2, torsoX, torsoY, separate, flash2);
   c.save();
-  c.translate(torsoX + art.helmetFollow + separate * 0.2 - death * 15, torsoY - 16 - separate + death * 19);
+  c.translate(torsoX + art2.helmetFollow + separate * 0.2 - death * 15, torsoY - 16 - separate + death * 19);
   c.rotate(-shift4 * 8e-3 + 0.06 * strike * weight2 - death * 0.95);
   c.fillStyle = iron;
   c.strokeStyle = INK6;
@@ -79738,17 +79738,17 @@ function surface(w, h) {
   }
   return null;
 }
-function sprite2(art, white) {
-  const key4 = art + (white ? "/flash" : "");
+function sprite2(art2, white) {
+  const key4 = art2 + (white ? "/flash" : "");
   if (cache3.has(key4)) return cache3.get(key4);
   let out4 = null;
   try {
     if (typeof Path2D === "function" && typeof DOMMatrix === "function") {
-      const [x, y, w, h] = NAMED_ART[art]?.bounds ?? BOUNDS[art], canvas = surface(Math.ceil(w * RES), Math.ceil(h * RES)), c = canvas?.getContext("2d");
+      const [x, y, w, h] = NAMED_ART[art2]?.bounds ?? BOUNDS[art2], canvas = surface(Math.ceil(w * RES), Math.ceil(h * RES)), c = canvas?.getContext("2d");
       if (c) {
         c.scale(RES, RES);
         c.translate(-x, -y);
-        artFor(art)(c);
+        artFor(art2)(c);
         if (white) {
           c.setTransform(1, 0, 0, 1, 0, 0);
           c.globalCompositeOperation = "source-atop";
@@ -79802,12 +79802,12 @@ function painter(family) {
     c.translate(m.x + m.w / 2, m.y + m.h + dy);
     c.rotate(rot2);
     c.scale(sx, sy);
-    const art = NAMED_ART[m.namedEliteId]?.family === family ? m.namedEliteId : family, s = sprite2(art, false);
+    const art2 = NAMED_ART[m.namedEliteId]?.family === family ? m.namedEliteId : family, s = sprite2(art2, false);
     if (s) {
       c.imageSmoothingEnabled = true;
       c.drawImage(s.canvas, s.x, s.y, s.w, s.h);
       if (m.flashTimer) {
-        const f = sprite2(art, true);
+        const f = sprite2(art2, true);
         if (f) {
           c.globalAlpha *= 0.85;
           c.drawImage(f.canvas, f.x, f.y, f.w, f.h);
@@ -86388,16 +86388,16 @@ function snareWarnItems(actor, k, q2, tick, out4) {
   }
 }
 function snareGround(c, actor, k, tick) {
-  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], { age } = ageOf(k, t, tick), O15 = k.points?.[0], B9 = k.target;
-  if (!O15 || !B9) return;
+  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], { age } = ageOf(k, t, tick), O16 = k.points?.[0], B9 = k.target;
+  if (!O16 || !B9) return;
   const fade = 1 - ease4(clamp28((age - t.rootTicks - 12) / (t.upTicks - t.rootTicks - 12)));
   craterBack(c, B9.x, B9.y, 11, fade);
-  gameBurst(c, O15.x, O15.y, t.radius, age * SEC, OPEN_LOOKS.root, 0.5);
-  cracks(c, O15.x, O15.y, 22, 1 - clamp28((age - 9) / 30), 5, "#3a2a14");
+  gameBurst(c, O16.x, O16.y, t.radius, age * SEC, OPEN_LOOKS.root, 0.5);
+  cracks(c, O16.x, O16.y, 22, 1 - clamp28((age - 9) / 30), 5, "#3a2a14");
 }
 function snareItems(model, actor, k, tick, out4) {
-  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], { age } = ageOf(k, t, tick), O15 = k.points?.[0], B9 = k.target, id2 = "lesser-vfx/" + actor.entityId;
-  if (!O15 || !B9) return;
+  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], { age } = ageOf(k, t, tick), O16 = k.points?.[0], B9 = k.target, id2 = "lesser-vfx/" + actor.entityId;
+  if (!O16 || !B9) return;
   const wither = clamp28((age - t.rootTicks + 6) / 18), fade = 1 - ease4(clamp28((age - t.rootTicks - 12) / (t.upTicks - t.rootTicks - 12)));
   out4.push({ id: id2 + "/lip", anchorX: B9.x, anchorY: B9.y + (actor.hullRadius ?? 20) * 0.45 + 0.5, draw: (c) => {
     craterFront(c, B9.x, B9.y, 11, fade);
@@ -86405,11 +86405,11 @@ function snareItems(model, actor, k, tick, out4) {
   } });
   if (wither >= 1) return;
   for (let i = 0; i < 8; i++) {
-    const p = rimAt(O15, t.radius, i), g2 = ease4(clamp28((age - i * 1.2) / 9)), sway = Math.sin(tick * SEC * 5 + i * 1.3) * 2.2, lean = Math.cos(p.a) * 3;
+    const p = rimAt(O16, t.radius, i), g2 = ease4(clamp28((age - i * 1.2) / 9)), sway = Math.sin(tick * SEC * 5 + i * 1.3) * 2.2, lean = Math.cos(p.a) * 3;
     out4.push({ id: id2 + "/root" + i, anchorX: p.x, anchorY: p.y, draw: (c) => drawRoot(c, p.x, p.y, p.x + lean + sway, p.y - 9 - i % 3 * 2, g2, { w: 1.9, curl: (i % 2 ? 1 : -1) * 0.9, wither, leaf: false }) });
   }
   for (const h of party(model)) {
-    if (Math.hypot(h.position.x - O15.x, (h.position.y - O15.y) / 0.7) > t.radius + 4) continue;
+    if (Math.hypot(h.position.x - O16.x, (h.position.y - O16.y) / 0.7) > t.radius + 4) continue;
     const hx2 = h.position.x, hy = h.position.y - 7, wk = ease4(clamp28((age - 4) / 11)), hid = id2 + "/held/" + h.entityId;
     for (let i = 0; i < 2; i++) {
       const side = i ? 1 : -1, x0 = hx2 + side * 9, y0 = hy + 9, g2 = ease4(clamp28((age - 1 - i * 2) / 8));
@@ -86692,11 +86692,11 @@ function stingsGround(c, actor, k, tick) {
 function stingsItems(actor, k, tick, out4) {
   if (!k.points) return;
   const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], A2 = since(k, t, tick) - t.windupTicks, id2 = "lesser-vfx/" + actor.entityId, face4 = stingPose(actor, k, tick, {}).face;
-  const O15 = { x: actor.position.x - face4 * 24, y: actor.position.y - 10 - STING_LIFT };
+  const O16 = { x: actor.position.x - face4 * 24, y: actor.position.y - 10 - STING_LIFT };
   k.points.forEach((P28, i) => {
     const s = t.spawns[i], land = s + t.fillTicks, fire2 = land - STING_FLIGHT;
     if (A2 >= fire2 && A2 < land) {
-      const u = (A2 - fire2) / STING_FLIGHT, arc5 = (u2) => ({ x: mix18(O15.x, P28.x, u2), y: mix18(O15.y, P28.y - 4, u2) - Math.sin(u2 * Math.PI) * 22 }), p = arc5(u), b = arc5(Math.max(0, u - 0.12)), ang = Math.atan2(p.y - b.y, p.x - b.x || 1e-6);
+      const u = (A2 - fire2) / STING_FLIGHT, arc5 = (u2) => ({ x: mix18(O16.x, P28.x, u2), y: mix18(O16.y, P28.y - 4, u2) - Math.sin(u2 * Math.PI) * 22 }), p = arc5(u), b = arc5(Math.max(0, u - 0.12)), ang = Math.atan2(p.y - b.y, p.x - b.x || 1e-6);
       out4.push({ id: id2 + "/sting" + i, anchorX: p.x, anchorY: mix18(actor.position.y, P28.y, u) + 0.5, draw: (c) => {
         c.save();
         c.strokeStyle = "rgba(255,241,192,.7)";
@@ -93197,8 +93197,8 @@ function obsidian2(c, x, y, list, s) {
 function cone7(c, t, s, P28, heat, spent, sc2, small) {
   c.save();
   c.scale(sc2, sc2);
-  const O15 = CONE_O;
-  fillPts3(c, O15, W13(s, P28.rock));
+  const O16 = CONE_O;
+  fillPts3(c, O16, W13(s, P28.rock));
   if (!s.flash) {
     fillPts3(c, [[-46, -6], [-50, -16], [-45, -32], [-40, -48], [-32, -66], [-26, -80], [-22, -92], [-17, -93], [-21, -74], [-27, -50], [-31, -26], [-32, -6]], P28.rockL);
     fillPts3(c, [[-46, -6], [-50, -16], [-45, -32], [-41, -44], [-38, -30], [-40, -12]], P28.rockLL);
@@ -93231,7 +93231,7 @@ function cone7(c, t, s, P28, heat, spent, sc2, small) {
     }
     c.save();
     c.beginPath();
-    O15.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]));
+    O16.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]));
     c.closePath();
     c.clip();
     for (let i = 0; i < 46; i++) {
@@ -93295,7 +93295,7 @@ function cone7(c, t, s, P28, heat, spent, sc2, small) {
       c.restore();
     }
   }
-  inkPts(c, O15, s.noMouth ? FINE12 + 0.2 : LW14);
+  inkPts(c, O16, s.noMouth ? FINE12 + 0.2 : LW14);
   if (!s.noMouth) drawMouth(c, s, P28, heat, MOUTH);
   if (!small) {
     obsidian2(c, -44, -28, [[-2.85, 13, 5.4], [-2.4, 19, 6.6], [-2, 12, 5]], s);
@@ -93464,12 +93464,12 @@ function craterAt(c, t, s, P28, heat, spent, x, y, ang, k) {
   c.restore();
 }
 function miniWhorl(c, s, P28, heat, spent, w) {
-  const O15 = whorlPts(w, 0, 32), co = Math.cos(w.rot), si = Math.sin(w.rot), at9 = (x, y) => [w.cx + x * co - y * si, w.cy + x * si + y * co];
-  fillPts3(c, O15, W13(s, P28.rock));
+  const O16 = whorlPts(w, 0, 32), co = Math.cos(w.rot), si = Math.sin(w.rot), at9 = (x, y) => [w.cx + x * co - y * si, w.cy + x * si + y * co];
+  fillPts3(c, O16, W13(s, P28.rock));
   if (!s.flash) {
     c.save();
     c.beginPath();
-    O15.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]));
+    O16.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]));
     c.closePath();
     c.clip();
     c.fillStyle = P28.rockL;
@@ -93493,7 +93493,7 @@ function miniWhorl(c, s, P28, heat, spent, w) {
     }
     c.restore();
   }
-  inkPts(c, O15);
+  inkPts(c, O16);
   sutureGlow(c, s, P28, heat, spent, w);
 }
 function sutureGlow(c, s, P28, heat, spent, w) {
@@ -93515,12 +93515,12 @@ function sutureGlow(c, s, P28, heat, spent, w) {
   c.restore();
 }
 function whorlBody(c, t, s, P28, heat, spent, w, thin) {
-  const O15 = whorlPts(w), co = Math.cos(w.rot), si = Math.sin(w.rot), at9 = (x, y) => [w.cx + x * co - y * si, w.cy + x * si + y * co];
-  fillPts3(c, O15, W13(s, P28.rock));
+  const O16 = whorlPts(w), co = Math.cos(w.rot), si = Math.sin(w.rot), at9 = (x, y) => [w.cx + x * co - y * si, w.cy + x * si + y * co];
+  fillPts3(c, O16, W13(s, P28.rock));
   if (!s.flash) {
     c.save();
     c.beginPath();
-    O15.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]));
+    O16.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]));
     c.closePath();
     c.clip();
     c.fillStyle = P28.rockL;
@@ -93576,7 +93576,7 @@ function whorlBody(c, t, s, P28, heat, spent, w, thin) {
     c.restore();
     obsidian2(c, ...at9(10, -26), [[-1.3, 11, 4.6], [-0.85, 14, 5.6], [-1.75, 8, 3.8]], s);
   }
-  inkPts(c, O15);
+  inkPts(c, O16);
   sutureGlow(c, s, P28, heat, spent, w);
 }
 var circ_ = (c, x, y, r, col2) => {
@@ -95305,14 +95305,14 @@ function bomb(c, x, y, r, rot2) {
   c.save();
   c.translate(x, y);
   c.rotate(rot2);
-  const O15 = [];
+  const O16 = [];
   for (let i = 0; i < 9; i++) {
     const a = i / 9 * TAU147, k = 1 + (rnd4(i, 41) - 0.5) * 0.32;
-    O15.push([Math.cos(a) * r * k, Math.sin(a) * r * k]);
+    O16.push([Math.cos(a) * r * k, Math.sin(a) * r * k]);
   }
   c.shadowColor = P28.lava;
   c.shadowBlur = 10;
-  poly7(c, O15, P28.lava);
+  poly7(c, O16, P28.lava);
   c.shadowBlur = 0;
   c.fillStyle = P28.lavaL;
   c.beginPath();
@@ -95320,7 +95320,7 @@ function bomb(c, x, y, r, rot2) {
   c.fill();
   c.save();
   c.beginPath();
-  O15.forEach((p, i) => i ? c.lineTo(...p) : c.moveTo(...p));
+  O16.forEach((p, i) => i ? c.lineTo(...p) : c.moveTo(...p));
   c.closePath();
   c.clip();
   const cap9 = [[-r * 1.4, -r * 1.4], [r * 0.9, -r * 1.4], [r * 0.55, -r * 0.35], [r * 0.15, -r * 0.05], [-r * 0.1, r * 0.35], [-r * 0.5, r * 0.25], [-r * 0.8, r * 0.9], [-r * 1.4, r * 0.9]];
@@ -95343,7 +95343,7 @@ function bomb(c, x, y, r, rot2) {
   c.lineTo(-r * 0.5, r * 0.3);
   c.stroke();
   c.restore();
-  poly7(c, O15, "rgba(0,0,0,0)");
+  poly7(c, O16, "rgba(0,0,0,0)");
   c.strokeStyle = INK31;
   c.lineWidth = 1.2;
   c.stroke();
@@ -96320,8 +96320,8 @@ var SNACK_ART = {
   "frog-leg": { draw: drawFrogLeg, pool: "#f5c542", border: "#f5c542", word: "slurp", wordColor: "#ffd6ec" }
 };
 function drawSnackUse(c, snack, k, t) {
-  const art = SNACK_ART[snack];
-  if (!art || k < 0 || k > 3.2) return;
+  const art2 = SNACK_ART[snack];
+  if (!art2 || k < 0 || k > 3.2) return;
   const up2 = ease4(clamp28(k / 0.35)), hy = -26 - up2 * 6, scale = 0.8 + up2 * 0.2;
   if (k < 2.3) {
     c.save();
@@ -96338,7 +96338,7 @@ function drawSnackUse(c, snack, k, t) {
       }
     } else drawFrogLeg(c, t, { lick: k > 0.8 && k < 1.4 ? (k - 0.8) / 0.6 : -1 });
     c.restore();
-    if (k > 0.8 && k < 1.5) tripLabel(c, 24, hy - 8, art.word, 7, art.wordColor);
+    if (k > 0.8 && k < 1.5) tripLabel(c, 24, hy - 8, art2.word, 7, art2.wordColor);
   }
   if (k > 2.1 && k < 3.2) {
     const s = (k - 2.1) / 1.1;
@@ -107278,7 +107278,7 @@ function createTerracePainter() {
     const d = readTerrace(detail, key4);
     if (!d) return null;
     const g2 = terraceGeometry(d), b = g2.bbox, H8 = g2.cliff * T106, sd = d.sh >>> 0, levels = [];
-    const art = { x0: b.x0 * T106 - 24, y0: b.y0 * T106 - 24, x1: (b.x1 + 1) * T106 + 24, y1: (b.y1 + 1) * T106 + 24 }, big = [art.x0 - 256, art.y0 - 256, art.x1 - art.x0 + 512, art.y1 - art.y0 + 512];
+    const art2 = { x0: b.x0 * T106 - 24, y0: b.y0 * T106 - 24, x1: (b.x1 + 1) * T106 + 24, y1: (b.y1 + 1) * T106 + 24 }, big = [art2.x0 - 256, art2.y0 - 256, art2.x1 - art2.x0 + 512, art2.y1 - art2.y0 + 512];
     const PAD6 = 3, gx0 = b.x0 - PAD6, gy0 = b.y0 - PAD6, gw = b.x1 - b.x0 + 1 + 2 * PAD6, gh = b.y1 - b.y0 + 1 + 2 * PAD6, M4 = [null], LV = new Int8Array(gw * gh), OP = new Int8Array(gw * gh).fill(-1);
     for (let k = 1; k <= g2.n; k++) {
       const m = new Uint8Array(gw * gh);
@@ -107413,7 +107413,7 @@ function createTerracePainter() {
       rimStones.sort((a, b2) => a.y - b2.y);
       levels.push({ k, P: L.P, Q, cliffs, tufts: tufts8, feet, patches, slabs: slabs2, scree: screeN ? scree : null, sb, pebbles: pebbles2, rimBase: rimN ? rimBase : null, rb, rimStones, rimPebbles, box: { ...L.box, y1: L.box.y1 + H8 } });
     }
-    s = { g: g2, H: H8, levels, art, ramps, stair: stair2 };
+    s = { g: g2, H: H8, levels, art: art2, ramps, stair: stair2 };
     s.trail = trailLine(g2, ramps);
     shapes2.set(id2, s);
     built++;
@@ -108042,8 +108042,8 @@ function createVolcanoPainter() {
       }
       levels.push({ k, P: P28, cracks: cracks7, patches, seams, scree, cols, talus, body: body6, c: pal2.tops[Math.min(k, 4)] });
     }
-    const art = { x0: b.x0 * T107 - 12, y0: b.y0 * T107 - 12, x1: (b.x1 + 1) * T107 + 12, y1: (b.y1 + 1) * T107 + 12 };
-    s = { g: g2, H: H8, pal: pal2, levels, art, gap: g2.d.gap ? gapShape(g2) : null, ramps: g2.ramps.map((r) => rampShape(g2, r)), stair: g2.stair ? stairShape(g2) : null, crater: g2.pool ? craterShape(g2) : null, floor: g2.kind === "c" && g2.d.hole ? floorShape(g2) : null, flows: g2.flows.map((f) => flowShape(g2, f)) };
+    const art2 = { x0: b.x0 * T107 - 12, y0: b.y0 * T107 - 12, x1: (b.x1 + 1) * T107 + 12, y1: (b.y1 + 1) * T107 + 12 };
+    s = { g: g2, H: H8, pal: pal2, levels, art: art2, gap: g2.d.gap ? gapShape(g2) : null, ramps: g2.ramps.map((r) => rampShape(g2, r)), stair: g2.stair ? stairShape(g2) : null, crater: g2.pool ? craterShape(g2) : null, floor: g2.kind === "c" && g2.d.hole ? floorShape(g2) : null, flows: g2.flows.map((f) => flowShape(g2, f)) };
     s.trail = trailLine(g2, s.ramps);
     shapes2.set(id2, s);
     built++;
@@ -108997,7 +108997,7 @@ function createForestStandsArtV2(env, prior) {
     return s;
   }
   const fit2 = (p, max, n) => p ? Math.min(1, max / p.w) * (0.9 + (n >>> 7) % 3 * 0.05) : 1;
-  function art(code2, o, seed2) {
+  function art2(code2, o, seed2) {
     if (o.fn) return { s: pieces.sprite(o.fn, seed2 % STAND_PIECE_VARIANTS, o.fn === "fernbed" ? [o.pal, o.h] : o.fn === "tallgrass" ? [o.col, o.h, o.heads] : o.fn === "bramble" ? [o.pal, o.berry] : []), k: o.k ?? 1 };
     const s = kit2(code2, o.kit, seed2 >>> 3);
     return { s, k: o.k ?? fit2(s, 46, seed2) };
@@ -109108,7 +109108,7 @@ function createForestStandsArtV2(env, prior) {
           }
         } else {
           for (let i = 0; i < 3; i++) {
-            const q2 = H2(n, 20 + i), o = pick2(A2.mass ?? [{ kit: "bush" }, 1], q2 >>> 9), { s, k } = art(code2, o, q2);
+            const q2 = H2(n, 20 + i), o = pick2(A2.mass ?? [{ kit: "bush" }, 1], q2 >>> 9), { s, k } = art2(code2, o, q2);
             add2(item2("stand/" + wid + "/m" + i, s, (tx + [0.25, 0.75, 0.5][i]) * T108 + (q2 % 9 - 4), (ty + [0.4, 0.5, 0.9][i]) * T108, k * (o.fn === "bramble" ? 0.95 : 1)));
           }
           if (A2.massTree && n % 100 < 30) {
@@ -109142,7 +109142,7 @@ function createForestStandsArtV2(env, prior) {
             add2(item2("stand/" + wid + "/c" + i, s2, gx, gy + 2, fit2(s2, 44, q2) * (0.8 + (q2 >>> 4) % 4 * 0.07), { wet: 6, cut: 3 }));
             continue;
           }
-          const o = pick2(A2.cover, q2 >>> 9), { s, k } = art(code2, o, q2);
+          const o = pick2(A2.cover, q2 >>> 9), { s, k } = art2(code2, o, q2);
           add2(item2("stand/" + wid + "/c" + i, s, gx, gy, k * (0.8 + (q2 >>> 4) % 4 * 0.07)));
         }
       } else if (!c.trail && m.v.terrain[ty - m.oy]?.[tx - m.ox] === "g" && !(m.mountains.length && terraceAt(m, tx, ty)?.g.onPath(tx + m.pox, ty + m.poy))) {
@@ -109789,9 +109789,9 @@ function ribbonPath(r, half, p = new Path2D()) {
   for (let i = R14.length - 1; i >= 0; i--) p.lineTo(...R14[i]);
   p.closePath();
   let area3 = 0;
-  const O15 = [...L, ...R14.slice().reverse()];
-  for (let i = 0; i < O15.length; i++) {
-    const [x1, y1] = O15[i], [x2, y2] = O15[(i + 1) % O15.length];
+  const O16 = [...L, ...R14.slice().reverse()];
+  for (let i = 0; i < O16.length; i++) {
+    const [x1, y1] = O16[i], [x2, y2] = O16[(i + 1) % O16.length];
     area3 += x1 * y2 - x2 * y1;
   }
   for (const e of [P28[0], P28[P28.length - 1]]) {
@@ -110816,13 +110816,13 @@ function townIndex(asset) {
   if (!towns2.length) return null;
   const list = [];
   for (const t of towns2) {
-    const o = t.origin, art = townNewArtV1(t), add2 = (id2, pts2, w, draw, lane2 = null) => {
+    const o = t.origin, art2 = townNewArtV1(t), add2 = (id2, pts2, w, draw, lane2 = null) => {
       if (!pts2 || pts2.length < 2) return;
       const half = w * 16 + (w >= 3 ? 8 : 6);
       list.push({ id: "town:" + t.id + ":" + id2, kind: "secondary", Q: pts2.map(([x, y]) => ({ x: (o.x + x) * T110, y: (o.y + y) * T110 })), cut: 40 + w * 8, half, wf: half / PAINT_HALF.secondary, own: w / 2 + 1.3, only: "r", draw, lane: lane2, town: true });
     };
     t.streets.forEach(([pts2, w, paved], i) => {
-      if (paved && !art) return;
+      if (paved && !art2) return;
       add2("s" + i, pts2, w, !paved);
     });
     townConnectorsV1(t).forEach((c, i) => add2(i ? "c" + i : "c", c.pts, c.w, true));
@@ -117993,8 +117993,8 @@ function pharaohKhopesh(c, A2) {
   R3(c, 11.9, -1.1, 4, 2.2, UQ.lapis, { flat: true, lw: 1.1 });
   px3(c, 13, -1.1, 0.6, 2.2, UQ.gold.b);
   px3(c, 14.6, -1.1, 0.6, 2.2, A2.c);
-  const O15 = [17, -1.2, 22, -1.3, 24.2, -3.8, 27.6, -6.4, 31.6, -7.2, 35.2, -6, 37.3, -3, 37.2, 0.8, 35.6, 4, 34.2, 0.9, 33, -1.4, 30.8, -2.3, 28, -1.7, 25.6, 0.1, 23.4, 1.3, 17, 1.2];
-  G3(c, O15, UQ.gold, { bottom: true, split: 0.5, lw: 1.2 });
+  const O16 = [17, -1.2, 22, -1.3, 24.2, -3.8, 27.6, -6.4, 31.6, -7.2, 35.2, -6, 37.3, -3, 37.2, 0.8, 35.6, 4, 34.2, 0.9, 33, -1.4, 30.8, -2.3, 28, -1.7, 25.6, 0.1, 23.4, 1.3, 17, 1.2];
+  G3(c, O16, UQ.gold, { bottom: true, split: 0.5, lw: 1.2 });
   c.save();
   c.lineCap = "round";
   c.lineJoin = "round";
@@ -119666,8 +119666,8 @@ function sporeveil(c, A2) {
 var AEGIS_PULL = 0;
 function lodestoneAegis(c, A2) {
   const steel = { b: "#8c9cab", d: "#6a7a89", l: "#b4c2cc" }, field3 = { b: "#4f5d6a", d: "#3e4a56" }, stone3 = { b: "#4a4850", d: "#34333a" }, CY2 = "#65e6ec", CYL = "#b1fcf0", cx = -10.2, cy2 = 11.6, pull = AEGIS_PULL;
-  const O15 = [-17.6, 4.4, -2.8, 4.4, -2.8, 11, -5.3, 17, -10.2, 20.6, -15.1, 17, -17.6, 11], F7 = [-15.4, 6.6, -5, 6.6, -5, 10.8, -6.9, 15.4, -10.2, 17.9, -13.5, 15.4, -15.4, 10.8];
-  G3(c, O15, steel, { split: 0.6, lw: 1.5 });
+  const O16 = [-17.6, 4.4, -2.8, 4.4, -2.8, 11, -5.3, 17, -10.2, 20.6, -15.1, 17, -17.6, 11], F7 = [-15.4, 6.6, -5, 6.6, -5, 10.8, -6.9, 15.4, -10.2, 17.9, -13.5, 15.4, -15.4, 10.8];
+  G3(c, O16, steel, { split: 0.6, lw: 1.5 });
   G3(c, F7, field3, { split: 0.58, lw: 0.8 });
   c.save();
   c.shadowColor = CY2;
@@ -119854,8 +119854,8 @@ function twinpane(c, A2) {
     px3(c, -0.2, -l * 0.75, 0.4, l * 0.55, sil.l);
     c.restore();
   }
-  const O15 = [-17.6, 4.4, -2.8, 4.4, -2.8, 11, -5.3, 17, -10.2, 20.6, -15.1, 17, -17.6, 11];
-  G3(c, O15, sil, { split: 0.6, lw: 1.5 });
+  const O16 = [-17.6, 4.4, -2.8, 4.4, -2.8, 11, -5.3, 17, -10.2, 20.6, -15.1, 17, -17.6, 11];
+  G3(c, O16, sil, { split: 0.6, lw: 1.5 });
   const L = [-15.6, 6.4, -10.9, 6.4, -10.9, 18.1, -13.6, 15.8, -15.6, 10.8], Rp = [-9.5, 6.4, -4.8, 6.4, -4.8, 10.8, -6.8, 15.8, -9.5, 18.1];
   for (const [P28, side] of [[L, -1], [Rp, 1]]) {
     c.save();
@@ -123411,7 +123411,7 @@ KG_HELM["head-wrap"] = (c, A2, face4, sway = 0) => {
 var RG_SLOUCH = { b: "#7a5f36", d: "#5a4527", l: "#9c7c4a" };
 var RG_CORD = { b: "#b39556", d: "#6e5832" };
 KG_HELM["slouch-cap"] = (c, A2, face4, sway = 0) => {
-  const S18 = RG_SLOUCH, s = sway * 0.6, O15 = "#14110d";
+  const S18 = RG_SLOUCH, s = sway * 0.6, O16 = "#14110d";
   px3(c, -1.4, -10.2, 10.6, 1, "#00000038");
   G3(c, [-13.2, -9.4, -15.4 + s, -5.6, -14.6 + s, -4.6, -12.2 + s, -4.8, -12, -9.2], RG_HEM, { split: 0.5, lw: 1 });
   c.save();
@@ -123424,7 +123424,7 @@ KG_HELM["slouch-cap"] = (c, A2, face4, sway = 0) => {
   }
   c.stroke();
   c.restore();
-  R3(c, -13.6, -9.8, 2, 1, { b: A2.c, d: O15 }, { flat: true, lw: 0.6 });
+  R3(c, -13.6, -9.8, 2, 1, { b: A2.c, d: O16 }, { flat: true, lw: 0.6 });
   G3(c, [-11.8, -9.4, -12.6, -13, -13.8, -15.8, -13.4, -18.6, -11, -20.8, -7.4, -21.8, -3.4, -21.2, 0.8, -20.2, 5, -18.8, 8, -16.8, 9.4, -14.2, 9.4, -12, -3, -12], S18, { split: 0.6, lw: 1.3 });
   G3(c, [-13.6, -16, -11.6, -15.4, -10.4, -13.4, -12.6, -13.2], { b: S18.d, d: "#3e2f1a" }, { flat: true, lw: 0.6 });
   c.save();
@@ -123460,7 +123460,7 @@ KG_HELM["slouch-cap"] = (c, A2, face4, sway = 0) => {
   c.beginPath();
   c.moveTo(8.2, -16.2);
   c.bezierCurveTo(3, -18.4, -5, -16.2, -11, -10.6);
-  c.strokeStyle = O15;
+  c.strokeStyle = O16;
   c.lineWidth = 2.4;
   c.stroke();
   c.strokeStyle = tint2(RG_CORD.b);
@@ -123472,7 +123472,7 @@ KG_HELM["slouch-cap"] = (c, A2, face4, sway = 0) => {
   c.stroke();
   c.restore();
   c.save();
-  c.strokeStyle = O15;
+  c.strokeStyle = O16;
   c.lineWidth = 1.7;
   c.beginPath();
   c.arc(-11.6, -10.4, 1.4, 0, Math.PI * 2);
@@ -124065,7 +124065,7 @@ function rgSoft(c, path18, H8, split = 0.64) {
   c.stroke(path18);
 }
 function rgPilferDeco(c, A2, s, H8, moon = [-2.6, -16.8], ms = 1) {
-  const O15 = "#14110d";
+  const O16 = "#14110d";
   const cord = (pts2) => {
     c.save();
     c.lineCap = "round";
@@ -124090,7 +124090,7 @@ function rgPilferDeco(c, A2, s, H8, moon = [-2.6, -16.8], ms = 1) {
   cord([-10.6, -14.4, 8.6, -11]);
   cord([-10.6, -11.2, 8.6, -14.2]);
   cord([-11.2, -12.6, -13.4 + s * 0.7, -9.6]);
-  R3(c, -12.2, -14, 2.2, 2.2, { b: A2.c, d: O15 }, { flat: true, lw: 0.8 });
+  R3(c, -12.2, -14, 2.2, 2.2, { b: A2.c, d: O16 }, { flat: true, lw: 0.8 });
 }
 function rgPilferTails(c, H8, s) {
   G3(c, [-11, -13.2, -15.6 + s, -15.2, -15 + s, -13.4, -16.2 + s, -11.6, -11, -11.4], H8, { split: 0.5, lw: 1 });
@@ -128006,7 +128006,7 @@ var QUEST_ITEM_POLICY = Object.freeze({
   leftoverCap: 99,
   leftoverKinds: 16
 });
-var item = (id2, name, plural3, creatures, art, desc, title12, why) => Object.freeze({ id: id2, name, plural: plural3, creatures, art, desc, title: title12, why });
+var item = (id2, name, plural3, creatures, art2, desc, title12, why) => Object.freeze({ id: id2, name, plural: plural3, creatures, art: art2, desc, title: title12, why });
 var QUEST_ITEMS = Object.freeze({
   tusk_boar: item("boar-tusk", "Boar Tusk", "Boar Tusks", "Tusk Boars", "tusk", "Pried from a Tusk Boar.", "Tusk Trouble", "Tusk Boars have been tearing up the fields {dir} of {town}."),
   field_scarecrow: item("scarecrow-cape", "Scarecrow's Torn Cape", "Scarecrow's Torn Capes", "Field Scarecrows", "gear:cape:ragged-cape", "Torn off a Field Scarecrow.", "Rags in the Wind", "Field Scarecrows walk the meadows {dir} of {town} at all hours."),
@@ -152883,9 +152883,9 @@ var ART4 = {
     c.stroke();
   }
 };
-function drawQuestItemIconV1(c, art, size = 32) {
-  if (typeof art === "string" && art.startsWith("gear:")) {
-    const [, slot, kind] = art.split(":"), cv = c.canvas, d = cv?.ownerDocument?.createElement?.("canvas");
+function drawQuestItemIconV1(c, art2, size = 32) {
+  if (typeof art2 === "string" && art2.startsWith("gear:")) {
+    const [, slot, kind] = art2.split(":"), cv = c.canvas, d = cv?.ownerDocument?.createElement?.("canvas");
     if (!d) return drawObjectIcon(c, { slot, kind, tier: 0 }, size);
     const t = c.getTransform(), w = Math.ceil(size * Math.max(1, Math.abs(t.a))), off = Object.assign(d, { width: w, height: w }), o = off.getContext("2d");
     o.scale(w / size, w / size);
@@ -152896,7 +152896,7 @@ function drawQuestItemIconV1(c, art, size = 32) {
     c.restore();
     return true;
   }
-  const draw = ART4[art];
+  const draw = ART4[art2];
   if (!draw) return false;
   c.save();
   c.scale(size / 32, size / 32);
@@ -152907,14 +152907,14 @@ function drawQuestItemIconV1(c, art, size = 32) {
   return true;
 }
 var QUEST_ITEM_ARTS = Object.freeze(Object.keys(ART4));
-function questItemCanvasV1(doc, art, size = 32) {
+function questItemCanvasV1(doc, art2, size = 32) {
   const cv = doc.createElement("canvas"), dpr = Math.min(3, doc.defaultView?.devicePixelRatio || 1);
   cv.width = cv.height = Math.round(size * dpr);
   cv.style.width = cv.style.height = size + "px";
   const c = cv.getContext("2d");
   if (c) {
     c.scale(dpr, dpr);
-    drawQuestItemIconV1(c, art, size);
+    drawQuestItemIconV1(c, art2, size);
   }
   return cv;
 }
@@ -153468,15 +153468,15 @@ function itemIconUrl(item2, document2) {
 
 // src/client/trip_snacks_ui_v1.js
 function drawSnackIconV1(canvas, snack) {
-  const art = SNACK_ART[snack];
-  if (!art || !canvas.getContext) return canvas;
+  const art2 = SNACK_ART[snack];
+  if (!art2 || !canvas.getContext) return canvas;
   const c = canvas.getContext("2d"), w = canvas.width;
   c.setTransform(1, 0, 0, 1, 0, 0);
   c.clearRect(0, 0, w, canvas.height);
   const k = w / 30;
   c.setTransform(k, 0, 0, k, w / 2 + (snack === "frog-leg" ? 1.5 * k : 0), canvas.height - 3.5 * k);
   if (snack === "frog-leg") c.scale(0.95, 0.95);
-  art.draw(c, 0, { still: true });
+  art2.draw(c, 0, { still: true });
   c.setTransform(1, 0, 0, 1, 0, 0);
   return canvas;
 }
@@ -154506,11 +154506,11 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     const key4 = JSON.stringify([mine2.map((a) => [a.id, a.have, a.status]), left.map((l) => [l.id, l.count, l.price]), busy, notice, tripSnackKeyV1(readModel())]);
     if (key4 === etcKey) return;
     etcKey = key4;
-    const row2 = (art, name, desc, tags, count2, extra) => {
+    const row2 = (art2, name, desc, tags, count2, extra) => {
       const r = el3("article", null, "mt-row" + (count2 ? "" : " is-zero")), t = el3("div", null, "mt-text"), tg = el3("div", null, "mt-tags");
       for (const [x, c] of tags) tg.append(el3("span", x, "mt-tag" + (c ? " " + c : "")));
       t.append(el3("strong", name), el3("small", desc, "mt-desc"), tg);
-      r.append(questItemCanvasV1(doc, art, 32), t, el3("b", String(count2), "mt-count"));
+      r.append(questItemCanvasV1(doc, art2, 32), t, el3("b", String(count2), "mt-count"));
       if (extra) r.append(extra);
       return r;
     };
@@ -154842,19 +154842,19 @@ function grass2(c, x, y, h, col2, n = 7, seed2 = 1, spread = 1.3, o = 1.4) {
   }
 }
 function stone(c, x, y, w, h, col2, seed2 = 1, opt = {}) {
-  const P28 = opt.pal ?? ramp4(col2, "#0f1724", "#fff6dc"), R14 = rng27(seed2), n = opt.n ?? 9, cx = x, cy2 = y - h * 0.5, O15 = [], I = [], ax = x - w * 0.1 + (R14() - 0.5) * w * 0.08, ay = y - h * (opt.top ?? 0.66), ir = opt.inner ?? 0.46;
+  const P28 = opt.pal ?? ramp4(col2, "#0f1724", "#fff6dc"), R14 = rng27(seed2), n = opt.n ?? 9, cx = x, cy2 = y - h * 0.5, O16 = [], I = [], ax = x - w * 0.1 + (R14() - 0.5) * w * 0.08, ay = y - h * (opt.top ?? 0.66), ir = opt.inner ?? 0.46;
   for (let i = 0; i < n; i++) {
     const a = i / n * TAU173 + Math.PI * 0.5 + (R14() - 0.5) * 0.35, rr3 = 0.88 + R14() * 0.18;
-    O15.push([cx + Math.cos(a) * w * 0.5 * rr3, Math.min(cy2 + Math.sin(a) * h * 0.5 * rr3, y + 1.5)]);
+    O16.push([cx + Math.cos(a) * w * 0.5 * rr3, Math.min(cy2 + Math.sin(a) * h * 0.5 * rr3, y + 1.5)]);
     I.push([ax + Math.cos(a) * w * 0.5 * ir * (0.82 + R14() * 0.3), ay + Math.sin(a) * h * 0.5 * ir * 0.72 * (0.82 + R14() * 0.3)]);
   }
-  const out4 = rounded3(O15, opt.round ?? 0.26);
+  const out4 = rounded3(O16, opt.round ?? 0.26);
   prop4(c, [[out4, P28.m]], opt.o ?? 2.4);
   c.save();
   c.clip(out4);
   for (let i = 0; i < n; i++) {
-    const j = (i + 1) % n, mx = (O15[i][0] + O15[j][0]) / 2 - cx, my = (O15[i][1] + O15[j][1]) / 2 - cy2, L = Math.hypot(mx / w, my / h) || 1, nx = mx / w / L, ny = my / h / L, lf = -nx * 0.66 - (ny < 0 ? ny * 0.75 : ny * 0.12);
-    const f = poly13([O15[i], O15[j], I[j], I[i]]);
+    const j = (i + 1) % n, mx = (O16[i][0] + O16[j][0]) / 2 - cx, my = (O16[i][1] + O16[j][1]) / 2 - cy2, L = Math.hypot(mx / w, my / h) || 1, nx = mx / w / L, ny = my / h / L, lf = -nx * 0.66 - (ny < 0 ? ny * 0.75 : ny * 0.12);
+    const f = poly13([O16[i], O16[j], I[j], I[i]]);
     c.fillStyle = lf > 0.5 ? P28.h : lf > 0.16 ? P28.l : lf > -0.26 ? P28.m : lf > -0.56 ? P28.d : P28.d2;
     c.fill(f);
     c.globalAlpha = 0.5;
@@ -157747,8 +157747,8 @@ function propPiece(c, b, i, S18, time3) {
     c.lineTo(2, 0);
     c.stroke();
     if (i % 3 === 0) {
-      const O15 = ramp4("#3a3240", "#0c0a0e", "#c9b8d6");
-      prop4(c, [[shard3(4, 0, 9, -1.4, 1.6), O15.m]], 1);
+      const O16 = ramp4("#3a3240", "#0c0a0e", "#c9b8d6");
+      prop4(c, [[shard3(4, 0, 9, -1.4, 1.6), O16.m]], 1);
     }
   } else {
     const G5 = ramp4(S18.shell, "#16300c", "#f6ffd8");
@@ -168371,9 +168371,9 @@ function drawWightBody(c, o, P28 = wightPose(o)) {
     hand4(c, J.hx, J.hy, P28.ang, P28.open);
   }
   spaulder(c, 1);
-  const O15 = arm6(c, so[0], so[1], P28.off[0], P28.off[1], 1);
-  if (o.climb && (o.climb.grip ?? 1) > 0.5) hand4(c, O15.hx, O15.hy, P28.offRot + Math.PI, true);
-  else shield2(c, O15.hx + 0.4, O15.hy - 0.2, P28.offRot);
+  const O16 = arm6(c, so[0], so[1], P28.off[0], P28.off[1], 1);
+  if (o.climb && (o.climb.grip ?? 1) > 0.5) hand4(c, O16.hx, O16.hy, P28.offRot + Math.PI, true);
+  else shield2(c, O16.hx + 0.4, O16.hy - 0.2, P28.offRot);
   c.restore();
   c.restore();
   FLASH3 = false;
@@ -170072,10 +170072,10 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
   root6.append(top, body6);
   let tree2 = null, view3 = "tree", selected = null, open3 = false, confirmReset = false, d = null, ready = false, built = null, shown2 = null, lastRanks = {}, lastXp = null, drag2 = null;
   function disc4(n, withRank = true) {
-    const art = PROGRESSION_ICONS[n.iconKey], wrap3 = el3("span", "", "skill-disc"), rank = withRank && n.maxRank !== 1 ? el3("small") : null;
-    if (art) {
+    const art2 = PROGRESSION_ICONS[n.iconKey], wrap3 = el3("span", "", "skill-disc"), rank = withRank && n.maxRank !== 1 ? el3("small") : null;
+    if (art2) {
       const img = el3("img");
-      img.src = art.url;
+      img.src = art2.url;
       img.alt = "";
       wrap3.append(img);
     }
@@ -170342,6 +170342,208 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     lastRanks = {};
     lastXp = null;
   }, inspect: () => ({ tree: tree2, view: view3, selected, open: open3 }) });
+}
+
+// src/client/augment_marks_v1.js
+var O15 = "#0b1015";
+var SW = 3.4;
+var RARITY = { rare: ["#3498db", "#7cc1f0", "#1d5f8c"], epic: ["#9b59b6", "#c79be0", "#5e2f74"], legendary: ["#e67e22", "#ffb366", "#8f4510"] };
+var AUGMENT_MARKS_V1 = Object.freeze({
+  aegis_pulse: [
+    { "f": "M16.2 3.48L21.67 5.52L15.53 9.28ZM12 8a4.6 4.6 0 1 1 0 9.2a4.6 4.6 0 1 1 0 -9.2zM12 9.37a3.21 3.21 0 1 1 0 6.43a3.21 3.21 0 1 1 0 -6.43zM12 10.94a1.65 1.65 0 1 1 0 3.31a1.65 1.65 0 1 1 0 -3.31z", "s": "M18.6 7.4A8.4 8.4 0 1 0 20.4 13.4" },
+    { "f": "M9 4.6a8 8 0 1 1 0 16a8 8 0 1 1 0 -16zM9 7a5.6 5.6 0 1 1 0 11.2a5.6 5.6 0 1 1 0 -11.2zM9 9.71a2.88 2.88 0 1 1 0 5.76a2.88 2.88 0 1 1 0 -5.76zM20 4L23.2 8.6L16.8 8.6ZM18.8 8.6h2.4v10h-2.4z" },
+    { "f": "M12 7.2a4.8 4.8 0 1 1 0 9.6a4.8 4.8 0 1 1 0 -9.6zM12 8.64a3.36 3.36 0 1 1 0 6.72a3.36 3.36 0 1 1 0 -6.72zM12 10.27a1.72 1.72 0 1 1 0 3.45a1.72 1.72 0 1 1 0 -3.45zM23 12L19.4 15.4L19.4 8.6ZM1 12L4.6 8.6L4.6 15.4Z", "s": "M17.8 12H19.8M6.2 12H4.2" },
+    { "f": "M16.4 5.4a6.6 6.6 0 1 1 0 13.2a6.6 6.6 0 1 1 0 -13.2zM16.4 7.38a4.61 4.61 0 1 1 0 9.23a4.61 4.61 0 1 1 0 -9.23zM16.4 9.62a2.37 2.37 0 1 1 0 4.75a2.37 2.37 0 1 1 0 -4.75zM-1.6 15.8L3 12.4L3 19.2Z", "s": "M2.8 8.2H8.2M8.2 15.8H6.2M8.2 8.2a3.8 3.8 0 0 1 0 7.6" }
+  ],
+  ball_lightning: [
+    { "f": "M7.2 10.39a5.2 5.2 0 1 1 0 10.4a5.2 5.2 0 1 1 0 -10.4zM7.91 11.71L4.72 16.1L6.85 16.1L6.14 19.49L9.68 14.75L7.55 14.75ZM17 3a4.6 4.6 0 1 1 0 9.2a4.6 4.6 0 1 1 0 -9.2zM17.63 4.16L14.81 8.04L16.69 8.04L16.06 11.04L19.19 6.85L17.31 6.85Z" },
+    { "f": "M6.8 10.4a5.6 5.6 0 1 1 0 11.2a5.6 5.6 0 1 1 0 -11.2zM7.56 11.81L4.13 16.53L6.42 16.53L5.66 20.19L9.47 15.09L7.18 15.09ZM19.8 1.79a2.8 2.8 0 1 1 0 5.6a2.8 2.8 0 1 1 0 -5.6zM15.28 6.46L12.22 10.68L14.26 10.68L13.58 13.94L16.98 9.38L14.94 9.38Z" },
+    { "f": "M23 12L19.4 13.8L19.4 10.2ZM19.78 19.78L15.96 18.51L18.51 15.96ZM12 23L10.2 19.4L13.8 19.4ZM4.22 19.78L5.49 15.96L8.04 18.51ZM1 12L4.6 10.2L4.6 13.8ZM4.22 4.22L8.04 5.49L5.49 8.04ZM12 1L13.8 4.6L10.2 4.6ZM19.78 4.22L18.51 8.04L15.96 5.49ZM12 6.6a5.4 5.4 0 1 1 0 10.8a5.4 5.4 0 1 1 0 -10.8zM12.73 7.96L9.43 12.51L11.63 12.51L10.9 16.04L14.57 11.12L12.37 11.12Z" },
+    { "f": "M7.8 6.4a6 6 0 1 1 0 12a6 6 0 1 1 0 -12zM8.62 7.91L4.94 12.97L7.39 12.97L6.58 16.89L10.66 11.42L8.21 11.42ZM15.8 6.4h6.4v1.6c0 1.6-1.8 2.4-2.6 3.2.8.8 2.6 1.6 2.6 3.2v1.6h-6.4v-1.6c0-1.6 1.8-2.4 2.6-3.2C17.6 10.4 15.8 9.6 15.8 8z" },
+    { "f": "M8.4 4.8a7.2 7.2 0 1 1 0 14.4a7.2 7.2 0 1 1 0 -14.4zM9.38 6.61L4.97 12.69L7.91 12.69L6.93 17.39L11.83 10.82L8.89 10.82ZM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z" }
+  ],
+  counter_stance: [
+    { "f": "M7.04 19.36L15.38 11.02L16.02 7.98L12.98 8.62L4.64 16.96zM18.6 12.3C17.1 15 15.6 17.1 15.6 18.6a3 3 0 0 0 6 0C21.6 17.1 20.1 15 18.6 12.3z", "s": "M8.1 20.99L3.01 15.9M3.43 20.57L4.71 19.29" },
+    { "f": "M6.44 19.96L10.97 15.44L11.6 12.4L8.56 13.03L4.04 17.56zM17.4 5.19a1.4 1.4 0 1 1 0 2.8a1.4 1.4 0 1 1 0 -2.8z", "s": "M7.5 21.59L2.41 16.5M2.83 21.17L4.11 19.89M17.4 2.4a4.2 4.2 0 1 1 0 8.4a4.2 4.2 0 1 1 0 -8.4" },
+    { "f": "M13.7 19L13.7 5.2L12 2.6L10.3 5.2L10.3 19z", "s": "M15.6 19.4L8.4 19.4M12 22.4L12 20.6M5.4 7.4a8.4 8.4 0 0 0 0 9.2M18.6 7.4a8.4 8.4 0 0 1 0 9.2M2 5a12 12 0 0 0 0 14M22 5a12 12 0 0 1 0 14" },
+    { "f": "M5.84 20.56L10.22 16.18L10.86 13.14L7.82 13.78L3.44 18.16z", "s": "M6.9 22.19L1.81 17.1M2.23 21.77L3.51 20.49M13.6 4.6L16.6 1.6M16.6 9.4L20.4 5.6M20.4 13L23 10.4" },
+    { "f": "M6.44 19.96L13.37 13.03L14.01 9.99L10.97 10.63L4.04 17.56zM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z", "s": "M7.5 21.59L2.41 16.5M2.83 21.17L4.11 19.89" }
+  ],
+  earth_breaker: [
+    { "f": "M2 17.6H10.4L12 20L13.6 17.6H22V21.6H2zM7 4.2L8.25 7.15L11.2 8.4L8.25 9.65L7 12.6L5.75 9.65L2.8 8.4L5.75 7.15ZM17 4.2L18.25 7.15L21.2 8.4L18.25 9.65L17 12.6L15.75 9.65L12.8 8.4L15.75 7.15Z" },
+    { "f": "M2 17.6H10.4L12 20L13.6 17.6H22V21.6H2zM11.6 9.6L7.6 13L7.6 6.2ZM12.4 9.6L16.4 6.2L16.4 13Z", "s": "M2.2 9.6H7.8M21.8 9.6H16.2" },
+    { "f": "M2 17.6H10.4L12 20L13.6 17.6H22V21.6H2z", "s": "M6.4 13.4a5.6 4 0 0 1 11.2 0M2.4 12.4a9.6 8 0 0 1 19.2 0" },
+    { "f": "M2 17.6H10.4L12 20L13.6 17.6H22V21.6H2zM13.32 2.4C16.18 6.3 16.62 9.16 16.4 11.24C16.4 14.36 14.42 15.4 12 15.4C9.58 15.4 7.6 14.36 7.6 11.24C7.6 8.9 8.48 7.08 9.36 5C9.58 7.34 10.68 8.12 11.47 7.6C12.09 5.78 12.97 4.48 13.32 2.4z" },
+    { "f": "M1.6 17.6H7L8.6 20L10.2 17.6H15.6V21.6H1.6zM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM3.4 8.6l2.4-2 2.2 1.6-.8 3-3 .2zM10.4 5.4l2.8-.8 1.4 2.4-1.8 2.2-2.6-1z" }
+  ],
+  firebloom: [
+    { "f": "M13.2 5C15.8 9.68 16.2 13.11 16 15.61C16 19.35 14.2 20.6 12 20.6C9.8 20.6 8 19.35 8 15.61C8 12.8 8.8 10.62 9.6 8.12C9.8 10.93 10.8 11.86 11.52 11.24C12.08 9.06 12.88 7.5 13.2 5zM22.8 14L19.4 16.8L19.4 11.2ZM1.2 14L4.6 11.2L4.6 16.8Z" },
+    { "f": "M7.66 5.8C10.39 10.3 10.81 13.6 10.6 16C10.6 19.6 8.71 20.8 6.4 20.8C4.09 20.8 2.2 19.6 2.2 16C2.2 13.3 3.04 11.2 3.88 8.8C4.09 11.5 5.14 12.4 5.9 11.8C6.48 9.7 7.32 8.2 7.66 5.8zM18.86 5.8C21.59 10.3 22.01 13.6 21.8 16C21.8 19.6 19.91 20.8 17.6 20.8C15.29 20.8 13.4 19.6 13.4 16C13.4 13.3 14.24 11.2 15.08 8.8C15.29 11.5 16.34 12.4 17.1 11.8C17.68 9.7 18.52 8.2 18.86 5.8z" },
+    { "f": "M7.52 4.8C10.38 9.78 10.82 13.43 10.6 16.09C10.6 20.07 8.62 21.4 6.2 21.4C3.78 21.4 1.8 20.07 1.8 16.09C1.8 13.1 2.68 10.78 3.56 8.12C3.78 11.11 4.88 12.1 5.67 11.44C6.29 9.12 7.17 7.46 7.52 4.8z", "s": "M17.6 7.4a4.4 4.4 0 1 1 0 8.8a4.4 4.4 0 1 1 0-8.8zM17.6 9.6v2.4l1.7 1.1" },
+    { "f": "M9.22 4.4C12.73 9.5 13.27 13.24 13 15.96C13 20.04 10.57 21.4 7.6 21.4C4.63 21.4 2.2 20.04 2.2 15.96C2.2 12.9 3.28 10.52 4.36 7.8C4.63 10.86 5.98 11.88 6.95 11.2C7.71 8.82 8.79 7.12 9.22 4.4zM19.44 12.8C21.26 15.38 21.54 17.27 21.4 18.65C21.4 20.71 20.14 21.4 18.6 21.4C17.06 21.4 15.8 20.71 15.8 18.65C15.8 17.1 16.36 15.9 16.92 14.52C17.06 16.07 17.76 16.58 18.26 16.24C18.66 15.04 19.22 14.18 19.44 12.8zM18.6 3.2a1.8 1.8 0 1 1 0 3.6a1.8 1.8 0 1 1 0 -3.6z" },
+    { "f": "M10.52 3.4C14.68 8.8 15.32 12.76 15 15.64C15 19.96 12.12 21.4 8.6 21.4C5.08 21.4 2.2 19.96 2.2 15.64C2.2 12.4 3.48 9.88 4.76 7C5.08 10.24 6.68 11.32 7.83 10.6C8.73 8.08 10.01 6.28 10.52 3.4zM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z" }
+  ],
+  flame_wall: [
+    { "f": "M9.54 3.2C13.31 8.72 13.89 12.77 13.6 15.71C13.6 20.13 10.99 21.6 7.8 21.6C4.61 21.6 2 20.13 2 15.71C2 12.4 3.16 9.82 4.32 6.88C4.61 10.19 6.06 11.3 7.1 10.56C7.92 7.98 9.08 6.14 9.54 3.2z", "s": "M17 10l2.6-2.6 2.6 2.6M17 16.2l2.6-2.6 2.6 2.6", "c": "M8.78 10C10.47 12.88 10.73 14.99 10.6 16.53C10.6 18.83 9.43 19.6 8 19.6C6.57 19.6 5.4 18.83 5.4 16.53C5.4 14.8 5.92 13.46 6.44 11.92C6.57 13.65 7.22 14.22 7.69 13.84C8.05 12.5 8.57 11.54 8.78 10z" },
+    { "f": "M12 9.2a2.8 2.8 0 1 1 0 5.6a2.8 2.8 0 1 1 0 -5.6zM12.69 0.2C14.18 1.94 14.41 3.22 14.3 4.14C14.3 5.54 13.27 6 12 6C10.73 6 9.7 5.54 9.7 4.14C9.7 3.1 10.16 2.29 10.62 1.36C10.73 2.4 11.31 2.75 11.72 2.52C12.05 1.71 12.51 1.13 12.69 0.2zM23.44 9.01C22.24 10.97 21.1 11.58 20.18 11.76C18.86 12.19 18.1 11.35 17.71 10.15C17.32 8.94 17.44 7.82 18.76 7.38C19.75 7.06 20.67 7.25 21.69 7.4C20.74 7.83 20.58 8.49 20.93 8.81C21.8 8.86 22.5 9.12 23.44 9.01zM18.38 21.95C16.15 21.42 15.21 20.53 14.76 19.71C13.94 18.58 14.5 17.6 15.53 16.85C16.55 16.11 17.66 15.88 18.48 17C19.09 17.85 19.2 18.78 19.37 19.8C18.66 19.02 17.99 19.08 17.8 19.51C18.01 20.35 17.98 21.09 18.38 21.95zM4.51 21.14C4.32 18.85 4.88 17.69 5.52 17C6.34 15.88 7.45 16.11 8.47 16.85C9.5 17.6 10.06 18.58 9.24 19.71C8.63 20.55 7.78 20.94 6.86 21.42C7.38 20.51 7.12 19.89 6.65 19.83C5.91 20.3 5.2 20.5 4.51 21.14zM0.99 7.7C3.11 6.81 4.39 6.99 5.24 7.38C6.56 7.82 6.68 8.94 6.29 10.15C5.9 11.35 5.14 12.19 3.82 11.76C2.82 11.44 2.19 10.75 1.45 10.02C2.48 10.24 2.99 9.8 2.9 9.33C2.23 8.78 1.82 8.16 0.99 7.7z" },
+    { "f": "M1.6 19h11.6v2.6H1.6zM4.05 9.24C5.18 12.05 5.35 14.11 5.27 15.6C5.27 17.85 4.49 18.6 3.53 18.6C2.58 18.6 1.8 17.85 1.8 15.6C1.8 13.92 2.15 12.61 2.49 11.11C2.58 12.8 3.01 13.36 3.33 12.98C3.57 11.67 3.91 10.74 4.05 9.24zM7.92 6.6C9.05 10.2 9.22 12.84 9.13 14.76C9.13 17.64 8.35 18.6 7.4 18.6C6.45 18.6 5.67 17.64 5.67 14.76C5.67 12.6 6.01 10.92 6.36 9C6.45 11.16 6.88 11.88 7.19 11.4C7.43 9.72 7.78 8.52 7.92 6.6zM11.79 9.24C12.91 12.05 13.09 14.11 13 15.6C13 17.85 12.22 18.6 11.27 18.6C10.31 18.6 9.53 17.85 9.53 15.6C9.53 13.92 9.88 12.61 10.23 11.11C10.31 12.8 10.75 13.36 11.06 12.98C11.3 11.67 11.65 10.74 11.79 9.24zM15.8 6.4h6.4v1.6c0 1.6-1.8 2.4-2.6 3.2.8.8 2.6 1.6 2.6 3.2v1.6h-6.4v-1.6c0-1.6 1.8-2.4 2.6-3.2C17.6 10.4 15.8 9.6 15.8 8z" },
+    { "f": "M1.8 19h12.39v2.6H1.8zM4.43 9.24C5.64 12.05 5.83 14.11 5.73 15.6C5.73 17.85 4.89 18.6 3.87 18.6C2.84 18.6 2 17.85 2 15.6C2 13.92 2.37 12.61 2.75 11.11C2.84 12.8 3.31 13.36 3.64 12.98C3.9 11.67 4.28 10.74 4.43 9.24zM8.56 6.6C9.77 10.2 9.96 12.84 9.87 14.76C9.87 17.64 9.03 18.6 8 18.6C6.97 18.6 6.13 17.64 6.13 14.76C6.13 12.6 6.51 10.92 6.88 9C6.97 11.16 7.44 11.88 7.78 11.4C8.04 9.72 8.41 8.52 8.56 6.6zM12.69 9.24C13.91 12.05 14.09 14.11 14 15.6C14 17.85 13.16 18.6 12.13 18.6C11.11 18.6 10.27 17.85 10.27 15.6C10.27 13.92 10.64 12.61 11.01 11.11C11.11 12.8 11.57 13.36 11.91 12.98C12.17 11.67 12.54 10.74 12.69 9.24zM23.2 14.6L18.6 18.2L18.6 11Z", "s": "M15.4 14.6H19" },
+    { "f": "M1.6 19h13.6v2.6H1.6zM4.49 8.93C5.83 11.83 6.04 13.96 5.93 15.5C5.93 17.83 5 18.6 3.87 18.6C2.73 18.6 1.8 17.83 1.8 15.5C1.8 13.76 2.21 12.41 2.63 10.86C2.73 12.6 3.25 13.18 3.62 12.8C3.91 11.44 4.32 10.48 4.49 8.93zM9.02 6.2C10.36 9.92 10.57 12.65 10.47 14.63C10.47 17.61 9.54 18.6 8.4 18.6C7.26 18.6 6.33 17.61 6.33 14.63C6.33 12.4 6.75 10.66 7.16 8.68C7.26 10.91 7.78 11.66 8.15 11.16C8.44 9.42 8.85 8.18 9.02 6.2zM13.55 8.93C14.9 11.83 15.1 13.96 15 15.5C15 17.83 14.07 18.6 12.93 18.6C11.8 18.6 10.87 17.83 10.87 15.5C10.87 13.76 11.28 12.41 11.69 10.86C11.8 12.6 12.31 13.18 12.69 12.8C12.97 11.44 13.39 10.48 13.55 8.93zM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z" }
+  ],
+  flashfreeze: [
+    { "f": "M22.8 12L19.4 15L19.4 9ZM1.2 12L4.6 9L4.6 15Z", "s": "M12 18.2L12 5.8M6.63 15.1L17.37 8.9M6.63 8.9L17.37 15.1" },
+    { "f": "M5.7 3H18.3L21 5.7V18.3L18.3 21H5.7L3 18.3V5.7z", "c": "M9.6 3.4L13.2 9 10 12.6l4.4 4.6-2 4.2" },
+    { "f": "M1.8 5H10.2L8.6 9 11 12.6 8.8 16.2 10.2 19H1.8zM13.8 5H22.2V19H13.8L15.2 16.2 13 12.6 15.4 9z", "s": "M12 1.2V2.4M12 21.6V22.8" },
+    { "f": "M16.4 9L21.4 11.14C21.4 17.04 18.9 20.52 16.4 22.4C13.9 20.52 11.4 17.04 11.4 11.14z", "s": "M6.4 12.2L6.4 2.6M2.24 9.8L10.56 5M2.24 5L10.56 9.8" },
+    { "f": "M20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z", "s": "M8.6 20.2L8.6 3.8M1.5 16.1L15.7 7.9M1.5 7.9L15.7 16.1M8.6 6.92L6.86 5.18M8.6 6.92L10.34 5.18M13 9.46L13.64 7.08M13 9.46L15.38 10.09M13 14.54L15.38 13.91M13 14.54L13.64 16.92M8.6 17.08L10.34 18.82M8.6 17.08L6.86 18.82M4.2 14.54L3.56 16.92M4.2 14.54L1.82 13.91M4.2 9.46L1.82 10.09M4.2 9.46L3.56 7.08" }
+  ],
+  glacial_burst: [
+    { "f": "M8.4 5.4L9.7 9.75L14.12 8.7L11 12L14.12 15.3L9.7 14.25L8.4 18.6L7.1 14.25L2.68 15.3L5.8 12L2.68 8.7L7.1 9.75ZM12.02 18.43L14.37 14.38L16.43 20.02Z", "s": "M16.2 6.6c4.6 1.2 5.6 7.6 1.4 10.2" },
+    { "f": "M12 9.4a2.6 2.6 0 1 1 0 5.2a2.6 2.6 0 1 1 0 -5.2zM15.11 8.89L19.14 8.25L22.89 1.11L15.75 4.86zM15.11 15.11L15.75 19.14L22.89 22.89L19.14 15.75zM8.89 15.11L4.86 15.75L1.11 22.89L8.25 19.14zM8.89 8.89L8.25 4.86L1.11 1.11L4.86 8.25z" },
+    { "f": "M2 17.6h20l-2.6 4H4.6zM12 15.6L14.6 11.88L12 3.2L9.4 11.88zM6.6 15.6L7.78 12.42L3.66 7.52L3.65 13.93zM17.4 15.6L20.35 13.93L20.34 7.52L16.22 12.42z" },
+    { "f": "M12 10.4a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0 -3.2zM12 9.4L13.18 8.18L12 5.8L10.82 8.18zM14.25 10.7L15.9 11.11L17.37 8.9L14.72 9.07zM14.25 13.3L14.72 14.93L17.37 15.1L15.9 12.89zM12 14.6L10.82 15.82L12 18.2L13.18 15.82zM9.75 13.3L8.1 12.89L6.63 15.1L9.28 14.93zM9.75 10.7L9.28 9.07L6.63 8.9L8.1 11.11z", "s": "M7.4 2.4H16.6L21.6 7.4V16.6L16.6 21.6H7.4L2.4 16.6V7.4z" }
+  ],
+  ice_barrier: [
+    { "f": "M9 2.6L16.2 5.7C16.2 14.24 12.6 19.28 9 22C5.4 19.28 1.8 14.24 1.8 5.7zM20 5L23.2 9.6L16.8 9.6ZM18.8 9.6h2.4v10h-2.4z" },
+    { "f": "M12 2.4L20.8 5.54C20.8 14.16 16.4 19.26 12 22C7.6 19.26 3.2 14.16 3.2 5.54z", "c": "M11.4 2L13.6 8.4 10.4 12.4l3.6 4.4-1.8 5" },
+    { "f": "M12 5.4L18 7.64C18 13.8 15 17.44 12 19.4C9 17.44 6 13.8 6 7.64zM12 0.8L13.8 4.4L10.2 4.4ZM21.69 5.7L19.3 9.16L17.5 6.04ZM2.31 5.7L6.5 6.04L4.7 9.16ZM21.98 15.23L17.98 15.69L19.22 12.31ZM2.02 15.23L4.78 12.31L6.02 15.69Z" },
+    { "f": "M16.2 3.48L21.67 5.52L15.53 9.28ZM12 7.4L16 9.03C16 13.52 14 16.17 12 17.6C10 16.17 8 13.52 8 9.03z", "s": "M18.6 7.4A8.4 8.4 0 1 0 20.4 13.4" },
+    { "f": "M8.6 2.4L15.8 5.54C15.8 14.16 12.2 19.26 8.6 22C5 19.26 1.4 14.16 1.4 5.54zM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z" }
+  ],
+  lunge: [
+    { "f": "M22.6 12L15.4 16.4L15.4 7.6Z", "s": "M3 12H16.5M3 7.4v9.2" },
+    { "f": "M12 2.2C9 6.8 5.4 10.4 5.4 14.6a6.6 6.6 0 0 0 13.2 0C18.6 10.4 15 6.8 12 2.2z", "c": "M2.6 16.4L21.4 12.2" },
+    { "f": "M2.6 5.6h3.2v12.8H2.6zM9 5.6h3.2v12.8H9zM15.4 5.6h3.2v12.8h-3.2zM23.2 12L18.4 15.4L18.4 8.6Z", "c": "M1.6 12H19" },
+    { "f": "M21.2 7.2L12.4 11.1L12.4 3.3ZM21.2 16.8L12.4 20.7L12.4 12.9Z", "s": "M2.8 7.2H13.4M2.8 16.8H13.4" },
+    { "f": "M17.2 12L10.6 16.2L10.6 7.8ZM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z", "s": "M2.6 12H11.6" }
+  ],
+  meteor: [
+    { "s": "M12 12.2c0-1.6 2.4-1.6 2.4.2 0 2.6-4.2 3-5 .2-1-3.4 3.4-6 6.6-4.2 4 2.4 2.8 8.6-1.6 9.8-5 1.4-9.4-2.6-8.6-7.4.6-3.6 3.6-6 7-6.2" },
+    { "f": "M6.6 10.38L9.03 6.87L13.35 6.6L17.13 9.3L17.4 13.89L14.7 17.13L9.84 17.4L6.87 14.97ZM1.4 2.94L2.39 1.51L4.15 1.4L5.69 2.5L5.8 4.37L4.7 5.69L2.72 5.8L1.51 4.81ZM18.2 2.94L19.19 1.51L20.95 1.4L22.49 2.5L22.6 4.37L21.5 5.69L19.52 5.8L18.31 4.81ZM1.4 19.74L2.39 18.31L4.15 18.2L5.69 19.3L5.8 21.17L4.7 22.49L2.72 22.6L1.51 21.61ZM18.2 19.74L19.19 18.31L20.95 18.2L22.49 19.3L22.6 21.17L21.5 22.49L19.52 22.6L18.31 21.61Z" },
+    { "f": "M6 14.6L8.7 10.7L13.5 10.4L17.7 13.4L18 18.5L15 22.1L9.6 22.4L6.3 19.7ZM5.6 1L6.67 3.53L9.2 4.6L6.67 5.67L5.6 8.2L4.53 5.67L2 4.6L4.53 3.53ZM18.4 1L19.47 3.53L22 4.6L19.47 5.67L18.4 8.2L17.33 5.67L14.8 4.6L17.33 3.53Z" },
+    { "f": "M12.8 16.02L14.87 13.03L18.55 12.8L21.77 15.1L22 19.01L19.7 21.77L15.56 22L13.03 19.93Z", "s": "M3 3l8 8M3 10.4l5 5M10.4 3l5 5" }
+  ],
+  noxious_bloom: [
+    { "f": "M12 15.6a3.2 3.2 0 1 1 0 6.4a3.2 3.2 0 1 1 0 -6.4zM3.6 1.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20.4 1.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM5.17 8.22L8.66 10.78L4.14 12.42ZM18.83 8.22L19.86 12.42L15.34 10.78Z", "s": "M9.4 16.4Q6.8 15.4 6.4 11.8M14.6 16.4Q17.2 15.4 17.6 11.8" },
+    { "f": "M12 10.1a1.9 1.9 0 1 1 0 3.8a1.9 1.9 0 1 1 0 -3.8zM12 9.4Q14.24 7.5 12 5.6Q9.76 7.5 12 9.4zM14.25 10.7Q17.02 11.69 17.54 8.8Q14.78 7.81 14.25 10.7zM14.25 13.3Q14.78 16.19 17.54 15.2Q17.02 12.31 14.25 13.3zM12 14.6Q9.76 16.5 12 18.4Q14.24 16.5 12 14.6zM9.75 13.3Q6.98 12.31 6.46 15.2Q9.22 16.19 9.75 13.3zM9.75 10.7Q9.22 7.81 6.46 8.8Q6.98 11.69 9.75 10.7zM22.6 12L19 14.8L19 9.2ZM1.4 12L5 9.2L5 14.8Z" },
+    { "f": "M9 8.2a1.8 1.8 0 1 1 0 3.6a1.8 1.8 0 1 1 0 -3.6zM9 7.6Q11.24 5.2 9 2.8Q6.76 5.2 9 7.6zM11.08 8.8Q14.28 9.54 15.24 6.4Q12.04 5.66 11.08 8.8zM11.08 11.2Q12.04 14.34 15.24 13.6Q14.28 10.46 11.08 11.2zM9 12.4Q6.76 14.8 9 17.2Q11.24 14.8 9 12.4zM6.92 11.2Q3.72 10.46 2.76 13.6Q5.96 14.34 6.92 11.2zM6.92 8.8Q5.96 5.66 2.76 6.4Q3.72 9.54 6.92 8.8zM19 12.3C17.5 15 16 17.1 16 18.6a3 3 0 0 0 6 0C22 17.1 20.5 15 19 12.3z" },
+    { "s": "M2.4 21.2H21.6M6.4 21.2C6.4 15 3.4 13.6 4.2 9.4M12 21.2V8.6C12 5.6 14.4 4.4 15.6 6M17.6 21.2C17.6 16 20.6 14.8 19.8 10.6" }
+  ],
+  rallying_cry: [
+    { "f": "M12 19.2C4.6 14.2 1.8 10.2 1.8 6.2A5 5 0 0 1 12 4 5 5 0 0 1 22.2 6.2C22.2 10.2 19.4 14.2 12 19.2z", "c": "M12 7.6V12.6M9.5 10.1H14.5" },
+    { "f": "M12 18.8C8.01 16.1 6.5 13.94 6.5 11.79A2.7 2.7 0 0 1 12 10.6 2.7 2.7 0 0 1 17.5 11.79C17.5 13.94 15.99 16.1 12 18.8zM3 3.2a2.2 2.2 0 1 1 0 4.4a2.2 2.2 0 1 1 0 -4.4zM12 1.19a2.2 2.2 0 1 1 0 4.4a2.2 2.2 0 1 1 0 -4.4zM21 3.2a2.2 2.2 0 1 1 0 4.4a2.2 2.2 0 1 1 0 -4.4z" },
+    { "f": "M7.4 14.4a3.6 3.6 0 1 1 0 7.2a3.6 3.6 0 1 1 0 -7.2zM9.4 3h2.6v15h-2.6zM12 3c2.8.6 4.4 2.4 4 5.4-1-1.6-2.4-2.2-4-2.2zM19.4 4.2L22.6 8.8L16.2 8.8ZM18.2 8.8h2.4v10h-2.4z" },
+    { "f": "M12 1.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM4 10.4L6.4 13L1.6 13ZM20 10.4L22.4 13L17.6 13Z", "s": "M12 6.8V20.6M7.6 9.6h8.8M4 14.4c0 4 3.6 6.2 8 6.2s8-2.2 8-6.2" },
+    { "f": "M8.6 16.62C2.94 12.8 0.8 9.74 0.8 6.68A3.82 3.82 0 0 1 8.6 5 3.82 3.82 0 0 1 16.4 6.68C16.4 9.74 14.26 12.8 8.6 16.62zM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z" }
+  ],
+  retribution: [
+    { "f": "M12 5.2L13.07 9.41L16.81 7.19L14.59 10.93L18.8 12L14.59 13.07L16.81 16.81L13.07 14.59L12 18.8L10.93 14.59L7.19 16.81L9.41 13.07L5.2 12L9.41 10.93L7.19 7.19L10.93 9.41ZM23 12L19.6 15L19.6 9ZM1 12L4.4 9L4.4 15Z" },
+    { "f": "M12 0.8L14.45 6.09L19.92 4.08L17.91 9.55L23.2 12L17.91 14.45L19.92 19.92L14.45 17.91L12 23.2L9.55 17.91L4.08 19.92L6.09 14.45L0.8 12L6.09 9.55L4.08 4.08L9.55 6.09ZM12 7.72C10.6 10.24 9.2 12.2 9.2 13.6a2.8 2.8 0 0 0 5.6 0C14.8 12.2 13.4 10.24 12 7.72z" },
+    { "f": "M8.6 19.6C3.4 16 1.4 12.6 1.4 9.4A4.6 4.6 0 0 1 8.6 5.8l1.4 2.2-1.6 2.4 2 2.4-1.4 2.6 1.8 2.6zM17.6 1.6L21.2 6.6L14 6.6ZM16.4 6.6h2.4v12.6h-2.4z" },
+    { "f": "M12 0.8L14.45 6.09L19.92 4.08L17.91 9.55L23.2 12L17.91 14.45L19.92 19.92L14.45 17.91L12 23.2L9.55 17.91L4.08 19.92L6.09 14.45L0.8 12L6.09 9.55L4.08 4.08L9.55 6.09ZM12 14.71C9.32 12.9 8.3 11.45 8.3 10A1.81 1.81 0 0 1 12 9.2 1.81 1.81 0 0 1 15.7 10C15.7 11.45 14.68 12.9 12 14.71z" }
+  ],
+  riposte: [
+    { "f": "M1.8 18.4C4.4 8.2 19.6 8.2 22.2 18.4C17.4 13 6.6 13 1.8 18.4z" },
+    { "f": "M16.2 3.48L21.67 5.52L15.53 9.28ZM9.2 8.6L15.6 12 9.2 15.4l1.6-3.4z", "s": "M18.6 7.4A8.4 8.4 0 1 0 20.4 13.4" },
+    { "f": "M12 8.8a3.2 3.2 0 1 1 0 6.4a3.2 3.2 0 1 1 0 -6.4zM12 7.4L8.6 1.4L15.4 1.4ZM12 16.6L15.4 22.6L8.6 22.6ZM7.4 12L1.4 15.4L1.4 8.6ZM16.6 12L22.6 8.6L22.6 15.4Z" },
+    { "f": "M15 2.6h3.8v18.8H15zM-1.8 15.8L3 12.2L3 19.4Z", "s": "M2.8 8.2H12.6M12.6 15.8H6.4" },
+    { "f": "M16.56 6.64L14.44 12.44L10.76 8.76ZM-0.16 6.64L5.64 8.76L1.96 12.44ZM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z", "s": "M2.6 20.6L13.2 10M13.8 20.6L3.2 10" }
+  ],
+  rupture: [
+    { "f": "M5.6 7.42C3.7 10.84 1.8 13.5 1.8 15.4a3.8 3.8 0 0 0 7.6 0C9.4 13.5 7.5 10.84 5.6 7.42zM14 9.91C12.55 12.52 11.1 14.55 11.1 16a2.9 2.9 0 0 0 5.8 0C16.9 14.55 15.45 12.52 14 9.91zM20.6 12.19C19.55 14.08 18.5 15.55 18.5 16.6a2.1 2.1 0 0 0 4.2 0C22.7 15.55 21.65 14.08 20.6 12.19z", "s": "M2.6 22H21.4" },
+    { "f": "M12 4.96C9.8 8.92 7.6 12 7.6 14.2a4.4 4.4 0 0 0 8.8 0C16.4 12 14.2 8.92 12 4.96zM3 3a2 2 0 1 1 0 4a2 2 0 1 1 0 -4zM21 3a2 2 0 1 1 0 4a2 2 0 1 1 0 -4zM2.6 17.6a2 2 0 1 1 0 4a2 2 0 1 1 0 -4zM21.4 17.6a2 2 0 1 1 0 4a2 2 0 1 1 0 -4z" },
+    { "f": "M12 21.4C4.6 16.4 1.8 12.4 1.8 8.4A5 5 0 0 1 12 6.2 5 5 0 0 1 22.2 8.4C22.2 12.4 19.4 16.4 12 21.4z", "c": "M12 7.14C10.7 9.48 9.4 11.3 9.4 12.6a2.6 2.6 0 0 0 5.2 0C14.6 11.3 13.3 9.48 12 7.14z" },
+    { "f": "M12 1L14.45 6.09L19.78 4.22L17.91 9.55L23 12L17.91 14.45L19.78 19.78L14.45 17.91L12 23L9.55 17.91L4.22 19.78L6.09 14.45L1 12L6.09 9.55L4.22 4.22L9.55 6.09Z", "c": "M12 9a3 3 0 1 1 0 6a3 3 0 1 1 0 -6z" }
+  ],
+  shadowstep: [
+    { "f": "M12 1.8a8.4 8.4 0 0 0-8.4 8.4c0 3.2 1.6 5.2 3.6 6.2v4.6h9.6v-4.6c2-1 3.6-3 3.6-6.2A8.4 8.4 0 0 0 12 1.8zM8.6 8.6a2.2 2.2 0 1 1 0 4.4a2.2 2.2 0 1 1 0-4.4zM15.4 8.6a2.2 2.2 0 1 1 0 4.4a2.2 2.2 0 1 1 0-4.4zM12 13.6l1.4 2.4h-2.8z" },
+    { "s": "M4 4.8l7.2 7.2L4 19.2M12.6 4.8l7.2 7.2-7.2 7.2" },
+    { "f": "M12 1.4C9.6 3.4 5.4 6.8 5 12.4L2.4 22.4h19.2L19 12.4C18.6 6.8 14.4 3.4 12 1.4zM12 8.6c-2.2 0-3.6 1.9-3.6 4.2s1.6 3.6 3.6 3.6 3.6-1.3 3.6-3.6S14.2 8.6 12 8.6z" },
+    { "f": "M19.95 4.05L16.56 10.56L13.44 7.44ZM4.05 4.05L10.56 7.44L7.44 10.56Z", "s": "M5.4 18.6L15.4 8.6M18.6 18.6L8.6 8.6M3.6 15.2l5.2 5.2M20.4 15.2l-5.2 5.2" }
+  ],
+  shield_charge: [
+    { "f": "M1.6 4H11.6V10.24C11.6 15.54 8.6 18.35 6.6 19.6C4.6 18.35 1.6 15.54 1.6 10.24zM14.2 2.4h7.6v5.4h-7.6zM16.6 9.4h5.2v5.4h-5.2zM14.2 16.4h7.6v5.4h-7.6z" },
+    { "f": "M11.4 4H21.8V10.24C21.8 15.54 18.68 18.35 16.6 19.6C14.52 18.35 11.4 15.54 11.4 10.24z", "s": "M1.6 7.4H8.8M1.6 11.8H9.4M1.6 16.2H8.8" },
+    { "f": "M2 3H16V10.2C16 16.32 11.8 19.56 9 21C6.2 19.56 2 16.32 2 10.2zM20 20L16.8 15.4L23.2 15.4ZM18.8 5.4h2.4v10h-2.4z" },
+    { "f": "M6.8 1.6H17.2V6.64C17.2 10.92 14.08 13.19 12 14.2C9.92 13.19 6.8 10.92 6.8 6.64zM2 17.8H10.4L12 20.2L13.6 17.8H22V21.8H2z" },
+    { "f": "M1.8 3H15.4V10.2C15.4 16.32 11.32 19.56 8.6 21C5.88 19.56 1.8 16.32 1.8 10.2zM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z" }
+  ],
+  shield_throw: [
+    { "f": "M6.6 18.2a2.2 2.2 0 1 1 0 4.4a2.2 2.2 0 1 1 0 -4.4zM11.4 2.2a2.2 2.2 0 1 1 0 4.4a2.2 2.2 0 1 1 0 -4.4zM18.52 9.94L18.04 16.42L12.36 11.98Z", "s": "M1.8 9.4L6.6 15.4 11.4 9.4 15.4 14.4" },
+    { "f": "M17.4 3.4a4.6 4.6 0 1 1 0 9.2a4.6 4.6 0 1 1 0 -9.2zM17.4 4.78a3.21 3.21 0 1 1 0 6.43a3.21 3.21 0 1 1 0 -6.43zM17.4 6.34a1.65 1.65 0 1 1 0 3.31a1.65 1.65 0 1 1 0 -3.31zM-1.4 16L3 12.6L3 19.4Z", "s": "M3.8 16H13.6a4 4 0 0 0 4-4" },
+    { "f": "M12 1.4L14.02 4.47L17.3 2.82L17.52 6.48L21.18 6.7L19.53 9.98L22.6 12L19.53 14.02L21.18 17.3L17.52 17.52L17.3 21.18L14.02 19.53L12 22.6L9.98 19.53L6.7 21.18L6.48 17.52L2.82 17.3L4.47 14.02L1.4 12L4.47 9.98L2.82 6.7L6.48 6.48L6.7 2.82L9.98 4.47ZM12 6.8a5.2 5.2 0 1 1 0 10.4a5.2 5.2 0 1 1 0 -10.4zM12 9.4a2.6 2.6 0 1 1 0 5.2a2.6 2.6 0 1 1 0 -5.2z" },
+    { "f": "M16 8a6.4 6.4 0 1 1 0 12.8a6.4 6.4 0 1 1 0 -12.8zM16 9.92a4.47 4.47 0 1 1 0 8.95a4.47 4.47 0 1 1 0 -8.95zM16 12.09a2.3 2.3 0 1 1 0 4.6a2.3 2.3 0 1 1 0 -4.6zM11.76 6.73L7.55 9.37L8.45 3.03Z", "s": "M3.4 19C1.8 11.4 4.2 6.6 8.4 6.2" },
+    { "f": "M8.6 4.8a7.2 7.2 0 1 1 0 14.4a7.2 7.2 0 1 1 0 -14.4zM8.6 6.96a5.04 5.04 0 1 1 0 10.08a5.04 5.04 0 1 1 0 -10.08zM8.6 9.4a2.59 2.59 0 1 1 0 5.18a2.59 2.59 0 1 1 0 -5.18zM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z" }
+  ],
+  skyfall_leap: [
+    { "f": "M5.4 13.6h13.2a6.6 6.6 0 0 1-13.2 0zM23.2 9.6L19.8 12.6L19.8 6.6ZM0.8 9.6L4.2 6.6L4.2 12.6Z", "s": "M2.4 13.6H21.6" },
+    { "f": "M2 17.4h11.6a5.8 5.8 0 0 1-11.6 0zM15.8 3.4h6.4V5c0 1.6-1.8 2.4-2.6 3.2.8.8 2.6 1.6 2.6 3.2V13h-6.4v-1.6c0-1.6 1.8-2.4 2.6-3.2C17.6 7.4 15.8 6.6 15.8 5z", "s": "M1.2 17.4H14.4" },
+    { "f": "M10 17.6H14.6L16.2 20L17.8 17.6H22.4V21.6H10zM18.57 17.01L14.17 14.45L20.63 12.35Z", "s": "M1.8 15.8C3.6 2.4 13.4 1.6 16.6 10.6" },
+    { "f": "M2 17.6H10.4L12 20L13.6 17.6H22V21.6H2z", "s": "M5.6 13.4L12 7.8l6.4 5.6M5.6 7.6L12 2l6.4 5.6" }
+  ],
+  smoke_veil: [
+    { "f": "M6.5 15.5a4 4 0 0 1-.4-8a5.6 5.6 0 0 1 10.6-1.4a4.6 4.6 0 0 1 1.2 9.4z", "s": "M8 19.6v1.6M12 18.8v2.8M16 19.6v1.6" },
+    { "f": "M10 7.6a7 7 0 1 1 0 14a7 7 0 1 1 0-14zM19.6 1.2l1 2.2 2.2 1-2.2 1-1 2.2-1-2.2-2.2-1 2.2-1z", "s": "M14.6 9.6l2.6-2.6" },
+    { "f": "M10.6 4.6L22 12l-11.4 7.4 3-7.4z", "s": "M2.8 8h5M1.8 12h6.4M2.8 16h5" },
+    { "f": "M1.6 12C4.6 7 8 5 12 5s7.4 2 10.4 7c-3 5-6.4 7-10.4 7s-7.4-2-10.4-7zM12 8.6a3.4 3.4 0 1 0 0 6.8a3.4 3.4 0 1 0 0-6.8z", "c": "M4 21L20 3" },
+    { "f": "M5.6 1.8h12.8v2.6c0 4.2-4.4 5.6-4.4 7.6s4.4 3.4 4.4 7.6v2.6H5.6v-2.6c0-4.2 4.4-5.6 4.4-7.6S5.6 8.6 5.6 4.4zM9 18.6c.6-1.8 2-2.6 3-2.6s2.4.8 3 2.6z" }
+  ],
+  static_field: [
+    { "f": "M12 4.8L15.6 9.6L8.4 9.6ZM10.8 9.6h2.4v6.6h-2.4z", "s": "M12 3.4a8.6 8.6 0 1 1 0 17.2a8.6 8.6 0 1 1 0 -17.2" },
+    { "f": "M3.8 2h5.2v3.8H3.8zM15 2h5.2v3.8H15z", "s": "M6.4 5.6V12a5.6 5.6 0 0 0 11.2 0V5.6" },
+    { "f": "M13.24 5.18L7.66 12.87L11.38 12.87L10.14 18.82L16.34 10.51L12.62 10.51Z", "s": "M12 3.4a8.6 8.6 0 1 1 0 17.2a8.6 8.6 0 1 1 0 -17.2" },
+    { "f": "M14.4 9.2a2.8 2.8 0 1 1 0 5.6a2.8 2.8 0 1 1 0 -5.6z", "s": "M14.4 4.6a7.4 7.4 0 1 1 0 14.8a7.4 7.4 0 1 1 0 -14.8M1.8 8.4H4.6M1.2 12H4M1.8 15.6H4.6" },
+    { "f": "M8.6 9.4a2.6 2.6 0 1 1 0 5.2a2.6 2.6 0 1 1 0 -5.2zM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z", "s": "M8.6 5.2a6.8 6.8 0 1 1 0 13.6a6.8 6.8 0 1 1 0 -13.6" }
+  ],
+  thousand_cuts: [
+    { "f": "M10.4 6.2l2.2 6 6 2.2-6 2.2-2.2 6-2.2-6-6-2.2 6-2.2z", "s": "M19.2 2.4v6.4M16 5.6h6.4" },
+    { "f": "M12 3L15 22L9 22ZM0.92 9.37L14.11 20.15L9.89 23.85ZM23.08 9.37L14.11 23.85L9.89 20.15Z" },
+    { "f": "M5.2 21.6L21.2 5.6l.6 4.2L9.4 22.2z", "s": "M2.8 9.4L8.4 3.8M2.8 15.2L11 7" },
+    { "f": "M17.2 11.2c-1.6 2.6-3.6 4.6-3.6 6.8a3.6 3.6 0 0 0 7.2 0c0-2.2-2-4.2-3.6-6.8z", "s": "M2.4 5.6c2.4-2.6 4.8 2.6 7.2 0s4.8-2.6 7.2 0M2.4 12.4c2.4-2.6 4.8 2.6 7.2 0" }
+  ],
+  thunderfall: [
+    { "f": "M13.64 2.98L6.26 13.15L11.18 13.15L9.54 21.02L17.74 10.03L12.82 10.03ZM4.32 5.04L1.08 9.5L3.24 9.5L2.52 12.96L6.12 8.14L3.96 8.14ZM21.12 5.04L17.88 9.5L20.04 9.5L19.32 12.96L22.92 8.14L20.76 8.14Z" },
+    { "f": "M11.32 3.14L3.58 13.8L8.74 13.8L7.02 22.06L15.62 10.54L10.46 10.54ZM19.6 2.4L20.67 4.93L23.2 6L20.67 7.07L19.6 9.6L18.53 7.07L16 6L18.53 4.93ZM19.2 14.8L20.03 16.77L22 17.6L20.03 18.43L19.2 20.4L18.37 18.43L16.4 17.6L18.37 16.77Z" },
+    { "f": "M13.08 1.66L8.22 8.36L11.46 8.36L10.38 13.54L15.78 6.3L12.54 6.3ZM4 22h16l1.2-7.4-4.6 3.4L12 13.4 7.4 18 2.8 14.6z" },
+    { "f": "M16.2 3.48L21.67 5.52L15.53 9.28ZM12.6 6.9L8.1 13.1L11.1 13.1L10.1 17.9L15.1 11.2L12.1 11.2Z", "s": "M18.6 7.4A8.4 8.4 0 1 0 20.4 13.4" }
+  ],
+  toxic_fan: [
+    { "f": "M-4.55 16.22L5.93 17.63L4.76 21.24ZM1.77 7.52L9.42 14.82L6.35 17.05ZM12 4.2L13.9 14.6L10.1 14.6ZM22.23 7.52L17.65 17.05L14.58 14.82ZM28.55 16.22L19.24 21.24L18.07 17.63ZM12 19.4a2.2 2.2 0 1 1 0 4.4a2.2 2.2 0 1 1 0 -4.4z" },
+    { "f": "M5 2.6h14v3.2c0 3.2-3.6 4.6-5.2 6.2 1.6 1.6 5.2 3 5.2 6.2v3.2H5v-3.2c0-3.2 3.6-4.6 5.2-6.2C8.6 10.4 5 9 5 5.8z", "c": "M8.4 18.6h7.2" },
+    { "f": "M16.7 7.3L6.52 21.72L2.28 17.48ZM0.95 23.05L2.92 18.12L5.88 21.08ZM18.6 11.68C17 14.56 15.4 16.8 15.4 18.4a3.2 3.2 0 0 0 6.4 0C21.8 16.8 20.2 14.56 18.6 11.68z" },
+    { "f": "M19.67 9.05L13.44 10.39L15.76 4.01ZM19.6 12.79a3.6 3.6 0 1 1 0 7.2a3.6 3.6 0 1 1 0 -7.2z", "s": "M3 20.4C3 10 10.6 5.2 15.4 7.6", "c": "M19.6 14.99a1.4 1.4 0 1 1 0 2.8a1.4 1.4 0 1 1 0 -2.8z" },
+    { "f": "M15.8 12L4.4 15.6L4.4 8.4ZM1.21 12L4.4 9.48L4.4 14.52ZM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z" }
+  ],
+  war_banner: [
+    { "f": "M6.6 4.6H17L14.2 8.8L17 13H6.6zM5.4 1.4a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0 -3.2zM23 18.6L19.6 21.6L19.6 15.6Z", "s": "M5.4 3.6V21.2M10.4 18.6H17" },
+    { "f": "M6.2 4.6H16.6L13.8 8.8L16.6 13H6.2zM5 1.4a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0 -3.2z", "s": "M5 3.6V21.2M18.6 13v8M14.6 17h8" },
+    { "f": "M6.2 4.6H16.6L13.8 8.8L16.6 13H6.2zM5 1.4a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0 -3.2zM18.4 12.2l4 1.4c0 4.2-1.6 6.6-4 8-2.4-1.4-4-3.8-4-8z", "s": "M5 3.6V21.2" },
+    { "f": "M10.2 3.6H20.6L17.8 7.4L20.6 11.2H10.2zM9 0.39a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0 -3.2zM9 18.6L6.6 14L11.4 14ZM3.4 21.4a5.6 2.4 0 0 1 11.2 0z", "s": "M9 2.6V14.4" },
+    { "f": "M5.6 4.6H15.2L12.4 8.8L15.2 13H5.6zM4.4 1.4a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0 -3.2zM20 2.8a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8zM20 16.4a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0 -4.8z", "s": "M4.4 3.6V21.2" }
+  ],
+  whirling_blades: [
+    { "f": "M20.34 20.34L14.97 19.78L19.78 14.97ZM3.66 20.34L4.22 14.97L9.03 19.78ZM3.66 3.66L9.03 4.22L4.22 9.03ZM20.34 3.66L19.78 9.03L14.97 4.22Z", "s": "M12 7.8a4.2 4.2 0 1 1 0 8.4a4.2 4.2 0 1 1 0-8.4z" },
+    { "f": "M12 9.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0-4.8z", "s": "M12.43 13.12L12.28 13.34L12.07 13.53L11.8 13.69L11.49 13.79L11.13 13.83L10.76 13.81L10.37 13.7L9.98 13.51L9.61 13.24L9.29 12.89L9.02 12.47L8.81 11.98L8.7 11.44L8.67 10.86L8.76 10.26L8.95 9.65L9.25 9.07L9.67 8.53L10.19 8.05L10.81 7.65L11.52 7.35L12.28 7.17L13.1 7.11L13.93 7.2L14.77 7.44L15.58 7.82L16.33 8.34L17.01 9.01L17.58 9.8L18.03 10.69L18.32 11.67L18.46 12.72L18.42 13.8L18.19 14.88L17.78 15.94L17.19 16.93L16.42 17.84L15.5 18.62L14.44 19.26L13.26 19.72L11.99 19.99L10.67 20.05L9.34 19.88L8.02 19.49L6.76 18.89L5.6 18.06L4.57 17.04L3.7 15.84L3.03 14.5L2.58 13.03L2.37 11.49L2.42 9.9L2.73 8.32L3.3 6.78L4.13 5.34L5.21 4.03L6.5 2.9L7.98 1.97L9.62 1.29L11.37 0.88" },
+    { "f": "M12 1.8l8.4 3.2v6.2c0 6.2-4 9.6-8.4 11.2-4.4-1.6-8.4-5-8.4-11.2V5zM6.6 15.8L15.6 6.8l1.7 1.7-9 9z" },
+    { "s": "M3 4.5h18M6 10h13M9 15.5h8M11.5 20.5h3" },
+    { "f": "M12 1L14.1 5.6L9.9 5.6ZM19.78 4.22L18.01 8.96L15.04 5.99ZM23 12L18.4 14.1L18.4 9.9ZM19.78 19.78L15.04 18.01L18.01 15.04ZM12 23L9.9 18.4L14.1 18.4ZM4.22 19.78L5.99 15.04L8.96 18.01ZM1 12L5.6 9.9L5.6 14.1ZM4.22 4.22L8.96 5.99L5.99 8.96ZM12 9.2a2.8 2.8 0 1 1 0 5.6a2.8 2.8 0 1 1 0-5.6z" }
+  ]
+});
+var uid = 0;
+function art(m, ink5, bg) {
+  let g2 = "";
+  if (m.s) g2 += `<path d="${m.s}" fill="none" stroke="${O15}" stroke-width="${SW + 2.4}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if (m.f) g2 += `<path d="${m.f}" fill="${O15}" fill-rule="evenodd" stroke="${O15}" stroke-width="2.4" stroke-linejoin="round"/>`;
+  if (m.s) g2 += `<path d="${m.s}" fill="none" stroke="${ink5}" stroke-width="${SW}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if (m.f) g2 += `<path d="${m.f}" fill="${ink5}" fill-rule="evenodd"/>`;
+  if (m.c) g2 += `<path d="${m.c}" fill="none" stroke="${bg}" stroke-width="${SW + 2.6}" stroke-linecap="round"/><path d="${m.c}" fill="none" stroke="${O15}" stroke-width="${SW + 1.6}" stroke-linecap="round"/><path d="${m.c}" fill="none" stroke="${ink5}" stroke-width="${SW - 0.6}" stroke-linecap="round"/>`;
+  return g2;
+}
+function augmentBadgeSvg(skillId, index, rarity) {
+  const m = AUGMENT_MARKS_V1[skillId]?.[index], c = RARITY[rarity];
+  if (!m || !c) return "";
+  const [base3, hi, deep6] = c, p = "amk" + ++uid;
+  return `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="${p}" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="${hi}"/><stop offset=".55" stop-color="${base3}"/><stop offset="1" stop-color="${deep6}"/></radialGradient></defs><circle cx="24" cy="24" r="21.5" fill="url(#${p})" stroke="${O15}" stroke-width="2.6"/><circle cx="24" cy="24" r="18.4" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="1.4"/><path d="M9.6 19.4a15 15 0 0 1 9.6-9.8" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/><g transform="translate(10.8 10.8) scale(1.1)">${art(m, "#ffffff", base3)}</g></svg>`;
 }
 
 // src/shared/content/class_tree_ranks_v1.js
@@ -170663,9 +170865,9 @@ function createClassSkillsViewV1({ document: document2, send }) {
   function treeArt(id2) {
     const svg3 = CLASS_TREE_ART_V1[id2] ?? (CLASS_TREE_SKILLS[id2]?.kind === "active" ? SKILL_ICONS_V1[id2] : null);
     if (!svg3) return null;
-    const art = el3("span", "cs-art");
-    art.innerHTML = svg3;
-    return art;
+    const art2 = el3("span", "cs-art");
+    art2.innerHTML = svg3;
+    return art2;
   }
   function icon2(id2, color28) {
     const svg3 = svgEl("svg");
@@ -170934,7 +171136,12 @@ function createClassSkillsViewV1({ document: document2, send }) {
       text3.prepend(el3("span", "cs-rar", AUGMENT_RARITY_NAMES[rarity] ?? ""));
       if (!owned2) text3.append(el3("em", "", `Craft at an Enchanter \xB7 ${augmentPrice(id2, i)} Glyph Dust` + (rarity === "legendary" ? holdsElderGlyph(d, id2) ? " \xB7 Elder Glyph in hand" : " + its Elder Glyph" : "")));
       else if (!offer.ok && st.learned) text3.append(el3("em", "", offer.reason));
-      row2.append(el3("i"), text3);
+      const mk = el3("i"), svg3 = augmentBadgeSvg(id2, i, rarity);
+      if (svg3) {
+        mk.className = "cs-amk";
+        mk.innerHTML = svg3;
+      }
+      row2.append(mk, text3);
       box6.append(row2);
     });
     return box6;
@@ -171570,7 +171777,7 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
         materials2.append(el3("p", "Augment crafting", "mt-sec"), dr);
         for (const id2 of craft?.glyphs ?? []) {
           const r = el3("article", "", "mt-row mt-glyph"), ic = el3("span", "", "mt-glyph-ic"), t = el3("div", "", "mt-text"), a = CLASS_SKILL_AUGMENTS[id2]?.[legendaryAugmentIndex(id2)];
-          ic.innerHTML = SKILL_ICONS_V1[id2] ?? "";
+          ic.innerHTML = (SKILL_ICONS_V1[id2] ?? "") + (augmentBadgeSvg(id2, legendaryAugmentIndex(id2), "legendary") ? '<span class="mt-glyph-mk">' + augmentBadgeSvg(id2, legendaryAugmentIndex(id2), "legendary") + "</span>" : "");
           t.append(el3("strong", "Elder Glyph \xB7 " + (a?.name ?? CLASS_TREE_SKILLS[id2]?.name ?? id2)), el3("small", "Crafts the Legendary " + (CLASS_TREE_SKILLS[id2]?.name ?? "") + " augment, with 200 Glyph Dust", "mt-desc"));
           r.append(ic, t, el3("b", "1", "mt-count"));
           materials2.append(r);
@@ -174044,6 +174251,7 @@ function createSettlementServicesMenu2(options) {
  #settlement-services .tn-augcard{display:flex;flex-direction:column;gap:8px}
  #settlement-services .tn-aughead{display:flex;align-items:center;gap:10px}#settlement-services .tn-aughead h4{margin:0;flex:1;min-width:0;font:700 15px/1.2 system-ui,sans-serif}#settlement-services .tn-aughead small{color:var(--tn-muted);font-size:12px;flex:none}
  #settlement-services .tn-augic{width:40px;height:40px;border-radius:12px;background:var(--tn-card2);display:grid;place-items:center;flex:none;overflow:hidden}#settlement-services .tn-augic svg{width:34px;height:34px}
+ #settlement-services .tn-amk{width:34px;height:34px;flex:none;display:grid}#settlement-services .tn-amk svg{width:34px;height:34px}#settlement-services .tn-augrow[data-owned="false"] .tn-amk{opacity:.6;filter:saturate(.55)}
  #settlement-services .tn-augrow{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;background:#111820;border:1px solid var(--tn-line2);border-left:3px solid var(--r)}
  #settlement-services .tn-augrow b{display:block;font:700 13px/1.25 system-ui,sans-serif;color:var(--tn-text)}#settlement-services .tn-augrow small{display:block;font-size:12px;line-height:1.35;color:var(--tn-muted)}
  #settlement-services .tn-rar{display:block;margin-bottom:2px;font:800 9.5px/1 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb,var(--r) 75%,#fff)}
@@ -174598,7 +174806,8 @@ function createSettlementServicesMenu2(options) {
             act.title = q2.ok ? "Craft " + a.name : q2.reason;
             act.setAttribute("aria-label", q2.ok ? "Craft " + a.name + " for " + q2.price + " Glyph Dust" : a.name + ": " + q2.reason);
           }
-          row2.append(info2, act);
+          const mk = markup(el3("span", void 0, "tn-amk"), augmentBadgeSvg(id2, i, q2.rarity));
+          row2.append(...mk.firstChild ? [mk] : [], info2, act);
           card.append(row2);
         });
         body6.append(card);
@@ -176445,9 +176654,9 @@ function atlasRoads(c, meta, view3, s, visible3 = null) {
 var ROOF18 = ["#9a5b45", "#8c5240", "#a3664c", "#7f5a4a", "#94604f"];
 var SHOPROOF = { merchant: "#c98f3a", forge: "#6e6a66", inn: "#a5583c", enchanter: "#5b6fb0", temple: "#cfc6b0", hall: "#8e3b30" };
 function drawTownPlan(c, t, view3, s, style) {
-  const O15 = t.origin;
-  if (!inBox(view3, { x: O15.x - 8, y: O15.y - 8, right: O15.x + t.core[0] + 8, bottom: O15.y + t.core[1] + 8 })) return;
-  const P28 = (x, y) => ({ x: (O15.x + x - view3.x) * s, y: (O15.y + y - view3.y) * s }), atlas = style === "atlas";
+  const O16 = t.origin;
+  if (!inBox(view3, { x: O16.x - 8, y: O16.y - 8, right: O16.x + t.core[0] + 8, bottom: O16.y + t.core[1] + 8 })) return;
+  const P28 = (x, y) => ({ x: (O16.x + x - view3.x) * s, y: (O16.y + y - view3.y) * s }), atlas = style === "atlas";
   c.save();
   c.lineJoin = "round";
   c.lineCap = "round";
@@ -180066,7 +180275,7 @@ function enemyDepthFocusPointsV1(model, view3, pad2 = 96) {
 // src/client/ground_item_presentation.js
 var LOOT_VISUAL_BUDGET = Object.freeze({ rich: 12, motes: 24, labels: 4 });
 function groundItemPresentation(drop3, time3, establish = 1, collapse = 0) {
-  const artKey = itemArtKey(drop3), art = EQUIPMENT_ART[artKey], center3 = art?.visibleCenter ?? { x: 17, y: 17 }, pivot2 = art?.pivot ?? { x: 17, y: 31 }, seed2 = gearHash(drop3.itemId ?? drop3.sourceEntityId), phase3 = seed2 % 6283 / 1e3, scale = 26 / 34 * (1 - collapse * 0.3), bob = Math.sin(time3 / 430 + phase3) * 1.1 * establish;
+  const artKey = itemArtKey(drop3), art2 = EQUIPMENT_ART[artKey], center3 = art2?.visibleCenter ?? { x: 17, y: 17 }, pivot2 = art2?.pivot ?? { x: 17, y: 31 }, seed2 = gearHash(drop3.itemId ?? drop3.sourceEntityId), phase3 = seed2 % 6283 / 1e3, scale = 26 / 34 * (1 - collapse * 0.3), bob = Math.sin(time3 / 430 + phase3) * 1.1 * establish;
   const origin = { x: drop3.position.x - center3.x * scale, y: drop3.position.y - pivot2.y * scale - 3 + bob + (1 - establish) * 5 };
   return { artKey, origin, scale, visibleCenter: { x: origin.x + center3.x * scale, y: origin.y + center3.y * scale }, contact: { x: origin.x + pivot2.x * scale, y: drop3.position.y }, phase: phase3, alpha: establish * (1 - collapse), growth: establish, rarity: itemDefinition(drop3)?.rarityTier ?? 0 };
 }
@@ -180155,7 +180364,7 @@ function createGroundItemPresentation() {
       if (time3 - r.removed >= 120) records.delete(id2);
     }
   }
-  function draw(ctx, model, time3, viewport, art) {
+  function draw(ctx, model, time3, viewport, art2) {
     update2(model, time3);
     counts = { rich: 0, motes: 0, labels: 0 };
     const actor = model.entitiesById[model.playersById[model.localPlayerId].entityId];
@@ -180242,7 +180451,7 @@ function createGroundItemPresentation() {
         }
         ctx.globalAlpha = t.alpha;
       }
-      const image = art(t.artKey);
+      const image = art2(t.artKey);
       if (image) ctx.drawImage(image, t.origin.x, t.origin.y, 34 * t.scale, 34 * t.scale);
       if (drop3.canPickUp && counts.labels < LOOT_VISUAL_BUDGET.labels && r.removed === null) {
         counts.labels++;
@@ -189011,7 +189220,7 @@ function drawVoidBossHud(c, canvas, model) {
 
 // src/client/sandglass_wraith_v1.js
 var TAU198 = Math.PI * 2;
-var SW = Object.freeze({
+var SW2 = Object.freeze({
   ink: "#14202a",
   sand: "#e2c27a",
   sandShade: "#b88a48",
@@ -189031,8 +189240,8 @@ var SW = Object.freeze({
   glassShade: "#a9cdcc",
   glassLight: "#f6fdfc"
 });
-var P19 = SW;
-var SAND11 = { sand: SW.sand, sandShade: SW.sandShade, sandLight: SW.sandLight };
+var P19 = SW2;
+var SAND11 = { sand: SW2.sand, sandShade: SW2.sandShade, sandLight: SW2.sandLight };
 var EMBER4 = { sand: "#f08a3c", sandShade: "#b5512a", sandLight: "#ffd27a" };
 function path11(c, pts2) {
   c.beginPath();
@@ -189109,7 +189318,7 @@ function sandglassState(actor, tick, o = {}) {
     p2: o.p2 ?? 0,
     crackAge: o.crackAge ?? -1,
     S: o.p2 ? EMBER4 : SAND11,
-    eye: o.p2 ? "#ff9a4a" : SW.eye
+    eye: o.p2 ? "#ff9a4a" : SW2.eye
   };
 }
 function hourglass(c, s, flash2) {
@@ -189510,7 +189719,7 @@ function drawSlamGround(c, row2, tick) {
       const at9 = 0.06 + 0.86 * hash55(i + 5);
       if (p < at9) continue;
       const g2 = smooth27((p - at9) / 0.18), q2 = hash55(i + 6) * TAU199, r = Math.sqrt(hash55(i + 7)) * (R8 - 14);
-      blob9(c, Math.cos(q2) * r, Math.sin(q2) * r * 0.62, (1.6 + 2.2 * hash55(i + 8)) * g2, i, i % 4 ? SW.sand : SW.sandLight, i % 4 ? SW.sandShade : null, 0.9);
+      blob9(c, Math.cos(q2) * r, Math.sin(q2) * r * 0.62, (1.6 + 2.2 * hash55(i + 8)) * g2, i, i % 4 ? SW2.sand : SW2.sandLight, i % 4 ? SW2.sandShade : null, 0.9);
     }
     if (h != null) {
       const k = 1 - h / 70;
@@ -189544,18 +189753,18 @@ function drawSlamGround(c, row2, tick) {
     c.stroke();
     c.beginPath();
     c.arc(0, 0, R8, -Math.PI / 2, end);
-    c.strokeStyle = SW.sand;
+    c.strokeStyle = SW2.sand;
     c.lineWidth = 4;
     c.stroke();
     c.beginPath();
     c.arc(0, -1, R8, -Math.PI / 2, end);
-    c.strokeStyle = SW.sandLight;
+    c.strokeStyle = SW2.sandLight;
     c.lineWidth = 1.2;
     c.stroke();
     const hx2 = Math.cos(end) * R8, hy = Math.sin(end) * R8;
     for (let k = 0; k < 4; k++) {
       const u = (tick * 0.11 + k / 4) % 1;
-      c.fillStyle = SW.sandLight;
+      c.fillStyle = SW2.sandLight;
       c.fillRect(hx2 - 1 + (k - 1.5) * 1.3, hy - 14 * (1 - u) - 1, 2, 2);
     }
     c.restore();
@@ -189577,17 +189786,17 @@ function drawSlamGround(c, row2, tick) {
   }
   for (let i = 0; i < 7; i++) {
     const q2 = i * TAU199 / 7 + hash55(i + 50) * 0.5, r = (30 + 10 * hash55(i + 51)) * grow2, rr3 = (5 + 3 * hash55(i + 52)) * grow2;
-    blob9(c, Math.cos(q2) * r, Math.sin(q2) * r * 0.62, rr3, i + 50, SW.sand, SW.sandShade);
+    blob9(c, Math.cos(q2) * r, Math.sin(q2) * r * 0.62, rr3, i + 50, SW2.sand, SW2.sandShade);
     c.beginPath();
     c.ellipse(Math.cos(q2) * r, Math.sin(q2) * r * 0.62 - 1, rr3 * 0.55, rr3 * 0.22, q2 * 0.2, Math.PI * 1.1, Math.PI * 1.9);
-    c.strokeStyle = SW.sandLight;
+    c.strokeStyle = SW2.sandLight;
     c.lineWidth = 0.9;
     c.stroke();
   }
   const B9 = 22 * grow2;
   c.beginPath();
   c.ellipse(0, 0, B9, B9 * 0.62, 0, 0, TAU199);
-  c.fillStyle = SW.sand;
+  c.fillStyle = SW2.sand;
   c.fill();
   c.strokeStyle = "#14202a";
   c.lineWidth = 1.4;
@@ -189598,21 +189807,21 @@ function drawSlamGround(c, row2, tick) {
   c.clip();
   c.beginPath();
   c.ellipse(0, -B9 * 0.18, B9 * 0.98, B9 * 0.62, 0, 0, TAU199);
-  c.fillStyle = SW.sandShade;
+  c.fillStyle = SW2.sandShade;
   c.fill();
   c.beginPath();
   c.ellipse(0, B9 * 0.06, B9 * 0.72, B9 * 0.4, 0, 0, TAU199);
-  c.fillStyle = SW.sandDeep;
+  c.fillStyle = SW2.sandDeep;
   c.fill();
   c.beginPath();
   c.ellipse(0, B9 * 0.14, B9 * 0.6, B9 * 0.3, 0, 0, TAU199);
-  c.fillStyle = SW.sandShade;
+  c.fillStyle = SW2.sandShade;
   c.fill();
   c.restore();
   if (B9 > 2) {
     c.beginPath();
     c.ellipse(0, 0, B9 - 1, B9 * 0.62 - 1, 0, Math.PI * 1.08, Math.PI * 1.92);
-    c.strokeStyle = SW.sandLight;
+    c.strokeStyle = SW2.sandLight;
     c.lineWidth = 1.4;
     c.stroke();
   }
@@ -189620,7 +189829,7 @@ function drawSlamGround(c, row2, tick) {
     c.save();
     c.translate(3, B9 * 0.12);
     c.rotate(-0.25);
-    c.fillStyle = SW.bronze;
+    c.fillStyle = SW2.bronze;
     c.strokeStyle = "#14202a";
     c.lineWidth = 1.1;
     c.beginPath();
@@ -189631,7 +189840,7 @@ function drawSlamGround(c, row2, tick) {
     c.moveTo(-7, -2.2);
     c.lineTo(-5, -6);
     c.lineTo(-3, -2.2);
-    c.fillStyle = SW.bronzeLight;
+    c.fillStyle = SW2.bronzeLight;
     c.fill();
     c.stroke();
     c.restore();
@@ -189662,7 +189871,7 @@ function drawSlamGround(c, row2, tick) {
     c.lineTo(gx, gy - 2.2);
     c.lineTo(gx + 2, gy + 0.7);
     c.closePath();
-    c.fillStyle = SW.glass;
+    c.fillStyle = SW2.glass;
     c.fill();
     c.strokeStyle = "#14202a";
     c.lineWidth = 0.8;
@@ -189700,7 +189909,7 @@ function slamDepthItems(row2, tick) {
           c.beginPath();
           c.moveTo(x + dx, y - h + 2);
           c.lineTo(x + dx * 0.4, y);
-          c.strokeStyle = SW.sandLight;
+          c.strokeStyle = SW2.sandLight;
           c.lineWidth = dx ? 1 : 1.6;
           c.stroke();
         }
@@ -189732,13 +189941,13 @@ function slamDepthItems(row2, tick) {
       if (kind === 0) {
         c.beginPath();
         c.ellipse(0, 0, 3.4, 2.6, 0, 0, TAU199);
-        c.fillStyle = SW.sand;
+        c.fillStyle = SW2.sand;
         c.fill();
         c.strokeStyle = "#14202a";
         c.lineWidth = 1;
         c.stroke();
       } else if (kind === 1) {
-        c.fillStyle = SW.bronze;
+        c.fillStyle = SW2.bronze;
         c.strokeStyle = "#14202a";
         c.lineWidth = 1;
         c.fillRect(-3.5, -1.2, 7, 2.4);
@@ -189749,7 +189958,7 @@ function slamDepthItems(row2, tick) {
         c.lineTo(0, -3);
         c.lineTo(2.6, 1);
         c.closePath();
-        c.fillStyle = SW.glassLight;
+        c.fillStyle = SW2.glassLight;
         c.fill();
         c.strokeStyle = "#14202a";
         c.lineWidth = 0.9;
@@ -189763,7 +189972,7 @@ function slamDepthItems(row2, tick) {
         const q2 = i * TAU199 / 16 + hash55(i + 30) * 0.3, r0 = 18 + 44 * u, r1 = r0 + 10 * (1 - u) + 3, lift = 10 * Math.sin(Math.PI * u) * (0.6 + 0.6 * hash55(i));
         const a0 = [x + Math.cos(q2) * r0, y + Math.sin(q2) * r0 * 0.62 - lift], a1 = [x + Math.cos(q2) * r1, y + Math.sin(q2) * r1 * 0.62 - lift * 0.6];
         line33(c, [a0, a1], "#14202a", 3.2 * (1 - u) + 1.2);
-        line33(c, [a0, a1], i % 2 ? SW.sandLight : SW.sand, 2 * (1 - u) + 0.6);
+        line33(c, [a0, a1], i % 2 ? SW2.sandLight : SW2.sand, 2 * (1 - u) + 0.6);
       }
     }
   } });
@@ -189867,7 +190076,7 @@ function drawFieldGround(c, row2, tick) {
   c.stroke();
   c.beginPath();
   c.arc(0, 0, R9 - 0.8, a0, a1);
-  c.strokeStyle = SW.eyeHot;
+  c.strokeStyle = SW2.eyeHot;
   c.lineWidth = 0.8;
   c.stroke();
   c.beginPath();
@@ -189920,7 +190129,7 @@ function drawFieldGround(c, row2, tick) {
     c.strokeStyle = "#14202a";
     c.lineWidth = 2;
     c.stroke();
-    c.strokeStyle = SW.eyeHot;
+    c.strokeStyle = SW2.eyeHot;
     c.lineWidth = 0.9;
     c.stroke();
     c.restore();
@@ -189960,7 +190169,7 @@ function fieldDepthItems(row2, tick) {
       c.rotate(0.785 + tick * 2e-3 * (i % 2 ? 1 : -1));
       c.fillStyle = "#6a4520";
       c.fillRect(-s - 0.5, -s - 0.5, 2 * s + 1, 2 * s + 1);
-      c.fillStyle = i % 3 ? GOLD_HI : SW.eyeHot;
+      c.fillStyle = i % 3 ? GOLD_HI : SW2.eyeHot;
       c.fillRect(-s, -s, 2 * s, 2 * s);
       c.restore();
     } });
@@ -190016,14 +190225,14 @@ function drawRewindGround(c, row2, t) {
     c.globalAlpha *= 1 - u;
     c.beginPath();
     c.ellipse(fx, fy + 2, 20 * (1 - u * 0.4), 6 * (1 - u * 0.4), 0, 0, TAU201);
-    c.fillStyle = SW.sandShade;
+    c.fillStyle = SW2.sandShade;
     c.fill();
     c.strokeStyle = "#14202a";
     c.lineWidth = 1.2;
     c.stroke();
     c.beginPath();
     c.ellipse(fx, fy + 0.5, 13 * (1 - u * 0.4), 3.6 * (1 - u * 0.4), 0, 0, TAU201);
-    c.fillStyle = SW.sand;
+    c.fillStyle = SW2.sand;
     c.fill();
     c.restore();
   }
@@ -190037,7 +190246,7 @@ function drawRewindGround(c, row2, t) {
       const p0 = [Math.cos(q2) * r0, Math.sin(q2) * r0 * 0.62], p1 = [Math.cos(q2) * r1, Math.sin(q2) * r1 * 0.62];
       c.globalAlpha = on * Math.sin(Math.PI * u);
       line34(c, [p0, p1], "#14202a", 4.6);
-      line34(c, [p0, p1], i % 3 ? SW.sand : SW.sandLight, 2.8);
+      line34(c, [p0, p1], i % 3 ? SW2.sand : SW2.sandLight, 2.8);
     }
     c.restore();
     c.save();
@@ -190048,12 +190257,12 @@ function drawRewindGround(c, row2, t) {
     c.strokeStyle = "#14202a";
     c.lineWidth = 4;
     c.stroke();
-    c.strokeStyle = SW.sand;
+    c.strokeStyle = SW2.sand;
     c.lineWidth = 2.2;
     c.stroke();
     c.beginPath();
     c.ellipse(0, 2, 30, 9, 0, Math.PI * 1.1, Math.PI * 1.9);
-    c.strokeStyle = SW.sandLight;
+    c.strokeStyle = SW2.sandLight;
     c.lineWidth = 1;
     c.stroke();
     c.restore();
@@ -190087,14 +190296,14 @@ function drawRewindGround(c, row2, t) {
         j ? c.lineTo(px7 + Math.cos(qq) * rr3 * k, py + Math.sin(qq) * rr3 * k * 0.4) : c.moveTo(px7 + Math.cos(qq) * rr3 * k, py + Math.sin(qq) * rr3 * k * 0.4);
       }
       c.closePath();
-      c.fillStyle = SW.sand;
+      c.fillStyle = SW2.sand;
       c.fill();
       c.strokeStyle = "#14202a";
       c.lineWidth = 1;
       c.stroke();
       c.beginPath();
       c.ellipse(px7 + rr3 * 0.2, py + rr3 * 0.1, rr3 * 0.55, rr3 * 0.16, 0, 0, TAU201);
-      c.fillStyle = SW.sandShade;
+      c.fillStyle = SW2.sandShade;
       c.fill();
     }
     c.restore();
@@ -190116,8 +190325,8 @@ function drawStreak(c, x, y, band14, q2, len, scale) {
     pts2.push([x + ex * Math.cos(band14.tilt) - ey * Math.sin(band14.tilt), y - band14.h + ex * Math.sin(band14.tilt) + ey * Math.cos(band14.tilt)]);
   }
   line34(c, pts2, "#14202a", 4);
-  line34(c, pts2, SW.sand, 2.4);
-  line34(c, pts2.map(([a, b]) => [a, b - 0.8]), SW.sandLight, 0.9);
+  line34(c, pts2, SW2.sand, 2.4);
+  line34(c, pts2.map(([a, b]) => [a, b - 0.8]), SW2.sandLight, 0.9);
 }
 function rewindDepthItems(row2, t, frac) {
   const ph = phase(row2, t), out4 = [];
@@ -190160,7 +190369,7 @@ function rewindDepthItems(row2, t, frac) {
         c.rotate(0.785);
         c.fillStyle = "#5a4128";
         c.fillRect(-1.9, -1.9, 3.8, 3.8);
-        c.fillStyle = i % 2 ? SW.sandLight : SW.sand;
+        c.fillStyle = i % 2 ? SW2.sandLight : SW2.sand;
         c.fillRect(-1.4, -1.4, 2.8, 2.8);
         c.restore();
       } });
@@ -190175,7 +190384,7 @@ function rewindDepthItems(row2, t, frac) {
         const q2 = dir + (hash57(i + h.tick) - 0.5) * 1.4, v = 1.6 + 1.4 * hash57(i + h.tick + 3), px7 = x + Math.cos(dir) * 34 + Math.cos(q2) * v * b, py = y - 40 + Math.sin(q2) * v * b * 0.62 - 3 * b + 0.3 * b * b;
         c.fillStyle = "#14202a";
         c.fillRect(px7 - 1.7, py - 1.7, 3.4, 3.4);
-        c.fillStyle = i % 2 ? SW.sandLight : SW.sand;
+        c.fillStyle = i % 2 ? SW2.sandLight : SW2.sand;
         c.fillRect(px7 - 1.1, py - 1.1, 2.2, 2.2);
       }
     } });
@@ -190191,7 +190400,7 @@ function rewindDepthItems(row2, t, frac) {
         c.rotate(q2 + b * 0.2);
         c.fillStyle = "#14202a";
         c.fillRect(-3.2, -1.6, 6.4, 3.2);
-        c.fillStyle = i % 2 ? SW.sand : SW.sandLight;
+        c.fillStyle = i % 2 ? SW2.sand : SW2.sandLight;
         c.fillRect(-2.5, -0.9, 5, 1.8);
         c.restore();
       }
@@ -190208,7 +190417,7 @@ function rewindDepthItems(row2, t, frac) {
         c.rotate(0.785);
         c.fillStyle = "#6a4520";
         c.fillRect(-2, -2, 4, 4);
-        c.fillStyle = i % 2 ? SW.eyeHot : "#ffd86b";
+        c.fillStyle = i % 2 ? SW2.eyeHot : "#ffd86b";
         c.fillRect(-1.4, -1.4, 2.8, 2.8);
         c.restore();
       }
@@ -197204,11 +197413,11 @@ function drawHollowglassReflection(c, a, tick, flash2 = false) {
     const k = clamp73((tick - cast2.startedTick) / Math.max(1, cast2.resolvesTick - cast2.startedTick));
     if (cast2.skill === "combo" || skillArtOf(cast2.skill) === "bash") Object.assign(pose3, comboPoseV2(r.heroClass, 3, "windup", k));
   } else if (lc && since2 < 16) {
-    const art = skillArtOf(lc.skill);
-    if (art === "flurry") {
+    const art2 = skillArtOf(lc.skill);
+    if (art2 === "flurry") {
       const fp = flurryPose(since2);
       if (fp) Object.assign(pose3, fp);
-    } else if (art !== "cast") Object.assign(pose3, comboPoseV2(r.heroClass, 3, "active", since2 / 16));
+    } else if (art2 !== "cast") Object.assign(pose3, comboPoseV2(r.heroClass, 3, "active", since2 / 16));
   }
   c.save();
   c.fillStyle = "rgba(19,23,34,.25)";
@@ -197287,11 +197496,11 @@ function skillDepthItems(r, refl, tick, out4) {
   if (!lc) return;
   const since2 = tick - lc.resolvedTick, ms = since2 * 1e3 / 60;
   if (since2 < 0 || since2 > 50) return;
-  const hero = lastModel?.entitiesById?.[r.heroId], f = lc.from, aim2 = lc.aim, dx = aim2.x - f.x, dy = aim2.y - f.y, l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, face4 = ux < 0 ? -1 : 1, art = skillArtOf(lc.skill);
+  const hero = lastModel?.entitiesById?.[r.heroId], f = lc.from, aim2 = lc.aim, dx = aim2.x - f.x, dy = aim2.y - f.y, l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, face4 = ux < 0 ? -1 : 1, art2 = skillArtOf(lc.skill);
   const at9 = refl ?? f;
-  if (art === "bash") out4.push({ anchorY: at9.y + 3, draw: (c) => drawBashWave(c, at9.x, at9.y, ux, uy, ms, shieldTypeOf(hero?.heroLook?.gear?.off?.kind)) });
-  else if (art === "flurry") out4.push({ anchorY: at9.y + 3, draw: (c) => drawFlurry(c, at9.x, at9.y, ux, uy, ms, daggerTypeOf(hero?.heroLook?.gear?.off?.kind)) });
-  else if (art === "cast") {
+  if (art2 === "bash") out4.push({ anchorY: at9.y + 3, draw: (c) => drawBashWave(c, at9.x, at9.y, ux, uy, ms, shieldTypeOf(hero?.heroLook?.gear?.off?.kind)) });
+  else if (art2 === "flurry") out4.push({ anchorY: at9.y + 3, draw: (c) => drawFlurry(c, at9.x, at9.y, ux, uy, ms, daggerTypeOf(hero?.heroLook?.gear?.off?.kind)) });
+  else if (art2 === "cast") {
     const el3 = heroTomeElsV1(hero)[0] ?? "fire", len = REFLECTION_SKILLS_V1.cast.len;
     out4.push({ anchorY: at9.y + 3, draw: (c) => drawCastSigil(c, at9.x + ux * 14, at9.y - 12, el3, ms + 360, face4) });
     const hit2 = lc.hitEntityIds?.length ? lastModel?.entitiesById?.[lc.hitEntityIds[0]]?.position : null, reach = hit2 ? Math.max(0, Math.hypot(hit2.x - at9.x, hit2.y - at9.y) - 18) : len, fly = Math.max(2, reach / 18), k = since2 / fly;
@@ -197301,7 +197510,7 @@ function skillDepthItems(r, refl, tick, out4) {
       const ix = hit2 ? hit2.x : at9.x + ux * len, iy = hit2 ? hit2.y : at9.y + uy * len;
       out4.push({ anchorY: iy + 3, draw: (c) => drawCastImpact(c, el3, ix, iy - 3, im) });
     }
-  } else if (art === "combo") {
+  } else if (art2 === "combo") {
     if (since2 < 12) out4.push({ anchorY: at9.y + 3, draw: (c) => {
       const k = since2 / 12;
       c.save();
@@ -198605,8 +198814,8 @@ function project(model, tick) {
     gildedGoldDrops: []
   };
   for (const actor of bosses2) {
-    const id2 = actor.boss.bossDefinitionId, b = actor.boss, art = artActors[actor.entityId];
-    const act = art.boss.pendingAction, last = art.boss.lastAction;
+    const id2 = actor.boss.bossDefinitionId, b = actor.boss, art2 = artActors[actor.entityId];
+    const act = art2.boss.pendingAction, last = art2.boss.lastAction;
     for (const row2 of tele.filter((q2) => q2.bossId === b.bossId)) {
       const original = copyAction(id2, row2, actor), rad = marcus(id2) ? original.ability === "inversion" ? 120 : original.ability === "lasso" ? 48 : 42 : original.ability === "gold_fall" ? 24 : 64;
       const target = point14(original.targetPosition ?? row2.position), base3 = {
@@ -198681,10 +198890,10 @@ function project(model, tick) {
           hazards[dest].push({ targetEntityId: a.entityId, position: point14(a.position), appliedTick: row2.applicationTick, expiresTick: row2.expirationTick });
         }
       }
-      const shield4 = art.boss.moltenShield;
+      const shield4 = art2.boss.moltenShield;
       if (shield4) hazards.marcusMoltenShields.push(shield4);
     } else {
-      const shield4 = art.boss.taxation;
+      const shield4 = art2.boss.taxation;
       if (shield4) hazards.gildedTaxations.push(shield4);
     }
   }
@@ -198735,8 +198944,8 @@ function treasuryBossEffectLights(model, tick) {
   return out4;
 }
 function drawTreasuryBossHudV2(c, canvas, model) {
-  const art = project(model, model.tick);
-  if (!art) return false;
+  const art2 = project(model, model.tick);
+  if (!art2) return false;
   const boss = Object.values(model.entitiesById ?? {}).find((a) => a.alive && gilded(a.boss?.bossDefinitionId) && a.boss?.shieldActive);
   if (!boss) return false;
   const b = boss.boss, width2 = Math.min(430, canvas.width - 28), x = (canvas.width - width2) / 2, y = 53;
@@ -200618,7 +200827,7 @@ function layersOf(t) {
     const st = streets.reduce((a, s) => near5(h, s[0]) < near5(h, a[0]) ? s : a, streets[0]), paved2 = big || Boolean(st?.[2]);
     return { h, stone: t.size !== "village" && t.size !== "hamlet" && (paved2 || h.w >= 3), paved: paved2 };
   });
-  const under = [], over = [], grow2 = (r, m) => ({ x0: r.x0 - m, y0: r.y0 - m, x1: r.x1 + m, y1: r.y1 + m }), art = townArtSizeV1(t), forges = t.features.filter((f) => f.type === "forge" && f.pad), innF = t.features.find((f) => f.type === "inn" && f.garden), court = t.features.find((f) => f.type === "tower" && f.circle)?.circle;
+  const under = [], over = [], grow2 = (r, m) => ({ x0: r.x0 - m, y0: r.y0 - m, x1: r.x1 + m, y1: r.y1 + m }), art2 = townArtSizeV1(t), forges = t.features.filter((f) => f.type === "forge" && f.pad), innF = t.features.find((f) => f.type === "inn" && f.garden), court = t.features.find((f) => f.type === "tower" && f.circle)?.circle;
   const grid = townGridV1(t), Wg = t.core[0], down = (xt, y0) => {
     xt = Math.floor(xt);
     for (let n = 0; n < 10; n++) {
@@ -200734,7 +200943,7 @@ function layersOf(t) {
     for (const p of capital) if (hits(p.box, b)) p.draw(c);
     for (const f of plazas) if (hits(grow2(sq(f), 28), b)) {
       if (zone) cityPlaza2Bands(c, f, t.biome);
-      else plaza2Ground(c, f, t.biome, art);
+      else plaza2Ground(c, f, t.biome, art2);
     }
     for (const f of forges) if (hits(grow2(sq(f.pad), 40), b)) forgeGround2(c, f.pad, t.biome);
     if (innF && hits(grow2(sq(innF.garden), 30), b)) innGround2(c, innF.garden, t.biome);
@@ -200843,9 +201052,9 @@ function drawGeneratedTownsGround(c, m, v) {
   const list = towns(m, v);
   prepareTownBuildingsV1(c, list.filter(({ t }) => townNewArtV1(t)), v);
   for (const { t, o } of list) {
-    const [W21, H8] = t.core, L = layersOf(t), art = townNewArtV1(t);
+    const [W21, H8] = t.core, L = layersOf(t), art2 = townNewArtV1(t);
     for (const f of t.features) {
-      if (art && (f.type === "field" || f.type === "forge" || f.type === "inn" || f.type === "chapel")) continue;
+      if (art2 && (f.type === "field" || f.type === "forge" || f.type === "inn" || f.type === "chapel")) continue;
       if (f.type === "field" && seen4(v, o.x + f.x * T116, o.y + f.y * T116, f.w * T116, f.h * T116)) field2(c, o, f);
       else if (f.type === "forge" && f.pad && seen4(v, o.x + f.pad.x * T116, o.y + f.pad.y * T116, f.pad.w * T116, f.pad.h * T116)) pad(c, o, f.pad, "rgba(60,48,40,.35)");
       else if (f.type === "inn" && f.garden && seen4(v, o.x + f.garden.x * T116, o.y + f.garden.y * T116, f.garden.w * T116, f.garden.h * T116)) pad(c, o, f.garden, "rgba(160,130,90,.3)");
@@ -200993,11 +201202,11 @@ function generatedTownDepthItems(m, v, env = null) {
   const out4 = [];
   const actor = m.entitiesById?.[m.playersById?.[m.localPlayerId]?.entityId], ax = actor?.position.x, ay = actor?.position.y, ids4 = admittedSet(m.space.visual);
   for (const { t, o } of towns(m, v)) {
-    const tp = templateOf(t), key4 = "gen-town/" + t.id.replace("settlement-slot:", "") + "/", art = townNewArtV1(t);
+    const tp = templateOf(t), key4 = "gen-town/" + t.id.replace("settlement-slot:", "") + "/", art2 = townNewArtV1(t);
     out4.push(...settlementDepthItemsV1("generated", tp, o, t.biome, v, { actor, props: townPropsV1(t), idPrefix: key4, fallback: drawSettlementBuilding, admitted: (b) => ids4.has(t.id + ":" + b.id) }));
     const S18 = stoneOf9(t.biome);
     for (const [i, p] of wallParts(t).entries()) {
-      if (art) continue;
+      if (art2) continue;
       if (p.kind === "tower") {
         const x = o.x + p.x * T116, y = o.y + p.y * T116;
         if (!seen4(v, x - 40, y - 110, 80, 130)) continue;
@@ -201020,7 +201229,7 @@ function generatedTownDepthItems(m, v, env = null) {
         c.restore();
       } }));
     }
-    if (art) {
+    if (art2) {
       out4.push(...townBuildingDepthItemsV1(t, o, v, actor, key4, env));
       for (const [i, p] of townStreetPlanV1(t).entries()) {
         const lx = p.x * T116, ly = p.y * T116 - 4, x = o.x + lx, y = o.y + ly;
@@ -201046,11 +201255,11 @@ function generatedTownDepthItems(m, v, env = null) {
       }
     }
     for (const f of t.features) {
-      if (f.type === "lamps" && !art) for (const [i, l] of f.lamps.entries()) {
+      if (f.type === "lamps" && !art2) for (const [i, l] of f.lamps.entries()) {
         const x = o.x + l.x * T116 + 16, y = o.y + l.y * T116 + 24;
         if (seen4(v, x - 20, y - 80, 40, 90)) out4.push(depthItem({ id: key4 + "lamp:" + i, anchorX: x, anchorY: y, draw: (c) => lamp2(c, x, y) }));
       }
-      if (f.type === "stalls" && !art) for (const [i, s] of f.stalls.entries()) {
+      if (f.type === "stalls" && !art2) for (const [i, s] of f.stalls.entries()) {
         const x = o.x + s.x * T116 + 2, y = o.y + s.y * T116 + 30;
         if (seen4(v, x - 10, y - 60, 80, 70)) out4.push(depthItem({ id: key4 + "stall:" + i, anchorX: x, anchorY: y, draw: (c) => stall7(c, x, y, i + t.buildings.length) }));
       }
@@ -203506,10 +203715,10 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     counts.labels = boxes2.length;
     lastLabelBoxes = boxes2;
   }
-  function draw(ctx, model, time3, viewport, art, { deferEmission = false, frame: frame5 = null } = {}) {
-    if (!enabled()) return legacy.draw(ctx, model, time3, viewport, art);
+  function draw(ctx, model, time3, viewport, art2, { deferEmission = false, frame: frame5 = null } = {}) {
+    if (!enabled()) return legacy.draw(ctx, model, time3, viewport, art2);
     begin2(model, time3, viewport);
-    currentArt = art;
+    currentArt = art2;
     for (const r of visible3) {
       const t = pose3(r);
       ctx.save();
@@ -212676,11 +212885,11 @@ function debrisFragmentPoseV1(id2, n, age) {
   const gy = Math.sin(angle3) * speed * travel * 0.48;
   return { fly, x: Math.cos(angle3) * speed * travel, y: gy - (fly ? 90 * seconds - 145 * seconds * seconds : 0), gy, rotation: seed2 % 17 * 0.37 + n * 0.71 + (fly ? seconds * (n % 2 ? 5 : -4) : 0), size: 7 + (seed2 + n * 7) % 7, alpha: Math.max(0, 1 - age / (fly ? 700 : 4500)), variant: (seed2 + n) % 4, metal: n % 4 === 0 };
 }
-function createResourceDebrisV1({ art = null, presentation = null, remnants = null } = {}) {
+function createResourceDebrisV1({ art: art2 = null, presentation = null, remnants = null } = {}) {
   const legacy = presentation ?? createResourcePresentation(), seen5 = /* @__PURE__ */ new Map();
   let identity2 = null, counts = { breaks: 0, flying: 0, settled: 0, fallbackFragments: 0 };
   function depthItems2(model, time3, viewport) {
-    if (art?.enabled?.() === false) return legacy.depthItems(model, time3, viewport);
+    if (art2?.enabled?.() === false) return legacy.depthItems(model, time3, viewport);
     const key4 = model.context.sessionId + "/" + model.context.spaceInstanceId;
     if (key4 !== identity2) {
       identity2 = key4;
@@ -212715,7 +212924,7 @@ function createResourceDebrisV1({ art = null, presentation = null, remnants = nu
           if (p.fly) counts.flying++;
           else counts.settled++;
           const material = r.art === "barrel" ? p.metal ? "metal" : "wood" : r.art === "urn" ? "urn" : "clay";
-          if (art?.fragment(ctx, material, p.variant, x + p.x, y + p.y, p.size, p.rotation, p.alpha)) return;
+          if (art2?.fragment(ctx, material, p.variant, x + p.x, y + p.y, p.size, p.rotation, p.alpha)) return;
           counts.fallbackFragments++;
           ctx.save();
           ctx.globalAlpha = p.alpha;
@@ -212797,7 +213006,7 @@ function drawBossChestParticlesD12_5B2(ctx, x, y, age, seed2, front2) {
   }
   ctx.restore();
 }
-function createResourcePresentationV2({ art = null } = {}) {
+function createResourcePresentationV2({ art: art2 = null } = {}) {
   let domain = null;
   const seen5 = /* @__PURE__ */ new Map();
   function depthItems2(model, time3, viewport) {
@@ -212841,13 +213050,13 @@ function createResourcePresentationV2({ art = null } = {}) {
           }
           if (r.altarChest) {
           } else if (r.eventChest) drawIronChest(ctx, x, y, time3, r.used ? Math.min(1, age / 300) : 0);
-          else if (bossCompletion) art?.chest?.(ctx, x, y, bossCompletion ? model.tick * 1e3 / 60 : time3, r.used ? Math.min(1, age / 300) : 0) || drawIronChest(ctx, x, y, bossCompletion ? model.tick * 1e3 / 60 : time3, r.used ? Math.min(1, age / 300) : 0);
-          else art?.chest?.(ctx, x, y, finaleCompletion ? model.tick * 1e3 / 60 : time3, r.used ? Math.min(1, age / 300) : 0) || drawIronChest(ctx, x, y, finaleCompletion ? model.tick * 1e3 / 60 : time3, r.used ? Math.min(1, age / 300) : 0);
+          else if (bossCompletion) art2?.chest?.(ctx, x, y, bossCompletion ? model.tick * 1e3 / 60 : time3, r.used ? Math.min(1, age / 300) : 0) || drawIronChest(ctx, x, y, bossCompletion ? model.tick * 1e3 / 60 : time3, r.used ? Math.min(1, age / 300) : 0);
+          else art2?.chest?.(ctx, x, y, finaleCompletion ? model.tick * 1e3 / 60 : time3, r.used ? Math.min(1, age / 300) : 0) || drawIronChest(ctx, x, y, finaleCompletion ? model.tick * 1e3 / 60 : time3, r.used ? Math.min(1, age / 300) : 0);
           ctx.restore();
           return;
         }
         if (!r.used) {
-          if (art?.prop?.(ctx, r.art, r.sourceEntityId, x, y)) return;
+          if (art2?.prop?.(ctx, r.art, r.sourceEntityId, x, y)) return;
           drawDungeonProp(ctx, { type: { pot: "clay_pot", urn: "ancient_urn", barrel: "wooden_barrel" }[r.art] }, x - 16, y - 16, 32);
           return;
         }
@@ -216039,20 +216248,20 @@ function siteArtV3OwnsDecoration(space, d) {
   const m = /^(cave-decoration|ruin-art):site:([0-9a-f]+):/.exec(d.id ?? "");
   return Boolean(m) && (m[1] === "cave-decoration" || d.kind === "ruin-entry-facade") && owned(space).has(m[2]);
 }
-var plantsOf = (art) => art?.drawNatureProp ? (c, kit2, kind, x, y, s, n) => art.drawNatureProp(c, kit2, kind, x, y, s, n) : null;
-var entranceKey = (e, art) => e.family + "/" + e.biome + "/" + e.seed + (e.family === "cave" && plantsOf(art) ? "/planted" : "");
-var entranceSprite = (e, art) => sprite6(entranceKey(e, art), BOX3[e.family], (c) => ENTRANCE[e.family](c, 0, 0, e.biome, e.seed, plantsOf(art)));
-function drawSiteEntranceV3(ctx, e, art = null) {
-  stamp6(ctx, entranceSprite(e, art), e.x, e.y);
+var plantsOf = (art2) => art2?.drawNatureProp ? (c, kit2, kind, x, y, s, n) => art2.drawNatureProp(c, kit2, kind, x, y, s, n) : null;
+var entranceKey = (e, art2) => e.family + "/" + e.biome + "/" + e.seed + (e.family === "cave" && plantsOf(art2) ? "/planted" : "");
+var entranceSprite = (e, art2) => sprite6(entranceKey(e, art2), BOX3[e.family], (c) => ENTRANCE[e.family](c, 0, 0, e.biome, e.seed, plantsOf(art2)));
+function drawSiteEntranceV3(ctx, e, art2 = null) {
+  stamp6(ctx, entranceSprite(e, art2), e.x, e.y);
 }
 var queued = /* @__PURE__ */ new Set();
-function prewarmSiteEntranceV3(e, art = null) {
-  const key4 = entranceKey(e, art);
+function prewarmSiteEntranceV3(e, art2 = null) {
+  const key4 = entranceKey(e, art2);
   if (sprites6.has(key4) || queued.has(key4)) return;
   queued.add(key4);
   const run2 = () => {
     queued.delete(key4);
-    entranceSprite(e, art);
+    entranceSprite(e, art2);
   };
   if (typeof requestIdleCallback === "function") requestIdleCallback(run2, { timeout: 1500 });
   else setTimeout(run2, 0);
@@ -217106,7 +217315,7 @@ function createCombatFeedback() {
     return out4;
   }
   let screenScale = null;
-  function draw(ctx, time3, art = () => null, viewport = null) {
+  function draw(ctx, time3, art2 = () => null, viewport = null) {
     ctx.save();
     const cv = ctx.canvas;
     if (!screenScale || screenScale.canvas !== cv || screenScale.width !== cv.width || !(time3 - screenScale.at >= 0 && time3 - screenScale.at <= 1e3)) screenScale = { canvas: cv, width: cv.width, at: time3, scale: cv.width / (cv.clientWidth || cv.width) };
@@ -219836,7 +220045,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
   const emit = (kind, values = {}) => {
     if (diagnostics) diagnostics({ kind, at: performance.now(), ...values });
   };
-  const art = { tree(ctx, x, y, size, n) {
+  const art2 = { tree(ctx, x, y, size, n) {
     const variant = n % 12;
     let tile2 = stamps.get(variant);
     if (!tile2) {
@@ -220064,7 +220273,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
         });
         return methods.get(name);
       } });
-      drawing = prepareDrawing(recording, space, { x, y, width: SIZE12, height: SIZE12 }, layoutFor(space), art);
+      drawing = prepareDrawing(recording, space, { x, y, width: SIZE12, height: SIZE12 }, layoutFor(space), art2);
     }
     rc.resetTransform();
     rc.clearRect(0, 0, pixels3, pixels3);
@@ -220459,7 +220668,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     schedule();
     return true;
   }
-  return Object.freeze({ draw, drawWater, drawFlowers, depthItems: (space, view3, time3) => prepareDepthItems?.(space, view3, layoutFor(space), art, time3) ?? [], shadowCasters: (space, view3) => prepareShadowCasters?.(space, view3, layoutFor(space)) ?? [], prepareVisible, clear: clear2, park, resources: () => ({ ...pathStats, environmentCacheParks: parkCount, waterMotion: waterMotion.resources(), environmentPathPreparationVersion: "moving-path-priority-v3", environmentPathLookaheadPixels: SIZE12 * 2, environmentPathPrefetchLimit: ROUTE_PREFETCH, environmentPathQueued: routeQueue.length, environmentPathAheadActive: Boolean(aheadJob), environmentPathAheadRecords: aheadReady.size, overworldRasterPages: pages2.size, overworldRasterBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0), environmentRetainedCanvasBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0) + [...fallbacks.values()].reduce((n, p) => n + (p.raster?.width ?? 0) * (p.raster?.height ?? 0) * 4, 0) + rasterPool.reduce((n, c) => n + c.width * c.height * 4, 0) + [...stamps.values(), ...flowerStamps.filter(Boolean)].reduce((n, c) => n + c.width * c.height * 4, 0), overworldRasterBuilds: builds, overworldRasterCanvasesCreated: created, overworldRasterEvictions: evictions, environmentRasterMisses: misses, environmentFallbackBuilds: fallbackBuilds, environmentFallbackHits: fallbackHits, environmentFallbackCachePages: fallbacks.size, environmentFallbackLimit: Math.max(capacity, visibleIds.size), environmentLastMissReason: lastMissReason, environmentCacheClears: clearCount, environmentLastClearReason: lastClearReason, environmentClearReasons: { ...clearReasons }, environmentProtectedRasters: protectedIds.size, environmentVisibleRetained: visibleIds.size, environmentPreloadRetained: preloadIds.size, environmentRecentRetained: recentIds.size, environmentRetentionHits: retentionHits, visibleRasterPages, fallbackRasterPages: fallbackPages, environmentPeakFallbackPages: peakFallbackPages, activeColliderVisuals, missingColliderVisuals, underCoveredColliderVisuals, lastColliderAudit, lastColliderRepair, lastRasterLifecycle, environmentVisualGeneration: visualGeneration, environmentRasterGeneration: rasterGeneration, environmentStaleRasterDiscards: staleRasterDiscards, environmentAtomicRasterReplacements: atomicRasterReplacements, environmentRasterCompletenessRepairs: rasterCompletenessRepairs, environmentArtStamps: stamps.size + flowerStamps.filter(Boolean).length, environmentDescriptorTiles: descriptors.size, environmentDescriptorCommands: [...descriptors.values()].reduce((n, d) => n + d.commands.length, 0), environmentDescriptorReuses: descriptorReuses, environmentLayoutPages: layouts3.size, environmentRequiredMissing: requiredTasks.length, environmentPrefetchQueued: queue.length, environmentPrefetchActive: Boolean(activeJob || layoutJob || pending !== null), environmentPeakNeeded: peakNeeded, environmentPeakPrefetch: peakPrefetched, environmentRasterLimit: capacity, environmentRasterMaximum: MAX_LIMIT, environmentDescriptorLimit: DESCRIPTORS, environmentPrefetchLimit: PREFETCH, environmentRecentLimit: RECENT }) });
+  return Object.freeze({ draw, drawWater, drawFlowers, depthItems: (space, view3, time3) => prepareDepthItems?.(space, view3, layoutFor(space), art2, time3) ?? [], shadowCasters: (space, view3) => prepareShadowCasters?.(space, view3, layoutFor(space)) ?? [], prepareVisible, clear: clear2, park, resources: () => ({ ...pathStats, environmentCacheParks: parkCount, waterMotion: waterMotion.resources(), environmentPathPreparationVersion: "moving-path-priority-v3", environmentPathLookaheadPixels: SIZE12 * 2, environmentPathPrefetchLimit: ROUTE_PREFETCH, environmentPathQueued: routeQueue.length, environmentPathAheadActive: Boolean(aheadJob), environmentPathAheadRecords: aheadReady.size, overworldRasterPages: pages2.size, overworldRasterBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0), environmentRetainedCanvasBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0) + [...fallbacks.values()].reduce((n, p) => n + (p.raster?.width ?? 0) * (p.raster?.height ?? 0) * 4, 0) + rasterPool.reduce((n, c) => n + c.width * c.height * 4, 0) + [...stamps.values(), ...flowerStamps.filter(Boolean)].reduce((n, c) => n + c.width * c.height * 4, 0), overworldRasterBuilds: builds, overworldRasterCanvasesCreated: created, overworldRasterEvictions: evictions, environmentRasterMisses: misses, environmentFallbackBuilds: fallbackBuilds, environmentFallbackHits: fallbackHits, environmentFallbackCachePages: fallbacks.size, environmentFallbackLimit: Math.max(capacity, visibleIds.size), environmentLastMissReason: lastMissReason, environmentCacheClears: clearCount, environmentLastClearReason: lastClearReason, environmentClearReasons: { ...clearReasons }, environmentProtectedRasters: protectedIds.size, environmentVisibleRetained: visibleIds.size, environmentPreloadRetained: preloadIds.size, environmentRecentRetained: recentIds.size, environmentRetentionHits: retentionHits, visibleRasterPages, fallbackRasterPages: fallbackPages, environmentPeakFallbackPages: peakFallbackPages, activeColliderVisuals, missingColliderVisuals, underCoveredColliderVisuals, lastColliderAudit, lastColliderRepair, lastRasterLifecycle, environmentVisualGeneration: visualGeneration, environmentRasterGeneration: rasterGeneration, environmentStaleRasterDiscards: staleRasterDiscards, environmentAtomicRasterReplacements: atomicRasterReplacements, environmentRasterCompletenessRepairs: rasterCompletenessRepairs, environmentArtStamps: stamps.size + flowerStamps.filter(Boolean).length, environmentDescriptorTiles: descriptors.size, environmentDescriptorCommands: [...descriptors.values()].reduce((n, d) => n + d.commands.length, 0), environmentDescriptorReuses: descriptorReuses, environmentLayoutPages: layouts3.size, environmentRequiredMissing: requiredTasks.length, environmentPrefetchQueued: queue.length, environmentPrefetchActive: Boolean(activeJob || layoutJob || pending !== null), environmentPeakNeeded: peakNeeded, environmentPeakPrefetch: peakPrefetched, environmentRasterLimit: capacity, environmentRasterMaximum: MAX_LIMIT, environmentDescriptorLimit: DESCRIPTORS, environmentPrefetchLimit: PREFETCH, environmentRecentLimit: RECENT }) });
 }
 
 // src/client/environment_presentation.js
@@ -220645,7 +220854,7 @@ function woodlandGroundDetail(space, x, y, blockedTiles = null) {
   const px7 = x * t, py = y * t, dx = 7 + n % 19, dy = 11 + (n >>> 8) % 17, kind = (n >>> 13) % 10;
   return { id: `${x},${y}:${kind}`, x: px7 + dx, y: py + dy, motionX: px7 + dx + offset2.x, motionY: py + dy + offset2.y, n, kind };
 }
-function drawWoodlandDetail(ctx, detail, bounds2, flowers, art, pilot = null, space = null) {
+function drawWoodlandDetail(ctx, detail, bounds2, flowers, art2, pilot = null, space = null) {
   if (!detail) return 0;
   const { x, y, motionX, motionY, n, kind } = detail;
   if (pilot?.drawGroundDetail?.(ctx, space, detail)) return 1;
@@ -220658,20 +220867,20 @@ function drawWoodlandDetail(ctx, detail, bounds2, flowers, art, pilot = null, sp
     if (!pilot?.rock(ctx, space, x - 5, y - 5, 10, n)) drawWoodlandStone(ctx, x, y, n);
   } else if (kind === 7) drawMushrooms(ctx, x, y, n);
   else {
-    if (art && flowers.length < 4 && x >= bounds2.x && y >= bounds2.y && x < bounds2.x + bounds2.width && y < bounds2.y + bounds2.height) flowers.push({ x, y, n, motionX, motionY });
+    if (art2 && flowers.length < 4 && x >= bounds2.x && y >= bounds2.y && x < bounds2.x + bounds2.width && y < bounds2.y + bounds2.height) flowers.push({ x, y, n, motionX, motionY });
     else drawFlower(ctx, x, y, n);
   }
   return 1;
 }
-function drawEnvironment(ctx, space, viewport = null, layout = createEnvironmentLayout(space), art = null) {
-  const work = prepareEnvironmentDrawing(ctx, space, viewport, layout, art);
+function drawEnvironment(ctx, space, viewport = null, layout = createEnvironmentLayout(space), art2 = null) {
+  const work = prepareEnvironmentDrawing(ctx, space, viewport, layout, art2);
   let next;
   do {
     next = work.next();
   } while (!next.done);
   return next.value;
 }
-function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = createEnvironmentLayout(space), art = null, pilot = null) {
+function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = createEnvironmentLayout(space), art2 = null, pilot = null) {
   const c = space.collision, t = c.tileSize, v = space.visual;
   const seed2 = environmentSeed(space), offset2 = environmentWorldOffset(space);
   const ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, terrainAt = (x, y) => v.terrain[y - oy]?.[x - ox];
@@ -220715,7 +220924,7 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
       if (biome === "w" || biome === "o") {
         const proposed = pilot?.groundDetail?.(space, x, y, layout.occupiedTiles), detail = proposed === void 0 ? woodlandGroundDetail(space, x, y, layout.occupiedTiles) : proposed;
         if (detail) {
-          paintedDecorations += drawWoodlandDetail(ctx, detail, bounds2, flowers, art, pilot, space);
+          paintedDecorations += drawWoodlandDetail(ctx, detail, bounds2, flowers, art2, pilot, space);
           woodlandDetailIds.push(detail.id);
         }
       } else {
@@ -220803,7 +221012,7 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
     }
     if (tree2.biome === "marsh" && !pilot?.natureTile?.(space, x + size * 0.5, y + size * 0.78)) drawReeds(ctx, x + size * 0.24, y + size * 0.83, n);
     if (!pilot?.tree(ctx, space, x, y, size, n, tree2) && tree2.biome !== "nature") {
-      if (art) art.tree(ctx, x, y, size, n);
+      if (art2) art2.tree(ctx, x, y, size, n);
       else drawCanopy(ctx, x, y, size, n);
     }
     obstacleVisualIds.push(tree2.id);
@@ -221268,14 +221477,14 @@ function drawEnvironmentFallback(ctx, space, bounds2, pilot = null) {
   for (const f of plannedRuinEntranceFrames(space)) if (f.x >= bounds2.x - 192 && f.y >= bounds2.y - 192 && f.x <= bounds2.x + bounds2.width + 192 && f.y <= bounds2.y + bounds2.height + 192) drawPlannedRuinEntranceGround(siteContextAtV1(ctx, space, f.x, f.y), f, pilot);
   return { paintedTerrainTiles: (maxX - minX + 1) * (maxY - minY + 1), paintedBlockers: v.blockers.length, paintedDecorations, totalTerrainTiles: c.width * c.height, flowers: [], obstacleVisualIds, woodlandDetailIds };
 }
-function prepareEnvironmentDepthItems(space, view3, layout, art, time3, pilot = null) {
+function prepareEnvironmentDepthItems(space, view3, layout, art2, time3, pilot = null) {
   const focus = { x: view3.x + view3.width / 2, y: view3.y + view3.height / 2 }, items3 = [], t = space.collision.tileSize, inside6 = (x, y, pad2 = 96) => x >= view3.x - pad2 && y >= view3.y - pad2 && x <= view3.x + view3.width + pad2 && y <= view3.y + view3.height + pad2;
   for (const tree2 of layout.trees ?? []) {
     const { x, y, size, n } = tree2;
     if (!inside6(x + size / 2, y + size * 0.65, size) || pilot?.hasTree && !pilot.hasTree(space, x, y, size, n)) continue;
     items3.push(depthItem({ id: "tree/" + tree2.id, anchorX: x + size / 2, anchorY: y + size * 0.78, draw: (ctx) => {
       if (!pilot?.tree(ctx, space, x, y, size, n, tree2, depthFocusPointsV1(focus)) && tree2.biome !== "nature") {
-        if (art?.tree) art.tree(ctx, x, y, size, n);
+        if (art2?.tree) art2.tree(ctx, x, y, size, n);
         else drawCanopy(ctx, x, y, size, n);
       }
     } }));
@@ -221352,7 +221561,7 @@ function prepareEnvironmentShadowCasters(space, view3, layout, pilot) {
   return casters;
 }
 function createEnvironmentCache2(canvas, { authoredArt = null, ...options } = {}) {
-  return createEnvironmentCache(canvas, { ...options, presentationIdentity: () => authoredArt?.fort?.identity?.() ?? "", depthColliderVisuals: fortDepthColliderVisuals, prepareAhead: authoredArt?.prepareRouteAhead ? ((space, bounds2) => authoredArt.prepareRouteAhead(space, bounds2)) : null, fallbackReady: authoredArt?.routeFallbackReady ? ((space, bounds2) => authoredArt.routeFallbackReady(space, bounds2)) : null, prepareDrawing: (ctx, space, view3, layout, art) => prepareEnvironmentDrawing(ctx, space, view3, layout, art, authoredArt), prepareDepthItems: (space, view3, layout, art, time3) => prepareEnvironmentDepthItems(space, view3, layout, art, time3, authoredArt), prepareShadowCasters: (space, view3, layout) => prepareEnvironmentShadowCasters(space, view3, layout, authoredArt), drawFallback: (ctx, space, bounds2) => drawEnvironmentFallback(ctx, space, bounds2, authoredArt), drawRequiredObstacle: (ctx, space, b, tx, ty) => drawRequiredObstacleVisual(ctx, space, b, tx, ty, authoredArt) });
+  return createEnvironmentCache(canvas, { ...options, presentationIdentity: () => authoredArt?.fort?.identity?.() ?? "", depthColliderVisuals: fortDepthColliderVisuals, prepareAhead: authoredArt?.prepareRouteAhead ? ((space, bounds2) => authoredArt.prepareRouteAhead(space, bounds2)) : null, fallbackReady: authoredArt?.routeFallbackReady ? ((space, bounds2) => authoredArt.routeFallbackReady(space, bounds2)) : null, prepareDrawing: (ctx, space, view3, layout, art2) => prepareEnvironmentDrawing(ctx, space, view3, layout, art2, authoredArt), prepareDepthItems: (space, view3, layout, art2, time3) => prepareEnvironmentDepthItems(space, view3, layout, art2, time3, authoredArt), prepareShadowCasters: (space, view3, layout) => prepareEnvironmentShadowCasters(space, view3, layout, authoredArt), drawFallback: (ctx, space, bounds2) => drawEnvironmentFallback(ctx, space, bounds2, authoredArt), drawRequiredObstacle: (ctx, space, b, tx, ty) => drawRequiredObstacleVisual(ctx, space, b, tx, ty, authoredArt) });
 }
 
 // src/client/emissive_occlusion_v1.js
@@ -226045,12 +226254,12 @@ function drawFrogGroundV1(c, n, model, time3) {
     if (m.spots[1] && k >= T120.crouch && k < T120.land) gameWarn(c, m.spots[1].x, m.spots[1].y + FEET4, NIGHTMARE_FROG_RULES.tongue.flopRadius, (k - T120.crouch) / (T120.land - T120.crouch), k - T120.crouch, LOOK);
   }
   if (m?.kind === "croak" && m.spots) {
-    const k = sec(model, m.start), O15 = { x: m.origin.x, y: m.origin.y + FEET4 }, C3 = NIGHTMARE_FROG_RULES.croak;
+    const k = sec(model, m.start), O16 = { x: m.origin.x, y: m.origin.y + FEET4 }, C3 = NIGHTMARE_FROG_RULES.croak;
     m.spots.forEach((g2, i) => {
       const sp = CWU + C3.spawns[i] / S14, ga = Math.atan2(g2.y, g2.x);
-      if (k >= sp - CWU && k < sp + 0.1) gapFan(c, O15.x, O15.y, ga, clamp28((k - (sp - CWU)) / (CWU + 0.1)), LOOK, 34, 70, C3.gapHalf);
+      if (k >= sp - CWU && k < sp + 0.1) gapFan(c, O16.x, O16.y, ga, clamp28((k - (sp - CWU)) / (CWU + 0.1)), LOOK, 34, 70, C3.gapHalf);
       const r = C3.start + (k - sp) * S14 * C3.speed;
-      if (k >= sp && r < C3.reach + 20) croakRing(c, O15.x, O15.y, r, ga, 1 - clamp28((r - C3.reach + 10) / 30), LOOK, C3.halfWidth * 2, C3.gapHalf);
+      if (k >= sp && r < C3.reach + 20) croakRing(c, O16.x, O16.y, r, ga, 1 - clamp28((r - C3.reach + 10) / 30), LOOK, C3.halfWidth * 2, C3.gapHalf);
     });
   }
   if (m?.kind === "spawn" && m.spots) {
@@ -226402,15 +226611,15 @@ function sporeGround2(ctx, n, model, time3) {
   else splitGround("spore", ctx, n.x, n.y + FEET5, time3 / 1e3, sec2(model, n.born) - CRACK_DELAY, SEED3);
   const m = n.move;
   if (m?.kind === "ring") {
-    const k = sec2(model, m.start), O15 = { x: m.origin.x, y: m.origin.y + FEET5 };
+    const k = sec2(model, m.start), O16 = { x: m.origin.x, y: m.origin.y + FEET5 };
     NIGHTMARE_RULES.ring.bands.forEach(([a, b], i) => {
       const at9 = WU + i * GAP3;
-      if (k < at9) gameRingWarn(ctx, O15.x, O15.y, a, b, k / at9, k, TRIP_LOOK);
-      else gameRingBurst(ctx, O15.x, O15.y, a, b, k - at9, TRIP_LOOK, 0.45);
+      if (k < at9) gameRingWarn(ctx, O16.x, O16.y, a, b, k / at9, k, TRIP_LOOK);
+      else gameRingBurst(ctx, O16.x, O16.y, a, b, k - at9, TRIP_LOOK, 0.45);
     });
     if (k > WU) {
-      gameBurst(ctx, O15.x, O15.y, 14 * K12, k - WU, TRIP_LOOK, 0.4);
-      cracks(ctx, O15.x, O15.y, 30, ease4(clamp28((k - WU) / 0.2)), 17, "#1a0610");
+      gameBurst(ctx, O16.x, O16.y, 14 * K12, k - WU, TRIP_LOOK, 0.4);
+      cracks(ctx, O16.x, O16.y, 30, ease4(clamp28((k - WU) / 0.2)), 17, "#1a0610");
     }
   }
   if (m?.kind === "rain" && m.spots) {
