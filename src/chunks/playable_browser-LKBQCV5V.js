@@ -219599,7 +219599,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     }
   }
   let lastView = null, travelX = 0, travelY = 0, exitsKey = null;
-  let layoutJob = null, activeJob = null, planKey = null, planVisual = null, key4 = null, scaleKey = null, queue = [], routeQueue = [], routeBurst = 0, pending = null, generation = 0, visualGeneration = 0, rasterGeneration = 0, currentVisual = null, currentSpace = null, frameSequence = 0, visibleIds = /* @__PURE__ */ new Set(), nearIds = /* @__PURE__ */ new Set(), pathScreenIds = /* @__PURE__ */ new Set(), preloadIds = /* @__PURE__ */ new Set(), recentIds = /* @__PURE__ */ new Set(), recentSeen = /* @__PURE__ */ new Map(), protectedIds = /* @__PURE__ */ new Set(), lastFlowers = [], lastWater = [], requiredTasks = [], builds = 0, created = 0, worstBuildMs = 0, descriptorReuses = 0, retentionHits = 0, peakNeeded = 0, peakPrefetched = 0, capacity = BASE_LIMIT, evictions = 0, misses = 0, fallbackBuilds = 0, fallbackHits = 0, peakFallbackPages = 0, visibleRasterPages = 0, fallbackPages = 0, activeColliderVisuals = 0, missingColliderVisuals = 0, underCoveredColliderVisuals = 0, lastColliderRepair = null, lastColliderAudit = null, lastRasterLifecycle = null, staleRasterDiscards = 0, atomicRasterReplacements = 0, rasterCompletenessRepairs = 0, clearCount = 0, lastClearReason = "none", lastMissReason = "none", clearReasons = /* @__PURE__ */ Object.create(null);
+  let layoutJob = null, activeJob = null, planKey = null, planVisual = null, key4 = null, scaleKey = null, queue = [], routeQueue = [], routeBurst = 0, pending = null, generation = 0, visualGeneration = 0, rasterGeneration = 0, currentVisual = null, currentSpace = null, frameSequence = 0, visibleIds = /* @__PURE__ */ new Set(), nearIds = /* @__PURE__ */ new Set(), pathScreenIds = /* @__PURE__ */ new Set(), preloadIds = /* @__PURE__ */ new Set(), recentIds = /* @__PURE__ */ new Set(), recentSeen = /* @__PURE__ */ new Map(), protectedIds = /* @__PURE__ */ new Set(), lastFlowers = [], lastWater = [], requiredTasks = [], builds = 0, created = 0, worstBuildMs = 0, descriptorReuses = 0, retentionHits = 0, peakNeeded = 0, peakPrefetched = 0, capacity = BASE_LIMIT, evictions = 0, misses = 0, fallbackBuilds = 0, fallbackHits = 0, peakFallbackPages = 0, visibleRasterPages = 0, fallbackPages = 0, activeColliderVisuals = 0, missingColliderVisuals = 0, underCoveredColliderVisuals = 0, lastColliderRepair = null, lastColliderAudit = null, lastRasterLifecycle = null, staleRasterDiscards = 0, atomicRasterReplacements = 0, rasterCompletenessRepairs = 0, clearCount = 0, parkCount = 0, lastClearReason = "none", lastMissReason = "none", clearReasons = /* @__PURE__ */ Object.create(null);
   const emit = (kind, values = {}) => {
     if (diagnostics) diagnostics({ kind, at: performance.now(), ...values });
   };
@@ -219715,6 +219715,40 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     underCoveredColliderVisuals = 0;
     lastColliderRepair = null;
     lastColliderAudit = null;
+  }
+  function park(reason = "park") {
+    stopAhead();
+    parkCount++;
+    emit("park", { reason, pages: pages2.size });
+    generation++;
+    if (pending !== null) {
+      if (win13.requestIdleCallback) win13.cancelIdleCallback(pending);
+      else win13.clearTimeout(pending);
+    }
+    pending = null;
+    queue = [];
+    routeQueue = [];
+    routeBurst = 0;
+    if (activeJob) releaseRaster(activeJob.raster);
+    activeJob = null;
+    layoutJob = null;
+    const keep8 = /* @__PURE__ */ new Set([...visibleIds, ...nearIds]);
+    for (const [id2, e] of [...pages2]) if (!keep8.has(id2)) {
+      freeRaster(e.raster);
+      pages2.delete(id2);
+    }
+    for (const e of fallbacks.values()) freeRaster(e.raster);
+    fallbacks.clear();
+    for (const c of rasterPool) freeRaster(c);
+    rasterPool.length = 0;
+    requiredTasks = [];
+    recentSeen.clear();
+    recentIds.clear();
+    preloadIds.clear();
+    planKey = null;
+    planVisual = null;
+    lastFlowers = [];
+    lastWater = [];
   }
   function signature(space, x, y) {
     const v = space.visual, t = space.collision.tileSize, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
@@ -220192,7 +220226,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     schedule();
     return true;
   }
-  return Object.freeze({ draw, drawWater, drawFlowers, depthItems: (space, view3, time3) => prepareDepthItems?.(space, view3, layoutFor(space), art, time3) ?? [], shadowCasters: (space, view3) => prepareShadowCasters?.(space, view3, layoutFor(space)) ?? [], prepareVisible, clear: clear2, resources: () => ({ ...pathStats, waterMotion: waterMotion.resources(), environmentPathPreparationVersion: "moving-path-priority-v3", environmentPathLookaheadPixels: SIZE12 * 2, environmentPathPrefetchLimit: ROUTE_PREFETCH, environmentPathQueued: routeQueue.length, environmentPathAheadActive: Boolean(aheadJob), environmentPathAheadRecords: aheadReady.size, overworldRasterPages: pages2.size, overworldRasterBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0), environmentRetainedCanvasBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0) + [...fallbacks.values()].reduce((n, p) => n + (p.raster?.width ?? 0) * (p.raster?.height ?? 0) * 4, 0) + rasterPool.reduce((n, c) => n + c.width * c.height * 4, 0) + [...stamps.values(), ...flowerStamps.filter(Boolean)].reduce((n, c) => n + c.width * c.height * 4, 0), overworldRasterBuilds: builds, overworldRasterCanvasesCreated: created, overworldRasterEvictions: evictions, environmentRasterMisses: misses, environmentFallbackBuilds: fallbackBuilds, environmentFallbackHits: fallbackHits, environmentFallbackCachePages: fallbacks.size, environmentFallbackLimit: Math.max(capacity, visibleIds.size), environmentLastMissReason: lastMissReason, environmentCacheClears: clearCount, environmentLastClearReason: lastClearReason, environmentClearReasons: { ...clearReasons }, environmentProtectedRasters: protectedIds.size, environmentVisibleRetained: visibleIds.size, environmentPreloadRetained: preloadIds.size, environmentRecentRetained: recentIds.size, environmentRetentionHits: retentionHits, visibleRasterPages, fallbackRasterPages: fallbackPages, environmentPeakFallbackPages: peakFallbackPages, activeColliderVisuals, missingColliderVisuals, underCoveredColliderVisuals, lastColliderAudit, lastColliderRepair, lastRasterLifecycle, environmentVisualGeneration: visualGeneration, environmentRasterGeneration: rasterGeneration, environmentStaleRasterDiscards: staleRasterDiscards, environmentAtomicRasterReplacements: atomicRasterReplacements, environmentRasterCompletenessRepairs: rasterCompletenessRepairs, environmentArtStamps: stamps.size + flowerStamps.filter(Boolean).length, environmentDescriptorTiles: descriptors.size, environmentDescriptorCommands: [...descriptors.values()].reduce((n, d) => n + d.commands.length, 0), environmentDescriptorReuses: descriptorReuses, environmentLayoutPages: layouts3.size, environmentRequiredMissing: requiredTasks.length, environmentPrefetchQueued: queue.length, environmentPrefetchActive: Boolean(activeJob || layoutJob || pending !== null), environmentPeakNeeded: peakNeeded, environmentPeakPrefetch: peakPrefetched, environmentRasterLimit: capacity, environmentRasterMaximum: MAX_LIMIT, environmentDescriptorLimit: DESCRIPTORS, environmentPrefetchLimit: PREFETCH, environmentRecentLimit: RECENT }) });
+  return Object.freeze({ draw, drawWater, drawFlowers, depthItems: (space, view3, time3) => prepareDepthItems?.(space, view3, layoutFor(space), art, time3) ?? [], shadowCasters: (space, view3) => prepareShadowCasters?.(space, view3, layoutFor(space)) ?? [], prepareVisible, clear: clear2, park, resources: () => ({ ...pathStats, environmentCacheParks: parkCount, waterMotion: waterMotion.resources(), environmentPathPreparationVersion: "moving-path-priority-v3", environmentPathLookaheadPixels: SIZE12 * 2, environmentPathPrefetchLimit: ROUTE_PREFETCH, environmentPathQueued: routeQueue.length, environmentPathAheadActive: Boolean(aheadJob), environmentPathAheadRecords: aheadReady.size, overworldRasterPages: pages2.size, overworldRasterBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0), environmentRetainedCanvasBytes: [...pages2.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0) + [...fallbacks.values()].reduce((n, p) => n + (p.raster?.width ?? 0) * (p.raster?.height ?? 0) * 4, 0) + rasterPool.reduce((n, c) => n + c.width * c.height * 4, 0) + [...stamps.values(), ...flowerStamps.filter(Boolean)].reduce((n, c) => n + c.width * c.height * 4, 0), overworldRasterBuilds: builds, overworldRasterCanvasesCreated: created, overworldRasterEvictions: evictions, environmentRasterMisses: misses, environmentFallbackBuilds: fallbackBuilds, environmentFallbackHits: fallbackHits, environmentFallbackCachePages: fallbacks.size, environmentFallbackLimit: Math.max(capacity, visibleIds.size), environmentLastMissReason: lastMissReason, environmentCacheClears: clearCount, environmentLastClearReason: lastClearReason, environmentClearReasons: { ...clearReasons }, environmentProtectedRasters: protectedIds.size, environmentVisibleRetained: visibleIds.size, environmentPreloadRetained: preloadIds.size, environmentRecentRetained: recentIds.size, environmentRetentionHits: retentionHits, visibleRasterPages, fallbackRasterPages: fallbackPages, environmentPeakFallbackPages: peakFallbackPages, activeColliderVisuals, missingColliderVisuals, underCoveredColliderVisuals, lastColliderAudit, lastColliderRepair, lastRasterLifecycle, environmentVisualGeneration: visualGeneration, environmentRasterGeneration: rasterGeneration, environmentStaleRasterDiscards: staleRasterDiscards, environmentAtomicRasterReplacements: atomicRasterReplacements, environmentRasterCompletenessRepairs: rasterCompletenessRepairs, environmentArtStamps: stamps.size + flowerStamps.filter(Boolean).length, environmentDescriptorTiles: descriptors.size, environmentDescriptorCommands: [...descriptors.values()].reduce((n, d) => n + d.commands.length, 0), environmentDescriptorReuses: descriptorReuses, environmentLayoutPages: layouts3.size, environmentRequiredMissing: requiredTasks.length, environmentPrefetchQueued: queue.length, environmentPrefetchActive: Boolean(activeJob || layoutJob || pending !== null), environmentPeakNeeded: peakNeeded, environmentPeakPrefetch: peakPrefetched, environmentRasterLimit: capacity, environmentRasterMaximum: MAX_LIMIT, environmentDescriptorLimit: DESCRIPTORS, environmentPrefetchLimit: PREFETCH, environmentRecentLimit: RECENT }) });
 }
 
 // src/client/environment_presentation.js
@@ -228626,7 +228660,8 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     minorBossBar.reset();
     bossEffects.clear();
     prompt.clear();
-    environmentCache.clear(reason);
+    if (reason === "space-change" || reason === "prepared-space-change") environmentCache.park(reason);
+    else environmentCache.clear(reason);
     siteEnvironment.clear();
     lighting.clear();
     dayNight.clear();
