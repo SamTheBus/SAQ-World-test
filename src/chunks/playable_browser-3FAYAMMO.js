@@ -177175,6 +177175,9 @@ var store = { get(k) {
   } catch {
   }
 } };
+function farMarkV1(m) {
+  return m.kind === "settlement" || m.kind === "ferry" || m.kind === "site" && Boolean(m.travel);
+}
 function createAtlasMapV2({ document: doc, environment: env, port, releaseInput, issue = null, otherLands = null }) {
   const el3 = (tag2, cls, text3) => {
     const e = doc.createElement(tag2);
@@ -178106,10 +178109,10 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       }
     }
     for (const m of list) {
-      if (far && m.kind !== "settlement") continue;
+      if (far && !farMarkV1(m)) continue;
       const q2 = P28(m);
       if (q2.x < -20 || q2.y < -20 || q2.x > width2 + 20 || q2.y > height + 20) continue;
-      const r = m.kind === "settlement" ? m.big ? 11 : 9 : m.kind === "event" ? 7 : 7.5;
+      const r = m.kind === "settlement" ? m.big ? 11 : 9 : far ? 6 : m.kind === "event" ? 7 : 7.5;
       marks.push({ m, q: q2, r });
     }
     marks.sort((a, b) => a.r - b.r);
