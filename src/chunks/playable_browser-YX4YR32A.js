@@ -234354,6 +234354,36 @@ function devPlacesV1(settlements, eventPlan, capacities) {
   events.sort((a, b) => a.label < b.label ? -1 : 1);
   return [...towns2, ...events];
 }
+function devStoreV1(storage, channel2, passport) {
+  try {
+    writeHeroPassport(storage, channel2, passport, null);
+  } catch {
+  }
+  let back = null;
+  try {
+    back = readHeroPassport(storage, channel2, passport.heroId);
+  } catch {
+  }
+  if (samePassport(back, passport)) return true;
+  throw Error("Nothing was given: the change couldn\u2019t be saved. " + devStorageNoteV1(storage));
+}
+var STORE_NAMES = [[/hero-store/, "hero saves"], [/blackbox/, "session record"], [/heroes-v1/, "hero list"], [/site-placements/, "map sites"], [/seen-items/, "bag \u201Cnew\u201D marks"], [/bestiary/, "bestiary"], [/friends/, "friends"]];
+function devStorageNoteV1(storage) {
+  const rows = /* @__PURE__ */ new Map();
+  let total = 0;
+  try {
+    for (let i = 0; i < storage.length; i++) {
+      const k = storage.key(i), n = (k.length + (storage.getItem(k)?.length ?? 0)) * 2;
+      total += n;
+      const name = STORE_NAMES.find(([re]) => re.test(k))?.[1] ?? "other";
+      rows.set(name, (rows.get(name) ?? 0) + n);
+    }
+  } catch {
+    return "This browser\u2019s storage couldn\u2019t be read.";
+  }
+  const mb = (n) => (n / 1048576).toFixed(n < 104858 ? 2 : 1) + " MB", top = [...rows].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, n]) => k + " " + mb(n)).join(", ");
+  return "This browser\u2019s game storage holds " + mb(total) + (top ? " (most: " + top + ")" : "") + "; Safari allows about 5 MB.";
+}
 function devApplyV1(passport, changes) {
   let next = passport;
   for (const c of Array.isArray(changes) ? changes : [changes]) {
@@ -239384,7 +239414,7 @@ async function startWorldClient(environment) {
       const next = devApplyV1(passport, changes);
       devPending = true;
       try {
-        writeHeroPassport(deviceStorage, channel2, next, null);
+        devStoreV1(deviceStorage, channel2, next);
       } catch (error) {
         devPending = false;
         throw error;
