@@ -1846,6 +1846,23 @@ body.skill-arc-v1 .shadow-dash:disabled,body.skill-arc-v1 .shield-guard:disabled
 .cs-wheel-spot[data-picked=true] .cs-wheel-icon{transform:scale(1.08);box-shadow:0 0 0 3px #f4cf6a,0 0 14px #f4cf6aaa}
 .cs-wheel-name{max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
 .cs-wheel-gap{flex:none;width:1px;align-self:stretch;margin:4px 2px 18px;background:#2f3a46}
+.cs-wheel-panel{display:flex;flex-direction:column;gap:6px;min-width:0}
+#world-inventory #world-progression-view .cs-wheel-toggle{display:none}
+/* Short landscape screens: the wheel is one button that opens it as a panel over the trees. */
+@media(orientation:landscape) and (max-height:560px){
+ .cs-head{flex-wrap:nowrap}
+ .cs-head .cs-tabs{flex:1 1 0}
+ .cs-wheel{flex:0 0 auto;position:relative;padding:0;background:none;border:0}
+ .cs-wheel-label{display:none}
+ #world-inventory #world-progression-view .cs-wheel-toggle{display:flex;align-items:center;gap:8px;min-height:40px;margin:0;padding:0 8px 0 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--class) 45%,#2f3a46);background:#151d26;color:#d9d4c8;font:700 11px/1 system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+ .cs-wheel-mini{display:flex}
+ .cs-wheel-mini i{width:22px;height:22px;margin-left:-5px;border-radius:50%;border:1.5px solid #0b1015;background:#18222b;box-shadow:inset 0 0 0 1.5px var(--class);display:grid;place-items:center;color:color-mix(in srgb,var(--class) 55%,#fff)}
+ .cs-wheel-mini i:first-child{margin-left:0}
+ .cs-wheel-mini svg{width:66%;height:66%}
+ .cs-wheel-toggle b{padding:5px 8px;border-radius:8px;background:var(--class);color:#0c1219;font:800 10px/1 system-ui,sans-serif;letter-spacing:.06em}
+ .cs-wheel:not([data-open=true]) .cs-wheel-panel{display:none}
+ .cs-wheel-panel{position:absolute;top:calc(100% + 6px);right:0;z-index:6;width:max-content;max-width:min(560px,calc(100vw - 48px));padding:8px 10px;border-radius:14px;background:#111820;border:1px solid #26313d;box-shadow:0 10px 26px #000a}
+}
 /* HUD v3: slate (mockup KLqEnsiJj2TSpY1KDRa9Jx, all A, 2026-11-09; was HUD v2 brass).
    Built like the Attack button and the field note: slate fill, dark outline, a thin pale-gold edge and a hard drop
    shadow. vitals_hud_v4.js draws the slate level disc with XP as a gold ring (from #world-level and #world-xp-bar,

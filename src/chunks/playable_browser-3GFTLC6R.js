@@ -423,6 +423,8 @@ import {
   approachIntent,
   archivedCombatProfile,
   areaAtWorldPosition,
+  arenaDoorsV1,
+  arenaRoomV1,
   asCombatAmount,
   assertActorGeometryD9,
   assertNoNewActorGeometryFailureD9,
@@ -661,6 +663,7 @@ import {
   impHashV1,
   impIdV1,
   impScrapBandV1,
+  inArenaBoxV1,
   inGroup,
   initialD8Progression,
   initialDenV1,
@@ -928,6 +931,7 @@ import {
   shopkeeperCastV1,
   signedAddress,
   siteBossDoorV1,
+  siteBossDownV1,
   siteClearIsSavedV1,
   siteClearXpV2,
   siteEndRoleV1,
@@ -1125,7 +1129,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-KV3Q5DGE.js";
+} from "./chunk-FRVGUEMK.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -3699,10 +3703,10 @@ function tintRgb(r, g2, b, s, out4) {
     return out4;
   }
   if (s.stone && max - min <= 34) {
-    const T121 = s.stone, lt = T121[0] * 0.299 + T121[1] * 0.587 + T121[2] * 0.114, f = L / lt * s.gain, a = s.amount;
-    out4[0] = clamp2(r + (T121[0] * f - r) * a);
-    out4[1] = clamp2(g2 + (T121[1] * f - g2) * a);
-    out4[2] = clamp2(b + (T121[2] * f - b) * a);
+    const T120 = s.stone, lt = T120[0] * 0.299 + T120[1] * 0.587 + T120[2] * 0.114, f = L / lt * s.gain, a = s.amount;
+    out4[0] = clamp2(r + (T120[0] * f - r) * a);
+    out4[1] = clamp2(g2 + (T120[1] * f - g2) * a);
+    out4[2] = clamp2(b + (T120[2] * f - b) * a);
   }
   return out4;
 }
@@ -83122,7 +83126,7 @@ function wing8(c, P28, s, d, rot2, fold, crack8) {
   c.scale(d, 1);
   c.rotate(-rot2);
   c.scale(1 - fold * 0.55, 1 + fold * 0.12);
-  const Wr = [20, -22], T121 = [[43, -17], [47, 1], [37, 16]], B9 = [3, 15];
+  const Wr = [20, -22], T120 = [[43, -17], [47, 1], [37, 16]], B9 = [3, 15];
   const scal = (a, b, k = 0.3) => {
     const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
     return [m[0] + (Wr[0] - m[0]) * k, m[1] + (Wr[1] - m[1]) * k];
@@ -83131,10 +83135,10 @@ function wing8(c, P28, s, d, rot2, fold, crack8) {
     c.beginPath();
     c.moveTo(0, 0);
     c.lineTo(...Wr);
-    c.lineTo(...T121[0]);
-    c.quadraticCurveTo(...scal(T121[0], T121[1]), ...T121[1]);
-    c.quadraticCurveTo(...scal(T121[1], T121[2]), ...T121[2]);
-    c.quadraticCurveTo(...scal(T121[2], B9, 0.25), ...B9);
+    c.lineTo(...T120[0]);
+    c.quadraticCurveTo(...scal(T120[0], T120[1]), ...T120[1]);
+    c.quadraticCurveTo(...scal(T120[1], T120[2]), ...T120[2]);
+    c.quadraticCurveTo(...scal(T120[2], B9, 0.25), ...B9);
     c.closePath();
   };
   mem();
@@ -83152,14 +83156,14 @@ function wing8(c, P28, s, d, rot2, fold, crack8) {
     c.beginPath();
     c.moveTo(0, 0);
     c.lineTo(...Wr);
-    c.lineTo(...T121[0]);
+    c.lineTo(...T120[0]);
     c.lineTo(30, -12);
     c.lineTo(8, 2);
     c.closePath();
     c.fill();
     c.strokeStyle = P28.wingD;
     c.lineWidth = 0.6;
-    for (const tp of T121) {
+    for (const tp of T120) {
       c.beginPath();
       c.moveTo(Wr[0] * 0.6, Wr[1] * 0.6 + 4);
       c.quadraticCurveTo((Wr[0] + tp[0]) / 2, (Wr[1] + tp[1]) / 2 + 5, tp[0] - 3, tp[1]);
@@ -83172,11 +83176,11 @@ function wing8(c, P28, s, d, rot2, fold, crack8) {
   c.lineWidth = LW3;
   c.stroke();
   limb2(c, [[0, 0], [Wr[0] * 0.5, Wr[1] * 0.62], Wr], W3(s, P28.st), 3.6);
-  for (const [i, tp] of T121.entries()) limb2(c, [Wr, tp], W3(s, P28.st), 2.3 - i * 0.3);
+  for (const [i, tp] of T120.entries()) limb2(c, [Wr, tp], W3(s, P28.st), 2.3 - i * 0.3);
   if (!s.flash) stroke2(c, [[1, -1.4], [Wr[0] * 0.5, Wr[1] * 0.62 - 1.2], [Wr[0] - 1, Wr[1] - 1]], P28.stL, 0.9);
   circ3(c, Wr[0], Wr[1], 2.6, W3(s, P28.st), true, FINE3);
   poly7(c, [[Wr[0] - 1.6, Wr[1] - 1], [Wr[0] + 1, Wr[1] - 7.5], [Wr[0] + 2.6, Wr[1] - 0.6]], W3(s, P28.horn), true, FINE3);
-  for (const tp of T121) poly7(c, [[tp[0] - 1, tp[1] - 1], [tp[0] + 2.6, tp[1] + 0.6], [tp[0] - 0.4, tp[1] + 1.4]], W3(s, P28.horn), true, 0.8);
+  for (const tp of T120) poly7(c, [[tp[0] - 1, tp[1] - 1], [tp[0] + 2.6, tp[1] + 0.6], [tp[0] - 0.4, tp[1] + 1.4]], W3(s, P28.horn), true, 0.8);
   if (crack8) glowLine(c, s, P28, [[26, -4], [29, -1.6], [28.4, 1.6]], 0.8);
   if (P28.moss && !s.flash) {
     for (const [x, y] of [[6, 4], [14, 10]]) {
@@ -85934,12 +85938,12 @@ function drawTwister(c, t, { y0 = -4, y1 = -60, r0 = 2.5, r1 = 22, n = 9, spin =
     const v = i / (n - 1);
     B9.push({ v, y: mix18(y0, y1, v), r: mix18(r0, r1, Math.pow(v, 1.75)), x: Math.sin(t * 3 * spin - v * 4.2) * sway * (0.35 + (1 - v) * 0.9) + lean * v });
   }
-  const T121 = B9[n - 1], ryT = T121.r * 0.3;
+  const T120 = B9[n - 1], ryT = T120.r * 0.3;
   const sil = () => {
     c.beginPath();
     c.moveTo(B9[0].x, B9[0].y + 1.5);
     for (const b of B9) c.lineTo(b.x - b.r, b.y);
-    c.ellipse(T121.x, T121.y, T121.r, ryT, 0, Math.PI, 0);
+    c.ellipse(T120.x, T120.y, T120.r, ryT, 0, Math.PI, 0);
     for (let i = n - 1; i >= 0; i--) c.lineTo(B9[i].x + B9[i].r, B9[i].y);
     c.closePath();
   };
@@ -86006,7 +86010,7 @@ function drawTwister(c, t, { y0 = -4, y1 = -60, r0 = 2.5, r1 = 22, n = 9, spin =
     c.restore();
   }
   c.beginPath();
-  c.ellipse(T121.x, T121.y, T121.r, ryT, 0, 0, TAU147);
+  c.ellipse(T120.x, T120.y, T120.r, ryT, 0, 0, TAU147);
   c.fillStyle = flash2 ? "#fff" : P28.s1;
   c.fill();
   c.strokeStyle = INK31;
@@ -86015,7 +86019,7 @@ function drawTwister(c, t, { y0 = -4, y1 = -60, r0 = 2.5, r1 = 22, n = 9, spin =
   if (!flash2) {
     c.fillStyle = P28.s3;
     c.beginPath();
-    c.ellipse(T121.x + 1, T121.y + 0.4, T121.r * 0.62, ryT * 0.55, 0, 0, TAU147);
+    c.ellipse(T120.x + 1, T120.y + 0.4, T120.r * 0.62, ryT * 0.55, 0, 0, TAU147);
     c.fill();
   }
 }
@@ -86354,10 +86358,10 @@ var rimAt = (o, R14, i) => {
   return { x: o.x + Math.cos(a) * (R14 - 3), y: o.y + Math.sin(a) * (R14 - 3) * 0.7, a };
 };
 function snareWarnItems(actor, k, q2, tick, out4) {
-  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], T121 = k.target, id2 = "lesser-vfx/" + actor.entityId;
-  if (!T121 || q2 <= 0.35) return;
+  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], T120 = k.target, id2 = "lesser-vfx/" + actor.entityId;
+  if (!T120 || q2 <= 0.35) return;
   for (let i = 0; i < 8; i++) {
-    const p = rimAt(T121, t.radius, i), j = Math.sin(tick * SEC * 22 + i * 1.7) * 1.2, g2 = ease4((q2 - 0.35) / 0.65) * 0.32;
+    const p = rimAt(T120, t.radius, i), j = Math.sin(tick * SEC * 22 + i * 1.7) * 1.2, g2 = ease4((q2 - 0.35) / 0.65) * 0.32;
     out4.push({ id: id2 + "/tip" + i, anchorX: p.x, anchorY: p.y, draw: (c) => drawRoot(c, p.x, p.y, p.x + j, p.y - 7, g2, { w: 2.4, curl: Math.cos(p.a) * 0.3, leaf: false }) });
   }
 }
@@ -87111,35 +87115,35 @@ function devilK(k, t, tick) {
   return k.phase === "chase" ? ease4(clamp28(age / 15)) : k.phase === "fade" ? 1 - ease4(q2) : 0;
 }
 function devilGround(c, actor, k, tick) {
-  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], G5 = OPEN_LOOKS.dust, { age } = ageOf(k, t, tick), T121 = k.target;
-  if (!T121) return;
+  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], G5 = OPEN_LOOKS.dust, { age } = ageOf(k, t, tick), T120 = k.target;
+  if (!T120) return;
   if (k.phase === "warn") {
-    gameWarn(c, T121.x, T121.y, t.radius, age / t.warnTicks, age * SEC, G5);
+    gameWarn(c, T120.x, T120.y, t.radius, age / t.warnTicks, age * SEC, G5);
     return;
   }
   if (k.phase !== "chase" && k.phase !== "fade") return;
   let trail3 = devilTrails.get(actor.entityId);
   if (!trail3 || trail3.sequence !== k.sequence) {
-    trail3 = { sequence: k.sequence, start: { x: T121.x, y: T121.y }, pts: [], tick: -1 };
+    trail3 = { sequence: k.sequence, start: { x: T120.x, y: T120.y }, pts: [], tick: -1 };
     devilTrails.set(actor.entityId, trail3);
   }
   if (trail3.tick !== tick && k.phase === "chase") {
-    trail3.pts.push({ x: T121.x, y: T121.y });
+    trail3.pts.push({ x: T120.x, y: T120.y });
     if (trail3.pts.length > 80) trail3.pts.shift();
     trail3.tick = tick;
   }
   const kk = devilK(k, t, tick);
   if (k.phase === "chase") gameBurst(c, trail3.start.x, trail3.start.y, t.radius, age * SEC, G5, 0.35);
   scuffs(c, trail3.pts, kk);
-  chaseRing(c, T121.x, T121.y, t.radius, tick * SEC, kk);
+  chaseRing(c, T120.x, T120.y, t.radius, tick * SEC, kk);
 }
 function devilItems(actor, k, tick, out4) {
   if (k.phase !== "chase" && k.phase !== "fade" || !k.target) return;
-  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], T121 = k.target, kk = devilK(k, t, tick);
+  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], T120 = k.target, kk = devilK(k, t, tick);
   if (kk <= 0) return;
-  out4.push({ id: "lesser-vfx/" + actor.entityId + "/devil", anchorX: T121.x, anchorY: T121.y + 0.5, draw: (c) => {
+  out4.push({ id: "lesser-vfx/" + actor.entityId + "/devil", anchorX: T120.x, anchorY: T120.y + 0.5, draw: (c) => {
     c.save();
-    c.translate(T121.x, T121.y);
+    c.translate(T120.x, T120.y);
     c.scale(kk, mix18(0.2, 1, kk));
     drawTwister(c, tick * SEC, { y0: -2, y1: -40, r0: 1.8, r1: 14, n: 8, spin: 1.6, sway: 2.5, P: SIRO_PAL.S });
     c.restore();
@@ -89638,9 +89642,9 @@ function galeItems(model, actor, k, tick, out4) {
     } });
   }
   if (k.phase !== "gusts") return;
-  const fade = 1 - clamp28((age - (GALE.gustTicks - 9)) / 9), T121 = age * SEC4;
+  const fade = 1 - clamp28((age - (GALE.gustTicks - 9)) / 9), T120 = age * SEC4;
   for (let i = 0; i < 12; i++) {
-    const u = (T121 * 1.5 + i / 12) % 1, a = W21.a + (rnd4(i, 3) - 0.5) * 1.7 * GALE.halfAngle, r = 26 + u * (R14 - 36), gy = W21.y + Math.sin(a) * r * 0.9, x = W21.x + Math.cos(a) * r, y = gy - 4 - rnd4(i, 4) * 18;
+    const u = (T120 * 1.5 + i / 12) % 1, a = W21.a + (rnd4(i, 3) - 0.5) * 1.7 * GALE.halfAngle, r = 26 + u * (R14 - 36), gy = W21.y + Math.sin(a) * r * 0.9, x = W21.x + Math.cos(a) * r, y = gy - 4 - rnd4(i, 4) * 18;
     out4.push({ id: id2 + "/gust" + i, anchorX: x, anchorY: gy, draw: (c) => {
       streak(c, x, y, a, 12 + rnd4(i, 5) * 8, Math.sin(u * Math.PI) * fade);
       if (i % 3 === 0) {
@@ -89655,7 +89659,7 @@ function galeItems(model, actor, k, tick, out4) {
     } });
   }
   for (let i = 0; i < 2; i++) {
-    const u = (T121 * 0.8 + i * 0.5) % 1, r = 10 + u * 130, x = W21.x + Math.cos(W21.a) * r, gy = W21.y + Math.sin(W21.a) * r, y = gy - 40 + i * 22 + Math.sin(u * 9 + i) * 6 - u * 10;
+    const u = (T120 * 0.8 + i * 0.5) % 1, r = 10 + u * 130, x = W21.x + Math.cos(W21.a) * r, gy = W21.y + Math.sin(W21.a) * r, y = gy - 40 + i * 22 + Math.sin(u * 9 + i) * 6 - u * 10;
     out4.push({ id: id2 + "/feather" + i, anchorX: x, anchorY: gy - 10, draw: (c) => {
       c.save();
       c.globalAlpha = fade;
@@ -89802,19 +89806,19 @@ function fillPts2(c, pts2, col2) {
 function crystal2(c, x, y, a, L, w, P28, s, o = {}) {
   if (L < 0.5) return;
   const ca = Math.cos(a), sa = Math.sin(a), p = (u, v) => P22(u, v, ca, sa, x, y), sh3 = o.shoulder ?? 0.68;
-  const A2 = p(0, -w * 0.4), B9 = p(L * sh3, -w * 0.5), T121 = p(L, 0), C3 = p(L * sh3, w * 0.5), D2 = p(0, w * 0.4), r0 = p(0, -w * 0.08), r1 = p(L * sh3, -w * 0.1), d0 = p(0, w * 0.2), d1 = p(L * sh3, w * 0.25);
+  const A2 = p(0, -w * 0.4), B9 = p(L * sh3, -w * 0.5), T120 = p(L, 0), C3 = p(L * sh3, w * 0.5), D2 = p(0, w * 0.4), r0 = p(0, -w * 0.08), r1 = p(L * sh3, -w * 0.1), d0 = p(0, w * 0.2), d1 = p(L * sh3, w * 0.25);
   const dark = o.dark;
-  fillPts2(c, [A2, B9, T121, C3, D2], W10(s, dark ? P28.iceDD : P28.ice));
+  fillPts2(c, [A2, B9, T120, C3, D2], W10(s, dark ? P28.iceDD : P28.ice));
   if (!s.flash) {
-    fillPts2(c, [A2, B9, T121, r1, r0], dark ? P28.iceD : P28.iceL);
-    fillPts2(c, [d0, d1, T121, C3, D2], dark ? P28.deep : P28.iceD);
-    fillPts2(c, [B9, T121, r1], dark ? P28.ice : P28.rim);
+    fillPts2(c, [A2, B9, T120, r1, r0], dark ? P28.iceD : P28.iceL);
+    fillPts2(c, [d0, d1, T120, C3, D2], dark ? P28.deep : P28.iceD);
+    fillPts2(c, [B9, T120, r1], dark ? P28.ice : P28.rim);
     c.strokeStyle = dark ? "rgba(220,245,255,.35)" : "rgba(255,255,255,.75)";
     c.lineWidth = 0.7;
     c.beginPath();
     c.moveTo(...r0);
     c.lineTo(...r1);
-    c.lineTo(...T121);
+    c.lineTo(...T120);
     c.stroke();
     if (o.frost) {
       c.fillStyle = P28.frost;
@@ -89830,7 +89834,7 @@ function crystal2(c, x, y, a, L, w, P28, s, o = {}) {
   c.beginPath();
   c.moveTo(...A2);
   c.lineTo(...B9);
-  c.lineTo(...T121);
+  c.lineTo(...T120);
   c.lineTo(...C3);
   c.lineTo(...D2);
   if (o.open !== true) c.closePath();
@@ -92107,7 +92111,7 @@ function clock4(k, t, tick) {
   }
   return A2;
 }
-var seg2 = (T121, a, b) => clamp28((T121 - a) / (b - a));
+var seg2 = (T120, a, b) => clamp28((T120 - a) / (b - a));
 var faceOf4 = (actor) => actor.presentationFacingX === -1 ? -1 : 1;
 function meleeOf4(actor, tick) {
   const m = actor.meleePhase;
@@ -92558,24 +92562,24 @@ function cagePose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face4 = k.direction.x < 0 ? -1 : 1;
-    const T121 = clock4(k, CAGE, tick) * SEC5;
-    s.cast = T121 < 1 ? ease4(seg2(T121, 0, 0.45)) : 1 - ease4(seg2(T121, 1.05, 1.4));
-    s.thrust = T121 < 2.1 ? ease4(seg2(T121, 1.55, 1.82)) : 1 - ease4(seg2(T121, 2.1, 2.4));
-    s.spent = ease4(seg2(T121, 2.15, 2.6)) * (1 - ease4(seg2(T121, REGROW, CAGE_END)));
-    if (T121 >= REGROW) {
+    const T120 = clock4(k, CAGE, tick) * SEC5;
+    s.cast = T120 < 1 ? ease4(seg2(T120, 0, 0.45)) : 1 - ease4(seg2(T120, 1.05, 1.4));
+    s.thrust = T120 < 2.1 ? ease4(seg2(T120, 1.55, 1.82)) : 1 - ease4(seg2(T120, 2.1, 2.4));
+    s.spent = ease4(seg2(T120, 2.15, 2.6)) * (1 - ease4(seg2(T120, REGROW, CAGE_END)));
+    if (T120 >= REGROW) {
       s.launched = 0;
       s.regrowFrom = 4;
-      s.regrow = seg2(T121, REGROW, CAGE_END);
-    } else s.launched = THROWS.filter((q2) => T121 >= q2.t).length;
+      s.regrow = seg2(T120, REGROW, CAGE_END);
+    } else s.launched = THROWS.filter((q2) => T120 >= q2.t).length;
   }
   return { face: face4, x, y, rot: 0, sq: 1 };
 }
 var rim = (k, a) => ({ x: k.target.x + Math.cos(a) * CR, y: k.target.y + Math.sin(a) * CR });
 function cageGround(c, actor, k, tick) {
   if (!k.target) return;
-  const G5 = ICE_LOOK, T121 = clock4(k, CAGE, tick) * SEC5, { x: CX2, y: CY2 } = k.target;
-  if (T121 >= WARN0 && T121 < CLOSE) {
-    gameWarn(c, CX2, CY2, CR, seg2(T121, WARN0, CLOSE), T121 - WARN0, G5);
+  const G5 = ICE_LOOK, T120 = clock4(k, CAGE, tick) * SEC5, { x: CX2, y: CY2 } = k.target;
+  if (T120 >= WARN0 && T120 < CLOSE) {
+    gameWarn(c, CX2, CY2, CR, seg2(T120, WARN0, CLOSE), T120 - WARN0, G5);
     for (const p of PILLARS) {
       const q2 = rim(k, p.a);
       c.fillStyle = G5.lit;
@@ -92584,8 +92588,8 @@ function cageGround(c, actor, k, tick) {
       c.fill();
     }
   }
-  if (T121 >= CLOSE && T121 < NOVA + 0.1) {
-    const u = seg2(T121, CLOSE, NOVA);
+  if (T120 >= CLOSE && T120 < NOVA + 0.1) {
+    const u = seg2(T120, CLOSE, NOVA);
     c.save();
     c.fillStyle = `rgba(47,159,214,${0.18 + u * 0.22})`;
     c.beginPath();
@@ -92608,10 +92612,10 @@ function cageGround(c, actor, k, tick) {
     c.stroke();
     c.restore();
   }
-  if (T121 >= NOVA && T121 < NOVA + 0.6) gameBurst(c, CX2, CY2, CR, T121 - NOVA, G5, 0.55);
-  if (T121 >= CLOSE && T121 < THAW + 0.7) {
+  if (T120 >= NOVA && T120 < NOVA + 0.6) gameBurst(c, CX2, CY2, CR, T120 - NOVA, G5, 0.55);
+  if (T120 >= CLOSE && T120 < THAW + 0.7) {
     c.save();
-    c.globalAlpha = 1 - seg2(T121, THAW + 0.2, THAW + 0.7);
+    c.globalAlpha = 1 - seg2(T120, THAW + 0.2, THAW + 0.7);
     c.strokeStyle = "#f4f9fc";
     c.lineWidth = 5;
     c.beginPath();
@@ -92626,9 +92630,9 @@ function cageGround(c, actor, k, tick) {
   }
   for (const q2 of THROWS) {
     const land = q2.t + FLY2, r = rim(k, q2.a);
-    if (T121 >= land && T121 < land + 0.4) gameBurst(c, r.x, r.y, 9, T121 - land, G5, 0.35);
-    if (T121 >= q2.t && T121 < land) {
-      const u = seg2(T121, q2.t, land), o = k.origin;
+    if (T120 >= land && T120 < land + 0.4) gameBurst(c, r.x, r.y, 9, T120 - land, G5, 0.35);
+    if (T120 >= q2.t && T120 < land) {
+      const u = seg2(T120, q2.t, land), o = k.origin;
       shadow66(c, mix18(o.x, r.x, u), mix18(o.y, r.y, u), 5, 1.8, 0.18);
     }
   }
@@ -92636,11 +92640,11 @@ function cageGround(c, actor, k, tick) {
 var caged = (model, k) => party2(model).filter((h) => Math.hypot(h.position.x - k.target.x, h.position.y - k.target.y) <= CR + (h.hullRadius ?? 10) * 0.5);
 function cageItems(model, actor, k, tick, out4) {
   if (!k.target) return;
-  const T121 = clock4(k, CAGE, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, o = actor.position;
+  const T120 = clock4(k, CAGE, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, o = actor.position;
   for (const [i, q2] of THROWS.entries()) {
     const r = rim(k, q2.a), land = q2.t + FLY2;
-    if (T121 >= q2.t && T121 < land) {
-      const sx = o.x + face4 * q2.back[0], sy = o.y + q2.back[1], u = seg2(T121, q2.t, land), x = mix18(sx, r.x, u), y = mix18(sy, r.y, u) - Math.sin(u * Math.PI) * 60, dx = r.x - sx, dy = r.y - sy - Math.cos(u * Math.PI) * 60 * Math.PI, a = Math.atan2(dy, dx), gy = mix18(o.y, r.y, u);
+    if (T120 >= q2.t && T120 < land) {
+      const sx = o.x + face4 * q2.back[0], sy = o.y + q2.back[1], u = seg2(T120, q2.t, land), x = mix18(sx, r.x, u), y = mix18(sy, r.y, u) - Math.sin(u * Math.PI) * 60, dx = r.x - sx, dy = r.y - sy - Math.cos(u * Math.PI) * 60 * Math.PI, a = Math.atan2(dy, dx), gy = mix18(o.y, r.y, u);
       out4.push({ id: id2 + "/shard" + i, anchorX: x, anchorY: Math.max(gy, footOf(actor) + 0.5), draw: (c) => {
         for (let j = 1; j < 5; j++) {
           const v = Math.max(0, u - j * 0.06);
@@ -92649,9 +92653,9 @@ function cageItems(model, actor, k, tick, out4) {
         crystal2(c, x - Math.cos(a) * 16, y - Math.sin(a) * 16, a, 32, 10, P13, {}, { frost: true, lw: 1.4 });
       } });
     }
-    if (T121 >= land && T121 < CLOSE + 0.05) out4.push({ id: id2 + "/stuck" + i, anchorX: r.x, anchorY: r.y + 0.5, draw: (c) => crystal2(c, r.x - Math.cos(q2.a) * 3, r.y + 2, -Math.PI / 2 + Math.cos(q2.a) * 0.35, 26, 9, P13, {}, { frost: true, lw: 1.3 }) });
-    if (T121 >= land && T121 < land + 0.35) {
-      const v = seg2(T121, land, land + 0.35);
+    if (T120 >= land && T120 < CLOSE + 0.05) out4.push({ id: id2 + "/stuck" + i, anchorX: r.x, anchorY: r.y + 0.5, draw: (c) => crystal2(c, r.x - Math.cos(q2.a) * 3, r.y + 2, -Math.PI / 2 + Math.cos(q2.a) * 0.35, 26, 9, P13, {}, { frost: true, lw: 1.3 }) });
+    if (T120 >= land && T120 < land + 0.35) {
+      const v = seg2(T120, land, land + 0.35);
       out4.push({ id: id2 + "/chip" + i, anchorX: r.x, anchorY: r.y + 3, draw: (c) => {
         for (let j = 0; j < 4; j++) {
           const aa = Math.PI + j / 3 * Math.PI;
@@ -92661,10 +92665,10 @@ function cageItems(model, actor, k, tick, out4) {
     }
   }
   for (const [i, p] of PILLARS.entries()) {
-    const r = rim(k, p.a), h = p.big ? 30 : 24, grow2 = seg2(T121, CLOSE, CLOSE + 0.14);
-    if (T121 >= CLOSE && T121 < THAW + 0.05) out4.push({ id: id2 + "/pillar" + i, anchorX: r.x, anchorY: r.y, draw: (c) => pillar(c, r.x, r.y, h, grow2, p.seed, p.big) });
-    else if (T121 >= THAW + 0.05 && T121 < THAW + 0.6) {
-      const v = seg2(T121, THAW + 0.05, THAW + 0.6);
+    const r = rim(k, p.a), h = p.big ? 30 : 24, grow2 = seg2(T120, CLOSE, CLOSE + 0.14);
+    if (T120 >= CLOSE && T120 < THAW + 0.05) out4.push({ id: id2 + "/pillar" + i, anchorX: r.x, anchorY: r.y, draw: (c) => pillar(c, r.x, r.y, h, grow2, p.seed, p.big) });
+    else if (T120 >= THAW + 0.05 && T120 < THAW + 0.6) {
+      const v = seg2(T120, THAW + 0.05, THAW + 0.6);
       out4.push({ id: id2 + "/pillar" + i, anchorX: r.x, anchorY: r.y, draw: (c) => {
         c.save();
         c.globalAlpha = 1 - seg2(v, 0.6, 1);
@@ -92675,19 +92679,19 @@ function cageItems(model, actor, k, tick, out4) {
         c.restore();
       } });
     }
-    if (T121 >= CLOSE && T121 < CLOSE + 0.25) {
-      const v = seg2(T121, CLOSE, CLOSE + 0.25);
+    if (T120 >= CLOSE && T120 < CLOSE + 0.25) {
+      const v = seg2(T120, CLOSE, CLOSE + 0.25);
       out4.push({ id: id2 + "/pspark" + i, anchorX: r.x, anchorY: r.y + 1, draw: (c) => spark(c, r.x + (rnd4(p.seed, 1) - 0.5) * 8, r.y - h * v, 3, 1 - v) });
     }
   }
-  if (T121 >= NOVA && T121 < THAW + 0.5) for (const h of caged(model, k)) {
+  if (T120 >= NOVA && T120 < THAW + 0.5) for (const h of caged(model, k)) {
     const hx2 = h.position.x, hy = h.position.y, fy = heroFoot(h);
-    if (T121 < THAW + 0.05) out4.push({ id: id2 + "/ice/" + h.entityId, anchorX: hx2, anchorY: fy, draw: (c) => {
-      iceBlock(c, hx2, hy + 1, clamp28((T121 - NOVA) / 0.08), seg2(T121, THAW - 0.35, THAW));
+    if (T120 < THAW + 0.05) out4.push({ id: id2 + "/ice/" + h.entityId, anchorX: hx2, anchorY: fy, draw: (c) => {
+      iceBlock(c, hx2, hy + 1, clamp28((T120 - NOVA) / 0.08), seg2(T120, THAW - 0.35, THAW));
       label2(c, "FROZEN", hx2, hy + 13, 1, "#bfefff");
     } });
     else {
-      const v = seg2(T121, THAW + 0.05, THAW + 0.5);
+      const v = seg2(T120, THAW + 0.05, THAW + 0.5);
       out4.push({ id: id2 + "/ice/" + h.entityId, anchorX: hx2, anchorY: fy, draw: (c) => {
         for (let j = 0; j < 7; j++) {
           const aa = j / 7 * TAU147 + 0.3;
@@ -92696,7 +92700,7 @@ function cageItems(model, actor, k, tick, out4) {
       } });
     }
   }
-  openLabel(actor, id2, T121 > 2.4 && T121 < REGROW ? clamp28((T121 - 2.4) / 0.2) * clamp28((REGROW - 0.1 - T121) / 0.2) : 0, out4);
+  openLabel(actor, id2, T120 > 2.4 && T120 < REGROW ? clamp28((T120 - 2.4) / 0.2) * clamp28((REGROW - 0.1 - T120) / 0.2) : 0, out4);
 }
 var RIME = LESSER_BOSS_TRICKS_V1.rimehorn;
 var HURL = 0.25;
@@ -92725,55 +92729,55 @@ function heavePose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face4 = k.direction.x < 0 ? -1 : 1;
-    const T121 = clock4(k, RIME, tick) * SEC5;
+    const T120 = clock4(k, RIME, tick) * SEC5;
     if (throwing(k)) {
       for (const th of TOSS) {
         const t0 = th.w, t1 = th.h, t2 = th.h + HURL;
-        if (T121 >= t0 && T121 < t1) {
-          Object.assign(s, { wind: seg2(T121, t0, t1), ball: mix18(3, 7, ease4(seg2(T121, t0 + 0.02, t1 - 0.08))) });
-        } else if (T121 >= t1 && T121 < t2) {
-          const u = seg2(T121, t1, t2);
+        if (T120 >= t0 && T120 < t1) {
+          Object.assign(s, { wind: seg2(T120, t0, t1), ball: mix18(3, 7, ease4(seg2(T120, t0 + 0.02, t1 - 0.08))) });
+        } else if (T120 >= t1 && T120 < t2) {
+          const u = seg2(T120, t1, t2);
           Object.assign(s, { wind: 1, hurl: u, ball: u < REL ? 7 : 0 });
-        } else if (T121 >= t2 && T121 < t2 + 0.3) s.follow = 1 - ease4(seg2(T121, t2 + 0.05, t2 + 0.3));
+        } else if (T120 >= t2 && T120 < t2 + 0.3) s.follow = 1 - ease4(seg2(T120, t2 + 0.05, t2 + 0.3));
       }
-      const G0 = RIME.tossTicks * SEC5, G1 = G0 + RIME.gatherTicks * SEC5, scoop = ease4(seg2(T121, G0 + 0.05, G0 + 0.35)) * (1 - ease4(seg2(T121, G1 - 0.3, G1)));
+      const G0 = RIME.tossTicks * SEC5, G1 = G0 + RIME.gatherTicks * SEC5, scoop = ease4(seg2(T120, G0 + 0.05, G0 + 0.35)) * (1 - ease4(seg2(T120, G1 - 0.3, G1)));
       if (scoop > 0) {
         for (const key4 of ["wind", "hurl", "ball", "follow"]) delete s[key4];
         s.scoop = scoop;
       }
     } else {
       const rel = HEAVE[0] + (HEAVE[1] - HEAVE[0]) * REL;
-      s.scoop = T121 < LIFT[0] ? ease4(seg2(T121, 0, 0.25)) : 1 - ease4(seg2(T121, LIFT[0], LIFT[1]));
-      s.lift = T121 < HEAVE[1] ? ease4(seg2(T121, LIFT[0], LIFT[1])) : 0;
-      s.heave = T121 < HEAVE[1] ? seg2(T121, HEAVE[0], HEAVE[1]) : 1 - ease4(seg2(T121, 1.45, 1.75));
-      s.tired = T121 < WIND_END ? ease4(seg2(T121, 1.45, 1.8)) : 1 - ease4(seg2(T121, WIND_END, WIND_END + 0.5));
-      s.chunk = T121 < rel ? mix18(0.35, 1, ease4(seg2(T121, 0.2, 0.6))) : 0;
-      s.chunkRot = (T121 >= LIFT[1] && T121 < HEAVE[0] ? Math.sin(T121 * 60) * 0.03 : 0) + (T121 >= HEAVE[0] && T121 < rel ? -seg2(T121, HEAVE[0], rel) * 0.4 : 0);
+      s.scoop = T120 < LIFT[0] ? ease4(seg2(T120, 0, 0.25)) : 1 - ease4(seg2(T120, LIFT[0], LIFT[1]));
+      s.lift = T120 < HEAVE[1] ? ease4(seg2(T120, LIFT[0], LIFT[1])) : 0;
+      s.heave = T120 < HEAVE[1] ? seg2(T120, HEAVE[0], HEAVE[1]) : 1 - ease4(seg2(T120, 1.45, 1.75));
+      s.tired = T120 < WIND_END ? ease4(seg2(T120, 1.45, 1.8)) : 1 - ease4(seg2(T120, WIND_END, WIND_END + 0.5));
+      s.chunk = T120 < rel ? mix18(0.35, 1, ease4(seg2(T120, 0.2, 0.6))) : 0;
+      s.chunkRot = (T120 >= LIFT[1] && T120 < HEAVE[0] ? Math.sin(T120 * 60) * 0.03 : 0) + (T120 >= HEAVE[0] && T120 < rel ? -seg2(T120, HEAVE[0], rel) * 0.4 : 0);
       if (k.phase === "drift" && s.walk) s.tired *= 0.5;
     }
   }
   return { face: face4, x, y, rot: 0, sq: 1 };
 }
 function heaveGround(c, actor, k, tick) {
-  const G5 = SNOW_LOOK, T121 = clock4(k, RIME, tick) * SEC5, face4 = k.direction?.x < 0 ? -1 : 1;
+  const G5 = SNOW_LOOK, T120 = clock4(k, RIME, tick) * SEC5, face4 = k.direction?.x < 0 ? -1 : 1;
   if (throwing(k)) {
     TOSS.forEach((th, i) => {
       const p = k.points?.[i];
       if (!p) return;
-      if (T121 >= th.w + 0.15 && T121 < th.land) gameWarn(c, p.x, p.y, RIME.throwRadius, seg2(T121, th.w + 0.15, th.land), T121 - th.w - 0.15, G5);
-      if (T121 >= th.land && T121 < th.land + 0.4) gameBurst(c, p.x, p.y, RIME.throwRadius + 2, T121 - th.land, G5, 0.4);
-      if (T121 >= th.land && T121 < th.land + 1.6) splat(c, p.x, p.y, Math.min(1, seg2(T121, th.land, th.land + 0.08)) * (1 - seg2(T121, th.land + 1.2, th.land + 1.6)));
-      if (T121 >= th.h + HURL * REL && T121 < th.land) {
-        const u = seg2(T121, th.h + HURL * REL, th.land);
+      if (T120 >= th.w + 0.15 && T120 < th.land) gameWarn(c, p.x, p.y, RIME.throwRadius, seg2(T120, th.w + 0.15, th.land), T120 - th.w - 0.15, G5);
+      if (T120 >= th.land && T120 < th.land + 0.4) gameBurst(c, p.x, p.y, RIME.throwRadius + 2, T120 - th.land, G5, 0.4);
+      if (T120 >= th.land && T120 < th.land + 1.6) splat(c, p.x, p.y, Math.min(1, seg2(T120, th.land, th.land + 0.08)) * (1 - seg2(T120, th.land + 1.2, th.land + 1.6)));
+      if (T120 >= th.h + HURL * REL && T120 < th.land) {
+        const u = seg2(T120, th.h + HURL * REL, th.land);
         shadow66(c, mix18(actor.position.x, p.x, u), mix18(actor.position.y, p.y, u) + 1, 5, 1.8, 0.22 * u + 0.06);
       }
     });
     return;
   }
-  if (T121 >= 0.15 && T121 < 1.4) {
-    const h = local4(actor, face4, [TROLL_HANDS.scoop[0] - 2, -1]), g2 = ease4(seg2(T121, 0.15, 0.5));
+  if (T120 >= 0.15 && T120 < 1.4) {
+    const h = local4(actor, face4, [TROLL_HANDS.scoop[0] - 2, -1]), g2 = ease4(seg2(T120, 0.15, 0.5));
     c.save();
-    c.globalAlpha = 1 - seg2(T121, 1.1, 1.4);
+    c.globalAlpha = 1 - seg2(T120, 1.1, 1.4);
     c.fillStyle = "rgba(110,140,165,.45)";
     c.beginPath();
     c.ellipse(h.x, h.y, 15 * g2, 5 * g2, 0, 0, TAU147);
@@ -92785,20 +92789,20 @@ function heaveGround(c, actor, k, tick) {
   }
   if (!k.target) return;
   const { x: tx, y: ty } = k.target;
-  if (T121 >= LIFT[0] && T121 < LAND) gameWarn(c, tx, ty, RR, seg2(T121, LIFT[0], LAND), T121 - LIFT[0], G5);
-  if (T121 >= LAND && T121 < LAND + 0.5) gameBurst(c, tx, ty, RR + 4, T121 - LAND, G5, 0.5);
+  if (T120 >= LIFT[0] && T120 < LAND) gameWarn(c, tx, ty, RR, seg2(T120, LIFT[0], LAND), T120 - LIFT[0], G5);
+  if (T120 >= LAND && T120 < LAND + 0.5) gameBurst(c, tx, ty, RR + 4, T120 - LAND, G5, 0.5);
   const rel = HEAVE[0] + (HEAVE[1] - HEAVE[0]) * REL;
-  if (T121 >= rel && T121 < LAND) {
-    const u = seg2(T121, rel, LAND);
+  if (T120 >= rel && T120 < LAND) {
+    const u = seg2(T120, rel, LAND);
     shadow66(c, mix18(actor.position.x, tx, u), mix18(actor.position.y, ty, u) + 1, mix18(10, 24, u), mix18(3, 8, u), 0.12 + u * 0.22);
   }
 }
 function heaveItems(model, actor, k, tick, out4) {
-  const T121 = clock4(k, RIME, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, o = actor.position, foot2 = footOf(actor), hand7 = local4(actor, face4, TROLL_HANDS.scoop);
+  const T120 = clock4(k, RIME, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, o = actor.position, foot2 = footOf(actor), hand7 = local4(actor, face4, TROLL_HANDS.scoop);
   const scoopSnow = (t0, t1, n, key4) => {
-    if (T121 >= t0 && T121 < t1) out4.push({ id: id2 + "/" + key4, anchorX: hand7.x, anchorY: foot2 + 0.5, draw: (c) => {
+    if (T120 >= t0 && T120 < t1) out4.push({ id: id2 + "/" + key4, anchorX: hand7.x, anchorY: foot2 + 0.5, draw: (c) => {
       for (let i = 0; i < n; i++) {
-        const ph = (T121 * 2.6 + i / n) % 1;
+        const ph = (T120 * 2.6 + i / n) % 1;
         clump(c, hand7.x + face4 * (-8 - n + i * 7 + ph * 4), o.y - 2 - Math.sin(ph * Math.PI) * (n > 3 ? 16 : 12), 1.4 + ph, ph * 5 + i);
       }
     } });
@@ -92808,8 +92812,8 @@ function heaveItems(model, actor, k, tick, out4) {
     scoopSnow(G0 + 0.1, G1 - 0.1, 3, "scoop");
     TOSS.forEach((th, i) => {
       const p = k.points?.[i], rel2 = th.h + HURL * REL;
-      if (T121 >= th.w && T121 < th.w + 0.3) {
-        const v = seg2(T121, th.w, th.w + 0.3), gx = o.x + face4 * 46;
+      if (T120 >= th.w && T120 < th.w + 0.3) {
+        const v = seg2(T120, th.w, th.w + 0.3), gx = o.x + face4 * 46;
         out4.push({ id: id2 + "/grab" + i, anchorX: gx, anchorY: foot2 + 0.5, draw: (c) => {
           for (let j = 0; j < 4; j++) {
             const a = Math.PI * (1.1 + j * 0.27);
@@ -92818,8 +92822,8 @@ function heaveItems(model, actor, k, tick, out4) {
         } });
       }
       if (!p) return;
-      if (T121 >= rel2 && T121 < th.land) {
-        const hp = trollThrowHand({ wind: 1, hurl: REL }), sx = o.x + face4 * hp[0], sy = o.y + hp[1], u = seg2(T121, rel2, th.land), at9 = (v) => [mix18(sx, p.x, v), mix18(sy, p.y - 6, v) - Math.sin(v * Math.PI) * 46], gy = mix18(o.y, p.y, u);
+      if (T120 >= rel2 && T120 < th.land) {
+        const hp = trollThrowHand({ wind: 1, hurl: REL }), sx = o.x + face4 * hp[0], sy = o.y + hp[1], u = seg2(T120, rel2, th.land), at9 = (v) => [mix18(sx, p.x, v), mix18(sy, p.y - 6, v) - Math.sin(v * Math.PI) * 46], gy = mix18(o.y, p.y, u);
         out4.push({ id: id2 + "/ball" + i, anchorX: mix18(sx, p.x, u), anchorY: Math.max(gy, foot2 + 0.5), draw: (c) => {
           for (let j = 3; j >= 1; j--) {
             const [qx, qy] = at9(Math.max(0, u - j * 0.06));
@@ -92835,11 +92839,11 @@ function heaveItems(model, actor, k, tick, out4) {
             c.restore();
           }
           const [bx, by] = at9(u);
-          snowball(c, bx, by, 8, T121 * 9);
+          snowball(c, bx, by, 8, T120 * 9);
         } });
       }
-      if (T121 >= th.land && T121 < th.land + 0.45) {
-        const v = seg2(T121, th.land, th.land + 0.45);
+      if (T120 >= th.land && T120 < th.land + 0.45) {
+        const v = seg2(T120, th.land, th.land + 0.45);
         out4.push({ id: id2 + "/burst" + i, anchorX: p.x, anchorY: p.y + 6, draw: (c) => {
           for (let j = 0; j < 7; j++) {
             const a = Math.PI + j / 6 * Math.PI + rnd4(j, 7) * 0.3, d = v * (8 + rnd4(j, 8) * 12);
@@ -92848,19 +92852,19 @@ function heaveItems(model, actor, k, tick, out4) {
         } });
       }
     });
-    openLabel(actor, id2, clamp28((T121 - G0 - 0.2) / 0.15) * clamp28((G1 - 0.25 - T121) / 0.15), out4);
+    openLabel(actor, id2, clamp28((T120 - G0 - 0.2) / 0.15) * clamp28((G1 - 0.25 - T120) / 0.15), out4);
     return;
   }
   scoopSnow(0.15, 0.7, 5, "tear");
   const rel = HEAVE[0] + (HEAVE[1] - HEAVE[0]) * REL;
   if (!k.target) return;
   const { x: tx, y: ty } = k.target;
-  if (T121 >= rel && T121 < LAND) {
-    const hp = trollChunkAt({ lift: 1, heave: REL, chunk: 1 }, 0, 24), sx = o.x + face4 * hp[0], sy = o.y + hp[1], u = seg2(T121, rel, LAND), gy = mix18(o.y, ty, u), x = mix18(sx, tx, u), y = mix18(sy, ty - 14, u) - Math.sin(u * Math.PI) * 70;
+  if (T120 >= rel && T120 < LAND) {
+    const hp = trollChunkAt({ lift: 1, heave: REL, chunk: 1 }, 0, 24), sx = o.x + face4 * hp[0], sy = o.y + hp[1], u = seg2(T120, rel, LAND), gy = mix18(o.y, ty, u), x = mix18(sx, tx, u), y = mix18(sy, ty - 14, u) - Math.sin(u * Math.PI) * 70;
     out4.push({ id: id2 + "/chunk", anchorX: x, anchorY: Math.max(gy, foot2 + 1), draw: (c) => snowChunk(c, x, y, 24, (-0.4 - u * 3.2) * face4) });
   }
-  if (T121 >= LAND && T121 < LAND + 0.7) {
-    const v = seg2(T121, LAND, LAND + 0.7);
+  if (T120 >= LAND && T120 < LAND + 0.7) {
+    const v = seg2(T120, LAND, LAND + 0.7);
     out4.push({ id: id2 + "/smash", anchorX: tx, anchorY: ty + 16, draw: (c) => {
       for (let i = 0; i < 7; i++) {
         const a = i / 7 * TAU147 + rnd4(i, 41) * 0.5, d = v * (14 + rnd4(i, 42) * 26);
@@ -92872,14 +92876,14 @@ function heaveItems(model, actor, k, tick, out4) {
       }
     } });
   }
-  if (T121 >= LAND) {
-    const kk = ease4(seg2(T121, LAND, LAND + 0.2)), a = 1 - seg2(T121, DRIFT_END - 0.5, DRIFT_END);
+  if (T120 >= LAND) {
+    const kk = ease4(seg2(T120, LAND, LAND + 0.2)), a = 1 - seg2(T120, DRIFT_END - 0.5, DRIFT_END);
     out4.push({ id: id2 + "/drift", anchorX: tx, anchorY: ty - 2, draw: (c) => {
       drift4(c, tx, ty, kk * 1.25, a);
-      label2(c, "drift: slows", tx, ty + 24, seg2(T121, LAND + 0.3, LAND + 0.5) * a);
+      label2(c, "drift: slows", tx, ty + 24, seg2(T120, LAND + 0.3, LAND + 0.5) * a);
     } });
   }
-  openLabel(actor, id2, T121 > 1.75 && T121 < WIND_END ? clamp28((T121 - 1.75) / 0.15) * clamp28((WIND_END - 0.1 - T121) / 0.2) : 0, out4);
+  openLabel(actor, id2, T120 > 1.75 && T120 < WIND_END ? clamp28((T120 - 1.75) / 0.15) * clamp28((WIND_END - 0.1 - T120) / 0.2) : 0, out4);
 }
 var WHITE = LESSER_BOSS_TRICKS_V1.frostvigil;
 var WR = WHITE.radius;
@@ -92906,9 +92910,9 @@ function vigilPose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face4 = k.direction.x < 0 ? -1 : 1;
-    const T121 = clock4(k, WHITE, tick) * SEC5;
-    s.raise = T121 < CALM ? ease4(seg2(T121, 0, 0.55)) : 1 - ease4(seg2(T121, CALM, CALM + 0.3));
-    s.gutter = ease4(seg2(T121, CALM, CALM + 0.35)) * (1 - ease4(seg2(T121, GUT_END - 0.35, GUT_END)));
+    const T120 = clock4(k, WHITE, tick) * SEC5;
+    s.raise = T120 < CALM ? ease4(seg2(T120, 0, 0.55)) : 1 - ease4(seg2(T120, CALM, CALM + 0.3));
+    s.gutter = ease4(seg2(T120, CALM, CALM + 0.35)) * (1 - ease4(seg2(T120, GUT_END - 0.35, GUT_END)));
   }
   return { face: face4, x, y, rot: 0, sq: 1 };
 }
@@ -92921,7 +92925,7 @@ function meterOf(actor, k, h, tick) {
     m = { seq: k.sequence, tick, n: 0, frozenUntil: -1, frozenAt: -1 };
     meters.set(key4, m);
   }
-  const T121 = clock4(k, WHITE, tick) * SEC5, inStorm = k.phase === "storm", dt = Math.min(10, Math.max(0, tick - m.tick));
+  const T120 = clock4(k, WHITE, tick) * SEC5, inStorm = k.phase === "storm", dt = Math.min(10, Math.max(0, tick - m.tick));
   m.tick = tick;
   if (inStorm && dt > 0 && tick >= m.frozenUntil) {
     const inReach = Math.hypot(h.position.x - k.origin.x, h.position.y - k.origin.y) <= WR;
@@ -92932,7 +92936,7 @@ function meterOf(actor, k, h, tick) {
       m.frozenUntil = tick + WHITE.frozenTicks;
     }
   }
-  if (!inStorm && T121 < STORM) m.n = 0;
+  if (!inStorm && T120 < STORM) m.n = 0;
   return m;
 }
 function sweepMeters(model) {
@@ -92942,12 +92946,12 @@ function sweepMeters(model) {
   }
 }
 function vigilGround(c, actor, k, tick, model) {
-  const G5 = STORM_LOOK, T121 = clock4(k, WHITE, tick) * SEC5, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [];
-  const storm = T121 >= STORM && T121 < CALM + 0.3, sa = T121 < CALM ? seg2(T121, STORM, STORM + 0.2) : 1 - seg2(T121, CALM, CALM + 0.3);
-  if (T121 >= 0.2 && T121 < STORM + 0.25) {
+  const G5 = STORM_LOOK, T120 = clock4(k, WHITE, tick) * SEC5, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [];
+  const storm = T120 >= STORM && T120 < CALM + 0.3, sa = T120 < CALM ? seg2(T120, STORM, STORM + 0.2) : 1 - seg2(T120, CALM, CALM + 0.3);
+  if (T120 >= 0.2 && T120 < STORM + 0.25) {
     c.save();
-    c.globalAlpha = 1 - seg2(T121, STORM, STORM + 0.25);
-    gameWarn(c, BX, BY, WR, seg2(T121, 0.2, STORM), T121 - 0.2, G5);
+    c.globalAlpha = 1 - seg2(T120, STORM, STORM + 0.25);
+    gameWarn(c, BX, BY, WR, seg2(T120, 0.2, STORM), T120 - 0.2, G5);
     c.restore();
   }
   if (storm) {
@@ -92965,10 +92969,10 @@ function vigilGround(c, actor, k, tick, model) {
     c.stroke();
     c.restore();
   }
-  const pk = seg2(T121, POOLS_AT, POOLS_AT + 0.15) * (1 - seg2(T121, GUT_END - 0.3, GUT_END));
+  const pk = seg2(T120, POOLS_AT, POOLS_AT + 0.15) * (1 - seg2(T120, GUT_END - 0.3, GUT_END));
   for (const p of pts2) pool3(c, p.x, p.y, pk, tick * SEC5, PR);
-  if (T121 >= POOLS_AT && T121 < POOLS_AT + 0.35) for (const p of pts2) gameBurst(c, p.x, p.y, PR, T121 - POOLS_AT, LIGHT_LOOK, 0.35);
-  if (T121 >= POOLS_AT && T121 < CALM) for (const p of pts2) for (let j = 0; j < 3; j++) {
+  if (T120 >= POOLS_AT && T120 < POOLS_AT + 0.35) for (const p of pts2) gameBurst(c, p.x, p.y, PR, T120 - POOLS_AT, LIGHT_LOOK, 0.35);
+  if (T120 >= POOLS_AT && T120 < CALM) for (const p of pts2) for (let j = 0; j < 3; j++) {
     const ph = (tick * SEC5 * 1.1 + j / 3) % 1, r = PR + (1 - ph) * 26;
     c.save();
     c.globalAlpha = ph * 0.85 * pk;
@@ -92988,15 +92992,15 @@ function vigilGround(c, actor, k, tick, model) {
   }
 }
 function vigilItems(model, actor, k, tick, out4) {
-  const T121 = clock4(k, WHITE, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [], t = tick * SEC5;
-  const pk = seg2(T121, POOLS_AT, POOLS_AT + 0.15) * (1 - seg2(T121, GUT_END - 0.3, GUT_END)), storm = T121 >= STORM && T121 < CALM + 0.3, sa = T121 < CALM ? seg2(T121, STORM, STORM + 0.2) : 1 - seg2(T121, CALM, CALM + 0.3);
-  const L = LANTERN({ raise: T121 < CALM ? ease4(seg2(T121, 0, 0.55)) : 0 }), LX = actor.position.x + face4 * L[0], LY = actor.position.y + L[1];
+  const T120 = clock4(k, WHITE, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [], t = tick * SEC5;
+  const pk = seg2(T120, POOLS_AT, POOLS_AT + 0.15) * (1 - seg2(T120, GUT_END - 0.3, GUT_END)), storm = T120 >= STORM && T120 < CALM + 0.3, sa = T120 < CALM ? seg2(T120, STORM, STORM + 0.2) : 1 - seg2(T120, CALM, CALM + 0.3);
+  const L = LANTERN({ raise: T120 < CALM ? ease4(seg2(T120, 0, 0.55)) : 0 }), LX = actor.position.x + face4 * L[0], LY = actor.position.y + L[1];
   pts2.forEach((p, i) => {
     out4.push({ id: id2 + "/beam" + i, anchorX: p.x, anchorY: p.y - PR, draw: (c) => beam(c, p.x, p.y, pk, t, PR) });
     const end = CALM, taken = party2(model).some((h) => Math.hypot(h.position.x - p.x, h.position.y - p.y) <= SAFE);
-    if (T121 >= POOLS_AT + 0.05 && T121 < end && !taken) out4.push({ id: id2 + "/here" + i, anchorX: p.x, anchorY: p.y + PR, draw: (c) => label2(c, "STAND IN THE LIGHT", p.x, p.y - PR - 6, Math.min(seg2(T121, POOLS_AT + 0.05, POOLS_AT + 0.2), 1 - seg2(T121, end - 0.15, end)), "#ffe7a0") });
-    const t0 = 0.2 + i * 0.06, u = seg2(T121, t0, POOLS_AT);
-    if (T121 >= t0 && T121 < POOLS_AT) out4.push({ id: id2 + "/spark" + i, anchorX: p.x, anchorY: p.y, draw: (c) => {
+    if (T120 >= POOLS_AT + 0.05 && T120 < end && !taken) out4.push({ id: id2 + "/here" + i, anchorX: p.x, anchorY: p.y + PR, draw: (c) => label2(c, "STAND IN THE LIGHT", p.x, p.y - PR - 6, Math.min(seg2(T120, POOLS_AT + 0.05, POOLS_AT + 0.2), 1 - seg2(T120, end - 0.15, end)), "#ffe7a0") });
+    const t0 = 0.2 + i * 0.06, u = seg2(T120, t0, POOLS_AT);
+    if (T120 >= t0 && T120 < POOLS_AT) out4.push({ id: id2 + "/spark" + i, anchorX: p.x, anchorY: p.y, draw: (c) => {
       for (let j = 0; j < 4; j++) {
         const v = Math.max(0, u - j * 0.07);
         warmSpark(c, mix18(LX, p.x, v), mix18(LY, p.y, v) - Math.sin(v * Math.PI) * 30, 3.4 - j * 0.6, 1 - j * 0.22);
@@ -93032,7 +93036,7 @@ function vigilItems(model, actor, k, tick, out4) {
       } });
     }
   }
-  openLabel(actor, id2, T121 > CALM + 0.3 && T121 < GUT_END ? clamp28((T121 - CALM - 0.3) / 0.15) * clamp28((GUT_END - 0.2 - T121) / 0.2) : 0, out4);
+  openLabel(actor, id2, T120 > CALM + 0.3 && T120 < GUT_END ? clamp28((T120 - CALM - 0.3) / 0.15) * clamp28((GUT_END - 0.2 - T120) / 0.2) : 0, out4);
 }
 var SNOW_POSES = Object.freeze({ shardheart: cagePose, rimehorn: heavePose, frostvigil: vigilPose });
 var SNOW_GROUNDS = Object.freeze({ cage: cageGround, heave: heaveGround, whiteout: vigilGround });
@@ -95039,7 +95043,7 @@ function clock5(k, t, tick) {
   }
   return A2 * SEC6;
 }
-var seg5 = (T121, a, b) => clamp28((T121 - a) / (b - a));
+var seg5 = (T120, a, b) => clamp28((T120 - a) / (b - a));
 var faceOf5 = (actor) => actor.presentationFacingX === -1 ? -1 : 1;
 function meleeOf5(actor, tick) {
   const m = actor.meleePhase;
@@ -95432,63 +95436,63 @@ function ventPose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face4 = k.direction.x < 0 ? -1 : 1;
-    const T121 = clock5(k, VENT, tick);
-    s.brace = T121 < 1.8 ? ease4(seg5(T121, 0, 0.6)) : 1 - ease4(seg5(T121, 1.8, 2.1));
+    const T120 = clock5(k, VENT, tick);
+    s.brace = T120 < 1.8 ? ease4(seg5(T120, 0, 0.6)) : 1 - ease4(seg5(T120, 1.8, 2.1));
     let erupt = 0;
-    for (const L of LAUNCH) if (T121 >= L - 0.06 && T121 < L + 0.3) erupt = Math.max(erupt, 1 - Math.abs(T121 - L - 0.05) / 0.25);
+    for (const L of LAUNCH) if (T120 >= L - 0.06 && T120 < L + 0.3) erupt = Math.max(erupt, 1 - Math.abs(T120 - L - 0.05) / 0.25);
     s.erupt = clamp28(erupt);
-    s.spent = T121 < V_SPENT_END ? ease4(seg5(T121, 2.1, 2.5)) : 1 - ease4(seg5(T121, V_SPENT_END, V_END));
+    s.spent = T120 < V_SPENT_END ? ease4(seg5(T120, 2.1, 2.5)) : 1 - ease4(seg5(T120, V_SPENT_END, V_END));
     s.gape = s.spent > 0.5 ? 0.05 : 0.2 + s.brace * 0.35;
   }
   return { face: face4, x, y, rot: 0, sq: 1 };
 }
 function ventGround(c, actor, k, tick) {
   if (!k.target) return;
-  const G5 = LAVA_LOOK, T121 = clock5(k, VENT, tick), spots2 = bombSpots(k);
+  const G5 = LAVA_LOOK, T120 = clock5(k, VENT, tick), spots2 = bombSpots(k);
   spots2.forEach((b, i) => {
     const t0 = LAUNCH[i], land = t0 + FLY3;
-    if (T121 >= t0 && T121 < land) {
-      gameWarn(c, b.x, b.y, BR7, seg5(T121, t0, land), T121 - t0, G5);
-      const u = seg5(T121, t0, land);
+    if (T120 >= t0 && T120 < land) {
+      gameWarn(c, b.x, b.y, BR7, seg5(T120, t0, land), T120 - t0, G5);
+      const u = seg5(T120, t0, land);
       shadow66(c, mix18(actor.position.x, b.x, u), mix18(actor.position.y, b.y, u), 2 + u * 5, 1 + u * 2.4, 0.1 + u * 0.2);
     }
-    if (T121 >= land && T121 < land + 0.5) gameBurst(c, b.x, b.y, BR7, T121 - land, G5, 0.45);
-    if (T121 >= land) {
-      const kk = ease4(seg5(T121, land, land + 0.18)), fade = 1 - seg5(T121, V_END - 0.3, V_END);
+    if (T120 >= land && T120 < land + 0.5) gameBurst(c, b.x, b.y, BR7, T120 - land, G5, 0.45);
+    if (T120 >= land) {
+      const kk = ease4(seg5(T120, land, land + 0.18)), fade = 1 - seg5(T120, V_END - 0.3, V_END);
       c.save();
       c.globalAlpha = fade;
-      lavaPool(c, b.x, b.y, PR2, T121, kk, ease4(seg5(T121, land + POOL, land + POOL + 0.6)), i * 1.7 + 1);
+      lavaPool(c, b.x, b.y, PR2, T120, kk, ease4(seg5(T120, land + POOL, land + POOL + 0.6)), i * 1.7 + 1);
       c.restore();
     }
   });
 }
 function ventItems(model, actor, k, tick, out4) {
-  const T121 = clock5(k, VENT, tick), id2 = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, cr = craterAt2(actor, face4), foot2 = footOf2(actor);
+  const T120 = clock5(k, VENT, tick), id2 = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, cr = craterAt2(actor, face4), foot2 = footOf2(actor);
   LAUNCH.forEach((t0, i) => {
-    if (T121 >= t0 - 0.04 && T121 < t0 + 0.3) out4.push({ id: id2 + "/spit" + i, anchorX: actor.position.x, anchorY: foot2 + 2, draw: (c) => spit(c, cr.x, cr.y, seg5(T121, t0 - 0.04, t0 + 0.3)) });
+    if (T120 >= t0 - 0.04 && T120 < t0 + 0.3) out4.push({ id: id2 + "/spit" + i, anchorX: actor.position.x, anchorY: foot2 + 2, draw: (c) => spit(c, cr.x, cr.y, seg5(T120, t0 - 0.04, t0 + 0.3)) });
   });
   if (!k.target) return;
   bombSpots(k).forEach((b, i) => {
     const t0 = LAUNCH[i], land = t0 + FLY3;
-    if (T121 >= t0 && T121 < land) {
-      const u = seg5(T121, t0, land), x = mix18(cr.x, b.x, u), y = mix18(cr.y, b.y, u) - Math.sin(u * Math.PI) * 92, gy = mix18(actor.position.y, b.y, u);
+    if (T120 >= t0 && T120 < land) {
+      const u = seg5(T120, t0, land), x = mix18(cr.x, b.x, u), y = mix18(cr.y, b.y, u) - Math.sin(u * Math.PI) * 92, gy = mix18(actor.position.y, b.y, u);
       out4.push({ id: id2 + "/bomb" + i, anchorX: x, anchorY: Math.max(gy, foot2 + 0.5), draw: (c) => {
         for (let j = 8; j >= 1; j--) {
           const v = Math.max(0, u - j * 0.035);
           trail2(c, mix18(cr.x, b.x, v), mix18(cr.y, b.y, v) - Math.sin(v * Math.PI) * 92, (0.9 - j * 0.09) * clamp28(u * 6), j);
         }
-        bomb(c, x, y, 5.6, T121 * 6 + i);
+        bomb(c, x, y, 5.6, T120 * 6 + i);
       } });
     }
-    if (T121 >= land && T121 < land + 0.5) {
-      const u = seg5(T121, land, land + 0.5);
+    if (T120 >= land && T120 < land + 0.5) {
+      const u = seg5(T120, land, land + 0.5);
       out4.push({ id: id2 + "/splash" + i, anchorX: b.x, anchorY: b.y + 4, draw: (c) => {
         drops(c, b.x, b.y, u / 0.9, i * 3 + 2);
         bombChips(c, b.x, b.y, u, i * 5 + 3);
       } });
     }
   });
-  openLabel2(actor, id2, T121 > 2.5 && T121 < V_SPENT_END ? clamp28((T121 - 2.5) / 0.15) * clamp28((V_SPENT_END - 0.05 - T121) / 0.15) : 0, out4);
+  openLabel2(actor, id2, T120 > 2.5 && T120 < V_SPENT_END ? clamp28((T120 - 2.5) / 0.15) * clamp28((V_SPENT_END - 0.05 - T120) / 0.15) : 0, out4);
 }
 var ANV = LESSER_BOSS_TRICKS_V1.anvilgrim;
 var AP = ANVIL_PAL;
@@ -95504,10 +95508,10 @@ var T_OUT = T_BURN + 0.4;
 var T_COOL = A_END - 0.05;
 var SURGE = 0.42;
 var PUMPS = [-0.26, 0, 0.25, 0.5, 0.75].map((d) => T_FIRE + d);
-var pumpAt = (T121) => {
+var pumpAt = (T120) => {
   let v = 0;
   for (const p of PUMPS) {
-    if (T121 >= p - 0.1 && T121 < p + 0.22) v = Math.max(v, T121 < p ? ease4(seg5(T121, p - 0.1, p)) : 1 - ease4(seg5(T121, p, p + 0.22)));
+    if (T120 >= p - 0.1 && T120 < p + 0.22) v = Math.max(v, T120 < p ? ease4(seg5(T120, p - 0.1, p)) : 1 - ease4(seg5(T120, p, p + 0.22)));
   }
   return v;
 };
@@ -95607,27 +95611,27 @@ function anvilPose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready" && k.target) {
     face4 = k.target.x < actor.position.x ? -1 : 1;
-    const T121 = clock5(k, ANV, tick);
-    s.raise = T121 < T_SLAM ? ease4(seg5(T121, 0, 0.75)) * (1 - ease4(seg5(T121, T_SLAM - 0.18, T_SLAM))) : 0;
-    s.slam = T121 < T_FREE ? ease4(seg5(T121, T_SLAM - 0.18, T_SLAM)) : 1 - ease4(seg5(T121, T_FREE, T_FREE + 0.4));
-    s.stuck = T121 < T_FREE ? ease4(seg5(T121, T_SLAM + 0.15, T_SLAM + 0.5)) : 1 - ease4(seg5(T121, T_FREE, T_FREE + 0.25));
-    s.pump = pumpAt(T121);
+    const T120 = clock5(k, ANV, tick);
+    s.raise = T120 < T_SLAM ? ease4(seg5(T120, 0, 0.75)) * (1 - ease4(seg5(T120, T_SLAM - 0.18, T_SLAM))) : 0;
+    s.slam = T120 < T_FREE ? ease4(seg5(T120, T_SLAM - 0.18, T_SLAM)) : 1 - ease4(seg5(T120, T_FREE, T_FREE + 0.4));
+    s.stuck = T120 < T_FREE ? ease4(seg5(T120, T_SLAM + 0.15, T_SLAM + 0.5)) : 1 - ease4(seg5(T120, T_FREE, T_FREE + 0.25));
+    s.pump = pumpAt(T120);
   }
   return { face: face4, x, y, rot: 0, sq: 1 };
 }
 function anvilGround(c, actor, k, tick) {
   if (!k.target || !k.direction) return;
-  const G5 = LAVA_LOOK, T121 = clock5(k, ANV, tick), IX = k.target.x, IY = k.target.y, P28 = AP;
-  const crK = T121 < T_FREE ? ease4(seg5(T121, T_SLAM, T_SLAM + 0.12)) : 1 - seg5(T121, T_FREE + 0.2, A_END);
+  const G5 = LAVA_LOOK, T120 = clock5(k, ANV, tick), IX = k.target.x, IY = k.target.y, P28 = AP;
+  const crK = T120 < T_FREE ? ease4(seg5(T120, T_SLAM, T_SLAM + 0.12)) : 1 - seg5(T120, T_FREE + 0.2, A_END);
   if (crK > 0) craterBack(c, IX, IY, 9, crK);
-  if (T121 >= T_SLAM && T121 < T_SLAM + 0.5) gameBurst(c, IX, IY, 16, T121 - T_SLAM, G5, 0.5);
+  if (T120 >= T_SLAM && T120 < T_SLAM + 0.5) gameBurst(c, IX, IY, 16, T120 - T_SLAM, G5, 0.5);
   for (const L of lanesOf(k)) {
-    if (T121 >= T_LANE && T121 < T_FIRE) gameLane(c, L, seg5(T121, T_LANE, T_FIRE), T121 - T_LANE, G5, 4);
-    if (T121 >= T_FIRE && T121 < T_FIRE + 0.4) gameLaneBurst(c, L, T121 - T_FIRE, G5, 0.4);
-    if (T121 >= T_SLAM && T121 < T_COOL) {
-      const reach = ease4(seg5(T121, T_SLAM + L.i * 0.04, T_SLAM + T_RACE + L.i * 0.04)) * L.len;
-      const heat = T121 < T_FIRE ? 0.55 + 0.45 * seg5(T121, T_FIRE - 0.3, T_FIRE) * (0.6 + 0.4 * Math.sin(T121 * 40)) : T121 < T_OUT ? 1 : 1 - seg5(T121, T_OUT, T_OUT + 0.8);
-      floorCrack(c, crackPts(L, reach), heat, 1 - seg5(T121, T_COOL - 0.5, T_COOL));
+    if (T120 >= T_LANE && T120 < T_FIRE) gameLane(c, L, seg5(T120, T_LANE, T_FIRE), T120 - T_LANE, G5, 4);
+    if (T120 >= T_FIRE && T120 < T_FIRE + 0.4) gameLaneBurst(c, L, T120 - T_FIRE, G5, 0.4);
+    if (T120 >= T_SLAM && T120 < T_COOL) {
+      const reach = ease4(seg5(T120, T_SLAM + L.i * 0.04, T_SLAM + T_RACE + L.i * 0.04)) * L.len;
+      const heat = T120 < T_FIRE ? 0.55 + 0.45 * seg5(T120, T_FIRE - 0.3, T_FIRE) * (0.6 + 0.4 * Math.sin(T120 * 40)) : T120 < T_OUT ? 1 : 1 - seg5(T120, T_OUT, T_OUT + 0.8);
+      floorCrack(c, crackPts(L, reach), heat, 1 - seg5(T120, T_COOL - 0.5, T_COOL));
       if (reach < L.len && reach > 2) {
         const p = crackPts(L, reach).pop();
         c.save();
@@ -95640,8 +95644,8 @@ function anvilGround(c, actor, k, tick) {
         c.restore();
       }
     }
-    for (const p of PUMPS) if (T121 >= p && T121 < p + SURGE && T121 < T_BURN + 0.1) {
-      const d = ease4(seg5(T121, p, p + SURGE)) * L.len, pt = crackPts(L, Math.max(2, d)).pop();
+    for (const p of PUMPS) if (T120 >= p && T120 < p + SURGE && T120 < T_BURN + 0.1) {
+      const d = ease4(seg5(T120, p, p + SURGE)) * L.len, pt = crackPts(L, Math.max(2, d)).pop();
       c.save();
       c.shadowColor = P28.lava;
       c.shadowBlur = 10;
@@ -95655,8 +95659,8 @@ function anvilGround(c, actor, k, tick) {
       c.fill();
       c.restore();
     }
-    if (T121 >= T_FIRE && T121 < T_OUT) {
-      const front2 = ease4(seg5(T121, T_FIRE, T_FIRE + WAVE)) * L.len, fall = 1 - ease4(seg5(T121, T_BURN, T_OUT)), pts2 = crackPts(L, L.len);
+    if (T120 >= T_FIRE && T120 < T_OUT) {
+      const front2 = ease4(seg5(T120, T_FIRE, T_FIRE + WAVE)) * L.len, fall = 1 - ease4(seg5(T120, T_BURN, T_OUT)), pts2 = crackPts(L, L.len);
       c.save();
       c.globalAlpha = 0.55 * fall;
       c.shadowColor = P28.lava;
@@ -95673,8 +95677,8 @@ function anvilGround(c, actor, k, tick) {
 }
 function anvilItems(model, actor, k, tick, out4) {
   if (!k.target || !k.direction) return;
-  const T121 = clock5(k, ANV, tick), id2 = "lesser-vfx/" + actor.entityId, IX = k.target.x, IY = k.target.y, P28 = AP, o = actor.position, face4 = IX < o.x ? -1 : 1;
-  const hand7 = [o.x + face4 * HAND[0], o.y + HAND[1]], head19 = [o.x + face4 * HEAD2[0], o.y + HEAD2[1]], pump = pumpAt(T121), foot2 = footOf2(actor);
+  const T120 = clock5(k, ANV, tick), id2 = "lesser-vfx/" + actor.entityId, IX = k.target.x, IY = k.target.y, P28 = AP, o = actor.position, face4 = IX < o.x ? -1 : 1;
+  const hand7 = [o.x + face4 * HAND[0], o.y + HAND[1]], head19 = [o.x + face4 * HEAD2[0], o.y + HEAD2[1]], pump = pumpAt(T120), foot2 = footOf2(actor);
   if (pump > 0.05) out4.push({ id: id2 + "/haft", anchorX: o.x, anchorY: foot2 + 1.4, draw: (c) => {
     c.save();
     c.globalAlpha = pump * 0.85;
@@ -95694,8 +95698,8 @@ function anvilItems(model, actor, k, tick, out4) {
     c.restore();
   } });
   PUMPS.forEach((p, n) => {
-    if (T121 >= p - 0.1 && T121 < p + 0.02) out4.push({ id: id2 + "/bead" + n, anchorX: o.x, anchorY: foot2 + 1.5, draw: (c) => {
-      const u = ease4(seg5(T121, p - 0.1, p)), x = mix18(hand7[0], head19[0], u), y = mix18(hand7[1], head19[1], u);
+    if (T120 >= p - 0.1 && T120 < p + 0.02) out4.push({ id: id2 + "/bead" + n, anchorX: o.x, anchorY: foot2 + 1.5, draw: (c) => {
+      const u = ease4(seg5(T120, p - 0.1, p)), x = mix18(hand7[0], head19[0], u), y = mix18(hand7[1], head19[1], u);
       c.save();
       c.shadowColor = P28.lava;
       c.shadowBlur = 9;
@@ -95709,9 +95713,9 @@ function anvilItems(model, actor, k, tick, out4) {
       c.fill();
       c.restore();
     } });
-    if (T121 >= p && T121 < p + 0.3) out4.push({ id: id2 + "/gout" + n, anchorX: IX, anchorY: IY + 2.5, draw: (c) => {
-      const u = seg5(T121, p, p + 0.3), h = (1 - u * 0.8) * (22 + n % 2 * 5) * ease4(clamp28(u * 6));
-      for (const [dx, kk, ph] of [[-9, 0.6, 0], [-4, 1, 1.3], [2, 0.85, 2.1], [7, 0.95, 2.8], [11, 0.55, 3.4]]) tongue2(c, IX + dx, IY + 1.5, h * kk, 4, T121, ph + n, true);
+    if (T120 >= p && T120 < p + 0.3) out4.push({ id: id2 + "/gout" + n, anchorX: IX, anchorY: IY + 2.5, draw: (c) => {
+      const u = seg5(T120, p, p + 0.3), h = (1 - u * 0.8) * (22 + n % 2 * 5) * ease4(clamp28(u * 6));
+      for (const [dx, kk, ph] of [[-9, 0.6, 0], [-4, 1, 1.3], [2, 0.85, 2.1], [7, 0.95, 2.8], [11, 0.55, 3.4]]) tongue2(c, IX + dx, IY + 1.5, h * kk, 4, T120, ph + n, true);
       c.save();
       c.globalAlpha = (1 - u) * 0.7;
       c.shadowColor = P28.lava;
@@ -95723,23 +95727,23 @@ function anvilItems(model, actor, k, tick, out4) {
       c.restore();
     } });
   });
-  const crK = T121 < T_FREE ? ease4(seg5(T121, T_SLAM, T_SLAM + 0.12)) : 1 - seg5(T121, T_FREE + 0.2, A_END);
+  const crK = T120 < T_FREE ? ease4(seg5(T120, T_SLAM, T_SLAM + 0.12)) : 1 - seg5(T120, T_FREE + 0.2, A_END);
   if (crK > 0) out4.push({ id: id2 + "/crater", anchorX: IX, anchorY: IY + 2, draw: (c) => craterFront(c, IX, IY, 9, crK) });
-  if (T121 >= T_SLAM && T121 < T_SLAM + 0.6) {
-    const u = seg5(T121, T_SLAM, T_SLAM + 0.6);
+  if (T120 >= T_SLAM && T120 < T_SLAM + 0.6) {
+    const u = seg5(T120, T_SLAM, T_SLAM + 0.6);
     out4.push({ id: id2 + "/dust", anchorX: IX, anchorY: IY + 3, draw: (c) => {
       for (const [dx, dy, s] of [[-12, 2, 1], [11, 3, 0.9], [2, -3, 1.1]]) dust(c, IX + dx * (1 + u), IY + dy, 4 + u * 5 * s, (1 - u) * 0.85);
       rockChips(c, IX, IY, u / 0.83, 11);
     } });
   }
-  if (T121 >= T_FREE && T121 < T_FREE + 0.45) out4.push({ id: id2 + "/free", anchorX: IX, anchorY: IY + 3.5, draw: (c) => rockChips(c, IX, IY, seg5(T121, T_FREE, T_FREE + 0.45), 23, 6, 18) });
+  if (T120 >= T_FREE && T120 < T_FREE + 0.45) out4.push({ id: id2 + "/free", anchorX: IX, anchorY: IY + 3.5, draw: (c) => rockChips(c, IX, IY, seg5(T120, T_FREE, T_FREE + 0.45), 23, 6, 18) });
   for (const L of lanesOf(k)) {
-    if (T121 >= T_FIRE && T121 < T_OUT) {
-      const front2 = ease4(seg5(T121, T_FIRE, T_FIRE + WAVE)) * L.len, fall = 1 - ease4(seg5(T121, T_BURN, T_OUT)), H8 = 24 * fall, pts2 = crackPts(L, L.len);
+    if (T120 >= T_FIRE && T120 < T_OUT) {
+      const front2 = ease4(seg5(T120, T_FIRE, T_FIRE + WAVE)) * L.len, fall = 1 - ease4(seg5(T120, T_BURN, T_OUT)), H8 = 24 * fall, pts2 = crackPts(L, L.len);
       const surgeAt = (d) => {
         let b = 0;
-        for (const p of PUMPS) if (T121 >= p && T121 < p + SURGE) {
-          const sd = ease4(seg5(T121, p, p + SURGE)) * L.len;
+        for (const p of PUMPS) if (T120 >= p && T120 < p + SURGE) {
+          const sd = ease4(seg5(T120, p, p + SURGE)) * L.len;
           b = Math.max(b, Math.exp(-(((d - sd) / 16) ** 2)));
         }
         return b;
@@ -95747,13 +95751,13 @@ function anvilItems(model, actor, k, tick, out4) {
       for (let j = 1; j < pts2.length; j++) {
         const [x, y, d] = pts2[j];
         if (d > front2) break;
-        const lit2 = ease4(clamp28((front2 - d) / 14)), kk = (0.75 + 0.25 * Math.sin(j * 2.3 + L.i) + 0.12 * Math.sin(T121 * 9 + j * 1.7)) * lit2 * (1 + 0.6 * surgeAt(d)), edge = Math.min(1, j / 2.5);
-        out4.push({ id: id2 + "/wall" + L.i + "/" + j, anchorX: x, anchorY: y + 0.5, draw: (c) => tongue2(c, x, y + 1, H8 * kk * edge * (j % 2 ? 1 : 0.78), 5.6, T121, j * 1.9 + L.i, true) });
+        const lit2 = ease4(clamp28((front2 - d) / 14)), kk = (0.75 + 0.25 * Math.sin(j * 2.3 + L.i) + 0.12 * Math.sin(T120 * 9 + j * 1.7)) * lit2 * (1 + 0.6 * surgeAt(d)), edge = Math.min(1, j / 2.5);
+        out4.push({ id: id2 + "/wall" + L.i + "/" + j, anchorX: x, anchorY: y + 0.5, draw: (c) => tongue2(c, x, y + 1, H8 * kk * edge * (j % 2 ? 1 : 0.78), 5.6, T120, j * 1.9 + L.i, true) });
       }
       const top = Math.min(...pts2.map((p) => p[1]));
       out4.push({ id: id2 + "/embers" + L.i, anchorX: pts2[pts2.length >> 1][0], anchorY: top - 1, draw: (c) => {
         for (let i = 0; i < 10; i++) {
-          const ph = (T121 * 1.2 + rnd4(i, L.i + 31)) % 1, p = pts2[1 + Math.floor(rnd4(i, L.i + 32) * (pts2.length - 1))], px7 = p[0] + Math.sin(T121 * 4 + i) * 2, py = p[1] - 10 - ph * 30;
+          const ph = (T120 * 1.2 + rnd4(i, L.i + 31)) % 1, p = pts2[1 + Math.floor(rnd4(i, L.i + 32) * (pts2.length - 1))], px7 = p[0] + Math.sin(T120 * 4 + i) * 2, py = p[1] - 10 - ph * 30;
           c.save();
           c.globalAlpha = Math.sin(ph * Math.PI) * fall;
           c.fillStyle = ph < 0.5 ? P28.lavaL : P28.ember;
@@ -95762,13 +95766,13 @@ function anvilItems(model, actor, k, tick, out4) {
         }
       } });
     }
-    if (T121 >= T_OUT - 0.1 && T121 < T_COOL) {
+    if (T120 >= T_OUT - 0.1 && T120 < T_COOL) {
       const pts2 = crackPts(L, L.len), last = pts2[pts2.length - 1];
       out4.push({ id: id2 + "/smoke" + L.i, anchorX: last[0], anchorY: last[1] - 2, draw: (c) => {
         for (let j = 2; j < pts2.length; j += 4) {
-          const ph = ((T121 - T_OUT) * 0.9 + rnd4(j, L.i + 40)) % 1, [x, y] = pts2[j];
+          const ph = ((T120 - T_OUT) * 0.9 + rnd4(j, L.i + 40)) % 1, [x, y] = pts2[j];
           c.save();
-          c.globalAlpha = (1 - ph) * 0.35 * (1 - seg5(T121, T_COOL - 0.6, T_COOL));
+          c.globalAlpha = (1 - ph) * 0.35 * (1 - seg5(T120, T_COOL - 0.6, T_COOL));
           c.fillStyle = "#6a5e5a";
           c.beginPath();
           c.arc(x + Math.sin(ph * 5 + j) * 2, y - 3 - ph * 16, 2 + ph * 3, 0, TAU147);
@@ -95778,7 +95782,7 @@ function anvilItems(model, actor, k, tick, out4) {
       } });
     }
   }
-  openLabel2(actor, id2, T121 > T_BURN + 0.2 && T121 < T_FREE ? clamp28((T121 - T_BURN - 0.2) / 0.15) * clamp28((T_FREE - 0.05 - T121) / 0.15) : 0, out4);
+  openLabel2(actor, id2, T120 > T_BURN + 0.2 && T120 < T_FREE ? clamp28((T120 - T_BURN - 0.2) / 0.15) * clamp28((T_FREE - 0.05 - T120) / 0.15) : 0, out4);
 }
 var PYR = LESSER_BOSS_TRICKS_V1.pyrelisk;
 var PP = PYRE_PAL;
@@ -95870,30 +95874,30 @@ function pyrePose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face4 = k.direction.x < 0 ? -1 : 1;
-    const T121 = clock5(k, PYR, tick);
-    s.rear = T121 < SP0 ? ease4(seg5(T121, 0, 0.5)) : 1 - ease4(seg5(T121, SP0, SP0 + 0.3));
-    s.spent = T121 < RS0 ? ease4(seg5(T121, SP0 + 0.05, SP0 + 0.45)) : 1 - ease4(seg5(T121, RS0, P_END));
+    const T120 = clock5(k, PYR, tick);
+    s.rear = T120 < SP0 ? ease4(seg5(T120, 0, 0.5)) : 1 - ease4(seg5(T120, SP0, SP0 + 0.3));
+    s.spent = T120 < RS0 ? ease4(seg5(T120, SP0 + 0.05, SP0 + 0.45)) : 1 - ease4(seg5(T120, RS0, P_END));
   }
   return { face: face4, x, y, rot: 0, sq: 1 };
 }
 function pyreGround(c, actor, k, tick) {
   if (!k.origin) return;
-  const G5 = LAVA_LOOK, T121 = clock5(k, PYR, tick), o = k.origin, m = gapsOf(actor, k);
+  const G5 = LAVA_LOOK, T120 = clock5(k, PYR, tick), o = k.origin, m = gapsOf(actor, k);
   for (const w of WAVES) {
     const gaps = m[w.key];
     if (!gaps) continue;
     const seed2 = k.sequence * 7 + (w.key === "A" ? 1 : 2), end = w.fire + BURN;
-    const sc2 = T121 >= w.fire ? ease4(seg5(T121, w.fire, w.fire + 0.3)) * (1 - seg5(T121, end + 1.2, end + 2.4)) : 0;
+    const sc2 = T120 >= w.fire ? ease4(seg5(T120, w.fire, w.fire + 0.3)) * (1 - seg5(T120, end + 1.2, end + 2.4)) : 0;
     if (sc2 > 0) {
       c.save();
-      c.globalAlpha = 0.42 * sc2 * (1 - seg5(T121, P_END - 0.3, P_END));
+      c.globalAlpha = 0.42 * sc2 * (1 - seg5(T120, P_END - 0.3, P_END));
       fieldPath(c, o, gaps, seed2);
       c.fillStyle = "#1e1512";
       c.fill("evenodd");
       c.restore();
     }
-    if (T121 >= w.warn && T121 < w.fire) {
-      const p = seg5(T121, w.warn, w.fire), age = T121 - w.warn, fade = clamp28(age / 0.15), kk = ease4(p), flash2 = p > 0.86 ? Math.sin((p - 0.86) / 0.14 * Math.PI * 3) ** 2 : 0;
+    if (T120 >= w.warn && T120 < w.fire) {
+      const p = seg5(T120, w.warn, w.fire), age = T120 - w.warn, fade = clamp28(age / 0.15), kk = ease4(p), flash2 = p > 0.86 ? Math.sin((p - 0.86) / 0.14 * Math.PI * 3) ** 2 : 0;
       c.save();
       c.globalAlpha = fade;
       fieldPath(c, o, gaps, seed2);
@@ -95917,8 +95921,8 @@ function pyreGround(c, actor, k, tick) {
       c.stroke();
       c.restore();
     }
-    if (T121 >= w.fire && T121 < end) {
-      const age = T121 - w.fire, fall = 1 - ease4(seg5(T121, end - 0.3, end)), fl2 = 0.5 + 0.08 * Math.sin(T121 * 23) + 0.05 * Math.sin(T121 * 37);
+    if (T120 >= w.fire && T120 < end) {
+      const age = T120 - w.fire, fall = 1 - ease4(seg5(T120, end - 0.3, end)), fl2 = 0.5 + 0.08 * Math.sin(T120 * 23) + 0.05 * Math.sin(T120 * 37);
       c.save();
       fieldPath(c, o, gaps, seed2);
       c.fillStyle = age < 0.07 ? G5.lit : "#ff6a1c";
@@ -95966,24 +95970,24 @@ function flameRows(o, gaps, seed2) {
 }
 function pyreItems(model, actor, k, tick, out4) {
   if (!k.origin) return;
-  const T121 = clock5(k, PYR, tick), id2 = "lesser-vfx/" + actor.entityId, o = k.origin, m = gapsOf(actor, k);
+  const T120 = clock5(k, PYR, tick), id2 = "lesser-vfx/" + actor.entityId, o = k.origin, m = gapsOf(actor, k);
   for (const w of WAVES) {
     const gaps = m[w.key];
     if (!gaps) continue;
     const seed2 = k.sequence * 7 + (w.key === "A" ? 1 : 2), end = w.fire + BURN;
-    if (T121 >= w.fire && T121 < end) {
-      const rise = ease4(seg5(T121, w.fire, w.fire + 0.12)), fall = 1 - ease4(seg5(T121, end - 0.3, end)), rows = m.rows[w.key] ??= flameRows(o, gaps, seed2);
+    if (T120 >= w.fire && T120 < end) {
+      const rise = ease4(seg5(T120, w.fire, w.fire + 0.12)), fall = 1 - ease4(seg5(T120, end - 0.3, end)), rows = m.rows[w.key] ??= flameRows(o, gaps, seed2);
       rows.forEach((r, ri) => out4.push({ id: id2 + "/fire" + w.key + ri, anchorX: o.x, anchorY: r.y + 3.5, draw: (c) => {
         for (const [x, y, i] of r.spots) {
-          const h = (12 + rnd4(i, 7) * 9) * rise * fall * (0.86 + 0.14 * Math.sin(T121 * 9 + i));
-          tongue2(c, x, y, h, 4.6 + rnd4(i, 8) * 1.2, T121, i * 0.7);
+          const h = (12 + rnd4(i, 7) * 9) * rise * fall * (0.86 + 0.14 * Math.sin(T120 * 9 + i));
+          tongue2(c, x, y, h, 4.6 + rnd4(i, 8) * 1.2, T120, i * 0.7);
         }
       } }));
       out4.push({ id: id2 + "/embers" + w.key, anchorX: o.x, anchorY: o.y + FR, draw: (c) => {
         const all = rows.flatMap((r) => r.spots);
         if (!all.length) return;
         for (let e = 0; e < 30; e++) {
-          const s = all[e * 7 % all.length], ph = (T121 * 1.3 + rnd4(e, 40)) % 1, px7 = s[0] + (rnd4(e, 41) - 0.5) * 8, py = s[1] - 8 - ph * 24;
+          const s = all[e * 7 % all.length], ph = (T120 * 1.3 + rnd4(e, 40)) % 1, px7 = s[0] + (rnd4(e, 41) - 0.5) * 8, py = s[1] - 8 - ph * 24;
           c.save();
           c.globalAlpha = Math.sin(ph * Math.PI) * fall;
           c.fillStyle = ph < 0.5 ? PP.lavaL : PP.lava;
@@ -95992,8 +95996,8 @@ function pyreItems(model, actor, k, tick, out4) {
         }
       } });
     }
-    if (T121 >= end - 0.15 && T121 < end + 1) {
-      const u = seg5(T121, end - 0.15, end + 1), all = (m.rows[w.key] ??= flameRows(o, gaps, seed2)).flatMap((r) => r.spots);
+    if (T120 >= end - 0.15 && T120 < end + 1) {
+      const u = seg5(T120, end - 0.15, end + 1), all = (m.rows[w.key] ??= flameRows(o, gaps, seed2)).flatMap((r) => r.spots);
       if (all.length) out4.push({ id: id2 + "/smoke" + w.key, anchorX: o.x, anchorY: o.y + FR, draw: (c) => {
         for (let e = 0; e < 18; e++) {
           const s = all[e * 11 % all.length], ph = (u + rnd4(e, 50) * 0.5) % 1;
@@ -96008,7 +96012,7 @@ function pyreItems(model, actor, k, tick, out4) {
       } });
     }
   }
-  openLabel2(actor, id2, T121 > SP0 + 0.25 && T121 < RS0 ? clamp28((T121 - SP0 - 0.25) / 0.15) * clamp28((RS0 - 0.1 - T121) / 0.15) : 0, out4);
+  openLabel2(actor, id2, T120 > SP0 + 0.25 && T120 < RS0 ? clamp28((T120 - SP0 - 0.25) / 0.15) * clamp28((RS0 - 0.1 - T120) / 0.15) : 0, out4);
 }
 var VOLCANIC_POSES = Object.freeze({ ventshell: ventPose, anvilgrim: anvilPose, pyrelisk: pyrePose });
 var VOLCANIC_GROUNDS = Object.freeze({ eruption: ventGround, fissure: anvilGround, wildfire: pyreGround });
@@ -97093,12 +97097,12 @@ function graveGround5(c, actor, k, tick) {
       }
     }
     if (k.target) {
-      const T121 = k.target, lockAt = DIVE.airTicks - DIVE.lockTicks;
-      gameWarn(c, T121.x, T121.y, R14, q2, age * SEC7, STONE_WARN);
+      const T120 = k.target, lockAt = DIVE.airTicks - DIVE.lockTicks;
+      gameWarn(c, T120.x, T120.y, R14, q2, age * SEC7, STONE_WARN);
       const g2 = clamp28((age - 6) / (DIVE.airTicks - 6));
       c.fillStyle = `rgba(12,10,10,${0.12 + g2 * 0.3})`;
       c.beginPath();
-      c.ellipse(T121.x, T121.y, 6 + g2 * g2 * 22, (6 + g2 * g2 * 22) * 0.42, 0, 0, TAU147);
+      c.ellipse(T120.x, T120.y, 6 + g2 * g2 * 22, (6 + g2 * g2 * 22) * 0.42, 0, 0, TAU147);
       c.fill();
       if (age >= lockAt && age < lockAt + 12) {
         const u = (age - lockAt) / 12;
@@ -97107,7 +97111,7 @@ function graveGround5(c, actor, k, tick) {
         c.strokeStyle = "#ffffff";
         c.lineWidth = 2;
         c.beginPath();
-        c.arc(T121.x, T121.y, R14 + u * 5, 0, TAU147);
+        c.arc(T120.x, T120.y, R14 + u * 5, 0, TAU147);
         c.stroke();
         c.restore();
       }
@@ -97226,8 +97230,8 @@ function rotLean(k, tick) {
     const back = ease4(clamp28(q2 / 0.92));
     return { lean: -back * 0.9, swell: back, gape: mix18(0.22, 0.95, back), tilt: -back * 0.15 };
   }
-  const T121 = age * SEC7, lunge2 = Math.max(0, 1 - clamp28(T121 / 0.6)), kick = SEED_FIRE.reduce((m, f) => Math.max(m, age >= f && age < f + 8 ? 1 - (age - f) / 8 : 0), 0);
-  return { lean: mix18(-0.9, 0, clamp28(T121 / 0.1)) + lunge2 * 0.55 + kick * 0.25, swell: Math.max(0, 1 - clamp28(T121 / 0.45)), gape: T121 < 0.45 ? 0.95 - kick * 0.25 : void 0, tilt: 0 };
+  const T120 = age * SEC7, lunge2 = Math.max(0, 1 - clamp28(T120 / 0.6)), kick = SEED_FIRE.reduce((m, f) => Math.max(m, age >= f && age < f + 8 ? 1 - (age - f) / 8 : 0), 0);
+  return { lean: mix18(-0.9, 0, clamp28(T120 / 0.1)) + lunge2 * 0.55 + kick * 0.25, swell: Math.max(0, 1 - clamp28(T120 / 0.45)), gape: T120 < 0.45 ? 0.95 - kick * 0.25 : void 0, tilt: 0 };
 }
 function rotPose(actor, k, tick, s) {
   let face4 = actor.presentationFacingX === -1 ? -1 : 1;
@@ -97315,22 +97319,22 @@ function tongueLine(actor, k, tick) {
 function vineGround(c, actor, k, tick) {
   const VINE3 = LESSER_BOSS_TRICKS_V1[actor.enemyFamily];
   if (VINE3.snare && k.phase === "up") return snareGround(c, actor, k, tick);
-  const G5 = VINE3.snare ? OPEN_LOOKS.root : GROUND_LOOKS.thorn, { age, q: q2 } = phaseAge(k, VINE3, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T121 = k.target;
-  if (!T121) return;
+  const G5 = VINE3.snare ? OPEN_LOOKS.root : GROUND_LOOKS.thorn, { age, q: q2 } = phaseAge(k, VINE3, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T120 = k.target;
+  if (!T120) return;
   if (k.phase === "dive") craterBack(c, hole.x, hole.y, 9, Math.max(0.6, q2));
   else if (k.phase === "tunnel") {
     craterBack(c, hole.x, hole.y, 9, 0.6);
-    ridge2(c, hole.x + f * 4, hole.y, T121.x, T121.y + 1, ease4(q2), tick * SEC7);
+    ridge2(c, hole.x + f * 4, hole.y, T120.x, T120.y + 1, ease4(q2), tick * SEC7);
   } else if (k.phase === "warn") {
     craterBack(c, hole.x, hole.y, 9, 0.6 * (1 - clamp28((q2 - 0.35) / 0.65)));
-    if (q2 < 0.25) ridge2(c, hole.x + f * 4, hole.y, T121.x, T121.y + 1, 1, tick * SEC7);
-    gameWarn(c, T121.x, T121.y, VINE3.radius, q2, age * SEC7, G5);
-    cracks(c, T121.x, T121.y, 24, ease4(q2));
+    if (q2 < 0.25) ridge2(c, hole.x + f * 4, hole.y, T120.x, T120.y + 1, 1, tick * SEC7);
+    gameWarn(c, T120.x, T120.y, VINE3.radius, q2, age * SEC7, G5);
+    cracks(c, T120.x, T120.y, 24, ease4(q2));
   } else if (k.phase === "up") {
     const fade = 1 - ease4(clamp28((age - 48) / (VINE3.upTicks - 48)));
-    cracks(c, T121.x, T121.y, 24, fade);
-    craterBack(c, T121.x, T121.y, 11, fade);
-    gameBurst(c, T121.x, T121.y, VINE3.radius, age * SEC7, G5, 0.5);
+    cracks(c, T120.x, T120.y, 24, fade);
+    craterBack(c, T120.x, T120.y, 11, fade);
+    gameBurst(c, T120.x, T120.y, VINE3.radius, age * SEC7, G5, 0.5);
   }
 }
 function seedsTimeline(k, tick) {
@@ -97383,27 +97387,27 @@ function tongueGround(c, actor, k, tick) {
     gameWarn(c, k.target.x, k.target.y, FROG.radius, a / span3, a * SEC7, GP);
   }
   if (k.phase === "puddle" && k.target) {
-    const T121 = k.target;
-    gameBurst(c, T121.x, T121.y, FROG.radius, age * SEC7, GP, 0.5);
-    puddle5(c, T121.x, T121.y, FROG.puddleRadius, tick * SEC7, ease4(clamp28(age / 12)) * (1 - ease4(clamp28((age - FROG.puddleTicks + 30) / 30))));
+    const T120 = k.target;
+    gameBurst(c, T120.x, T120.y, FROG.radius, age * SEC7, GP, 0.5);
+    puddle5(c, T120.x, T120.y, FROG.puddleRadius, tick * SEC7, ease4(clamp28(age / 12)) * (1 - ease4(clamp28((age - FROG.puddleTicks + 30) / 30))));
   }
 }
 function vineItems(model, actor, k, tick, out4) {
   const VINE3 = LESSER_BOSS_TRICKS_V1[actor.enemyFamily];
   if (VINE3.snare && k.phase === "up") return snareItems(model, actor, k, tick, out4);
-  const P28 = VINE3.snare ? VINE_PAL.B : VINE_PAL.A, { age, q: q2 } = phaseAge(k, VINE3, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T121 = k.target, id2 = "lesser-vfx/" + actor.entityId;
-  if (!T121) return;
+  const P28 = VINE3.snare ? VINE_PAL.B : VINE_PAL.A, { age, q: q2 } = phaseAge(k, VINE3, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T120 = k.target, id2 = "lesser-vfx/" + actor.entityId;
+  if (!T120) return;
   if (k.phase === "dive") out4.push({ id: id2 + "/hole", anchorX: hole.x, anchorY: hole.y + 0.5, draw: (c) => {
     craterFront(c, hole.x, hole.y, 9, Math.max(0.6, q2));
     spray(c, hole.x, hole.y, clamp28((age - 3) / 27), 9, 2.6, 20, 11);
   } });
   else if (k.phase === "tunnel") {
-    const u = ease4(q2), len = Math.hypot(T121.x - hole.x, T121.y - hole.y) || 1, vis = 1 - clamp28((age - 44) / 10), lean = -1.1 * sideOf2(T121.x - hole.x, f);
+    const u = ease4(q2), len = Math.hypot(T120.x - hole.x, T120.y - hole.y) || 1, vis = 1 - clamp28((age - 44) / 10), lean = -1.1 * sideOf2(T120.x - hole.x, f);
     for (let i = 0; i < 3; i++) {
-      const v = clamp28(u - i * 6 / len), x = mix18(hole.x, T121.x, v), y = mix18(hole.y, T121.y, v) - 0.5, h = (13 - i * 2.5) * vis * clamp28(q2 * 6 - i * 0.5);
+      const v = clamp28(u - i * 6 / len), x = mix18(hole.x, T120.x, v), y = mix18(hole.y, T120.y, v) - 0.5, h = (13 - i * 2.5) * vis * clamp28(q2 * 6 - i * 0.5);
       out4.push({ id: id2 + "/fin" + i, anchorX: x, anchorY: y, draw: (c) => finThorn(c, x, y, h, lean, P28) });
     }
-    const fx = mix18(hole.x, T121.x, u), fy = mix18(hole.y, T121.y, u);
+    const fx = mix18(hole.x, T120.x, u), fy = mix18(hole.y, T120.y, u);
     out4.push({ id: id2 + "/dust", anchorX: fx, anchorY: fy + 1, draw: (c) => {
       for (let i = 0; i < 3; i++) {
         const ph = (age * SEC7 * 3.2 + i / 3) % 1;
@@ -97412,17 +97416,17 @@ function vineItems(model, actor, k, tick, out4) {
     } });
   } else if (k.phase === "warn" && VINE3.snare) snareWarnItems(actor, k, q2, tick, out4);
   else if (k.phase === "warn" && q2 > 0.55) for (let i = 0; i < 9; i++) {
-    const a = i / 9 * TAU147 + 0.2, x = T121.x + Math.cos(a) * 17 + Math.sin(tick * 0.67 + i) * 0.4, y = T121.y + Math.sin(a) * 17 * 0.7;
+    const a = i / 9 * TAU147 + 0.2, x = T120.x + Math.cos(a) * 17 + Math.sin(tick * 0.67 + i) * 0.4, y = T120.y + Math.sin(a) * 17 * 0.7;
     out4.push({ id: id2 + "/tip" + i, anchorX: x, anchorY: y, draw: (c) => finThorn(c, x, y, 2.5 + ease4((q2 - 0.55) / 0.45) * 3, 0, P28) });
   }
   else if (k.phase === "up") {
     const fade = 1 - ease4(clamp28((age - 48) / (VINE3.upTicks - 48))), retract = ease4(clamp28((age - 27) / 21));
-    out4.push({ id: id2 + "/lip", anchorX: T121.x, anchorY: T121.y + (actor.hullRadius ?? 20) * 0.45 + 0.5, draw: (c) => {
-      craterFront(c, T121.x, T121.y, 11, fade);
-      spray(c, T121.x, T121.y, clamp28(age / 33), 12, 6.2, 30, 21);
+    out4.push({ id: id2 + "/lip", anchorX: T120.x, anchorY: T120.y + (actor.hullRadius ?? 20) * 0.45 + 0.5, draw: (c) => {
+      craterFront(c, T120.x, T120.y, 11, fade);
+      spray(c, T120.x, T120.y, clamp28(age / 33), 12, 6.2, 30, 21);
     } });
     if (retract < 1) for (let i = 0; i < 9; i++) {
-      const a = i / 9 * TAU147 + 0.2, r = 17 + i % 2 * 4, x = T121.x + Math.cos(a) * r, y = T121.y + Math.sin(a) * r * 0.7, h = (15 + i % 3 * 5) * ease4(clamp28((age - i * 1.3) / 7)) * (1 - retract);
+      const a = i / 9 * TAU147 + 0.2, r = 17 + i % 2 * 4, x = T120.x + Math.cos(a) * r, y = T120.y + Math.sin(a) * r * 0.7, h = (15 + i % 3 * 5) * ease4(clamp28((age - i * 1.3) / 7)) * (1 - retract);
       out4.push({ id: id2 + "/thorn" + i, anchorX: x, anchorY: y, draw: (c) => finThorn(c, x, y, h, Math.cos(a) * 0.6, P28) });
     }
   }
@@ -97477,8 +97481,8 @@ function tongueItems(actor, k, tick, out4) {
     } });
   }
   if (k.phase === "puddle" && k.target && age < 30) {
-    const T121 = k.target;
-    out4.push({ id: id2 + "/splash", anchorX: T121.x, anchorY: T121.y + (actor.hullRadius ?? 20) * 0.45 + 1, draw: (c) => splash(c, T121.x, T121.y, age / 30, 10, 22, GROUND_LOOKS.poison.fill, 51) });
+    const T120 = k.target;
+    out4.push({ id: id2 + "/splash", anchorX: T120.x, anchorY: T120.y + (actor.hullRadius ?? 20) * 0.45 + 1, draw: (c) => splash(c, T120.x, T120.y, age / 30, 10, 22, GROUND_LOOKS.poison.fill, 51) });
   }
 }
 function lesserBossDepthItemsV1(model, tick) {
@@ -106162,7 +106166,7 @@ function grass(c, x, y, h, col2, n = 7, seed2 = 1, spread = 1.3, o = 1.4) {
   }
 }
 function frond2(c, x, y, len, ang, droop, wd, col2, o = 1.5) {
-  const P28 = R5(col2), qx = x + Math.cos(ang) * len * 0.55, qy = y + Math.sin(ang) * len * 0.55, tx = x + Math.cos(ang) * len * 0.9, ty = y + Math.sin(ang) * len * 0.9 + droop * len, C3 = (t) => [(1 - t) * (1 - t) * x + 2 * (1 - t) * t * qx + t * t * tx, (1 - t) * (1 - t) * y + 2 * (1 - t) * t * qy + t * t * ty], T121 = (t) => {
+  const P28 = R5(col2), qx = x + Math.cos(ang) * len * 0.55, qy = y + Math.sin(ang) * len * 0.55, tx = x + Math.cos(ang) * len * 0.9, ty = y + Math.sin(ang) * len * 0.9 + droop * len, C3 = (t) => [(1 - t) * (1 - t) * x + 2 * (1 - t) * t * qx + t * t * tx, (1 - t) * (1 - t) * y + 2 * (1 - t) * t * qy + t * t * ty], T120 = (t) => {
     const a = C3(Math.max(0, t - 0.01)), b = C3(Math.min(1, t + 0.01)), l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
     return [(b[0] - a[0]) / l, (b[1] - a[1]) / l];
   }, Wd = (t) => wd * Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.04 + 0.06)), 0.7), M4 = Math.max(5, Math.round(len / 3.4));
@@ -106170,7 +106174,7 @@ function frond2(c, x, y, len, ang, droop, wd, col2, o = 1.5) {
     const segs = [];
     let prev = C3(0);
     for (let j = 0; j < M4; j++) {
-      const t0 = j / M4, t1 = (j + 1) / M4, tt = (j + 0.85) / M4, [ux, uy] = T121(tt), cp = C3(t0 + 0.35 / M4), [vx, vy] = T121(t0), tip = C3(Math.min(1, tt)), w = Wd(tt), n0 = C3(t1), w1 = Wd(t1), [nx1, ny1] = T121(t1);
+      const t0 = j / M4, t1 = (j + 1) / M4, tt = (j + 0.85) / M4, [ux, uy] = T120(tt), cp = C3(t0 + 0.35 / M4), [vx, vy] = T120(t0), tip = C3(Math.min(1, tt)), w = Wd(tt), n0 = C3(t1), w1 = Wd(t1), [nx1, ny1] = T120(t1);
       const TIP2 = [tip[0] - uy * s * w + ux * len / M4 * 0.5, tip[1] + ux * s * w + uy * len / M4 * 0.5], Q1 = [cp[0] - vy * s * w * 1.05, cp[1] + vx * s * w * 1.05], N1 = [n0[0] - ny1 * s * w1 * 0.32, n0[1] + nx1 * s * w1 * 0.32], Q2 = [(TIP2[0] + N1[0]) / 2 - uy * s * w * 0.05, (TIP2[1] + N1[1]) / 2 + ux * s * w * 0.05];
       segs.push([prev, Q1, TIP2], [TIP2, Q2, N1]);
       prev = N1;
@@ -106187,7 +106191,7 @@ function frond2(c, x, y, len, ang, droop, wd, col2, o = 1.5) {
   }
   p.closePath();
   prop3(c, [[p, P28.m]], o);
-  const [mx, my] = T121(0.5), litA = -my * -0.6 + mx * -0.8 > 0, L = litA ? A2 : B9, h = new Path2D();
+  const [mx, my] = T120(0.5), litA = -my * -0.6 + mx * -0.8 > 0, L = litA ? A2 : B9, h = new Path2D();
   h.moveTo(x, y);
   for (const [, q2, b] of L) h.quadraticCurveTo(q2[0], q2[1], b[0], b[1]);
   for (let t = 1; t >= 0; t -= 0.1) h.lineTo(...C3(t));
@@ -115044,12 +115048,12 @@ function impact(c, e, t0, dir, L, seed2) {
     });
   }
   for (let i = 0; i < 4; i++) {
-    const a = dir + Math.PI + (i - 1.5) * 0.8, v = 26 + hash39(seed2 + i * 5) * 16, up2 = 26 + hash39(i * 3 + seed2) * 10, size = 1.4 + hash39(i + seed2 * 7) * 0.8, drop3 = gy - hy + i % 2, land = (up2 + Math.sqrt(up2 * up2 + 4 * 70 * drop3)) / 140, T121 = Math.min(u, land), px7 = hx2 + Math.cos(a) * v * T121, py = hy + Math.sin(a) * v * T121 * 0.4 - (up2 * T121 - 70 * T121 * T121), al = 1 - ease10((u - 0.6) / 0.3);
+    const a = dir + Math.PI + (i - 1.5) * 0.8, v = 26 + hash39(seed2 + i * 5) * 16, up2 = 26 + hash39(i * 3 + seed2) * 10, size = 1.4 + hash39(i + seed2 * 7) * 0.8, drop3 = gy - hy + i % 2, land = (up2 + Math.sqrt(up2 * up2 + 4 * 70 * drop3)) / 140, T120 = Math.min(u, land), px7 = hx2 + Math.cos(a) * v * T120, py = hy + Math.sin(a) * v * T120 * 0.4 - (up2 * T120 - 70 * T120 * T120), al = 1 - ease10((u - 0.6) / 0.3);
     if (al <= 0) continue;
     stand(c, gy + i % 2, () => {
       c.globalAlpha = al;
       c.translate(px7, Math.min(py, gy + i % 2));
-      c.rotate(T121 * 12 * (i % 2 ? 1 : -1));
+      c.rotate(T120 * 12 * (i % 2 ? 1 : -1));
       poly11(c, [[-size, -size * 0.4], [size, -size * 0.6], [size * 0.6, size * 0.5], [-size * 0.8, size * 0.4]], WOOD62, INK35, 0.6);
     });
   }
@@ -123997,16 +124001,16 @@ KG_HELM.hood = (c, A2, face4, sway = 0) => {
 var RG_STEEL = { b: "#b7bfc8", d: "#868f99", l: "#e9edf1" };
 var RG_INKH = { b: "#2c2b31", d: "#1f1e23", l: "#46454e" };
 KG_HELM["plate-hood"] = (c, A2, face4, sway = 0) => {
-  const H8 = RG_INKH, s = sway * 0.8, T121 = { b: "#3a3940", d: "#29282e", l: "#55545c" };
-  G3(c, [-10.6, -11.4, -14.6 + s, -10, -15.4 + s, -8.4, -10.8, -10], T121, { flat: true, lw: 1 });
-  G3(c, [-10.6, -10.6, -13.4 + s * 0.7, -6, -12 + s * 0.7, -5.6, -10.2, -9.6], T121, { flat: true, lw: 1 });
+  const H8 = RG_INKH, s = sway * 0.8, T120 = { b: "#3a3940", d: "#29282e", l: "#55545c" };
+  G3(c, [-10.6, -11.4, -14.6 + s, -10, -15.4 + s, -8.4, -10.8, -10], T120, { flat: true, lw: 1 });
+  G3(c, [-10.6, -10.6, -13.4 + s * 0.7, -6, -12 + s * 0.7, -5.6, -10.2, -9.6], T120, { flat: true, lw: 1 });
   R3(c, -10, -14, 18, 15, H8, { split: 0.75 });
   rgHoodCloth(c, H8);
   if (face4) face4(c);
   else R3(c, -1.2, -10.4, 8.6, 9.6, { b: OPENING }, { lw: 1.2, flat: true });
   rgOpeningRim(c, H8);
-  R3(c, -10, -12, 7.4, 1.8, T121, { flat: true, lw: 1 });
-  R3(c, -11.4, -12.6, 2.2, 2.8, T121, { flat: true, lw: 1 });
+  R3(c, -10, -12, 7.4, 1.8, T120, { flat: true, lw: 1 });
+  R3(c, -11.4, -12.6, 2.2, 2.8, T120, { flat: true, lw: 1 });
   R3(c, -2.8, -12.6, 11, 3.4, RG_STEEL, { split: 0.78, lw: 1.2 });
   px3(c, -2.2, -12, 9.8, 0.5, RG_STEEL.l);
   px3(c, -2.1, -11.4, 0.9, 0.9, "#4b525a");
@@ -126016,7 +126020,7 @@ function hellIslandAtV1(x, y) {
 var tilesCache = null;
 function hellCollisionTiles() {
   if (tilesCache) return tilesCache;
-  const T121 = HELL_TILE, w = Math.ceil(HELL_WIDTH / T121), h = Math.ceil(HELL_HEIGHT / T121), grid = Array.from({ length: h }, () => new Uint8Array(w));
+  const T120 = HELL_TILE, w = Math.ceil(HELL_WIDTH / T120), h = Math.ceil(HELL_HEIGHT / T120), grid = Array.from({ length: h }, () => new Uint8Array(w));
   const prep = (pts2, grow2) => {
     const n = pts2.length, X = new Float64Array(n), Y = new Float64Array(n);
     let y0 = 1e9, y1 = -1e9;
@@ -126028,22 +126032,22 @@ function hellCollisionTiles() {
     }
     return { n, X, Y, y0, y1, grow: grow2 };
   };
-  const shapes2 = [...HELL_ISLANDS.map((o) => prep(o.pts, 0)), ...HELL_BRIDGES.map((b) => prep(b.pts, T121 / 3))], xs = [];
+  const shapes2 = [...HELL_ISLANDS.map((o) => prep(o.pts, 0)), ...HELL_BRIDGES.map((b) => prep(b.pts, T120 / 3))], xs = [];
   for (let ty = 0; ty < h; ty++) {
     const row2 = grid[ty];
-    for (const { n, X, Y, y0, y1, grow: grow2 } of shapes2) for (const y of grow2 ? [(ty + 0.5) * T121 - grow2, (ty + 0.5) * T121, (ty + 0.5) * T121 + grow2] : [(ty + 0.5) * T121]) {
+    for (const { n, X, Y, y0, y1, grow: grow2 } of shapes2) for (const y of grow2 ? [(ty + 0.5) * T120 - grow2, (ty + 0.5) * T120, (ty + 0.5) * T120 + grow2] : [(ty + 0.5) * T120]) {
       if (y < y0 || y > y1) continue;
       xs.length = 0;
       for (let i = 0, j = n - 1; i < n; j = i++) if (Y[i] > y !== Y[j] > y) xs.push((X[j] - X[i]) * (y - Y[i]) / (Y[j] - Y[i]) + X[i]);
       xs.sort((p, q2) => p - q2);
       for (let k = 0; k + 1 < xs.length; k += 2) {
-        const a = Math.max(0, Math.ceil((xs[k] - grow2) / T121 - 0.5)), b = Math.min(w - 1, Math.floor((xs[k + 1] + grow2) / T121 - 0.5));
+        const a = Math.max(0, Math.ceil((xs[k] - grow2) / T120 - 0.5)), b = Math.min(w - 1, Math.floor((xs[k + 1] + grow2) / T120 - 0.5));
         for (let tx = a; tx <= b; tx++) row2[tx] = 1;
       }
     }
-    for (let tx = 0; tx < w; tx++) if (row2[tx] && underWall((tx + 0.5) * T121, (ty + 0.5) * T121)) row2[tx] = 0;
+    for (let tx = 0; tx < w; tx++) if (row2[tx] && underWall((tx + 0.5) * T120, (ty + 0.5) * T120)) row2[tx] = 0;
   }
-  tilesCache = Object.freeze({ width: w, height: h, tileSize: T121, tiles: Object.freeze(grid.map((r) => {
+  tilesCache = Object.freeze({ width: w, height: h, tileSize: T120, tiles: Object.freeze(grid.map((r) => {
     let s = "";
     for (let i = 0; i < r.length; i++) s += r[i] ? "1" : "0";
     return s;
@@ -126735,24 +126739,24 @@ function rainSpots(s, h, n, heroes3, collision) {
   }
   return spots2;
 }
-function fanSpots(s, h, n, heroes3, collision, T121, label7, apart) {
+function fanSpots(s, h, n, heroes3, collision, T120, label7, apart) {
   const target = nearestHero(heroes3, n).x;
   if (!target) return [];
-  const count2 = T121.count + T121.perFriend * Math.max(0, heroes3.length - 1), alive = Object.values(n.caps).filter((m) => m.end === null).length, room = Math.max(0, T121.maxAlive - alive);
-  const base3 = Math.atan2(target.a.position.y - n.y, target.a.position.x - n.x), [lo, hi] = T121.ahead, spots2 = [];
+  const count2 = T120.count + T120.perFriend * Math.max(0, heroes3.length - 1), alive = Object.values(n.caps).filter((m) => m.end === null).length, room = Math.max(0, T120.maxAlive - alive);
+  const base3 = Math.atan2(target.a.position.y - n.y, target.a.position.x - n.x), [lo, hi] = T120.ahead, spots2 = [];
   for (let i = 0; i < Math.min(count2, room); i++) {
     let at9 = null;
     for (let k = 0; k < 8 && !at9; k++) {
       const a = base3 + (i - (count2 - 1) / 2) * 0.55 + (k ? (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 0.5 : 0), d = lo + roll2(s, h, `${label7}/${n.capN + i}/${k}`) % (hi - lo), p = { x: r22(n.x + Math.cos(a) * d), y: r22(n.y + Math.sin(a) * d * 0.8) };
-      if (!collidesWithTiles(collision, p.x, p.y, T121.hullRadius) && spots2.every((q2) => dist(q2, p) > apart)) at9 = p;
+      if (!collidesWithTiles(collision, p.x, p.y, T120.hullRadius) && spots2.every((q2) => dist(q2, p) > apart)) at9 = p;
     }
     if (at9) spots2.push(at9);
   }
   return spots2;
 }
 function minionHp(n) {
-  const T121 = minionRules(n);
-  return combatInteger(multiplyCombat(worldEnemyStats(n.level, "C").maxHp, T121.hpTimes[0], T121.hpTimes[1]), "ceil");
+  const T120 = minionRules(n);
+  return combatInteger(multiplyCombat(worldEnemyStats(n.level, "C").maxHp, T120.hpTimes[0], T120.hpTimes[1]), "ceil");
 }
 function raiseCaps(s, h, n, heroes3, spots2) {
   const R14 = rulesOf(n), target = nearestHero(heroes3, n).x, hp = minionHp(n), alive = Object.values(n.caps).filter((m) => m.end === null).length;
@@ -126764,33 +126768,33 @@ function raiseCaps(s, h, n, heroes3, spots2) {
 function sporeMoveStep(s, h, n, heroes3, collision, hooks) {
   const R14 = rulesOf(n), m = n.move, k = s.tick - m.start;
   if (m.kind === "ring") {
-    const T121 = R14.ring;
-    for (let b = 0; b < T121.bands.length; b++) if (k === T121.windupTicks + b * T121.gapTicks) {
-      const [r0, r1] = T121.bands[b];
+    const T120 = R14.ring;
+    for (let b = 0; b < T120.bands.length; b++) if (k === T120.windupTicks + b * T120.gapTicks) {
+      const [r0, r1] = T120.bands[b];
       for (const { a } of heroes3) {
         const d = dist(a.position, m.origin);
-        if (d >= r0 - a.hullRadius * 0.5 && d <= r1 + a.hullRadius * 0.5) hurt(s, h, n, a, T121.tenths, "nightmare_ring", hooks, false);
+        if (d >= r0 - a.hullRadius * 0.5 && d <= r1 + a.hullRadius * 0.5) hurt(s, h, n, a, T120.tenths, "nightmare_ring", hooks, false);
       }
     }
-    if (k >= T121.windupTicks + (T121.bands.length - 1) * T121.gapTicks + T121.recoverTicks) rest(s, n);
+    if (k >= T120.windupTicks + (T120.bands.length - 1) * T120.gapTicks + T120.recoverTicks) rest(s, n);
     return;
   }
   if (m.kind === "rain") {
-    const T121 = R14.rain;
-    if (k === T121.warnTicks) m.spots = rainSpots(s, h, n, heroes3, collision);
+    const T120 = R14.rain;
+    if (k === T120.warnTicks) m.spots = rainSpots(s, h, n, heroes3, collision);
     if (m.spots) m.spots.forEach((p, i) => {
-      if (k !== T121.landTicks + i * T121.staggerTicks) return;
+      if (k !== T120.landTicks + i * T120.staggerTicks) return;
       n.splats.push({ x: p.x, y: p.y, tick: s.tick });
-      for (const { a } of heroes3) if (dist(a.position, p) <= T121.radius + a.hullRadius * 0.6) hurt(s, h, n, a, T121.tenths, "nightmare_rain", hooks, true);
+      for (const { a } of heroes3) if (dist(a.position, p) <= T120.radius + a.hullRadius * 0.6) hurt(s, h, n, a, T120.tenths, "nightmare_rain", hooks, true);
     });
-    if (k >= T121.landTicks + (m.spots?.length ?? 0) * T121.staggerTicks + T121.recoverTicks) rest(s, n);
+    if (k >= T120.landTicks + (m.spots?.length ?? 0) * T120.staggerTicks + T120.recoverTicks) rest(s, n);
     return;
   }
   if (m.kind === "caps") {
-    const T121 = R14.caps;
-    if (k === T121.slamTicks) m.spots = fanSpots(s, h, n, heroes3, collision, T121, "cap", -1);
-    if (k === T121.popTicks && m.spots) raiseCaps(s, h, n, heroes3, m.spots);
-    if (k >= T121.doneTicks) rest(s, n);
+    const T120 = R14.caps;
+    if (k === T120.slamTicks) m.spots = fanSpots(s, h, n, heroes3, collision, T120, "cap", -1);
+    if (k === T120.popTicks && m.spots) raiseCaps(s, h, n, heroes3, m.spots);
+    if (k >= T120.doneTicks) rest(s, n);
   }
 }
 function sporePick(s, n, heroes3) {
@@ -126804,13 +126808,13 @@ function sporePick(s, n, heroes3) {
   }
   return null;
 }
-function frogTongueTimesV1(T121, caught) {
-  const lash = T121.windupTicks + T121.lashTicks, crouch = lash + (caught ? T121.reelTicks : 0), leap = crouch + T121.crouchTicks, land = leap + T121.leapTicks;
-  return { lash, crouch, leap, land, done: land + T121.recoverTicks };
+function frogTongueTimesV1(T120, caught) {
+  const lash = T120.windupTicks + T120.lashTicks, crouch = lash + (caught ? T120.reelTicks : 0), leap = crouch + T120.crouchTicks, land = leap + T120.leapTicks;
+  return { lash, crouch, leap, land, done: land + T120.recoverTicks };
 }
-var frogCroakEndV1 = (T121) => T121.windupTicks + T121.spawns[T121.spawns.length - 1] + Math.ceil((T121.reach - T121.start) / T121.speed);
+var frogCroakEndV1 = (T120) => T120.windupTicks + T120.spawns[T120.spawns.length - 1] + Math.ceil((T120.reach - T120.start) / T120.speed);
 function landingSpot(collision, n, want, R14) {
-  const dx = want.x - n.x, dy = want.y - n.y, d = Math.hypot(dx, dy), T121 = R14.tongue, f = d > T121.maxLeap ? T121.maxLeap / d : 1;
+  const dx = want.x - n.x, dy = want.y - n.y, d = Math.hypot(dx, dy), T120 = R14.tongue, f = d > T120.maxLeap ? T120.maxLeap / d : 1;
   for (const g2 of [1, 0.85, 0.7, 0.55, 0.4, 0.25, 0]) {
     const p = { x: r22(n.x + dx * f * g2), y: r22(n.y + dy * f * g2) };
     if (!collidesWithTiles(collision, p.x, p.y, R14.hullRadius) && onIsleV1(n.isle, p)) return p;
@@ -126820,25 +126824,25 @@ function landingSpot(collision, n, want, R14) {
 function frogMoveStep(s, h, n, heroes3, collision, hooks) {
   const R14 = rulesOf(n), m = n.move, k = s.tick - m.start;
   if (m.kind === "tongue") {
-    const T121 = R14.tongue, at9 = frogTongueTimesV1(T121, m.target !== null), end = m.spots?.[0];
+    const T120 = R14.tongue, at9 = frogTongueTimesV1(T120, m.target !== null), end = m.spots?.[0];
     if (!end) {
       rest(s, n);
       return;
     }
-    if (k === T121.windupTicks) {
+    if (k === T120.windupTicks) {
       const o = m.origin, l = Math.hypot(end.x - o.x, end.y - o.y) || 1, ux = (end.x - o.x) / l, uy = (end.y - o.y) / l;
-      const inLane2 = heroes3.map((x) => ({ x, u: (x.a.position.x - o.x) * ux + (x.a.position.y - o.y) * uy, v: Math.abs((x.a.position.y - o.y) * ux - (x.a.position.x - o.x) * uy) })).filter((r) => r.u >= 0 && r.u <= T121.length && r.v <= T121.halfWidth + r.x.a.hullRadius * 0.5).sort((p, q2) => p.u - q2.u || p.x.a.entityId.localeCompare(q2.x.a.entityId));
+      const inLane2 = heroes3.map((x) => ({ x, u: (x.a.position.x - o.x) * ux + (x.a.position.y - o.y) * uy, v: Math.abs((x.a.position.y - o.y) * ux - (x.a.position.x - o.x) * uy) })).filter((r) => r.u >= 0 && r.u <= T120.length && r.v <= T120.halfWidth + r.x.a.hullRadius * 0.5).sort((p, q2) => p.u - q2.u || p.x.a.entityId.localeCompare(q2.x.a.entityId));
       if (inLane2[0]) {
         m.target = inLane2[0].x.a.entityId;
-        hurt(s, h, n, inLane2[0].x.a, T121.lashTenths, "nightmare_lash", hooks, false);
+        hurt(s, h, n, inLane2[0].x.a, T120.lashTenths, "nightmare_lash", hooks, false);
       }
       return;
     }
     const caught = m.target ? s.entitiesById[m.target] : null, held = Boolean(caught?.alive && caught.residency.spaceInstanceId === h.spaceInstanceId);
     if (k > at9.lash && k <= at9.crouch && held) {
       const d = dist(caught.position, n);
-      if (d > T121.pullStop) {
-        const v = Math.min(T121.pullSpeed, d - T121.pullStop);
+      if (d > T120.pullStop) {
+        const v = Math.min(T120.pullSpeed, d - T120.pullStop);
         hooks.pull?.(caught.entityId, r22((n.x - caught.position.x) / d * v), r22((n.y - caught.position.y) / d * v));
       }
     }
@@ -126848,51 +126852,51 @@ function frogMoveStep(s, h, n, heroes3, collision, hooks) {
       if (t) n.dx = t.x < n.x ? -1 : 1;
     }
     if (k > at9.leap && k <= at9.land && m.spots[1]) {
-      const u = (k - at9.leap) / T121.leapTicks, o = m.origin, to = m.spots[1];
+      const u = (k - at9.leap) / T120.leapTicks, o = m.origin, to = m.spots[1];
       n.x = r22(o.x + (to.x - o.x) * u);
       n.y = r22(o.y + (to.y - o.y) * u);
     }
     if (k === at9.land && m.spots[1]) {
       n.splats.push({ x: n.x, y: n.y, tick: s.tick });
-      for (const { a } of heroes3) if (dist(a.position, n) <= T121.flopRadius + a.hullRadius * 0.5) {
-        hurt(s, h, n, a, T121.flopTenths, "nightmare_flop", hooks, true);
-        if (a.alive) shove(hooks, a, n, T121.shove);
+      for (const { a } of heroes3) if (dist(a.position, n) <= T120.flopRadius + a.hullRadius * 0.5) {
+        hurt(s, h, n, a, T120.flopTenths, "nightmare_flop", hooks, true);
+        if (a.alive) shove(hooks, a, n, T120.shove);
       }
     }
     if (k >= at9.done) rest(s, n);
     return;
   }
   if (m.kind === "croak") {
-    const T121 = R14.croak;
-    for (let i = 0; i < T121.spawns.length; i++) {
-      const age = k - T121.windupTicks - T121.spawns[i];
+    const T120 = R14.croak;
+    for (let i = 0; i < T120.spawns.length; i++) {
+      const age = k - T120.windupTicks - T120.spawns[i];
       if (age < 0) continue;
-      const r = T121.start + age * T121.speed, was = r - T121.speed;
-      if (r - T121.halfWidth > T121.reach) continue;
+      const r = T120.start + age * T120.speed, was = r - T120.speed;
+      if (r - T120.halfWidth > T120.reach) continue;
       const g2 = m.spots[i], ga = Math.atan2(g2.y, g2.x);
       for (const { a } of heroes3) {
-        const dx = a.position.x - m.origin.x, dy = a.position.y - m.origin.y, d = Math.hypot(dx, dy), w = T121.halfWidth + a.hullRadius * 0.5;
+        const dx = a.position.x - m.origin.x, dy = a.position.y - m.origin.y, d = Math.hypot(dx, dy), w = T120.halfWidth + a.hullRadius * 0.5;
         if (Math.abs(d - r) > w || age > 0 && Math.abs(d - was) <= w) continue;
         const off = Math.atan2(dy, dx) - ga;
-        if (d > 1 && Math.abs(Math.atan2(Math.sin(off), Math.cos(off))) <= T121.gapHalf) continue;
-        hurt(s, h, n, a, T121.tenths, "nightmare_croak", hooks, false);
-        if (a.alive) shove(hooks, a, m.origin, T121.shove);
+        if (d > 1 && Math.abs(Math.atan2(Math.sin(off), Math.cos(off))) <= T120.gapHalf) continue;
+        hurt(s, h, n, a, T120.tenths, "nightmare_croak", hooks, false);
+        if (a.alive) shove(hooks, a, m.origin, T120.shove);
       }
     }
-    if (k >= frogCroakEndV1(T121) + T121.recoverTicks) rest(s, n);
+    if (k >= frogCroakEndV1(T120) + T120.recoverTicks) rest(s, n);
     return;
   }
   if (m.kind === "spawn") {
-    const T121 = R14.spawn;
-    if (k === T121.coughTicks) m.spots = fanSpots(s, h, n, heroes3, collision, T121, "egg", T121.radius * 2.4);
+    const T120 = R14.spawn;
+    if (k === T120.coughTicks) m.spots = fanSpots(s, h, n, heroes3, collision, T120, "egg", T120.radius * 2.4);
     (m.spots ?? []).forEach((p, i) => {
-      if (k !== T121.coughTicks + T121.flyTicks + i * T121.staggerTicks) return;
+      if (k !== T120.coughTicks + T120.flyTicks + i * T120.staggerTicks) return;
       const alive = Object.values(n.caps).filter((q2) => q2.end === null).length;
-      if (alive >= T121.maxAlive) return;
+      if (alive >= T120.maxAlive) return;
       const c = n.capN++, hp = minionHp(n), t = nearestHero(heroes3, p).x;
-      n.caps[gazecapIdV1(s.campaign.campaignId, h.eatTick, c)] = { n: c, born: s.tick, x: p.x, y: p.y, dx: t && t.a.position.x < p.x ? -1 : 1, hp, maxHp: hp, end: null, endTick: null, hatch: s.tick + T121.eggTicks };
+      n.caps[gazecapIdV1(s.campaign.campaignId, h.eatTick, c)] = { n: c, born: s.tick, x: p.x, y: p.y, dx: t && t.a.position.x < p.x ? -1 : 1, hp, maxHp: hp, end: null, endTick: null, hatch: s.tick + T120.eggTicks };
     });
-    if (k >= T121.coughTicks + T121.flyTicks + Math.max(0, (m.spots?.length ?? 1) - 1) * T121.staggerTicks + T121.recoverTicks) rest(s, n);
+    if (k >= T120.coughTicks + T120.flyTicks + Math.max(0, (m.spots?.length ?? 1) - 1) * T120.staggerTicks + T120.recoverTicks) rest(s, n);
   }
 }
 function frogBegin(s, h, n, kind, heroes3) {
@@ -126924,28 +126928,28 @@ function moveStep(s, h, n, heroes3, collision, hooks) {
   return n.kind === "frog" ? frogMoveStep(s, h, n, heroes3, collision, hooks) : sporeMoveStep(s, h, n, heroes3, collision, hooks);
 }
 function capsStep(s, h, n, heroes3, collision, hooks) {
-  const T121 = minionRules(n);
+  const T120 = minionRules(n);
   for (const [id2, m] of Object.entries(n.caps).sort((a, b) => a[1].n - b[1].n)) {
     if (m.end !== null) {
       if (s.tick >= m.endTick + rulesOf(n).keepTicks) delete n.caps[id2];
       continue;
     }
-    if (n.dead !== null || s.tick >= m.born + T121.lifeTicks) {
+    if (n.dead !== null || s.tick >= m.born + T120.lifeTicks) {
       m.end = "wilted";
       m.endTick = s.tick;
       continue;
     }
-    if (m.hatch !== void 0 ? s.tick < m.hatch + T121.hatchWaitTicks : s.tick < m.born + T121.growTicks + T121.waitTicks) continue;
+    if (m.hatch !== void 0 ? s.tick < m.hatch + T120.hatchWaitTicks : s.tick < m.born + T120.growTicks + T120.waitTicks) continue;
     const { x: t, d } = nearestHero(heroes3, m);
     if (!t) continue;
-    if (d <= T121.triggerRadius + t.a.hullRadius) {
+    if (d <= T120.triggerRadius + t.a.hullRadius) {
       m.end = "popped";
       m.endTick = s.tick;
-      for (const { a } of heroes3) if (dist(a.position, m) <= T121.popRadius + a.hullRadius * 0.5) hurt(s, h, n, a, T121.tenths, n.kind === "frog" ? "nightmare_eyehopper" : "nightmare_gazecap", hooks, true);
+      for (const { a } of heroes3) if (dist(a.position, m) <= T120.popRadius + a.hullRadius * 0.5) hurt(s, h, n, a, T120.tenths, n.kind === "frog" ? "nightmare_eyehopper" : "nightmare_gazecap", hooks, true);
       continue;
     }
     const was = { x: m.x, y: m.y };
-    walkAt(collision, m, t.a.position, T121.speed, T121.hullRadius);
+    walkAt(collision, m, t.a.position, T120.speed, T120.hullRadius);
     if (!onIsleV1(n.isle, m)) {
       m.x = was.x;
       m.y = was.y;
@@ -126955,9 +126959,9 @@ function capsStep(s, h, n, heroes3, collision, hooks) {
 }
 function poolsStep(s, n, heroes3) {
   if (n.kind !== "frog") return;
-  const T121 = rulesOf(n).tongue;
-  for (const q2 of n.splats) if (s.tick - q2.tick < T121.poolTicks) {
-    for (const { pid, a } of heroes3) if (Math.hypot(a.position.x - q2.x, (a.position.y - q2.y) * 1.6) <= T121.poolRadius) legsUntil(s, n, pid, T121.poolLegsTicks);
+  const T120 = rulesOf(n).tongue;
+  for (const q2 of n.splats) if (s.tick - q2.tick < T120.poolTicks) {
+    for (const { pid, a } of heroes3) if (Math.hypot(a.position.x - q2.x, (a.position.y - q2.y) * 1.6) <= T120.poolRadius) legsUntil(s, n, pid, T120.poolLegsTicks);
   }
 }
 var splatLife = (n) => n.kind === "frog" ? rulesOf(n).tongue.poolTicks + rulesOf(n).keepTicks : rulesOf(n).keepTicks * 2;
@@ -127091,7 +127095,7 @@ function hitNightmareV1(s, p, targetId, requested) {
 function nightmareTargetsV1(s) {
   const h = s.trips?.hell, n = h?.nightmare;
   if (!n) return [];
-  const R14 = rulesOf(n), T121 = minionRules(n), list = [], space = { spaceInstanceId: h.spaceInstanceId };
+  const R14 = rulesOf(n), T120 = minionRules(n), list = [], space = { spaceInstanceId: h.spaceInstanceId };
   if (awake(s, n)) list.push({ kind: "actor", entityId: nightmareIdV1(s.campaign.campaignId, h.eatTick), team: "hostile", alive: true, hp: n.hp, maxHp: n.maxHp, position: { x: n.x, y: n.y }, hullRadius: R14.hullRadius, combatRadius: R14.hullRadius, residency: space, podResource: { nightmare: "boss" }, tripNightmare: { kind: n.kind, dx: n.dx, born: n.born } });
   for (const [id2, m] of Object.entries(n.caps)) if (capOut(s, n, m)) list.push({
     kind: "actor",
@@ -127101,8 +127105,8 @@ function nightmareTargetsV1(s) {
     hp: m.hp,
     maxHp: m.maxHp,
     position: { x: m.x, y: m.y },
-    hullRadius: T121.hullRadius,
-    combatRadius: T121.hullRadius,
+    hullRadius: T120.hullRadius,
+    combatRadius: T120.hullRadius,
     residency: space,
     podResource: { nightmare: id2 },
     tripGazecap: m.hatch === void 0 ? { n: m.n, born: m.born, dx: m.dx } : { n: m.n, born: m.born, dx: m.dx, hatch: m.hatch, egg: isEgg(s, m) }
@@ -127179,7 +127183,7 @@ function validateNightmareV1(s, h, n) {
     requireContract(n.dead === null && n.move === null && compareCombat(n.hp, n.maxHp) === 0, "Nightmare sunk");
   }
   requireContract(n.version === TRIP_NIGHTMARE_V1 && NIGHTMARE_KINDS.includes(n.kind) && n.kind === nightmareKindForSnackV1(h.snack), "Unknown Nightmare");
-  const R14 = rulesOf(n), T121 = minionRules(n);
+  const R14 = rulesOf(n), T120 = minionRules(n);
   safeInteger(n.level, 1, 50);
   safeInteger(n.born, h.eatTick, s.tick);
   requireContract(n.born >= h.endTick, "Nightmare early");
@@ -127211,7 +127215,7 @@ function validateNightmareV1(s, h, n) {
     safeInteger(m.n, 0, n.capN - 1);
     requireContract(!ns.has(m.n) && id2 === gazecapIdV1(s.campaign.campaignId, h.eatTick, m.n), "Gazecap identity");
     ns.add(m.n);
-    if (n.kind === "frog") requireContract(m.hatch === m.born + T121.eggTicks, "Egg hatch");
+    if (n.kind === "frog") requireContract(m.hatch === m.born + T120.eggTicks, "Egg hatch");
     safeInteger(m.born, n.born, s.tick);
     requireContract(Number.isFinite(m.x) && Number.isFinite(m.y) && (m.dx === 1 || m.dx === -1), "Gazecap position");
     hpValue2(m.hp, "Gazecap health");
@@ -133983,7 +133987,7 @@ function validateD9Root(root6) {
 
 // src/shared/contracts/origin_egress_d9.js
 function originEgress(manifest, collision, resources = []) {
-  const w = collision.width, h = collision.height, T121 = collision.tileSize, walk = (x, y) => collision.tiles[y]?.[x] === "1", start = { x: Math.floor(manifest.start.position.x / T121), y: Math.floor(manifest.start.position.y / T121) }, seen5 = /* @__PURE__ */ new Set(), queue = [start];
+  const w = collision.width, h = collision.height, T120 = collision.tileSize, walk = (x, y) => collision.tiles[y]?.[x] === "1", start = { x: Math.floor(manifest.start.position.x / T120), y: Math.floor(manifest.start.position.y / T120) }, seen5 = /* @__PURE__ */ new Set(), queue = [start];
   for (let i = 0; i < queue.length; i++) {
     const p = queue[i], key4 = p.x + "," + p.y;
     if (seen5.has(key4) || !walk(p.x, p.y)) continue;
@@ -133993,7 +133997,7 @@ function originEgress(manifest, collision, resources = []) {
       if (x >= 0 && y >= 0 && x < w && y < h && !seen5.has(x + "," + y)) queue.push({ x, y });
     }
   }
-  const overlap = (x, y) => manifest.safeRegions.some((r) => x * T121 < r.x + r.width && (x + 1) * T121 > r.x && y * T121 < r.y + r.height && (y + 1) * T121 > r.y) || [...manifest.sites, ...resources].some((s) => s.position && Math.hypot((x + 0.5) * T121 - s.position.x, (y + 0.5) * T121 - s.position.y) < 96);
+  const overlap = (x, y) => manifest.safeRegions.some((r) => x * T120 < r.x + r.width && (x + 1) * T120 > r.x && y * T120 < r.y + r.height && (y + 1) * T120 > r.y) || [...manifest.sites, ...resources].some((s) => s.position && Math.hypot((x + 0.5) * T120 - s.position.x, (y + 0.5) * T120 - s.position.y) < 96);
   const openings = [];
   for (const side of ["north", "east", "south", "west"]) {
     const horizontal = side === "north" || side === "south", length = horizontal ? w : h, candidates = [];
@@ -134039,7 +134043,7 @@ function originEgressGuidePaths(manifest, collision, overlay) {
   return paths;
 }
 function originEgressGuidePathsFresh(manifest, collision, overlay) {
-  const applied = applyOriginEgress(collision, overlay), T121 = applied.tileSize, start = { x: Math.floor(manifest.start.position.x / T121), y: Math.floor(manifest.start.position.y / T121) }, key4 = (p) => p.x + "," + p.y, prior = /* @__PURE__ */ new Map([[key4(start), null]]), queue = [start];
+  const applied = applyOriginEgress(collision, overlay), T120 = applied.tileSize, start = { x: Math.floor(manifest.start.position.x / T120), y: Math.floor(manifest.start.position.y / T120) }, key4 = (p) => p.x + "," + p.y, prior = /* @__PURE__ */ new Map([[key4(start), null]]), queue = [start];
   for (let i = 0; i < queue.length; i++) {
     const p = queue[i];
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
@@ -137677,62 +137681,6 @@ function frostMovementRates(s) {
   return rates;
 }
 
-// src/shared/rules/boss_arena_v1.js
-var T115 = 32;
-var ARENA_OUTSIDE_TILES = 4;
-function arenaRoomV1(floor) {
-  const g2 = floor?.graph, r = g2?.rooms?.find((x) => x.roomId === g2.topology?.endNodeId);
-  if (!r) return null;
-  return r.bounds ?? { x: r.cx - r.rx, y: r.cy - r.ry, width: r.rx * 2 + 1, height: r.ry * 2 + 1 };
-}
-var inArenaBoxV1 = (box6, p) => Boolean(box6 && p) && p.x >= box6.x * T115 && p.x < (box6.x + box6.width) * T115 && p.y >= box6.y * T115 && p.y < (box6.y + box6.height) * T115;
-function corridorSteps(path18) {
-  const steps7 = [];
-  for (let i = 1; i < path18.length; i++) {
-    const a = path18[i - 1], b = path18[i], dx = Math.sign(b.x - a.x), dy = Math.sign(b.y - a.y);
-    if (!dx && !dy) continue;
-    for (let x = a.x + dx, y = a.y + dy; ; x += dx, y += dy) {
-      steps7.push({ x, y, dx, dy });
-      if (x === b.x && y === b.y) break;
-    }
-  }
-  return steps7;
-}
-function openingRun(tiles9, box6, s) {
-  if (!tiles9) return null;
-  const open3 = (x2, y) => tiles9[y]?.[x2] === "1";
-  if (s.dy) {
-    const y = s.y, iy = s.dy > 0 ? y - 1 : y + 1, ok2 = (x2) => x2 >= box6.x && x2 < box6.x + box6.width && open3(x2, y) && open3(x2, iy);
-    if (!ok2(s.x)) return null;
-    let a2 = s.x, b2 = s.x;
-    while (ok2(a2 - 1)) a2--;
-    while (ok2(b2 + 1)) b2++;
-    return [a2, b2];
-  }
-  const x = s.x, ix = s.dx > 0 ? x - 1 : x + 1, ok = (y) => y >= box6.y && y < box6.y + box6.height && open3(x, y) && open3(ix, y);
-  if (!ok(s.y)) return null;
-  let a = s.y, b = s.y;
-  while (ok(a - 1)) a--;
-  while (ok(b + 1)) b++;
-  return [a, b];
-}
-function arenaDoorsV1(floor) {
-  const g2 = floor?.graph, box6 = arenaRoomV1(floor);
-  if (!box6) return [];
-  const end = g2.topology.endNodeId, doors = [];
-  for (const e of g2.edges ?? []) {
-    if (e.from !== end && e.to !== end || e.walkable === false || !Array.isArray(e.path) || e.path.length < 2) continue;
-    const steps7 = corridorSteps(e.from === end ? e.path : [...e.path].reverse()), i = steps7.findIndex((p) => p.x < box6.x || p.x >= box6.x + box6.width || p.y < box6.y || p.y >= box6.y + box6.height);
-    if (i < 0) continue;
-    const s = steps7[i], o = steps7[Math.min(steps7.length - 1, i + ARENA_OUTSIDE_TILES - 1)], run2 = openingRun(floor.collision?.tiles, box6, s);
-    const half = run2 ? (run2[1] - run2[0] + 1) * T115 / 2 : (e.widthTiles ?? 5) * T115 / 2, mid = run2 ? (run2[0] + run2[1] + 1) / 2 * T115 : null;
-    const x = s.dx ? (s.dx > 0 ? box6.x + box6.width : box6.x) * T115 : mid ?? (s.x + 0.5) * T115, y = s.dy ? (s.dy > 0 ? box6.y + box6.height : box6.y) * T115 : mid ?? (s.y + 0.5) * T115;
-    if (doors.some((d) => d.nx === s.dx && d.ny === s.dy && d.x === x && d.y === y)) continue;
-    doors.push({ edge: e.from === end ? e.to : e.from, x, y, nx: s.dx, ny: s.dy, half, out: { x: (o.x + 0.5) * T115, y: (o.y + 0.5) * T115 } });
-  }
-  return doors;
-}
-
 // src/shared/contracts/player_respawn_v2.js
 function nearestFoundTownV2(s, actor) {
   const k = s.d9World?.navigation?.knowledge;
@@ -140126,9 +140074,9 @@ var U = Object.freeze({ pool: 40, beam: { reach: 200, attack: [3, 5] }, sunfall:
 var TROPHY2 = Object.freeze({ goldOver: 20, stingPulses: 4 });
 function offhandStyle(player) {
   const inv = player?.inventory, item2 = inv?.itemsById[inv.equipped?.subweapon], type = item2 ? itemLookType(item2) : null;
-  return T116.styles[type] ? type : null;
+  return T115.styles[type] ? type : null;
 }
-var T116 = CLASS_SKILL_TUNING_V1;
+var T115 = CLASS_SKILL_TUNING_V1;
 var FLURRY_SWORD_CUT = 1;
 var scaled3 = (value2, f) => f ? Math.round(value2 * f[0] / f[1]) : value2;
 var unit6 = (v) => {
@@ -140364,7 +140312,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "bleed", boost ? combatInteger(pct3(stats3.attack, boost)) : stats3.attack, stats3);
   };
   const grip = (a, t, ticks) => {
-    if (t.alive && !isPodCombatTargetV4(t) && canStun(a)) effects2.status(a, t, "hinder", T116.grip, Math.min(60, ticks));
+    if (t.alive && !isPodCombatTargetV4(t) && canStun(a)) effects2.status(a, t, "hinder", T115.grip, Math.min(60, ticks));
   };
   function knockOut(a, t, base3, elite) {
     if (!t.alive || isPodCombatTargetV4(t)) return;
@@ -140403,22 +140351,22 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     else stun(a, t, stunTicks(a, 12 * r));
   }
   function bash(a, stats3, aim2, commandId) {
-    const impact2 = rank(a, "impact_training"), spiked = rank(a, "spiked_shield"), base3 = addCombat(multiplyCombat(stats3.attack, ...T116.bash.attack), shieldPacket(stats3)), raw = impact2 ? pct3(base3, 6 * impact2) : base3, style = T116.styles[offhandStyle(owner(a))] ?? {};
+    const impact2 = rank(a, "impact_training"), spiked = rank(a, "spiked_shield"), base3 = addCombat(multiplyCombat(stats3.attack, ...T115.bash.attack), shieldPacket(stats3)), raw = impact2 ? pct3(base3, 6 * impact2) : base3, style = T115.styles[offhandStyle(owner(a))] ?? {};
     lodePull(a, stats3, aim2);
     paneCall(a, aim2);
     let hits2 = 0;
-    for (const t of cone8(a, aim2, T116.bash.reach * (100 + 6 * rank(a, "seismic_reach")) / 100, T116.bash.cone)) {
+    for (const t of cone8(a, aim2, T115.bash.reach * (100 + 6 * rank(a, "seismic_reach")) / 100, T115.bash.cone)) {
       damage(a, t, raw, "bash", commandId, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill", masteryArea: true });
       hits2++;
       if (spiked) bleed(a, t, stats3, 10 * spiked);
       if (!t.alive || isPodCombatTargetV4(t)) continue;
       if (definition2(t).isBoss) {
-        daze(a, t, scaled3(T116.bash.stun, style.stun));
+        daze(a, t, scaled3(T115.bash.stun, style.stun));
         continue;
       }
       const elite = Boolean(definition2(t).isElite || definition2(t).isMiniboss);
-      knockback(a, t, scaled3(elite ? T116.bash.eliteKnockback : T116.bash.knockback, style.knockback));
-      if (canStun(a)) stun(a, t, stunTicks(a, scaled3(elite ? T116.bash.eliteStun : T116.bash.stun, style.stun)));
+      knockback(a, t, scaled3(elite ? T115.bash.eliteKnockback : T115.bash.knockback, style.knockback));
+      if (canStun(a)) stun(a, t, stunTicks(a, scaled3(elite ? T115.bash.eliteStun : T115.bash.stun, style.stun)));
     }
     bracing(a, hits2);
     return true;
@@ -140426,15 +140374,15 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function bracing(a, hits2) {
     const r = rank(a, "bracing_bash"), g2 = c.actors[a.entityId]?.guard;
     if (!r || !hits2 || !g2 || !a.alive) return;
-    const n = Math.round(32 * T116.bracingBash * r * hits2 / 100);
+    const n = Math.round(32 * T115.bracingBash * r * hits2 / 100);
     if (!n) return;
     g2.integrity = combatInteger(minCombat(32, addCombat(g2.integrity, n)));
     if (compareCombat(g2.integrity, 32) >= 0) g2.guardRechargeRemainder = 0;
   }
   function cut(a, stats3, aim2, commandId, index = 0) {
-    const combat = c.actors[a.entityId], style = T116.styles[offhandStyle(owner(a))] ?? {}, sword6 = index === FLURRY_SWORD_CUT;
-    for (const t of cone8(a, aim2, T116.flurry.reach, T116.flurry.cone)) {
-      damage(a, t, multiplyCombat(stats3.attack, ...T116.flurry.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), sword6 ? "main" : "offhand"), trigger: "skill", ...combat.skills?.keen ? { critBonus: combatAmount(1) } : style.critBonus ? { critBonus: combatAmount(...style.critBonus) } : {} });
+    const combat = c.actors[a.entityId], style = T115.styles[offhandStyle(owner(a))] ?? {}, sword6 = index === FLURRY_SWORD_CUT;
+    for (const t of cone8(a, aim2, T115.flurry.reach, T115.flurry.cone)) {
+      damage(a, t, multiplyCombat(stats3.attack, ...T115.flurry.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), sword6 ? "main" : "offhand"), trigger: "skill", ...combat.skills?.keen ? { critBonus: combatAmount(1) } : style.critBonus ? { critBonus: combatAmount(...style.critBonus) } : {} });
       if (!t.alive) continue;
       mastery?.primary(a, t, "proactive");
       if (!sword6) effects2.offhand(a, t, stats3);
@@ -140446,17 +140394,17 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (index === FLURRY_CUTS - 1) clearSkillState(combat, "keen");
   }
   function flurry(a, stats3, aim2, commandId) {
-    const combat = c.actors[a.entityId], r = rank(a, "fourth_cut"), fourth = Boolean(r && combatRoll(combat, combatAmount(T116.fourthCut * r, 100)));
+    const combat = c.actors[a.entityId], r = rank(a, "fourth_cut"), fourth = Boolean(r && combatRoll(combat, combatAmount(T115.fourthCut * r, 100)));
     cut(a, stats3, aim2, commandId);
     classSkillsRecord(combat).flurry = { cutsLeft: FLURRY_CUTS - 1 + (fourth ? 1 : 0), nextTick: s.tick + FLURRY_GAP_TICKS, ...aim2 };
     oathThrow(a, aim2);
-    if (T116.styles[offhandStyle(owner(a))]?.parry) openParryWindow(combat);
+    if (T115.styles[offhandStyle(owner(a))]?.parry) openParryWindow(combat);
     return fourth ? { n: 4 } : true;
   }
   function cast2(a, stats3, aim2, commandId) {
     const range2 = Math.min(137, 128 + (a.hullRadius ?? 0)), heading = Math.atan2(aim2.y, aim2.x);
     if (Object.keys(c.projectiles).length >= 16) return false;
-    const ahead = (t) => offAxis(a, t, heading) <= T116.cast.cone ? 0 : 1;
+    const ahead = (t) => offAxis(a, t, heading) <= T115.cast.cone ? 0 : 1;
     const target = effects2.nearby(a, a, range2 + 40).filter((t) => clearHullGap(a, t) <= 128).sort((x, y) => ahead(x) - ahead(y) || distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0] ?? null;
     const syphon = rank(a, "arcane_syphon") && spendBarrier(a) ? 6 * rank(a, "arcane_syphon") : 0;
     if (c.actors[a.entityId]?.skills?.core && worn(a, "coreheart")) {
@@ -140481,7 +140429,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       delivery: element,
       ...recipe ? { tomeRecipe: recipe } : { firePower: copyWire(stats3.familyProperties?.tomePower ?? stats3.familyProperties?.firePower ?? combatAmount(18, 10)) },
       sourceItem: damageSourceItem(player, element),
-      attack: copyWire(combatInteger(syphon ? pct3(multiplyCombat(stats3.attack, ...T116.cast.attack), syphon) : multiplyCombat(stats3.attack, ...T116.cast.attack))),
+      attack: copyWire(combatInteger(syphon ? pct3(multiplyCombat(stats3.attack, ...T115.cast.attack), syphon) : multiplyCombat(stats3.attack, ...T115.cast.attack))),
       rulesVersion: "combat-integer-v2",
       commandId
     };
@@ -140503,7 +140451,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return turned ?? true;
   }
   function earthBreaker2(a, stats3, aim2, commandId) {
-    const E9 = T116.earthBreaker, impact2 = rank(a, "impact_training"), n = paid(a, "earth_breaker"), base3 = addCombat(multiplyCombat(stats3.attack, ...E9.attack), shieldPacket(stats3)), hard = impact2 ? pct3(base3, 6 * impact2) : base3, raw = n ? pct3(hard, 20 * n) : hard, stunAll = aug(a, "earth_breaker", 0);
+    const E9 = T115.earthBreaker, impact2 = rank(a, "impact_training"), n = paid(a, "earth_breaker"), base3 = addCombat(multiplyCombat(stats3.attack, ...E9.attack), shieldPacket(stats3)), hard = impact2 ? pct3(base3, 6 * impact2) : base3, raw = n ? pct3(hard, 20 * n) : hard, stunAll = aug(a, "earth_breaker", 0);
     const reach = E9.radius * (100 + 6 * rank(a, "seismic_reach")) / 100 * (full(n) ? 1.5 : 1), targets = cone8(a, aim2, reach, Math.PI);
     if (aug(a, "earth_breaker", 1)) for (const t of targets) pull(a, t, E9.pull);
     const combat = c.actors[a.entityId], titan = combat.skills?.titan && rank(a, "titan") ? 15 * rank(a, "titan") : 0;
@@ -140533,7 +140481,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
     if (--k.ticks > 0) return;
     clearSkillState(combat, "aftershock");
-    const stats3 = getStats(a.entityId), hit2 = multiplyCombat(breakerHit(a, stats3, T116.earthBreaker.attack), ...T116.aftershock), sourceItem = damageSourceItem(owner(a), "bash");
+    const stats3 = getStats(a.entityId), hit2 = multiplyCombat(breakerHit(a, stats3, T115.earthBreaker.attack), ...T115.aftershock), sourceItem = damageSourceItem(owner(a), "bash");
     for (const t of around3(a, k, k.r)) damage(a, t, hit2, "quake", null, { sourceItem, trigger: "skill" });
   }
   function stepFault(a, combat) {
@@ -140544,14 +140492,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       return;
     }
     if (--k.next <= 0) {
-      k.next = T116.fault.pulse;
+      k.next = T115.fault.pulse;
       const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
-      for (const t of around3(a, k, k.r)) damage(a, t, multiplyCombat(stats3.attack, ...T116.fault.attack), "fire", null, { sourceItem, trigger: "skill" });
+      for (const t of around3(a, k, k.r)) damage(a, t, multiplyCombat(stats3.attack, ...T115.fault.attack), "fire", null, { sourceItem, trigger: "skill" });
     }
     if (--k.ticks <= 0) clearSkillState(combat, "fault");
   }
   function rallyingCry2(a, stats3, aim2) {
-    const R14 = T116.rallyingCry, secondWind = aug(a, "rallying_cry", 0), n = paid(a, "rallying_cry"), [hn, hd] = secondWind ? R14.secondWind : R14.heal;
+    const R14 = T115.rallyingCry, secondWind = aug(a, "rallying_cry", 0), n = paid(a, "rallying_cry"), [hn, hd] = secondWind ? R14.secondWind : R14.heal;
     const near5 = cone8(a, aim2, R14.radius, Math.PI).filter((t) => !isPodCombatTargetV4(t)), rousing = aug(a, "rallying_cry", 1) ? Math.min(R14.rousingMax, near5.length) : 0;
     heal(a, stats3, hn + (3 * n + rousing) * hd / 100, hd);
     if (!secondWind && canStun(a)) for (const t of near5) effects2.status(a, t, "weaken", 1, R14.weakenTicks);
@@ -140570,7 +140518,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return true;
   }
   function shieldCharge2(a, stats3, aim2) {
-    const R14 = T116.shieldCharge, n = paid(a, "shield_charge"), reach = (aug(a, "shield_charge", 1) ? scaled3(R14.reach, T116.wider) : R14.reach) * (100 + 10 * n) / 100, end = pathEnd(a, { x: aim2.x, y: aim2.y, remaining: reach }), len = Math.hypot(end.x - a.position.x, end.y - a.position.y);
+    const R14 = T115.shieldCharge, n = paid(a, "shield_charge"), reach = (aug(a, "shield_charge", 1) ? scaled3(R14.reach, T115.wider) : R14.reach) * (100 + 10 * n) / 100, end = pathEnd(a, { x: aim2.x, y: aim2.y, remaining: reach }), len = Math.hypot(end.x - a.position.x, end.y - a.position.y);
     classSkillsRecord(c.actors[a.entityId]).ram = { x: end.x, y: end.y, dx: aim2.x, dy: aim2.y, ticks: Math.min(RAM_TICKS, Math.max(1, Math.ceil(len / R14.step))) };
     scorchStart(a);
     lowerShield(c.actors[a.entityId].guard);
@@ -140593,7 +140541,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       clearSkillState(combat, "ram");
       return;
     }
-    const R14 = T116.shieldCharge, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), left = Math.hypot(r.x - a.position.x, r.y - a.position.y), move2 = Math.min(R14.step, left), kind = wears(a, "cinderhorn") ? "fire" : "bash";
+    const R14 = T115.shieldCharge, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), left = Math.hypot(r.x - a.position.x, r.y - a.position.y), move2 = Math.min(R14.step, left), kind = wears(a, "cinderhorn") ? "fire" : "bash";
     lowerShield(combat.guard);
     if (move2 > 0) {
       const ahead = (a.hullRadius ?? 0) + 4, front2 = { x: a.position.x + r.dx * ahead, y: a.position.y + r.dy * ahead };
@@ -140654,10 +140602,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
   }
   function slamBody(a, stats3, aim2, quake) {
-    const S18 = T116.slam, hit2 = multiplyCombat(breakerHit(a, stats3, T116.earthBreaker.attack), ...S18.attack), sourceItem = damageSourceItem(owner(a), "bash");
+    const S18 = T115.slam, hit2 = multiplyCombat(breakerHit(a, stats3, T115.earthBreaker.attack), ...S18.attack), sourceItem = damageSourceItem(owner(a), "bash");
     for (const t of around3(a, a.position, S18.radius * effects2.area(a))) {
       damage(a, t, hit2, "quake", null, { sourceItem, trigger: "skill" });
-      if (t.alive && canStun(a) && !isPodCombatTargetV4(t)) effects2.status(a, t, "slow", T116.earthBreaker.slow, S18.slowTicks);
+      if (t.alive && canStun(a) && !isPodCombatTargetV4(t)) effects2.status(a, t, "slow", T115.earthBreaker.slow, S18.slowTicks);
     }
     if (!quake) classSkillsRecord(c.actors[a.entityId]).shake = { x: a.position.x, y: a.position.y, dx: aim2.x, dy: aim2.y, r: extent(a, S18.radius), ticks: SHAKE_TICKS };
   }
@@ -140668,7 +140616,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return out4;
   }
   function shieldThrow2(a, stats3, aim2) {
-    const S18 = T116.shieldThrow, first = cone8(a, aim2, S18.reach, S18.cone, 1)[0], end = first ? null : pathEnd(a, { x: aim2.x, y: aim2.y, remaining: S18.reach }), k = classSkillsRecord(c.actors[a.entityId]);
+    const S18 = T115.shieldThrow, first = cone8(a, aim2, S18.reach, S18.cone, 1)[0], end = first ? null : pathEnd(a, { x: aim2.x, y: aim2.y, remaining: S18.reach }), k = classSkillsRecord(c.actors[a.entityId]);
     const sun3 = k.sun && wears(a, "sunshield") ? k.sun : 0;
     if (sun3) delete k.sun;
     k.thrown = { x: a.position.x, y: a.position.y, ids: first ? [first.entityId] : [], hit: [], ticks: THROW_TICKS, ...end ? { tx: end.x, ty: end.y } : {}, ...sun3 ? { sun: sun3 } : {} };
@@ -140676,16 +140624,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return first ? landingOffset(a, first.position) : landingOffset(a, end);
   }
   function throwHit(a, stats3, t) {
-    damage(a, t, addCombat(multiplyCombat(stats3.attack, ...T116.shieldThrow.attack), shieldPacket(stats3)), "bash", null, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill" });
+    damage(a, t, addCombat(multiplyCombat(stats3.attack, ...T115.shieldThrow.attack), shieldPacket(stats3)), "bash", null, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill" });
     if (aug(a, "shield_throw", 2)) bleed(a, t, stats3);
-    if (full(spendOf(a, "shield_throw"))) knockOut(a, t, T116.heavy.stun, T116.heavy.eliteStun);
+    if (full(spendOf(a, "shield_throw"))) knockOut(a, t, T115.heavy.stun, T115.heavy.eliteStun);
   }
   function guardReturn(a, combat, th) {
     if (!aug(a, "shield_throw", 3) || !a.alive) return;
     fillGuard(combat);
     const n = (/* @__PURE__ */ new Set([...th.hit, ...th.back ?? []])).size;
     if (!n) return;
-    const stats3 = getStats(a.entityId), more = combatInteger(multiplyCombat(stats3.maxHp, T116.shieldThrow.guardReturn * Math.min(12, n), 100)), k = classSkillsRecord(combat), old2 = k.aegis;
+    const stats3 = getStats(a.entityId), more = combatInteger(multiplyCombat(stats3.maxHp, T115.shieldThrow.guardReturn * Math.min(12, n), 100)), k = classSkillsRecord(combat), old2 = k.aegis;
     if (old2) {
       const hp = combatInteger(addCombat(old2.hp, more));
       k.aegis = { ...old2, hp, full: compareCombat(hp, old2.full) > 0 ? hp : old2.full, ticks: AEGIS_TICKS };
@@ -140699,7 +140647,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       return;
     }
     lowerShield(combat.guard);
-    const S18 = T116.shieldThrow, stats3 = getStats(a.entityId);
+    const S18 = T115.shieldThrow, stats3 = getStats(a.entityId);
     let target = th.ids.length ? s.entitiesById[th.ids[0]] : null;
     if (target && (!target.alive || target.residency.spaceInstanceId !== a.residency.spaceInstanceId)) {
       th.ids = [];
@@ -140738,7 +140686,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (--th.ticks <= 0) clearSkillState(combat, "thrown");
   }
   function warBanner2(a, stats3, aim2) {
-    const on = aug(a, "war_banner", 3) ? cone8(a, aim2, T116.lance.reach, 0.6, 3).find((t) => !isPodCombatTargetV4(t)) : null, at9 = on ? on.position : a.position;
+    const on = aug(a, "war_banner", 3) ? cone8(a, aim2, T115.lance.reach, 0.6, 3).find((t) => !isPodCombatTargetV4(t)) : null, at9 = on ? on.position : a.position;
     const k = classSkillsRecord(c.actors[a.entityId]);
     k.banner = { x: at9.x, y: at9.y, ticks: BANNER_TICKS + 120 * paid(a, "war_banner"), next: 60, ...on ? { on: on.entityId } : {} };
     if (wears(a, "sporeveil-aegis")) {
@@ -140750,12 +140698,12 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function sporeBanner(a, b) {
     const linger = worn(a, "sporeveil-aegis");
     if (!linger || !canStun(a)) return;
-    for (const t of around3(a, b, T116.warBanner.radius)) if (!isPodCombatTargetV4(t)) effects2.status(a, t, "slow", SPORE_SLOW, Math.max(UQ_PULSE_TICKS + 10, linger));
+    for (const t of around3(a, b, T115.warBanner.radius)) if (!isPodCombatTargetV4(t)) effects2.status(a, t, "slow", SPORE_SLOW, Math.max(UQ_PULSE_TICKS + 10, linger));
   }
-  const bannerBonus = (a) => full(spendOf(a, "war_banner")) ? 25 : aug(a, "war_banner", 0) && !c.actors[a.entityId]?.skills?.banner?.on ? T116.warBanner.carried : null;
+  const bannerBonus = (a) => full(spendOf(a, "war_banner")) ? 25 : aug(a, "war_banner", 0) && !c.actors[a.entityId]?.skills?.banner?.on ? T115.warBanner.carried : null;
   const nearBanner = (a) => {
     const b = c.actors[a.entityId]?.skills?.banner;
-    return Boolean(b && a.alive && Math.hypot(a.position.x - b.x, a.position.y - b.y) <= T116.warBanner.radius);
+    return Boolean(b && a.alive && Math.hypot(a.position.x - b.x, a.position.y - b.y) <= T115.warBanner.radius);
   };
   function stepBanner(a, combat) {
     const b = combat.skills?.banner;
@@ -140771,16 +140719,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
         b.y = t.position.y;
       } else delete b.on;
     } else if (aug(a, "war_banner", 0)) {
-      b.x = a.position.x + T116.warBanner.carry[0];
-      b.y = a.position.y + T116.warBanner.carry[1];
+      b.x = a.position.x + T115.warBanner.carry[0];
+      b.y = a.position.y + T115.warBanner.carry[1];
     }
     if (b.ticks % UQ_PULSE_TICKS === 0) sporeBanner(a, b);
     if (--b.next <= 0) {
       b.next = 60;
-      if (aug(a, "war_banner", 1) && nearBanner(a)) heal(a, getStats(a.entityId), ...T116.warBanner.heal);
+      if (aug(a, "war_banner", 1) && nearBanner(a)) heal(a, getStats(a.entityId), ...T115.warBanner.heal);
       if (b.on) {
         const stats3 = getStats(a.entityId);
-        damage(a, s.entitiesById[b.on], multiplyCombat(stats3.attack, ...T116.lance.attack), "bash", null, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill" });
+        damage(a, s.entitiesById[b.on], multiplyCombat(stats3.attack, ...T115.lance.attack), "bash", null, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill" });
       }
     }
     if (--b.ticks <= 0) clearSkillState(combat, "banner");
@@ -140795,9 +140743,9 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function readyStrike(a, combat) {
     const k = combat.skills;
     if (k?.counter !== 1 || !a.alive || !aug(a, "counter_stance", 1) || aug(a, "counter_stance", 3) && k.counters !== MAX_COUNTERS) return;
-    const t = around3(a, a.position, T116.counter.ready).filter((t2) => !isPodCombatTargetV4(t2)).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0];
+    const t = around3(a, a.position, T115.counter.ready).filter((t2) => !isPodCombatTargetV4(t2)).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0];
     if (!t) return;
-    const stats3 = getStats(a.entityId), grit = spendOf(a, "counter_stance"), strike2 = grit ? pct3(multiplyCombat(stats3.attack, ...T116.counter.attack), 40 * grit) : multiplyCombat(stats3.attack, ...T116.counter.attack);
+    const stats3 = getStats(a.entityId), grit = spendOf(a, "counter_stance"), strike2 = grit ? pct3(multiplyCombat(stats3.attack, ...T115.counter.attack), 40 * grit) : multiplyCombat(stats3.attack, ...T115.counter.attack);
     damage(a, t, multiplyCombat(strike2, 1, 2), "riposte", null, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill" });
   }
   function stepStill(a, combat) {
@@ -140822,33 +140770,33 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       return;
     }
     if (--k.next <= 0) {
-      k.next = T116.crack.pulse;
+      k.next = T115.crack.pulse;
       if (canStun(a)) {
-        for (const t of around3(a, k, k.r)) if (!isPodCombatTargetV4(t)) effects2.status(a, t, "hinder", k.rank, T116.crack.hold);
+        for (const t of around3(a, k, k.r)) if (!isPodCombatTargetV4(t)) effects2.status(a, t, "hinder", k.rank, T115.crack.hold);
       }
     }
     if (--k.ticks <= 0) clearSkillState(combat, "crack");
   }
   function shove2(a, strong = false) {
-    const P28 = T116.aegisPulse;
+    const P28 = T115.aegisPulse;
     let n = 0;
     for (const t of around3(a, a.position, P28.radius * effects2.area(a))) if (!isPodCombatTargetV4(t) && !definition2(t).isBoss) {
       n++;
       knockback(a, t, (definition2(t).isElite || definition2(t).isMiniboss ? P28.shove / 2 : P28.shove) * (strong ? 2 : 1));
-      if (strong && t.alive && ordinary(t) && canStun(a)) stun(a, t, stunTicks(a, T116.repulsor));
+      if (strong && t.alive && ordinary(t) && canStun(a)) stun(a, t, stunTicks(a, T115.repulsor));
     }
     return n;
   }
   function aegisPulse2(a, stats3) {
-    const P28 = T116.aegisPulse, shoved = shove2(a, aug(a, "aegis_pulse", 2)), bulwark2 = aug(a, "aegis_pulse", 1) ? Math.min(P28.bulwarkMax, shoved) : 0, worth = combatInteger(multiplyCombat(stats3.maxHp, P28.worth + P28.bulwark * bulwark2, 100)), spent = spentOn(a, "aegis_pulse"), hp = spent ? combatInteger(pct3(worth, PIP_BONUS * spent)) : worth;
+    const P28 = T115.aegisPulse, shoved = shove2(a, aug(a, "aegis_pulse", 2)), bulwark2 = aug(a, "aegis_pulse", 1) ? Math.min(P28.bulwarkMax, shoved) : 0, worth = combatInteger(multiplyCombat(stats3.maxHp, P28.worth + P28.bulwark * bulwark2, 100)), spent = spentOn(a, "aegis_pulse"), hp = spent ? combatInteger(pct3(worth, PIP_BONUS * spent)) : worth;
     if (compareCombat(hp, 0) > 0) classSkillsRecord(c.actors[a.entityId]).aegis = { hp, full: hp, ticks: AEGIS_TICKS, ...aug(a, "aegis_pulse", 0) ? { echo: true } : {} };
     return { r: extent(a, P28.radius) };
   }
   function skyfallLeap2(a, stats3, aim2) {
-    const L = T116.skyfallLeap, t = cone8(a, aim2, L.reach, L.cone, 1)[0], toward3 = t ? unit6({ x: t.position.x - a.position.x, y: t.position.y - a.position.y }) : aim2, far = t ? Math.max(0, Math.min(L.reach, distance12(a, t) - (a.hullRadius ?? 0) - (t.hullRadius ?? 0) - 2)) : L.reach, end = pathEnd(a, { x: toward3.x, y: toward3.y, remaining: far }), combat = c.actors[a.entityId];
+    const L = T115.skyfallLeap, t = cone8(a, aim2, L.reach, L.cone, 1)[0], toward3 = t ? unit6({ x: t.position.x - a.position.x, y: t.position.y - a.position.y }) : aim2, far = t ? Math.max(0, Math.min(L.reach, distance12(a, t) - (a.hullRadius ?? 0) - (t.hullRadius ?? 0) - 2)) : L.reach, end = pathEnd(a, { x: toward3.x, y: toward3.y, remaining: far }), combat = c.actors[a.entityId];
     classSkillsRecord(combat).leap = { x: end.x, y: end.y, sx: a.position.x, sy: a.position.y, ticks: LEAP_TICKS };
     lowerShield(combat.guard);
-    return { ...landingOffset(a, end), r: extent(a, aug(a, "skyfall_leap", 0) ? scaled3(L.radius, T116.wide) : L.radius), ...aug(a, "skyfall_leap", 2) ? { air: LEAP_TICKS } : {} };
+    return { ...landingOffset(a, end), r: extent(a, aug(a, "skyfall_leap", 0) ? scaled3(L.radius, T115.wide) : L.radius), ...aug(a, "skyfall_leap", 2) ? { air: LEAP_TICKS } : {} };
   }
   function stepLeap(a, combat) {
     const l = combat.skills?.leap;
@@ -140866,7 +140814,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (--l.ticks > 0) return;
     clearSkillState(combat, "leap");
     treadSlam(a, { x: l.sx, y: l.sy });
-    const L = T116.skyfallLeap, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), radius = (aug(a, "skyfall_leap", 0) ? scaled3(L.radius, T116.wide) : L.radius) * effects2.area(a), near5 = around3(a, a.position, radius), crash2 = crowd(a, breakerHit(a, stats3, L.attack), near5.length), heavy2 = aug(a, "skyfall_leap", 2), flown = Math.min(L.reach, Math.round(Math.hypot(l.x - l.sx, l.y - l.sy))), hit2 = heavy2 ? multiplyCombat(crash2, L.reach + flown, L.reach) : crash2, heavyStun = heavy2 ? 2 : 1;
+    const L = T115.skyfallLeap, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), radius = (aug(a, "skyfall_leap", 0) ? scaled3(L.radius, T115.wide) : L.radius) * effects2.area(a), near5 = around3(a, a.position, radius), crash2 = crowd(a, breakerHit(a, stats3, L.attack), near5.length), heavy2 = aug(a, "skyfall_leap", 2), flown = Math.min(L.reach, Math.round(Math.hypot(l.x - l.sx, l.y - l.sy))), hit2 = heavy2 ? multiplyCombat(crash2, L.reach + flown, L.reach) : crash2, heavyStun = heavy2 ? 2 : 1;
     for (const t of near5) {
       const was = slowed(t);
       damage(a, t, hit2, "quake", null, { sourceItem, trigger: "skill" });
@@ -140885,7 +140833,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (rank(a, "titan")) classSkillsRecord(combat).titan = TITAN_TICKS;
   }
   function retribution2(a, stats3, aim2, commandId) {
-    const R14 = T116.retribution, k = classSkillsRecord(c.actors[a.entityId]), held2 = k.held ?? [], base3 = held2.reduce((sum2, h) => addCombat(sum2, h.amount), multiplyCombat(stats3.attack, ...R14.attack)), missing = aug(a, "retribution", 2) ? Math.max(0, Math.min(99, 100 - Number(BigInt(a.hp) * 100n / BigInt(stats3.maxHp)))) : 0, raw = missing ? multiplyCombat(base3, 100 + missing, 100) : base3, reach = Math.min(400, (aug(a, "retribution", 0) ? scaled3(R14.radius, T116.wide) : R14.radius) * effects2.area(a)), sourceItem = damageSourceItem(owner(a), "bash");
+    const R14 = T115.retribution, k = classSkillsRecord(c.actors[a.entityId]), held2 = k.held ?? [], base3 = held2.reduce((sum2, h) => addCombat(sum2, h.amount), multiplyCombat(stats3.attack, ...R14.attack)), missing = aug(a, "retribution", 2) ? Math.max(0, Math.min(99, 100 - Number(BigInt(a.hp) * 100n / BigInt(stats3.maxHp)))) : 0, raw = missing ? multiplyCombat(base3, 100 + missing, 100) : base3, reach = Math.min(400, (aug(a, "retribution", 0) ? scaled3(R14.radius, T115.wide) : R14.radius) * effects2.area(a)), sourceItem = damageSourceItem(owner(a), "bash");
     delete k.held;
     for (const t of around3(a, a.position, reach)) {
       const burst9 = aug(a, "retribution", 1) && c.effects[a.entityId + "/" + t.entityId + "/bleed"];
@@ -140903,7 +140851,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   }
   let refund = 0;
   function lunge2(a, stats3, aim2, commandId) {
-    const L = T116.lunge, reach = aug(a, "lunge", 0) ? scaled3(L.reach, T116.wider) : L.reach, t = cone8(a, aim2, reach, L.cone, 1)[0], combat = c.actors[a.entityId], toward3 = t ? { x: t.position.x - a.position.x, y: t.position.y - a.position.y } : aim2, l = Math.hypot(toward3.x, toward3.y);
+    const L = T115.lunge, reach = aug(a, "lunge", 0) ? scaled3(L.reach, T115.wider) : L.reach, t = cone8(a, aim2, reach, L.cone, 1)[0], combat = c.actors[a.entityId], toward3 = t ? { x: t.position.x - a.position.x, y: t.position.y - a.position.y } : aim2, l = Math.hypot(toward3.x, toward3.y);
     const step4 = t ? Math.min(L.step, Math.max(0, l - (a.hullRadius ?? 0) - (t.hullRadius ?? 0) - 4)) : L.step / 2;
     if (step4 >= 8 && l > 1e-9 && !combat.dash.frames) {
       const frames = Math.ceil(step4 / 8);
@@ -140911,7 +140859,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       sunTrail(a, combat);
       treadStart(a, a.position, frames);
     }
-    const n = paid(a, "lunge"), stab = combat.skills?.again ? multiplyCombat(multiplyCombat(stats3.attack, ...L.attack), ...T116.again) : multiplyCombat(stats3.attack, ...L.attack), each = n ? pct3(stab, 20 * n) : stab;
+    const n = paid(a, "lunge"), stab = combat.skills?.again ? multiplyCombat(multiplyCombat(stats3.attack, ...L.attack), ...T115.again) : multiplyCombat(stats3.attack, ...L.attack), each = n ? pct3(stab, 20 * n) : stab;
     if (aug(a, "lunge", 2)) {
       const d = unit6(toward3), end = pathEnd(a, { x: d.x, y: d.y, remaining: reach });
       for (const n2 of alongPath(a, a.position, end)) if (n2 !== t && n2.alive) damage(a, n2, each, "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
@@ -140933,7 +140881,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     b.poisons[t.entityId] = { id: t.entityId, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, attack: copyWire(power > 1 && (!old2 || compareCombat(old2.attack, attack) < 0) ? attack : old2?.attack ?? attack), rank: old2?.rank ?? 1, toxicRank: old2?.toxicRank ?? "0", stacks: Math.min(5, (old2?.stacks ?? 0) + 1), nextTick: old2?.nextTick ?? s.tick + 60, expiresTick: s.tick + Math.min(900, ailmentTicks(a, 60 * (10 + rank(a, "lingering_venom")) + longer)), sourceItem: damageSourceItem(owner(a), "poison") };
   }
   function toxicFan2(a, stats3, aim2, commandId) {
-    const F7 = T116.toxicFan, wide = aug(a, "toxic_fan", 0), slow = aug(a, "toxic_fan", 1), barbed = aug(a, "toxic_fan", 2), seek = aug(a, "toxic_fan", 3), reach = seek ? scaled3(F7.reach, T116.seeking.reach) : F7.reach, width2 = seek ? T116.seeking.cone : wide ? F7.wideCone : F7.cone;
+    const F7 = T115.toxicFan, wide = aug(a, "toxic_fan", 0), slow = aug(a, "toxic_fan", 1), barbed = aug(a, "toxic_fan", 2), seek = aug(a, "toxic_fan", 3), reach = seek ? scaled3(F7.reach, T115.seeking.reach) : F7.reach, width2 = seek ? T115.seeking.cone : wide ? F7.wideCone : F7.cone;
     const n = paid(a, "toxic_fan"), combat = c.actors[a.entityId];
     for (const t of cone8(a, aim2, reach, width2, (wide ? F7.wideTargets : F7.targets) + n)) {
       plantCap(a, combat, t);
@@ -140945,12 +140893,12 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return { r: extent(a, reach), spread: width2 };
   }
   function whirlingBlades2(a, stats3, aim2, commandId) {
-    const W21 = T116.whirlingBlades, reach = aug(a, "whirling_blades", 0) ? scaled3(W21.radius, T116.wide) : W21.radius, targets = cone8(a, aim2, reach, Math.PI);
+    const W21 = T115.whirlingBlades, reach = aug(a, "whirling_blades", 0) ? scaled3(W21.radius, T115.wide) : W21.radius, targets = cone8(a, aim2, reach, Math.PI);
     if (aug(a, "whirling_blades", 1)) for (const t of targets) pull(a, t, W21.pull);
     const n = paid(a, "whirling_blades");
     for (const t of targets) for (let i = 0; i < W21.hits + n && t.alive; i++) damage(a, t, multiplyCombat(stats3.attack, ...W21.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
     const ward = aug(a, "whirling_blades", 2), tornado = aug(a, "whirling_blades", 3);
-    if (ward || tornado) classSkillsRecord(c.actors[a.entityId]).spin = { ticks: tornado ? TORNADO_TICKS : SPIN_TICKS, r: Math.max(1, Math.min(400, Math.round(reach))), ...tornado ? { hits: T116.tornado.waves, next: T116.tornado.gap } : {} };
+    if (ward || tornado) classSkillsRecord(c.actors[a.entityId]).spin = { ticks: tornado ? TORNADO_TICKS : SPIN_TICKS, r: Math.max(1, Math.min(400, Math.round(reach))), ...tornado ? { hits: T115.tornado.waves, next: T115.tornado.gap } : {} };
     echoLeave(a, reach);
     const ring10 = full(n);
     if (ring10) {
@@ -140973,10 +140921,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       return;
     }
     if (sp.hits && --sp.next <= 0) {
-      const W21 = T116.whirlingBlades, stats3 = getStats(a.entityId), targets = cone8(a, { x: 1, y: 0 }, sp.r, Math.PI);
+      const W21 = T115.whirlingBlades, stats3 = getStats(a.entityId), targets = cone8(a, { x: 1, y: 0 }, sp.r, Math.PI);
       if (aug(a, "whirling_blades", 1)) for (const t of targets) pull(a, t, W21.pull);
       for (const t of targets) damage(a, t, multiplyCombat(stats3.attack, ...W21.attack), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
-      if (--sp.hits > 0) sp.next = T116.tornado.gap;
+      if (--sp.hits > 0) sp.next = T115.tornado.gap;
       else {
         delete sp.hits;
         delete sp.next;
@@ -140988,11 +140936,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const k = classSkillsRecord(c.actors[a.entityId]);
     k.parry = RIPOSTE_TICKS;
     k.riposte = RIPOSTE_TICKS;
-    if (aug(a, "riposte", 2)) for (const t of around3(a, a.position, T116.riposte.bait)) drawTo(t, a.position, T116.riposte.baitPull, (a.hullRadius ?? 0) + (t.hullRadius ?? 0) + 4);
+    if (aug(a, "riposte", 2)) for (const t of around3(a, a.position, T115.riposte.bait)) drawTo(t, a.position, T115.riposte.baitPull, (a.hullRadius ?? 0) + (t.hullRadius ?? 0) + 4);
     return true;
   }
   function rupture2(a, stats3, aim2, commandId) {
-    const R14 = T116.rupture, reach = R14.radius * effects2.area(a), sourceItem = damageSourceItem(owner(a), "offhand"), torn = [];
+    const R14 = T115.rupture, reach = R14.radius * effects2.area(a), sourceItem = damageSourceItem(owner(a), "offhand"), torn = [];
     let total = "0";
     for (const t of around3(a, a.position, reach)) {
       const id2 = a.entityId + "/" + t.entityId + "/bleed", e = c.effects[id2];
@@ -141014,7 +140962,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       if (res?.damage) total = addCombat(total, res.damage);
       if (!torn.includes(t)) torn.push(t);
     }
-    if (aug(a, "rupture", 2) && a.alive && compareCombat(total, 0) > 0) a.hp = combatInteger(minCombat(stats3.maxHp, addCombat(a.hp, multiplyCombat(total, T116.vampiric, rank(a, "blood_price") ? 200 : 100))));
+    if (aug(a, "rupture", 2) && a.alive && compareCombat(total, 0) > 0) a.hp = combatInteger(minCombat(stats3.maxHp, addCombat(a.hp, multiplyCombat(total, T115.vampiric, rank(a, "blood_price") ? 200 : 100))));
     ventPlant(a, torn);
     if (aug(a, "rupture", 0)) for (const t of torn) for (const n of effects2.nearby(a, t, R14.hop).filter((n2) => n2 !== t && n2.alive && !torn.includes(n2)).sort((x, y) => distance12(t, x) - distance12(t, y) || x.entityId.localeCompare(y.entityId)).slice(0, R14.chain)) bleed(a, n, stats3);
     const contagious = rank(a, "contagious");
@@ -141025,25 +140973,25 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     classSkillsRecord(c.actors[a.entityId]).smoke = { x: a.position.x, y: a.position.y, ticks: SMOKE_TICKS + 60 * paid(a, "smoke_veil"), next: 1 };
     hareWake(a);
     if (aug(a, "smoke_veil", 1) && canStun(a)) {
-      for (const t of around3(a, a.position, T116.smokeVeil.radius)) if (t.alive && !isPodCombatTargetV4(t) && ordinary(t)) stun(a, t, stunTicks(a, T116.smokeVeil.bomb));
+      for (const t of around3(a, a.position, T115.smokeVeil.radius)) if (t.alive && !isPodCombatTargetV4(t) && ordinary(t)) stun(a, t, stunTicks(a, T115.smokeVeil.bomb));
     }
-    return { r: T116.smokeVeil.radius };
+    return { r: T115.smokeVeil.radius };
   }
   const lostIn = (source3, target) => {
     const m = c.actors[target.entityId]?.skills?.smoke;
     if (!m || !target.alive || !full(spendOf(target, "smoke_veil"))) return false;
-    const r = T116.smokeVeil.radius;
+    const r = T115.smokeVeil.radius;
     return Math.hypot(target.position.x - m.x, target.position.y - m.y) <= r && Math.hypot(source3.position.x - m.x, source3.position.y - m.y) <= r + (source3.hullRadius ?? 0);
   };
   const blinded = (t) => Object.entries(c.actors).some(([id2, k]) => {
     const m = k.skills?.smoke;
     if (!m) return false;
     const h = s.entitiesById?.[id2];
-    return Boolean(h?.alive && aug(h, "smoke_veil", 3) && Math.hypot(t.position.x - m.x, t.position.y - m.y) <= T116.smokeVeil.radius + (t.hullRadius ?? 0));
+    return Boolean(h?.alive && aug(h, "smoke_veil", 3) && Math.hypot(t.position.x - m.x, t.position.y - m.y) <= T115.smokeVeil.radius + (t.hullRadius ?? 0));
   });
   const inSmoke = (a) => {
     const m = c.actors[a.entityId]?.skills?.smoke;
-    return Boolean(m && a.alive && Math.hypot(a.position.x - m.x, a.position.y - m.y) <= T116.smokeVeil.radius);
+    return Boolean(m && a.alive && Math.hypot(a.position.x - m.x, a.position.y - m.y) <= T115.smokeVeil.radius);
   };
   function stepSmoke(a, combat) {
     const m = combat.skills?.smoke;
@@ -141052,7 +141000,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       clearSkillState(combat, "smoke");
       return;
     }
-    const S18 = T116.smokeVeil;
+    const S18 = T115.smokeVeil;
     const shade9 = rank(a, "shade");
     if (shade9 && combat.dash.cooldown > 1 && s.tick % 10 < shade9 && inSmoke(a)) combat.dash.cooldown--;
     if (aug(a, "smoke_veil", 2) && inSmoke(a) && combat.dash.cooldown > combat.dash.frames) combat.dash.cooldown = combat.dash.frames;
@@ -141070,20 +141018,20 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (--m.ticks <= 0) clearSkillState(combat, "smoke");
   }
   function thousandCuts2(a, stats3, aim2, commandId) {
-    const C3 = T116.thousandCuts, t = cone8(a, aim2, C3.reach, C3.cone, 1)[0];
+    const C3 = T115.thousandCuts, t = cone8(a, aim2, C3.reach, C3.cone, 1)[0];
     if (!t || isPodCombatTargetV4(t)) return false;
     classSkillsRecord(c.actors[a.entityId]).cuts = { target: t.entityId, left: C3.cuts + spentOn(a, "thousand_cuts"), next: s.tick };
     slash2(a, stats3, commandId);
     return landingOffset(a, t.position);
   }
   function slash2(a, stats3, commandId = null) {
-    const C3 = T116.thousandCuts, combat = c.actors[a.entityId], cuts = combat.skills?.cuts, t = cuts ? s.entitiesById[cuts.target] : null;
+    const C3 = T115.thousandCuts, combat = c.actors[a.entityId], cuts = combat.skills?.cuts, t = cuts ? s.entitiesById[cuts.target] : null;
     if (!t?.alive || t.residency.spaceInstanceId !== a.residency.spaceInstanceId || distance12(a, t) > C3.reach + 40 + (t.hullRadius ?? 0)) {
       clearSkillState(combat, "cuts");
       return;
     }
-    const sourceItem = damageSourceItem(owner(a), "offhand"), each = multiplyCombat(stats3.attack, ...C3.attack), hit2 = damage(a, t, aug(a, "thousand_cuts", 2) && cuts.left === 1 ? multiplyCombat(each, T116.finalCut, 1) : each, "offhand", commandId, { sourceItem, trigger: "skill" });
-    if (aug(a, "thousand_cuts", 3) && t.alive && combatRoll(combat, combatAmount(...T116.ribbons))) bleed(a, t, stats3);
+    const sourceItem = damageSourceItem(owner(a), "offhand"), each = multiplyCombat(stats3.attack, ...C3.attack), hit2 = damage(a, t, aug(a, "thousand_cuts", 2) && cuts.left === 1 ? multiplyCombat(each, T115.finalCut, 1) : each, "offhand", commandId, { sourceItem, trigger: "skill" });
+    if (aug(a, "thousand_cuts", 3) && t.alive && combatRoll(combat, combatAmount(...T115.ribbons))) bleed(a, t, stats3);
     if (aug(a, "thousand_cuts", 1)) for (const n of effects2.nearby(a, t, C3.fan).filter((n2) => n2 !== t && n2.alive).sort((x, y) => distance12(t, x) - distance12(t, y) || x.entityId.localeCompare(y.entityId)).slice(0, C3.fanTargets)) damage(a, n, each, "offhand", commandId, { sourceItem, trigger: "skill", mark: "fan" });
     if (hit2?.critical) {
       const flourish = rank(a, "flourish");
@@ -141107,7 +141055,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     slash2(a, stats3);
   }
   function noxiousBloom2(a, stats3, aim2, commandId) {
-    const N4 = T116.noxiousBloom, r = Math.max(1, Math.min(400, Math.round((aug(a, "noxious_bloom", 1) ? scaled3(N4.radius, T116.wide) : N4.radius) * effects2.area(a)))), longer = 0, sourceItem = damageSourceItem(owner(a), "offhand");
+    const N4 = T115.noxiousBloom, r = Math.max(1, Math.min(400, Math.round((aug(a, "noxious_bloom", 1) ? scaled3(N4.radius, T115.wide) : N4.radius) * effects2.area(a)))), longer = 0, sourceItem = damageSourceItem(owner(a), "offhand");
     for (const t of around3(a, a.position, r)) {
       damage(a, t, multiplyCombat(stats3.attack, ...N4.attack), "offhand", commandId, { sourceItem, trigger: "skill" });
       poison(a, t, stats3, longer);
@@ -141146,7 +141094,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const r = rank(a, "afterimage");
     if (!r || !a.alive) return;
     const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "offhand");
-    for (const t of around3(a, e, T116.afterimage.radius)) damage(a, t, multiplyCombat(stats3.attack, 20 * r, 100), "offhand", null, { sourceItem, trigger: "proc" });
+    for (const t of around3(a, e, T115.afterimage.radius)) damage(a, t, multiplyCombat(stats3.attack, 20 * r, 100), "offhand", null, { sourceItem, trigger: "proc" });
   }
   function sunBounce(a, combat, th, target) {
     if (!th.sun || !wears(a, "sunshield")) return;
@@ -141179,7 +141127,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function landStaffSuns(a, f) {
     const share = worn(a, "undying-sun-staff");
     if (!share) return;
-    const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), hit2 = /* @__PURE__ */ new Set(), raw = pct3(spell(stats3, T116.meteor.attack), share - 100);
+    const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), hit2 = /* @__PURE__ */ new Set(), raw = pct3(spell(stats3, T115.meteor.attack), share - 100);
     for (const d of sunfallDiscsV1(f.seed, 0, { x: f.x, y: f.y }, 58)) for (const t of around3(a, d, U.sunfall.radius * effects2.area(a))) if (!hit2.has(t.entityId)) {
       hit2.add(t.entityId);
       tagged(TAGS.sunfall, damage, a, t, raw, "fire", null, { sourceItem, trigger: "skill" });
@@ -141204,14 +141152,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     echoBurst(a, e);
   }
   function shadowstep2(a, stats3, aim2, exclude = null) {
-    const S18 = T116.shadowstep, t = effects2.nearby(a, a, S18.reach).filter((t2) => t2.alive && t2.entityId !== exclude && !isPodCombatTargetV4(t2) && distance12(a, t2) <= S18.reach + (t2.hullRadius ?? 0)).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0];
+    const S18 = T115.shadowstep, t = effects2.nearby(a, a, S18.reach).filter((t2) => t2.alive && t2.entityId !== exclude && !isPodCombatTargetV4(t2) && distance12(a, t2) <= S18.reach + (t2.hullRadius ?? 0)).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0];
     if (!t) return false;
     const d = unit6({ x: t.position.x - a.position.x, y: t.position.y - a.position.y }), gap2 = (t.hullRadius ?? 0) + (a.hullRadius ?? 0) + 6, from = { ...a.position }, col2 = space(a);
     const spot2 = [[d.x, d.y], [-d.y, d.x], [d.y, -d.x], [-d.x, -d.y]].map(([x, y]) => ({ x: t.position.x + x * gap2, y: t.position.y + y * gap2 })).find((p) => !collidesWithTiles(col2, p.x, p.y, a.hullRadius));
     if (!spot2) return false;
     a.position = spot2;
     a.movedLastTick = true;
-    expose(a, t, T116.smokeVeil.expose);
+    expose(a, t, T115.smokeVeil.expose);
     treadSlam(a, from);
     const k = classSkillsRecord(c.actors[a.entityId]);
     k.stepped = STEPPED_TICKS;
@@ -141251,7 +141199,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return { position: { x: a.position.x + aim2.x * d, y: a.position.y + aim2.y * d } };
   }
   function firebloom2(a, stats3, aim2, commandId) {
-    const B9 = T116.firebloom, n = paid(a, "firebloom"), marks = cone8(a, aim2, B9.reach, B9.cone, aug(a, "firebloom", 1) ? 2 : 1), radius = (aug(a, "firebloom", 0) ? scaled3(B9.radius, T116.wide) : B9.radius) * effects2.area(a);
+    const B9 = T115.firebloom, n = paid(a, "firebloom"), marks = cone8(a, aim2, B9.reach, B9.cone, aug(a, "firebloom", 1) ? 2 : 1), radius = (aug(a, "firebloom", 0) ? scaled3(B9.radius, T115.wide) : B9.radius) * effects2.area(a);
     const origins = marks.length ? marks.map((t) => ({ position: { ...t.position } })) : [landing2(a, aim2, B9.distance)], out4 = { r: Math.min(400, radius), ...landingOffset(a, origins[0].position), ...origins[1] ? landingOffset(a, origins[1].position, "2") : {} };
     if (wears(a, "crownflame-scepter")) {
       const combat = c.actors[a.entityId], k = classSkillsRecord(combat);
@@ -141264,15 +141212,15 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return out4;
   }
   function bloom4(a, stats3, origins, radius, n, commandId) {
-    const B9 = T116.firebloom, raw = n ? pct3(spell(stats3, B9.attack), 15 * n) : spell(stats3, B9.attack), kindling = rank(a, "kindling"), base3 = combatInteger(multiplyCombat(stats3.attack, ...B9.attack)), hot = kindling ? combatInteger(pct3(base3, 6 * kindling)) : base3, burn3 = full(n) ? combatInteger(multiplyCombat(hot, 2, 1)) : hot, sourceItem = damageSourceItem(owner(a), "fire");
-    const linger = aug(a, "firebloom", 2) ? { extra: T116.linger } : {};
+    const B9 = T115.firebloom, raw = n ? pct3(spell(stats3, B9.attack), 15 * n) : spell(stats3, B9.attack), kindling = rank(a, "kindling"), base3 = combatInteger(multiplyCombat(stats3.attack, ...B9.attack)), hot = kindling ? combatInteger(pct3(base3, 6 * kindling)) : base3, burn3 = full(n) ? combatInteger(multiplyCombat(hot, 2, 1)) : hot, sourceItem = damageSourceItem(owner(a), "fire");
+    const linger = aug(a, "firebloom", 2) ? { extra: T115.linger } : {};
     for (const origin of origins) for (const t of effects2.nearby(a, origin, radius)) {
       damage(a, t, raw, "fire", commandId, { sourceItem, trigger: "skill" });
       if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", burn3, { sourceItem, ...linger });
     }
     if (aug(a, "firebloom", 3)) {
       const k = classSkillsRecord(c.actors[a.entityId]);
-      k.seeds = [...k.seeds ?? [], ...origins.map((o) => ({ x: o.position.x, y: o.position.y, r: Math.max(1, Math.min(400, Math.round(radius * T116.seed[0] / T116.seed[1]))), ticks: SEED_TICKS }))].slice(-MAX_SEEDS);
+      k.seeds = [...k.seeds ?? [], ...origins.map((o) => ({ x: o.position.x, y: o.position.y, r: Math.max(1, Math.min(400, Math.round(radius * T115.seed[0] / T115.seed[1]))), ticks: SEED_TICKS }))].slice(-MAX_SEEDS);
     }
   }
   function stepSeeds(a, combat) {
@@ -141282,7 +141230,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       clearSkillState(combat, "seeds");
       return;
     }
-    const B9 = T116.firebloom, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), linger = aug(a, "firebloom", 2) ? { extra: T116.linger } : {};
+    const B9 = T115.firebloom, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), linger = aug(a, "firebloom", 2) ? { extra: T115.linger } : {};
     for (const e of list) if (--e.ticks <= 0) for (const t of around3(a, e, e.r)) {
       damage(a, t, spell(stats3, B9.attack), "fire", null, { sourceItem, trigger: "skill" });
       if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", combatInteger(multiplyCombat(stats3.attack, ...B9.attack)), { sourceItem, ...linger });
@@ -141292,7 +141240,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     else clearSkillState(combat, "seeds");
   }
   function flashfreeze2(a, stats3, aim2, commandId) {
-    const F7 = T116.flashfreeze, n = paid(a, "flashfreeze"), raw = spell(stats3, F7.attack), chill = 240 + 24 * rank(a, "cold_snap"), reach = aug(a, "flashfreeze", 0) ? scaled3(F7.radius, T116.wide) : F7.radius, frozen = [];
+    const F7 = T115.flashfreeze, n = paid(a, "flashfreeze"), raw = spell(stats3, F7.attack), chill = 240 + 24 * rank(a, "cold_snap"), reach = aug(a, "flashfreeze", 0) ? scaled3(F7.radius, T115.wide) : F7.radius, frozen = [];
     c.controls ??= {};
     for (const t of cone8(a, aim2, reach, Math.PI)) {
       damage(a, t, raw, "frost", commandId, { sourceItem: damageSourceItem(owner(a), "frost"), trigger: "skill" });
@@ -141308,7 +141256,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       const k = classSkillsRecord(combat);
       k.thaw = [...(k.thaw ?? []).filter((e) => !frozen.some((f) => f.targetId === e.target)), ...frozen.map((f) => ({ target: f.targetId, at: f.expiresTick }))].slice(-MAX_THAW);
     }
-    if (aug(a, "flashfreeze", 3) && frozen.length) growIce(a, combat, T116.frostArmor.worth * frozen.length, T116.frostArmor.cap);
+    if (aug(a, "flashfreeze", 3) && frozen.length) growIce(a, combat, T115.frostArmor.worth * frozen.length, T115.frostArmor.cap);
     return { r: extent(a, reach) };
   }
   function stepThaw(a, combat) {
@@ -141318,7 +141266,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       clearSkillState(combat, "thaw");
       return;
     }
-    const N4 = T116.nova, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "frost"), left = [];
+    const N4 = T115.nova, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "frost"), left = [];
     for (const e of list) {
       const t = s.entitiesById[e.target];
       if (!t?.alive) continue;
@@ -141343,7 +141291,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     return true;
   }
   function zap(a, stats3, o) {
-    const B9 = T116.ballLightning, heart = spendOf(a, "ball_lightning"), raw = heart ? pct3(spell(stats3, B9.attack), 15 * heart) : spell(stats3, B9.attack), sourceItem = damageSourceItem(owner(a), "lightning"), from = { entityId: a.entityId, position: { x: o.x, y: o.y } }, hit2 = effects2.nearby(a, { position: { x: o.x, y: o.y } }, B9.radius * effects2.area(a)), chain3 = aug(a, "ball_lightning", 1);
+    const B9 = T115.ballLightning, heart = spendOf(a, "ball_lightning"), raw = heart ? pct3(spell(stats3, B9.attack), 15 * heart) : spell(stats3, B9.attack), sourceItem = damageSourceItem(owner(a), "lightning"), from = { entityId: a.entityId, position: { x: o.x, y: o.y } }, hit2 = effects2.nearby(a, { position: { x: o.x, y: o.y } }, B9.radius * effects2.area(a)), chain3 = aug(a, "ball_lightning", 1);
     for (const t of hit2) {
       damage(a, t, raw, "lightning", null, { sourceItem, trigger: "skill", chainFrom: from });
       if (chain3) {
@@ -141367,7 +141315,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       return;
     }
     const stats3 = getStats(a.entityId), col2 = space(a);
-    const v = T116.ballLightning.speed * (aug(a, "ball_lightning", 3) ? T116.slowOrb : 1);
+    const v = T115.ballLightning.speed * (aug(a, "ball_lightning", 3) ? T115.slowOrb : 1);
     const pull2 = full(spendOf(a, "ball_lightning"));
     for (const o of orbs) {
       const x = o.x + o.dx * v, y = o.y + o.dy * v;
@@ -141378,9 +141326,9 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       if (--o.next <= 0) {
         o.next = ORB_ZAP_TICKS;
         zap(a, stats3, o);
-        if (pull2) for (const t of around3(a, o, T116.ballLightning.radius * 2)) drawTo(t, o, T116.staticField.pull, T116.staticField.core);
+        if (pull2) for (const t of around3(a, o, T115.ballLightning.radius * 2)) drawTo(t, o, T115.staticField.pull, T115.staticField.core);
       }
-      if (--o.ticks <= 0 && o.boom) for (const t of around3(a, o, T116.boom.radius * effects2.area(a))) damage(a, t, spell(stats3, T116.boom.attack), "lightning", null, { sourceItem: damageSourceItem(owner(a), "lightning"), trigger: "skill" });
+      if (--o.ticks <= 0 && o.boom) for (const t of around3(a, o, T115.boom.radius * effects2.area(a))) damage(a, t, spell(stats3, T115.boom.attack), "lightning", null, { sourceItem: damageSourceItem(owner(a), "lightning"), trigger: "skill" });
     }
     const left = orbs.filter((o) => o.ticks > 0);
     if (left.length) combat.skills.orbs = left;
@@ -141396,18 +141344,18 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (--trail3.next <= 0) {
       trail3.next = TRAIL_PULSE_TICKS;
       const r = rank(a, "cinder_step"), stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
-      if (r) for (const t of alongPath(a, { x: trail3.x, y: trail3.y }, { x: trail3.x2, y: trail3.y2 })) damage(a, t, multiplyCombat(stats3.attack, T116.cinderStep.attack[0] * r, T116.cinderStep.attack[1]), "fire", null, { sourceItem, trigger: "proc" });
+      if (r) for (const t of alongPath(a, { x: trail3.x, y: trail3.y }, { x: trail3.x2, y: trail3.y2 })) damage(a, t, multiplyCombat(stats3.attack, T115.cinderStep.attack[0] * r, T115.cinderStep.attack[1]), "fire", null, { sourceItem, trigger: "proc" });
       if (wears(a, "pharaoh-khopesh")) for (const t of alongPath(a, { x: trail3.x, y: trail3.y }, { x: trail3.x2, y: trail3.y2 })) {
         poison(a, t, stats3);
         weaponTouch(a, t);
       }
       const fr = rank(a, "frost_step");
       if (fr && canStun(a)) {
-        for (const t of alongPath(a, { x: trail3.x, y: trail3.y }, { x: trail3.x2, y: trail3.y2 })) if (!isPodCombatTargetV4(t) && !Object.values(c.controls ?? {}).some((e) => e.sourceId === a.entityId && e.targetId === t.entityId && e.expiresTick > s.tick)) applyFrostControl(s, a, t, stats3, 240 + 24 * rank(a, "cold_snap"), T116.frostStep.boost * fr);
+        for (const t of alongPath(a, { x: trail3.x, y: trail3.y }, { x: trail3.x2, y: trail3.y2 })) if (!isPodCombatTargetV4(t) && !Object.values(c.controls ?? {}).some((e) => e.sourceId === a.entityId && e.targetId === t.entityId && e.expiresTick > s.tick)) applyFrostControl(s, a, t, stats3, 240 + 24 * rank(a, "cold_snap"), T115.frostStep.boost * fr);
       }
       const sp = rank(a, "static_step");
       if (sp) {
-        const S18 = T116.staticStep, at9 = { x: trail3.x, y: trail3.y }, from = { entityId: a.entityId, position: at9 }, d = (t) => Math.hypot(t.position.x - at9.x, t.position.y - at9.y), zapItem = damageSourceItem(owner(a), "lightning");
+        const S18 = T115.staticStep, at9 = { x: trail3.x, y: trail3.y }, from = { entityId: a.entityId, position: at9 }, d = (t) => Math.hypot(t.position.x - at9.x, t.position.y - at9.y), zapItem = damageSourceItem(owner(a), "lightning");
         for (const t of effects2.nearby(a, { position: at9 }, S18.radius * effects2.area(a)).sort((x, y) => d(x) - d(y) || x.entityId.localeCompare(y.entityId)).slice(0, S18.targets)) damage(a, t, multiplyCombat(stats3.attack, S18.attack[0] * sp, S18.attack[1]), "lightning", null, { sourceItem: zapItem, trigger: "proc", chainFrom: from });
       }
     }
@@ -141666,7 +141614,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function hareWake(a) {
     const combat = c.actors[a.entityId];
     if (!combat || !a.alive || !wears(a, "emberhare")) return;
-    const col2 = space(a), r = T116.smokeVeil.radius / 3, n0 = s.tick % 1e6, born = [];
+    const col2 = space(a), r = T115.smokeVeil.radius / 3, n0 = s.tick % 1e6, born = [];
     for (let i = 0; i < HARE_MAX; i++) {
       const ang = Math.PI / 2 + i * Math.PI * 2 / HARE_MAX, x = a.position.x + Math.cos(ang) * r, y = a.position.y + Math.sin(ang) * r * 0.7, ok = !collidesWithTiles(col2, x, y, 4), bx = ok ? x : a.position.x, by = ok ? y : a.position.y;
       born.push({ n: (n0 + i) % 1e6, bx, by, fx: bx, fy: by, tx: bx, ty: by, age: 0, last: "" });
@@ -141775,7 +141723,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
     if (++p.age === PANE_HIT) {
       const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash");
-      for (const t of coneFrom(a, p, { x: p.ax, y: p.ay }, T116.bash.reach, T116.bash.cone)) tagged(TAGS.pane, damage, a, t, multiplyCombat(stats3.attack, share, 100), "bash", null, { sourceItem, trigger: "proc" });
+      for (const t of coneFrom(a, p, { x: p.ax, y: p.ay }, T115.bash.reach, T115.bash.cone)) tagged(TAGS.pane, damage, a, t, multiplyCombat(stats3.attack, share, 100), "bash", null, { sourceItem, trigger: "proc" });
     }
     if (p.age >= PANE_TICKS) clearSkillState(combat, "pane");
   }
@@ -141885,7 +141833,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       return;
     }
     g2.age = Math.min(GV_TICKS, g2.age + 1);
-    const cls = heroOf(a), reach = cls === "mage" ? 110 : cls === "knight" ? T116.bash.reach : T116.flurry.reach, dist5 = (t) => Math.hypot(t.position.x - g2.x, t.position.y - g2.y);
+    const cls = heroOf(a), reach = cls === "mage" ? 110 : cls === "knight" ? T115.bash.reach : T115.flurry.reach, dist5 = (t) => Math.hypot(t.position.x - g2.x, t.position.y - g2.y);
     const foe = around3(a, a.position, GV_REACH).filter((t) => !isPodCombatTargetV4(t)).sort((x, y) => dist5(x) - dist5(y) || x.entityId.localeCompare(y.entityId))[0];
     let goal;
     if (foe) {
@@ -141928,17 +141876,17 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       };
       if (cls === "knight") {
         g2.act = g2.n % 2 ? "bash" : "combo";
-        if (g2.act === "bash") hit2(multiplyCombat(stats3.attack, ...T116.bash.attack), "bash", TAGS.reflectBash, coneFrom(a, g2, d, T116.bash.reach, T116.bash.cone), "bash");
+        if (g2.act === "bash") hit2(multiplyCombat(stats3.attack, ...T115.bash.attack), "bash", TAGS.reflectBash, coneFrom(a, g2, d, T115.bash.reach, T115.bash.cone), "bash");
         else hit2(stats3.attack, "offhand", TAGS.reflect, coneFrom(a, g2, d, 34, 1), "main");
       } else if (cls === "mage") {
         const id2 = tomeOf(a), el3 = id2 ? tomeElements(id2)[0] : stats3.spellType ?? "fire";
         g2.act = "cast";
         if (id2) g2.el = el3;
-        hit2(multiplyCombat(stats3.attack, ...T116.cast.attack), el3, TAGS.reflectCast, [foe], el3);
+        hit2(multiplyCombat(stats3.attack, ...T115.cast.attack), el3, TAGS.reflectCast, [foe], el3);
       } else {
         g2.act = "flurry";
-        const targets = coneFrom(a, g2, d, T116.flurry.reach, T116.flurry.cone);
-        for (let i = 0; i < 3; i++) hit2(multiplyCombat(stats3.attack, ...T116.flurry.attack), "offhand", TAGS.reflectFlurry, targets, "offhand");
+        const targets = coneFrom(a, g2, d, T115.flurry.reach, T115.flurry.cone);
+        for (let i = 0; i < 3; i++) hit2(multiplyCombat(stats3.attack, ...T115.flurry.attack), "offhand", TAGS.reflectFlurry, targets, "offhand");
       }
     }
     if (--g2.ticks <= 0) glassGone(combat, g2);
@@ -142079,7 +142027,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
         if (--w.next <= 0) {
           w.next = UQ_PULSE_TICKS;
           if (canStun(a)) {
-            for (const t of around3(a, f, T116.staticField.radius)) if (!isPodCombatTargetV4(t) && !definition2(t).isBoss) effects2.status(a, t, "slow", ROOT_SLOW, UQ_PULSE_TICKS + 10);
+            for (const t of around3(a, f, T115.staticField.radius)) if (!isPodCombatTargetV4(t) && !definition2(t).isBoss) effects2.status(a, t, "slow", ROOT_SLOW, UQ_PULSE_TICKS + 10);
           }
         }
         return;
@@ -142095,7 +142043,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const share = a.alive ? worn(a, "silkspinner") : null;
     if (!share) return;
     const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "lightning");
-    for (const t of around3(a, w, T116.staticField.radius)) {
+    for (const t of around3(a, w, T115.staticField.radius)) {
       tagged(TAGS.web, damage, a, t, multiplyCombat(stats3.attack, share, 100), "lightning", null, { sourceItem, trigger: "proc" });
       afflict(a, t, "lightning", sourceItem);
     }
@@ -142216,12 +142164,12 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (--k.ticks <= 0) clearSkillState(combat, "strip");
   }
   function flameWall2(a, stats3, aim2) {
-    const W21 = T116.flameWall, ring10 = aug(a, "flame_wall", 1), at9 = ring10 ? { position: { ...a.position } } : landing2(a, aim2, W21.ahead);
+    const W21 = T115.flameWall, ring10 = aug(a, "flame_wall", 1), at9 = ring10 ? { position: { ...a.position } } : landing2(a, aim2, W21.ahead);
     const n = paid(a, "flame_wall");
     classSkillsRecord(c.actors[a.entityId]).wall = { x: at9.position.x, y: at9.position.y, dx: aim2.x, dy: aim2.y, ticks: WALL_TICKS + 60 * n, next: 1, ...ring10 ? { ring: true } : {}, ...full(n) ? { long: true } : {} };
     return ring10 ? { r: W21.ring * (full(n) ? 1.5 : 1) } : landingOffset(a, at9.position);
   }
-  const wallHalf = (w) => T116.flameWall.half * (w.long ? 2 : 1), wallRing = (w) => T116.flameWall.ring * (w.long ? 1.5 : 1);
+  const wallHalf = (w) => T115.flameWall.half * (w.long ? 2 : 1), wallRing = (w) => T115.flameWall.ring * (w.long ? 1.5 : 1);
   function fromWall(w, p) {
     if (w.ring) return Math.abs(Math.hypot(p.x - w.x, p.y - w.y) - wallRing(w));
     const px7 = p.x - w.x, py = p.y - w.y, along4 = Math.max(-wallHalf(w), Math.min(wallHalf(w), -px7 * w.dy + py * w.dx));
@@ -142229,7 +142177,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   }
   const nearWall = (a) => {
     const w = c.actors[a.entityId]?.skills?.wall;
-    return Boolean(w && a.alive && fromWall(w, a.position) <= T116.flameWall.near);
+    return Boolean(w && a.alive && fromWall(w, a.position) <= T115.flameWall.near);
   };
   function moss7(a, combat) {
     const share = a.alive ? worn(a, "mossback-pelt") : null, k = combat.skills;
@@ -142254,9 +142202,9 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       clearSkillState(combat, "wall");
       return;
     }
-    const W21 = T116.flameWall;
+    const W21 = T115.flameWall;
     if (!w.ring && aug(a, "flame_wall", 3)) {
-      const x = w.x + w.dx * T116.rolling, y = w.y + w.dy * T116.rolling;
+      const x = w.x + w.dx * T115.rolling, y = w.y + w.dy * T115.rolling;
       if (!collidesWithTiles(space(a), x, y, 4)) {
         w.x = x;
         w.y = y;
@@ -142278,8 +142226,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (--w.ticks <= 0) clearSkillState(combat, "wall");
   }
   function iceWorth(a, stats3) {
-    const I = T116.iceBarrier, base3 = aug(a, "ice_barrier", 0) ? I.thick : I.worth, worth = combatInteger(multiplyCombat(stats3.maxHp, base3, 100));
-    return rank(a, "ice_fortress") ? combatInteger(multiplyCombat(worth, ...T116.fortress)) : worth;
+    const I = T115.iceBarrier, base3 = aug(a, "ice_barrier", 0) ? I.thick : I.worth, worth = combatInteger(multiplyCombat(stats3.maxHp, base3, 100));
+    return rank(a, "ice_fortress") ? combatInteger(multiplyCombat(worth, ...T115.fortress)) : worth;
   }
   function iceBarrier(a, stats3) {
     const n = paid(a, "ice_barrier"), worth = iceWorth(a, stats3), hp = n ? combatInteger(pct3(worth, 10 * n)) : worth;
@@ -142294,13 +142242,13 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function spendBarrier(a) {
     const combat = c.actors[a.entityId], ice = combat?.skills?.ice;
     if (ice) {
-      const cost = combatInteger(multiplyCombat(ice.hp, 1, T116.syphon)), left = combatInteger(subtractCombat(ice.hp, compareCombat(cost, 0) > 0 ? cost : 1));
+      const cost = combatInteger(multiplyCombat(ice.hp, 1, T115.syphon)), left = combatInteger(subtractCombat(ice.hp, compareCombat(cost, 0) > 0 ? cost : 1));
       if (compareCombat(left, 0) > 0) ice.hp = left;
       else clearSkillState(combat, "ice");
       return true;
     }
     if (combat && compareCombat(combat.barrier ?? 0, 0) > 0) {
-      const cost = combatInteger(multiplyCombat(combat.barrier, 1, T116.syphon));
+      const cost = combatInteger(multiplyCombat(combat.barrier, 1, T115.syphon));
       combat.barrier = combatInteger(subtractCombat(combat.barrier, compareCombat(cost, 0) > 0 ? cost : 1));
       return true;
     }
@@ -142325,16 +142273,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       if (k.web?.held) webBurst(a, k.web);
       k.web = { x: a.position.x, y: a.position.y, ticks: WEB_TICKS, next: UQ_PULSE_TICKS, held: true, el: "lightning" };
     }
-    return { r: T116.staticField.radius };
+    return { r: T115.staticField.radius };
   }
   function inField(a) {
     const f = c.actors[a.entityId]?.skills?.field;
     if (!f || !a.alive) return [];
-    return around3(a, f, T116.staticField.radius);
+    return around3(a, f, T115.staticField.radius);
   }
   const fieldHolds = (a, t) => {
     const f = c.actors[a.entityId]?.skills?.field;
-    return Boolean(f && Math.hypot(t.position.x - f.x, t.position.y - f.y) <= T116.staticField.radius + (t.hullRadius ?? 0));
+    return Boolean(f && Math.hypot(t.position.x - f.x, t.position.y - f.y) <= T115.staticField.radius + (t.hullRadius ?? 0));
   };
   const conductor = (a, t) => (aug(a, "static_field", 2) && fieldHolds(a, t) ? 2 : 0) + (offhandKind(owner(a)) === "storm" ? OFFHAND_TOUCHES.stormHops : 0);
   function stepField(a, combat) {
@@ -142344,7 +142292,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       clearSkillState(combat, "field");
       return;
     }
-    const F7 = T116.staticField;
+    const F7 = T115.staticField;
     if (aug(a, "static_field", 3)) {
       f.x = a.position.x;
       f.y = a.position.y;
@@ -142352,7 +142300,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (--f.next <= 0) {
       const n = spendOf(a, "static_field");
       f.next = full(n) ? PULSE_TICKS / 2 : PULSE_TICKS;
-      const stats3 = getStats(a.entityId), spark2 = spell(stats3, F7.attack), raw = n ? pct3(spark2, 20 * n) : spark2, sourceItem = damageSourceItem(owner(a), "lightning"), from = { entityId: a.entityId, position: { x: f.x, y: f.y } }, magnet = (aug(a, "static_field", 1) ? F7.pull : 0) + T116.magnetic * rank(a, "magnetic");
+      const stats3 = getStats(a.entityId), spark2 = spell(stats3, F7.attack), raw = n ? pct3(spark2, 20 * n) : spark2, sourceItem = damageSourceItem(owner(a), "lightning"), from = { entityId: a.entityId, position: { x: f.x, y: f.y } }, magnet = (aug(a, "static_field", 1) ? F7.pull : 0) + T115.magnetic * rank(a, "magnetic");
       for (const t of inField(a)) {
         damage(a, t, raw, "lightning", null, { sourceItem, trigger: "skill", chainFrom: from });
         if (magnet && t.alive && !isPodCombatTargetV4(t) && !definition2(t).isBoss) {
@@ -142367,7 +142315,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (--f.ticks <= 0) clearSkillState(combat, "field");
   }
   function meteor(a, stats3, aim2) {
-    const M4 = T116.meteor, first = cone8(a, aim2, M4.reach, M4.cone, 1)[0], at9 = first ? { ...first.position } : landing2(a, aim2, M4.distance).position;
+    const M4 = T115.meteor, first = cone8(a, aim2, M4.reach, M4.cone, 1)[0], at9 = first ? { ...first.position } : landing2(a, aim2, M4.distance).position;
     if (wears(a, "undying-sun-staff")) {
       const k2 = classSkillsRecord(c.actors[a.entityId]);
       if (k2.staffSuns) landStaffSuns(a, k2.staffSuns);
@@ -142375,7 +142323,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       return { ...landingOffset(a, at9), n: 1 };
     }
     const shower = false, comet = aug(a, "meteor", 3), ground = METEOR_GROUND_TICKS, col2 = space(a), heading = Math.atan2(aim2.y, aim2.x);
-    const spots2 = shower ? [0, 1, 2].map((i) => ({ x: at9.x + Math.cos(heading + i * Math.PI * 2 / 3) * M4.spacing, y: at9.y + Math.sin(heading + i * Math.PI * 2 / 3) * M4.spacing })).map((p) => collidesWithTiles(col2, p.x, p.y, 4) ? { ...at9 } : p) : [at9], size = shower ? scaled3(M4.radius, M4.small) : M4.radius, r = comet ? scaled3(size, T116.comet) : size;
+    const spots2 = shower ? [0, 1, 2].map((i) => ({ x: at9.x + Math.cos(heading + i * Math.PI * 2 / 3) * M4.spacing, y: at9.y + Math.sin(heading + i * Math.PI * 2 / 3) * M4.spacing })).map((p) => collidesWithTiles(col2, p.x, p.y, 4) ? { ...at9 } : p) : [at9], size = shower ? scaled3(M4.radius, M4.small) : M4.radius, r = comet ? scaled3(size, T115.comet) : size;
     const k = classSkillsRecord(c.actors[a.entityId]), fresh = spots2.map((p, i) => ({ x: p.x, y: p.y, fall: comet ? 1 + i * 4 : METEOR_FALL_TICKS + i * 10, ticks: ground, next: M4.pulse, r }));
     k.meteors = [...k.meteors ?? [], ...fresh].slice(-MAX_METEORS);
     return { n: spots2.length };
@@ -142387,7 +142335,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       clearSkillState(combat, "meteors");
       return;
     }
-    const M4 = T116.meteor, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), A2 = effects2.area(a);
+    const M4 = T115.meteor, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), A2 = effects2.area(a);
     for (const m of list) {
       if (m.fall > 0) {
         if (--m.fall > 0) continue;
@@ -142395,7 +142343,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
         for (const t of around3(a, m, m.r * A2)) {
           damage(a, t, raw, "fire", null, { sourceItem, trigger: "skill" });
           burn2(a, t, sourceItem);
-          if (aug(a, "meteor", 2) && t.alive && ordinary(t) && canStun(a)) effects2.status(a, t, "stun", 1, T116.molten);
+          if (aug(a, "meteor", 2) && t.alive && ordinary(t) && canStun(a)) effects2.status(a, t, "stun", 1, T115.molten);
         }
         if (aug(a, "meteor", 1)) {
           const hit2 = new Set(around3(a, m, m.r * A2).map((t) => t.entityId)), col2 = space(a);
@@ -142436,7 +142384,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
   }
   function glacialBurst2(a, stats3, aim2, commandId) {
-    const G5 = T116.glacialBurst, combat = c.actors[a.entityId], ice = combat.skills?.ice, old2 = combat.barrier ?? 0, spent = addCombat(ice ? ice.hp : 0, old2);
+    const G5 = T115.glacialBurst, combat = c.actors[a.entityId], ice = combat.skills?.ice, old2 = combat.barrier ?? 0, spent = addCombat(ice ? ice.hp : 0, old2);
     if (compareCombat(spent, 0) <= 0) return false;
     const ticks = ice?.ticks ?? ICE_TICKS;
     clearSkillState(combat, "ice");
@@ -142471,14 +142419,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       return;
     }
     if (--k.next <= 0) {
-      k.next = T116.rime.pulse;
-      for (const t of around3(a, k, k.r)) grip(a, t, T116.rime.hold);
+      k.next = T115.rime.pulse;
+      for (const t of around3(a, k, k.r)) grip(a, t, T115.rime.hold);
     }
     if (--k.ticks <= 0) clearSkillState(combat, "rime");
   }
   const weight2 = (t) => isPodCombatTargetV4(t) ? -1 : definition2(t).isBoss ? 2 : definition2(t).isElite || definition2(t).isMiniboss ? 1 : 0;
   function strike(a, stats3, commandId) {
-    const F7 = T116.thunderfall, bolts = F7.bolts + (aug(a, "thunderfall", 0) ? 2 : 0) + rank(a, "storm_call"), reach = Math.min(400, F7.radius * effects2.area(a)), raw = spell(stats3, F7.attack), sourceItem = damageSourceItem(owner(a), "lightning"), clap = aug(a, "thunderfall", 1);
+    const F7 = T115.thunderfall, bolts = F7.bolts + (aug(a, "thunderfall", 0) ? 2 : 0) + rank(a, "storm_call"), reach = Math.min(400, F7.radius * effects2.area(a)), raw = spell(stats3, F7.attack), sourceItem = damageSourceItem(owner(a), "lightning"), clap = aug(a, "thunderfall", 1);
     const near5 = around3(a, a.position, reach).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId)), rod2 = aug(a, "thunderfall", 2) ? near5.slice().sort((x, y) => weight2(y) - weight2(x) || compareCombat(y.hp, x.hp) || distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0] : null;
     const targets = rod2 ? Array(bolts).fill(rod2) : near5.slice(0, bolts);
     for (const t of targets) {
@@ -142514,7 +142462,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
     if (--st.next > 0) return;
     st.next = STORM_TICKS;
-    const F7 = T116.thunderfall, t = around3(a, a.position, Math.min(400, T116.storm.radius * effects2.area(a))).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0];
+    const F7 = T115.thunderfall, t = around3(a, a.position, Math.min(400, T115.storm.radius * effects2.area(a))).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0];
     if (!t) return;
     const stats3 = getStats(a.entityId);
     damage(a, t, spell(stats3, F7.attack), "lightning", null, { sourceItem: damageSourceItem(owner(a), "lightning"), trigger: "proc", chainFrom: { entityId: a.entityId, position: { x: t.position.x, y: t.position.y - F7.sky } } });
@@ -142523,7 +142471,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (!rank(a, "absolute_zero") || !a.alive) return;
     let n = 0;
     for (const e of Object.values(c.controls ?? {})) if (e.sourceId === a.entityId && e.phase === "freeze" && e.appliedTick === s.tick - 1) n++;
-    if (n) growIce(a, combat, T116.zero.worth * n, T116.zero.cap);
+    if (n) growIce(a, combat, T115.zero.worth * n, T115.zero.cap);
   }
   function growIce(a, combat, percent, capPercent) {
     const stats3 = getStats(a.entityId), ice = combat.skills?.ice, had = ice ? ice.hp : "0", cap9 = combatInteger(multiplyCombat(stats3.maxHp, capPercent, 100)), gain = combatInteger(multiplyCombat(stats3.maxHp, percent, 100)), hp = compareCombat(had, cap9) >= 0 ? had : combatInteger(minCombat(cap9, addCombat(had, gain)));
@@ -142549,7 +142497,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (!combat.skills?.blaze) return;
     delete combat.skills.blaze;
     if (!a.alive) return;
-    const P28 = T116.phoenix, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
+    const P28 = T115.phoenix, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
     for (const t of around3(a, a.position, Math.min(400, P28.radius * effects2.area(a)))) {
       damage(a, t, spell(stats3, P28.attack), "fire", null, { sourceItem, trigger: "proc" });
       burn2(a, t, sourceItem);
@@ -142566,19 +142514,19 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   const ELEMENT = { firebloom: "fire", flame_wall: "fire", meteor: "fire", flashfreeze: "frost", ice_barrier: "frost", glacial_burst: "frost", ball_lightning: "lightning", static_field: "lightning", thunderfall: "lightning" };
   let weaving = 0;
   const SMART_AIM = {
-    shield_bash: (a) => [T116.bash.reach * (100 + 6 * rank(a, "seismic_reach")) / 100, T116.bash.cone],
-    flurry: () => [T116.flurry.reach, T116.flurry.cone],
+    shield_bash: (a) => [T115.bash.reach * (100 + 6 * rank(a, "seismic_reach")) / 100, T115.bash.cone],
+    flurry: () => [T115.flurry.reach, T115.flurry.cone],
     toxic_fan: (a) => {
-      const F7 = T116.toxicFan, seek = aug(a, "toxic_fan", 3);
-      return [seek ? scaled3(F7.reach, T116.seeking.reach) : F7.reach, seek ? T116.seeking.cone : aug(a, "toxic_fan", 0) ? F7.wideCone : F7.cone];
+      const F7 = T115.toxicFan, seek = aug(a, "toxic_fan", 3);
+      return [seek ? scaled3(F7.reach, T115.seeking.reach) : F7.reach, seek ? T115.seeking.cone : aug(a, "toxic_fan", 0) ? F7.wideCone : F7.cone];
     },
-    thousand_cuts: () => [T116.thousandCuts.reach, T116.thousandCuts.cone],
-    shield_throw: () => [T116.shieldThrow.reach, T116.shieldThrow.cone],
-    firebloom: () => [T116.firebloom.reach, T116.firebloom.cone],
-    meteor: () => [T116.meteor.reach, T116.meteor.cone],
+    thousand_cuts: () => [T115.thousandCuts.reach, T115.thousandCuts.cone],
+    shield_throw: () => [T115.shieldThrow.reach, T115.shieldThrow.cone],
+    firebloom: () => [T115.firebloom.reach, T115.firebloom.cone],
+    meteor: () => [T115.meteor.reach, T115.meteor.cone],
     flame_wall: (a) => aug(a, "flame_wall", 1) ? null : [120, 0.9],
     ball_lightning: () => [160, 0.6],
-    war_banner: (a) => aug(a, "war_banner", 3) ? [T116.lance.reach, 0.6] : null
+    war_banner: (a) => aug(a, "war_banner", 3) ? [T115.lance.reach, 0.6] : null
   };
   function smartAim(a, skillId, aim2) {
     const fit2 = SMART_AIM[skillId]?.(a);
@@ -142646,7 +142594,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       }
     }
     const kind = offhandKind(owner(a)), quick = kind === "buckler" && inGroup("move", heroOf(a), skillId) || kind === "kite" && inGroup("def", heroOf(a), skillId), own0 = quick ? Math.ceil(CLASS_SKILLS[skillId].cooldownTicks * (100 - OFFHAND_TOUCHES.recharge) / 100) : CLASS_SKILLS[skillId].cooldownTicks;
-    const record3 = classSkillsRecord(c.actors[a.entityId]), styled = skillId === "shield_bash" ? Math.ceil(scaled3(own0, T116.styles[offhandStyle(owner(a))]?.cooldown)) : own0;
+    const record3 = classSkillsRecord(c.actors[a.entityId]), styled = skillId === "shield_bash" ? Math.ceil(scaled3(own0, T115.styles[offhandStyle(owner(a))]?.cooldown)) : own0;
     const sigCut = (SIGNATURE_CUTS[skillId] ?? []).reduce((n, id2) => n + rank(a, id2), 0), base3 = sigCut ? Math.ceil(styled * (100 - 2 * sigCut) / 100) : styled;
     const longer = rank(a, "restless") ? [6, 5] : [1, 1];
     record3.cooldowns[skillId] = Math.ceil((BREAKER.includes(skillId) && rank(a, "reckless") ? Math.ceil(base3 * 3 / 4) : base3) * longer[0] / longer[1]);
@@ -142702,11 +142650,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   function mend(a, combat) {
     const k = combat.skills;
     if (!k?.mend || !a.alive || k.mend % 60 !== 1) return;
-    heal(a, getStats(a.entityId), T116.secondBreath * Math.max(1, rank(a, "second_breath")), 100);
+    heal(a, getStats(a.entityId), T115.secondBreath * Math.max(1, rank(a, "second_breath")), 100);
   }
   function bearer(a, combat) {
     const r = rank(a, "standard_bearer"), g2 = combat.guard;
-    if (!r || !g2 || g2.raised || g2.delay > 0 || s.tick % Math.round(T116.bearer / r) || !nearBanner(a) || compareCombat(g2.integrity, 32) >= 0) return;
+    if (!r || !g2 || g2.raised || g2.delay > 0 || s.tick % Math.round(T115.bearer / r) || !nearBanner(a) || compareCombat(g2.integrity, 32) >= 0) return;
     g2.integrity = combatInteger(minCombat(32, addCombat(g2.integrity, 1)));
     if (compareCombat(g2.integrity, 32) >= 0) g2.guardRechargeRemainder = 0;
   }
@@ -142778,14 +142726,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       clearSkillState(combat, "eye");
       return;
     }
-    const v = T116.ballLightning.speed * (aug(a, "ball_lightning", 3) ? T116.slowOrb : 1), x = e.x + e.dx * v, y = e.y + e.dy * v;
+    const v = T115.ballLightning.speed * (aug(a, "ball_lightning", 3) ? T115.slowOrb : 1), x = e.x + e.dx * v, y = e.y + e.dy * v;
     if (!collidesWithTiles(space(a), x, y, 4)) {
       e.x = x;
       e.y = y;
     }
     if (--e.next <= 0) {
       e.next = ORB_ZAP_TICKS;
-      const share = worn(a, "waking-eye-tome"), stats3 = getStats(a.entityId), raw = pct3(spell(stats3, T116.ballLightning.attack), share - 100), sourceItem = damageSourceItem(owner(a), "lightning");
+      const share = worn(a, "waking-eye-tome"), stats3 = getStats(a.entityId), raw = pct3(spell(stats3, T115.ballLightning.attack), share - 100), sourceItem = damageSourceItem(owner(a), "lightning");
       const near5 = around3(a, e, EYE_REACH).filter((n) => !isPodCombatTargetV4(n)).sort((p, q2) => Math.hypot(p.position.x - e.x, p.position.y - e.y) - Math.hypot(q2.position.x - e.x, q2.position.y - e.y) || p.entityId.localeCompare(q2.entityId)).slice(0, EYE_MAX_RAYS);
       e.targets = near5.map((t) => t.entityId);
       e.rays = near5.map((t) => ({ x: t.position.x, y: t.position.y }));
@@ -143059,7 +143007,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (bulwark2 && stance) out4 = multiplyCombat(out4, 100 - 2 * stance * bulwark2.stacks, 100);
     if (nearBanner(target)) {
       const q2 = addCombat(getStats(target.entityId)?.defense ?? 0, 0), n = BigInt(q2.n), d = BigInt(q2.d);
-      if (n > 0n) out4 = multiplyCombat(out4, 2000n * d + 100n * n, 2000n * d + BigInt(100 + (bannerBonus(target) ?? T116.warBanner.defense)) * n);
+      if (n > 0n) out4 = multiplyCombat(out4, 2000n * d + 100n * n, 2000n * d + BigInt(100 + (bannerBonus(target) ?? T115.warBanner.defense)) * n);
     }
     const rooted = rank(target, "rooted");
     if (rooted && record2(target)?.still >= STILL_TICKS) out4 = multiplyCombat(out4, 100 - 4 * rooted, 100);
@@ -143074,9 +143022,9 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const septic = rank(target, "septic"), poisoned = septic ? c.mastery?.[target.entityId]?.poisons?.[source3.entityId] : null;
     if (septic && poisoned && poisoned.expiresTick > s.tick) out4 = multiplyCombat(out4, 100 - 3 * septic, 100);
     const k = record2(target);
-    if (k?.jugg) out4 = multiplyCombat(out4, T116.jugg, 100);
-    if (k?.spin && aug(target, "whirling_blades", 2)) out4 = multiplyCombat(out4, T116.ward, 100);
-    if (blinded(source3)) out4 = multiplyCombat(out4, T116.blind, 100);
+    if (k?.jugg) out4 = multiplyCombat(out4, T115.jugg, 100);
+    if (k?.spin && aug(target, "whirling_blades", 2)) out4 = multiplyCombat(out4, T115.ward, 100);
+    if (blinded(source3)) out4 = multiplyCombat(out4, T115.blind, 100);
     if (k?.cloak || lostIn(source3, target)) return multiplyCombat(out4, 0, 1);
     const own = c.actors[target.entityId];
     if (k?.mist) {
@@ -143190,10 +143138,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       const r = rank(source3, id2);
       if (r && applies(marks, target, mechanic)) out4 = pct3(out4, percent * r);
     }
-    if (ELEMENT_OF[mechanic] && aug(source3, "static_field", 0) && fieldHolds(source3, target)) out4 = pct3(out4, T116.ion);
+    if (ELEMENT_OF[mechanic] && aug(source3, "static_field", 0) && fieldHolds(source3, target)) out4 = pct3(out4, T115.ion);
     {
       const e = c.controls?.[source3.entityId + "/" + target.entityId];
-      if (e?.phase === "freeze" && e.expiresTick > s.tick && current !== "flashfreeze" && aug(source3, "flashfreeze", 1)) out4 = pct3(out4, T116.fracture);
+      if (e?.phase === "freeze" && e.expiresTick > s.tick && current !== "flashfreeze" && aug(source3, "flashfreeze", 1)) out4 = pct3(out4, T115.fracture);
     }
     {
       const big = eliteOrBoss(target);
@@ -143237,14 +143185,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       out4 = pct3(out4, 8 * rank(source3, "en_garde"));
     }
     const duel = rank(source3, "duel");
-    if (duel && effects2.nearby(source3, source3, T116.duel).filter((t) => t.alive && Math.hypot(t.position.x - source3.position.x, t.position.y - source3.position.y) <= T116.duel + (t.hullRadius ?? 0)).length === 1) out4 = pct3(out4, 4 * duel);
+    if (duel && effects2.nearby(source3, source3, T115.duel).filter((t) => t.alive && Math.hypot(t.position.x - source3.position.x, t.position.y - source3.position.y) <= T115.duel + (t.hullRadius ?? 0)).length === 1) out4 = pct3(out4, 4 * duel);
     const firewalker = rank(source3, "firewalker");
     if (firewalker && nearWall(source3)) out4 = pct3(out4, 4 * firewalker);
     const wire2 = rank(source3, "live_wire");
     if (wire2 && mechanic === "lightning" && fieldHolds(source3, target)) out4 = pct3(out4, 5 * wire2);
     if (weaving) out4 = pct3(out4, 4 * weaving);
-    if (nearBanner(source3)) out4 = pct3(out4, bannerBonus(source3) ?? T116.warBanner.attack);
-    if (record2(source3)?.hymn) out4 = pct3(out4, T116.hymn);
+    if (nearBanner(source3)) out4 = pct3(out4, bannerBonus(source3) ?? T115.warBanner.attack);
+    if (record2(source3)?.hymn) out4 = pct3(out4, T115.hymn);
     const vengeance = rank(source3, "vengeance");
     if (vengeance) {
       const q2 = addCombat(getStats(source3.entityId)?.maxHp ?? 0, 0), n = BigInt(q2.n), lost = n - BigInt(source3.hp) * BigInt(q2.d), tenths = n > 0n && lost > 0n ? Number(10n * lost / n) : 0;
@@ -143272,7 +143220,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (fester && mechanic === "poison" && inFlower(source3, target)) out4 = pct3(out4, 5 * fester);
     const pyro = rank(source3, "pyromaniac");
     if (pyro) {
-      const P28 = T116.pyromaniac;
+      const P28 = T115.pyromaniac;
       let n = 0;
       for (const e of Object.values(c.effects)) {
         if (n >= P28.most) break;
@@ -143284,7 +143232,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
     if (stepHit === target.entityId) {
       stepHit = null;
-      out4 = multiplyCombat(out4, ...T116.shadowstep.crit);
+      out4 = multiplyCombat(out4, ...T115.shadowstep.crit);
       if (aug(source3, "shadowstep", 0)) assassinMark = { id: target.entityId, tick: s.tick };
       {
         const n = spentOn(source3, "shadowstep");
@@ -143382,10 +143330,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       k.focus = k.focus?.target === target.entityId ? { target: target.entityId, hits: Math.min(5, k.focus.hits + 1) } : { target: target.entityId, hits: 1 };
     }
     if (rank(source3, "master_duelist") && !isPodCombatTargetV4(target)) {
-      const k = classSkillsRecord(combat), same12 = k.duel?.target === target.entityId, busy = k.duel && !same12 && DUEL_TICKS - k.duel.ticks < T116.duelHold && s.entitiesById[k.duel.target]?.alive === true;
+      const k = classSkillsRecord(combat), same12 = k.duel?.target === target.entityId, busy = k.duel && !same12 && DUEL_TICKS - k.duel.ticks < T115.duelHold && s.entitiesById[k.duel.target]?.alive === true;
       if (!busy) {
         const stacks = same12 ? k.duel.stacks : 0;
-        if (stacks) out4 = pct3(out4, T116.duelist * stacks);
+        if (stacks) out4 = pct3(out4, T115.duelist * stacks);
         k.duel = { target: target.entityId, stacks: Math.min(MAX_DUEL, stacks + 1), ticks: DUEL_TICKS };
       }
     }
@@ -143399,7 +143347,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const p = owner(target);
     if (!p?.d8?.heroClass || !source3?.alive || source3.team !== "hostile") return;
     const combat = c.actors[target.entityId], riposting = Boolean(combat?.skills?.riposte);
-    if (riposting && defense.defense === "parry" && source3.alive && !isPodCombatTargetV4(source3)) expose(target, source3, T116.smokeVeil.expose);
+    if (riposting && defense.defense === "parry" && source3.alive && !isPodCombatTargetV4(source3)) expose(target, source3, T115.smokeVeil.expose);
     if (combat) {
       fought(target);
       const hero = heroOf(target);
@@ -143414,7 +143362,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       delete k.guardUp;
       if (G5.perfectDmg) k.sharp = SHARP_TICKS;
       if (G5.perfectCdr) signatureCut(target, (own) => cutGroups(target, own, ["move", "def"], G5.perfectCdr));
-      if (!isPodCombatTargetV4(source3) && !definition2(source3).isBoss && !s.bossCombat?.bossesByEntityId?.[source3.entityId]) knockback(target, source3, eliteOrBoss(source3) ? T116.bash.eliteKnockback : T116.bash.knockback);
+      if (!isPodCombatTargetV4(source3) && !definition2(source3).isBoss && !s.bossCombat?.bossesByEntityId?.[source3.entityId]) knockback(target, source3, eliteOrBoss(source3) ? T115.bash.eliteKnockback : T115.bash.knockback);
     }
     const mirrored = attribution?.projectileImpact && (defense.defense === "block" && (defense.aegis || combat?.skills?.aegis) && aug(target, "aegis_pulse", 3) || defense.defense === "parry" && riposting && aug(target, "riposte", 3));
     if (mirrored) {
@@ -143423,22 +143371,22 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       if (!source3.alive) return;
     }
     if (defense.counter === "stance") {
-      const grit = spendOf(target, "counter_stance"), strike2 = grit ? pct3(multiplyCombat(stats3.attack, ...T116.counter.attack), 40 * grit) : multiplyCombat(stats3.attack, ...T116.counter.attack);
+      const grit = spendOf(target, "counter_stance"), strike2 = grit ? pct3(multiplyCombat(stats3.attack, ...T115.counter.attack), 40 * grit) : multiplyCombat(stats3.attack, ...T115.counter.attack);
       damage(target, source3, strike2, "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
       if (full(grit) && combat) {
-        for (const t of around3(target, target.position, T116.reprisal * effects2.area(target))) if (t !== source3 && t.alive && !isPodCombatTargetV4(t)) {
-          if (definition2(t).isBoss) daze(target, t, T116.counter.stun);
-          else if (canStun(target)) stun(target, t, stunTicks(target, T116.counter.stun));
+        for (const t of around3(target, target.position, T115.reprisal * effects2.area(target))) if (t !== source3 && t.alive && !isPodCombatTargetV4(t)) {
+          if (definition2(t).isBoss) daze(target, t, T115.counter.stun);
+          else if (canStun(target)) stun(target, t, stunTicks(target, T115.counter.stun));
         }
         classSkillsRecord(combat).wave = WAVE_TICKS;
       }
       if (aug(target, "counter_stance", 2) && combat) {
-        for (const t of around3(target, target.position, T116.reprisal * effects2.area(target))) if (t !== source3) damage(target, t, multiplyCombat(stats3.attack, ...T116.counter.attack), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
+        for (const t of around3(target, target.position, T115.reprisal * effects2.area(target))) if (t !== source3) damage(target, t, multiplyCombat(stats3.attack, ...T115.counter.attack), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
         classSkillsRecord(combat).wave = WAVE_TICKS;
       }
       if (aug(target, "counter_stance", 0)) bleed(target, source3, stats3);
-      if (definition2(source3).isBoss) daze(target, source3, T116.counter.stun);
-      else if (source3.alive && canStun(target)) stun(target, source3, stunTicks(target, T116.counter.stun));
+      if (definition2(source3).isBoss) daze(target, source3, T115.counter.stun);
+      else if (source3.alive && canStun(target)) stun(target, source3, stunTicks(target, T115.counter.stun));
     }
     const retaliation = rank(target, "retaliation");
     if (retaliation && defense.defense === "block" && source3.alive) damage(target, source3, multiplyCombat(stats3.defense, retaliation, 10), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
@@ -143455,15 +143403,15 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (defense.defense === "parry" && rank(target, "en_garde") && combat) classSkillsRecord(combat).enGarde = EN_GARDE_TICKS;
     if (defense.defense === "parry" && combat?.skills?.riposte) {
       clearSkillState(combat, "riposte");
-      const combo = spendOf(target, "riposte"), bare = multiplyCombat(stats3.attack, ...T116.riposte.attack), cut2 = offhandKind(p) === "main-gauche" ? pct3(bare, OFFHAND_TOUCHES.parryCut) : bare, cutBack = combo ? pct3(cut2, 30 * combo) : cut2;
+      const combo = spendOf(target, "riposte"), bare = multiplyCombat(stats3.attack, ...T115.riposte.attack), cut2 = offhandKind(p) === "main-gauche" ? pct3(bare, OFFHAND_TOUCHES.parryCut) : bare, cutBack = combo ? pct3(cut2, 30 * combo) : cut2;
       damage(target, source3, cutBack, "riposte", null, { sourceItem: damageSourceItem(p, "offhand"), trigger: "reactive" });
       if (aug(target, "riposte", 0)) {
         const d = unit6({ x: source3.position.x - target.position.x, y: source3.position.y - target.position.y });
-        for (const t of cone8(target, d, T116.riposte.wide, T116.riposte.wideCone)) if (t !== source3) damage(target, t, cutBack, "riposte", null, { sourceItem: damageSourceItem(p, "offhand"), trigger: "reactive", mark: "fan" });
+        for (const t of cone8(target, d, T115.riposte.wide, T115.riposte.wideCone)) if (t !== source3) damage(target, t, cutBack, "riposte", null, { sourceItem: damageSourceItem(p, "offhand"), trigger: "reactive", mark: "fan" });
       }
       lashFling(target, combat);
       if (full(combo) && canStun(target)) {
-        for (const t of around3(target, target.position, T116.smokeVeil.radius)) if (!isPodCombatTargetV4(t)) expose(target, t, T116.smokeVeil.expose);
+        for (const t of around3(target, target.position, T115.smokeVeil.radius)) if (!isPodCombatTargetV4(t)) expose(target, t, T115.smokeVeil.expose);
       }
       classSkillsRecord(combat).keen = KEEN_TICKS;
       if (aug(target, "riposte", 1)) combat.dash.cooldown = 0;
@@ -143473,16 +143421,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const nerves = rank(target, "steel_nerves");
     if (nerves && defense.defense === "parry" && target.alive) heal(target, stats3, nerves, 100);
     if (defense.ice && source3.alive && canStun(target)) frost(target, source3, full(spendOf(target, "ice_barrier")));
-    if (defense.ice && source3.alive && aug(target, "ice_barrier", 2)) damage(target, source3, spell(stats3, T116.spiked), "frost", null, { sourceItem: damageSourceItem(p, "frost"), trigger: "reactive" });
+    if (defense.ice && source3.alive && aug(target, "ice_barrier", 2)) damage(target, source3, spell(stats3, T115.spiked), "frost", null, { sourceItem: damageSourceItem(p, "frost"), trigger: "reactive" });
     if (defense.ice === "broke" && combat?.skills?.regrow && aug(target, "ice_barrier", 3) && target.alive) {
-      const hp = combatInteger(multiplyCombat(iceWorth(target, stats3), ...T116.regrow.share));
+      const hp = combatInteger(multiplyCombat(iceWorth(target, stats3), ...T115.regrow.share));
       clearSkillState(combat, "regrow");
-      if (compareCombat(hp, 0) > 0) classSkillsRecord(combat).ice = { hp, ticks: T116.regrow.ticks, grown: true };
+      if (compareCombat(hp, 0) > 0) classSkillsRecord(combat).ice = { hp, ticks: T115.regrow.ticks, grown: true };
     }
-    if (defense.ice === "broke" && aug(target, "ice_barrier", 1) && canStun(target)) for (const t of around3(target, target.position, T116.flashfreeze.radius)) frost(target, t, true);
+    if (defense.ice === "broke" && aug(target, "ice_barrier", 1) && canStun(target)) for (const t of around3(target, target.position, T115.flashfreeze.radius)) frost(target, t, true);
     const ward = rank(target, "frost_ward");
     if (ward && defense.ice === "broke" && canStun(target)) {
-      for (const t of around3(target, target.position, T116.flashfreeze.radius)) if (!isPodCombatTargetV4(t)) for (let n = 0; n < ward && t.alive; n++) applyFrostControl(s, target, t, stats3, 240 + 24 * rank(target, "cold_snap"));
+      for (const t of around3(target, target.position, T115.flashfreeze.radius)) if (!isPodCombatTargetV4(t)) for (let n = 0; n < ward && t.alive; n++) applyFrostControl(s, target, t, stats3, 240 + 24 * rank(target, "cold_snap"));
     }
     const aegis = combat?.skills?.aegis, bastion = rank(target, "bastion_ward");
     if (aegis && bastion && defense.defense === "block") aegis.hp = combatInteger(minCombat(aegis.full, addCombat(aegis.hp, multiplyCombat(aegis.full, 2 * bastion, 100))));
@@ -143496,7 +143444,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       }
     }
     if (defense.defense !== "block" && rank(target, "retribution") && aug(target, "retribution", 3) && combat) {
-      const amount2 = combatInteger(multiplyCombat(defense.damage ?? 0, ...T116.retaliate));
+      const amount2 = combatInteger(multiplyCombat(defense.damage ?? 0, ...T115.retaliate));
       if (compareCombat(amount2, 0) > 0) {
         const k = classSkillsRecord(combat);
         k.held = [...k.held ?? [], { amount: amount2, ticks: MEMORY_TICKS }].slice(-HELD_MAX);
@@ -143504,7 +143452,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
     if (rank(target, "thorned_bulwark") && defense.defense === "block" && source3.alive) bleed(target, source3, stats3);
     if (rank(target, "bulwark_colossus") && defense.defense === "block" && combat && target.alive) {
-      const W21 = T116.colossus, sourceItem = damageSourceItem(p, "bash");
+      const W21 = T115.colossus, sourceItem = damageSourceItem(p, "bash");
       for (const t of around3(target, target.position, W21.radius * effects2.area(target))) {
         damage(target, t, multiplyCombat(stats3.attack, ...W21.attack), "quake", null, { sourceItem, trigger: "reactive" });
         if (t.alive && !isPodCombatTargetV4(t) && !definition2(t).isBoss) knockback(target, t, W21.shove);
@@ -143543,7 +143491,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const p = players.get(entityId2);
     if (!p) return 1;
     if (c.actors[entityId2]?.skills?.sunk) return 0;
-    const surge = c.actors[entityId2]?.skills?.surge, plating = (classRank(p.d8, "heavy_plating") ? 0.9 : 1) * (classRank(p.d8, "ice_fortress") && s.entitiesById[entityId2] && hasBarrier(s.entitiesById[entityId2]) ? T116.fortressSpeed : 1);
+    const surge = c.actors[entityId2]?.skills?.surge, plating = (classRank(p.d8, "heavy_plating") ? 0.9 : 1) * (classRank(p.d8, "ice_fortress") && s.entitiesById[entityId2] && hasBarrier(s.entitiesById[entityId2]) ? T115.fortressSpeed : 1);
     const zip = c.actors[entityId2]?.skills?.zip ? 1 + UNIQUE_TOUCHES.zipSpeed / 100 : 1;
     return (surge ? plating * (1 + (4 * classRank(p.d8, "momentum") + 5 * classRank(p.d8, "light_step")) / 100) : plating) * zip;
   }
@@ -143587,7 +143535,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (rank(a, "hit_and_run")) classSkillsRecord(combat).rush = RUSH_TICKS;
     {
       const r = rank(a, "blade_rush");
-      if (r && combatRoll(combat, combatAmount(T116.bladeRush * r, 100))) gainPips(a, 1);
+      if (r && combatRoll(combat, combatAmount(T115.bladeRush * r, 100))) gainPips(a, 1);
     }
     if (rank(a, "evasive")) classSkillsRecord(combat).evade = EVADE_TICKS;
     {
@@ -143600,7 +143548,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const cross7 = rank(a, "crosscut");
     if (cross7) {
       const stats3 = getStats(a.entityId);
-      for (const t of alongPath(a, from, to)) damage(a, t, multiplyCombat(stats3.attack, T116.crosscut.attack[0] * cross7, T116.crosscut.attack[1]), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "proc" });
+      for (const t of alongPath(a, from, to)) damage(a, t, multiplyCombat(stats3.attack, T115.crosscut.attack[0] * cross7, T115.crosscut.attack[1]), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "proc" });
     }
     {
       const sunTicks = worn(a, "pharaoh-khopesh") ?? 0, fire2 = rank(a, "cinder_step") > 0, venom = sunTicks > 0, frost2 = rank(a, "frost_step") > 0, spark2 = rank(a, "static_step") > 0, ticks = Math.max(rank(a, "cinder_step") || frost2 || spark2 ? TRAIL_TICKS : 0, sunTicks);
@@ -143622,7 +143570,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
   }
   function burst8(a, target, element, percent) {
     const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), element);
-    for (const t of around3(a, target.position, T116.burst)) if (t !== target) damage(a, t, multiplyCombat(stats3.attack, percent, 100), element, null, { sourceItem, trigger: "proc" });
+    for (const t of around3(a, target.position, T115.burst)) if (t !== target) damage(a, t, multiplyCombat(stats3.attack, percent, 100), element, null, { sourceItem, trigger: "proc" });
   }
   function defeated(a, target) {
     popCaps(target);
@@ -143635,7 +143583,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       const venom = c.mastery?.[a.entityId]?.poisons?.[target.entityId];
       if (venom && venom.expiresTick > s.tick && aug(a, "noxious_bloom", 0)) {
         const stats3 = getStats(a.entityId);
-        for (const n of effects2.nearby(a, target, T116.noxiousBloom.jump).filter((n2) => n2 !== target && n2.alive && !isPodCombatTargetV4(n2)).sort((x, y) => distance12(target, x) - distance12(target, y) || x.entityId.localeCompare(y.entityId)).slice(0, 2)) poison(a, n, stats3);
+        for (const n of effects2.nearby(a, target, T115.noxiousBloom.jump).filter((n2) => n2 !== target && n2.alive && !isPodCombatTargetV4(n2)).sort((x, y) => distance12(target, x) - distance12(target, y) || x.entityId.localeCompare(y.entityId)).slice(0, 2)) poison(a, n, stats3);
       }
     }
     {
@@ -143688,15 +143636,15 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (rank(a, "quickening") && combat && zapped?.id === target.entityId && zapped.tick === s.tick) classSkillsRecord(combat).quick = QUICK_TICKS;
     if (rank(a, "virulent_bloom") && a.alive && combat && c.mastery?.[a.entityId]?.poisons?.[target.entityId]) {
       const k = classSkillsRecord(combat);
-      k.blooms = [...k.blooms ?? [], { x: target.position.x, y: target.position.y, r: Math.max(1, Math.min(400, Math.round(T116.bloom.radius * effects2.area(a)))), ticks: BLOOM_TICKS, next: PULSE_TICKS }].slice(-MAX_BLOOMS);
+      k.blooms = [...k.blooms ?? [], { x: target.position.x, y: target.position.y, r: Math.max(1, Math.min(400, Math.round(T115.bloom.radius * effects2.area(a)))), ticks: BLOOM_TICKS, next: PULSE_TICKS }].slice(-MAX_BLOOMS);
     }
     const harvest = rank(a, "red_harvest"), bled = c.effects[a.entityId + "/" + target.entityId + "/bleed"];
-    if (harvest && bled) for (const n of around3(a, target.position, T116.jump).filter((n2) => n2 !== target && !isPodCombatTargetV4(n2)).sort((x, y) => distance12(target, x) - distance12(target, y) || x.entityId.localeCompare(y.entityId)).slice(0, harvest)) periodic(a, n, "bleed", bled.attack, { sourceItem: bled.sourceItem });
+    if (harvest && bled) for (const n of around3(a, target.position, T115.jump).filter((n2) => n2 !== target && !isPodCombatTargetV4(n2)).sort((x, y) => distance12(target, x) - distance12(target, y) || x.entityId.localeCompare(y.entityId)).slice(0, harvest)) periodic(a, n, "bleed", bled.attack, { sourceItem: bled.sourceItem });
   }
   function spread(a, t, e) {
     const r = rank(a, "spreading_flames");
     if (!r || !a.alive || !combatRoll(c.actors[a.entityId], combatAmount(5 * r, 100))) return;
-    const n = around3(a, t.position, T116.jump).filter((n2) => n2 !== t && !isPodCombatTargetV4(n2) && !c.effects[a.entityId + "/" + n2.entityId + "/burn"]).sort((x, y) => distance12(t, x) - distance12(t, y) || x.entityId.localeCompare(y.entityId))[0];
+    const n = around3(a, t.position, T115.jump).filter((n2) => n2 !== t && !isPodCombatTargetV4(n2) && !c.effects[a.entityId + "/" + n2.entityId + "/burn"]).sort((x, y) => distance12(t, x) - distance12(t, y) || x.entityId.localeCompare(y.entityId))[0];
     if (n) periodic(a, n, "burn", e.attack, { sourceItem: e.sourceItem });
   }
   function lethal(a, raw) {
@@ -143706,7 +143654,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       const stats3 = getStats(a.entityId), k2 = classSkillsRecord(combat);
       k2.phoenix = PHOENIX_TICKS;
       k2.blaze = true;
-      const to = combatInteger(multiplyCombat(stats3.maxHp, T116.phoenix.heal, 100));
+      const to = combatInteger(multiplyCombat(stats3.maxHp, T115.phoenix.heal, 100));
       if (compareCombat(to, a.hp) > 0) a.hp = to;
       return combatInteger(subtractCombat(raw, raw));
     }
@@ -148414,7 +148362,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
         const r = state2.campaign.sitesById[d.siteId];
         if (r.conqueredTick === null && d.groups.every((g2) => state2.groupsById[g2.groupId].cleared)) r.conqueredTick = state2.tick;
       }
-      for (const functional of Object.values(state2.d9World?.functionalSitesById ?? {})) if (functional.conqueredTick === null && functionalSiteGroupsD12(functional).every((id2) => state2.groupsById[id2]?.cleared)) functional.conqueredTick = state2.tick;
+      for (const functional of Object.values(state2.d9World?.functionalSitesById ?? {})) if (functional.conqueredTick === null && (siteBossDownV1(state2, functional) || functionalSiteGroupsD12(functional).every((id2) => state2.groupsById[id2]?.cleared))) functional.conqueredTick = state2.tick;
       for (const r of Object.values(state2.d9World?.worldEvents?.records ?? {})) {
         const g2 = state2.groupsById[r.groupId];
         if (g2 && !g2.cleared && eventReadyToClear(state2, r.groupId) && g2.entityIds.every((id2) => !state2.entitiesById[id2].alive)) {
@@ -155113,9 +155061,9 @@ function paintCryptEntranceV3(c, x, y, biome, seed2 = 21) {
       stone(c, sx, sy, 14 + R14() * 12, 10 + R14() * 8, b.rock, seed2 + i, { n: 7, o: 1.4, crack: false });
     }
   } else if (b.cover === "grass" || b.cover === "moss") {
-    const T121 = [tone88(b.mound, -0.3), tone88(b.mound, -0.16), tone88(b.mound, 0.2), tone88(b.mound, 0.32)];
+    const T120 = [tone88(b.mound, -0.3), tone88(b.mound, -0.16), tone88(b.mound, 0.2), tone88(b.mound, 0.32)];
     for (let i = 0; i < 190; i++) {
-      c.fillStyle = T121[R14() * 4 | 0];
+      c.fillStyle = T120[R14() * 4 | 0];
       c.fill(leaf4(x + (R14() - 0.5) * 350, y - 12 - R14() * 168, 4 + R14() * 4, -Math.PI / 2 + (R14() - 0.5) * 1.6, 1.5));
     }
     for (let i = 0; i < 12; i++) {
@@ -155439,27 +155387,27 @@ function mound2(c, cx, base3, w, h, b, seed2) {
     const X = cx + w / 2 - i * w / 6;
     foot2.push([X, base3 + 5 + R14() * 7]);
   }
-  const out4 = smooth22([...top, ...foot2]), T121 = coverPal(b), topAt = (X) => {
+  const out4 = smooth22([...top, ...foot2]), T120 = coverPal(b), topAt = (X) => {
     for (let i = 1; i < top.length; i++) if (X <= top[i][0]) {
       const k = (X - top[i - 1][0]) / (top[i][0] - top[i - 1][0]);
       return top[i - 1][1] + (top[i][1] - top[i - 1][1]) * k;
     }
     return base3;
   };
-  prop4(c, [[out4, T121.m]], 2.6);
+  prop4(c, [[out4, T120.m]], 2.6);
   c.save();
   c.clip(out4);
-  c.fillStyle = T121.d;
+  c.fillStyle = T120.d;
   c.fill(out4);
   const lit2 = new Path2D();
   lit2.addPath(out4, new DOMMatrix([1, 0, 0, 1, -w * 0.035, -h * 0.1]));
-  c.fillStyle = T121.m;
+  c.fillStyle = T120.m;
   c.fill(lit2);
-  c.fillStyle = T121.l;
+  c.fillStyle = T120.l;
   c.beginPath();
   c.ellipse(cx - w * 0.14, base3 - h * 0.66, w * 0.34, h * 0.3, -0.15, 0, TAU173);
   c.fill();
-  c.fillStyle = T121.h;
+  c.fillStyle = T120.h;
   c.globalAlpha = 0.6;
   c.beginPath();
   c.ellipse(cx - w * 0.2, base3 - h * 0.84, w * 0.17, h * 0.08, -0.2, 0, TAU173);
@@ -155469,7 +155417,7 @@ function mound2(c, cx, base3, w, h, b, seed2) {
     const n = Math.round(w * h / 70);
     for (let i = 0; i < n; i++) {
       const X = cx - w / 2 + R14() * w, Y = topAt(X) + 4 + R14() * (base3 - topAt(X));
-      c.fillStyle = [T121.d, T121.l, T121.m, T121.h, T121.d, T121.m][R14() * 6 | 0];
+      c.fillStyle = [T120.d, T120.l, T120.m, T120.h, T120.d, T120.m][R14() * 6 | 0];
       c.fill(leaf4(X, Y, 4 + R14() * 4, -Math.PI / 2 + (R14() - 0.5) * 1.5, 1.4));
     }
     if (b.cover === "heather") for (let i = 0; i < w * h / 900; i++) {
@@ -155479,7 +155427,7 @@ function mound2(c, cx, base3, w, h, b, seed2) {
       c.fill();
     }
   } else if (b.cover === "sand") {
-    c.strokeStyle = T121.d;
+    c.strokeStyle = T120.d;
     c.lineWidth = 1.2;
     for (let i = 0; i < h / 18; i++) {
       const ry = base3 - 8 - i * 18;
@@ -162229,39 +162177,39 @@ function boulder4(c, pts2, seed2, o = 1.3) {
   });
 }
 function slab5(c, x, y, w, h, d, sk, seed2, o = 1.3) {
-  const L = x - w / 2, Rr = x + w / 2, T121 = y - h, cr = Math.min(5, h * 0.3), r1 = (rnd(seed2) - 0.5) * 3, r23 = (rnd(seed2 + 1) - 0.5) * 3;
-  const front2 = smooth([[L + cr, y + 1], [L, y - cr], [L - 1, T121 + cr + r1], [L + cr * 0.6, T121], [x, T121 + r23 * 0.4], [Rr - cr * 0.6, T121 + r23], [Rr + 1, T121 + cr], [Rr, y - cr], [Rr - cr, y + 1], [x, y + 2]]);
-  const top = smooth([[L + cr * 0.6, T121 + 1], [L + sk + cr, T121 - d], [x + sk, T121 - d - 1 + r1 * 0.5], [Rr + sk - cr, T121 - d + r23 * 0.3], [Rr - cr * 0.6, T121 + 1], [x, T121 + 2]]);
+  const L = x - w / 2, Rr = x + w / 2, T120 = y - h, cr = Math.min(5, h * 0.3), r1 = (rnd(seed2) - 0.5) * 3, r23 = (rnd(seed2 + 1) - 0.5) * 3;
+  const front2 = smooth([[L + cr, y + 1], [L, y - cr], [L - 1, T120 + cr + r1], [L + cr * 0.6, T120], [x, T120 + r23 * 0.4], [Rr - cr * 0.6, T120 + r23], [Rr + 1, T120 + cr], [Rr, y - cr], [Rr - cr, y + 1], [x, y + 2]]);
+  const top = smooth([[L + cr * 0.6, T120 + 1], [L + sk + cr, T120 - d], [x + sk, T120 - d - 1 + r1 * 0.5], [Rr + sk - cr, T120 - d + r23 * 0.3], [Rr - cr * 0.6, T120 + 1], [x, T120 + 2]]);
   contour(c, [front2, top], o);
   fill(c, top, GRIT.l);
   clip(c, top, () => {
     c.fillStyle = GRIT.h;
-    c.fill(ell(L + w * 0.3 + sk, T121 - d * 0.55, w * 0.22, d * 0.25));
+    c.fill(ell(L + w * 0.3 + sk, T120 - d * 0.55, w * 0.22, d * 0.25));
     c.fillStyle = GRIT.m;
-    c.fillRect(Rr - w * 0.22 + sk, T121 - d - 4, w * 0.3, d + 6);
+    c.fillRect(Rr - w * 0.22 + sk, T120 - d - 4, w * 0.3, d + 6);
   });
   fill(c, front2, GRIT.m);
   clip(c, front2, () => {
     c.fillStyle = GRIT.l;
-    c.fillRect(L - 2, T121 - 2, w * 0.16, h + 4);
+    c.fillRect(L - 2, T120 - 2, w * 0.16, h + 4);
     c.fillStyle = GRIT.d;
-    c.fillRect(Rr - w * 0.2, T121 - 2, w * 0.2 + 3, h + 4);
+    c.fillRect(Rr - w * 0.2, T120 - 2, w * 0.2 + 3, h + 4);
     c.fillStyle = GRIT.d2;
-    c.fillRect(Rr - w * 0.07, T121 - 2, w * 0.1, h + 4);
+    c.fillRect(Rr - w * 0.07, T120 - 2, w * 0.1, h + 4);
     c.fillStyle = GRIT.d;
     c.fillRect(L - 2, y - h * 0.22, w + 4, h * 0.3);
     for (let i = 1; i < Math.max(2, Math.round(h / 9)); i++) {
-      const yy = T121 + i * h / Math.max(2, Math.round(h / 9)) + (rnd(seed2 + i) - 0.5) * 2;
+      const yy = T120 + i * h / Math.max(2, Math.round(h / 9)) + (rnd(seed2 + i) - 0.5) * 2;
       taper(c, L - 2, yy + (rnd(seed2 + i * 3) - 0.5) * 2, Rr + 2, yy + (rnd(seed2 + i * 5) - 0.5) * 2, 0.85, (rnd(seed2 + i * 7) - 0.5) * 3, GRIT.d2);
       taper(c, L + w * 0.04, yy + 1.3, L + w * 0.6, yy + 1.4, 0.4, 0, GRIT.l);
     }
     for (let i = 0; i < Math.round(w / 20); i++) {
       const xx = L + w * (0.15 + rnd(seed2 + i * 9) * 0.7);
-      taper(c, xx, T121 + h * 0.1, xx + (rnd(seed2 + i) - 0.5) * 4, T121 + h * (0.5 + rnd(seed2 + i * 2) * 0.4), 0.7, 1, GRIT.d2);
+      taper(c, xx, T120 + h * 0.1, xx + (rnd(seed2 + i) - 0.5) * 4, T120 + h * (0.5 + rnd(seed2 + i * 2) * 0.4), 0.7, 1, GRIT.d2);
     }
   });
   for (let i = 0; i < Math.round(w / 7); i++) {
-    const onTop = i % 3 === 0, xx = L + w * (0.08 + rnd(seed2 * 3 + i) * 0.84) + (onTop ? sk * 0.6 : 0), yy = onTop ? T121 - d * (0.2 + rnd(seed2 * 5 + i) * 0.6) : T121 + h * (0.12 + rnd(seed2 * 5 + i) * 0.55), r = 0.6 + rnd(seed2 + i * 11) * 1.3;
+    const onTop = i % 3 === 0, xx = L + w * (0.08 + rnd(seed2 * 3 + i) * 0.84) + (onTop ? sk * 0.6 : 0), yy = onTop ? T120 - d * (0.2 + rnd(seed2 * 5 + i) * 0.6) : T120 + h * (0.12 + rnd(seed2 * 5 + i) * 0.55), r = 0.6 + rnd(seed2 + i * 11) * 1.3;
     c.fillStyle = i % 4 ? "#a8b45a" : "#d89a3a";
     c.beginPath();
     c.ellipse(xx, yy, r * 1.4, r * (onTop ? 0.6 : 1), 0, 0, TAU);
@@ -163662,12 +163610,12 @@ function seam2(c, pts2, w = 1.4) {
 }
 function column3(c, x, base3, w, h, seed2, o = 1.1) {
   const top = base3 - h, k = w * 0.36;
-  const T121 = poly([[x - w, top], [x - w / 2, top - k], [x + w / 2, top - k], [x + w, top], [x + w / 2, top + k], [x - w / 2, top + k]]), L = poly([[x - w, top], [x - w / 2, top + k], [x - w / 2, base3 + k], [x - w, base3]]), F7 = poly([[x - w / 2, top + k], [x + w / 2, top + k], [x + w / 2, base3 + k], [x - w / 2, base3 + k]]), R14 = poly([[x + w / 2, top + k], [x + w, top], [x + w, base3], [x + w / 2, base3 + k]]);
-  contour(c, [T121, L, F7, R14], o);
+  const T120 = poly([[x - w, top], [x - w / 2, top - k], [x + w / 2, top - k], [x + w, top], [x + w / 2, top + k], [x - w / 2, top + k]]), L = poly([[x - w, top], [x - w / 2, top + k], [x - w / 2, base3 + k], [x - w, base3]]), F7 = poly([[x - w / 2, top + k], [x + w / 2, top + k], [x + w / 2, base3 + k], [x - w / 2, base3 + k]]), R14 = poly([[x + w / 2, top + k], [x + w, top], [x + w, base3], [x + w / 2, base3 + k]]);
+  contour(c, [T120, L, F7, R14], o);
   fill(c, L, BAS.l);
   fill(c, F7, BAS.m);
   fill(c, R14, BAS.d);
-  fill(c, T121, BAS.h);
+  fill(c, T120, BAS.h);
   c.fillStyle = BAS.l;
   c.fill(poly([[x - w * 0.62, top], [x - w * 0.4, top - k * 0.6], [x + w * 0.2, top - k * 0.6], [x, top + k * 0.1]]));
   c.strokeStyle = BAS.d2;
@@ -163693,9 +163641,9 @@ function column3(c, x, base3, w, h, seed2, o = 1.1) {
 }
 function lyingCol(c, x0, x1, y, h, seed2, brk = 0) {
   const top = y - h * 0.5, bot = y + h * 0.5, k = 3.4, b = brk;
-  const T121 = poly([[x0 + 2, top - k], [x1 - 2 - b * 2, top - k], [x1, top], [x0, top]]), U2 = poly([[x0, top], [x1, top], [x1 - b * 3.4 + 1, y], [x0 - 1, y]]), D2 = poly([[x0 - 1, y], [x1 - b * 3.4 + 1, y], [x1 + b * 1.6 - 1, bot], [x0 + 1, bot]]);
-  contour(c, [T121, U2, D2], 1.1);
-  fill(c, T121, BAS.h);
+  const T120 = poly([[x0 + 2, top - k], [x1 - 2 - b * 2, top - k], [x1, top], [x0, top]]), U2 = poly([[x0, top], [x1, top], [x1 - b * 3.4 + 1, y], [x0 - 1, y]]), D2 = poly([[x0 - 1, y], [x1 - b * 3.4 + 1, y], [x1 + b * 1.6 - 1, bot], [x0 + 1, bot]]);
+  contour(c, [T120, U2, D2], 1.1);
+  fill(c, T120, BAS.h);
   fill(c, U2, BAS.l);
   fill(c, D2, BAS.d);
   c.fillStyle = BAS.m;
@@ -170576,7 +170524,7 @@ function createClassSkillsViewV1({ document: document2, send }) {
   wheelBar.setAttribute("aria-label", "Skill wheel");
   head19.append(points2, tabs, wheelBar);
   root6.append(head19, body6);
-  let d = null, ready = false, classId = null, tree2 = null, selected = null, confirmReset = false, grids = {}, tabButtons = {}, lastRanks = {}, wheelPick = null;
+  let d = null, ready = false, classId = null, tree2 = null, selected = null, confirmReset = false, grids = {}, tabButtons = {}, lastRanks = {}, wheelPick = null, wheelOpen = false;
   const GATE_LOCK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path class="cs-lock-shackle" d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="3" y="7" width="10" height="7.5" rx="1.8" fill="currentColor"/></svg>';
   function treeArt(id2) {
     const svg3 = CLASS_TREE_ART_V1[id2] ?? (CLASS_TREE_SKILLS[id2]?.kind === "active" ? SKILL_ICONS_V1[id2] : null);
@@ -170681,7 +170629,22 @@ function createClassSkillsViewV1({ document: document2, send }) {
         row2.append(b);
       }
     }
-    wheelBar.replaceChildren(head20, row2);
+    const toggle = button3("cs-wheel-toggle", "", () => {
+      wheelOpen = !wheelOpen;
+      if (!wheelOpen) wheelPick = null;
+      paint4();
+    }), mini = el3("span", "cs-wheel-mini");
+    for (const id2 of slots2) {
+      const i = el3("i");
+      i.innerHTML = id2 === MOVE_SLOT ? SKILL_ICONS_V1[MOVE_ICON_FOR[hc.offhand]] ?? "" : id2 ? SKILL_ICONS_V1[id2] ?? "" : "";
+      mini.append(i);
+    }
+    toggle.append(el3("span", "cs-wheel-label", "Skill wheel"), mini, el3("b", "", wheelOpen ? "Done" : "Change"));
+    toggle.setAttribute("aria-expanded", String(wheelOpen));
+    const panel = el3("div", "cs-wheel-panel");
+    panel.append(head20, row2);
+    wheelBar.dataset.open = String(wheelOpen);
+    wheelBar.replaceChildren(toggle, panel);
   }
   function pickWheel(key4) {
     if (wheelPick === null || wheelPick === key4) {
@@ -170868,6 +170831,7 @@ function createClassSkillsViewV1({ document: document2, send }) {
       selected = null;
       lastRanks = {};
       wheelPick = null;
+      wheelOpen = false;
       buildTabs(trees2);
     }
     if (!tree2) tree2 = defaultTree(trees2);
@@ -170888,6 +170852,7 @@ function createClassSkillsViewV1({ document: document2, send }) {
     grids = {};
     lastRanks = {};
     wheelPick = null;
+    wheelOpen = false;
   }, inspect: () => ({ tree: tree2, selected }) });
 }
 
@@ -190183,9 +190148,9 @@ function drawSandglassGround(c, model, tick) {
     if (s) drawSlamGround(c, s, tick);
     if (e && tick >= e.slamEnd) drawSlamGround(c, e, tick);
     if (e && tick >= e.lock && tick < e.lock + 10) {
-      const u = (tick - e.lock) / 10, T121 = e.target;
+      const u = (tick - e.lock) / 10, T120 = e.target;
       c.save();
-      c.translate(T121.x, T121.y);
+      c.translate(T120.x, T120.y);
       c.scale(1, 0.62);
       c.beginPath();
       c.arc(0, 0, 64 + 8 * (1 - u), 0, Math.PI * 2);
@@ -200333,7 +200298,7 @@ function streetPropSpriteV1(c, t, o, kind, lx, ly, i) {
   propDrawn++;
   c.drawImage(sprite7, o.x + lx + PROP_BOX.x, o.y + ly + PROP_BOX.y, PROP_BOX.w, PROP_BOX.h);
 }
-var T117 = 32;
+var T116 = 32;
 var OL115 = "#151515";
 var STONE35 = { desert: "#d6bc8e", frostland: "#b9bfc4", volcanic: "#5c5452", wetland: "#9e9886", upland: "#a9a9a1", tropical: "#c2b391" };
 var stoneOf9 = (b) => STONE35[b] ?? "#b3ab9a";
@@ -200344,8 +200309,8 @@ function towns(m, v) {
   for (const p of m.space.generatedTowns ?? []) {
     const t = generatedTownV1(p.id);
     if (!t) continue;
-    const W21 = t.core[0] * T117, H8 = t.core[1] * T117;
-    if (!seen4(v, p.x - 12 * T117, p.y - 12 * T117, W21 + 24 * T117, H8 + 24 * T117, 160)) continue;
+    const W21 = t.core[0] * T116, H8 = t.core[1] * T116;
+    if (!seen4(v, p.x - 12 * T116, p.y - 12 * T116, W21 + 24 * T116, H8 + 24 * T116, 160)) continue;
     out4.push({ t, o: { x: p.x, y: p.y } });
   }
   return out4;
@@ -200375,7 +200340,7 @@ function templateOf(t) {
   return m;
 }
 function field2(c, o, f) {
-  const x = o.x + f.x * T117, y = o.y + f.y * T117, w = f.w * T117, h = f.h * T117, [a, b] = CROP[f.kind] ?? CROP.hay;
+  const x = o.x + f.x * T116, y = o.y + f.y * T116, w = f.w * T116, h = f.h * T116, [a, b] = CROP[f.kind] ?? CROP.hay;
   prop(c, [[rect3(x + 4, y + 4, w - 8, h - 8), a]], 1.6);
   c.save();
   c.beginPath();
@@ -200392,10 +200357,10 @@ function field2(c, o, f) {
   c.strokeRect(x, y, w, h);
 }
 function pad(c, o, R14, col2) {
-  const x = o.x + R14.x * T117, y = o.y + R14.y * T117;
+  const x = o.x + R14.x * T116, y = o.y + R14.y * T116;
   c.fillStyle = col2;
   c.beginPath();
-  c.roundRect(x + 3, y + 3, R14.w * T117 - 6, R14.h * T117 - 6, 10);
+  c.roundRect(x + 3, y + 3, R14.w * T116 - 6, R14.h * T116 - 6, 10);
   c.fill();
 }
 var layerCache = /* @__PURE__ */ new WeakMap();
@@ -200407,7 +200372,7 @@ function layersOf(t) {
   if (!townNewArtV1(t)) return L;
   const geo2 = townGeometryV1(t), zone = t.features.some((f) => f.type === "zone"), plazas = t.features.filter((f) => f.type === "plaza"), greens = t.features.filter((f) => f.type === "green"), big = t.size === "city" || t.size === "capital";
   const streets = [...t.streets, ...townConnectorsV1(t).map((c) => [c.pts, c.w, false])];
-  const paved = zone ? townDryStreetsV1(t).filter((s) => s[2]) : [], dirt2 = t.streets.filter((s) => !s[2]), sq = (f) => ({ x0: f.x * T117, y0: f.y * T117, x1: (f.x + f.w) * T117, y1: (f.y + f.h) * T117 });
+  const paved = zone ? townDryStreetsV1(t).filter((s) => s[2]) : [], dirt2 = t.streets.filter((s) => !s[2]), sq = (f) => ({ x0: f.x * T116, y0: f.y * T116, x1: (f.x + f.w) * T116, y1: (f.y + f.h) * T116 });
   const near5 = (h, pts2) => {
     let best = 1e9;
     for (let i = 1; i < pts2.length; i++) {
@@ -200432,29 +200397,29 @@ function layersOf(t) {
   const A2 = townArtBuildingsV1(t), chapelF = t.features.find((f) => f.type === "chapel"), civic = [];
   if (A2.chapel) {
     const b = A2.chapel, path18 = down(b.label === "Chapel" ? b.x + 3.3 : b.x + b.w / 2, b.y + b.h);
-    civic.push({ box: { x0: b.x * T117 - 60, y0: b.y * T117 - 60, x1: (b.x + b.w) * T117 + 60, y1: (b.y + b.h + path18 + 1) * T117 + 30 }, draw: (c) => churchGround4(c, b, t.biome, path18) });
+    civic.push({ box: { x0: b.x * T116 - 60, y0: b.y * T116 - 60, x1: (b.x + b.w) * T116 + 60, y1: (b.y + b.h + path18 + 1) * T116 + 30 }, draw: (c) => churchGround4(c, b, t.biome, path18) });
     const E9 = chapelF?.yard;
     if (E9) {
       const gp = down(E9.x + E9.w / 2, E9.y + E9.h);
-      civic.push({ box: { x0: E9.x * T117 - 30, y0: E9.y * T117 - 30, x1: (E9.x + E9.w) * T117 + 30, y1: (E9.y + E9.h + gp + 1) * T117 + 30 }, draw: (c) => graveGround4(c, E9, t.biome, b.label, gp) });
+      civic.push({ box: { x0: E9.x * T116 - 30, y0: E9.y * T116 - 30, x1: (E9.x + E9.w) * T116 + 30, y1: (E9.y + E9.h + gp + 1) * T116 + 30 }, draw: (c) => graveGround4(c, E9, t.biome, b.label, gp) });
     }
   }
   if (A2.hall) {
     const b = A2.hall, path18 = down(b.x + b.w / 2, b.y + b.h + 3);
-    civic.push({ box: { x0: b.x * T117 - 40, y0: b.y * T117 - 40, x1: (b.x + b.w) * T117 + 40, y1: (b.y + b.h + 3 + path18 + 1) * T117 + 40 }, draw: (c) => hallGround4(c, b, t.biome, path18) });
+    civic.push({ box: { x0: b.x * T116 - 40, y0: b.y * T116 - 40, x1: (b.x + b.w) * T116 + 40, y1: (b.y + b.h + 3 + path18 + 1) * T116 + 40 }, draw: (c) => hallGround4(c, b, t.biome, path18) });
   }
   for (const b of A2.manors) {
     const path18 = down(b.x + b.w / 2, b.y + b.h);
-    civic.push({ box: { x0: b.x * T117 - 60, y0: b.y * T117 - 40, x1: (b.x + b.w) * T117 + 60, y1: (b.y + b.h + Math.max(3, path18) + 1) * T117 + 40 }, draw: (c) => manorGround6(c, b, t.biome, path18) });
+    civic.push({ box: { x0: b.x * T116 - 60, y0: b.y * T116 - 40, x1: (b.x + b.w) * T116 + 60, y1: (b.y + b.h + Math.max(3, path18) + 1) * T116 + 40 }, draw: (c) => manorGround6(c, b, t.biome, path18) });
   }
   for (const f of t.features.filter((f2) => f2.type === "monument")) {
-    const F7 = { ...f, r: f.r - 0.7 }, x = f.x * T117, y = f.y * T117, R14 = F7.r * T117 + 60, slot = t.id.replace("settlement-slot:", "");
+    const F7 = { ...f, r: f.r - 0.7 }, x = f.x * T116, y = f.y * T116, R14 = F7.r * T116 + 60, slot = t.id.replace("settlement-slot:", "");
     civic.push({ box: { x0: x - R14, y0: y - R14, x1: x + R14, y1: y + R14 }, draw: (c) => monumentGround26(c, F7, t.biome, slot) });
   }
   const castleF = t.features.find((f) => f.type === "castle"), capital = [];
   for (const f of t.features.filter((f2) => f2.type === "avenue")) {
-    const q2 = boxOf(f.pts), g2 = f.w * T117 / 2 + 20;
-    capital.push({ box: { x0: q2.x0 * T117 - g2, y0: q2.y0 * T117 - g2, x1: q2.x1 * T117 + g2, y1: q2.y1 * T117 + g2 }, draw: (c) => avenueStrip6(c, f.pts, f.w, t.biome) });
+    const q2 = boxOf(f.pts), g2 = f.w * T116 / 2 + 20;
+    capital.push({ box: { x0: q2.x0 * T116 - g2, y0: q2.y0 * T116 - g2, x1: q2.x1 * T116 + g2, y1: q2.y1 * T116 + g2 }, draw: (c) => avenueStrip6(c, f.pts, f.w, t.biome) });
   }
   if (castleF) capital.push({ box: grow2(sq(castleF), 20), draw: (c) => castleGround6(c, castleF, t.biome) });
   for (const f of t.features.filter((f2) => f2.type === "manor" && f2.garden && !f2.building)) capital.push({ box: grow2(sq(f.garden), 16), draw: (c) => formalGarden6(c, f.garden, t.biome) });
@@ -200462,7 +200427,7 @@ function layersOf(t) {
   for (const f of t.features.filter((f2) => f2.type === "field")) farm.push({ box: grow2(sq(f), 20), draw: (c) => fieldGround(c, f, t.biome) });
   for (const [, R14, k] of t.places) if (k === "garden") farm.push({ box: grow2(sq(R14), 20), draw: (c) => plotGround(c, R14, t.biome) });
   for (const f of t.features.filter((f2) => f2.type === "yard")) farm.push({ box: grow2(sq(f), 16), draw: (c) => yardGround6(c, f, t.biome) });
-  for (const [b, fn] of [[A2.barracks, barracksGround6], [A2.stables, stablesGround6]]) if (b) farm.push({ box: { x0: b.x * T117 - 10, y0: (b.y + b.h) * T117 - 20, x1: (b.x + b.w) * T117 + 10, y1: (b.y + b.h) * T117 + 70 }, draw: (c) => fn(c, b, t.biome) });
+  for (const [b, fn] of [[A2.barracks, barracksGround6], [A2.stables, stablesGround6]]) if (b) farm.push({ box: { x0: b.x * T116 - 10, y0: (b.y + b.h) * T116 - 20, x1: (b.x + b.w) * T116 + 10, y1: (b.y + b.h) * T116 + 70 }, draw: (c) => fn(c, b, t.biome) });
   if (t.biome === "wetland") {
     const A22 = townArtBuildingsV1(t), own = new Set([A22.chapel, A22.hall, ...A22.manors, A22.barracks, A22.stables].filter(Boolean).map((b) => b.id));
     own.add("b:900");
@@ -200508,8 +200473,8 @@ function layersOf(t) {
   if (paved.length) {
     let b = null;
     for (const [p, w] of paved) {
-      const q2 = boxOf(p), g2 = w * T117 / 2 + 12;
-      const r = { x0: q2.x0 * T117 - g2, y0: q2.y0 * T117 - g2, x1: q2.x1 * T117 + g2, y1: q2.y1 * T117 + g2 };
+      const q2 = boxOf(p), g2 = w * T116 / 2 + 12;
+      const r = { x0: q2.x0 * T116 - g2, y0: q2.y0 * T116 - g2, x1: q2.x1 * T116 + g2, y1: q2.y1 * T116 + g2 };
       under.push(r);
     }
     for (const f of plazas) {
@@ -200519,15 +200484,15 @@ function layersOf(t) {
   }
   const rw = geo2.river?.w ?? 0;
   for (const { h } of bridges) {
-    const R14 = (rw + 2.4) * T117 / 2 + h.w * T117;
-    under.push({ x0: h.x * T117 - R14, y0: h.y * T117 - R14, x1: h.x * T117 + R14, y1: h.y * T117 + R14 });
+    const R14 = (rw + 2.4) * T116 / 2 + h.w * T116;
+    under.push({ x0: h.x * T116 - R14, y0: h.y * T116 - R14, x1: h.x * T116 + R14, y1: h.y * T116 + R14 });
   }
   const mouths = zone ? [] : plazas;
   for (const f of mouths) {
     const r = sq(f);
     over.push({ x0: r.x0 - 200, y0: r.y0 - 200, x1: r.x1 + 200, y1: r.y1 + 200 });
   }
-  for (const g2 of greens) over.push({ x0: (g2.x - g2.rx) * T117 - 30, y0: (g2.y - g2.ry) * T117 - 30, x1: (g2.x + g2.rx) * T117 + 30, y1: (g2.y + g2.ry) * T117 + 30 });
+  for (const g2 of greens) over.push({ x0: (g2.x - g2.rx) * T116 - 30, y0: (g2.y - g2.ry) * T116 - 30, x1: (g2.x + g2.rx) * T116 + 30, y1: (g2.y + g2.ry) * T116 + 30 });
   if (under.length) L.under = { boxes: under, draw: (c, b) => {
     if (paved.length) {
       cityPaving(c, paved, plazas, b, t.biome);
@@ -200542,8 +200507,8 @@ function layersOf(t) {
     if (innF && hits(grow2(sq(innF.garden), 30), b)) innGround2(c, innF.garden, t.biome);
     if (court && hits(grow2(sq(court), 20), b)) runeCourtGround(c, court, t.biome);
     for (const x of bridges) {
-      const R14 = (rw + 2.4) * T117 / 2 + x.h.w * T117;
-      if (hits({ x0: x.h.x * T117 - R14, y0: x.h.y * T117 - R14, x1: x.h.x * T117 + R14, y1: x.h.y * T117 + R14 }, b)) townBridge(c, x.h, rw, t.biome, x.stone, x.paved);
+      const R14 = (rw + 2.4) * T116 / 2 + x.h.w * T116;
+      if (hits({ x0: x.h.x * T116 - R14, y0: x.h.y * T116 - R14, x1: x.h.x * T116 + R14, y1: x.h.y * T116 + R14 }, b)) townBridge(c, x.h, rw, t.biome, x.stone, x.paved);
     }
     for (const p of civic) if (hits(p.box, b)) p.draw(c);
   } };
@@ -200648,13 +200613,13 @@ function drawGeneratedTownsGround(c, m, v) {
     const [W21, H8] = t.core, L = layersOf(t), art = townNewArtV1(t);
     for (const f of t.features) {
       if (art && (f.type === "field" || f.type === "forge" || f.type === "inn" || f.type === "chapel")) continue;
-      if (f.type === "field" && seen4(v, o.x + f.x * T117, o.y + f.y * T117, f.w * T117, f.h * T117)) field2(c, o, f);
-      else if (f.type === "forge" && f.pad && seen4(v, o.x + f.pad.x * T117, o.y + f.pad.y * T117, f.pad.w * T117, f.pad.h * T117)) pad(c, o, f.pad, "rgba(60,48,40,.35)");
-      else if (f.type === "inn" && f.garden && seen4(v, o.x + f.garden.x * T117, o.y + f.garden.y * T117, f.garden.w * T117, f.garden.h * T117)) pad(c, o, f.garden, "rgba(160,130,90,.3)");
-      else if (f.type === "chapel" && f.yard && seen4(v, o.x + f.yard.x * T117, o.y + f.yard.y * T117, f.yard.w * T117, f.yard.h * T117)) pad(c, o, f.yard, "rgba(70,110,50,.25)");
+      if (f.type === "field" && seen4(v, o.x + f.x * T116, o.y + f.y * T116, f.w * T116, f.h * T116)) field2(c, o, f);
+      else if (f.type === "forge" && f.pad && seen4(v, o.x + f.pad.x * T116, o.y + f.pad.y * T116, f.pad.w * T116, f.pad.h * T116)) pad(c, o, f.pad, "rgba(60,48,40,.35)");
+      else if (f.type === "inn" && f.garden && seen4(v, o.x + f.garden.x * T116, o.y + f.garden.y * T116, f.garden.w * T116, f.garden.h * T116)) pad(c, o, f.garden, "rgba(160,130,90,.3)");
+      else if (f.type === "chapel" && f.yard && seen4(v, o.x + f.yard.x * T116, o.y + f.yard.y * T116, f.yard.w * T116, f.yard.h * T116)) pad(c, o, f.yard, "rgba(70,110,50,.25)");
     }
     drawLayer(c, t, o, v, "u", L.under, s, budget);
-    if (seen4(v, o.x, o.y, W21 * T117, H8 * T117)) drawSettlementGroundV1(c, "generated", templateOf(t), o, t.biome, v);
+    if (seen4(v, o.x, o.y, W21 * T116, H8 * T116)) drawSettlementGroundV1(c, "generated", templateOf(t), o, t.biome, v);
     drawLayer(c, t, o, v, "o", L.over, s, budget);
   }
   for (const { t, o } of list) {
@@ -200801,7 +200766,7 @@ function generatedTownDepthItems(m, v, env = null) {
     for (const [i, p] of wallParts(t).entries()) {
       if (art) continue;
       if (p.kind === "tower") {
-        const x = o.x + p.x * T117, y = o.y + p.y * T117;
+        const x = o.x + p.x * T116, y = o.y + p.y * T116;
         if (!seen4(v, x - 40, y - 110, 80, 130)) continue;
         const behind2 = actor && ay < y + 14 && ay > y - 110 && Math.abs(ax - x) < 40;
         out4.push(depthItem({ id: key4 + "tower:" + i, anchorX: x, anchorY: y + 14, draw: (c) => {
@@ -200812,7 +200777,7 @@ function generatedTownDepthItems(m, v, env = null) {
         } }));
         continue;
       }
-      const pts2 = p.pts.map(([x, y]) => [o.x + x * T117, o.y + y * T117]), b = boxOf(pts2);
+      const pts2 = p.pts.map(([x, y]) => [o.x + x * T116, o.y + y * T116]), b = boxOf(pts2);
       if (!seen4(v, b.x0 - 20, b.y0 - WH2 - 20, b.x1 - b.x0 + 40, b.y1 - b.y0 + WH2 + 30)) continue;
       const behind = actor && ay < b.y1 + 6 && ay > b.y0 - WH2 - 40 && ax > b.x0 - 14 && ax < b.x1 + 14;
       out4.push(depthItem({ id: key4 + "wall:" + i, anchorX: b.x0, anchorY: b.y1 + 6, draw: (c) => {
@@ -200825,14 +200790,14 @@ function generatedTownDepthItems(m, v, env = null) {
     if (art) {
       out4.push(...townBuildingDepthItemsV1(t, o, v, actor, key4, env));
       for (const [i, p] of townStreetPlanV1(t).entries()) {
-        const lx = p.x * T117, ly = p.y * T117 - 4, x = o.x + lx, y = o.y + ly;
+        const lx = p.x * T116, ly = p.y * T116 - 4, x = o.x + lx, y = o.y + ly;
         if (!seen4(v, x - 50, y - 100, 100, 110)) continue;
         out4.push(depthItem({ id: key4 + "prop:" + i, anchorX: x, anchorY: y, draw: (c) => streetPropSpriteV1(c, t, o, p.kind, lx, ly, i) }));
       }
       for (const { b, d, south } of fencesOf(t)) {
-        const x = o.x + b.x * T117, y0 = o.y + (south ? b.y + b.h : b.y - d) * T117;
-        if (!seen4(v, x - 10, y0 - 30, b.w * T117 + 20, d * T117 + 40)) continue;
-        const side = o.y + (south ? (b.y + b.h + d) * T117 - 8 : b.y * T117 - 8), front2 = o.y + (south ? (b.y + b.h + d) * T117 - 6 : (b.y - d) * T117 + 4);
+        const x = o.x + b.x * T116, y0 = o.y + (south ? b.y + b.h : b.y - d) * T116;
+        if (!seen4(v, x - 10, y0 - 30, b.w * T116 + 20, d * T116 + 40)) continue;
+        const side = o.y + (south ? (b.y + b.h + d) * T116 - 8 : b.y * T116 - 8), front2 = o.y + (south ? (b.y + b.h + d) * T116 - 6 : (b.y - d) * T116 + 4);
         out4.push(depthItem({ id: key4 + "pickets:" + b.id, anchorX: x, anchorY: side, draw: (c) => {
           c.save();
           c.translate(o.x, o.y);
@@ -200849,11 +200814,11 @@ function generatedTownDepthItems(m, v, env = null) {
     }
     for (const f of t.features) {
       if (f.type === "lamps" && !art) for (const [i, l] of f.lamps.entries()) {
-        const x = o.x + l.x * T117 + 16, y = o.y + l.y * T117 + 24;
+        const x = o.x + l.x * T116 + 16, y = o.y + l.y * T116 + 24;
         if (seen4(v, x - 20, y - 80, 40, 90)) out4.push(depthItem({ id: key4 + "lamp:" + i, anchorX: x, anchorY: y, draw: (c) => lamp2(c, x, y) }));
       }
       if (f.type === "stalls" && !art) for (const [i, s] of f.stalls.entries()) {
-        const x = o.x + s.x * T117 + 2, y = o.y + s.y * T117 + 30;
+        const x = o.x + s.x * T116 + 2, y = o.y + s.y * T116 + 30;
         if (seen4(v, x - 10, y - 60, 80, 70)) out4.push(depthItem({ id: key4 + "stall:" + i, anchorX: x, anchorY: y, draw: (c) => stall7(c, x, y, i + t.buildings.length) }));
       }
     }
@@ -201789,7 +201754,7 @@ function plannedTownDepthItems(m, v) {
 }
 
 // src/client/town_art_v1/interiors.js
-var T118 = 32;
+var T117 = 32;
 var TAU221 = Math.PI * 2;
 var OL116 = "#151515";
 var line42 = (c, pts2, col2, w) => {
@@ -202016,7 +201981,7 @@ function plate6(c, x, y, food = "bread") {
   }
 }
 function table(c, p, t, items3) {
-  const x = p.x * T118, y = p.y * T118, w = p.w * T118, h = p.h * T118, top = y + 4, th = h - 20;
+  const x = p.x * T117, y = p.y * T117, w = p.w * T117, h = p.h * T117, top = y + 4, th = h - 20;
   shadow70(c, x + w / 2 + 3, y + h - 2, w / 2, 5, 0.25);
   for (const lx of [x + 5, x + w - 10]) prop2(c, [[rect4(lx, y + h - 16, 5, 14), DARKW2]], 1);
   prop2(c, [[rect4(x + 2, top, w - 4, th), OAK4]], 1.6);
@@ -202033,21 +201998,21 @@ function table(c, p, t, items3) {
   items3(c, x, top, w, th, t);
 }
 function bench14(c, p) {
-  const x = p.x * T118, y = p.y * T118, w = p.w * T118;
+  const x = p.x * T117, y = p.y * T117, w = p.w * T117;
   shadow70(c, x + w / 2 + 2, y + 28, w / 2, 4, 0.22);
   for (const lx of [x + 6, x + w - 10]) prop2(c, [[rect4(lx, y + 18, 4, 10), DARKW2]], 1);
   prop2(c, [[rect4(x + 3, y + 8, w - 6, 10), OAK4], [rect4(x + 3, y + 18, w - 6, 4), tone2(OAK4, -0.22)]], 1.3);
   px6(c, x + 5, y + 9.4, w - 10, 1.6, tone2(OAK4, 0.18));
 }
 function chair(c, p) {
-  const x = p.x * T118, y = p.y * T118;
+  const x = p.x * T117, y = p.y * T117;
   shadow70(c, x + 17, y + 28, 10, 4, 0.22);
   prop2(c, [[rect4(x + 7, y + 14, 18, 7), OAK4], [rect4(x + 8, y + 21, 3, 8), DARKW2], [rect4(x + 21, y + 21, 3, 8), DARKW2]], 1.1);
   prop2(c, [[rect4(x + 6, y - 2, 20, 4), tone2(OAK4, 0.1)], [rect4(x + 7, y + 2, 3, 16), DARKW2], [rect4(x + 22, y + 2, 3, 16), DARKW2]], 1.1);
   for (const sx of [x + 12.5, x + 17]) px6(c, sx, y + 2, 2.4, 12, tone2(OAK4, -0.1));
 }
 function hearth(c, p, t) {
-  const x = p.x * T118 - 4, y = p.y * T118, w = p.w * T118 + 8, h = p.h * T118;
+  const x = p.x * T117 - 4, y = p.y * T117, w = p.w * T117 + 8, h = p.h * T117;
   prop2(c, [[rect4(x + 4, y - 26, w - 8, 30), STONE36]], 1.4);
   prop2(c, [[rect4(x, y + 2, w, h - 2), STONE36]], 1.8);
   const r = rnd13(11);
@@ -202088,7 +202053,7 @@ function hearth(c, p, t) {
   prop2(c, [[rect4(x - 2, y + h - 2, w + 4, 5), tone2(STONE36, -0.1)]], 1);
 }
 function counter(c, p, t) {
-  const x = p.x * T118, y = p.y * T118, w = p.w * T118, h = p.h * T118;
+  const x = p.x * T117, y = p.y * T117, w = p.w * T117, h = p.h * T117;
   shadow70(c, x + w / 2 + 4, y + h, w / 2 + 4, 5, 0.25);
   prop2(c, [[rect4(x + 1, y - 6, w - 2, h - 6), "#5a3a22"]], 1.8);
   px6(c, x + 3, y - 4, w - 6, 2, tone2("#5a3a22", 0.25));
@@ -202110,7 +202075,7 @@ function counter(c, p, t) {
   tankard(c, x + 12, y + 90);
 }
 function oven(c, p, t) {
-  const x = p.x * T118, y = p.y * T118, w = p.w * T118, h = p.h * T118;
+  const x = p.x * T117, y = p.y * T117, w = p.w * T117, h = p.h * T117;
   prop2(c, [[rect4(x + 14, y - 30, 14, 32), "#a4523a"]], 1.3);
   const dome3 = new Path2D();
   dome3.moveTo(x + 2, y + h - 2);
@@ -202151,7 +202116,7 @@ function oven(c, p, t) {
   prop2(c, [[rect4(x, y + h - 3, w, 4), tone2("#b8603e", -0.2)]], 1);
 }
 function worktop(c, p) {
-  const x = p.x * T118, y = p.y * T118, w = p.w * T118, h = p.h * T118;
+  const x = p.x * T117, y = p.y * T117, w = p.w * T117, h = p.h * T117;
   shadow70(c, x + w / 2 + 3, y + h, w / 2, 4, 0.22);
   for (const ly of [y + h - 14]) for (const lx of [x + 4, x + w - 8]) prop2(c, [[rect4(lx, ly, 4, 12), DARKW2]], 1);
   prop2(c, [[rect4(x + 1, y + 2, w - 2, h - 16), "#c9a676"]], 1.5);
@@ -202170,7 +202135,7 @@ function worktop(c, p) {
   prop2(c, [[ell3(x + 20, y + 38, 4, 2.6), "#d29a4a"]], 0.8);
 }
 function cupboard(c, p) {
-  const x = p.x * T118, y = p.y * T118, w = p.w * T118, h = p.h * T118;
+  const x = p.x * T117, y = p.y * T117, w = p.w * T117, h = p.h * T117;
   shadow70(c, x + w / 2 + 3, y + h, w / 2, 4, 0.22);
   prop2(c, [[rect4(x + 2, y - 32, w - 4, h + 30), "#7a5232"]], 1.8);
   px6(c, x + 5, y - 29, w - 10, h + 24, "#3a2a20");
@@ -202187,7 +202152,7 @@ function cupboard(c, p) {
   sc(c, x + w - 16, y + h - 2, 0.5, () => sack(c, x + w - 16, y + h - 2, "#b89a6a"));
 }
 function barrelRack(c, p) {
-  const x = p.x * T118, y = p.y * T118, w = p.w * T118, h = p.h * T118;
+  const x = p.x * T117, y = p.y * T117, w = p.w * T117, h = p.h * T117;
   shadow70(c, x + w / 2 + 3, y + h, w / 2, 4, 0.22);
   prop2(c, [[rect4(x + 2, y + h - 10, w - 4, 8), DARKW2]], 1.2);
   for (const [bx, by] of [[x + 16, y + h - 12], [x + w - 16, y + h - 12], [x + w / 2, y + h - 30]]) {
@@ -202201,7 +202166,7 @@ function barrelRack(c, p) {
   }
 }
 function stairs(c, p) {
-  const x = p.x * T118, y = p.y * T118, w = p.w * T118, h = p.h * T118;
+  const x = p.x * T117, y = p.y * T117, w = p.w * T117, h = p.h * T117;
   prop2(c, [[rect4(x, y, w, h), "#4a3626"]], 1.6);
   for (let i = 0; i < 7; i++) {
     const sy = y + h - 10 - i * 8;
@@ -202235,7 +202200,7 @@ var QUILT = { nw: "#4f6f9a", ne: "#5e7f4e", sw: "#9a4a3e", se: "#b8863a" };
 var WARD2 = "#7a5232";
 var BRASS10 = "#d8a640";
 function bed(c, p, head19, quilt) {
-  const x = p.x * T118, y = p.y * T118, w = p.w * T118, h = p.h * T118;
+  const x = p.x * T117, y = p.y * T117, w = p.w * T117, h = p.h * T117;
   shadow70(c, x + w / 2 + 3, y + h - 1, w / 2, 5, 0.25);
   c.save();
   if (head19 === "R") {
@@ -202266,7 +202231,7 @@ function bed(c, p, head19, quilt) {
   c.restore();
 }
 function desk(c, p, t) {
-  const x = p.x * T118, y = p.y * T118, w = T118, h = T118;
+  const x = p.x * T117, y = p.y * T117, w = T117, h = T117;
   shadow70(c, x + w / 2 + 2, y + h - 1, w / 2 - 2, 4, 0.22);
   for (const lx of [x + 4, x + w - 8]) prop2(c, [[rect4(lx, y + h - 14, 4, 13), DARKW2]], 1);
   prop2(c, [[rect4(x + 2, y + 2, w - 4, h - 17), OAK4]], 1.4);
@@ -202280,7 +202245,7 @@ function desk(c, p, t) {
   candle(c, x + 7, y + 9, t);
 }
 function wardrobe(c, p) {
-  const x = p.x * T118, y = p.y * T118, w = T118, h = T118;
+  const x = p.x * T117, y = p.y * T117, w = T117, h = T117;
   shadow70(c, x + w / 2 + 3, y + h - 2, w / 2, 4, 0.22);
   prop2(c, [[rect4(x + 3, y - 26, w - 6, h + 22), WARD2]], 1.6);
   prop2(c, [[rect4(x + 1, y - 31, w - 2, 6), tone2(WARD2, -0.12)]], 1.2);
@@ -202304,7 +202269,7 @@ function ovalRug(c, cx, cy2, rx, ry, col2) {
   });
 }
 function stairsDown(c, p) {
-  const x = p.x * T118, y = p.y * T118, w = p.w * T118, h = p.h * T118;
+  const x = p.x * T117, y = p.y * T117, w = p.w * T117, h = p.h * T117;
   prop2(c, [[rect4(x, y, w, h), "#20160f"]], 1.6);
   for (let i = 0; i < 6; i++) {
     const sy = y + 2 + i * 9, f = tone2(PLANK4, -0.04 - i * 0.1);
@@ -202643,8 +202608,8 @@ function plantPot(c, x, y) {
     c.fill();
   }
 }
-var IW = TAVERN_INTERIOR_V1.width * T118;
-var IH = TAVERN_INTERIOR_V1.height * T118;
+var IW = TAVERN_INTERIOR_V1.width * T117;
+var IH = TAVERN_INTERIOR_V1.height * T117;
 function innFloorV1(c, floorId, t) {
   px6(c, 0, 0, IW, IH, "#2a241e");
   if (floorId === "ground") {
@@ -202674,7 +202639,7 @@ function innItemsV1(floorId, t) {
   const F7 = TAVERN_INTERIOR_V1.floors.find((f) => f.id === floorId), items3 = [];
   if (floorId === "ground") {
     for (const p of F7.furniture) {
-      const bottom = (p.y + p.h) * T118;
+      const bottom = (p.y + p.h) * T117;
       let draw;
       if (p.type === "table") draw = (c) => table(c, p, t, ITEMS2[p.id] ?? (() => {
       }));
@@ -202686,9 +202651,9 @@ function innItemsV1(floorId, t) {
       else if (p.type === "worktop") draw = (c) => worktop(c, p);
       else if (p.type === "cupboard") draw = (c) => cupboard(c, p);
       else draw = (c) => barrelRack(c, p);
-      items3.push({ id: p.id, x: p.x * T118, y: bottom - 4, draw });
+      items3.push({ id: p.id, x: p.x * T117, y: bottom - 4, draw });
     }
-    items3.push({ id: "stairs", x: F7.stairs.x * T118, y: (F7.stairs.y + F7.stairs.h) * T118 - 30, draw: (c) => stairs(c, F7.stairs) });
+    items3.push({ id: "stairs", x: F7.stairs.x * T117, y: (F7.stairs.y + F7.stairs.h) * T117 - 30, draw: (c) => stairs(c, F7.stairs) });
     items3.push({ id: "bar-barrels", x: 300, y: 182, draw: (c) => {
       sc(c, 300, 182, 0.55, () => barrel8(c, 300, 182, 10, 24));
       sc(c, 282, 186, 0.5, () => crate2(c, 268, 186, 26, 22));
@@ -202697,20 +202662,20 @@ function innItemsV1(floorId, t) {
     return items3;
   }
   for (const p of F7.furniture) {
-    const k = p.id.split("-")[1], bottom = (p.y + p.h) * T118;
+    const k = p.id.split("-")[1], bottom = (p.y + p.h) * T117;
     let draw;
     if (p.type === "bed") draw = (c) => bed(c, p, k.endsWith("e") ? "R" : "L", QUILT[k]);
     else if (p.type === "desk") draw = (c) => desk(c, p, t);
     else draw = (c) => wardrobe(c, p);
-    items3.push({ id: p.id, x: p.x * T118, y: bottom - 4, draw });
+    items3.push({ id: p.id, x: p.x * T117, y: bottom - 4, draw });
   }
-  items3.push({ id: "stairs", x: F7.stairs.x * T118, y: F7.stairs.y * T118, draw: (c) => stairsDown(c, F7.stairs) });
+  items3.push({ id: "stairs", x: F7.stairs.x * T117, y: F7.stairs.y * T117, draw: (c) => stairsDown(c, F7.stairs) });
   items3.push({ id: "caps", x: 0, y: IH + 40, draw: (c) => wallCaps(c, IW, IH, null) });
   return items3;
 }
 var R10 = ENCHANTER_TOWER_V1;
-var HW = R10.width * T118;
-var HH = R10.height * T118;
+var HW = R10.width * T117;
+var HH = R10.height * T117;
 var DOOR4 = [R10.floors[0].door.x0, R10.floors[0].door.x1];
 var E8 = R10.round;
 var WALL9 = 30;
@@ -202832,7 +202797,7 @@ function hallFloorV1(c, t) {
 function hallItemsV1(t) {
   const items3 = [];
   for (const p of R10.floors[0].furniture) {
-    const k = p.type, tx = p.x, ty = p.y, x = tx * T118, y = ty * T118, w = p.w * T118, h = p.h * T118, bottom = y + h;
+    const k = p.type, tx = p.x, ty = p.y, x = tx * T117, y = ty * T117, w = p.w * T117, h = p.h * T117, bottom = y + h;
     let draw;
     if (k === "shelf") draw = (c) => bookshelf(c, x, y, w, tx * 7 + ty);
     else if (k === "altar") draw = (c) => altar(c, x, y, w, h, t);
@@ -218336,7 +218301,7 @@ function drawInlandDryBank(c, type, biome, x, y, t, seed2, offset2, at9) {
 
 // src/client/river_bridges_v1.js
 var TAU232 = Math.PI * 2;
-var T119 = 32;
+var T118 = 32;
 var OL119 = "#151515";
 function rng28(seed2) {
   let a = seed2 >>> 0;
@@ -218526,34 +218491,34 @@ function pileRipple(c, x, y, w) {
   c.stroke();
 }
 function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
-  const B9 = BRIDGE[style], P28 = ramp6(B9.deck, "#1d120a", "#ffe7b8"), Pb = ramp6(B9.beam ?? B9.curb, "#120a04", "#ffd9a0"), Pp = ramp6(B9.post ?? B9.curb ?? B9.wall, "#140c06", "#ffe0a8"), R14 = rng28(seed2), H8 = wid * T119, L = len * T119;
-  const tiles9 = parts ?? [...Array(len).keys()].map((i) => [i === 0 ? "a" : i === len - 1 ? "b" : "m", x + i * T119]);
-  const span3 = [Math.min(...tiles9.map((t) => t[1])), Math.max(...tiles9.map((t) => t[1])) + T119];
+  const B9 = BRIDGE[style], P28 = ramp6(B9.deck, "#1d120a", "#ffe7b8"), Pb = ramp6(B9.beam ?? B9.curb, "#120a04", "#ffd9a0"), Pp = ramp6(B9.post ?? B9.curb ?? B9.wall, "#140c06", "#ffe0a8"), R14 = rng28(seed2), H8 = wid * T118, L = len * T118;
+  const tiles9 = parts ?? [...Array(len).keys()].map((i) => [i === 0 ? "a" : i === len - 1 ? "b" : "m", x + i * T118]);
+  const span3 = [Math.min(...tiles9.map((t) => t[1])), Math.max(...tiles9.map((t) => t[1])) + T118];
   c.save();
   c.lineJoin = "round";
   c.lineCap = "round";
   c.fillStyle = "rgba(6,14,22,.26)";
-  for (const [k, tx] of tiles9) c.fillRect(tx + 3, y + 5, T119, H8);
+  for (const [k, tx] of tiles9) c.fillRect(tx + 3, y + 5, T118, H8);
   const faceH = B9.stone || B9.basalt ? 13 : 6;
   for (const [k, tx] of tiles9) {
     const fy = y + H8;
     if (B9.stone || B9.basalt) {
       const Pw = ramp6(B9.wall, "#14181e", "#fff0d0");
-      prop5(c, [[rect6(tx, fy, T119, faceH), Pw.m]], 1.2);
-      masonry5(c, tx, fy, T119, faceH, Pw, R14);
+      prop5(c, [[rect6(tx, fy, T118, faceH), Pw.m]], 1.2);
+      masonry5(c, tx, fy, T118, faceH, Pw, R14);
       if (k === "m") {
         const a = new Path2D();
         a.moveTo(tx + 5, fy + faceH + 1);
         a.lineTo(tx + 5, fy + 7);
-        a.quadraticCurveTo(tx + T119 / 2, fy - 1, tx + T119 - 5, fy + 7);
-        a.lineTo(tx + T119 - 5, fy + faceH + 1);
+        a.quadraticCurveTo(tx + T118 / 2, fy - 1, tx + T118 - 5, fy + 7);
+        a.lineTo(tx + T118 - 5, fy + faceH + 1);
         a.closePath();
         c.fillStyle = B9.basalt ? "#3a1a10" : "#173847";
         c.fill(a);
         c.save();
         c.clip(a);
         c.fillStyle = B9.basalt ? "rgba(255,140,40,.55)" : "rgba(120,200,220,.35)";
-        c.fillRect(tx, fy + faceH - 3, T119, 3);
+        c.fillRect(tx, fy + faceH - 3, T118, 3);
         c.restore();
         c.strokeStyle = OL119;
         c.lineWidth = 1.4;
@@ -218562,36 +218527,36 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
         c.lineWidth = 1.2;
         c.beginPath();
         c.moveTo(tx + 4, fy + 7.5);
-        c.quadraticCurveTo(tx + T119 / 2, fy - 2.2, tx + T119 - 4, fy + 7.5);
+        c.quadraticCurveTo(tx + T118 / 2, fy - 2.2, tx + T118 - 4, fy + 7.5);
         c.stroke();
       }
     } else {
       if (k === "m") {
-        for (const px7 of [tx + 3, tx + T119 - 3]) {
+        for (const px7 of [tx + 3, tx + T118 - 3]) {
           prop5(c, [[rect6(px7 - 2, fy + 2, 4, 9), Pb.d]], 1);
           pileRipple(c, px7, fy + 11, 3);
         }
       } else {
         const st = ramp6(B9.foot, "#10161e", "#fff4dc");
         for (let i = 0; i < 3; i++) {
-          const q2 = rrect2(tx + i * T119 / 3 + 0.5, fy + 2, T119 / 3 - 1, 6, 1.4);
+          const q2 = rrect2(tx + i * T118 / 3 + 0.5, fy + 2, T118 / 3 - 1, 6, 1.4);
           prop5(c, [[q2, st.m]], 1);
           c.fillStyle = st.l;
-          c.fillRect(tx + i * T119 / 3 + 1.4, fy + 2.6, T119 / 3 - 3, 1.2);
+          c.fillRect(tx + i * T118 / 3 + 1.4, fy + 2.6, T118 / 3 - 3, 1.2);
         }
       }
-      prop5(c, [[rect6(tx, fy, T119, 4), Pb.m]], 1.1);
+      prop5(c, [[rect6(tx, fy, T118, 4), Pb.m]], 1.1);
       c.fillStyle = Pb.l;
-      c.fillRect(tx, fy, T119, 1);
+      c.fillRect(tx, fy, T118, 1);
     }
   }
   const top = new Path2D();
-  for (const [k, tx] of tiles9) top.rect(tx, y, T119, H8);
+  for (const [k, tx] of tiles9) top.rect(tx, y, T118, H8);
   prop5(c, [[top, P28.m]], 1.3);
   c.save();
   c.clip(top);
   for (const [k, tx] of tiles9) {
-    if (B9.stone) flags14(c, tx, y, T119, H8, P28, R14);
+    if (B9.stone) flags14(c, tx, y, T118, H8, P28, R14);
     else if (B9.basalt) {
       const Ph = ramp6(B9.deck, "#0a0808", "#ffd2a0");
       for (let j = 0; j < Math.ceil(H8 / 9) + 1; j++) for (let i = 0; i < 5; i++) {
@@ -218606,9 +218571,9 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
         c.fillStyle = tone91(Ph.m, (R14() - 0.5) * 0.1);
         c.fill(shift3(q2, 0.4, 0.5));
       }
-    } else planks2(c, tx, y, T119, H8, true, P28, R14, B9.rope_ ? 5.3 : 6.4, B9.rope_ ? "#2a3a40" : null);
+    } else planks2(c, tx, y, T118, H8, true, P28, R14, B9.rope_ ? 5.3 : 6.4, B9.rope_ ? "#2a3a40" : null);
     if (B9.moss) for (let i = 0; i < 3; i++) {
-      const mx = tx + R14() * T119, my = y + R14() * H8;
+      const mx = tx + R14() * T118, my = y + R14() * H8;
       c.fillStyle = "rgba(110,150,70,.55)";
       c.beginPath();
       c.ellipse(mx, my, 3 + R14() * 3, 1.6 + R14(), 0, 0, TAU232);
@@ -218621,9 +218586,9 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
     for (const [ey, face4] of [[y, true], [y + H8 - 6, true]]) {
       for (const [k, tx] of tiles9) {
         const wy = ey - 5;
-        prop5(c, [[rect6(tx, wy, T119, 11), Pw.m]], 1.2);
+        prop5(c, [[rect6(tx, wy, T118, 11), Pw.m]], 1.2);
         c.save();
-        c.clip(rect6(tx, wy, T119, 11));
+        c.clip(rect6(tx, wy, T118, 11));
         if (B9.basalt) {
           for (let i = 0; i < 5; i++) {
             const cx = tx + 3.2 + i * 6.4, q2 = poly34([...Array(6)].map((_, a) => [cx + Math.cos(a * TAU232 / 6) * 3.3, wy + 3 + Math.sin(a * TAU232 / 6) * 2.6]));
@@ -218642,7 +218607,7 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
           }
         } else {
           c.fillStyle = Pw.l;
-          c.fillRect(tx, wy, T119, 4);
+          c.fillRect(tx, wy, T118, 4);
           c.strokeStyle = Pw.d2;
           c.lineWidth = 0.9;
           for (let i = 0; i < 4; i++) {
@@ -218652,13 +218617,13 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
             c.stroke();
           }
           c.fillStyle = Pw.h;
-          c.fillRect(tx, wy, T119, 1);
-          masonry5(c, tx, wy + 4, T119, 7, Pw, R14);
+          c.fillRect(tx, wy, T118, 1);
+          masonry5(c, tx, wy + 4, T118, 7, Pw, R14);
         }
         c.restore();
       }
       for (const [k, tx] of tiles9) if (k !== "m") {
-        const px7 = k === "a" ? tx + 2 : tx + T119 - 2;
+        const px7 = k === "a" ? tx + 2 : tx + T118 - 2;
         const q2 = rect6(px7 - 3.5, ey - 9, 7, 15);
         prop5(c, [[q2, Pw.m]], 1.2);
         c.fillStyle = Pw.l;
@@ -218670,16 +218635,16 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
   } else {
     for (const ey of [y, y + H8 - 4]) {
       const q2 = new Path2D();
-      for (const [k, tx] of tiles9) q2.rect(tx, ey, T119, 4);
+      for (const [k, tx] of tiles9) q2.rect(tx, ey, T118, 4);
       prop5(c, [[q2, Pb.m]], 1.1);
       c.fillStyle = Pb.l;
-      for (const [k, tx] of tiles9) c.fillRect(tx, ey, T119, 1.2);
+      for (const [k, tx] of tiles9) c.fillRect(tx, ey, T118, 1.2);
     }
     for (const ey of [y + 2, y + H8 - 2]) {
       const xs = [];
       for (const [k, tx] of tiles9) {
         xs.push(tx);
-        if (k === "b") xs.push(tx + T119);
+        if (k === "b") xs.push(tx + T118);
       }
       const xu = [...new Set(xs.map((v) => Math.round(v * 10) / 10))].sort((a, b) => a - b);
       if (B9.low) {
@@ -218723,7 +218688,7 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
         continue;
       }
       for (const hh of [11, 6]) {
-        const segs = parts ? tiles9.map(([k, tx]) => [k === "a" ? tx + 1 : tx, k === "b" ? tx + T119 - 1 : tx + T119]) : [[span3[0] + 1, span3[1] - 1]];
+        const segs = parts ? tiles9.map(([k, tx]) => [k === "a" ? tx + 1 : tx, k === "b" ? tx + T118 - 1 : tx + T118]) : [[span3[0] + 1, span3[1] - 1]];
         for (const [a, b] of segs) {
           prop5(c, [[rect6(a, ey - hh - 1.6, b - a, 3.2), Pp.m]], 1);
           c.fillStyle = Pp.h;
@@ -218732,7 +218697,7 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
           c.fillRect(a, ey - hh + 0.8, b - a, 0.8);
         }
         if (B9.snow) {
-          for (const [k, tx] of tiles9) drift8(c, [[tx + T119 / 2, ey - hh - 1.6, T119 * 0.42, 1.3]], 0.6);
+          for (const [k, tx] of tiles9) drift8(c, [[tx + T118 / 2, ey - hh - 1.6, T118 * 0.42, 1.3]], 0.6);
         }
       }
       for (const px7 of xu) {
@@ -218741,46 +218706,46 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
       }
     }
     if (B9.snow) {
-      for (const [k, tx] of tiles9) for (const ey of [y + 5.5, y + H8 - 6]) drift8(c, [[tx + T119 * 0.3, ey, T119 * 0.32, 1.7], [tx + T119 * 0.72, ey + 0.4, T119 * 0.3, 1.5]], 0.7);
+      for (const [k, tx] of tiles9) for (const ey of [y + 5.5, y + H8 - 6]) drift8(c, [[tx + T118 * 0.3, ey, T118 * 0.32, 1.7], [tx + T118 * 0.72, ey + 0.4, T118 * 0.3, 1.5]], 0.7);
     }
   }
   c.restore();
 }
 function bridgeV(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
-  const B9 = BRIDGE[style], P28 = ramp6(B9.deck, "#1d120a", "#ffe7b8"), Pb = ramp6(B9.beam ?? B9.curb, "#120a04", "#ffd9a0"), Pp = ramp6(B9.post ?? B9.curb ?? B9.wall, "#140c06", "#ffe0a8"), R14 = rng28(seed2), W21 = wid * T119;
-  const tiles9 = parts ?? [...Array(len).keys()].map((i) => [i === 0 ? "a" : i === len - 1 ? "b" : "m", y + i * T119]);
+  const B9 = BRIDGE[style], P28 = ramp6(B9.deck, "#1d120a", "#ffe7b8"), Pb = ramp6(B9.beam ?? B9.curb, "#120a04", "#ffd9a0"), Pp = ramp6(B9.post ?? B9.curb ?? B9.wall, "#140c06", "#ffe0a8"), R14 = rng28(seed2), W21 = wid * T118;
+  const tiles9 = parts ?? [...Array(len).keys()].map((i) => [i === 0 ? "a" : i === len - 1 ? "b" : "m", y + i * T118]);
   c.save();
   c.lineJoin = "round";
   c.lineCap = "round";
   c.fillStyle = "rgba(6,14,22,.26)";
-  for (const [k, ty] of tiles9) c.fillRect(x + 4, ty + 4, W21, T119);
+  for (const [k, ty] of tiles9) c.fillRect(x + 4, ty + 4, W21, T118);
   if (!B9.stone) {
     for (const [k, ty] of tiles9) if (k === "m") for (const ex of [x - 3, x + W21 - 1]) {
-      prop5(c, [[rect6(ex, ty + T119 / 2 - 2, 4, 4), Pb.d]], 1);
+      prop5(c, [[rect6(ex, ty + T118 / 2 - 2, 4, 4), Pb.d]], 1);
     }
   }
   const top = new Path2D();
-  for (const [k, ty] of tiles9) top.rect(x, ty, W21, T119);
+  for (const [k, ty] of tiles9) top.rect(x, ty, W21, T118);
   prop5(c, [[top, P28.m]], 1.3);
   c.save();
   c.clip(top);
   for (const [k, ty] of tiles9) {
-    if (B9.stone) flags14(c, x, ty, W21, T119, P28, R14);
-    else planks2(c, x, ty, W21, T119, false, P28, R14);
+    if (B9.stone) flags14(c, x, ty, W21, T118, P28, R14);
+    else planks2(c, x, ty, W21, T118, false, P28, R14);
   }
   c.restore();
   for (const [k, ty] of tiles9) if (k === "b") {
-    const fy = ty + T119, st = ramp6(B9.stone ? B9.wall : B9.foot, "#10161e", "#fff4dc");
+    const fy = ty + T118, st = ramp6(B9.stone ? B9.wall : B9.foot, "#10161e", "#fff4dc");
     prop5(c, [[rect6(x, fy, W21, B9.stone ? 9 : 6), st.m]], 1.2);
     masonry5(c, x, fy, W21, B9.stone ? 9 : 6, st, R14);
   }
   if (B9.stone) {
     const Pw = ramp6(B9.wall, "#14181e", "#fff0d0");
     for (const ex of [x, x + W21 - 6]) for (const [k, ty] of tiles9) {
-      const q2 = rect6(ex, ty - 6, 6, T119 + (k === "b" ? 6 : 0));
+      const q2 = rect6(ex, ty - 6, 6, T118 + (k === "b" ? 6 : 0));
       prop5(c, [[q2, Pw.l]], 1.1);
       c.fillStyle = Pw.h;
-      c.fillRect(ex, ty - 6, 1, T119);
+      c.fillRect(ex, ty - 6, 1, T118);
       c.strokeStyle = Pw.d2;
       c.lineWidth = 0.8;
       for (let i = 1; i < 4; i++) {
@@ -218791,25 +218756,25 @@ function bridgeV(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
       }
       if (k === "b") {
         c.fillStyle = Pw.d;
-        c.fillRect(ex, ty + T119 - 6, 6, 6);
+        c.fillRect(ex, ty + T118 - 6, 6, 6);
       }
     }
   } else {
     for (const ex of [x, x + W21 - 4]) {
       const q2 = new Path2D();
-      for (const [k, ty] of tiles9) q2.rect(ex, ty, 4, T119);
+      for (const [k, ty] of tiles9) q2.rect(ex, ty, 4, T118);
       prop5(c, [[q2, Pb.m]], 1.1);
       c.fillStyle = Pb.l;
-      for (const [k, ty] of tiles9) c.fillRect(ex, ty, 1.2, T119);
+      for (const [k, ty] of tiles9) c.fillRect(ex, ty, 1.2, T118);
     }
     for (const ex of [x + 2, x + W21 - 2]) {
       for (const [k, ty] of tiles9) {
-        const q2 = rect6(ex - 1.1, ty - 10, 2.2, T119);
+        const q2 = rect6(ex - 1.1, ty - 10, 2.2, T118);
         prop5(c, [[q2, Pp.l]], 0.9);
       }
       for (const [k, ty] of tiles9) {
         post5(c, ex, ty + (k === "a" ? 3 : 0) + 1, k === "a" ? 13 : 11.5, Pp, k === "a" ? 4.6 : 3.6, true, B9.snow);
-        if (k === "b") post5(c, ex, ty + T119 - 1, 13, Pp, 4.6, true, B9.snow);
+        if (k === "b") post5(c, ex, ty + T118 - 1, 13, Pp, 4.6, true, B9.snow);
       }
     }
   }
@@ -225643,27 +225608,27 @@ function pose(n, model) {
   if (!m) return s;
   const k = sec(model, m.start);
   if (m.kind === "tongue") {
-    const T121 = TT(m.target !== null);
-    if (k < T121.wu) {
-      const q2 = k / T121.wu;
+    const T120 = TT(m.target !== null);
+    if (k < T120.wu) {
+      const q2 = k / T120.wu;
       s.crouch = ease4(q2) * 0.6;
       s.swell = ease4(q2);
       s.gape = q2 > 0.6 ? (q2 - 0.6) * 0.5 : 0;
-    } else if (k < T121.crouch || k < T121.lash + 0.2) {
+    } else if (k < T120.crouch || k < T120.lash + 0.2) {
       s.crouch = 0.3;
-      s.swell = Math.max(0, 1 - (k - T121.wu) / 0.3);
+      s.swell = Math.max(0, 1 - (k - T120.wu) / 0.3);
       s.gape = 1;
       s.tongueOut = true;
-    } else if (k < T121.leap) {
-      const q2 = (k - T121.crouch) / (T121.leap - T121.crouch);
+    } else if (k < T120.leap) {
+      const q2 = (k - T120.crouch) / (T120.leap - T120.crouch);
       s.crouch = ease4(clamp28(q2));
-      s.gape = Math.max(0, 1 - (k - T121.crouch) / 0.07) * 0.8;
-      s.tongueOut = k - T121.crouch < 0.15;
-    } else if (k < T121.land) {
-      const u = (k - T121.leap) / (T121.land - T121.leap);
+      s.gape = Math.max(0, 1 - (k - T120.crouch) / 0.07) * 0.8;
+      s.tongueOut = k - T120.crouch < 0.15;
+    } else if (k < T120.land) {
+      const u = (k - T120.leap) / (T120.land - T120.leap);
       s.lift = Math.sin(u * Math.PI) * 40;
       s.air = Math.sin(Math.min(1, u * 1.6) * Math.PI / 2) * (u < 0.8 ? 1 : 1 - (u - 0.8) / 0.2);
-    } else s.squash = Math.max(0, 1 - (k - T121.land) / 0.35);
+    } else s.squash = Math.max(0, 1 - (k - T120.land) / 0.35);
   } else if (m.kind === "croak") {
     for (const sp0 of NIGHTMARE_FROG_RULES.croak.spawns) {
       const sp = CWU + sp0 / S14, wv = clamp28((k - (sp - CWU)) / CWU), a = clamp28((k - sp) / 0.3);
@@ -225807,10 +225772,10 @@ function drawFrogGroundV1(c, n, model, time3) {
   else splitGround("frog", c, n.x, n.y + FEET4, t, sec(model, n.born) - CRACK_DELAY, SEED2);
   const m = n.move;
   if (m?.kind === "tongue" && m.spots) {
-    const k = sec(model, m.start), T121 = TT(m.target !== null), L = laneOf(m);
-    if (k < T121.wu) gameLane(c, L, k / T121.wu, k, LOOK, 6);
-    else gameLaneBurst(c, L, k - T121.wu, LOOK, 0.4);
-    if (m.spots[1] && k >= T121.crouch && k < T121.land) gameWarn(c, m.spots[1].x, m.spots[1].y + FEET4, NIGHTMARE_FROG_RULES.tongue.flopRadius, (k - T121.crouch) / (T121.land - T121.crouch), k - T121.crouch, LOOK);
+    const k = sec(model, m.start), T120 = TT(m.target !== null), L = laneOf(m);
+    if (k < T120.wu) gameLane(c, L, k / T120.wu, k, LOOK, 6);
+    else gameLaneBurst(c, L, k - T120.wu, LOOK, 0.4);
+    if (m.spots[1] && k >= T120.crouch && k < T120.land) gameWarn(c, m.spots[1].x, m.spots[1].y + FEET4, NIGHTMARE_FROG_RULES.tongue.flopRadius, (k - T120.crouch) / (T120.land - T120.crouch), k - T120.crouch, LOOK);
   }
   if (m?.kind === "croak" && m.spots) {
     const k = sec(model, m.start), O15 = { x: m.origin.x, y: m.origin.y + FEET4 }, C3 = NIGHTMARE_FROG_RULES.croak;
@@ -225822,11 +225787,11 @@ function drawFrogGroundV1(c, n, model, time3) {
     });
   }
   if (m?.kind === "spawn" && m.spots) {
-    const k = sec(model, m.start), T121 = NIGHTMARE_FROG_RULES.spawn;
+    const k = sec(model, m.start), T120 = NIGHTMARE_FROG_RULES.spawn;
     m.spots.forEach((p, i) => {
-      const go = COUGH, land = (T121.coughTicks + T121.flyTicks + i * T121.staggerTicks) / S14;
-      if (k > go && k < land) gameWarn(c, p.x, p.y + EGG_FEET, T121.radius, (k - go) / (land - go), k - go, LOOK);
-      if (k >= land) gameBurst(c, p.x, p.y + EGG_FEET, T121.radius, k - land, LOOK, 0.35);
+      const go = COUGH, land = (T120.coughTicks + T120.flyTicks + i * T120.staggerTicks) / S14;
+      if (k > go && k < land) gameWarn(c, p.x, p.y + EGG_FEET, T120.radius, (k - go) / (land - go), k - go, LOOK);
+      if (k >= land) gameBurst(c, p.x, p.y + EGG_FEET, T120.radius, k - land, LOOK, 0.35);
     });
   }
   const P28 = NIGHTMARE_FROG_RULES.tongue.poolTicks / S14;
@@ -225926,17 +225891,17 @@ function drawFrogOverV1(c, n, model, time3) {
   if (!m || n.dead !== null) return;
   const k = sec(model, m.start);
   if (m.kind === "tongue" && m.spots) {
-    const T121 = TT(m.target !== null), s = pose(n, model), mo = mouthOf2(n, n.x, n.y, s), caught = m.target ? model.entitiesById?.[m.target] : null, end = m.spots[0];
+    const T120 = TT(m.target !== null), s = pose(n, model), mo = mouthOf2(n, n.x, n.y, s), caught = m.target ? model.entitiesById?.[m.target] : null, end = m.spots[0];
     const tip = caught?.alive ? { x: caught.position.x - (caught.position.x > n.x ? 5 : -5), y: caught.position.y - 4 } : { x: end.x, y: end.y + FEET4 - 6 };
     const h = heroNear(model, n.x, n.y), lx = h?.position.x ?? tip.x, ly = (h?.position.y ?? tip.y) - 20;
-    if (k >= T121.wu && k < T121.lash) {
-      const u = ease4((k - T121.wu) / (T121.lash - T121.wu));
+    if (k >= T120.wu && k < T120.lash) {
+      const u = ease4((k - T120.wu) / (T120.lash - T120.wu));
       tongue14(c, mo.x, mo.y, mix18(mo.x, tip.x, u), mix18(mo.y, tip.y, u), t, lx, ly);
-    } else if (caught && k >= T121.lash && k < T121.crouch) {
-      tongue14(c, mo.x, mo.y, tip.x, tip.y, t, lx, ly, { sag: Math.sin(clamp28((k - T121.lash) / (T121.crouch - T121.lash)) * Math.PI) * 4, splat: 1 - clamp28((k - T121.lash) / 0.3) });
+    } else if (caught && k >= T120.lash && k < T120.crouch) {
+      tongue14(c, mo.x, mo.y, tip.x, tip.y, t, lx, ly, { sag: Math.sin(clamp28((k - T120.lash) / (T120.crouch - T120.lash)) * Math.PI) * 4, splat: 1 - clamp28((k - T120.lash) / 0.3) });
       tag(c, tip.x, tip.y - 38, "Caught!", 8, "#f0d0ff");
     } else {
-      const from = caught ? T121.crouch : T121.lash;
+      const from = caught ? T120.crouch : T120.lash;
       if (k >= from && k < from + 0.15) {
         const u = ease4((k - from) / 0.15);
         tongue14(c, mo.x, mo.y, mix18(tip.x, mo.x, u), mix18(tip.y, mo.y, u), t, lx, ly);
@@ -225944,9 +225909,9 @@ function drawFrogOverV1(c, n, model, time3) {
     }
   }
   if (m.kind === "spawn" && m.spots) {
-    const T121 = NIGHTMARE_FROG_RULES.spawn, s = pose(n, model), mo = mouthOf2(n, n.x, n.y, { ...s, gape: 0.8 });
+    const T120 = NIGHTMARE_FROG_RULES.spawn, s = pose(n, model), mo = mouthOf2(n, n.x, n.y, { ...s, gape: 0.8 });
     m.spots.forEach((p, i) => {
-      const go = COUGH + i * T121.staggerTicks / S14, u = (k - go) / (T121.flyTicks / S14);
+      const go = COUGH + i * T120.staggerTicks / S14, u = (k - go) / (T120.flyTicks / S14);
       if (u <= 0 || u >= 1) return;
       const h = heroNear(model, p.x, p.y);
       egg4(c, mix18(mo.x, p.x, u), mix18(mo.y, p.y + EGG_FEET, u) - Math.sin(u * Math.PI) * 50, t, h?.position.x ?? p.x, (h?.position.y ?? p.y) - 16, { g: 0.75, i });
@@ -228484,7 +228449,7 @@ var pools = /* @__PURE__ */ new Map();
 function poolRadius(id2, x, y, r) {
   let got = pools.get(id2);
   if (got !== void 0) return got;
-  const g2 = hellCollisionTiles(), T121 = g2.tileSize, open3 = (px7, py) => g2.tiles[Math.floor(py / T121)]?.[Math.floor(px7 / T121)] === "1";
+  const g2 = hellCollisionTiles(), T120 = g2.tileSize, open3 = (px7, py) => g2.tiles[Math.floor(py / T120)]?.[Math.floor(px7 / T120)] === "1";
   const land = (px7, py) => open3(px7, py) || open3(px7, py - CLIFF - 6) || WALLS.some((w) => px7 >= w.box.x0 && px7 <= w.box.x1 && py >= w.box.y0 && py <= w.box.y1 + 10);
   got = 0;
   for (let rr3 = r; rr3 >= 14; rr3 -= 6) {
@@ -231694,7 +231659,7 @@ function overlayFunctionalSiteBootstrapD9(chunk4, plan) {
 
 // src/shared/generation/woodland_ruin_exterior_d11_3_2.js
 var WOODLAND_RUIN_EXTERIOR_D11_3_2 = "woodland-ruin-exterior-d11.3.2-v1";
-var T120 = 32;
+var T119 = 32;
 var ROWS2 = [
   "000000000",
   "000000000",
@@ -231710,7 +231675,7 @@ var TOP4 = -4;
 function overlayWoodlandRuinExteriorD11_3_2(chunk4, bootstrap) {
   const site = bootstrap?.bootstrap ?? bootstrap?.guaranteedCandidate ?? bootstrap;
   if (!site?.entrance || site.entrance.chunkX !== chunk4.chunkX || site.entrance.chunkY !== chunk4.chunkY) return chunk4;
-  const ex = Math.floor(site.entrance.localX / T120), ey = Math.floor(site.entrance.localY / T120);
+  const ex = Math.floor(site.entrance.localX / T119), ey = Math.floor(site.entrance.localY / T119);
   requireContract(ex + LEFT >= 0 && ex + LEFT + 9 <= 32 && ey + TOP4 >= 0 && ey + TOP4 + 8 <= 26, "Ruin exterior crosses page boundary");
   const collision = chunk4.collision.tiles.map((r) => [...r]), terrain = chunk4.visual.terrain.map((r) => [...r]), biomes2 = chunk4.visual.biomes.map((r) => [...r]), centerline = chunk4.visual.route.centerline.map((r) => [...r]), clearance = chunk4.visual.route.clearance.map((r) => [...r]);
   for (let ry = 0; ry < ROWS2.length; ry++) for (let rx = 0; rx < ROWS2[ry].length; rx++) {
@@ -231733,7 +231698,7 @@ function overlayWoodlandRuinExteriorD11_3_2(chunk4, bootstrap) {
     { x: ex - 4, y: ey + 3, width: 1, height: 1, detail: "left-root" },
     { x: ex + 4, y: ey + 3, width: 1, height: 1, detail: "right-root" }
   ]) blockers.push({ id: `ruin:${site.siteId}:${b.detail}`, ...b, kind: "ruin-exterior-masonry" });
-  const decorations = (chunk4.visual.decorations ?? []).filter((d) => !owns(Math.floor(d.x), Math.floor(d.y))), anchors = chunk4.anchors.filter((a) => !owns(Math.floor(a.position.x / T120), Math.floor(a.position.y / T120))), sites = chunk4.sites.filter((s) => s.siteId === site.siteId || !owns(Math.floor(s.entrance.localX / T120), Math.floor(s.entrance.localY / T120)));
+  const decorations = (chunk4.visual.decorations ?? []).filter((d) => !owns(Math.floor(d.x), Math.floor(d.y))), anchors = chunk4.anchors.filter((a) => !owns(Math.floor(a.position.x / T119), Math.floor(a.position.y / T119))), sites = chunk4.sites.filter((s) => s.siteId === site.siteId || !owns(Math.floor(s.entrance.localX / T119), Math.floor(s.entrance.localY / T119)));
   return freezeWire({ ...copyWire(chunk4), collision: { ...copyWire(chunk4.collision), tiles: collision.map((r) => r.join("")) }, visual: { ...copyWire(chunk4.visual), terrain: terrain.map((r) => r.join("")), biomes: biomes2.map((r) => r.join("")), blockers, decorations, route: { centerline: centerline.map((r) => r.join("")), clearance: clearance.map((r) => r.join("")) } }, anchors, sites, ruinExterior: { version: WOODLAND_RUIN_EXTERIOR_D11_3_2, siteId: site.siteId, entranceTile: { x: ex, y: ey }, mask: [...ROWS2] } });
 }
 
@@ -232597,7 +232562,7 @@ function siteResetEligibilityD13C(state2, siteId, { transitioningPlayerIds = [] 
   else if (episode.status !== "cleared") reasons.push(`episode-${episode.status}`);
   if (occupants.length) reasons.push("site-occupied");
   if (transitioningPlayerIds.length) reasons.push("site-transitioning");
-  if (Array.isArray(site?.floors) && (episode?.episode > 1 ? !state2.groupsById[site.floors.at(-1).groupId]?.cleared : site.floors.some((floor) => !state2.groupsById[floor.groupId]?.cleared))) reasons.push("encounter-not-cleared");
+  if (Array.isArray(site?.floors) && !siteBossDownV1(state2, site) && (episode?.episode > 1 ? !state2.groupsById[site.floors.at(-1).groupId]?.cleared : site.floors.some((floor) => !state2.groupsById[floor.groupId]?.cleared))) reasons.push("encounter-not-cleared");
   return freezeWire({ version: SITE_RESET_D13C, siteId, eligible: reasons.length === 0, reasons, occupantPlayerIds: occupants, transitioningPlayerIds: [...transitioningPlayerIds], episode: episode?.episode ?? null, status: episode?.status ?? null });
 }
 async function prepareSiteResetD13C(state2, siteId, { sha256, transitioningPlayerIds = [], playerId = state2.session.playerIds[0] }) {
@@ -234895,19 +234860,19 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
     const b = BASE_STEPS[(step3 - 1) % BASE_STEPS.length] ?? BASE_STEPS[0], l = learned[step3] ?? {};
     return { startup: l.startup ?? b.startup, active: l.active ?? b.active, recovery: l.recovery ?? b.recovery };
   };
-  const total = (T121) => T121.startup + T121.active + T121.recovery, endOf = (w) => w.startedTick + total(w.T);
+  const total = (T120) => T120.startup + T120.active + T120.recovery, endOf = (w) => w.startedTick + total(w.T);
   function hostSwing(c) {
     if (!c || !["startup", "active", "recovery"].includes(c.phase)) return null;
-    const T121 = timingFor(c.comboStep);
-    T121[c.phase] = Math.max(1, c.phaseEndsTick - c.phaseStartedTick);
-    const startedTick = c.phase === "startup" ? c.phaseStartedTick : c.phase === "active" ? c.phaseStartedTick - T121.startup : c.phaseStartedTick - T121.startup - T121.active;
-    return { comboStep: c.comboStep, startedTick, T: T121, aim: c.aim, id: c.primaryActionId };
+    const T120 = timingFor(c.comboStep);
+    T120[c.phase] = Math.max(1, c.phaseEndsTick - c.phaseStartedTick);
+    const startedTick = c.phase === "startup" ? c.phaseStartedTick : c.phase === "active" ? c.phaseStartedTick - T120.startup : c.phaseStartedTick - T120.startup - T120.active;
+    return { comboStep: c.comboStep, startedTick, T: T120, aim: c.aim, id: c.primaryActionId };
   }
   function phaseAt(w, D2) {
     if (!w) return null;
-    const { T: T121 } = w, s = w.startedTick;
-    if (D2 >= s + total(T121)) return null;
-    const [phase3, ps, pe] = D2 < s + T121.startup ? ["startup", s, s + T121.startup] : D2 < s + T121.startup + T121.active ? ["active", s + T121.startup, s + T121.startup + T121.active] : ["recovery", s + T121.startup + T121.active, s + total(T121)];
+    const { T: T120 } = w, s = w.startedTick;
+    if (D2 >= s + total(T120)) return null;
+    const [phase3, ps, pe] = D2 < s + T120.startup ? ["startup", s, s + T120.startup] : D2 < s + T120.startup + T120.active ? ["active", s + T120.startup, s + T120.startup + T120.active] : ["recovery", s + T120.startup + T120.active, s + total(T120)];
     return { comboStep: w.comboStep, phase: phase3, phaseStartedTick: ps, phaseEndsTick: pe, aim: w.aim, primaryActionId: w.id };
   }
   const canSwing = (model, e) => Boolean(model.primary && model.persistence?.phase === "encounter" && e.alive && !model.siteActivationPending && !model.subweapon?.guard?.requested && !model.playersById?.[model.localPlayerId]?.d8?.attackSkill);
@@ -234947,9 +234912,9 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
     return shown2 ?? phaseAt(guess, D2);
   }
   function ownContact(model, id2, e, mine2, w, D2, br, t) {
-    const T121 = timingFor(w.comboStep), activeAt2 = w.phase === "active" ? w.phaseStartedTick : w.phase === "recovery" ? w.phaseStartedTick - T121.active : null;
-    if (activeAt2 === null || activeAt2 < contactUntil || D2 - activeAt2 > T121.active + 6) return null;
-    contactUntil = activeAt2 + T121.active + T121.recovery;
+    const T120 = timingFor(w.comboStep), activeAt2 = w.phase === "active" ? w.phaseStartedTick : w.phase === "recovery" ? w.phaseStartedTick - T120.active : null;
+    if (activeAt2 === null || activeAt2 < contactUntil || D2 - activeAt2 > T120.active + 6) return null;
+    contactUntil = activeAt2 + T120.active + T120.recovery;
     const raw = w.primaryActionId === "guess" && pressAim ? pressAim : w.aim, len = Math.hypot(raw?.x ?? 0, raw?.y ?? 0);
     if (!len) return null;
     const ax = raw.x / len, ay = raw.y / len, found = [];

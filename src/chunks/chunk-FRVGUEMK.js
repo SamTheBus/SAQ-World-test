@@ -10341,7 +10341,7 @@ function townCrossingsV1(streets, line, closed = false) {
 var allStreets = (t) => [...t.streets, ...townConnectorsV1(t).map((c) => [c.pts, c.w])];
 var GATE_ART = { village: { WH: 36, TW: 34, k: 0.9 }, town: { WH: 40, TW: 36, k: 1 }, city: { WH: 50, TW: 40, k: 1.15 }, capital: { WH: 58, TW: 44, k: 1.3 } };
 function townGateSpanV1(size, f3, h, at2, len = 0) {
-  const cfg = GATE_ART[size === "hamlet" ? "village" : size] ?? GATE_ART.town, gk = Math.min(1.5, (f3.gateScale ?? 1) * cfg.k), T4 = 32, s = h.s;
+  const cfg = GATE_ART[size === "hamlet" ? "village" : size] ?? GATE_ART.town, gk = Math.min(1.5, (f3.gateScale ?? 1) * cfg.k), T5 = 32, s = h.s;
   const [ax, ay] = at2(s - 0.8), [bx, by] = at2(s + 0.8), wa = PM.atan2(by - ay, bx - ax);
   let lo = 0, hi = 0;
   for (const p of h.parts ?? [h]) {
@@ -10359,7 +10359,7 @@ function townGateSpanV1(size, f3, h, at2, len = 0) {
     const half = Math.max(-lo, hi) + pad;
     return { pre: half, post: half, vertical: false };
   }
-  const foot = cfg.WH + cfg.TW / 2 + 6, h2 = (cfg.WH + 60) * gk * 1.3, north = Math.max(pad, (foot + 12) / T4), south = Math.max(pad, (h2 + 26 - foot) / T4);
+  const foot = cfg.WH + cfg.TW / 2 + 6, h2 = (cfg.WH + 60) * gk * 1.3, north = Math.max(pad, (foot + 12) / T5), south = Math.max(pad, (h2 + 26 - foot) / T5);
   return ay < by ? { pre: -lo + north, post: hi + south, vertical: true } : { pre: -lo + south, post: hi + north, vertical: true };
 }
 function townGateGapV1(g, d, len) {
@@ -10653,20 +10653,20 @@ function townBannersV1(t) {
   L2 = [];
   bannerCache.set(t, L2);
   if (!townNewArtV1(t)) return L2;
-  const T4 = 32;
+  const T5 = 32;
   const f3 = t.features.find((q) => q.type === "banners");
   if (!f3) return L2;
   const pz = t.features.find((q) => q.type === "plaza"), inPz = (b) => pz && b.x > pz.x && b.x < pz.x + pz.w && b.y > pz.y && b.y < pz.y + pz.h;
-  for (const b of f3.list) if (!inPz(b)) L2.push({ x: b.x * T4, y: b.y * T4, flip: !!b.flip });
+  for (const b of f3.list) if (!inPz(b)) L2.push({ x: b.x * T5, y: b.y * T5, flip: !!b.flip });
   if (pz) {
-    const fy = (pz.y + pz.h / 2) * T4 + 20;
-    for (const [bx, flip] of [[pz.x * T4 + 34, false], [(pz.x + pz.w) * T4 - 34, true]]) for (const dy of [-44, 64]) L2.push({ x: bx, y: fy + dy, flip });
+    const fy = (pz.y + pz.h / 2) * T5 + 20;
+    for (const [bx, flip] of [[pz.x * T5 + 34, false], [(pz.x + pz.w) * T5 - 34, true]]) for (const dy of [-44, 64]) L2.push({ x: bx, y: fy + dy, flip });
   }
   return L2;
 }
 function townCastleYewsV1(f3) {
-  const T4 = 32, k = f3.keep, cx = (f3.x + f3.w / 2) * T4, G2 = (k.y + k.h) * T4, yb = (f3.y + f3.h - 1) * T4, out = [];
-  for (let y = G2 + 2.8 * T4; y < yb - 6.2 * T4; y += 2.2 * T4) for (const sd of [-1, 1]) out.push({ x: cx + sd * (2.6 * T4 + 16), y });
+  const T5 = 32, k = f3.keep, cx = (f3.x + f3.w / 2) * T5, G2 = (k.y + k.h) * T5, yb = (f3.y + f3.h - 1) * T5, out = [];
+  for (let y = G2 + 2.8 * T5; y < yb - 6.2 * T5; y += 2.2 * T5) for (const sd of [-1, 1]) out.push({ x: cx + sd * (2.6 * T5 + 16), y });
   return out;
 }
 var townFountainArtV1 = (t) => {
@@ -10681,11 +10681,11 @@ function townArtBlockersV1(t) {
   out = [];
   blockCache.set(t, out);
   if (!townNewArtV1(t)) return out;
-  const T4 = 32;
-  const tile = (x, y) => out.push({ x: Math.floor(x / T4), y: Math.floor(y / T4), w: 1, h: 1 });
+  const T5 = 32;
+  const tile = (x, y) => out.push({ x: Math.floor(x / T5), y: Math.floor(y / T5), w: 1, h: 1 });
   const span = (p0, p1) => {
-    let a = Math.ceil(p0 / T4 - 0.5), b = Math.floor(p1 / T4 - 0.5);
-    if (b < a) a = b = Math.floor((p0 + p1) / 2 / T4);
+    let a = Math.ceil(p0 / T5 - 0.5), b = Math.floor(p1 / T5 - 0.5);
+    if (b < a) a = b = Math.floor((p0 + p1) / 2 / T5);
     return [a, b - a + 1];
   };
   const box2 = (x0, y0, x1, y1) => {
@@ -10693,24 +10693,24 @@ function townArtBlockersV1(t) {
     out.push({ x: a, y: b, w, h });
   };
   const oval = (cx, cy, rx, ry) => {
-    for (let y = Math.floor((cy - ry) / T4); y <= Math.floor((cy + ry) / T4); y++) for (let x = Math.floor((cx - rx) / T4); x <= Math.floor((cx + rx) / T4); x++) {
-      const dx = ((x + 0.5) * T4 - cx) / rx, dy = ((y + 0.5) * T4 - cy) / ry;
+    for (let y = Math.floor((cy - ry) / T5); y <= Math.floor((cy + ry) / T5); y++) for (let x = Math.floor((cx - rx) / T5); x <= Math.floor((cx + rx) / T5); x++) {
+      const dx = ((x + 0.5) * T5 - cx) / rx, dy = ((y + 0.5) * T5 - cy) / ry;
       if (dx * dx + dy * dy <= 1) out.push({ x, y, w: 1, h: 1 });
     }
     tile(cx, cy);
   };
   const zone = t.features.some((f3) => f3.type === "zone"), plazas = t.features.filter((f3) => f3.type === "plaza");
   const ring = (R, gate) => {
-    const gx = (R.x + R.w / 2) * T4;
+    const gx = (R.x + R.w / 2) * T5;
     for (let x = R.x; x < R.x + R.w; x++) {
       out.push({ x, y: R.y, w: 1, h: 1 });
-      if (Math.abs((x + 0.5) * T4 - gx) >= gate) out.push({ x, y: R.y + R.h - 1, w: 1, h: 1 });
+      if (Math.abs((x + 0.5) * T5 - gx) >= gate) out.push({ x, y: R.y + R.h - 1, w: 1, h: 1 });
     }
     out.push({ x: R.x, y: R.y, w: 1, h: R.h }, { x: R.x + R.w - 1, y: R.y, w: 1, h: R.h });
   };
   for (const [, R, k] of t.places) if (k === "garden") {
     ring(R, 20);
-    const x = R.x * T4, y = R.y * T4, w = R.w * T4, h = R.h * T4;
+    const x = R.x * T5, y = R.y * T5, w = R.w * T5, h = R.h * T5;
     tile(x + w / 2 + 34, y + h + 12);
     tile(x + w / 2 - 40, y + h + 14);
     if (w >= 192) box2(x + w - 48, y + 34, x + w - 8, y + 46);
@@ -10720,30 +10720,30 @@ function townArtBlockersV1(t) {
     oval(f3.x, f3.y + dy, rx, ry);
   }
   for (const p of plazas) {
-    const fx = (p.x + p.w / 2) * T4, fy = (p.y + p.h / 2) * T4 + 20;
+    const fx = (p.x + p.w / 2) * T5, fy = (p.y + p.h / 2) * T5 + 20;
     if (zone) {
       const cap3 = t.size === "capital", d = cap3 ? 230 : 200;
       for (const s of [-1, 1]) {
         box2(fx + s * d - 22, fy - 56, fx + s * d + 22, fy - 32);
-        const bx = fx + s * (p.w * T4 / 2 - 60);
+        const bx = fx + s * (p.w * T5 / 2 - 60);
         box2(bx - 18, fy - 8, bx + 18, fy + 10);
       }
       for (const st of t.features.filter((f3) => f3.type === "stalls")) st.stalls.forEach((s, k) => {
         if (k !== Math.floor((st.stalls.length - 1) / 2)) out.push({ x: s.x, y: p.y + p.h - 3, w: 3, h: 2 });
       });
     } else if (t.arch !== "lake") {
-      const d = p.w * T4 / 2 - 56;
+      const d = p.w * T5 / 2 - 56;
       for (const s of [-1, 1]) box2(fx + s * d - 18, fy - 6, fx + s * d + 18, fy + 12);
     }
   }
   for (const st of t.features.filter((f3) => f3.type === "stalls")) for (const s of st.stalls) out.push({ x: s.x, y: s.y, w: 3, h: 2 });
   for (const g of t.features.filter((f3) => f3.type === "green")) {
-    oval(g.x * T4, g.y * T4 + 10, 30, 12);
-    oval(g.x * T4 + g.rx * T4 * 0.55, g.y * T4 - g.ry * T4 * 0.15, 26, 10);
+    oval(g.x * T5, g.y * T5 + 10, 30, 12);
+    oval(g.x * T5 + g.rx * T5 * 0.55, g.y * T5 - g.ry * T5 * 0.15, 26, 10);
   }
   for (const f3 of t.features) {
     if (f3.type === "tower" && f3.circle) {
-      const E = f3.circle, cx = (E.x + E.w / 2) * T4, cy = (E.y + E.h / 2) * T4, rx = E.w * T4 / 2 - 6, ry = E.h * T4 / 2 - 4;
+      const E = f3.circle, cx = (E.x + E.w / 2) * T5, cy = (E.y + E.h / 2) * T5, rx = E.w * T5 / 2 - 6, ry = E.h * T5 / 2 - 4;
       for (let k = 0; k < 6; k++) {
         const a = -Math.PI / 2 + k * Math.PI * 2 / 6 + 0.26;
         if (Math.cos(a) > 0.5 && Math.sin(a) < 0.5) continue;
@@ -10751,7 +10751,7 @@ function townArtBlockersV1(t) {
       }
     }
     if (f3.type === "forge" && f3.pad) {
-      const E = f3.pad, x = E.x * T4, y = E.y * T4;
+      const E = f3.pad, x = E.x * T5, y = E.y * T5;
       out.push({ x: E.x, y: E.y, w: E.w, h: Math.min(4, E.h) });
       tile(x + 134, y + 208);
       box2(x + 168, y + 162, x + 208, y + 178);
@@ -10766,7 +10766,7 @@ function townArtBlockersV1(t) {
     if (f3.type === "manor" && f3.building) {
       const b = t.buildings.find((q) => q.id === f3.building);
       if (b) {
-        const X = b.x * T4, W6 = b.w * T4, G2 = (b.y + b.h) * T4, cx = X + W6 / 2, fy = G2 + 2.4 * T4;
+        const X = b.x * T5, W6 = b.w * T5, G2 = (b.y + b.h) * T5, cx = X + W6 / 2, fy = G2 + 2.4 * T5;
         box2(X + 6, fy - 10, cx - 34, fy);
         box2(cx + 34, fy - 10, X + W6 - 6, fy);
         for (const sx of [cx - 120, cx + 120]) tile(sx, G2 + 30);
@@ -10775,7 +10775,7 @@ function townArtBlockersV1(t) {
     if (f3.type === "field") ring(f3, 26);
     if (f3.type === "yard") out.push({ x: f3.x, y: f3.y, w: f3.w, h: f3.h });
     if (f3.type === "monument") {
-      const x = f3.x * T4, y = f3.y * T4, R = (f3.r - 0.7) * T4, E = 0.8;
+      const x = f3.x * T5, y = f3.y * T5, R = (f3.r - 0.7) * T5, E = 0.8;
       oval(x, y + 24, 62, 26);
       for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
         tile(x + sx * 92, y + sy * R * E * 0.86 + (sy < 0 ? 6 : 12) - 4);
@@ -10783,44 +10783,44 @@ function townArtBlockersV1(t) {
       }
     }
     if (f3.type === "castle") {
-      const k = f3.keep, X = k.x * T4, W6 = k.w * T4, G2 = (k.y + k.h) * T4, cx = X + W6 / 2, pw = W6 * 0.3;
+      const k = f3.keep, X = k.x * T5, W6 = k.w * T5, G2 = (k.y + k.h) * T5, cx = X + W6 / 2, pw = W6 * 0.3;
       for (const sx of [X + 4, X + W6 - 4]) oval(sx, G2 + 20, 40, 16);
       for (const sd of [-1, 1]) tile(cx + sd * (pw / 2 + 54), G2 + 34);
       for (const y of townCastleYewsV1(f3)) tile(y.x, y.y - 4);
     }
-    if (f3.type === "castleTrees") for (const [tx, ty] of f3.trees) tile(tx * T4, ty * T4 - 2);
+    if (f3.type === "castleTrees") for (const [tx, ty] of f3.trees) tile(tx * T5, ty * T5 - 2);
     if (f3.type === "manor" && f3.garden && !f3.building) {
-      const g = f3.garden, x = g.x * T4, y = g.y * T4, w = g.w * T4, h = g.h * T4, cx = x + w / 2, cy = y + h / 2, R0 = Math.min(w, h) * 0.2, gap = 13;
+      const g = f3.garden, x = g.x * T5, y = g.y * T5, w = g.w * T5, h = g.h * T5, cx = x + w / 2, cy = y + h / 2, R0 = Math.min(w, h) * 0.2, gap = 13;
       oval(cx, cy, R0 + 4, R0 * 0.7 + 3);
       for (const [px, py] of [[x + 18, y + 18], [x + w - 18, y + 18], [x + 18, y + h - 18], [x + w - 18, y + h - 18]]) tile(px, py);
       if (w >= 280) for (const sd of [-1, 1]) box2(cx + sd * (R0 + 22) - 14, cy + R0 - 8, cx + sd * (R0 + 22) + 14, cy + R0 + 10);
       for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
         const bx0 = sx < 0 ? x + 16 : cx + gap, by0 = sy < 0 ? y + 16 : cy + gap, bw = w / 2 - 16 - gap, bh = h / 2 - 16 - gap;
-        for (let ty = Math.floor(by0 / T4); ty <= Math.floor((by0 + bh) / T4); ty++) for (let tx = Math.floor(bx0 / T4); tx <= Math.floor((bx0 + bw) / T4); tx++) {
-          const mx = (tx + 0.5) * T4, my = (ty + 0.5) * T4;
+        for (let ty = Math.floor(by0 / T5); ty <= Math.floor((by0 + bh) / T5); ty++) for (let tx = Math.floor(bx0 / T5); tx <= Math.floor((bx0 + bw) / T5); tx++) {
+          const mx = (tx + 0.5) * T5, my = (ty + 0.5) * T5;
           if (mx > bx0 && mx < bx0 + bw && my > by0 && my < by0 + bh) out.push({ x: tx, y: ty, w: 1, h: 1 });
         }
       }
     }
     if (f3.type === "inn" && f3.garden) {
-      const E = f3.garden, b = t.buildings.find((q) => q.id === f3.building), north = b?.doorSide === "north", x = E.x * T4, y = E.y * T4, w = E.w * T4, h = E.h * T4, py0 = y + (north ? h * 0.52 : h * 0.2);
+      const E = f3.garden, b = t.buildings.find((q) => q.id === f3.building), north = b?.doorSide === "north", x = E.x * T5, y = E.y * T5, w = E.w * T5, h = E.h * T5, py0 = y + (north ? h * 0.52 : h * 0.2);
       for (const ty of [py0 + 30, north ? y + 70 : y + h - 50]) box2(x + w / 2 - 30, ty - 6, x + w / 2 + 22, ty + 22);
       const gy = north ? y + h - 26 : y + 40;
       box2(x + w - 64, gy - 10, x + w - 34, gy);
-      out.push({ x: E.x, y: Math.floor((y + 12) / T4), w: 1, h: Math.floor((y + h - 13) / T4) - Math.floor((y + 12) / T4) + 1 });
+      out.push({ x: E.x, y: Math.floor((y + 12) / T5), w: 1, h: Math.floor((y + h - 13) / T5) - Math.floor((y + 12) / T5) + 1 });
       out.push({ x: E.x, y: north ? E.y + E.h - 1 : E.y, w: E.w, h: 1 });
     }
   }
   const A = townArtBuildingsV1(t);
   if (A.barracks) {
-    const b = A.barracks, X = b.x * T4, W6 = b.w * T4, G2 = (b.y + b.h) * T4, x0 = X + 12, x1 = X + W6 - 12;
+    const b = A.barracks, X = b.x * T5, W6 = b.w * T5, G2 = (b.y + b.h) * T5, x0 = X + 12, x1 = X + W6 - 12;
     tile(x0 + 40, G2 + 26);
     tile(x0 + 100, G2 + 30);
     tile(x1 - 40, G2 + 26);
     tile(x1 - 92, G2 + 18);
   }
   if (A.stables) {
-    const b = A.stables, X = b.x * T4, W6 = b.w * T4, G2 = (b.y + b.h) * T4, x0 = X + 12, x1 = X + W6 - 12, cx = (x0 + x1) / 2;
+    const b = A.stables, X = b.x * T5, W6 = b.w * T5, G2 = (b.y + b.h) * T5, x0 = X + 12, x1 = X + W6 - 12, cx = (x0 + x1) / 2;
     tile(x0 + 56, G2 + 20);
     box2(cx - 80, G2 + 12, cx - 44, G2 + 30);
     tile(cx + 70, G2 + 18);
@@ -14403,7 +14403,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     }
     return false;
   }
-  const T4 = terraces ? createUplandTerraces({
+  const T5 = terraces ? createUplandTerraces({
     hash: standsHashText(seedDigest + "/" + FOREST_STANDS_VERSION + "/terrace"),
     high,
     biomeAt: (x, y) => x < 0 || y < 0 || x >= W6 || y >= terrain2.heightTiles ? null : base(x, y).biome,
@@ -14477,7 +14477,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
         kind2 = p.grove && S.vnoise(K.grove, x / 60, y / 60) > 0.55 ? "bamboo" : "thicket";
         r = 2.2 + roll2 * 4;
       }
-      if (kind2 && (T4 && T4.near(x - r * 1.32, y - r * 1.32, x + r * 1.32, y + r * 1.32, 4) || V && V.near(x - r * 1.32, y - r * 1.32, x + r * 1.32, y + r * 1.32, 4))) kind2 = null;
+      if (kind2 && (T5 && T5.near(x - r * 1.32, y - r * 1.32, x + r * 1.32, y + r * 1.32, 4) || V && V.near(x - r * 1.32, y - r * 1.32, x + r * 1.32, y + r * 1.32, 4))) kind2 = null;
       if (kind2 && e.road > 4) {
         const a = (h >>> 18 & 255) / 255, stretch = 1.05 + (h >>> 26 & 15) / 28;
         c = { cx, cy, x, y, kind: kind2, biome: e.biome, r: Math.min(RMAX, r), pri: h, ax: a, stretch };
@@ -14616,7 +14616,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     }
     const p = PROFILES[e.biome], s = standAt(x, y), zone = S.zone(s, e.biome);
     out = { zone, cover: false, trail: false, block: null, kind: null, clusterId: null };
-    const tm = T4?.at(x, y) ?? V?.at(x, y);
+    const tm = T5?.at(x, y) ?? V?.at(x, y);
     if (tm) {
       const g = tm.g;
       if (tm.r.block) {
@@ -14673,8 +14673,8 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     const [cx, cy] = key5.split(",").map(Number);
     return mass(cx, cy);
   }
-  const terraceAt = (x, y) => T4?.at(x, y) ?? V?.at(x, y) ?? null;
-  return Object.freeze({ tileAt, massByKey, standAt, envAt, terraceAt, terraces: T4, volcanoes: V });
+  const terraceAt = (x, y) => T5?.at(x, y) ?? V?.at(x, y) ?? null;
+  return Object.freeze({ tileAt, massByKey, standAt, envAt, terraceAt, terraces: T5, volcanoes: V });
 }
 var pick = (list2, h) => {
   let total = 0;
@@ -16536,6 +16536,62 @@ function validateCompositionEliteV1(s, e) {
     const row2 = [...broodElitesV1(s, g, { includeDefeated: true }), ...huntChampionElitesV1(s, g, { includeDefeated: true }), ...denAlphaElitesV1(s, g, { includeDefeated: true }), ...summitGuardElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
     requireContract(row2 && row2.primary === e.affixIds[0], "Composition candidate roll changed");
   }
+}
+
+// src/shared/rules/boss_arena_v1.js
+var T = 32;
+var ARENA_OUTSIDE_TILES = 4;
+function arenaRoomV1(floor) {
+  const g = floor?.graph, r = g?.rooms?.find((x) => x.roomId === g.topology?.endNodeId);
+  if (!r) return null;
+  return r.bounds ?? { x: r.cx - r.rx, y: r.cy - r.ry, width: r.rx * 2 + 1, height: r.ry * 2 + 1 };
+}
+var inArenaBoxV1 = (box2, p) => Boolean(box2 && p) && p.x >= box2.x * T && p.x < (box2.x + box2.width) * T && p.y >= box2.y * T && p.y < (box2.y + box2.height) * T;
+function corridorSteps(path) {
+  const steps = [];
+  for (let i = 1; i < path.length; i++) {
+    const a = path[i - 1], b = path[i], dx = Math.sign(b.x - a.x), dy = Math.sign(b.y - a.y);
+    if (!dx && !dy) continue;
+    for (let x = a.x + dx, y = a.y + dy; ; x += dx, y += dy) {
+      steps.push({ x, y, dx, dy });
+      if (x === b.x && y === b.y) break;
+    }
+  }
+  return steps;
+}
+function openingRun(tiles3, box2, s) {
+  if (!tiles3) return null;
+  const open = (x2, y) => tiles3[y]?.[x2] === "1";
+  if (s.dy) {
+    const y = s.y, iy = s.dy > 0 ? y - 1 : y + 1, ok2 = (x2) => x2 >= box2.x && x2 < box2.x + box2.width && open(x2, y) && open(x2, iy);
+    if (!ok2(s.x)) return null;
+    let a2 = s.x, b2 = s.x;
+    while (ok2(a2 - 1)) a2--;
+    while (ok2(b2 + 1)) b2++;
+    return [a2, b2];
+  }
+  const x = s.x, ix = s.dx > 0 ? x - 1 : x + 1, ok = (y) => y >= box2.y && y < box2.y + box2.height && open(x, y) && open(ix, y);
+  if (!ok(s.y)) return null;
+  let a = s.y, b = s.y;
+  while (ok(a - 1)) a--;
+  while (ok(b + 1)) b++;
+  return [a, b];
+}
+function arenaDoorsV1(floor) {
+  const g = floor?.graph, box2 = arenaRoomV1(floor);
+  if (!box2) return [];
+  const end = g.topology.endNodeId, doors = [];
+  for (const e of g.edges ?? []) {
+    if (e.from !== end && e.to !== end || e.walkable === false || !Array.isArray(e.path) || e.path.length < 2) continue;
+    const steps = corridorSteps(e.from === end ? e.path : [...e.path].reverse()), i = steps.findIndex((p) => p.x < box2.x || p.x >= box2.x + box2.width || p.y < box2.y || p.y >= box2.y + box2.height);
+    if (i < 0) continue;
+    const s = steps[i], o = steps[Math.min(steps.length - 1, i + ARENA_OUTSIDE_TILES - 1)], run = openingRun(floor.collision?.tiles, box2, s);
+    const half = run ? (run[1] - run[0] + 1) * T / 2 : (e.widthTiles ?? 5) * T / 2, mid = run ? (run[0] + run[1] + 1) / 2 * T : null;
+    const x = s.dx ? (s.dx > 0 ? box2.x + box2.width : box2.x) * T : mid ?? (s.x + 0.5) * T, y = s.dy ? (s.dy > 0 ? box2.y + box2.height : box2.y) * T : mid ?? (s.y + 0.5) * T;
+    if (doors.some((d) => d.nx === s.dx && d.ny === s.dy && d.x === x && d.y === y)) continue;
+    doors.push({ edge: e.from === end ? e.to : e.from, x, y, nx: s.dx, ny: s.dy, half, out: { x: (o.x + 0.5) * T, y: (o.y + 0.5) * T } });
+  }
+  return doors;
 }
 
 // src/shared/content/bosses_d12_5.js
@@ -20160,9 +20216,9 @@ var FORT_FAMILY_DEFINITION_V2 = Object.freeze({ package: FORT_PACKAGE_V2, family
 // src/shared/generation/woodland_cave_family_d12.js
 var GENERATED_SITE_D12 = "generated-site-family-d12-v1";
 var GENERATED_FLOOR_D12 = "generated-site-floor-d12-v1";
-var T = 32;
+var T2 = 32;
 var u32 = (bytes) => ((bytes[0] ?? 0) << 24 >>> 0) + ((bytes[1] ?? 0) << 16) + ((bytes[2] ?? 0) << 8) + (bytes[3] ?? 0) >>> 0;
-var point7 = (x, y) => ({ x: (x + 0.5) * T, y: (y + 0.5) * T });
+var point7 = (x, y) => ({ x: (x + 0.5) * T2, y: (y + 0.5) * T2 });
 async function scoped(seed, siteId2, floorIndex, domain, sha256) {
   return hashBytes(frameUtf8([WOODLAND_CAVE_FAMILY_ID, WOODLAND_CAVE_GENERATOR_VERSION, seed, siteId2, String(floorIndex), domain]), sha256);
 }
@@ -20260,7 +20316,7 @@ async function generateWoodlandCaveInstanceD12({ campaignSeed, site, spawnOrdina
     if (up) decorations3.push({ id: `decor:${floorIndex}:stairs-up`, kind: "cave-stairs-up", x: arrival.x + 0.5, y: arrival.y + 0.5, variant: floorIndex % 3 });
     if (down) decorations3.push({ id: `decor:${floorIndex}:stairs-down`, kind: "cave-stairs-down", x: progress.x + 0.5, y: progress.y + 0.5, variant: floorIndex % 3 });
     if (floorIndex === floorCount - 1) decorations3.push({ id: `decor:${floorIndex}:reward-nook`, kind: "cave-reward-nook", x: progress.x + 0.5, y: progress.y + 0.5, variant: 0 });
-    const rows3 = grid.map((r) => r.join("")), floorId = `floor:${site.siteId}:${floorIndex}`, recipe = { version: GENERATED_FLOOR_D12, floorId, index: floorIndex, floorSeed, graph: { rooms, edges }, collision: { tileSize: T, width, height, tiles: [...rows3] }, visual: { version: "woodland-cave-generated-d12-v1", originTile: { x: 0, y: 0 }, terrain: [...rows3], blockers: [], decorations: decorations3 }, entrance: point7(arrival.x, arrival.y), transitions: { up, down }, encounter: { rank: WOODLAND_CAVE_FAMILY_D12.encounterPolicy.rank, members }, reward: floorIndex === floorCount - 1 ? { rewardId: `reward:${site.siteId}:${floorIndex}:0`, ...WOODLAND_CAVE_FAMILY_D12.rewardPolicy, position: point7(progress.x + (progress.x < width / 2 ? 2 : -2), progress.y) } : null, decorationIds: decorations3.map((d) => d.id) };
+    const rows3 = grid.map((r) => r.join("")), floorId = `floor:${site.siteId}:${floorIndex}`, recipe = { version: GENERATED_FLOOR_D12, floorId, index: floorIndex, floorSeed, graph: { rooms, edges }, collision: { tileSize: T2, width, height, tiles: [...rows3] }, visual: { version: "woodland-cave-generated-d12-v1", originTile: { x: 0, y: 0 }, terrain: [...rows3], blockers: [], decorations: decorations3 }, entrance: point7(arrival.x, arrival.y), transitions: { up, down }, encounter: { rank: WOODLAND_CAVE_FAMILY_D12.encounterPolicy.rank, members }, reward: floorIndex === floorCount - 1 ? { rewardId: `reward:${site.siteId}:${floorIndex}:0`, ...WOODLAND_CAVE_FAMILY_D12.rewardPolicy, position: point7(progress.x + (progress.x < width / 2 ? 2 : -2), progress.y) } : null, decorationIds: decorations3.map((d) => d.id) };
     floors.push(recipe);
   }
   for (let i = 0; i < floors.length; i++) {
@@ -20336,12 +20392,12 @@ var WOODLAND_CAVE_FAMILY_DEFINITION_D12 = Object.freeze({ package: WOODLAND_CAVE
 // src/shared/generation/woodland_cave_family_d12_1.js
 var GENERATED_SITE_D12_1 = "generated-site-family-d12-1-v1";
 var GENERATED_FLOOR_D12_1 = "generated-site-floor-d12-1-v1";
-var T2 = 32;
+var T3 = 32;
 var W5 = 62;
 var H5 = 47;
 var u322 = (bytes) => ((bytes[0] ?? 0) << 24 >>> 0) + ((bytes[1] ?? 0) << 16) + ((bytes[2] ?? 0) << 8) + (bytes[3] ?? 0) >>> 0;
 var pick4 = (bytes, n, offset = 0) => u322(bytes.slice(offset % Math.max(1, bytes.length - 3), offset % Math.max(1, bytes.length - 3) + 4)) % n;
-var point8 = (x, y) => ({ x: (x + 0.5) * T2, y: (y + 0.5) * T2 });
+var point8 = (x, y) => ({ x: (x + 0.5) * T3, y: (y + 0.5) * T3 });
 var distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 var gridPoint = (x, y) => ({ x, y });
 var rolesEncounter = /* @__PURE__ */ new Set(["small-encounter", "large-encounter", "junction"]);
@@ -20483,7 +20539,7 @@ function assembleFloor({ site, floorIndex, floorCount, roomCount, tier, b, floor
   requireContract(connected2(rooms, edges), "Disconnected Cave module graph");
   const arrival = gridPoint(rooms[0].cx, rooms[0].cy), last = rooms.at(-1), progress = gridPoint(last.cx, last.cy), up = floorIndex > 0 ? { transitionId: `transition:${site.siteId}:${floorIndex}:up`, floorId: null, anchor: point8(arrival.x, arrival.y) } : null, down = floorIndex < floorCount - 1 ? { transitionId: `transition:${site.siteId}:${floorIndex}:down`, floorId: null, anchor: point8(progress.x, progress.y) } : null;
   const reward = floorIndex === floorCount - 1 ? { rewardId: `reward:${site.siteId}:${floorIndex}:0`, ...WOODLAND_CAVE_FAMILY_D12_1.rewardPolicy, position: point8(progress.x + (mirror ? -2 : 2), progress.y) } : null;
-  const reserved = [arrival, progress, ...reward ? [{ x: reward.position.x / T2 - 0.5, y: reward.position.y / T2 - 0.5 }] : []], encounterRooms = rooms.filter((r) => rolesEncounter.has(r.role)), members = [], used = [];
+  const reserved = [arrival, progress, ...reward ? [{ x: reward.position.x / T3 - 0.5, y: reward.position.y / T3 - 0.5 }] : []], encounterRooms = rooms.filter((r) => rolesEncounter.has(r.role)), members = [], used = [];
   const memberCount = Math.min(WOODLAND_CAVE_FAMILY_D12_1.encounterPolicy.maximumMembersPerFloor, tier.threat[0] + pick4(b, tier.threat[1] - tier.threat[0] + 1, 27));
   for (let i = 0; i < memberCount; i++) {
     const room2 = encounterRooms[i % Math.max(1, encounterRooms.length)] ?? rooms[Math.min(i + 1, rooms.length - 2)];
@@ -20515,7 +20571,7 @@ function assembleFloor({ site, floorIndex, floorCount, roomCount, tier, b, floor
   if (reward) decorations3.push({ id: `decor:${floorIndex}:reward-nook`, kind: "cave-reward-nook", x: progress.x + 0.5, y: progress.y + 0.5, variant: 0, interactionDecoration: true });
   requireContract(rooms.every((room2) => reachable(grid, arrival, { x: room2.cx, y: room2.cy })) && reachable(grid, arrival, progress), "Unreachable Cave module anchor");
   const rows3 = grid.map((row2) => row2.join("")), floorId = `floor:${site.siteId}:${floorIndex}`;
-  return { version: GENERATED_FLOOR_D12_1, floorId, index: floorIndex, floorSeed, graph: { rooms, edges, modules, assembly: { version: "bounded-authored-module-assembly-d12-1-v1", attempt: pick4(b, 8, 1), fallback: false } }, collision: { tileSize: T2, width: W5, height: H5, tiles: rows3 }, visual: { version: "woodland-cave-generated-d12-1-v1", originTile: { x: 0, y: 0 }, terrain: [...rows3], blockers: [], decorations: decorations3, motifs: floorMotifs(grid, b, floorIndex) }, entrance: point8(arrival.x, arrival.y), transitions: { up, down }, encounter: { rank: WOODLAND_CAVE_FAMILY_D12_1.encounterPolicy.rank, members }, reward, decorationIds: decorations3.map((d) => d.id) };
+  return { version: GENERATED_FLOOR_D12_1, floorId, index: floorIndex, floorSeed, graph: { rooms, edges, modules, assembly: { version: "bounded-authored-module-assembly-d12-1-v1", attempt: pick4(b, 8, 1), fallback: false } }, collision: { tileSize: T3, width: W5, height: H5, tiles: rows3 }, visual: { version: "woodland-cave-generated-d12-1-v1", originTile: { x: 0, y: 0 }, terrain: [...rows3], blockers: [], decorations: decorations3, motifs: floorMotifs(grid, b, floorIndex) }, entrance: point8(arrival.x, arrival.y), transitions: { up, down }, encounter: { rank: WOODLAND_CAVE_FAMILY_D12_1.encounterPolicy.rank, members }, reward, decorationIds: decorations3.map((d) => d.id) };
 }
 async function generateWoodlandCaveInstanceD12_1({ campaignSeed, site, reservation = null, spawnOrdinal = 0, evidenceFixture = null }, { sha256 }) {
   validateWoodlandCaveModuleCatalogD12_1();
@@ -20545,9 +20601,9 @@ function validateGeneratedWoodlandCaveD12_1(g) {
   for (const [i, f3] of g.floors.entries()) {
     requireContract(f3.version === GENERATED_FLOOR_D12_1 && f3.index === i && f3.floorId === g.floorIds[i] && f3.collision.width === W5 && f3.collision.height === H5 && f3.collision.tiles.length === H5 && f3.collision.tiles.every((row2) => row2.length === W5 && /^[01]+$/.test(row2)) && canonicalStringify(f3.visual.terrain) === canonicalStringify(f3.collision.tiles) && connected2(f3.graph.rooms, f3.graph.edges), "Invalid generated D12.1 Cave floor");
     requireContract(f3.graph.rooms.length >= tier.rooms[0] && f3.graph.rooms.length <= tier.rooms[1] && f3.graph.rooms.every((room2, a) => f3.graph.rooms.every((other, b) => a === b || room2.bounds.x + room2.bounds.width <= other.bounds.x || other.bounds.x + other.bounds.width <= room2.bounds.x || room2.bounds.y + room2.bounds.height <= other.bounds.y || other.bounds.y + other.bounds.height <= room2.bounds.y)), "Overlapping or out-of-tier Cave rooms");
-    const actorTiles = f3.encounter.members.map((m) => ({ x: m.position.x / T2 - 0.5, y: m.position.y / T2 - 0.5 }));
+    const actorTiles = f3.encounter.members.map((m) => ({ x: m.position.x / T3 - 0.5, y: m.position.y / T3 - 0.5 }));
     requireContract(actorTiles.every((a, n) => actorTiles.every((b, m) => n === m || distance(a, b) >= 3)), "Crowded Cave encounter anchors");
-    const fixed = [{ x: f3.entrance.x / T2 - 0.5, y: f3.entrance.y / T2 - 0.5 }, ...Object.values(f3.transitions).filter(Boolean).map((t) => ({ x: t.anchor.x / T2 - 0.5, y: t.anchor.y / T2 - 0.5 })), ...f3.reward ? [{ x: f3.reward.position.x / T2 - 0.5, y: f3.reward.position.y / T2 - 0.5 }] : []];
+    const fixed = [{ x: f3.entrance.x / T3 - 0.5, y: f3.entrance.y / T3 - 0.5 }, ...Object.values(f3.transitions).filter(Boolean).map((t) => ({ x: t.anchor.x / T3 - 0.5, y: t.anchor.y / T3 - 0.5 })), ...f3.reward ? [{ x: f3.reward.position.x / T3 - 0.5, y: f3.reward.position.y / T3 - 0.5 }] : []];
     requireContract(f3.visual.decorations.filter((d) => !d.interactionDecoration).every((d) => fixed.every((p) => distance(d, p) >= 3) && actorTiles.every((p) => distance(d, p) >= 3)), "Cave decoration exclusion violated");
   }
   return g;
@@ -20611,7 +20667,7 @@ var WOODLAND_CAVE_FAMILY_DEFINITION_D12_1 = Object.freeze({ package: WOODLAND_CA
 // src/shared/generation/woodland_cave_family_d12_2.js
 var GENERATED_SITE_D12_2 = "generated-site-family-d12-2-v1";
 var GENERATED_FLOOR_D12_2 = "generated-site-floor-d12-2-v1";
-var T3 = 32;
+var T4 = 32;
 var VW = 180;
 var VH = 150;
 var DIRS = { north: [0, -1], east: [1, 0], south: [0, 1], west: [-1, 0] };
@@ -20620,7 +20676,7 @@ var lastAssemblyFailure = "none";
 var u323 = (bytes, o = 0) => ((bytes[o % Math.max(1, bytes.length - 3)] ?? 0) << 24 >>> 0) + ((bytes[(o + 1) % bytes.length] ?? 0) << 16) + ((bytes[(o + 2) % bytes.length] ?? 0) << 8) + (bytes[(o + 3) % bytes.length] ?? 0) >>> 0;
 var pick5 = (bytes, n, o = 0) => u323(bytes, o) % n;
 var dist3 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-var point9 = (p) => ({ x: (p.x + 0.5) * T3, y: (p.y + 0.5) * T3 });
+var point9 = (p) => ({ x: (p.x + 0.5) * T4, y: (p.y + 0.5) * T4 });
 var key3 = (x, y) => x + "," + y;
 async function scoped3(seed, siteId2, floorIndex, domain, sha256) {
   return hashBytes(frameUtf8([WOODLAND_CAVE_FAMILY_ID, WOODLAND_CAVE_GENERATOR_VERSION_D12_2, seed, siteId2, String(floorIndex), domain]), sha256);
@@ -20969,7 +21025,7 @@ function assembleFloor2({ site, floorIndex, floorCount, roomCount, tier, bytes, 
     motifs.push({ motifId: `motif:${floorIndex}:${i}`, kind: motifKind(character, i), x: p.x + 0.5, y: p.y + 0.5, scale: 0.65 + pick5(bytes, 50, 281 + i) / 100, rotation: (pick5(bytes, 628, 291 + i) - 314) / 100 });
   }
   const graph = { version: "assembled-cave-graph-d12-2-v1", topology: { ...topology, character }, rooms, edges: topology.edges.map((e) => ({ ...e, walkable: true })), modules: geometry2.modules, assembly: { version: "bounded-socket-assembly-d12-2-v1", attempt: attempt - 1, fallback, topologyTransform: geometry2.topologyTransform, stampedPassageCount: geometry2.modules.filter((m) => m.category === "passage").length } };
-  return { version: GENERATED_FLOOR_D12_2, floorId: `floor:${site.siteId}:${floorIndex}`, index: floorIndex, floorSeed, graph, collision: { tileSize: T3, width: geometry2.width, height: geometry2.height, tiles: geometry2.rows }, visual: { version: "woodland-cave-generated-d12-2-v1", originTile: { x: 0, y: 0 }, character, terrain: [...geometry2.rows], blockers: [], decorations: decorations3, motifs }, entrance: point9(arrival), transitions: { up, down }, encounter: { rank: WOODLAND_CAVE_FAMILY_D12_2.encounterPolicy.rank, members }, reward, decorationIds: decorations3.map((d) => d.id) };
+  return { version: GENERATED_FLOOR_D12_2, floorId: `floor:${site.siteId}:${floorIndex}`, index: floorIndex, floorSeed, graph, collision: { tileSize: T4, width: geometry2.width, height: geometry2.height, tiles: geometry2.rows }, visual: { version: "woodland-cave-generated-d12-2-v1", originTile: { x: 0, y: 0 }, character, terrain: [...geometry2.rows], blockers: [], decorations: decorations3, motifs }, entrance: point9(arrival), transitions: { up, down }, encounter: { rank: WOODLAND_CAVE_FAMILY_D12_2.encounterPolicy.rank, members }, reward, decorationIds: decorations3.map((d) => d.id) };
 }
 async function generateWoodlandCaveInstanceD12_2({ campaignSeed, site, reservation = null, spawnOrdinal = 0 }, { sha256 }) {
   validateWoodlandCaveFormationCatalogD12_2();
@@ -21010,7 +21066,7 @@ function validateGeneratedWoodlandCaveD12_2(g) {
     requireContract(f3.version === GENERATED_FLOOR_D12_2 && f3.index === i && f3.collision.width >= 20 && f3.collision.width <= 180 && f3.collision.height >= 20 && f3.collision.height <= 150 && f3.collision.tiles.length === f3.collision.height && f3.collision.tiles.every((r) => r.length === f3.collision.width && /^[01]+$/.test(r)) && canonicalStringify(f3.visual.terrain) === canonicalStringify(f3.collision.tiles) && connected3(f3.graph.rooms, f3.graph.edges), "Invalid generated D12.2 Cave floor");
     requireContract(f3.graph.assembly.attempt >= 0 && f3.graph.assembly.attempt < 12 && f3.graph.assembly.stampedPassageCount > 0 && f3.graph.modules.some((m) => m.category === "passage" && m.appliedCellCount > 0), "Cave assembly provenance missing");
     if (f3.graph.topology.form !== "winding") expressive = true;
-    const actors2 = f3.encounter.members.map((m) => ({ x: m.position.x / T3 - 0.5, y: m.position.y / T3 - 0.5 }));
+    const actors2 = f3.encounter.members.map((m) => ({ x: m.position.x / T4 - 0.5, y: m.position.y / T4 - 0.5 }));
     requireContract(actors2.every((a, n) => actors2.every((b, m) => n === m || dist3(a, b) >= 3)), "Crowded Cave encounter anchors");
   }
   if (["large", "deep"].includes(g.sizeTier)) requireContract(expressive, "Large Cave lacks a branching topology");
@@ -23832,6 +23888,17 @@ function validateSalvageProgress(a, b, before, after = null) {
   }
 }
 
+// src/shared/rules/site_boss_down_v1.js
+function siteBossIdsV1(state, site) {
+  const floor = Array.isArray(site?.floors) ? site.floors.at(-1) : null;
+  if (!floor) return [];
+  return (floor.enemyIds ?? []).filter((id, i) => state.bossCombat?.bossesByEntityId?.[id] || i === 0 && siteEndRoleV1(floor, id));
+}
+function siteBossDownV1(state, site) {
+  const ids = siteBossIdsV1(state, site);
+  return ids.length > 0 && ids.every((id) => !state.entitiesById?.[id]?.alive);
+}
+
 // src/shared/contracts/site_run_episode_d13b.js
 var LEGACY_SITE_RUN_EPISODE_D13B = "site-run-episode-d13b-v1";
 var LEGACY_SITE_RUN_EPISODE_D13C = "site-run-episode-d13c-v1";
@@ -23884,6 +23951,10 @@ function currentGroupIds(state, siteId2) {
 function currentClearTick(state, siteId2) {
   if (siteSupportsResetD13C(state, siteId2)) {
     const ids = currentGroupIds(state, siteId2), groups = ids.map((id) => state.groupsById[id]);
+    if (siteBossDownV1(state, state.d9World?.functionalSitesById?.[siteId2])) {
+      const rec = state.campaign.siteRunEpisodesById?.[siteId2];
+      return rec?.status === "cleared" && rec.clearedTick !== null ? rec.clearedTick : state.tick;
+    }
     if (ids.length > 1 && state.campaign.siteRunEpisodesById?.[siteId2]?.episode > 1) {
       const last = ids.at(-1);
       return state.groupsById[last]?.cleared ? state.encounterEconomy?.groups?.[last]?.clearedTick ?? state.tick : null;
@@ -24427,7 +24498,9 @@ function siteBossDoorV1(site) {
   if (!site || site.conqueredTick == null || !Array.isArray(site.floors) || site.floors.length < 2) return null;
   const last = site.floors.at(-1), down = site.floors.at(-2).transitions?.down;
   if (!down?.targetAnchor || down.spaceInstanceId !== last.spaceInstanceId) return null;
-  return { spaceInstanceId: last.spaceInstanceId, destination: down.targetAnchor, floorIndex: site.floors.length - 1 };
+  const doors = site.sizeTier !== "small" && last.graph ? arenaDoorsV1(last) : [], from = down.targetAnchor;
+  const door = [...doors].sort((a, b) => Math.hypot(a.out.x - from.x, a.out.y - from.y) - Math.hypot(b.out.x - from.x, b.out.y - from.y))[0];
+  return { spaceInstanceId: last.spaceInstanceId, destination: door ? { ...door.out } : down.targetAnchor, floorIndex: site.floors.length - 1 };
 }
 function functionalSiteTransitionTargetD9(state, actor, payload) {
   const f3 = state.d9World?.functionalSitesById?.[payload.siteId];
@@ -32401,6 +32474,9 @@ export {
   projectHostileHazardsD12_4J,
   subweaponSuppressedD12_4I,
   adoptEncounterCompositionV1,
+  arenaRoomV1,
+  inArenaBoxV1,
+  arenaDoorsV1,
   ARACHNID_TREANT_PROFILE,
   ARACHNID_TREANT_D12_5A,
   usesSpawnLevelsV1,
@@ -32616,6 +32692,7 @@ export {
   salvageQuote,
   canSalvage,
   applySalvage,
+  siteBossDownV1,
   siteSupportsResetD13C,
   siteOccupantsD13C,
   retireSiteEpisodeAuthorityD13C1,

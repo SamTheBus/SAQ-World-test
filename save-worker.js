@@ -23498,6 +23498,17 @@ function validateSiteFinaleCompletionRewardSourceD13D_C(state, source11) {
   return source11;
 }
 
+// src/shared/rules/site_boss_down_v1.js
+function siteBossIdsV1(state, site) {
+  const floor = Array.isArray(site?.floors) ? site.floors.at(-1) : null;
+  if (!floor) return [];
+  return (floor.enemyIds ?? []).filter((id2, i) => state.bossCombat?.bossesByEntityId?.[id2] || i === 0 && siteEndRoleV1(floor, id2));
+}
+function siteBossDownV1(state, site) {
+  const ids = siteBossIdsV1(state, site);
+  return ids.length > 0 && ids.every((id2) => !state.entitiesById?.[id2]?.alive);
+}
+
 // src/shared/contracts/site_run_episode_d13b.js
 var LEGACY_SITE_RUN_EPISODE_D13B = "site-run-episode-d13b-v1";
 var LEGACY_SITE_RUN_EPISODE_D13C = "site-run-episode-d13c-v1";
@@ -23550,6 +23561,10 @@ function currentGroupIds(state, siteId2) {
 function currentClearTick(state, siteId2) {
   if (siteSupportsResetD13C(state, siteId2)) {
     const ids = currentGroupIds(state, siteId2), groups = ids.map((id2) => state.groupsById[id2]);
+    if (siteBossDownV1(state, state.d9World?.functionalSitesById?.[siteId2])) {
+      const rec = state.campaign.siteRunEpisodesById?.[siteId2];
+      return rec?.status === "cleared" && rec.clearedTick !== null ? rec.clearedTick : state.tick;
+    }
     if (ids.length > 1 && state.campaign.siteRunEpisodesById?.[siteId2]?.episode > 1) {
       const last = ids.at(-1);
       return state.groupsById[last]?.cleared ? state.encounterEconomy?.groups?.[last]?.clearedTick ?? state.tick : null;
