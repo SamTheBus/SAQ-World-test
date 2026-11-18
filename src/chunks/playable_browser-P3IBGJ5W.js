@@ -1129,7 +1129,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-UB3766MN.js";
+} from "./chunk-VOGXLUXS.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -134536,7 +134536,7 @@ function validateSubweaponCombat(s) {
     safeInteger(e.appliedTick, 0, s.tick);
     safeInteger(e.expiresTick, s.tick + 1, e.appliedTick + 360);
     const def = s.content.definitionsById[t.contentDefinitionId] ?? {};
-    requireContract((e.phase === "chill" ? e.expiresTick - e.appliedTick >= 240 && e.expiresTick - e.appliedTick <= 360 : e.phase === "boss-slow" ? e.expiresTick - e.appliedTick === 90 : e.expiresTick - e.appliedTick >= 12 && e.expiresTick - e.appliedTick <= (def.isElite ? 68 : 135) + 126) && e.phase === "boss-slow" === (e.phase !== "chill" && def.isBoss === true), "Frost duration/classification");
+    requireContract((e.phase === "chill" ? e.expiresTick - e.appliedTick >= (e.stacks === 1 ? 60 : 240) && e.expiresTick - e.appliedTick <= 360 : e.phase === "boss-slow" ? e.expiresTick - e.appliedTick === 90 : e.expiresTick - e.appliedTick >= 12 && e.expiresTick - e.appliedTick <= (def.isElite ? 68 : 135) + 126) && e.phase === "boss-slow" === (e.phase !== "chill" && def.isBoss === true), "Frost duration/classification");
   }
 }
 function cancelSubweaponResidency(s, id2) {
@@ -137667,8 +137667,15 @@ function frostMovement(s, target) {
 }
 function expireFrost(s) {
   for (const [id2, e] of Object.entries(s.subweaponCombat.controls ?? {})) {
-    const a = s.entitiesById[e.sourceId], b = s.entitiesById[e.targetId];
-    if (s.tick >= e.expiresTick || !a?.alive || !b?.alive || a.residency.spaceInstanceId !== e.spaceInstanceId || b.residency.spaceInstanceId !== e.spaceInstanceId) delete s.subweaponCombat.controls[id2];
+    const a = s.entitiesById[e.sourceId], b = s.entitiesById[e.targetId], here2 = a?.alive && b?.alive && a.residency.spaceInstanceId === e.spaceInstanceId && b.residency.spaceInstanceId === e.spaceInstanceId;
+    if (!here2 || s.tick >= e.expiresTick) {
+      const linger = here2 && e.phase === "freeze" ? heroRank(Object.values(s.playersById ?? {}).find((p) => p.entityId === e.sourceId), "deep_freeze") : 0;
+      if (linger) {
+        s.subweaponCombat.controls[id2] = { id: e.id, sourceId: e.sourceId, targetId: e.targetId, spaceInstanceId: e.spaceInstanceId, phase: "chill", stacks: 1, appliedTick: s.tick, expiresTick: s.tick + 60 * linger, ...chillSince(s, a, null) };
+        continue;
+      }
+      delete s.subweaponCombat.controls[id2];
+    }
   }
 }
 function frostMovementRates(s) {
@@ -141246,7 +141253,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       damage(a, t, raw, "frost", commandId, { sourceItem: damageSourceItem(owner(a), "frost"), trigger: "skill" });
       if (!t.alive || isPodCombatTargetV4(t)) continue;
       const def = definition2(t), phase3 = def.isBoss === true ? full(n) ? "chill" : "boss-slow" : !full(n) && (def.isElite === true || def.isMiniboss) ? "chill" : "freeze", id2 = a.entityId + "/" + t.entityId;
-      c.controls[id2] = { id: id2, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase: phase3, stacks: phase3 === "chill" ? 3 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase3 === "chill" ? controlTicks(a, chill, 360) : phase3 === "boss-slow" ? 90 : controlTicks(a, Math.round(60 * (100 + 10 * rank(a, "deep_freeze")) / 100) + 18 * n, freezeCap(t))), ...phase3 === "chill" ? chillSince(s, a, c.controls[id2]) : {} };
+      c.controls[id2] = { id: id2, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase: phase3, stacks: phase3 === "chill" ? 3 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase3 === "chill" ? controlTicks(a, chill, 360) : phase3 === "boss-slow" ? 90 : controlTicks(a, Math.round(60 * (100 + 10 * rank(a, "cold_snap")) / 100) + 18 * n, freezeCap(t))), ...phase3 === "chill" ? chillSince(s, a, c.controls[id2]) : {} };
       if (phase3 === "freeze") frozen.push(c.controls[id2]);
       mageEarns(a, phase3 === "freeze" ? freezePips(a) : 1);
     }
@@ -143764,10 +143771,10 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     }
     if (element === "lightning") hops.forEach((hop, k) => skills.castImpact(damage, source3, hop.target, stormRaw, "lightning", b.commandId, { sourceItem: b.sourceItem, trigger: "proc", chainFrom: hop.from }));
     if (element === "frost") {
-      if (eligible2(source3, target) && !isPodCombatTargetV4(target)) applyFrostControl(s, source3, target, stats3(source3.entityId), 240 + 24 * tree2("cold_snap"), tree2("frostbinder"), 10 * tree2("deep_freeze"));
+      if (eligible2(source3, target) && !isPodCombatTargetV4(target)) applyFrostControl(s, source3, target, stats3(source3.entityId), 240 + 24 * tree2("cold_snap"), tree2("frostbinder"), 10 * tree2("cold_snap"));
       for (const t of effects2.nearby(source3, origin, FIRE_BURST * A2)) if (t.entityId !== target.entityId && eligible2(source3, t)) {
         damage(source3, t, multiplyCombat(raw, 20, 100), "frost", b.commandId, { sourceItem: b.sourceItem, trigger: "proc" });
-        if (!isPodCombatTargetV4(t) && combatRoll(c.actors[source3.entityId], combatAmount(FROST_BURST_CHILL, 100))) applyFrostControl(s, source3, t, stats3(source3.entityId), 240 + 24 * tree2("cold_snap"), tree2("frostbinder"), 10 * tree2("deep_freeze"));
+        if (!isPodCombatTargetV4(t) && combatRoll(c.actors[source3.entityId], combatAmount(FROST_BURST_CHILL, 100))) applyFrostControl(s, source3, t, stats3(source3.entityId), 240 + 24 * tree2("cold_snap"), tree2("frostbinder"), 10 * tree2("cold_snap"));
       }
       for (const t of neighbors) effects2.status(source3, t, "slow", overload, 240);
     }
@@ -170226,13 +170233,13 @@ var CLASS_TREE_RANKS = freezeWire({
   brittle: [["Chilled and frozen enemies take {v}% more damage", 4]],
   bulwark_stance: [["Each block: {v}% less damage taken (stacks 3 times)", 2]],
   cinder_step: [["Fire trail burns for {v}% Attack", 10], CD("Blink")],
-  cold_snap: [["Chills last {v}% longer", 10]],
+  cold_snap: [["Chills and freezes last {v}% longer", 10]],
   concussion: [["Stuns slow bosses {v}%", 6]],
   contagious: [["Rupture spreads Bleed to {v} {enemy|enemies}", 1]],
   coup_de_grace: [["Below 25% health: {v}% more crit damage", 6]],
   crosscut: [["Dash cuts for {v}% Attack", 15]],
   crowd_breaker: [["Breaker hits on 3+ enemies deal {v}% more", 5]],
-  deep_freeze: [["Freezes last {v}% longer", 10]],
+  deep_freeze: [["Chilled for {v}s after a freeze", 1]],
   duel: [["One enemy near: +{v}% Attack", 4]],
   echoing_burst: [["Glacial Burst gives back {v}% of its Barrier", 5]],
   elemental_overload: [["New-element hits deal {v}% bonus damage", 5]],
