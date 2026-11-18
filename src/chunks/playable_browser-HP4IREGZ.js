@@ -137717,27 +137717,75 @@ function arenaBossIdsV2(s, floor) {
   return (floor.enemyIds ?? []).filter((id2, i) => s.bossCombat?.bossesByEntityId?.[id2] || i === 0 && siteEndRoleV1(floor, id2));
 }
 var arenaBossStandsV2 = (s, floor) => arenaBossIdsV2(s, floor).some((id2) => s.entitiesById[id2]?.alive);
+var RESPAWN_NEARBY_V1 = Object.freeze({ minTiles: 6, safeTiles: 9, searchTiles: 28, maximumNodes: 3200 });
+function nearbyRespawnSpotsV1(s, actor, avoidBox = null) {
+  const space = actor.residency.spaceInstanceId, collision = s.spacesByInstanceId?.[space]?.collision, from = actor.position;
+  if (!collision || !from) return [];
+  const T120 = collision.tileSize, P28 = RESPAWN_NEARBY_V1, hull3 = actor.hullRadius ?? 9, sx = Math.floor(from.x / T120), sy = Math.floor(from.y / T120);
+  const foes = Object.values(s.entitiesById ?? {}).filter((e) => e.alive && e.team === "hostile" && e.residency?.spaceInstanceId === space && Math.hypot(e.position.x - from.x, e.position.y - from.y) < (P28.searchTiles + P28.safeTiles + 2) * T120).map((e) => e.position);
+  const safe = P28.safeTiles * T120, min = P28.minTiles * T120, seen5 = /* @__PURE__ */ new Set([sx + "," + sy]), queue = [[sx, sy]], out4 = [];
+  for (let i = 0; i < queue.length && i < P28.maximumNodes; i++) {
+    const [x, y] = queue[i], c = { x: (x + 0.5) * T120, y: (y + 0.5) * T120 }, d = Math.hypot(c.x - from.x, c.y - from.y);
+    if (d >= min && !(avoidBox && inArenaBoxV1(avoidBox, c)) && !foes.some((f) => Math.hypot(f.x - c.x, f.y - c.y) < safe)) out4.push(c);
+    for (const [dx, dy] of [[0, -1], [-1, 0], [1, 0], [0, 1]]) {
+      const nx = x + dx, ny = y + dy, k = nx + "," + ny;
+      if (seen5.has(k) || Math.hypot(nx - sx, ny - sy) > P28.searchTiles) continue;
+      seen5.add(k);
+      if (!collidesWithTiles(collision, (nx + 0.5) * T120, (ny + 0.5) * T120, hull3)) queue.push([nx, ny]);
+    }
+  }
+  return out4;
+}
+function nearbyTargetV1(s, actor, avoidBox) {
+  const space = actor.residency.spaceInstanceId;
+  for (const at9 of nearbyRespawnSpotsV1(s, actor, avoidBox).slice(0, 24)) {
+    const t = sitePartyArrivalTarget(s, actor, space, at9);
+    if (t) return { kind: "nearby", label: "close by", settlementId: null, ...t };
+  }
+  return null;
+}
+var NEARBY = { kind: "nearby", label: "close by", settlementId: null };
 function respawnDestinationV2(s, actor) {
   if (!s.d9World?.plannedWorld) return null;
+  if (actor.residency.spaceInstanceId === s.overworldInstanceId) return s.spacesByInstanceId?.[s.overworldInstanceId]?.collision ? NEARBY : fallbackDestinationV1(s, actor);
+  const at9 = siteFloorOfV2(s, actor);
+  if (!at9) return null;
+  const arena = floorArenaV2(at9.site, at9.floor);
+  if (arena && inArenaBoxV1(arena.box, actor.position) && arenaBossStandsV2(s, at9.floor)) return { kind: "arena", label: "outside the arena", settlementId: null };
+  return NEARBY;
+}
+function fallbackDestinationV1(s, actor) {
   if (actor.residency.spaceInstanceId === s.overworldInstanceId) {
     const town = nearestFoundTownV2(s, actor);
     return town ? { kind: "town", label: town.label, settlementId: town.id } : null;
   }
   const at9 = siteFloorOfV2(s, actor);
   if (!at9) return null;
-  const arena = floorArenaV2(at9.site, at9.floor);
-  if (arena && inArenaBoxV1(arena.box, actor.position) && arenaBossStandsV2(s, at9.floor)) return { kind: "arena", label: "outside the arena", settlementId: null };
   const floors = functionalSiteFloorsD12(at9.site).length;
   return { kind: "floor", label: floors > 1 ? `Floor ${at9.floor.index + 1}'s start` : "the entrance", settlementId: null };
 }
 function respawnPreparationV2(s, actor) {
-  const d = respawnDestinationV2(s, actor);
+  let d = respawnDestinationV2(s, actor);
+  if (d?.kind === "nearby") {
+    if (nearbyRespawnSpotsV1(s, actor, arenaBoxOfV1(s, actor)).length) return { kind: "nearby" };
+    d = fallbackDestinationV1(s, actor);
+  }
   if (d?.kind !== "town") return d ? { kind: d.kind } : null;
   return { kind: "town", address: fastTravelArrivalAddress(s, d.settlementId), chunks: fastTravelPreparationChunks(s, d.settlementId) };
 }
+function arenaBoxOfV1(s, actor) {
+  const at9 = siteFloorOfV2(s, actor), arena = at9 && floorArenaV2(at9.site, at9.floor);
+  return arena && arenaBossStandsV2(s, at9.floor) ? arena.box : null;
+}
 function respawnTargetV2(s, actor) {
-  const d = respawnDestinationV2(s, actor);
+  let d = respawnDestinationV2(s, actor);
   if (!d) return null;
+  if (d.kind === "nearby") {
+    const t2 = nearbyTargetV1(s, actor, arenaBoxOfV1(s, actor));
+    if (t2) return t2;
+    d = fallbackDestinationV1(s, actor);
+    if (!d) return null;
+  }
   if (d.kind === "town") {
     const t2 = fastTravelArrivalV1(s, actor, d.settlementId);
     return t2 ? { ...d, spaceInstanceId: t2.spaceInstanceId, position: t2.position } : null;
@@ -179763,7 +179811,7 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
     set("world-death-level", `Level ${xpText(xp.level)}`);
     set("world-death-xp", xp.capped ? `XP ${xpText(xp.totalXp)} \xB7 Maximum level` : `XP ${xpText(xp.totalXp)} total \xB7 ${xpText(xp.current)}/${xpText(xp.required)} to next level`);
     const arena = model.recovery.kind === "arena";
-    set("world-death-anchor", arena ? "Respawn outside the arena" : /^outside /.test(model.recovery.anchorLabel) ? `Respawn ${model.recovery.anchorLabel}` : `Respawn at ${model.recovery.anchorLabel}`);
+    set("world-death-anchor", arena ? "Respawn outside the arena" : /^(outside |close by)/.test(model.recovery.anchorLabel) ? `Respawn ${model.recovery.anchorLabel}` : `Respawn at ${model.recovery.anchorLabel}`);
     const waiting = deathWaitingV1(model) ? "Waiting for a revive \xB7 " : "";
     set("world-death-note", waiting + (arena ? "No XP lost \xB7 The boss heals back to full if no one is left inside" : "No XP lost"));
     const w = wakeMs ? Math.min(1, Math.round((now3() - shownAt) / wakeMs * 50) / 50) : 1;
