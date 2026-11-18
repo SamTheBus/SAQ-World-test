@@ -2090,3 +2090,27 @@ body #world-inventory.rpg-menu>.rm-sub[hidden]{display:none}
 body #world-inventory.rpg-menu button.rm-subtab{flex:1 1 0;max-width:170px;min-width:0;min-height:0;height:36px;margin:0;padding:0 10px;border-radius:10px;border:1px solid #33404d;background:#151d26;box-shadow:none;color:#aeb5b6;font:700 13px/1 system-ui,sans-serif;letter-spacing:.02em;text-transform:none;cursor:pointer}
 body #world-inventory.rpg-menu button.rm-subtab[hidden]{display:none}
 body #world-inventory.rpg-menu button.rm-subtab[aria-selected=true]{border-color:#c9a35a;background:#2a2412;color:#f0c862;box-shadow:inset 0 -3px 0 #f0c862}
+/* Interact button v3 (2026-11-18): the HUD v3 slate pill with a gold E key, a kind icon and a revive fill bar.
+   Position rules above are kept; only the look changes. interaction_hud_v2.js builds the parts. */
+body #rpg-interaction-v2{gap:11px;min-height:56px;padding:7px 18px 7px 8px;border:2px solid #0b1015;border-radius:999px;background:radial-gradient(120% 160% at 30% 0%,#5c6d78 0%,#2b3b46 55%,#17242e 100%);box-shadow:inset 0 0 0 1px #d4b98a,inset 0 1px 0 #ffffff22,0 3px 0 #070b10,0 10px 22px #0007;color:#f4ecd8;overflow:visible}
+body #rpg-interaction-v2 kbd{position:relative;display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff1b8,#f0c862 45%,#b8862e 100%);box-shadow:0 0 0 2px #0b1015,inset 0 -3px 0 #8a6420,inset 0 1px 0 #fff8;color:#2a1c05;font:900 18px/1 var(--rpg-ui)}
+body #rpg-interaction-v2 kbd::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid #f0c86288;pointer-events:none}
+body #rpg-interaction-v2 kbd::after{content:none}
+body #rpg-interaction-v2 kbd b{font:inherit}body #rpg-interaction-v2 kbd i{display:none}body #rpg-interaction-v2 kbd i svg{width:22px;height:22px;display:block}
+body #rpg-interaction-v2>.interaction-icon,body #rpg-interaction-alt-v1>.interaction-icon{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:9px;background:#0b101566;box-shadow:inset 0 0 0 1px #d4b98a44}
+body #rpg-interaction-v2>.interaction-icon svg,body #rpg-interaction-alt-v1>.interaction-icon svg{width:19px;height:19px;display:block}
+body #rpg-interaction-v2>.interaction-copy,body #rpg-interaction-alt-v1>.interaction-copy{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;flex:1}
+body #rpg-interaction-v2 small{font:700 9.5px/1 var(--rpg-ui);letter-spacing:.14em;text-transform:uppercase;color:#d4b98a;white-space:nowrap}
+body #rpg-interaction-v2 strong{font:700 15px/1.15 var(--rpg-ui);color:#f6eedb;text-shadow:0 1px 0 #0008;overflow-wrap:anywhere}
+body #rpg-interaction-v2 .interaction-tap{display:none}
+body #rpg-interaction-v2>.interaction-bar{position:absolute;left:58px;right:20px;bottom:6px;height:3px;border-radius:2px;background:#0b101599;overflow:hidden;pointer-events:none}
+body #rpg-interaction-v2>.interaction-bar[hidden]{display:none}
+body #rpg-interaction-v2>.interaction-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#c9963a,#f0c862)}
+@media(hover:hover) and (pointer:fine){body #rpg-interaction-v2:hover{background:radial-gradient(120% 160% at 30% 0%,#6a7c88 0%,#334552 55%,#1b2a35 100%);border-color:#0b1015}}
+body #rpg-interaction-v2:active kbd{transform:translateY(1px);box-shadow:0 0 0 2px #0b1015,inset 0 -1px 0 #8a6420}
+@media(pointer:coarse){body #rpg-interaction-v2 kbd{font-size:18px}body #rpg-interaction-v2 kbd b{display:none}body #rpg-interaction-v2 kbd i{display:block}}
+@media(max-width:700px){body #rpg-interaction-v2 strong{font-size:14px}}
+body #rpg-interaction-alt-v1{flex-direction:row;align-items:center;gap:8px;min-height:40px;padding:5px 16px 5px 6px;border:2px solid #0b1015;border-radius:999px;background:radial-gradient(120% 160% at 30% 0%,#6b5a2c 0%,#3d3016 60%,#241c0c 100%);box-shadow:inset 0 0 0 1px #f0c862,0 3px 0 #070b10;color:#ffe9b8;text-align:left}
+body #rpg-interaction-alt-v1>.interaction-icon{width:28px;height:28px;border-radius:50%}
+body #rpg-interaction-alt-v1 small{font:700 9.5px/1 var(--rpg-ui,system-ui);letter-spacing:.14em;color:#e2c47e}
+body #rpg-interaction-alt-v1 strong{font:700 13.5px/1.1 var(--rpg-ui,system-ui)}

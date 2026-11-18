@@ -173825,6 +173825,14 @@ function createInventoryPresentation({ document: document2, environment, readMod
 
 // src/client/interaction_hud_v2.js
 var PICKUP_CONTEXT_V2 = "rpg-context:pickup";
+var ICON_PATHS2 = Object.freeze({ door: "M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M4 21h16M14 12h.01", shop: "M4 9h16l-1.5 11h-13zM8 9V7a4 4 0 0 1 8 0v2", loot: "M4 10h16v10H4zM4 10l2-5h12l2 5M10 14h4", cave: "M3 20c0-6 4-12 9-12s9 6 9 12M8 20c0-3 1.8-6 4-6s4 3 4 6", skull: "M12 3a7 7 0 0 0-7 7c0 2.5 1.3 4 2.5 5v3h9v-3c1.2-1 2.5-2.5 2.5-5a7 7 0 0 0-7-7zM9.5 11h.01M14.5 11h.01M10 18v3M14 18v3", heart: "M12 20l-7-7a4.5 4.5 0 0 1 7-5.6A4.5 4.5 0 0 1 19 13z", scroll: "M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7M7 4a2 2 0 0 0-2 2v1h4M7 4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2M12 9h4M12 13h4", boat: "M3 16h18l-2.5 4h-13zM12 3v13M12 4l6 9h-6", star: "M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z", anvil: "M3 8h13c0 2.5 2 4 5 4v1h-6l-1 3h2v3H8v-3h2l-1-3C5 13 3 11 3 8z", hand: "M9 11V5a1.5 1.5 0 0 1 3 0v5M12 10V4a1.5 1.5 0 0 1 3 0v6M15 10V6a1.5 1.5 0 0 1 3 0v7a7 7 0 0 1-7 7c-2.5 0-4-1-5.5-3L3 13a1.5 1.5 0 0 1 2.3-1.9L7 13V8a1.5 1.5 0 0 1 3 0", up: "M12 19V5M6 11l6-6 6 6" });
+var KIND_ICONS = Object.freeze({ "Door": "door", "Passage": "door", "Dungeon passage": "cave", "Settlement service": "shop", "Ground loot": "loot", "Nearby object": "hand", "Notice board": "scroll", "Quest": "scroll", "Field note": "scroll", "Ferry landing": "boat", "World event": "star", "Workshop": "anvil" });
+function interactionIconV2(kind = "", label7 = "") {
+  if (/revive/i.test(kind) || /^revive/i.test(label7)) return "heart";
+  if (/boss/i.test(label7)) return "skull";
+  return KIND_ICONS[kind] ?? (/ascend|up/i.test(label7) ? "up" : "door");
+}
+var iconSvg = (name, color28) => `<svg viewBox="0 0 24 24" fill="none" stroke="${color28}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICON_PATHS2[name] ?? ICON_PATHS2.door}"/></svg>`;
 var REVIVE_CONTEXT_V2 = "rpg-context:revive:";
 var CLASS_NAMES4 = Object.freeze({ shield: "Knight", dagger: "Rogue", tome: "Mage" });
 function reviveChoice(model, actor) {
@@ -173862,12 +173870,20 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
   button3.id = "rpg-interaction-v2";
   button3.hidden = true;
   button3.dataset.gameplayHud = "";
-  const key4 = doc.createElement("kbd"), copy4 = doc.createElement("span"), kind = doc.createElement("small"), label7 = doc.createElement("strong"), tap = doc.createElement("span");
-  key4.textContent = "E";
+  const key4 = doc.createElement("kbd"), keyE = doc.createElement("b"), keyHand = doc.createElement("i"), icon2 = doc.createElement("span"), copy4 = doc.createElement("span"), kind = doc.createElement("small"), label7 = doc.createElement("strong"), tap = doc.createElement("span"), bar2 = doc.createElement("span"), fill9 = doc.createElement("i");
+  keyE.textContent = "E";
+  keyHand.innerHTML = iconSvg("hand", "#2a1c05");
+  key4.append(keyE, keyHand);
+  icon2.className = "interaction-icon";
+  bar2.className = "interaction-bar";
+  bar2.hidden = true;
+  bar2.append(fill9);
   tap.className = "interaction-tap";
   tap.textContent = "Tap";
+  copy4.className = "interaction-copy";
   copy4.append(kind, label7);
-  button3.append(key4, copy4, tap);
+  button3.append(key4, icon2, copy4, tap, bar2);
+  let iconName = "";
   doc.getElementById("world-view").parentElement.append(button3);
   doc.body.dataset.rpgInteraction = "v2";
   let previous = "", writes = 0;
@@ -173880,12 +173896,15 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
     const chosen = interactionChoiceV2(readModel());
     if (chosen) activate(chosen.exitId);
   } });
-  const alt = doc.createElement("button"), altKind = doc.createElement("small"), altLabel = doc.createElement("strong");
+  const alt = doc.createElement("button"), altIcon = doc.createElement("span"), altCopy = doc.createElement("span"), altKind = doc.createElement("small"), altLabel = doc.createElement("strong");
   alt.type = "button";
   alt.id = "rpg-interaction-alt-v1";
   alt.hidden = true;
   alt.dataset.gameplayHud = "";
-  alt.append(altKind, altLabel);
+  altIcon.className = "interaction-icon";
+  altCopy.className = "interaction-copy";
+  altCopy.append(altKind, altLabel);
+  alt.append(altIcon, altCopy);
   const holder = doc.getElementById("world-view").parentElement;
   holder.append(alt);
   let altKey = "";
@@ -173922,6 +173941,7 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
         altKey = k;
         altKind.textContent = a.kind;
         altLabel.textContent = a.label;
+        altIcon.innerHTML = iconSvg(interactionIconV2(a.kind, a.label), "#f0c862");
         alt.setAttribute("aria-label", a.label);
       }
       place4();
@@ -173931,10 +173951,18 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
       return false;
     }
     const signature = target.exitId + "|" + target.kind + "|" + target.label;
+    const holding = model.revive?.holding;
+    bar2.hidden = !(holding && target.exitId === REVIVE_CONTEXT_V2 + holding.playerId);
+    if (!bar2.hidden && fill9.style) fill9.style.width = Math.round(Math.min(1, Math.max(0, holding.progress)) * 100) + "%";
     if (signature !== previous) {
       previous = signature;
       kind.textContent = target.kind;
       label7.textContent = target.label;
+      const n = interactionIconV2(target.kind, target.label);
+      if (n !== iconName) {
+        iconName = n;
+        icon2.innerHTML = iconSvg(n, "#e8d3a4");
+      }
       button3.setAttribute("aria-label", target.label + "; press E or tap");
       writes++;
     }
