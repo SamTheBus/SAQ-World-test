@@ -116663,7 +116663,7 @@ var M = {
   blueInner: { b: "#d9e6f5", d: "#b8cde6" },
   rope: { b: "#c8a46a", d: "#a5844f" },
   steel: { b: "#a9b3ba", d: "#7f8a92", l: "#d0d7dc" },
-  darkSteel: { b: "#6c777e", d: "#545e64" },
+  darkSteel: { b: "#6c777e", d: "#545e64", l: "#8a959c" },
   oak: { b: "#7a4e27", d: "#5c3a1d" },
   willow: { b: "#b08a55", d: "#8c6b3e" }
 };
@@ -124100,7 +124100,7 @@ var MG = {
   ochre: { b: "#c8862e", d: "#9c6620", l: "#e0a24a" },
   navy: { b: "#2c3a73", d: "#212c58", l: "#3f529a" },
   navyDark: { b: "#212c58", d: "#1a2246" },
-  silver: { b: "#9fb0de", d: "#7d8fc2" },
+  silver: { b: "#9fb0de", d: "#7d8fc2", l: "#c4d0ee" },
   crimson: { b: "#8e2f3c", d: "#6b222d", l: "#b04452" },
   crimsonDark: { b: "#6b222d", d: "#561b24" },
   black: { b: "#2a2230", d: "#1d1722", l: "#3d3346" },
