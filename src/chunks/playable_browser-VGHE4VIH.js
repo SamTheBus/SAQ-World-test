@@ -174240,6 +174240,10 @@ function createSettlementServicesMenu2(options) {
  #settlement-services .tn-pgrid .tn-st,#settlement-services .tn-pgrid .tn-lv{background:none;text-shadow:0 1px 2px #000;font-weight:800}#settlement-services .tn-pgrid .tn-lv{left:0;right:0;text-align:center}
  #settlement-services .tn-slotn{font:600 10.5px/1 system-ui,sans-serif;color:var(--tn-dim);max-width:66px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
  #settlement-services .tn-pgrid .tn-cell[aria-pressed=true] .tn-tile{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--r) 80%,#000),0 0 0 2px #0c1117,0 0 0 4px var(--tn-gold),0 0 18px #f0c86255}#settlement-services .tn-pgrid .tn-cell[aria-pressed=true] .tn-slotn{color:var(--tn-gold)}
+ #settlement-services .tn-pgrid .tn-cell,#settlement-services .tn-pgrid .tn-cell[aria-pressed=true]{background:none} #settlement-services .tn-pgrid .tn-pr{font-size:11px}#settlement-services .tn-pick .tn-restock{margin:0;padding:8px 10px;background:#111820}#settlement-services .tn-pgrid .tn-cell.is-picked .tn-tile{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--r) 80%,#000),0 0 0 2px #0c1117,0 0 0 4px var(--tn-gold)}
+ #settlement-services .tn-detail{display:flex;flex-direction:column;gap:10px}#settlement-services .tn-detail>.tn-sec:first-of-type{border-top:0;padding-top:0}
+ #settlement-services .tn-sale{display:grid;gap:6px}#settlement-services .tn-salebig{display:flex;align-items:center;gap:10px;font:800 30px/1 system-ui,sans-serif;color:var(--tn-gold);font-variant-numeric:tabular-nums}#settlement-services .tn-salebig .tn-coin{width:26px;height:26px}#settlement-services .tn-salelist{display:grid;gap:0;padding:6px 12px}#settlement-services .tn-salelist .tn-ln+.tn-ln{border-top:1px solid var(--tn-line2)}
+ #settlement-services .tn-inncard{display:grid;gap:8px}#settlement-services .tn-inncard .tn-ln b{font-variant-numeric:tabular-nums}
  #settlement-services .tn-side{display:contents}#settlement-services .tn-pickcard{order:-2}#settlement-services .tn-pick{order:-1}
  #settlement-services .tn-pickcard{background:linear-gradient(135deg,color-mix(in srgb,var(--r) 18%,#151d26),#121920 60%);border:1px solid color-mix(in srgb,var(--r) 45%,var(--tn-line));padding:14px}
  #settlement-services .tn-pickcard .tn-ihead{gap:14px}#settlement-services .tn-pickcard .tn-ihead .tn-tile{width:80px;height:80px;border-radius:18px}#settlement-services .tn-pickcard .tn-ihead .tn-tile img{width:60px;height:60px}#settlement-services .tn-pickcard .tn-iname{font:700 19px/1.15 Georgia,'Times New Roman',serif}#settlement-services .tn-pickcard .tn-isub{margin-top:4px}
@@ -174399,7 +174403,7 @@ function createSettlementServicesMenu2(options) {
     i.style.setProperty("--m", MATS[k] ?? "#9a6bff");
     return i;
   };
-  const price = (n, cls) => {
+  const color28 = (d) => `color-mix(in srgb,${RARITY_COLORS[tierOf2(d)]} 70%,#fff)`, price = (n, cls) => {
     const s = el3("span", void 0, "tn-pr" + (cls ? " " + cls : ""));
     s.append(coin3(), formatAmount(n));
     return s;
@@ -174462,13 +174466,20 @@ function createSettlementServicesMenu2(options) {
     return h;
   }
   function itemSheet(item2, inv, foot2, notes = []) {
-    const d = itemDefinition(item2), w = wornFor(inv, d), sec4 = sectionsOf(item2), cmp = w ? compareSections(sec4, [sectionsOf(w)]) : { base: sec4.base.map((l) => ({ ...l, mark: "new" })), affixes: sec4.affixes.map((l) => ({ ...l, mark: "new" })) };
-    const s = el3("div", void 0, "tn-sheet");
+    const d = itemDefinition(item2), s = el3("div", void 0, "tn-sheet");
     s.style.setProperty("--r", RARITY_COLORS[tierOf2(d)]);
     s.setAttribute("role", "dialog");
     s.setAttribute("aria-label", displayName(d));
     const sc2 = el3("div", void 0, "tn-sheetscroll");
-    sc2.append(itemHead(item2));
+    sc2.append(itemHead(item2), ...itemDetails(item2, inv, notes));
+    const f = el3("div", void 0, "tn-foot");
+    f.append(...foot2);
+    s.append(sc2, f);
+    return s;
+  }
+  function itemDetails(item2, inv, notes = []) {
+    const d = itemDefinition(item2), w = wornFor(inv, d), sec4 = sectionsOf(item2), cmp = w ? compareSections(sec4, [sectionsOf(w)]) : { base: sec4.base.map((l) => ({ ...l, mark: "new" })), affixes: sec4.affixes.map((l) => ({ ...l, mark: "new" })) };
+    const sc2 = doc.createDocumentFragment();
     if (w) {
       const c = el3("div", void 0, "tn-cmp"), n = el3("b", displayName(itemDefinition(w)));
       n.style.color = RARITY_COLORS[tierOf2(itemDefinition(w))];
@@ -174500,19 +174511,16 @@ function createSettlementServicesMenu2(options) {
       for (const l of cmp.affixes) {
         box6.append(lineRow(l));
         if (l.roll && !l.roll.fixed) {
-          const bar2 = el3("div", void 0, "tn-roll" + (l.roll.max ? " is-max" : "")), f2 = el3("i");
-          f2.style.width = (l.roll.quality * 100).toFixed(1) + "%";
-          bar2.append(f2);
+          const bar2 = el3("div", void 0, "tn-roll" + (l.roll.max ? " is-max" : "")), f = el3("i");
+          f.style.width = (l.roll.quality * 100).toFixed(1) + "%";
+          bar2.append(f);
           box6.append(bar2);
         }
       }
       sc2.append(box6);
     }
     if (!flat2.length && !traits.length && !cmp.affixes.length) sc2.append(el3("p", "No stat bonus", "tn-note"));
-    const f = el3("div", void 0, "tn-foot");
-    f.append(...foot2);
-    s.append(sc2, f);
-    return s;
+    return [...sc2.childNodes];
   }
   function costs(parent, gold, materials2, inv, npc, p) {
     if (gold === "0" && !Object.keys(materials2 ?? {}).length) return true;
@@ -174588,12 +174596,13 @@ function createSettlementServicesMenu2(options) {
     }
     if (kind === "inn") {
       const hero = m.entitiesById?.[m.playersById[m.localPlayerId].entityId], hp = Number(hero?.hpExact ?? 0) || 0, max = Number(hero?.maxHpExact ?? 0) || 0, box6 = el3("div", void 0, "tn-body");
-      const top = el3("div", void 0, "tn-ln");
-      top.append(el3("span", "Health"), el3("span", Math.round(hp) + " / " + Math.round(max) + (hp < max ? " \u2192 " + Math.round(max) : "")));
+      const card = el3("div", void 0, "tn-card tn-inncard"), top = el3("div", void 0, "tn-ln");
+      top.append(markup(el3("span"), '<svg width="18" height="18" viewBox="0 0 24 24" fill="#e8404a" aria-hidden="true"><path d="M12 21l-7-7C3.5 12.5 2 10.8 2 8.5A5.5 5.5 0 0 1 12 5a5.5 5.5 0 0 1 10 3.5c0 2.3-1.5 4-3 5.5z"/></svg>Health'), el3("b", Math.round(hp) + " / " + Math.round(max)));
       const bar2 = el3("div", void 0, "tn-hp"), fill9 = el3("i");
       fill9.style.width = (max ? Math.min(100, hp / max * 100) : 0).toFixed(1) + "%";
       bar2.append(fill9);
-      box6.append(top, bar2);
+      card.append(top, bar2, el3("p", hp < max ? "A night by the fire heals you to " + Math.round(max) + "." : "Rest heals you fully. Potions refill free in town.", "tn-hint is-left"));
+      box6.append(card);
       if (notice) box6.append(el3("p", notice, "tn-note" + (bad ? " is-warn" : "")));
       const rest2 = button3("", () => issue("service.rest", { npcId }), "rest", "tn-btn is-gold");
       rest2.append("Rest by the fire \xB7 ", coin3(), formatAmount(SETTLEMENT_LIFE_POLICY.rest.price));
@@ -174623,7 +174632,7 @@ function createSettlementServicesMenu2(options) {
     shell5.append(wallet);
     const modes = kind === "forge" ? [...[["attune", "Upgrade"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["shatter", "Salvage"], ["break", "Scraps"]].filter(([id2]) => npc.services.includes(id2 === "break" ? "shatter" : id2)), ...npc.stock?.length ? [["gear", "Buy"]] : []] : kind === "altar" ? [["enchant", "Enchant"], ["purge", "Purge"], ["resonance", "Resonance"], ...npc.services?.includes("rebind") ? [["rebind", "Rebind"]] : [], ["augments", "Augments"]] : kind === "shop" ? [["gear", "Buy"], ["sell", "Sell"], ["supplies", "Potions"]] : [["supplies", "Potions"]];
     if (!modes.some(([id2]) => id2 === mode)) mode = modes[0][0];
-    panel.dataset.layout = ["reforge", "awaken", "shatter", "enchant", "purge", "resonance", "rebind"].includes(mode) ? "work" : "";
+    panel.dataset.layout = ["reforge", "awaken", "shatter", "enchant", "purge", "resonance", "rebind", "gear", "sell"].includes(mode) ? "work" : "";
     if (modes.length > 1) {
       const tabs = el3("nav", void 0, "tn-tabs");
       tabs.setAttribute("aria-label", "Services");
@@ -174648,44 +174657,67 @@ function createSettlementServicesMenu2(options) {
     shell5.append(body6);
     const foot2 = el3("div", void 0, "tn-foot");
     if (mode === "gear") {
-      const offers = npc.stock ?? [], kinds2 = new Set(offers.map((q3) => bagFilterOf(itemDefinition(q3.item))));
-      if (!kinds2.has(filter)) filter = "all";
-      if (npc.restockTicks != null && offers.length) {
-        const r = el3("div", void 0, "tn-restock"), txt = el3("div"), top = Math.max(...offers.map((q3) => q3.item.generated?.rarityTier ?? 0)), mins = Math.max(1, Math.ceil(npc.restockTicks / 3600));
-        r.innerHTML = RESTOCK;
-        txt.append(el3("b", "Restocks at dawn"), el3("small", offers.length + " items \xB7 " + (npc.tier === "village" ? "up to Uncommon" : npc.tier === "town" ? "up to Rare" : "up to Epic")));
-        r.append(txt, el3("span", mins >= 60 ? "1 h" : mins + " min", "tn-when"));
-        r.title = "Shops restock at 06:00 each in-game day";
-        body6.append(r);
+      const offers = npc.stock ?? [], kinds2 = {};
+      for (const q2 of offers) {
+        const k = bagFilterOf(itemDefinition(q2.item));
+        kinds2[k] = (kinds2[k] ?? 0) + 1;
       }
-      if (kinds2.size > 1) body6.append(chips3(FILTERS.filter(([id2]) => id2 === "all" || kinds2.has(id2)), filter, (id2) => {
-        filter = id2;
-        redraw();
-      }));
-      const grid = el3("div", void 0, "tn-grid");
-      for (const q3 of offers) {
-        if (filter !== "all" && bagFilterOf(itemDefinition(q3.item)) !== filter) continue;
-        const allowed = equipmentLevelAllowed(p, q3.item);
-        grid.append(cell(q3.item, { badge: !allowed ? "lock" : !q3.purchased && isUpgradeOver(q3.item, inv) ? "up" : null, cost: q3.price, costClass: compareAmount(inv.gold, q3.price) < 0 ? "is-short" : null, label: q3.purchased ? "Sold" : null, cls: (q3.purchased ? "is-sold" : "") + (sheet2 === q3.id ? " is-viewed" : ""), fn: () => {
-          sheet2 = q3.id;
-          redraw();
-        }, id: "item:" + q3.id }));
-      }
-      if (offers.length) {
-        body6.append(grid, el3("p", "Tap an item to see it and compare. What you buy stays sold until dawn.", "tn-hint"));
-      } else body6.append(el3("p", "Nothing for sale here.", "tn-empty"));
-      const q2 = offers.find((q3) => q3.id === sheet2);
-      if (q2) {
-        const required = equipmentRequiredLevel(p, q2.item), notes = required !== null && !equipmentLevelAllowed(p, q2.item) ? ["You can wear this at hero level " + required + "."] : [];
-        const shut = button3("Close", () => {
-          sheet2 = null;
-          redraw();
-        }, "close-item", "tn-btn"), buy = button3("", () => issue("service.buy", { npcId, offerId: q2.id }), "buy:" + q2.id, "tn-btn is-gold");
+      if (filter !== "all" && !kinds2[filter]) filter = "all";
+      if (!offers.length) {
+        panel.dataset.layout = "";
+        body6.append(el3("p", "Nothing for sale here.", "tn-empty"));
+      } else {
+        if (!offers.some((q3) => q3.id === sheet2)) sheet2 = (offers.find((q3) => !q3.purchased) ?? offers[0]).id;
+        const pick4 = el3("div", void 0, "tn-pick"), ph = el3("div", void 0, "tn-pickh");
+        ph.append(el3("b", "For sale"), el3("small", offers.length + " items" + (npc.tier ? " \xB7 " + (npc.tier === "village" ? "up to Uncommon" : npc.tier === "town" ? "up to Rare" : "up to Epic") : "")));
+        pick4.append(ph);
+        if (npc.restockTicks != null) {
+          const r = el3("div", void 0, "tn-restock"), txt = el3("div"), mins = Math.max(1, Math.ceil(npc.restockTicks / 3600));
+          r.innerHTML = RESTOCK;
+          txt.append(el3("b", "Restocks at dawn"), el3("small", "What you buy stays sold until then"));
+          r.append(txt, el3("span", mins >= 60 ? "1 h" : mins + " min", "tn-when"));
+          r.title = "Shops restock at 06:00 each in-game day";
+          pick4.append(r);
+        }
+        if (Object.keys(kinds2).length > 1) {
+          const row2 = chips3(FILTERS.filter(([id2]) => id2 === "all" || kinds2[id2]), filter, (id2) => {
+            filter = id2;
+            redraw();
+          });
+          for (const b of row2.children) {
+            const id2 = b.dataset.serviceAction.slice(5);
+            b.append(" ", el3("em", String(id2 === "all" ? offers.length : kinds2[id2])));
+          }
+          pick4.append(row2);
+        }
+        const grid = el3("div", void 0, "tn-pgrid");
+        for (const q3 of offers) {
+          if (filter !== "all" && bagFilterOf(itemDefinition(q3.item)) !== filter) continue;
+          const allowed = equipmentLevelAllowed(p, q3.item), b = cell(q3.item, { named: false, badge: !allowed ? "lock" : !q3.purchased && isUpgradeOver(q3.item, inv) ? "up" : null, cost: q3.price, costClass: compareAmount(inv.gold, q3.price) < 0 ? "is-short" : null, label: q3.purchased ? "Sold" : null, cls: q3.purchased ? "is-sold" : "", fn: () => {
+            sheet2 = q3.id;
+            redraw();
+          }, id: "item:" + q3.id });
+          b.setAttribute("aria-pressed", String(sheet2 === q3.id));
+          grid.append(b);
+        }
+        pick4.append(grid, el3("p", "A green arrow marks an upgrade over what you wear.", "tn-hint is-left"));
+        const side = el3("div", void 0, "tn-side");
+        body6.append(pick4, side);
+        const q2 = offers.find((q3) => q3.id === sheet2), d = itemDefinition(q2.item), required = equipmentRequiredLevel(p, q2.item), notes = required !== null && !equipmentLevelAllowed(p, q2.item) ? ["You can wear this at hero level " + required + "."] : [];
+        const card = el3("div", void 0, "tn-card tn-pickcard");
+        card.style.setProperty("--r", RARITY_COLORS[tierOf2(d)]);
+        card.append(itemHead(q2.item));
+        side.append(card);
+        const det = el3("div", void 0, "tn-card tn-detail");
+        det.append(...itemDetails(q2.item, inv, notes));
+        side.append(det);
+        const buy = button3("", () => issue("service.buy", { npcId, offerId: q2.id }), "buy:" + q2.id, "tn-btn is-gold"), short = compareAmount(inv.gold, q2.price) < 0;
         if (q2.purchased) buy.append("Sold");
-        else if (compareAmount(inv.gold, q2.price) < 0) buy.append("Need ", coin3(), formatAmount(q2.price));
         else buy.append("Buy \xB7 ", coin3(), formatAmount(q2.price));
-        buy.disabled = busy || q2.purchased || compareAmount(inv.gold, q2.price) < 0;
-        shell5.append(itemSheet(q2.item, inv, [shut, buy], notes));
+        buy.disabled = busy || q2.purchased || short;
+        if (!busy && !q2.purchased && short) foot2.append(el3("span", "Not enough gold", "tn-why"));
+        foot2.append(buy);
+        shell5.append(foot2);
       }
     } else if (mode === "sell") {
       const sellable = Object.values(inv.itemsById).map((i) => ({ i, q: saleQuote(p, i) })).filter((x) => x.q !== null);
@@ -174696,22 +174728,47 @@ function createSettlementServicesMenu2(options) {
         confirm = null;
         redraw();
       };
-      if (sellable.length) {
-        body6.append(chips3([["common", "Pick all Commons"], ["uncommon", "Pick all Uncommons"], ["clear", "Clear"]], null, (id2) => id2 === "clear" ? (picks.clear(), confirm = null, redraw()) : pickTier(id2 === "common" ? 0 : 1)));
-        const grid = el3("div", void 0, "tn-grid");
-        for (const { i, q: q2 } of sellable) {
-          const on = picks.has(i.itemId);
-          grid.append(cell(i, { badge: on ? "pick" : null, cost: q2, cls: on ? "is-picked" : "", fn: () => {
+      const chosen = sellable.filter((x) => picks.has(x.i.itemId)), total = chosen.reduce((a, x) => addAmount(a, x.q), "0");
+      if (!sellable.length) {
+        panel.dataset.layout = "";
+        body6.append(el3("p", "Nothing here this merchant will buy. Worn and Unique gear never shows up here.", "tn-empty"));
+      } else {
+        const pick4 = el3("div", void 0, "tn-pick"), ph = el3("div", void 0, "tn-pickh");
+        ph.append(el3("b", "Your bag"), el3("small", sellable.length + " items \xB7 tap to pick"));
+        pick4.append(ph, chips3([["common", "All Commons"], ["uncommon", "All Uncommons"], ["clear", "Clear"]], null, (id2) => id2 === "clear" ? (picks.clear(), confirm = null, redraw()) : pickTier(id2 === "common" ? 0 : 1)));
+        const rank = (i) => {
+          const k = PICK_ORDER.indexOf(itemDefinition(i)?.slot === "ring" ? "ring1" : itemDefinition(i)?.slot);
+          return k < 0 ? 99 : k;
+        }, grid = el3("div", void 0, "tn-pgrid");
+        for (const { i, q: q2 } of [...sellable].sort((a, b) => rank(a.i) - rank(b.i) || tierOf2(itemDefinition(b.i)) - tierOf2(itemDefinition(a.i)))) {
+          const on = picks.has(i.itemId), b = cell(i, { named: false, badge: on ? "pick" : null, cost: q2, cls: on ? "is-picked" : "", fn: () => {
             if (on) picks.delete(i.itemId);
             else picks.add(i.itemId);
             confirm = null;
             redraw();
-          }, id: "pick:" + i.itemId }));
+          }, id: "pick:" + i.itemId });
+          b.setAttribute("aria-pressed", String(on));
+          grid.append(b);
         }
-        body6.append(grid, el3("p", "Worn and Unique gear never shows up here.", "tn-hint"));
-      } else body6.append(el3("p", "Nothing here this merchant will buy. Worn and Unique gear never shows up here.", "tn-empty"));
-      const chosen = sellable.filter((x) => picks.has(x.i.itemId)), total = chosen.reduce((a, x) => addAmount(a, x.q), "0"), sum2 = el3("div", void 0, "tn-sum");
-      sum2.append(el3("b", chosen.length === 1 ? "1 item" : chosen.length + " items"), el3("small", chosen.length ? "Tap Sell to trade them for gold" : "Tap items to pick them"));
+        pick4.append(grid, el3("p", "Worn and Unique gear never shows up here.", "tn-hint is-left"));
+        const side = el3("div", void 0, "tn-side"), card = el3("div", void 0, "tn-card tn-pickcard tn-sale");
+        card.style.setProperty("--r", "#d9b25f");
+        const big = el3("div", void 0, "tn-salebig");
+        big.append(coin3(), "+" + formatAmount(total));
+        card.append(el3("p", "Selling", "tn-sect"), big, el3("small", chosen.length ? chosen.length === 1 ? "1 item picked" : chosen.length + " items picked" : "Tap items on the left to pick them", "tn-isub"));
+        side.append(card);
+        if (chosen.length) {
+          const list = el3("div", void 0, "tn-card tn-salelist");
+          for (const { i, q: q2 } of chosen) {
+            const d = itemDefinition(i), row2 = el3("div", void 0, "tn-ln"), n = el3("span", displayName(d));
+            n.style.color = color28(d);
+            row2.append(n, price(q2));
+            list.append(row2);
+          }
+          side.append(list);
+        }
+        body6.append(pick4, side);
+      }
       const sell = button3("", () => {
         if (confirm === "sell") sellMany(chosen.map((x) => x.i.itemId));
         else {
@@ -174720,9 +174777,9 @@ function createSettlementServicesMenu2(options) {
         }
       }, "sell", "tn-btn is-gold");
       if (confirm === "sell") sell.append("Tap again to sell");
-      else sell.append("Sell \xB7 +", coin3(), formatAmount(total));
+      else sell.append(chosen.length ? "Sell " + chosen.length + " \xB7 +" : "Sell \xB7 +", coin3(), formatAmount(total));
       sell.disabled = busy || !chosen.length;
-      foot2.append(sum2, sell);
+      foot2.append(sell);
       shell5.append(foot2);
     } else if (mode === "supplies") {
       const belt2 = m.potions, card = el3("div", void 0, "tn-card");
