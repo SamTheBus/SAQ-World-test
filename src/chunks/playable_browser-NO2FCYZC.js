@@ -20,6 +20,9 @@ import {
   ARACHNID_TREANT_PROFILE,
   ARTIFACT_PROOF_CATALOG,
   ATTRIBUTE_RESET_GOLD,
+  AUGMENT_CRAFT_VERSION,
+  AUGMENT_RARITY_COLORS,
+  AUGMENT_RARITY_NAMES,
   AUGMENT_SLOTS,
   BANDITS_V1_METADATA,
   BANDITS_V1_VERSION,
@@ -117,6 +120,8 @@ import {
   DUNGEON_MOBS_V2_SOURCE_COMMIT,
   DUNGEON_MOBS_V2_VERSION,
   DurableIdentityConflictError,
+  ELDER_GLYPH_CHANCE,
+  ELDER_GLYPH_OWN_SKILL,
   ELITE_ATTACK_AURA_D12_4H_A_VERSION,
   ELITE_GUARD_D12_4G_VERSION,
   ELITE_HASTE_D12_4D_VERSION,
@@ -141,6 +146,8 @@ import {
   FUNCTIONAL_RUIN_FAMILY,
   GLACIAL_WARDEN_AFFIX_ID,
   GLACIAL_WARDEN_D12_4E,
+  GLYPH_DUST,
+  GLYPH_DUST_DROPS,
   HERO_ARRIVAL_VERSION,
   HERO_CLASSES,
   HERO_NAME_MAX,
@@ -433,6 +440,11 @@ import {
   attunementCost,
   attunementSpent,
   augmentAvailability,
+  augmentCraftOf,
+  augmentCraftProblemV1,
+  augmentLive,
+  augmentPrice,
+  augmentRarity,
   authoredGeographyDefinition,
   autoSalvageEligibleRewards,
   awardEpisodeReward,
@@ -509,6 +521,7 @@ import {
   compositionHashV1,
   copyWire,
   corrosiveShedKindV4,
+  craftAvailability,
   createCampaignAuthority,
   createCampaignStoreTransactions,
   createCommandGatewayContracts,
@@ -616,6 +629,7 @@ import {
   generatedTownV1,
   generatedTownsOfV1,
   generatedTownsV1,
+  glyphDust,
   goldUnit,
   grantPotions,
   groundCoverageMovingInteriorD9,
@@ -650,6 +664,7 @@ import {
   heroLookOf,
   heroRank,
   historicalSiteContentD9,
+  holdsElderGlyph,
   hollowOrdinal,
   hollowglassStepNodesV1,
   hornPostPointV1,
@@ -717,6 +732,7 @@ import {
   learnAvailability,
   learnedClassActives,
   legacyWorldPosition,
+  legendaryAugmentIndex,
   lesserCooldownV1,
   lineToPoint,
   listedEquipmentSlots,
@@ -778,6 +794,7 @@ import {
   originalFireCone,
   outgoingCombat,
   ownedItem,
+  ownsAugment,
   packSizeRangeV1,
   packSizesForBindingV1,
   packageEligibleD9,
@@ -902,6 +919,7 @@ import {
   rewardProfileD9,
   rewardProgression,
   rewardProgressionD9,
+  rewardSourceV1,
   roadsideChestV1,
   roadsideSkinOfV1,
   rollRaresV1,
@@ -959,6 +977,7 @@ import {
   startTripV1,
   starterArrivalTilesV1,
   stepActorMovement,
+  storeAugmentCraft,
   subtractAmount,
   subtractCombat,
   subweaponSuppressedD12_4I,
@@ -1129,7 +1148,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-VOGXLUXS.js";
+} from "./chunk-OZ6K2QND.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -116663,7 +116682,7 @@ var M = {
   blueInner: { b: "#d9e6f5", d: "#b8cde6" },
   rope: { b: "#c8a46a", d: "#a5844f" },
   steel: { b: "#a9b3ba", d: "#7f8a92", l: "#d0d7dc" },
-  darkSteel: { b: "#6c777e", d: "#545e64", l: "#8a959c" },
+  darkSteel: { b: "#6c777e", d: "#545e64" },
   oak: { b: "#7a4e27", d: "#5c3a1d" },
   willow: { b: "#b08a55", d: "#8c6b3e" }
 };
@@ -124100,7 +124119,7 @@ var MG = {
   ochre: { b: "#c8862e", d: "#9c6620", l: "#e0a24a" },
   navy: { b: "#2c3a73", d: "#212c58", l: "#3f529a" },
   navyDark: { b: "#212c58", d: "#1a2246" },
-  silver: { b: "#9fb0de", d: "#7d8fc2", l: "#c4d0ee" },
+  silver: { b: "#9fb0de", d: "#7d8fc2" },
   crimson: { b: "#8e2f3c", d: "#6b222d", l: "#b04452" },
   crimsonDark: { b: "#6b222d", d: "#561b24" },
   black: { b: "#2a2230", d: "#1d1722", l: "#3d3346" },
@@ -130643,9 +130662,10 @@ var ICONS = {
   potion: '<path d="M9 2h6v2h-1v4.2a7 7 0 1 1-4 0V4H9z"/>',
   loot: '<path d="M4 8h16l-1 12H5zM8 8V6a4 4 0 0 1 8 0v2"/>',
   soul: '<path d="M12 2c3 4 6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 3-7 6-11z"/>',
-  event: '<path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm-1 5h2v6h-2zm0 8h2v2h-2z"/>'
+  event: '<path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm-1 5h2v6h-2zm0 8h2v2h-2z"/>',
+  glyph: '<path d="M12 2l7 10-7 10-7-10z" opacity=".4"/><path d="M12 6l4 6-4 6-4-6z"/>'
 };
-var ACCENTS = { level: "#f5c451", mastery: "#e2b65c", potion: "#ff6a5c", loot: "#cfd8e3", soul: "#9fd6ff", event: "#c59cf0" };
+var ACCENTS = { level: "#f5c451", mastery: "#e2b65c", potion: "#ff6a5c", loot: "#cfd8e3", soul: "#9fd6ff", event: "#c59cf0", glyph: "#b98cff" };
 var lanes = /* @__PURE__ */ new WeakMap();
 function toastLimitV1(doc) {
   const n = parseInt(doc?.body?.dataset?.hudToastFit ?? "", 10);
@@ -134563,6 +134583,41 @@ function cancelSubweaponResidency(s, id2) {
   for (const [key4, e] of Object.entries(c.effects)) if (e.sourceId === id2 || e.targetId === id2) delete c.effects[key4];
 }
 
+// src/shared/contracts/augment_drops_v1.js
+function augmentDropKindV1(state2, target, progression) {
+  if (isRareV1(state2, target.entityId)) return "rare";
+  const source3 = rewardSourceV1(progression);
+  if (source3 === "lair-boss") return "boss";
+  if (source3 === "mini-boss") return "lesser";
+  if (source3 === "site-end-elite" || state2.eliteCombat?.elitesByEntityId?.[target.entityId]?.namedEliteId) return "named";
+  return source3 === "elite" ? "elite" : null;
+}
+function elderGlyphPoolV1(d8) {
+  if (!d8?.heroClass) return [];
+  return Object.keys(CLASS_SKILL_AUGMENTS).filter((id2) => {
+    const i = legendaryAugmentIndex(id2);
+    return CLASS_TREE_SKILLS[id2].classId === d8.heroClass && i >= 0 && augmentLive(id2, i) && !ownsAugment(d8, id2, i) && !holdsElderGlyph(d8, id2);
+  }).sort();
+}
+function rollAugmentDropV1(state2, p, kind, rewardId) {
+  if (!kind || !p?.d8?.heroClass || !state2.campaign?.seed) return null;
+  const key4 = `${AUGMENT_CRAFT_VERSION}/${state2.campaign.seed.seedHex}/${p.playerId}/${rewardId}`, d = GLYPH_DUST_DROPS[kind];
+  const dust3 = d && hashReward(key4 + "/dust") % 100 < d.chance ? d.amount : 0;
+  let glyph2 = null;
+  const chance = ELDER_GLYPH_CHANCE[kind] ?? 0;
+  if (chance && hashReward(key4 + "/glyph") % 100 < chance) {
+    const pool4 = elderGlyphPoolV1(p.d8), learned = pool4.filter((id2) => classRank(p.d8, id2) > 0), from = learned.length && hashReward(key4 + "/glyph-own") % 100 < ELDER_GLYPH_OWN_SKILL ? learned : pool4;
+    if (from.length) glyph2 = from[hashReward(key4 + "/glyph-pick") % from.length];
+  }
+  if (!dust3 && !glyph2) return null;
+  const c = augmentCraftOf(p.d8), next = { ...p.d8 };
+  c.dust += dust3;
+  if (glyph2) c.glyphs.push(glyph2);
+  storeAugmentCraft(next, c);
+  p.d8 = next;
+  return { dust: dust3, glyph: glyph2 };
+}
+
 // src/shared/contracts/content_numeric_admission_d9.js
 var admitted = /* @__PURE__ */ new Map();
 function admitContentNumericD9(level, rank) {
@@ -134828,6 +134883,7 @@ function useEconomicResource(s, m, p, payload, prepareEpisode = null, primaryDam
   else s.encounterEconomy.groups[r.groupId].usedResources[source3.sourceEntityId] = { tick: s.tick, playerIds: players.map((p2) => p2.playerId) };
   for (const [i, p2] of players.entries()) {
     const reward = plans2 ? applyEpisodeReward(s, p2, plans2[i]) : awardEpisodeReward(s, p2, source3, r.position, r.spaceInstanceId);
+    if (reward && plans2?.[i]?.record.episodeSource.progression?.siteReward === "lair-chest") rollAugmentDropV1(s, p2, "chest", plans2[i].id);
     if (reward?.healing) {
       const actor = s.entitiesById[p2.entityId], max = stateMax(actor);
       actor.hp = s.subweaponCombat ? combatInteger(minCombat(actor.maxHp, addCombat(actor.hp, roundCombat(multiplyCombat(actor.maxHp, 15, 100))))) : structuredClone(combatIntegerWire(Math.min(max, boundedCombatInteger(actor.hp) + Math.round(max * 0.15))));
@@ -135521,6 +135577,8 @@ function validateActivityCommandForState(c, s) {
     requireContract(c.expectedSaveRevision === s.campaign.saveRevision, "Stale save revision");
     const plan = prepareD8Command(s.playersById[c.playerId], c);
     requireContract(plan && !plan.error, plan?.error ?? "Progression unavailable");
+    const craft = augmentCraftProblemV1(s, s.playersById[c.playerId], c);
+    requireContract(craft === null, craft);
   }
   if (c.kind === "subweapon.claim") requireContract(canClaimSubweapon(s, s.playersById[c.playerId], c.payload), "Provision unavailable");
   if (c.kind === "classkit.claim") requireContract(canClaimClassKit(s, s.playersById[c.playerId], c.payload), "Class kit unavailable");
@@ -137717,75 +137775,27 @@ function arenaBossIdsV2(s, floor) {
   return (floor.enemyIds ?? []).filter((id2, i) => s.bossCombat?.bossesByEntityId?.[id2] || i === 0 && siteEndRoleV1(floor, id2));
 }
 var arenaBossStandsV2 = (s, floor) => arenaBossIdsV2(s, floor).some((id2) => s.entitiesById[id2]?.alive);
-var RESPAWN_NEARBY_V1 = Object.freeze({ minTiles: 6, safeTiles: 9, searchTiles: 28, maximumNodes: 3200 });
-function nearbyRespawnSpotsV1(s, actor, avoidBox = null) {
-  const space = actor.residency.spaceInstanceId, collision = s.spacesByInstanceId?.[space]?.collision, from = actor.position;
-  if (!collision || !from) return [];
-  const T120 = collision.tileSize, P28 = RESPAWN_NEARBY_V1, hull3 = actor.hullRadius ?? 9, sx = Math.floor(from.x / T120), sy = Math.floor(from.y / T120);
-  const foes = Object.values(s.entitiesById ?? {}).filter((e) => e.alive && e.team === "hostile" && e.residency?.spaceInstanceId === space && Math.hypot(e.position.x - from.x, e.position.y - from.y) < (P28.searchTiles + P28.safeTiles + 2) * T120).map((e) => e.position);
-  const safe = P28.safeTiles * T120, min = P28.minTiles * T120, seen5 = /* @__PURE__ */ new Set([sx + "," + sy]), queue = [[sx, sy]], out4 = [];
-  for (let i = 0; i < queue.length && i < P28.maximumNodes; i++) {
-    const [x, y] = queue[i], c = { x: (x + 0.5) * T120, y: (y + 0.5) * T120 }, d = Math.hypot(c.x - from.x, c.y - from.y);
-    if (d >= min && !(avoidBox && inArenaBoxV1(avoidBox, c)) && !foes.some((f) => Math.hypot(f.x - c.x, f.y - c.y) < safe)) out4.push(c);
-    for (const [dx, dy] of [[0, -1], [-1, 0], [1, 0], [0, 1]]) {
-      const nx = x + dx, ny = y + dy, k = nx + "," + ny;
-      if (seen5.has(k) || Math.hypot(nx - sx, ny - sy) > P28.searchTiles) continue;
-      seen5.add(k);
-      if (!collidesWithTiles(collision, (nx + 0.5) * T120, (ny + 0.5) * T120, hull3)) queue.push([nx, ny]);
-    }
-  }
-  return out4;
-}
-function nearbyTargetV1(s, actor, avoidBox) {
-  const space = actor.residency.spaceInstanceId;
-  for (const at9 of nearbyRespawnSpotsV1(s, actor, avoidBox).slice(0, 24)) {
-    const t = sitePartyArrivalTarget(s, actor, space, at9);
-    if (t) return { kind: "nearby", label: "close by", settlementId: null, ...t };
-  }
-  return null;
-}
-var NEARBY = { kind: "nearby", label: "close by", settlementId: null };
 function respawnDestinationV2(s, actor) {
   if (!s.d9World?.plannedWorld) return null;
-  if (actor.residency.spaceInstanceId === s.overworldInstanceId) return s.spacesByInstanceId?.[s.overworldInstanceId]?.collision ? NEARBY : fallbackDestinationV1(s, actor);
-  const at9 = siteFloorOfV2(s, actor);
-  if (!at9) return null;
-  const arena = floorArenaV2(at9.site, at9.floor);
-  if (arena && inArenaBoxV1(arena.box, actor.position) && arenaBossStandsV2(s, at9.floor)) return { kind: "arena", label: "outside the arena", settlementId: null };
-  return NEARBY;
-}
-function fallbackDestinationV1(s, actor) {
   if (actor.residency.spaceInstanceId === s.overworldInstanceId) {
     const town = nearestFoundTownV2(s, actor);
     return town ? { kind: "town", label: town.label, settlementId: town.id } : null;
   }
   const at9 = siteFloorOfV2(s, actor);
   if (!at9) return null;
+  const arena = floorArenaV2(at9.site, at9.floor);
+  if (arena && inArenaBoxV1(arena.box, actor.position) && arenaBossStandsV2(s, at9.floor)) return { kind: "arena", label: "outside the arena", settlementId: null };
   const floors = functionalSiteFloorsD12(at9.site).length;
   return { kind: "floor", label: floors > 1 ? `Floor ${at9.floor.index + 1}'s start` : "the entrance", settlementId: null };
 }
 function respawnPreparationV2(s, actor) {
-  let d = respawnDestinationV2(s, actor);
-  if (d?.kind === "nearby") {
-    if (nearbyRespawnSpotsV1(s, actor, arenaBoxOfV1(s, actor)).length) return { kind: "nearby" };
-    d = fallbackDestinationV1(s, actor);
-  }
+  const d = respawnDestinationV2(s, actor);
   if (d?.kind !== "town") return d ? { kind: d.kind } : null;
   return { kind: "town", address: fastTravelArrivalAddress(s, d.settlementId), chunks: fastTravelPreparationChunks(s, d.settlementId) };
 }
-function arenaBoxOfV1(s, actor) {
-  const at9 = siteFloorOfV2(s, actor), arena = at9 && floorArenaV2(at9.site, at9.floor);
-  return arena && arenaBossStandsV2(s, at9.floor) ? arena.box : null;
-}
 function respawnTargetV2(s, actor) {
-  let d = respawnDestinationV2(s, actor);
+  const d = respawnDestinationV2(s, actor);
   if (!d) return null;
-  if (d.kind === "nearby") {
-    const t2 = nearbyTargetV1(s, actor, arenaBoxOfV1(s, actor));
-    if (t2) return t2;
-    d = fallbackDestinationV1(s, actor);
-    if (!d) return null;
-  }
   if (d.kind === "town") {
     const t2 = fastTravelArrivalV1(s, actor, d.settlementId);
     return t2 ? { ...d, spaceInstanceId: t2.spaceInstanceId, position: t2.position } : null;
@@ -138089,7 +138099,17 @@ function createActivityProgression(state2, manifest, measure2) {
         }
         markEarning(state2, manifest, player);
         player.progression = copyWire(next);
-        if (d8) player.d8 = d8;
+        if (d8) {
+          const craft = player.d8?.augmentCraft;
+          if (craft === d8.augmentCraft) player.d8 = d8;
+          else {
+            const n = { ...d8 };
+            if (craft) n.augmentCraft = craft;
+            else delete n.augmentCraft;
+            player.d8 = n;
+          }
+        }
+        if (!row2.xpOnly && row2.inventoryPlan) rollAugmentDropV1(state2, player, augmentDropKindV1(state2, target, row2.inventoryPlan.record.episodeSource.progression), row2.inventoryPlan.id);
         counters.recipients++;
         if (resolved) {
           const actor = state2.entitiesById[player.entityId];
@@ -148061,7 +148081,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
   }
   function apply3(command, authorityOrder) {
     requireContract(authorityOrder === state2.lastAppliedAuthorityOrder + 1 && command.clientSequence === state2.appliedClientSequences[command.playerId] + 1, "Noncontiguous applied command");
-    const player = state2.playersById[command.playerId], actor = state2.entitiesById[player.entityId], inventory = player.inventory, respawning = command.kind === "player.respawn", suppressed = subweaponSuppressedD12_4I(state2, actor.entityId), target = command.kind === "ferry.travel" ? ferryTravelTarget(state2, actor, command.payload) : command.kind === "map.travel" ? fastTravelTarget(state2, actor, command.payload) : command.kind === "site.transition" ? siteTransitionTarget(state2, manifest, actor, command.payload) : null, progressionPlan = prepareD8Command(player, command), valid = (command.kind !== "worldEvent.activate" || canActivateWorldEvent(state2, player, command.payload.groupId)) && (command.kind !== "discovery.readNote" || canReadTrailNote(state2, player, command.payload)) && (command.kind !== "quest.act" || questActionProblemV1(state2, player, command.payload) === null) && (!progressionPlan || !progressionPlan.error && command.expectedSaveRevision === state2.campaign.saveRevision) && activityContextMatches(state2, command) && (respawning ? !actor.alive : actor.alive) && (!["site.transition", "ferry.travel", "map.travel"].includes(command.kind) || Boolean(target)) && (command.kind !== "loot.pickup" || inventory?.revision === command.payload.inventoryRevision && canPickUp(state2, player, command.payload.sourceEntityId, resolvePlayerStats(player).pickupRadius)) && (command.kind !== "subweapon.claim" || canClaimSubweapon(state2, player, command.payload)) && (command.kind !== "classkit.claim" || canClaimClassKit(state2, player, command.payload)) && (command.kind !== "combat.guardIntent" || !command.payload.pressed || !suppressed && resolvePlayerStats(player).subType === "shield") && (command.kind !== "combat.shadowDash" || canShadowDash(actor, state2.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), suppressed)) && (command.kind !== "combat.skill" || canUseClassSkill(player, actor, state2.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.skillId, suppressed)) && (command.kind !== "gear.salvage" || canSalvage(state2, player, command.payload)) && (command.kind !== "gear.drop" || canDropGear(state2, player, command.payload)) && (command.kind !== "resource.interact" || canUseResource(state2, manifest, player, command.payload)) && (command.kind !== "forge.attune" || canAttune(state2, player, command.payload, manifest)) && (!(command.kind.startsWith("service.") || command.kind === "supply.use") || serviceActionProblem(state2, player, command.kind, command.payload) === null) && (!command.kind.startsWith("equipment.") || equipmentActionAvailable(state2, player, command.kind, command.payload)) && !tripHoldsCommandV1(state2, command.playerId, command.kind);
+    const player = state2.playersById[command.playerId], actor = state2.entitiesById[player.entityId], inventory = player.inventory, respawning = command.kind === "player.respawn", suppressed = subweaponSuppressedD12_4I(state2, actor.entityId), target = command.kind === "ferry.travel" ? ferryTravelTarget(state2, actor, command.payload) : command.kind === "map.travel" ? fastTravelTarget(state2, actor, command.payload) : command.kind === "site.transition" ? siteTransitionTarget(state2, manifest, actor, command.payload) : null, progressionPlan = prepareD8Command(player, command), valid = (command.kind !== "worldEvent.activate" || canActivateWorldEvent(state2, player, command.payload.groupId)) && (command.kind !== "discovery.readNote" || canReadTrailNote(state2, player, command.payload)) && (command.kind !== "quest.act" || questActionProblemV1(state2, player, command.payload) === null) && augmentCraftProblemV1(state2, player, command) === null && (!progressionPlan || !progressionPlan.error && command.expectedSaveRevision === state2.campaign.saveRevision) && activityContextMatches(state2, command) && (respawning ? !actor.alive : actor.alive) && (!["site.transition", "ferry.travel", "map.travel"].includes(command.kind) || Boolean(target)) && (command.kind !== "loot.pickup" || inventory?.revision === command.payload.inventoryRevision && canPickUp(state2, player, command.payload.sourceEntityId, resolvePlayerStats(player).pickupRadius)) && (command.kind !== "subweapon.claim" || canClaimSubweapon(state2, player, command.payload)) && (command.kind !== "classkit.claim" || canClaimClassKit(state2, player, command.payload)) && (command.kind !== "combat.guardIntent" || !command.payload.pressed || !suppressed && resolvePlayerStats(player).subType === "shield") && (command.kind !== "combat.shadowDash" || canShadowDash(actor, state2.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), suppressed)) && (command.kind !== "combat.skill" || canUseClassSkill(player, actor, state2.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.skillId, suppressed)) && (command.kind !== "gear.salvage" || canSalvage(state2, player, command.payload)) && (command.kind !== "gear.drop" || canDropGear(state2, player, command.payload)) && (command.kind !== "resource.interact" || canUseResource(state2, manifest, player, command.payload)) && (command.kind !== "forge.attune" || canAttune(state2, player, command.payload, manifest)) && (!(command.kind.startsWith("service.") || command.kind === "supply.use") || serviceActionProblem(state2, player, command.kind, command.payload) === null) && (!command.kind.startsWith("equipment.") || equipmentActionAvailable(state2, player, command.kind, command.payload)) && !tripHoldsCommandV1(state2, command.playerId, command.kind);
     if (valid) {
       if (respawning) measure2("playerRespawn", () => {
         state2.encounterEconomy.outingsByPlayer[player.playerId].earnedOutside = false;
@@ -170836,7 +170856,7 @@ function createClassSkillsViewV1({ document: document2, send }) {
   }
   function augmentList(id2, s, st) {
     const slotted = classAugments(d, id2), box6 = el3("div", "cs-augs"), head20 = el3("div", "cs-augh");
-    head20.append(el3("span", "", "AUGMENTS \xB7 PICK 2"), el3("small", "", st.learned ? `${slotted.length}/${AUGMENT_SLOTS} slotted` : `Learn ${s.name} to slot them`));
+    head20.append(el3("span", "", "AUGMENTS \xB7 PICK 2"), el3("small", "", st.learned ? `${slotted.length}/${AUGMENT_SLOTS} slotted \xB7 ${glyphDust(d)} Glyph Dust` : `Learn ${s.name} to craft them`));
     box6.append(head20);
     CLASS_SKILL_AUGMENTS[id2].forEach((a, i) => {
       const offer = augmentAvailability(d, id2, i), on = slotted.includes(i), row2 = button3("cs-aug", "", () => {
@@ -170849,7 +170869,12 @@ function createClassSkillsViewV1({ document: document2, send }) {
       row2.disabled = !ready || !offer.ok && !on;
       const text3 = el3("span");
       text3.append(el3("b", "", a.name), document2.createTextNode(a.description));
-      if (!offer.ok && st.learned) text3.append(el3("em", "", offer.reason));
+      const rarity = augmentRarity(id2, i), owned2 = ownsAugment(d, id2, i);
+      row2.style.setProperty("--r", AUGMENT_RARITY_COLORS[rarity] ?? "#56636f");
+      row2.dataset.rarity = rarity ?? "";
+      text3.prepend(el3("span", "cs-rar", AUGMENT_RARITY_NAMES[rarity] ?? ""));
+      if (!owned2) text3.append(el3("em", "", `Craft at an Enchanter \xB7 ${augmentPrice(id2, i)} Glyph Dust` + (rarity === "legendary" ? holdsElderGlyph(d, id2) ? " \xB7 Elder Glyph in hand" : " + its Elder Glyph" : "")));
+      else if (!offer.ok && st.learned) text3.append(el3("em", "", offer.reason));
       row2.append(el3("i"), text3);
       box6.append(row2);
     });
@@ -173938,6 +173963,16 @@ function createSettlementServicesMenu2(options) {
  #settlement-services .tn-bar{height:8px;border-radius:4px;background:#26313d;overflow:hidden}#settlement-services .tn-bar i{display:block;height:100%;background:linear-gradient(90deg,#c9963a,#f0c862)}
  #settlement-services .tn-hp{height:12px;border-radius:6px;background:#3a1c22;overflow:hidden}#settlement-services .tn-hp i{display:block;height:100%;background:linear-gradient(#ff6b6b,#d33a46)}
  #settlement-services .tn-setnow{display:grid;gap:4px}#settlement-services .tn-setname{font:700 18px/1.2 Georgia,'Times New Roman',serif;color:var(--tn-text)}#settlement-services .tn-setgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}#settlement-services .tn-set{display:grid;gap:6px;align-content:start;padding:10px;background:var(--tn-card);border:1px solid var(--tn-line);border-radius:14px}#settlement-services .tn-set.is-now{border-color:var(--tn-gold);box-shadow:inset 0 0 0 1px var(--tn-gold)}#settlement-services .tn-seth{display:flex;align-items:center;gap:7px;min-width:0}#settlement-services .tn-seth b{flex:1;min-width:0;font-size:13px;color:var(--tn-text)}#settlement-services .tn-seti{display:grid;place-items:center;width:22px;height:22px;flex:none;border-radius:7px;background:var(--tn-card2);color:var(--tn-accent)}#settlement-services .tn-seti svg{width:14px;height:14px}#settlement-services .tn-setn{flex:none;padding:2px 6px;border-radius:999px;background:color-mix(in srgb,var(--tn-up) 18%,transparent);color:var(--tn-up);font:700 10px/1.2 system-ui,sans-serif}#settlement-services .tn-pc{display:flex;gap:7px;align-items:flex-start;font-size:12px;line-height:1.3;color:var(--tn-muted)}#settlement-services .tn-pc i{flex:none;min-width:30px;padding:1px 0;text-align:center;font:800 10px/14px system-ui,sans-serif;font-style:normal;border-radius:6px;background:var(--tn-card2);color:var(--tn-label)}#settlement-services .tn-pc.is-on{color:var(--tn-up)}#settlement-services .tn-pc.is-on i{background:color-mix(in srgb,var(--tn-up) 20%,transparent);color:var(--tn-up)}#settlement-services .tn-sets{display:grid;gap:7px}#settlement-services .tn-sets div{display:grid;gap:1px;font-size:12px;line-height:1.35;color:var(--tn-muted)}#settlement-services .tn-sets b{color:var(--tn-text);font-weight:700}
+ #settlement-services .tn-augcard{display:flex;flex-direction:column;gap:8px}
+ #settlement-services .tn-aughead{display:flex;align-items:center;gap:10px}#settlement-services .tn-aughead h4{margin:0;flex:1;min-width:0;font:700 15px/1.2 system-ui,sans-serif}#settlement-services .tn-aughead small{color:var(--tn-muted);font-size:12px;flex:none}
+ #settlement-services .tn-augic{width:40px;height:40px;border-radius:12px;background:var(--tn-card2);display:grid;place-items:center;flex:none;overflow:hidden}#settlement-services .tn-augic svg{width:34px;height:34px}
+ #settlement-services .tn-augrow{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;background:#111820;border:1px solid var(--tn-line2);border-left:3px solid var(--r)}
+ #settlement-services .tn-augrow b{display:block;font:700 13px/1.25 system-ui,sans-serif;color:var(--tn-text)}#settlement-services .tn-augrow small{display:block;font-size:12px;line-height:1.35;color:var(--tn-muted)}
+ #settlement-services .tn-rar{display:block;margin-bottom:2px;font:800 9.5px/1 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb,var(--r) 75%,#fff)}
+ #settlement-services .tn-glyph{display:block;margin-top:3px;font:600 11px/1.2 system-ui,sans-serif;font-style:normal;color:#d9a07a}#settlement-services .tn-glyph.is-have{color:#f0b46a}
+ #settlement-services .tn-owned{flex:none;font:800 12px/1 system-ui,sans-serif;color:var(--tn-up);padding:0 6px}
+ #settlement-services .tn-augrow[data-owned=true]{opacity:.7}
+ #settlement-services .tn-btn.is-gold .tn-mat{box-shadow:0 0 0 1px #2a1c05}
  `;
   doc.head.append(style);
   const panel = doc.createElement("dialog");
@@ -174018,7 +174053,7 @@ function createSettlementServicesMenu2(options) {
     try {
       const result = await adapter.issue(kind, { ...payload, inventoryRevision: readModel().inventory.revision });
       if (!["admitted", "alreadyApplied"].includes(result?.status)) throw Error("That did not go through. Try again.");
-      notice = { "service.buy": "Bought.", "service.rest": "Rested. Health is full.", "service.material": "Bought.", "forge.attune": "Slot upgraded.", "service.modify": "Done." }[kind] ?? "Done.";
+      notice = { "service.buy": "Bought.", "service.rest": "Rested. Health is full.", "service.material": "Bought.", "forge.attune": "Slot upgraded.", "service.modify": "Done.", "progression.change": "Crafted. Slot it on the Skills page." }[kind] ?? "Done.";
     } catch (e) {
       bad = true;
       notice = e.message;
@@ -174043,7 +174078,7 @@ function createSettlementServicesMenu2(options) {
     inn: '<svg viewBox="0 0 24 24" fill="none" stroke="#9fd0ff" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M3 18V9M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.6"/></svg>',
     supplies: FLASK(true)
   };
-  const MATS = { "Monster Soul": "#9a6bff", "Wakestone": "#ff6fb5", "Overlord's Sigil": "#ff6b5a", "Astral Essence": "#6fc3ff" };
+  const MATS = { "Glyph Dust": "#b98cff", "Monster Soul": "#9a6bff", "Wakestone": "#ff6fb5", "Overlord's Sigil": "#ff6b5a", "Astral Essence": "#6fc3ff" };
   const FILTERS = [["all", "All"], ["weapon", "Weapons"], ["offhand", "Offhand"], ["armor", "Armor"], ["ring", "Rings"]];
   const markup = (e, html) => {
     e.innerHTML = html;
@@ -174260,6 +174295,12 @@ function createSettlementServicesMenu2(options) {
     const wallet = el3("div", void 0, "tn-wallet"), g2 = el3("span", void 0, "tn-chipv");
     g2.append(coin3(), formatAmount(inv.gold));
     wallet.append(g2);
+    if (kind === "altar") {
+      const d8 = m.playersById[m.localPlayerId].d8, c = el3("span", void 0, "tn-chipv");
+      c.title = GLYPH_DUST;
+      c.append(mat(GLYPH_DUST), String(glyphDust(d8)));
+      wallet.append(c);
+    }
     if (kind === "forge" || kind === "altar") {
       for (const [k, n] of Object.entries(inv.economy.materials ?? {})) if (n > 0) {
         const c = el3("span", void 0, "tn-chipv");
@@ -174269,7 +174310,7 @@ function createSettlementServicesMenu2(options) {
       }
     }
     shell5.append(wallet);
-    const modes = kind === "forge" ? [...[["attune", "Upgrade"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["shatter", "Salvage"], ["break", "Scraps"]].filter(([id2]) => npc.services.includes(id2 === "break" ? "shatter" : id2)), ...npc.stock?.length ? [["gear", "Buy"]] : []] : kind === "altar" ? [["enchant", "Enchant"], ["purge", "Purge"], ["resonance", "Resonance"], ...npc.services?.includes("rebind") ? [["rebind", "Rebind"]] : []] : kind === "shop" ? [["gear", "Buy"], ["sell", "Sell"], ["supplies", "Potions"]] : [["supplies", "Potions"]];
+    const modes = kind === "forge" ? [...[["attune", "Upgrade"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["shatter", "Salvage"], ["break", "Scraps"]].filter(([id2]) => npc.services.includes(id2 === "break" ? "shatter" : id2)), ...npc.stock?.length ? [["gear", "Buy"]] : []] : kind === "altar" ? [["enchant", "Enchant"], ["purge", "Purge"], ["resonance", "Resonance"], ...npc.services?.includes("rebind") ? [["rebind", "Rebind"]] : [], ["augments", "Augments"]] : kind === "shop" ? [["gear", "Buy"], ["sell", "Sell"], ["supplies", "Potions"]] : [["supplies", "Potions"]];
     if (!modes.some(([id2]) => id2 === mode)) mode = modes[0][0];
     if (modes.length > 1) {
       const tabs = el3("nav", void 0, "tn-tabs");
@@ -174454,6 +174495,38 @@ function createSettlementServicesMenu2(options) {
         foot2.append(b);
         shell5.append(foot2);
       } else body6.append(el3("p", "This slot is fully upgraded.", "tn-hint"));
+    } else if (mode === "augments") {
+      const d8 = m.playersById[m.localPlayerId].d8, ids4 = learnedClassActives(d8), glyphs = d8?.augmentCraft?.glyphs ?? [];
+      body6.append(el3("p", "Glyph Dust drops from elites, named elites, rare monsters and bosses. What you craft is yours for good. Pick two per skill on the Skills page.", "tn-hint is-left"));
+      if (!ids4.length) body6.append(el3("p", "Learn an active skill to craft its augments.", "tn-empty"));
+      for (const id2 of ids4) {
+        const list = CLASS_SKILL_AUGMENTS[id2], card = el3("div", void 0, "tn-card tn-augcard"), head20 = el3("div", void 0, "tn-aughead");
+        head20.append(markup(el3("span", void 0, "tn-augic"), SKILL_ICONS_V1[id2] ?? ""), el3("h4", CLASS_TREE_SKILLS[id2].name), el3("small", list.filter((_, i) => ownsAugment(d8, id2, i)).length + " / " + list.length + " crafted"));
+        card.append(head20);
+        list.forEach((a, i) => {
+          const q2 = craftAvailability(d8, id2, i), row2 = el3("div", void 0, "tn-augrow"), info2 = el3("div");
+          row2.style.setProperty("--r", AUGMENT_RARITY_COLORS[q2.rarity] ?? "#3a4654");
+          row2.dataset.owned = String(Boolean(q2.owned));
+          info2.style.cssText = "flex:1;min-width:0";
+          info2.append(el3("span", AUGMENT_RARITY_NAMES[q2.rarity] ?? "", "tn-rar"), el3("b", a.name), el3("small", a.description));
+          const have = holdsElderGlyph(d8, id2);
+          if (q2.needsGlyph && !q2.owned) info2.append(el3("em", have ? "Elder Glyph in hand" : "Needs its Elder Glyph \xB7 bosses drop them", "tn-glyph" + (have ? " is-have" : "")));
+          let act;
+          if (q2.owned) act = el3("span", "Yours", "tn-owned");
+          else {
+            act = button3("", () => craft(id2, i), "craft:" + id2 + ":" + i, "tn-btn is-gold is-small");
+            act.append(mat(GLYPH_DUST), String(q2.price));
+            act.disabled = busy || !q2.ok;
+            act.title = q2.ok ? "Craft " + a.name : q2.reason;
+            act.setAttribute("aria-label", q2.ok ? "Craft " + a.name + " for " + q2.price + " Glyph Dust" : a.name + ": " + q2.reason);
+          }
+          row2.append(info2, act);
+          card.append(row2);
+        });
+        body6.append(card);
+      }
+      const loose = glyphs.filter((g3) => !ids4.includes(g3));
+      if (loose.length) body6.append(el3("p", "Elder Glyphs for skills you have not learned: " + loose.map((g3) => CLASS_TREE_SKILLS[g3].name).join(", ") + ".", "tn-note"));
     } else {
       const worn = new Set(Object.values(inv.equipped)), items3 = Object.values(inv.itemsById).filter((i2) => i2.generated && !i2.unique && !i2.protected && (!i2.generated.definition.unique || mode === "reforge" && rerollableUniqueV3(i2.generated)) && !(mode === "shatter" && worn.has(i2.itemId)) && (mode !== "rebind" || rebindable(i2)));
       if (!items3.some((i2) => i2.itemId === selected)) selected = items3[0]?.itemId;
@@ -174573,6 +174646,11 @@ function createSettlementServicesMenu2(options) {
       shell5.append(foot2);
     }
   }
+  async function craft(skillId, index) {
+    const m = readModel(), d8 = m.playersById[m.localPlayerId]?.d8;
+    if (!d8) return;
+    await issue("progression.change", { progressionRevision: d8.revision, action: { kind: "augment.craft", skillId, index, npcId } });
+  }
   async function sellMany(ids4) {
     if (busy || !ids4.length) return;
     clearInput();
@@ -174599,7 +174677,20 @@ function createSettlementServicesMenu2(options) {
       redraw();
     }
   }
+  let lastCraft = null;
+  function craftToasts(m) {
+    const p = m.playersById?.[m.localPlayerId], c = p?.d8?.augmentCraft, now3 = { id: m.localPlayerId, dust: c?.dust ?? 0, glyphs: [...c?.glyphs ?? []] };
+    const was = lastCraft;
+    lastCraft = now3;
+    if (!was || was.id !== now3.id) return;
+    if (now3.dust > was.dust) toastV1(doc, { kind: "glyph", title: "+" + (now3.dust - was.dust) + " Glyph Dust", sub: now3.dust + " Glyph Dust \xB7 craft augments at an Enchanter", key: "glyph-dust" });
+    for (const g2 of now3.glyphs) if (!was.glyphs.includes(g2)) {
+      const a = CLASS_SKILL_AUGMENTS[g2]?.[legendaryAugmentIndex(g2)];
+      toastV1(doc, { kind: "glyph", title: "Elder Glyph \xB7 " + (a?.name ?? CLASS_TREE_SKILLS[g2]?.name ?? g2), sub: "Legendary " + (CLASS_TREE_SKILLS[g2]?.name ?? "") + " augment \xB7 craft it at an Enchanter", key: "glyph:" + g2, ms: 5200 });
+    }
+  }
   function refresh(m) {
+    craftToasts(m);
     supplyButton.hidden = !m.potions?.enabled;
     if (supplyButton.hidden) return;
     const belt2 = m.potions, cooling = belt2.cooldownTicks > 0, seconds = cooling ? String(Math.ceil(belt2.cooldownTicks / 60)) : "";
@@ -174618,7 +174709,7 @@ function createSettlementServicesMenu2(options) {
     supplyButton.dataset.cooling = String(cooling);
     supplyButton.style.setProperty("--potion-cooldown", String(cooling ? belt2.cooldownTicks / belt2.cooldownTotal : 0));
     supplyButton.setAttribute("aria-label", "Drink health potion, " + belt2.count + " of " + belt2.capacity + ", heals " + belt2.healPercent + " percent");
-    const next = m.localPlayerId + "/" + m.inventory.revision + "/" + m.playersById[m.localPlayerId].progression.level + "/" + npcId + "/" + mode + "/" + selected + "/" + line45 + "/" + materialQuantity + "/" + busy + "/" + notice + "/" + confirm + "/" + sheet2 + "/" + filter + "/" + [...picks].join(",") + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false) + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.stock?.map((q2) => q2.id + (q2.purchased ? "!" : "")).join() ?? "") + "/" + Math.ceil((m.serviceNpcs?.find((n) => n.id === npcId)?.restockTicks ?? 0) / 3600);
+    const next = JSON.stringify(m.playersById[m.localPlayerId]?.d8?.augmentCraft ?? null) + "/" + (m.playersById[m.localPlayerId]?.d8?.revision ?? "") + "/" + m.localPlayerId + "/" + m.inventory.revision + "/" + m.playersById[m.localPlayerId].progression.level + "/" + npcId + "/" + mode + "/" + selected + "/" + line45 + "/" + materialQuantity + "/" + busy + "/" + notice + "/" + confirm + "/" + sheet2 + "/" + filter + "/" + [...picks].join(",") + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false) + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.stock?.map((q2) => q2.id + (q2.purchased ? "!" : "")).join() ?? "") + "/" + Math.ceil((m.serviceNpcs?.find((n) => n.id === npcId)?.restockTicks ?? 0) / 3600);
     if (panel.open && key4 !== next) {
       const focus = doc.activeElement?.dataset.serviceAction;
       key4 = next;
@@ -179811,7 +179902,7 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
     set("world-death-level", `Level ${xpText(xp.level)}`);
     set("world-death-xp", xp.capped ? `XP ${xpText(xp.totalXp)} \xB7 Maximum level` : `XP ${xpText(xp.totalXp)} total \xB7 ${xpText(xp.current)}/${xpText(xp.required)} to next level`);
     const arena = model.recovery.kind === "arena";
-    set("world-death-anchor", arena ? "Respawn outside the arena" : /^(outside |close by)/.test(model.recovery.anchorLabel) ? `Respawn ${model.recovery.anchorLabel}` : `Respawn at ${model.recovery.anchorLabel}`);
+    set("world-death-anchor", arena ? "Respawn outside the arena" : /^outside /.test(model.recovery.anchorLabel) ? `Respawn ${model.recovery.anchorLabel}` : `Respawn at ${model.recovery.anchorLabel}`);
     const waiting = deathWaitingV1(model) ? "Waiting for a revive \xB7 " : "";
     set("world-death-note", waiting + (arena ? "No XP lost \xB7 The boss heals back to full if no one is left inside" : "No XP lost"));
     const w = wakeMs ? Math.min(1, Math.round((now3() - shownAt) / wakeMs * 50) / 50) : 1;

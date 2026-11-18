@@ -2004,8 +2004,8 @@ function numericContext(precision = 48) {
   const dungeonScale = (powerValue) => {
     const p = progressionBigInt(powerValue), band = (p + 3n) / 4n * 4n;
     const effective = band <= 100n ? q(band) : add(q(100), mul2(q(3, 2), frac(q(band - 100n), 7, 10)));
-    const E = mul2(exp2(mul2(effective, lnReduced(q(253, 250)))), add(q(1), mul2(q(3, 200), effective)));
-    return { effective, E };
+    const E2 = mul2(exp2(mul2(effective, lnReduced(q(253, 250)))), add(q(1), mul2(q(3, 200), effective)));
+    return { effective, E: E2 };
   };
   function endpoint(a, mode = "round", places = 0) {
     const scale2 = 10n ** BigInt(places), f3 = (n) => mode === "ceil" ? ceilDiv(n * scale2, S2) : mode === "floor" ? n * scale2 / S2 : (2n * n * scale2 + S2) / (2n * S2), lo = f3(a.lo), hi = f3(a.hi);
@@ -5568,18 +5568,18 @@ function terraceBox(d) {
 function terraceGeometry(d) {
   const { x: cx, y: cy, n, sh, dir } = d, st = (d.s ?? 10) / 10, [A0, B0] = SIZES[n], A1 = Math.round(A0 * st), B1 = Math.round(B0 * Math.min(1.25, 1 + (st - 1) * 0.19)), levels2 = [null];
   for (let k = 1; k <= n; k++) {
-    const A = Math.round(A1 - 6 * st * (k - 1)), top = cy - B1 + 3 * (k - 1), E = cy + B1 - STEPK * (k - 1);
-    levels2.push({ k, A, top, E, mid: (top + E + 1) / 2, hb: (E + 1 - top) / 2 });
+    const A = Math.round(A1 - 6 * st * (k - 1)), top = cy - B1 + 3 * (k - 1), E2 = cy + B1 - STEPK * (k - 1);
+    levels2.push({ k, A, top, E: E2, mid: (top + E2 + 1) / 2, hb: (E2 + 1 - top) / 2 });
   }
   const X0 = cx - 6, X1 = X0 + RAMP - 1;
   const stair = n >= 3 ? { k: 2, x: dir > 0 ? X1 + 3 : X0 - 4 } : null;
   for (let k = 1; k <= n; k++) {
-    const L2 = levels2[k];
-    L2.f0 = X0 - 1;
-    L2.f1 = X1 + 1;
+    const L3 = levels2[k];
+    L3.f0 = X0 - 1;
+    L3.f1 = X1 + 1;
     if (stair?.k === k) {
-      L2.f0 = Math.min(L2.f0, stair.x - 1);
-      L2.f1 = Math.max(L2.f1, stair.x + 2);
+      L3.f0 = Math.min(L3.f0, stair.x - 1);
+      L3.f1 = Math.max(L3.f1, stair.x + 2);
     }
   }
   const rampEast = (k) => (k - 1) % 2 === 0 === dir > 0;
@@ -5601,9 +5601,9 @@ function terraceGeometry(d) {
   const memo = /* @__PURE__ */ new Map();
   function raw(k, x, y) {
     y -= off(x);
-    const L2 = levels2[k];
-    if (y < L2.top || y > L2.E) return false;
-    const u = (x + 0.5 - cx) / L2.A, v = (y + 0.5 - L2.mid) / L2.hb;
+    const L3 = levels2[k];
+    if (y < L3.top || y > L3.E) return false;
+    const u = (x + 0.5 - cx) / L3.A, v = (y + 0.5 - L3.mid) / L3.hb;
     let q = 0.35 * (u * u + v * v) + 0.65 * (u * u * u * u + v * v * v * v);
     const au = u < 0 ? -u : u, s = v > 0 ? Math.min(1, Math.max(0.15, au * 1.7 - 0.4)) : 1;
     q += 0.5 * s * (vnoise(sh + k * 7919 >>> 0, x / 4.5, y / 4.5) - 0.5);
@@ -5615,8 +5615,8 @@ function terraceGeometry(d) {
     const key9 = (k * 4096 + (x - x0)) * 4096 + (y - y0);
     let r = memo.get(key9);
     if (r !== void 0) return r;
-    const L2 = levels2[k];
-    r = x >= L2.f0 && x <= L2.f1 ? y <= L2.E && y >= L2.top && (y >= L2.E - 3 || raw(k, x, y)) : raw(k, x, y);
+    const L3 = levels2[k];
+    r = x >= L3.f0 && x <= L3.f1 ? y <= L3.E && y >= L3.top && (y >= L3.E - 3 || raw(k, x, y)) : raw(k, x, y);
     if (r && k > 1) r = inS(k - 1, x, y - 3) && inS(k - 1, x - 3, y) && inS(k - 1, x + 3, y) && inS(k - 1, x, y + CLIFF + 3);
     if (memo.size > 1 << 16) memo.clear();
     memo.set(key9, r);
@@ -5900,18 +5900,18 @@ function volcanoGeometry(d) {
   };
   const inGap = (x, y) => Boolean(d.gap) && x > cx && y - cy >= d.gap[0] && y - cy <= d.gap[1];
   for (let k = 1; k <= n; k++) {
-    const A = A1 - 6 * (k - 1), top = cy - B1 + (round2 ? 5 : 3) * (k - 1), E = cy + B1 - STEPK2 * (k - 1);
-    levels2.push({ k, A, top, E, mid: (top + E + 1) / 2, hb: (E + 1 - top) / 2 });
+    const A = A1 - 6 * (k - 1), top = cy - B1 + (round2 ? 5 : 3) * (k - 1), E2 = cy + B1 - STEPK2 * (k - 1);
+    levels2.push({ k, A, top, E: E2, mid: (top + E2 + 1) / 2, hb: (E2 + 1 - top) / 2 });
   }
   const X0 = cx - 6, X1 = X0 + RAMP2 - 1;
   const stair = n >= 3 && !bare ? { k: 2, x: dir > 0 ? X1 + 3 : X0 - 4 } : null;
   for (let k = 1; k <= n; k++) {
-    const L2 = levels2[k];
-    L2.f0 = bare ? 1 : X0 - 1;
-    L2.f1 = bare ? 0 : X1 + 1;
+    const L3 = levels2[k];
+    L3.f0 = bare ? 1 : X0 - 1;
+    L3.f1 = bare ? 0 : X1 + 1;
     if (stair?.k === k) {
-      L2.f0 = Math.min(L2.f0, stair.x - 1);
-      L2.f1 = Math.max(L2.f1, stair.x + 2);
+      L3.f0 = Math.min(L3.f0, stair.x - 1);
+      L3.f1 = Math.max(L3.f1, stair.x + 2);
     }
   }
   const rampEast = (k) => (k - 1) % 2 === 0 === dir > 0;
@@ -5927,24 +5927,24 @@ function volcanoGeometry(d) {
   const memo = /* @__PURE__ */ new Map();
   if (d.gap) {
     const top = cy + d.gap[0], bot = cy + d.gap[1], N2 = 8;
-    let R2 = Infinity;
+    let R3 = Infinity;
     for (let y = top - CLIFF2 - 1; y <= bot + CLIFF2 + 1; y++) {
       let e = -Infinity;
       for (let x = x1; x > cx; x--) if (raw(1, x, y)) {
         e = x;
         break;
       }
-      R2 = Math.min(R2, e);
+      R3 = Math.min(R3, e);
     }
-    if (R2 > cx + 4 && R2 + N2 <= x1) {
+    if (R3 > cx + 4 && R3 + N2 <= x1) {
       const dAt = (j) => Math.min(CLIFF2, Math.floor(j / 2));
-      SG = { x0: R2 + 1, x1: R2 + N2, R: R2, top, bot, t0: top + 1, t1: bot - 1, N: N2, d: dAt };
+      SG = { x0: R3 + 1, x1: R3 + N2, R: R3, top, bot, t0: top + 1, t1: bot - 1, N: N2, d: dAt };
     }
   }
   function raw(k, x, y) {
-    const L2 = levels2[k];
-    if (y < L2.top || y > L2.E) return false;
-    const u = (x + 0.5 - cx) / L2.A, v = (y + 0.5 - L2.mid) / L2.hb;
+    const L3 = levels2[k];
+    if (y < L3.top || y > L3.E) return false;
+    const u = (x + 0.5 - cx) / L3.A, v = (y + 0.5 - L3.mid) / L3.hb;
     let q = round2 ? u * u + v * v : 0.2 * (u * u + v * v) + 0.8 * (u * u * u * u * u * u + v * v * v * v * v * v);
     const au = u < 0 ? -u : u, s = v > 0 ? Math.min(1, Math.max(0.15, au * 1.7 - 0.4)) : 1;
     q += (round2 ? 0.3 : 0.4) * s * (vnoise2(sh + k * 7919 >>> 0, x / 5, y / 5) - 0.5);
@@ -5956,8 +5956,8 @@ function volcanoGeometry(d) {
     const key9 = (k * 4096 + (x - x0)) * 4096 + (y - y0);
     let r = memo.get(key9);
     if (r !== void 0) return r;
-    const L2 = levels2[k];
-    r = x >= L2.f0 && x <= L2.f1 ? y <= L2.E && y >= L2.top && (y >= L2.E - 3 || raw(k, x, y)) : raw(k, x, y);
+    const L3 = levels2[k];
+    r = x >= L3.f0 && x <= L3.f1 ? y <= L3.E && y >= L3.top && (y >= L3.E - 3 || raw(k, x, y)) : raw(k, x, y);
     if (r && k > 1) {
       const G2 = round2 ? 4 : 3;
       r = inS(k - 1, x, y - G2) && inS(k - 1, x - G2, y) && inS(k - 1, x + G2, y) && inS(k - 1, x - G2 + 1, y - G2 + 1) && inS(k - 1, x + G2 - 1, y - G2 + 1) && inS(k - 1, x, y + CLIFF2 + 3);
@@ -6172,8 +6172,8 @@ function volcanoSlopesSafe(g) {
       return { lo: ra.lift === 0 ? ra.k - 1 : null, hi: ra.lift === C ? ra.k : null };
     }
     if (r.role === "stair") {
-      const E = g.levels[g.stair.k].E;
-      return { lo: y > E + C ? g.stair.k - 1 : null, hi: y === E + 1 ? g.stair.k : null };
+      const E2 = g.levels[g.stair.k].E;
+      return { lo: y > E2 + C ? g.stair.k - 1 : null, hi: y === E2 + 1 ? g.stair.k : null };
     }
     const dd = S2.d(x - S2.x0);
     return { lo: dd === C ? 0 : null, hi: dd === 0 ? 1 : null };
@@ -7063,17 +7063,17 @@ function segX(a, b, c, d) {
   return { x: a[0] + t * r[0], y: a[1] + t * r[1], ang: PM.atan2(r[1], r[0]), j: u };
 }
 function townCrossingsV1(streets, line, closed = false) {
-  const L2 = closed ? [...line, line[0]] : line, acc = [0];
-  for (let i = 1; i < L2.length; i++) acc.push(acc[i - 1] + hyp3(L2[i][0] - L2[i - 1][0], L2[i][1] - L2[i - 1][1]));
+  const L3 = closed ? [...line, line[0]] : line, acc = [0];
+  for (let i = 1; i < L3.length; i++) acc.push(acc[i - 1] + hyp3(L3[i][0] - L3[i - 1][0], L3[i][1] - L3[i - 1][1]));
   const out2 = [];
-  for (const [pts, w] of streets) for (let i = 1; i < pts.length; i++) for (let k = 1; k < L2.length; k++) {
-    const h = segX(pts[i - 1], pts[i], L2[k - 1], L2[k]);
+  for (const [pts, w] of streets) for (let i = 1; i < pts.length; i++) for (let k = 1; k < L3.length; k++) {
+    const h = segX(pts[i - 1], pts[i], L3[k - 1], L3[k]);
     if (!h) continue;
     const s = acc[k - 1] + h.j * (acc[k] - acc[k - 1]), o = out2.find((o2) => hyp3(o2.x - h.x, o2.y - h.y) < Math.max(w, o2.w) + 1.5);
     if (o) o.parts.push({ s, w, ang: h.ang });
     else out2.push({ ...h, w, s, parts: [{ s, w, ang: h.ang }] });
   }
-  return { list: out2, len: acc.at(-1), acc, L: L2 };
+  return { list: out2, len: acc.at(-1), acc, L: L3 };
 }
 var allStreets = (t) => [...t.streets, ...townConnectorsV1(t).map((c) => [c.pts, c.w])];
 var GATE_ART = { village: { WH: 36, TW: 34, k: 0.9 }, town: { WH: 40, TW: 36, k: 1 }, city: { WH: 50, TW: 40, k: 1.15 }, capital: { WH: 58, TW: 44, k: 1.3 } };
@@ -7100,7 +7100,7 @@ function townGateSpanV1(size, f3, h, at2, len = 0) {
   return ay < by ? { pre: -lo + north, post: hi + south, vertical: true } : { pre: -lo + south, post: hi + north, vertical: true };
 }
 function wallMarks(t, f3, open2) {
-  const X = townCrossingsV1(allStreets(t), f3.pts, !open2), { L: L2, acc, len } = X, mod = (s) => (s % len + len) % len, dist4 = (a, b) => {
+  const X = townCrossingsV1(allStreets(t), f3.pts, !open2), { L: L3, acc, len } = X, mod = (s) => (s % len + len) % len, dist4 = (a, b) => {
     const d = Math.abs(mod(a) - mod(b));
     return Math.min(d, len - d);
   };
@@ -7109,7 +7109,7 @@ function wallMarks(t, f3, open2) {
     let k = 1;
     while (k < acc.length - 1 && acc[k] < s) k++;
     const q = (s - acc[k - 1]) / (acc[k] - acc[k - 1] || 1);
-    return [L2[k - 1][0] + (L2[k][0] - L2[k - 1][0]) * q, L2[k - 1][1] + (L2[k][1] - L2[k - 1][1]) * q];
+    return [L3[k - 1][0] + (L3[k][0] - L3[k - 1][0]) * q, L3[k - 1][1] + (L3[k][1] - L3[k - 1][1]) * q];
   };
   const gates = X.list.map((h) => {
     const sp = townGateSpanV1(t.size, f3, h, at2, open2 ? 0 : len);
@@ -7145,17 +7145,17 @@ var LANE = 8;
 var LANE_END = 0.3;
 var laneCache = /* @__PURE__ */ new WeakMap();
 function townLanesV1(t) {
-  let L2 = laneCache.get(t);
-  if (L2) return L2;
-  L2 = [];
+  let L3 = laneCache.get(t);
+  if (L3) return L3;
+  L3 = [];
   const [W9, H9] = t.core, cns = townConnectorsV1(t);
   for (const { e, ux, uy, w, edge } of streetEnds(t.streets, W9, H9)) {
     if (cns.some((c) => segDist(c.pts, e[0], e[1]) < w / 2 + 2)) continue;
     const run = edge + LANE;
-    L2.push({ pts: [[r3(e[0]), r3(e[1])], [r3(e[0] + ux * run), r3(e[1] + uy * run)]], w, edge: r3(edge), run: r3(run) });
+    L3.push({ pts: [[r3(e[0]), r3(e[1])], [r3(e[0] + ux * run), r3(e[1] + uy * run)]], w, edge: r3(edge), run: r3(run) });
   }
-  laneCache.set(t, L2);
-  return L2;
+  laneCache.set(t, L3);
+  return L3;
 }
 var laneWidthV1 = (lane, d) => {
   if (d <= lane.edge) return 1;
@@ -7195,7 +7195,7 @@ function townGridV1(t) {
     else if (f3.type === "manor" && f3.garden) rectDo(f3.garden, 2);
     else if (f3.type === "stalls") for (const s of f3.stalls) rectDo({ x: s.x, y: s.y, w: 2, h: 1 }, 2);
   }
-  for (const [, R2] of t.places) rectDo(R2, 2);
+  for (const [, R3] of t.places) rectDo(R3, 2);
   for (const b of t.buildings) {
     rectDo(b, 2);
     if (b.porch) rectDo(b.porch, 2);
@@ -7205,7 +7205,7 @@ function townGridV1(t) {
     for (let i = 0; i < W9 * H9; i++) if (lw[i] && !G2[i]) G2[i] = 4;
   }
   for (const f3 of t.features) if (f3.type === "pier") rectDo(f3, 2);
-  for (const R2 of townLakePiecesV1(t)) rectDo(R2, 2);
+  for (const R3 of townLakePiecesV1(t)) rectDo(R3, 2);
   const keep = t.features.find((f3) => f3.type === "castle")?.keep;
   if (keep) rectDo(keep, 2);
   gridCache.set(t, G2);
@@ -7255,13 +7255,13 @@ function townStreetPlanV1(t) {
     if (w < 3) continue;
     let acc = 3.5, side = 1;
     for (let i = 1; i < pts.length; i++) {
-      const [ax, ay] = pts[i - 1], [bx, by] = pts[i], L2 = hyp3(bx - ax, by - ay);
-      if (L2 < 1e-6) continue;
-      const nx = -(by - ay) / L2, ny = (bx - ax) / L2;
-      for (let d = 0; d < L2; d += 0.5) {
+      const [ax, ay] = pts[i - 1], [bx, by] = pts[i], L3 = hyp3(bx - ax, by - ay);
+      if (L3 < 1e-6) continue;
+      const nx = -(by - ay) / L3, ny = (bx - ax) / L3;
+      for (let d = 0; d < L3; d += 0.5) {
         acc += 0.5;
         if (acc < (village ? 13 : 7)) continue;
-        const q = d / L2, cx = ax + (bx - ax) * q, cy = ay + (by - ay) * q, o = w / 2 + 0.9, lx = Math.floor(cx + nx * o * side), ly = Math.floor(cy + ny * o * side);
+        const q = d / L3, cx = ax + (bx - ax) * q, cy = ay + (by - ay) * q, o = w / 2 + 0.9, lx = Math.floor(cx + nx * o * side), ly = Math.floor(cy + ny * o * side);
         const wallAbove = [1, 2].some((k) => ly - k >= 0 && lx >= 0 && lx < W9 && grid[(ly - k) * W9 + lx] === 2);
         if (!inC(lx, ly) && !wallAbove && put3(village ? "lampV" : "lampT", lx, ly, 1, 1, 4)) {
           acc = 0;
@@ -7291,7 +7291,7 @@ function townStreetPlanV1(t) {
   for (const [pts, w] of t.streets) {
     for (let i = 2; i < pts.length - 1; i += 3) {
       if (r() < 0.55) continue;
-      const [x, y] = pts[i], [px, py] = pts[i - 1], L2 = hyp3(x - px, y - py) || 1, s = r() < 0.5 ? 1 : -1, o = w / 2 + 1.2, tx = Math.floor(x - (y - py) / L2 * o * s), ty = Math.floor(y + (x - px) / L2 * o * s);
+      const [x, y] = pts[i], [px, py] = pts[i - 1], L3 = hyp3(x - px, y - py) || 1, s = r() < 0.5 ? 1 : -1, o = w / 2 + 1.2, tx = Math.floor(x - (y - py) / L3 * o * s), ty = Math.floor(y + (x - px) / L3 * o * s);
       const k = ["tub", "barrels", "cart", "bench", "tub"][Math.floor(r() * 5)];
       if (!inC(tx, ty)) put3(k, tx, ty, k === "cart" ? 2 : 1, 1, 6);
     }
@@ -7354,17 +7354,17 @@ function townArtBlockersV1(t) {
     tile(cx, cy);
   };
   const zone = t.features.some((f3) => f3.type === "zone"), plazas = t.features.filter((f3) => f3.type === "plaza");
-  const ring = (R2, gate) => {
-    const gx = (R2.x + R2.w / 2) * T10;
-    for (let x = R2.x; x < R2.x + R2.w; x++) {
-      out2.push({ x, y: R2.y, w: 1, h: 1 });
-      if (Math.abs((x + 0.5) * T10 - gx) >= gate) out2.push({ x, y: R2.y + R2.h - 1, w: 1, h: 1 });
+  const ring = (R3, gate) => {
+    const gx = (R3.x + R3.w / 2) * T10;
+    for (let x = R3.x; x < R3.x + R3.w; x++) {
+      out2.push({ x, y: R3.y, w: 1, h: 1 });
+      if (Math.abs((x + 0.5) * T10 - gx) >= gate) out2.push({ x, y: R3.y + R3.h - 1, w: 1, h: 1 });
     }
-    out2.push({ x: R2.x, y: R2.y, w: 1, h: R2.h }, { x: R2.x + R2.w - 1, y: R2.y, w: 1, h: R2.h });
+    out2.push({ x: R3.x, y: R3.y, w: 1, h: R3.h }, { x: R3.x + R3.w - 1, y: R3.y, w: 1, h: R3.h });
   };
-  for (const [, R2, k] of t.places) if (k === "garden") {
-    ring(R2, 20);
-    const x = R2.x * T10, y = R2.y * T10, w = R2.w * T10, h = R2.h * T10;
+  for (const [, R3, k] of t.places) if (k === "garden") {
+    ring(R3, 20);
+    const x = R3.x * T10, y = R3.y * T10, w = R3.w * T10, h = R3.h * T10;
     tile(x + w / 2 + 34, y + h + 12);
     tile(x + w / 2 - 40, y + h + 14);
     if (w >= 192) box3(x + w - 48, y + 34, x + w - 8, y + 46);
@@ -7397,7 +7397,7 @@ function townArtBlockersV1(t) {
   }
   for (const f3 of t.features) {
     if (f3.type === "tower" && f3.circle) {
-      const E = f3.circle, cx = (E.x + E.w / 2) * T10, cy = (E.y + E.h / 2) * T10, rx = E.w * T10 / 2 - 6, ry = E.h * T10 / 2 - 4;
+      const E2 = f3.circle, cx = (E2.x + E2.w / 2) * T10, cy = (E2.y + E2.h / 2) * T10, rx = E2.w * T10 / 2 - 6, ry = E2.h * T10 / 2 - 4;
       for (let k = 0; k < 6; k++) {
         const a = -Math.PI / 2 + k * Math.PI * 2 / 6 + 0.26;
         if (Math.cos(a) > 0.5 && Math.sin(a) < 0.5) continue;
@@ -7405,8 +7405,8 @@ function townArtBlockersV1(t) {
       }
     }
     if (f3.type === "forge" && f3.pad) {
-      const E = f3.pad, x = E.x * T10, y = E.y * T10;
-      out2.push({ x: E.x, y: E.y, w: E.w, h: Math.min(4, E.h) });
+      const E2 = f3.pad, x = E2.x * T10, y = E2.y * T10;
+      out2.push({ x: E2.x, y: E2.y, w: E2.w, h: Math.min(4, E2.h) });
       tile(x + 134, y + 208);
       box3(x + 168, y + 162, x + 208, y + 178);
       tile(x + 30, y + 180);
@@ -7414,8 +7414,8 @@ function townArtBlockersV1(t) {
       box3(x + 166, y + 226, x + 202, y + 240);
     }
     if (f3.type === "chapel" && f3.yard) {
-      const E = f3.yard, gc = Math.floor(E.x + E.w / 2);
-      for (let y = E.y; y < E.y + E.h; y++) for (let x = E.x; x < E.x + E.w; x++) if (x !== gc || y === E.y) out2.push({ x, y, w: 1, h: 1 });
+      const E2 = f3.yard, gc = Math.floor(E2.x + E2.w / 2);
+      for (let y = E2.y; y < E2.y + E2.h; y++) for (let x = E2.x; x < E2.x + E2.w; x++) if (x !== gc || y === E2.y) out2.push({ x, y, w: 1, h: 1 });
     }
     if (f3.type === "manor" && f3.building) {
       const b = t.buildings.find((q) => q.id === f3.building);
@@ -7429,11 +7429,11 @@ function townArtBlockersV1(t) {
     if (f3.type === "field") ring(f3, 26);
     if (f3.type === "yard") out2.push({ x: f3.x, y: f3.y, w: f3.w, h: f3.h });
     if (f3.type === "monument") {
-      const x = f3.x * T10, y = f3.y * T10, R2 = (f3.r - 0.7) * T10, E = 0.8;
+      const x = f3.x * T10, y = f3.y * T10, R3 = (f3.r - 0.7) * T10, E2 = 0.8;
       oval(x, y + 24, 62, 26);
       for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
-        tile(x + sx * 92, y + sy * R2 * E * 0.86 + (sy < 0 ? 6 : 12) - 4);
-        tile(x + sx * R2 * 0.72 * 0.707, y + sy * R2 * 0.72 * 0.707 * E + 8);
+        tile(x + sx * 92, y + sy * R3 * E2 * 0.86 + (sy < 0 ? 6 : 12) - 4);
+        tile(x + sx * R3 * 0.72 * 0.707, y + sy * R3 * 0.72 * 0.707 * E2 + 8);
       }
     }
     if (f3.type === "castle") {
@@ -7457,12 +7457,12 @@ function townArtBlockersV1(t) {
       }
     }
     if (f3.type === "inn" && f3.garden) {
-      const E = f3.garden, b = t.buildings.find((q) => q.id === f3.building), north = b?.doorSide === "north", x = E.x * T10, y = E.y * T10, w = E.w * T10, h = E.h * T10, py0 = y + (north ? h * 0.52 : h * 0.2);
+      const E2 = f3.garden, b = t.buildings.find((q) => q.id === f3.building), north = b?.doorSide === "north", x = E2.x * T10, y = E2.y * T10, w = E2.w * T10, h = E2.h * T10, py0 = y + (north ? h * 0.52 : h * 0.2);
       for (const ty of [py0 + 30, north ? y + 70 : y + h - 50]) box3(x + w / 2 - 30, ty - 6, x + w / 2 + 22, ty + 22);
       const gy = north ? y + h - 26 : y + 40;
       box3(x + w - 64, gy - 10, x + w - 34, gy);
-      out2.push({ x: E.x, y: Math.floor((y + 12) / T10), w: 1, h: Math.floor((y + h - 13) / T10) - Math.floor((y + 12) / T10) + 1 });
-      out2.push({ x: E.x, y: north ? E.y + E.h - 1 : E.y, w: E.w, h: 1 });
+      out2.push({ x: E2.x, y: Math.floor((y + 12) / T10), w: 1, h: Math.floor((y + h - 13) / T10) - Math.floor((y + 12) / T10) + 1 });
+      out2.push({ x: E2.x, y: north ? E2.y + E2.h - 1 : E2.y, w: E2.w, h: 1 });
     }
   }
   const A = townArtBuildingsV1(t);
@@ -7513,7 +7513,7 @@ function townTemplateV1(t) {
     buildings.push({ id: "b:900", kind: "civic", label: "Castle", x: k.x, y: k.y, w: k.w, h: k.h, doorSide: "south", doorPoint: [k.x + Math.floor(k.w / 2), k.y + k.h], porch: { x: k.x + Math.floor(k.w / 2) - 1, y: k.y + k.h, w: 3, h: 2 }, path: [], target: [k.x, k.y] });
   }
   const bare = townNewArtV1(t) && t.features.some((f3) => f3.type === "zone");
-  const places = [...plaza ? [["Square", { x: plaza.x, y: plaza.y, w: plaza.w, h: plaza.h }, "public", ...bare ? [{ bare: true }] : t.arch === "lake" ? [{ well: true }] : []]] : [], ...t.places.map(([n, R2, k], i) => [n + " " + (i + 1), R2, k]), ...t.features.filter((f3) => f3.type === "manor" && f3.garden && !f3.building).map((f3, i) => ["Castle garden " + (i + 1), f3.garden, "garden"])];
+  const places = [...plaza ? [["Square", { x: plaza.x, y: plaza.y, w: plaza.w, h: plaza.h }, "public", ...bare ? [{ bare: true }] : t.arch === "lake" ? [{ well: true }] : []]] : [], ...t.places.map(([n, R3, k], i) => [n + " " + (i + 1), R3, k]), ...t.features.filter((f3) => f3.type === "manor" && f3.garden && !f3.building).map((f3, i) => ["Castle garden " + (i + 1), f3.garden, "garden"])];
   m = { id: "generated:" + t.seed + ":" + t.id.replace("settlement-slot:", ""), core: [...t.core], streets: allStreets(t).map(([p, w]) => [p, w]), buildings, places };
   templates.set(t, m);
   return m;
@@ -7539,8 +7539,8 @@ function townPropsV1(t) {
 var townFountainsV1 = (t) => t.arch === "lake" ? [] : townTemplateV1(t).places.filter((p) => p[2] === "public").map(([, p]) => ({ x: Math.floor(p.x + (p.w - 1) / 2), y: Math.floor(p.y + (p.h - 1) / 2) }));
 var rasters = /* @__PURE__ */ new WeakMap();
 function townRasterV1(t) {
-  let R2 = rasters.get(t);
-  if (R2) return R2;
+  let R3 = rasters.get(t);
+  if (R3) return R3;
   const [W9, H9] = t.core;
   let x0 = 0, y0 = 0, x1 = W9, y1 = H9;
   const lanes = townLanesV1(t);
@@ -7682,7 +7682,7 @@ function townRasterV1(t) {
         water[i] = 0;
       });
     }
-    for (const R3 of townLakePiecesV1(t)) rectDo(R3, (x, y) => {
+    for (const R4 of townLakePiecesV1(t)) rectDo(R4, (x, y) => {
       col[idx(x, y)] = 1;
     });
     for (const f3 of t.features) if (f3.type === "stalls") for (const st of f3.stalls) rectDo({ x: st.x, y: st.y, w: 3, h: 2 }, (x, y) => {
@@ -7696,9 +7696,9 @@ function townRasterV1(t) {
     deckId[idx(x, y)] = 0;
     water[idx(x, y)] = 0;
   }
-  R2 = { x0, y0, w, h, mat, col, deck, deckId, water, lakeW };
-  rasters.set(t, R2);
-  return R2;
+  R3 = { x0, y0, w, h, mat, col, deck, deckId, water, lakeW };
+  rasters.set(t, R3);
+  return R3;
 }
 var TOWN_SOFT_PROPS_V1 = /* @__PURE__ */ new Set(["lampV", "lampT", "signpost", "milestone", "tub"]);
 var reachCache = /* @__PURE__ */ new WeakMap();
@@ -7737,9 +7737,9 @@ var houseDoorSpots = (t, b) => {
     for (let k = t.biome === "woodland" ? 4 : 5; k > 0; k--) r();
     own3 = r() < 0.5 ? X + 40 : X + W9 - 40;
   } else own3 = side === "south" ? b.doorPoint[0] * 32 + 16 : side === "west" ? X + 34 : X + W9 - 34;
-  const R2 = townRasterV1(t), s = townReachV1(t), open2 = (px) => {
-    const x = Math.floor(px / 32) - R2.x0, y = b.y + b.h - R2.y0;
-    return x >= 0 && y >= 0 && x < R2.w && y < R2.h && s[y * R2.w + x] === 1;
+  const R3 = townRasterV1(t), s = townReachV1(t), open2 = (px) => {
+    const x = Math.floor(px / 32) - R3.x0, y = b.y + b.h - R3.y0;
+    return x >= 0 && y >= 0 && x < R3.w && y < R3.h && s[y * R3.w + x] === 1;
   };
   return { own: own3, spots: [own3, 2 * X + W9 - own3], open: open2 };
 };
@@ -7762,10 +7762,10 @@ var startCache = /* @__PURE__ */ new WeakMap();
 function townStartV1(t) {
   let s = startCache.get(t);
   if (s) return s;
-  const R2 = townRasterV1(t), reach = townReachV1(t), o = t.origin, [W9, H9] = t.core;
+  const R3 = townRasterV1(t), reach = townReachV1(t), o = t.origin, [W9, H9] = t.core;
   const open2 = (x, y) => {
-    const X = x - R2.x0, Y = y - R2.y0;
-    return x >= 0 && y >= 0 && x < W9 && y < H9 && X >= 0 && Y >= 0 && X < R2.w && Y < R2.h && reach[Y * R2.w + X] === 1;
+    const X = x - R3.x0, Y = y - R3.y0;
+    return x >= 0 && y >= 0 && x < W9 && y < H9 && X >= 0 && Y >= 0 && X < R3.w && Y < R3.h && reach[Y * R3.w + X] === 1;
   };
   const board = townStreetPlanV1(t).find((p) => p.kind === "notice"), cf = t.features.find((f3) => f3.type === "green" || f3.type === "plaza");
   const aim = board ? [board.tile.x + 1, board.tile.y + 2] : cf?.type === "green" ? [cf.x, cf.y + cf.ry + 1] : cf ? [cf.x + cf.w / 2, cf.y + cf.h / 2] : t.entry;
@@ -7784,29 +7784,29 @@ function townStartV1(t) {
   return s;
 }
 var townBoundsV1 = (t) => {
-  const R2 = townRasterV1(t);
-  return { x: t.origin.x + R2.x0, y: t.origin.y + R2.y0, w: R2.w, h: R2.h };
+  const R3 = townRasterV1(t);
+  return { x: t.origin.x + R3.x0, y: t.origin.y + R3.y0, w: R3.w, h: R3.h };
 };
 var MAT = ["", "g", "r", "p"];
 function createGeneratedTownTiles(terrain2, towns) {
   const list2 = towns.map((t) => ({ t, b: townBoundsV1(t), R: townRasterV1(t), code: CODE[t.biome] ?? null, keepers: new Set(townStationsV1(t).filter((s) => !townStationInsideV1(t, s)).map((s) => s.x + "," + s.y)) }));
   return (x, y, b0) => {
-    for (const { t, b: B2, R: R2, code, keepers } of list2) {
-      const o = t.origin, [W9, H9] = t.core, inB = x >= B2.x && y >= B2.y && x < B2.x + B2.w && y < B2.y + B2.h, i = inB ? (y - B2.y) * R2.w + (x - B2.x) : -1, m = inB ? R2.mat[i] : 0;
+    for (const { t, b: B2, R: R3, code, keepers } of list2) {
+      const o = t.origin, [W9, H9] = t.core, inB = x >= B2.x && y >= B2.y && x < B2.x + B2.w && y < B2.y + B2.h, i = inB ? (y - B2.y) * R3.w + (x - B2.x) : -1, m = inB ? R3.mat[i] : 0;
       const mine = m || x >= o.x && y >= o.y && x < o.x + W9 && y < o.y + H9, b = mine && code && b0.biome && b0.biome !== code && b0.walkable ? { ...b0, biome: code } : b0;
       if (!m) {
         if (b !== b0) return b;
         continue;
       }
-      if (R2.lakeW[i]) {
-        if (R2.deck[i]) return { ...b, walkable: true, kind: "bridge", underlyingKind: "lake", bridgeId: t.id + ":pier:" + R2.deckId[i], collision: "1", material: "V", route: 2, town: true, townBridge: true, pier: true };
-        return R2.col[i] && b.walkable ? { ...b, collision: "2", town: true } : b;
+      if (R3.lakeW[i]) {
+        if (R3.deck[i]) return { ...b, walkable: true, kind: "bridge", underlyingKind: "lake", bridgeId: t.id + ":pier:" + R3.deckId[i], collision: "1", material: "V", route: 2, town: true, townBridge: true, pier: true };
+        return R3.col[i] && b.walkable ? { ...b, collision: "2", town: true } : b;
       }
       if (!b.walkable) return b;
       const { naturalKind, naturalClusterId, ...rest } = b, material = MAT[m];
-      if (R2.water[i]) return { ...rest, walkable: false, kind: "river", collision: "2", material: "W", route: 0, town: true };
-      if (R2.deck[i]) return { ...rest, walkable: true, kind: "bridge", underlyingKind: "river", bridgeId: t.id + ":bridge:" + R2.deckId[i], collision: "1", material: R2.deck[i] === 1 ? "H" : "V", route: 2, town: true, townBridge: true };
-      return { ...rest, collision: R2.col[i] || keepers.has(x + "," + y) ? "2" : "1", material, route: m === 2 || m === 3 ? 2 : 0, town: true };
+      if (R3.water[i]) return { ...rest, walkable: false, kind: "river", collision: "2", material: "W", route: 0, town: true };
+      if (R3.deck[i]) return { ...rest, walkable: true, kind: "bridge", underlyingKind: "river", bridgeId: t.id + ":bridge:" + R3.deckId[i], collision: "1", material: R3.deck[i] === 1 ? "H" : "V", route: 2, town: true, townBridge: true };
+      return { ...rest, collision: R3.col[i] || keepers.has(x + "," + y) ? "2" : "1", material, route: m === 2 || m === 3 ? 2 : 0, town: true };
     }
     return b0;
   };
@@ -7819,11 +7819,11 @@ function townStationsV1(t) {
   if (out2) return out2;
   out2 = [];
   stationCache.set(t, out2);
-  const R2 = townRasterV1(t), o = t.origin, art = townNewArtV1(t), roles = townShopRolesV1(t), F = (type) => t.features.find((f3) => f3.type === type);
+  const R3 = townRasterV1(t), o = t.origin, art = townNewArtV1(t), roles = townShopRolesV1(t), F = (type) => t.features.find((f3) => f3.type === type);
   const free = (x, y) => {
-    if (x < R2.x0 || y < R2.y0 || x >= R2.x0 + R2.w || y >= R2.y0 + R2.h) return false;
-    const i = (y - R2.y0) * R2.w + (x - R2.x0);
-    return Boolean(R2.mat[i]) && !R2.col[i] && !R2.water[i] && !R2.deck[i];
+    if (x < R3.x0 || y < R3.y0 || x >= R3.x0 + R3.w || y >= R3.y0 + R3.h) return false;
+    const i = (y - R3.y0) * R3.w + (x - R3.x0);
+    return Boolean(R3.mat[i]) && !R3.col[i] && !R3.water[i] && !R3.deck[i];
   };
   const near = (x, y, order2) => {
     for (const [dx, dy] of order2) if (free(x + dx, y + dy)) return [x + dx, y + dy];
@@ -7841,8 +7841,8 @@ function townStationsV1(t) {
   }
   const fg = F("forge");
   if (roles.includes("smith") && fg?.pad) {
-    const E = fg.pad;
-    add("smith", art ? [E.x + 3, E.y + 6] : near(E.x + 3, E.y + 5, RING3), 1, fg.building, {});
+    const E2 = fg.pad;
+    add("smith", art ? [E2.x + 3, E2.y + 6] : near(E2.x + 3, E2.y + 5, RING3), 1, fg.building, {});
   }
   const inn = F("inn"), ib = inn && t.buildings.find((q) => q.id === inn.building);
   if (roles.includes("innkeeper") && ib?.doorPoint) {
@@ -7862,8 +7862,8 @@ function townStationsV1(t) {
   }
   const tw = F("tower");
   if (roles.includes("enchanter") && tw) {
-    const E = tw.circle;
-    add("enchanter", E ? near(E.x + 3, E.y + 2, RING3) : null, -1, tw.building, {});
+    const E2 = tw.circle;
+    add("enchanter", E2 ? near(E2.x + 3, E2.y + 2, RING3) : null, -1, tw.building, {});
   }
   return out2;
 }
@@ -7873,10 +7873,10 @@ function townEntrancesV1(t) {
   if (out2) return out2;
   out2 = [];
   entranceCache.set(t, out2);
-  const R2 = townRasterV1(t), o = t.origin, free = (x, y) => {
-    if (x < R2.x0 || y < R2.y0 || x >= R2.x0 + R2.w || y >= R2.y0 + R2.h) return false;
-    const i = (y - R2.y0) * R2.w + (x - R2.x0);
-    return Boolean(R2.mat[i]) && !R2.col[i] && !R2.water[i] && !R2.deck[i];
+  const R3 = townRasterV1(t), o = t.origin, free = (x, y) => {
+    if (x < R3.x0 || y < R3.y0 || x >= R3.x0 + R3.w || y >= R3.y0 + R3.h) return false;
+    const i = (y - R3.y0) * R3.w + (x - R3.x0);
+    return Boolean(R3.mat[i]) && !R3.col[i] && !R3.water[i] && !R3.deck[i];
   };
   for (const [type, recipe] of [["inn", "inn"], ["tower", "hall"]]) {
     const F = t.features.find((f3) => f3.type === type), b = F && t.buildings.find((q) => q.id === F.building);
@@ -7889,7 +7889,7 @@ function townEntrancesV1(t) {
       const m = b.x + Math.floor((b.w - 1) / 2);
       for (const k of [0, 1]) for (const x of b.w % 2 ? [m] : [m, m + 1]) seen.push([x, b.y + b.h + k]);
     } else if (TOWN_NEW_ART.has(t.biome) && b.doorSide === "north" && type === "inn") for (const k of [0, 1]) for (const x of [b.x + 2, b.x + 1, b.x + 3]) seen.push([x, b.y + b.h + k]);
-    const reach = townReachV1(t), walk = (x, y) => free(x, y) && reach[(y - R2.y0) * R2.w + (x - R2.x0)] === 1;
+    const reach = townReachV1(t), walk = (x, y) => free(x, y) && reach[(y - R3.y0) * R3.w + (x - R3.x0)] === 1;
     const p = seen.find((q) => walk(...q)) ?? c.find((q) => free(...q));
     if (p) out2.push(Object.freeze({ recipe, building: b.id, x: o.x + p[0], y: o.y + p[1] }));
   }
@@ -8109,7 +8109,7 @@ var collisions2 = /* @__PURE__ */ new Map();
 function townRecipeCollision(recipe, floor) {
   const key9 = recipe + "/" + floor;
   if (collisions2.has(key9)) return collisions2.get(key9);
-  const R2 = TOWN_INTERIOR_RECIPES[recipe], r = R2.room, o = r.round, outside = (x, y) => o && ((x * 32 + 16 - o.cx) / (o.rx - o.margin)) ** 2 + ((y * 32 + 16 - o.cy) / (o.ry - o.margin)) ** 2 > 1, q = townRecipeFloor(recipe, floor), k = R2.keeper.floor === floor ? R2.keeper.tile : null;
+  const R3 = TOWN_INTERIOR_RECIPES[recipe], r = R3.room, o = r.round, outside = (x, y) => o && ((x * 32 + 16 - o.cx) / (o.rx - o.margin)) ** 2 + ((y * 32 + 16 - o.cy) / (o.ry - o.margin)) ** 2 > 1, q = townRecipeFloor(recipe, floor), k = R3.keeper.floor === floor ? R3.keeper.tile : null;
   const c = freeze2({ width: r.width, height: r.height, tileSize: r.tileSize, tiles: Array.from({ length: r.height }, (_, y) => Array.from({ length: r.width }, (_2, x) => x === 0 || y === 0 || x === r.width - 1 || y === r.height - 1 || outside(x, y) || q.walls.some((p) => p.x === x && p.y === y) || q.furniture.some((p) => x >= p.x && y >= p.y && x < p.x + p.w && y < p.y + p.h) || k && k.x === x && k.y === y ? "2" : "1").join("")) });
   collisions2.set(key9, c);
   return c;
@@ -11773,15 +11773,15 @@ var box2 = (list2) => {
   const xs = list2.map((p) => p.x), ys = list2.map((p) => p.y), x = Math.min(...xs), y = Math.min(...ys);
   return { x, y, w: Math.max(...xs) - x + 1, h: Math.max(...ys) - y + 1 };
 };
-var span = (L2, f3, u, k0, k1, j0, j1) => box2([{ x: L2.x + f3.x * k0 + u.x * j0, y: L2.y + f3.y * k0 + u.y * j0 }, { x: L2.x + f3.x * k1 + u.x * j1, y: L2.y + f3.y * k1 + u.y * j1 }]);
+var span = (L3, f3, u, k0, k1, j0, j1) => box2([{ x: L3.x + f3.x * k0 + u.x * j0, y: L3.y + f3.y * k0 + u.y * j0 }, { x: L3.x + f3.x * k1 + u.x * j1, y: L3.y + f3.y * k1 + u.y * j1 }]);
 var inside2 = (r, x, y) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
 function harborLayoutV1(landing, length, id2 = "ferry:landing") {
   const f3 = landing.facing, facing = FACING[f3.x + "," + f3.y];
   if (!facing) return null;
-  const t = HARBOR_TEMPLATES[facing], L2 = landing.tile, u = across(f3), origin2 = { x: L2.x - t.landing[0], y: L2.y - t.landing[1] }, body = { x: origin2.x, y: origin2.y, w: t.core[0], h: t.core[1] };
-  const at2 = (k, j) => ({ x: L2.x + f3.x * k + u.x * j, y: L2.y + f3.y * k + u.y * j });
+  const t = HARBOR_TEMPLATES[facing], L3 = landing.tile, u = across(f3), origin2 = { x: L3.x - t.landing[0], y: L3.y - t.landing[1] }, body = { x: origin2.x, y: origin2.y, w: t.core[0], h: t.core[1] };
+  const at2 = (k, j) => ({ x: L3.x + f3.x * k + u.x * j, y: L3.y + f3.y * k + u.y * j });
   const pierDressing = [{ id: "pier:crates", kind: "crates", ...at2(2, -1) }, { id: "pier:barrel", kind: "barrels", ...at2(3, 1) }, { id: "pier:bollard", kind: "bollard", ...at2(length - 2, 1) }, { id: "pier:lamp", kind: "lamp", ...at2(length - 1, -1) }];
-  const pier = span(L2, f3, u, 0, length - 1, -1, 1), boat = span(L2, f3, u, length - 6, length - 1, 2, 4);
+  const pier = span(L3, f3, u, 0, length - 1, -1, 1), boat = span(L3, f3, u, length - 6, length - 1, 2, 4);
   return freezeWire({
     version: HARBOR_TOWN_VERSION,
     id: HARBOR_TOWN_ID,
@@ -11793,7 +11793,7 @@ function harborLayoutV1(landing, length, id2 = "ferry:landing") {
     template: t,
     origin: origin2,
     body,
-    landing: { ...L2 },
+    landing: { ...L3 },
     pier: { ...pier, length, beach: length - REACH },
     boat,
     pierDressing,
@@ -13323,8 +13323,8 @@ function summitPlanV1(g, tile, cx, cy, otherAnchors = []) {
   if (members.length < count2) return null;
   let ledge = null;
   if (g.stair) {
-    const E = g.levels[g.stair.k].E, side = g.stair.x > g.cairn.x ? 2 : -1;
-    for (const [x, y] of [[g.stair.x + side, E - 1], [g.stair.x, E - 2], [g.stair.x + 1, E - 2], [g.stair.x + side, E - 2]]) if (plain(g, tile, x, y, g.stair.k) && g.level(x, y) === g.stair.k) {
+    const E2 = g.levels[g.stair.k].E, side = g.stair.x > g.cairn.x ? 2 : -1;
+    for (const [x, y] of [[g.stair.x + side, E2 - 1], [g.stair.x, E2 - 2], [g.stair.x + 1, E2 - 2], [g.stair.x + side, E2 - 2]]) if (plain(g, tile, x, y, g.stair.k) && g.level(x, y) === g.stair.k) {
       ledge = local(x, y);
       break;
     }
@@ -13424,8 +13424,8 @@ function hash11(s) {
   }
   return h >>> 0;
 }
-function lakeLandingDetailV1(L2) {
-  return [L2.kind, L2.biome, L2.dir, L2.len, L2.pieces.map((p) => p.t + ":" + (p.x - L2.root.x) + "," + (p.y - L2.root.y)).join(";")].join("|");
+function lakeLandingDetailV1(L3) {
+  return [L3.kind, L3.biome, L3.dir, L3.len, L3.pieces.map((p) => p.t + ":" + (p.x - L3.root.x) + "," + (p.y - L3.root.y)).join(";")].join("|");
 }
 function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
   const hamlets = new Set((Array.isArray(asset?.generatedTowns?.towns) ? asset.generatedTowns.towns : []).map((t) => t?.lake?.basin).filter(Boolean));
@@ -13445,10 +13445,10 @@ function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
     if (got) return got;
     got = plan(b);
     done3.set(b.id, got);
-    for (const L2 of got) {
-      for (const q of L2.deck) tiles3.set(q.x + "," + q.y, { t: "deck", L: L2 });
-      for (const p of L2.pieces) for (let j = 0; j < p.h; j++) for (let i = 0; i < p.w; i++) if (SOLID.has(p.t)) tiles3.set(p.x + i + "," + (p.y + j), { t: p.t, L: L2 });
-      const all = [L2.root, ...L2.deck, ...L2.pieces.flatMap((p) => {
+    for (const L3 of got) {
+      for (const q of L3.deck) tiles3.set(q.x + "," + q.y, { t: "deck", L: L3 });
+      for (const p of L3.pieces) for (let j = 0; j < p.h; j++) for (let i = 0; i < p.w; i++) if (SOLID.has(p.t)) tiles3.set(p.x + i + "," + (p.y + j), { t: p.t, L: L3 });
+      const all = [L3.root, ...L3.deck, ...L3.pieces.flatMap((p) => {
         const o = [];
         for (let j = 0; j < p.h; j++) for (let i = 0; i < p.w; i++) o.push({ x: p.x + i, y: p.y + j });
         return o;
@@ -13477,10 +13477,10 @@ function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
   }
   function blockers2(cx, cy) {
     const out2 = [], x0 = cx * 32, y0 = cy * 26;
-    for (const L2 of forChunk(cx, cy)) {
-      const b = L2.box;
+    for (const L3 of forChunk(cx, cy)) {
+      const b = L3.box;
       if (b.x1 < x0 || b.x0 >= x0 + 32 || b.y1 < y0 || b.y0 >= y0 + 26) continue;
-      out2.push({ id: "lake-landing:" + L2.id, x: L2.root.x - x0, y: L2.root.y - y0, width: 1, height: 1, kind: "civilian-lake-landing", detail: L2.detail });
+      out2.push({ id: "lake-landing:" + L3.id, x: L3.root.x - x0, y: L3.root.y - y0, width: 1, height: 1, kind: "civilian-lake-landing", detail: L3.detail });
     }
     return out2;
   }
@@ -13626,11 +13626,11 @@ function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
       }
     }
     function seal(c, id2, pieces) {
-      const L2 = { id: id2, kind: c.kind, biome: c.biome, dir: c.dir, len: c.len, root: c.root, deck: Array.from({ length: c.len }, (_, k) => ({ x: c.root.x + c.dx * (k + 1), y: c.root.y + c.dy * (k + 1) })), pieces: pieces.map((p) => ({ ...p, w: SIZE[p.t][0], h: SIZE[p.t][1] })) };
-      const xs = [L2.root.x, ...L2.deck.map((q) => q.x), ...L2.pieces.flatMap((p) => [p.x, p.x + p.w - 1])], ys = [L2.root.y, ...L2.deck.map((q) => q.y), ...L2.pieces.flatMap((p) => [p.y, p.y + p.h - 1])];
-      L2.box = { x0: Math.min(...xs) - 1, x1: Math.max(...xs) + 1, y0: Math.min(...ys) - 1, y1: Math.max(...ys) + 1 };
-      L2.detail = lakeLandingDetailV1(L2);
-      return Object.freeze(L2);
+      const L3 = { id: id2, kind: c.kind, biome: c.biome, dir: c.dir, len: c.len, root: c.root, deck: Array.from({ length: c.len }, (_, k) => ({ x: c.root.x + c.dx * (k + 1), y: c.root.y + c.dy * (k + 1) })), pieces: pieces.map((p) => ({ ...p, w: SIZE[p.t][0], h: SIZE[p.t][1] })) };
+      const xs = [L3.root.x, ...L3.deck.map((q) => q.x), ...L3.pieces.flatMap((p) => [p.x, p.x + p.w - 1])], ys = [L3.root.y, ...L3.deck.map((q) => q.y), ...L3.pieces.flatMap((p) => [p.y, p.y + p.h - 1])];
+      L3.box = { x0: Math.min(...xs) - 1, x1: Math.max(...xs) + 1, y0: Math.min(...ys) - 1, y1: Math.max(...ys) + 1 };
+      L3.detail = lakeLandingDetailV1(L3);
+      return Object.freeze(L3);
     }
   }
   return Object.freeze({ tileAt, clearAt, blockers: blockers2, forChunk, count: () => basins.length });
@@ -14300,7 +14300,54 @@ var CLASS_SKILL_AUGMENTS = freezeWire({ "rallying_cry": [{ "name": "Second Wind"
 var LIVE_CLASS_SKILLS = Object.freeze(/* @__PURE__ */ new Set(["iron_will", "rallying_cry", "bulwark_stance", "iron_wall", "bracing_bash", "heavy_plating", "heavy_hands", "earth_breaker", "momentum", "shatterpoint", "concussion", "impact_training", "retaliation", "counter_stance", "spiked_shield", "grudge", "unbroken", "serrated_edge", "focus", "lunge", "en_garde", "fourth_cut", "footwork", "fencers_grace", "virulence", "toxic_fan", "serrated_cuts", "vipers_coating", "paralytic", "open_wounds", "light_step", "whirling_blades", "quick_dash", "crosscut", "blade_rush", "hit_and_run", "kindling", "firebloom", "firebrand", "fan_the_flames", "searing", "cinder_step", "cold_snap", "flashfreeze", "frostbinder", "brittle", "deep_freeze", "static_charge", "ball_lightning", "storm_conductor", "superconductor", "forked_lightning", "static_step", "war_banner", "hold_the_line", "rooted", "shield_charge", "reckless", "unstoppable", "shield_throw", "vengeance", "blood_for_blood", "duel", "riposte", "steel_nerves", "lingering_venom", "rupture", "hemorrhage", "evasive", "smoke_veil", "shade", "volatile", "flame_wall", "firewalker", "frost_step", "shatter", "ice_barrier", "steady_mind", "spell_weaving", "static_field", "live_wire", "second_breath", "standard_bearer", "last_stand", "crowd_breaker", "avalanche", "tremor", "blood_price", "marked_foe", "red_harvest", "spreading_flames", "kindle", "glass_furnace", "arcane_syphon", "frost_ward", "ice_fortress", "elemental_overload", "magnetic", "overload", "coup_de_grace", "marked_for_death", "glass_blade", "septic", "contagious", "toxic_blood", "opportunist", "exploit", "restless", "unyielding", "aegis_pulse", "bastion_ward", "groundbreaker", "skyfall_leap", "titan", "spite", "retribution", "executioner", "blade_dance", "thousand_cuts", "flourish", "bloodletting", "noxious_bloom", "fester", "afterimage", "shadowstep", "assassinate", "pyromaniac", "meteor", "molten_ground", "winters_grasp", "glacial_burst", "echoing_burst", "quickening", "thunderfall", "storm_call", "bulwark_colossus", "earthshaker", "thorned_bulwark", "phoenix", "absolute_zero", "living_storm", "master_duelist", "virulent_bloom", "shadow_assassin"]));
 var LIVE_AUGMENTS = freezeWire({ "rallying_cry": 5, "earth_breaker": 5, "counter_stance": 5, "lunge": 5, "toxic_fan": 5, "whirling_blades": 5, "firebloom": 5, "flashfreeze": 5, "ball_lightning": 5, "shield_charge": 5, "shield_throw": 5, "war_banner": 5, "riposte": 5, "rupture": 4, "smoke_veil": 5, "flame_wall": 5, "ice_barrier": 5, "static_field": 5, "aegis_pulse": 4, "skyfall_leap": 4, "retribution": 4, "thousand_cuts": 4, "noxious_bloom": 4, "shadowstep": 4, "meteor": 4, "glacial_burst": 4, "thunderfall": 4 });
 var classTreesFor = (classId) => CLASS_TREES[classId] ?? [];
-var classTreeOf = (classId, treeId) => classTreesFor(classId).find((t) => t.id === treeId) ?? null;
+
+// src/shared/content/augment_crafting_v1.js
+var AUGMENT_RARITIES = Object.freeze(["rare", "epic", "legendary"]);
+var AUGMENT_RARITY_NAMES = Object.freeze({ rare: "Rare", epic: "Epic", legendary: "Legendary" });
+var AUGMENT_RARITY_COLORS = Object.freeze({ rare: "#3498db", epic: "#9b59b6", legendary: "#e67e22" });
+var AUGMENT_PRICES = Object.freeze({ rare: 40, epic: 100, legendary: 200 });
+var GLYPH_DUST_DROPS = Object.freeze({
+  elite: Object.freeze({ chance: 25, amount: 2 }),
+  named: Object.freeze({ chance: 100, amount: 4 }),
+  rare: Object.freeze({ chance: 100, amount: 10 }),
+  lesser: Object.freeze({ chance: 100, amount: 6 }),
+  boss: Object.freeze({ chance: 100, amount: 12 }),
+  chest: Object.freeze({ chance: 100, amount: 6 })
+});
+var ELDER_GLYPH_CHANCE = Object.freeze({ boss: 8, lesser: 1 });
+var R = "rare";
+var E = "epic";
+var L2 = "legendary";
+var AUGMENT_RARITY = Object.freeze(Object.fromEntries(Object.entries({
+  rallying_cry: [R, R, E, E, L2],
+  war_banner: [L2, R, R, E, E],
+  aegis_pulse: [R, R, E, L2],
+  earth_breaker: [R, L2, E, R, E],
+  shield_charge: [L2, R, R, E, E],
+  skyfall_leap: [R, E, L2, E],
+  counter_stance: [R, E, E, L2, E],
+  shield_throw: [R, R, E, L2, E],
+  retribution: [R, E, L2, E],
+  firebloom: [R, E, R, E, L2],
+  flame_wall: [R, L2, R, E, E],
+  meteor: [E, L2, R, E],
+  flashfreeze: [R, E, E, R, L2],
+  ice_barrier: [R, E, R, E, L2],
+  glacial_burst: [R, E, R, L2],
+  ball_lightning: [E, R, E, R, L2],
+  static_field: [R, E, R, L2, E],
+  thunderfall: [R, R, L2, E],
+  lunge: [R, R, E, L2, E],
+  riposte: [R, R, E, E, L2],
+  thousand_cuts: [R, L2, E, R],
+  toxic_fan: [R, R, E, L2, E],
+  rupture: [E, L2, R, E],
+  noxious_bloom: [L2, R, E, R],
+  whirling_blades: [R, E, R, L2, E],
+  smoke_veil: [R, E, E, R, L2],
+  shadowstep: [L2, E, R, E]
+}).map(([id2, list2]) => [id2, Object.freeze(list2)])));
+var legendaryAugmentIndex = (id2) => AUGMENT_RARITY[id2]?.indexOf(L2) ?? -1;
 
 // src/shared/contracts/class_tree_progression_v1.js
 var classRank = (d8, id2) => d8?.classRanks?.[id2] ?? 0;
@@ -14321,16 +14368,42 @@ function learnedClassActives(d8) {
   if (!d8?.heroClass || !d8.classRanks) return [];
   return classTreesFor(d8.heroClass).flatMap((t) => t.rows.flat()).filter((id2) => CLASS_TREE_SKILLS[id2].kind === "active" && classRank(d8, id2) > 0);
 }
-var augmentThreshold = (id2, index) => Math.max(AUGMENT_UNLOCK_POINTS[index], classTierGate(CLASS_TREE_SKILLS[id2].tier));
+var ownsAugment = (d8, id2, index) => Boolean(d8?.augmentCraft?.owned?.[id2]?.includes(index));
+function storeAugmentCraft(d8, { dust = 0, owned = {}, glyphs = [] }) {
+  const o = Object.fromEntries(Object.entries(owned).filter(([, l]) => l.length).map(([id2, l]) => [id2, [...new Set(l)].sort((a, b) => a - b)]));
+  if (!dust && !Object.keys(o).length && !glyphs.length) delete d8.augmentCraft;
+  else d8.augmentCraft = { dust, owned: o, glyphs: [...glyphs] };
+}
 var augmentLive = (id2, index) => index < (LIVE_AUGMENTS[id2] ?? 0);
 function augmentAvailability(d8, id2, index) {
   const s = CLASS_TREE_SKILLS[id2], a = CLASS_SKILL_AUGMENTS[id2]?.[index];
   if (!s || !a || s.classId !== d8?.heroClass) return { ok: false, reason: "Not one of your augments" };
   if (classRank(d8, id2) <= 0) return { ok: false, reason: `Learn ${s.name} first` };
   if (!augmentLive(id2, index)) return { ok: false, reason: "Coming soon" };
-  const need = augmentThreshold(id2, index), tree = classTreeOf(s.classId, s.tree);
-  if (classTreeSpent(d8, s.tree) < need) return { ok: false, reason: `Opens at ${need} points in ${tree.name}` };
+  if (!ownsAugment(d8, id2, index)) return { ok: false, reason: "Craft it at an Enchanter" };
   return { ok: true };
+}
+function validateAugmentCraft(d8) {
+  const c = d8.augmentCraft;
+  if (c === void 0) return;
+  requireContract(d8.heroClass, "Augments need a class");
+  closedRecord(c, ["dust", "owned", "glyphs"]);
+  safeInteger(c.dust);
+  const mine = Object.keys(CLASS_SKILL_AUGMENTS).filter((id2) => CLASS_TREE_SKILLS[id2].classId === d8.heroClass);
+  closedRecord(c.owned, [], mine);
+  for (const [id2, list2] of Object.entries(c.owned)) {
+    requireContract(Array.isArray(list2) && list2.length > 0, "Empty crafted lists are omitted");
+    list2.forEach((i, n) => {
+      safeInteger(i, 0, CLASS_SKILL_AUGMENTS[id2].length - 1);
+      requireContract(n === 0 || i > list2[n - 1], "Crafted augments are listed once, in order");
+    });
+  }
+  requireContract(Array.isArray(c.glyphs) && new Set(c.glyphs).size === c.glyphs.length, "Each Elder Glyph once");
+  for (const id2 of c.glyphs) {
+    requireContract(mine.includes(id2) && legendaryAugmentIndex(id2) >= 0, "Not one of your Elder Glyphs");
+    requireContract(!ownsAugment(d8, id2, legendaryAugmentIndex(id2)), "Elder Glyph for an augment you own");
+  }
+  requireContract(c.dust > 0 || Object.keys(c.owned).length > 0 || c.glyphs.length > 0, "Empty augment craft is omitted");
 }
 function checkAugmentSlots(d8, id2, slots3) {
   requireContract(Array.isArray(slots3) && slots3.length <= AUGMENT_SLOTS && new Set(slots3).size === slots3.length, "Two augments at most, each once");
@@ -14366,6 +14439,7 @@ function validateClassRanks(d8) {
       checkAugmentSlots(d8, id2, slots3);
     }
   }
+  validateAugmentCraft(d8);
 }
 function classTreeEffects(d8) {
   const r = (id2) => classRank(d8, id2), out2 = {};
@@ -14377,11 +14451,12 @@ function classTreeMaxHpScale(d8) {
 }
 function fitClassTrees(d8) {
   if (!d8) return false;
-  const before = JSON.stringify([d8.classRanks, d8.classAugments]);
+  const before = JSON.stringify([d8.classRanks, d8.classAugments, d8.augmentCraft]);
   if (!d8.heroClass) {
     delete d8.classRanks;
     delete d8.classAugments;
-    return before !== JSON.stringify([d8.classRanks, d8.classAugments]);
+    delete d8.augmentCraft;
+    return before !== JSON.stringify([d8.classRanks, d8.classAugments, d8.augmentCraft]);
   }
   let ranks = Object.fromEntries(Object.entries(d8.classRanks ?? {}).filter(([id2, r]) => {
     const s = CLASS_TREE_SKILLS[id2];
@@ -14405,6 +14480,12 @@ function fitClassTrees(d8) {
   }
   if (Object.keys(ranks).length) d8.classRanks = ranks;
   else delete d8.classRanks;
+  {
+    const old = d8.augmentCraft, mine = (id2) => CLASS_TREE_SKILLS[id2]?.classId === d8.heroClass && AUGMENT_RARITY[id2], dust = Number.isSafeInteger(old?.dust) && old.dust > 0 ? old.dust : 0, owned = {};
+    for (const [id2, list2] of [...Object.entries(old?.owned ?? {}), ...Object.entries(d8.classAugments ?? {})]) if (mine(id2) && Array.isArray(list2)) owned[id2] = [...owned[id2] ?? [], ...list2.filter((i) => Number.isSafeInteger(i) && i >= 0 && i < CLASS_SKILL_AUGMENTS[id2].length)];
+    const glyphs = [...new Set(Array.isArray(old?.glyphs) ? old.glyphs : [])].filter((id2) => mine(id2) && !owned[id2]?.includes(legendaryAugmentIndex(id2)));
+    storeAugmentCraft(d8, { dust, owned, glyphs });
+  }
   const augs = {};
   for (const [id2, slots3] of Object.entries(d8.classAugments ?? {})) {
     const ok = Array.isArray(slots3) ? [...new Set(slots3)].filter((i) => Number.isSafeInteger(i) && i >= 0 && i < AUGMENT_UNLOCK_POINTS.length && augmentAvailability(d8, id2, i).ok).slice(0, AUGMENT_SLOTS) : [];
@@ -14412,7 +14493,7 @@ function fitClassTrees(d8) {
   }
   if (Object.keys(augs).length) d8.classAugments = augs;
   else delete d8.classAugments;
-  return before !== JSON.stringify([d8.classRanks, d8.classAugments]);
+  return before !== JSON.stringify([d8.classRanks, d8.classAugments, d8.augmentCraft]);
 }
 
 // src/shared/content/hero_classes_v1.js
@@ -14557,7 +14638,7 @@ function pointBalances(state) {
 }
 function validateD8Progression(state, heroLevel) {
   validateWire(state);
-  closedRecord(state, ["version", "highestHeroLevel", "revision", "attributeResetCount", "lastChange", "causalXp", "transient", "allocated", "utility", ...MASTERY_FAMILIES], ["heroClass", "skillSlots", "look", "classRanks", "classAugments", "attackSkill"]);
+  closedRecord(state, ["version", "highestHeroLevel", "revision", "attributeResetCount", "lastChange", "causalXp", "transient", "allocated", "utility", ...MASTERY_FAMILIES], ["heroClass", "skillSlots", "look", "classRanks", "classAugments", "augmentCraft", "attackSkill"]);
   if (state.heroClass !== void 0) requireContract(HERO_CLASS_IDS.includes(state.heroClass), "Unknown hero class");
   if (state.look !== void 0) validateHeroLook(state.look);
   validateClassRanks(state);
@@ -14739,215 +14820,6 @@ function validateProvisions(p, s, validateCommand2) {
 }
 function validateProvisionProgress(a, b) {
   for (const [t, r] of Object.entries(a.subweapons.claims)) requireContract(canonicalStringify(r) === canonicalStringify(b.subweapons.claims[t]), "Provision history rewritten");
-}
-
-// src/shared/content/spore_outbreak_v3.js
-var SPORE_V3 = "spore-outbreak-v3-active-pressure";
-var SPORE_V3_POLICY = freezeWire({ version: SPORE_V3, parent: "spore-outbreak-v2-damage-pods", firstPulseTicks: 60, pulseTicks: 150, lastPodPulseTicks: 90, living: 9, roster: 12, landingRadiiPixels: [80, 96, 64, 112, 56], maximumLandingDistancePixels: 112, minimumLandingSpacingPixels: 28, hatchPlayerClearancePixels: 64, tellTicks: 24, flightTicks: 36, growthTicks: 72, simulationHz: 60, activation: "Deliberate E/touch; no activation by proximity", pressure: "Autonomous pulses plus existing damage thresholds draw from the same twelve admitted mushrooms; no infinite reward farm", completion: "All pods destroyed and all launched mushrooms defeated; chest hidden until completed" });
-
-// src/shared/content/spore_outbreak_v2.js
-var SPORE_V2 = "spore-outbreak-v2-damage-pods";
-var SPORE_V2_POLICY = freezeWire({
-  version: SPORE_V2,
-  parent: "spore-outbreak-v1",
-  pods: 3,
-  mushrooms: 12,
-  living: 6,
-  maxActive: 4,
-  triangleSidesPixels: [256, 224, 192],
-  podClearancePixels: 56,
-  playerHullPixels: 9,
-  layoutSearch: { centerSources: "Accepted clearing and existing admitted encounter-member envelope", maximumCenterOffsetPixels: 64, centerStepPixels: 32, orientations: 12, clearingHalfExtentPixels: 192 },
-  health: "10 times a C-rank ordinary enemy at the frozen encounter level",
-  partyHealthPercent: [100, 160, 220, 280],
-  thresholdPercent: [75, 50, 25],
-  burstSizes: [1, 1, 2],
-  tellTicks: 24,
-  flightTicks: 60,
-  growthTicks: 90,
-  destroyed: "Stops unlaunched spores; already airborne or growing spores survive",
-  damage: "Authoritative primary strikes, normal attack power and critical roll; no interaction bypass",
-  rewards: "Existing pod breakable and personal completion rewards; no reward for partial damage",
-  reset: "One-time; manual reset remains deferred",
-  simulationHz: 60
-});
-
-// src/shared/contracts/spore_pods_v2.js
-var isSporeV2 = (r) => [SPORE_V2, SPORE_V3, SPORE_V4, SPORE_V5].includes(r?.rulesVersion);
-var isSporePodV2 = (s, id2, n) => isSporeV2(s.d9World?.worldEvents?.records[id2]) && n >= 0 && n < 3;
-var layouts = /* @__PURE__ */ new WeakMap();
-var hash12 = (text) => {
-  let h = 2166136261;
-  for (const c of text) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
-  return h >>> 0;
-};
-var lineOpen = (c, a, b) => {
-  const steps = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 16);
-  for (let i = 0; i <= steps; i++) {
-    const t = steps ? i / steps : 0;
-    if (collidesWithTiles(c, a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, 18)) return false;
-  }
-  return true;
-};
-var triangleOpen = (c, pods) => {
-  const center2 = { x: pods.reduce((v, p) => v + p.x, 0) / 3, y: pods.reduce((v, p) => v + p.y, 0) / 3 };
-  return pods.every((p, n) => !collidesWithTiles(c, p.x, p.y, 28) && Array.from({ length: 8 }, (_, i) => i * Math.PI / 4).every((a) => !collidesWithTiles(c, p.x + Math.cos(a) * SPORE_V2_POLICY.podClearancePixels, p.y + Math.sin(a) * SPORE_V2_POLICY.podClearancePixels, SPORE_V2_POLICY.playerHullPixels)) && lineOpen(c, p, pods[(n + 1) % 3]) && lineOpen(c, p, center2));
-};
-function sporeTriangleV2(s, id2) {
-  const runtime = s.d9World.runtime, frameKey = canonicalStringify(runtime.frames ?? []);
-  let cache6 = layouts.get(s);
-  if (cache6?.frameKey !== frameKey) {
-    cache6 = { frameKey, rows: /* @__PURE__ */ new Map() };
-    layouts.set(s, cache6);
-  }
-  const d = runtime.groups.find((g) => g.groupId === id2), c = s.spacesByInstanceId[s.overworldInstanceId].collision;
-  const prior = cache6.rows.get(id2);
-  if (prior?.layout && (prior.pages === c.pages && prior.tiles === c.tiles || triangleOpen(c, prior.layout.pods))) {
-    prior.pages = c.pages;
-    prior.tiles = c.tiles;
-    return prior.layout;
-  }
-  if (prior && !prior.layout && prior.revision === runtime.revision) return null;
-  if (!d) return null;
-  const event = SPORE_EVENTS.find((e) => e.ordinal === s.d9World.episodes[id2]?.geography.anchorOrdinal), clearing = event && runtime.frames?.length ? projectToLocalFrameD9(tileAddress(event.x, event.y), runtime.frames) : null;
-  const points = d.members.map((m) => m.position), xs = points.map((p) => p.x), ys = points.map((p) => p.y), memberBounds = { left: Math.min(...xs) - 32, right: Math.max(...xs) + 32, top: Math.min(...ys) - 32, bottom: Math.max(...ys) + 32 }, memberCenter = { x: (memberBounds.left + memberBounds.right) / 2, y: (memberBounds.top + memberBounds.bottom) / 2 }, bounds = clearing ? { left: Math.min(clearing.x - 192, memberBounds.left), right: Math.max(clearing.x + 192, memberBounds.right), top: Math.min(clearing.y - 192, memberBounds.top), bottom: Math.max(clearing.y + 192, memberBounds.bottom) } : memberBounds, centers = clearing ? [clearing, memberCenter] : [memberCenter];
-  const offsets = [];
-  for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) offsets.push([x * 32, y * 32]);
-  offsets.sort((a, b) => a[0] * a[0] + a[1] * a[1] - b[0] * b[0] - b[1] * b[1] || a[1] - b[1] || a[0] - b[0]);
-  let chosen = null;
-  for (const center2 of centers) {
-    for (const side of SPORE_V2_POLICY.triangleSidesPixels) {
-      for (const [dx, dy] of offsets) {
-        for (let turn = 0; turn < 12; turn++) {
-          const angle = (hash12(id2) % 12 + turn) * Math.PI / 6, radius = side / Math.sqrt(3), pods = Array.from({ length: 3 }, (_, n) => ({ x: center2.x + dx + Math.cos(angle + n * 2 * Math.PI / 3) * radius, y: center2.y + dy + Math.sin(angle + n * 2 * Math.PI / 3) * radius }));
-          const open2 = pods.every((p) => p.x >= bounds.left && p.x <= bounds.right && p.y >= bounds.top && p.y <= bounds.bottom && !collidesWithTiles(c, p.x, p.y, 28) && Array.from({ length: 8 }, (_, n) => n * Math.PI / 4).every((a) => !collidesWithTiles(c, p.x + Math.cos(a) * SPORE_V2_POLICY.podClearancePixels, p.y + Math.sin(a) * SPORE_V2_POLICY.podClearancePixels, SPORE_V2_POLICY.playerHullPixels)));
-          if (!open2 || !pods.every((p, n) => lineOpen(c, p, pods[(n + 1) % 3]))) continue;
-          const mid = { x: pods.reduce((v, p) => v + p.x, 0) / 3, y: pods.reduce((v, p) => v + p.y, 0) / 3 };
-          if (pods.every((p) => lineOpen(c, p, mid))) {
-            chosen = { side, pods, center: mid };
-            break;
-          }
-        }
-        if (chosen) break;
-      }
-      if (chosen) break;
-    }
-    if (chosen) break;
-  }
-  if (chosen) {
-    chosen.pods.forEach(Object.freeze);
-    Object.freeze(chosen.pods);
-    Object.freeze(chosen.center);
-    Object.freeze(chosen);
-  }
-  cache6.rows.set(id2, { revision: runtime.revision, pages: c.pages, tiles: c.tiles, layout: chosen });
-  return chosen;
-}
-function podPositionV2(s, id2, n, fallback) {
-  const r = s.d9World?.worldEvents?.records[id2];
-  if (n === 3 && isSporeV2(r)) {
-    const points = r.pods.map((p) => projectToLocalFrameD9(p.position, s.d9World.runtime.frames));
-    return points.every(Boolean) ? { x: points.reduce((v, p) => v + p.x, 0) / 3, y: points.reduce((v, p) => v + p.y, 0) / 3 } : fallback;
-  }
-  if (isSporeV2(r)) return projectToLocalFrameD9(r.pods[n].position, s.d9World.runtime.frames) ?? fallback;
-  if (!r) {
-    const triangle = sporeTriangleV2(s, id2);
-    return (n === 3 ? triangle?.center : triangle?.pods[n]) ?? fallback;
-  }
-  return fallback;
-}
-function validateSporePodsV2(r) {
-  requireContract(isSporeV2(r), "Unknown spore-pod policy");
-  safeInteger(r.partySize, 1, 4);
-  requireContract(r.podLevel !== void 0 && Array.isArray(r.pods) && r.pods.length === 3, "Spore pod inventory");
-  const expectedMax = combatInteger(multiplyCombat(worldObjectHealth(r.podLevel), 10 * SPORE_V2_POLICY.partyHealthPercent[r.partySize - 1], 100));
-  for (const p of r.pods) {
-    closedRecord(p, ["position", "hp", "maxHp", "lastHitTick", "bursts"], ["lastDamage"]);
-    if (p.lastDamage !== void 0) {
-      validateInteger(p.lastDamage);
-      requireContract(p.lastHitTick !== null && compareCombat(p.lastDamage, 0) > 0 && compareCombat(p.lastDamage, p.maxHp) <= 0, "Invalid pod hit feedback");
-    }
-    validateWorldPosition(p.position);
-    validateInteger(p.hp);
-    validateInteger(p.maxHp);
-    requireContract(canonicalStringify(p.maxHp) === canonicalStringify(expectedMax) && compareCombat(p.hp, p.maxHp) <= 0, "Spore pod health");
-    safeInteger(p.bursts, 0, 3);
-    if (p.lastHitTick !== null) safeInteger(p.lastHitTick, r.startedTick);
-    const expected = SPORE_V2_POLICY.thresholdPercent.filter((t) => compareCombat(multiplyCombat(p.hp, 100), multiplyCombat(p.maxHp, t)) <= 0).length;
-    requireContract(p.bursts === expected, "Spore burst threshold mismatch");
-  }
-  const [a, b, c] = r.pods.map((p) => p.position), relative = (p, q) => ({ x: Number(BigInt(p.chunkX) - BigInt(q.chunkX)) * 1024 + p.localX - q.localX, y: Number(BigInt(p.chunkY) - BigInt(q.chunkY)) * 832 + p.localY - q.localY }), distance5 = (p, q) => {
-    const d = relative(p, q);
-    return Math.hypot(d.x, d.y);
-  }, sides = [distance5(a, b), distance5(b, c), distance5(c, a)];
-  requireContract(SPORE_V2_POLICY.triangleSidesPixels.some((side) => sides.every((s) => Math.abs(s - side) < 1e-6)), "Spore pods must form an equilateral triangle");
-}
-function validateSporePodsProgressV2(a, b) {
-  requireContract(isSporeV2(b) && a.partySize === b.partySize && canonicalStringify(a.podLevel) === canonicalStringify(b.podLevel), "Spore pod scaling changed");
-  a.pods.forEach((p, n) => {
-    const q = b.pods[n];
-    requireContract(canonicalStringify(p.position) === canonicalStringify(q.position) && canonicalStringify(p.maxHp) === canonicalStringify(q.maxHp) && compareCombat(q.hp, p.hp) <= 0 && q.bursts >= p.bursts && (p.lastHitTick === null || q.lastHitTick >= p.lastHitTick), "Spore pod history regressed");
-  });
-}
-
-// src/shared/content/hidden_hollow_safety_v1.js
-var HOLLOW_SAFETY_VERSION = "hidden-hollow-v1-trunk-emergence";
-var HOLLOW_SAFETY_POLICY = Object.freeze({ version: HOLLOW_SAFETY_VERSION, parent: HOLLOW_HASH, collision: "trunk ground contact; open mouth and apron", pads: [[0, 48], [-80, 48], [80, 48], [-112, 80], [112, 80], [0, 112], [-48, 128], [48, 128], [-144, 32], [144, 32]], selection: "member-index rotation; collision, connected path, player and living-member clearance", waves: [6, 6, 1], playerClearance: 64, tellTicks: 45, spawnSpacingTicks: 24, blocked: "wait without spawning or granting invulnerability" });
-var HOLLOW_SAFETY_HASH = "93899adb07ec572303df69bc5838c2e4a644ff23d15bc82dcdd09a1d69561bfc";
-
-// src/shared/content/hidden_hollow_pour_v2.js
-var HOLLOW_POUR_VERSION = "hidden-hollow-v2-mouth-pour";
-var HOLLOW_POUR_POLICY = freezeWire({ version: HOLLOW_POUR_VERSION, parent: HOLLOW_SAFETY_HASH, geometry: "hidden-hollow-trunk-v2-recessed-mouth", mouthPoints: [[24, -30], [30, -28], [18, -28]], fanHomes: [[-64, 64], [64, 64], [-96, 96], [96, 96], [0, 112], [0, 144]], spawnSpacingTicks: 24, firstTellTicks: 45, playerClearance: 64, enemyClearance: "sum of hull radii plus4px", waves: [6, 6, 1], blocked: "wait for a clear mouth, never spawn remotely or on players", movement: "normal authoritative AI and collision; no teleports, emergence invulnerability or artificial visual positions" });
-var HOLLOW_POUR_HASH = "9816586f08d103863eaf586d276e37c35c11afafd11ea18206ea4f97c34a1677";
-
-// src/shared/contracts/hidden_hollow_v1.js
-function validateHollowV1(r) {
-  requireContract(r.kind === "hollow" && [HOLLOW_VERSION, HOLLOW_SAFETY_VERSION, HOLLOW_POUR_VERSION].includes(r.rulesVersion) && r.stages.length === 13, "Hollow policy/membership");
-  closedRecord(r.hollow, ["policyHash", "launchedWaves", "nextWaveElapsed", "nextSpawnElapsed"]);
-  requireContract(r.hollow.policyHash === (r.rulesVersion === HOLLOW_POUR_VERSION ? HOLLOW_POUR_HASH : r.rulesVersion === HOLLOW_SAFETY_VERSION ? HOLLOW_SAFETY_HASH : HOLLOW_HASH), "Hollow commitment");
-  safeInteger(r.hollow.launchedWaves, 0, 3);
-  safeInteger(r.hollow.nextWaveElapsed);
-  safeInteger(r.hollow.nextSpawnElapsed, 0, r.elapsedTicks + HOLLOW_POLICY.emergenceTellTicks);
-  requireContract(r.hollow.nextWaveElapsed <= r.elapsedTicks + HOLLOW_POLICY.intermissionTicks, "Hollow wave schedule");
-  requireContract(r.stages.every((s) => ["pending", "growing", "hatched", "defeated"].includes(s.phase)), "Hollow stage");
-  let offset = 0;
-  for (let wave = 0; wave < 3; wave++) {
-    const rows3 = r.stages.slice(offset, offset + HOLLOW_POLICY.waves[wave]);
-    if (wave < r.hollow.launchedWaves) requireContract(rows3.every((t) => t.phase !== "pending"), "Launched Hollow membership");
-    if (wave >= r.hollow.launchedWaves) requireContract(rows3.every((t) => t.phase === "pending"), "Unlaunched Hollow wave");
-    if (wave < r.hollow.launchedWaves - 1) requireContract(rows3.every((t) => t.phase === "defeated"), "Overlapping Hollow waves");
-    offset += HOLLOW_POLICY.waves[wave];
-  }
-  if (r.status === "completed") requireContract(hollowReadyV1(r), "Incomplete Hollow completion");
-}
-var hollowReadyV1 = (r) => r.hollow.launchedWaves === 3 && r.stages.every((t) => t.phase === "defeated");
-
-// src/shared/contracts/spore_pressure_v3.js
-var isSporeV3 = (r) => [SPORE_V3, SPORE_V4, SPORE_V5].includes(r?.rulesVersion);
-function validateSporePressureV3(r) {
-  if (!isSporeV3(r)) {
-    requireContract(r.pressure === void 0, "Unexpected spore pressure extension");
-    return;
-  }
-  const p = r.pressure;
-  closedRecord(p, ["version", "adoptedTick", "adoptedElapsed", "nextPulseElapsed", "landings"]);
-  requireContract(p.version === SPORE_V3 && r.kind === "spore", "Spore pressure policy");
-  safeInteger(p.adoptedTick, r.startedTick);
-  safeInteger(p.adoptedElapsed, 0, r.elapsedTicks);
-  safeInteger(p.nextPulseElapsed, Math.max(p.adoptedElapsed + 1, r.elapsedTicks + 1), r.elapsedTicks + (isSporeV5(r) ? Math.max(SPORE_V5_POLICY.firstPulseTicks, SPORE_V5_POLICY.pulseTicks) : SPORE_V3_POLICY.pulseTicks));
-  requireContract(Array.isArray(p.landings) && p.landings.length === 12, "Spore landing inventory");
-  p.landings.forEach((point15, n) => {
-    validateWorldPosition(point15);
-    const pod = r.pods[n % 3].position, dx = Number(BigInt(point15.chunkX) - BigInt(pod.chunkX)) * 1024 + point15.localX - pod.localX, dy = Number(BigInt(point15.chunkY) - BigInt(pod.chunkY)) * 832 + point15.localY - pod.localY;
-    requireContract(Math.hypot(dx, dy) <= SPORE_V3_POLICY.maximumLandingDistancePixels + 1e-6, "Spore landing too far from pod");
-  });
-}
-function validateSporePressureProgressV3(a, b, fromTick, toTick) {
-  if (isSporeV5(b) && !isSporeV5(a)) requireContract(adoptingSporeV5(a, b), "Invalid paced spore adoption");
-  if (isSporeV5(a)) requireContract(isSporeV5(b), "Paced spore policy regressed");
-  if (isSporeV3(a)) {
-    requireContract(isSporeV3(b) && a.pressure.adoptedTick === b.pressure.adoptedTick && a.pressure.adoptedElapsed === b.pressure.adoptedElapsed && a.pressure.nextPulseElapsed <= b.pressure.nextPulseElapsed && canonicalStringify(a.pressure.landings) === canonicalStringify(b.pressure.landings), "Spore pressure history changed");
-  } else if (isSporeV3(b)) requireContract(a.rulesVersion === SPORE_V2 && a.status === "active" && b.pressure.adoptedTick >= fromTick && b.pressure.adoptedTick <= toTick, "Invalid spore pressure adoption");
 }
 
 // src/shared/content/quest_gear_v1.js
@@ -16578,7 +16450,7 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
     /* any-class unique gloves, boots and armor (Cocoonsilk Wraps, Brimstone Treads, Wardenplate) keep their own noun */
   ], n = noun ?? (type === "subweapon" && cls && progression.mainTree ? smartOffhandNoun(cls, progression.mainTree, random) : shared.length && random() < 0.2 ? pick6(shared) : pick6(own3));
   requireContract((family2 ? cls ? classFamilies : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
-  const E = c.dungeonScale(power2).E, R2 = c.q(100 + 7 * rarityTier, 100), P2 = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R2, c.q(type === "overall" ? 18 : 10, 10));
+  const E2 = c.dungeonScale(power2).E, R3 = c.q(100 + 7 * rarityTier, 100), P2 = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R3, c.q(type === "overall" ? 18 : 10, 10));
   const I = (v) => {
     if (v && typeof v === "object" && "lo" in v) return v;
     const q = exactDecimal(v);
@@ -16660,8 +16532,8 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
     if (PERCENT_STAT_RANGES[key9]) {
       const [lo, hi] = PERCENT_STAT_RANGES[key9];
       value = round44(times3(f3(String(lo / 1e3), String(hi / 1e3)), c.q(100 + 5 * rarityTier, 100)));
-    } else if (key9 === "atk" || key9 === "def") value = ceil(times3(f3(".04", ".08"), E, flatR));
-    else if (key9 === "maxHp") value = ceil(times3(f3(".12", ".24"), E, flatR));
+    } else if (key9 === "atk" || key9 === "def") value = ceil(times3(f3(".04", ".08"), E2, flatR));
+    else if (key9 === "maxHp") value = ceil(times3(f3(".12", ".24"), E2, flatR));
     else if (key9 === "moveSpeed") value = isAffixesV2Plus(progression.affixes) ? ceil(times3(f3("10", "23"), P2)) : ceil(times3(1 + Math.floor(random() * 2), power2, P2));
     else if (key9 === "critChance") value = isAffixesV2Plus(progression.affixes) ? round44(capped(times3(f3(".01", ".02"), c.root(I(power2), 2), P2), I(".1"))) : round44(capped(times3(f3(".015", ".04"), c.root(I(power2), 2), P2), I(".2")));
     else if (key9 === "critDamage") value = round44(times3(f3(".03", ".06"), c.root(I(power2), 2), P2));
@@ -16693,7 +16565,7 @@ function affixRollRangeD9(g, key9) {
   positiveProgression(g.itemPower);
   const tier2 = safeInteger(g.rarityTier, 0, 5), p = g.itemPower, overall = g.definition.slot === "overall";
   return certifyNumeric((c) => {
-    const P2 = c.q((100 + 15 * tier2) * (overall ? 18 : 10), 1e3), R2 = c.q((100 + 7 * tier2) * (overall ? 18 : 10), 1e3), I = c.q, mul2 = c.mul;
+    const P2 = c.q((100 + 15 * tier2) * (overall ? 18 : 10), 1e3), R3 = c.q((100 + 7 * tier2) * (overall ? 18 : 10), 1e3), I = c.q, mul2 = c.mul;
     const cap3 = (a, b) => ({ lo: a.lo < b.lo ? a.lo : b.lo, hi: a.hi < b.hi ? a.hi : b.hi }), ceil = (x) => progressionWire(c.endpoint(x, "ceil")), round44 = (x) => decimalWire(c.endpoint(x, "round", 4), 4);
     let minimum, maximum;
     const star = c.q(100 + 5 * tier2, 100);
@@ -16721,7 +16593,7 @@ function affixRollRangeD9(g, key9) {
       minimum = progressionWire(1n);
       maximum = progressionWire(1n);
     } else if (["atk", "def", "maxHp"].includes(key9)) {
-      const scale2 = mul2(c.dungeonScale(p).E, R2), lo = key9 === "maxHp" ? 12 : 4;
+      const scale2 = mul2(c.dungeonScale(p).E, R3), lo = key9 === "maxHp" ? 12 : 4;
       minimum = ceil(mul2(I(lo, 100), scale2));
       maximum = ceil(mul2(I(lo * 2, 100), scale2));
     } else if (key9 === "moveSpeed" && isAffixesV2Plus(g.progression?.affixes)) {
@@ -17139,7 +17011,7 @@ function generateGear(seed, depth, { tier: tier2 = null, family: family2 = null,
   safeInteger(rarityTier, 0, 5);
   const type = family2 ?? pick6(GEAR_FAMILIES2), sub = type === "subweapon" ? subType ?? pick6(["shield", "dagger", "tome"]) : null, n = noun ?? pick6(GEAR_NOUNS2[sub ?? type]);
   requireContract(GEAR_FAMILIES2.includes(type) && GEAR_NOUNS2[sub ?? type]?.includes(n), "Unknown generated family/noun");
-  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1), f3 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
+  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E2 = Math.pow(1.012, effective) * (1 + 0.015 * effective), R3 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R3 * (type === "overall" ? 1.8 : 1), f3 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
   const raw = { type, subType: sub, statsRolled: rarityTier, noun: n, baseAtk: 0, baseDef: 0, baseMaxHp: 0, baseStr: 0, baseDex: 0, baseInt: 0, baseMoveSpeed: 0, baseCritChance: 0, baseCritDamage: 0, baseBlock: 0, baseParry: 0 };
   if (type === "ring") {
     const roll = random();
@@ -17152,8 +17024,8 @@ function generateGear(seed, depth, { tier: tier2 = null, family: family2 = null,
   for (let i = 0; i < rarityTier && pool.length; i++) {
     const key9 = pool.splice(Math.floor(random() * pool.length), 1)[0];
     let value;
-    if (key9 === "atk" || key9 === "def") value = Math.ceil(f3(0.04, 0.08) * E * flatR);
-    else if (key9 === "maxHp") value = Math.ceil(f3(0.12, 0.24) * E * flatR);
+    if (key9 === "atk" || key9 === "def") value = Math.ceil(f3(0.04, 0.08) * E2 * flatR);
+    else if (key9 === "maxHp") value = Math.ceil(f3(0.12, 0.24) * E2 * flatR);
     else if (key9 === "moveSpeed") value = Math.ceil(int(1, 2) * power2 * P2);
     else if (key9 === "critChance") value = round4(Math.min(0.2, f3(0.015, 0.04) * Math.sqrt(power2) * P2));
     else if (key9 === "critDamage") value = round4(f3(0.03, 0.06) * Math.sqrt(power2) * P2);
@@ -17456,7 +17328,7 @@ function generateGear2(seed, input, { tier: tier2 = null, family: family2 = null
   safeInteger(rarityTier, 0, 5);
   const type = family2 ?? pick6(GEAR_FAMILIES3), sub = type === "subweapon" ? subType ?? pick6(["shield", "dagger", "tome"]) : null, n = noun ?? pick6(GEAR_NOUNS3[sub ?? type]);
   requireContract(GEAR_FAMILIES3.includes(type) && GEAR_NOUNS3[sub ?? type]?.includes(n), "Unknown generated family/noun");
-  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1), f3 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
+  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E2 = Math.pow(1.012, effective) * (1 + 0.015 * effective), R3 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R3 * (type === "overall" ? 1.8 : 1), f3 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
   const raw = { type, subType: sub, statsRolled: rarityTier, noun: n, baseAtk: 0, baseDef: 0, baseMaxHp: 0, baseStr: 0, baseDex: 0, baseInt: 0, baseMoveSpeed: 0, baseCritChance: 0, baseCritDamage: 0, baseBlock: 0, baseParry: 0 };
   if (type === "ring") {
     const roll = random();
@@ -17469,8 +17341,8 @@ function generateGear2(seed, input, { tier: tier2 = null, family: family2 = null
   for (let i = 0; i < rarityTier && pool.length; i++) {
     const key9 = pool.splice(Math.floor(random() * pool.length), 1)[0];
     let value;
-    if (key9 === "atk" || key9 === "def") value = Math.ceil(f3(0.04, 0.08) * E * flatR);
-    else if (key9 === "maxHp") value = Math.ceil(f3(0.12, 0.24) * E * flatR);
+    if (key9 === "atk" || key9 === "def") value = Math.ceil(f3(0.04, 0.08) * E2 * flatR);
+    else if (key9 === "maxHp") value = Math.ceil(f3(0.12, 0.24) * E2 * flatR);
     else if (key9 === "moveSpeed") value = Math.ceil(int(1, 2) * power2 * P2);
     else if (key9 === "critChance") value = round42(Math.min(0.2, f3(0.015, 0.04) * Math.sqrt(power2) * P2));
     else if (key9 === "critDamage") value = round42(f3(0.03, 0.06) * Math.sqrt(power2) * P2);
@@ -17523,14 +17395,14 @@ var gearSeed = (state, p, source11) => `dungeon-gear-d7-v1/${state.campaign.seed
 var round43 = (n) => Number(n.toFixed(4));
 function affixRollRange(g, key9) {
   if (g.version === "dungeon-gear-d9-v1") return affixRollRangeD9(g, key9);
-  const power2 = safeInteger(g.itemPower, 1), rarityTier = safeInteger(g.rarityTier, 0, 5), type = g.definition.slot, band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1);
+  const power2 = safeInteger(g.itemPower, 1), rarityTier = safeInteger(g.rarityTier, 0, 5), type = g.definition.slot, band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E2 = Math.pow(1.012, effective) * (1 + 0.015 * effective), R3 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R3 * (type === "overall" ? 1.8 : 1);
   let minimum, maximum;
   if (key9 === "atk" || key9 === "def") {
-    minimum = Math.ceil(0.04 * E * flatR);
-    maximum = Math.ceil(0.08 * E * flatR);
+    minimum = Math.ceil(0.04 * E2 * flatR);
+    maximum = Math.ceil(0.08 * E2 * flatR);
   } else if (key9 === "maxHp") {
-    minimum = Math.ceil(0.12 * E * flatR);
-    maximum = Math.ceil(0.24 * E * flatR);
+    minimum = Math.ceil(0.12 * E2 * flatR);
+    maximum = Math.ceil(0.24 * E2 * flatR);
   } else if (key9 === "moveSpeed") {
     minimum = Math.ceil(power2 * P2);
     maximum = Math.ceil(2 * power2 * P2);
@@ -17573,7 +17445,7 @@ function generateGear3(seed, input, { tier: tier2 = null, family: family2 = null
   safeInteger(rarityTier, 0, 5);
   const type = family2 ?? pick6(GEAR_FAMILIES4), sub = type === "subweapon" ? subType ?? pick6(["shield", "dagger", "tome"]) : null, n = noun ?? pick6(GEAR_NOUNS4[sub ?? type]);
   requireContract(GEAR_FAMILIES4.includes(type) && GEAR_NOUNS4[sub ?? type]?.includes(n), "Unknown generated family/noun");
-  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1), f3 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
+  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E2 = Math.pow(1.012, effective) * (1 + 0.015 * effective), R3 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R3 * (type === "overall" ? 1.8 : 1), f3 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
   const raw = { type, subType: sub, statsRolled: rarityTier, noun: n, baseAtk: 0, baseDef: 0, baseMaxHp: 0, baseStr: 0, baseDex: 0, baseInt: 0, baseMoveSpeed: 0, baseCritChance: 0, baseCritDamage: 0, baseBlock: 0, baseParry: 0 };
   if (type === "ring") {
     const roll = random();
@@ -17586,8 +17458,8 @@ function generateGear3(seed, input, { tier: tier2 = null, family: family2 = null
   for (let i = 0; i < rarityTier && pool.length; i++) {
     const key9 = pool.splice(Math.floor(random() * pool.length), 1)[0];
     let value;
-    if (key9 === "atk" || key9 === "def") value = Math.ceil(f3(0.04, 0.08) * E * flatR);
-    else if (key9 === "maxHp") value = Math.ceil(f3(0.12, 0.24) * E * flatR);
+    if (key9 === "atk" || key9 === "def") value = Math.ceil(f3(0.04, 0.08) * E2 * flatR);
+    else if (key9 === "maxHp") value = Math.ceil(f3(0.12, 0.24) * E2 * flatR);
     else if (key9 === "moveSpeed") value = Math.ceil(int(1, 2) * power2 * P2);
     else if (key9 === "critChance") value = round43(Math.min(0.2, f3(0.015, 0.04) * Math.sqrt(power2) * P2));
     else if (key9 === "critDamage") value = round43(f3(0.03, 0.06) * Math.sqrt(power2) * P2);
@@ -18071,6 +17943,215 @@ function rollContentReward(state, player, { sourceEntityId, rank, kind: kind2, o
   return { gold: gold(roll < 60 ? profile2.breakableGold : 0), souls: roll >= 60 && roll < 80 ? 1 + hashReward(key9 + "/quantity") % 2 : 0, definitionId: null, healing: roll >= 80 && roll < 90 };
 }
 
+// src/shared/content/spore_outbreak_v3.js
+var SPORE_V3 = "spore-outbreak-v3-active-pressure";
+var SPORE_V3_POLICY = freezeWire({ version: SPORE_V3, parent: "spore-outbreak-v2-damage-pods", firstPulseTicks: 60, pulseTicks: 150, lastPodPulseTicks: 90, living: 9, roster: 12, landingRadiiPixels: [80, 96, 64, 112, 56], maximumLandingDistancePixels: 112, minimumLandingSpacingPixels: 28, hatchPlayerClearancePixels: 64, tellTicks: 24, flightTicks: 36, growthTicks: 72, simulationHz: 60, activation: "Deliberate E/touch; no activation by proximity", pressure: "Autonomous pulses plus existing damage thresholds draw from the same twelve admitted mushrooms; no infinite reward farm", completion: "All pods destroyed and all launched mushrooms defeated; chest hidden until completed" });
+
+// src/shared/content/spore_outbreak_v2.js
+var SPORE_V2 = "spore-outbreak-v2-damage-pods";
+var SPORE_V2_POLICY = freezeWire({
+  version: SPORE_V2,
+  parent: "spore-outbreak-v1",
+  pods: 3,
+  mushrooms: 12,
+  living: 6,
+  maxActive: 4,
+  triangleSidesPixels: [256, 224, 192],
+  podClearancePixels: 56,
+  playerHullPixels: 9,
+  layoutSearch: { centerSources: "Accepted clearing and existing admitted encounter-member envelope", maximumCenterOffsetPixels: 64, centerStepPixels: 32, orientations: 12, clearingHalfExtentPixels: 192 },
+  health: "10 times a C-rank ordinary enemy at the frozen encounter level",
+  partyHealthPercent: [100, 160, 220, 280],
+  thresholdPercent: [75, 50, 25],
+  burstSizes: [1, 1, 2],
+  tellTicks: 24,
+  flightTicks: 60,
+  growthTicks: 90,
+  destroyed: "Stops unlaunched spores; already airborne or growing spores survive",
+  damage: "Authoritative primary strikes, normal attack power and critical roll; no interaction bypass",
+  rewards: "Existing pod breakable and personal completion rewards; no reward for partial damage",
+  reset: "One-time; manual reset remains deferred",
+  simulationHz: 60
+});
+
+// src/shared/contracts/spore_pods_v2.js
+var isSporeV2 = (r) => [SPORE_V2, SPORE_V3, SPORE_V4, SPORE_V5].includes(r?.rulesVersion);
+var isSporePodV2 = (s, id2, n) => isSporeV2(s.d9World?.worldEvents?.records[id2]) && n >= 0 && n < 3;
+var layouts = /* @__PURE__ */ new WeakMap();
+var hash12 = (text) => {
+  let h = 2166136261;
+  for (const c of text) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return h >>> 0;
+};
+var lineOpen = (c, a, b) => {
+  const steps = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 16);
+  for (let i = 0; i <= steps; i++) {
+    const t = steps ? i / steps : 0;
+    if (collidesWithTiles(c, a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, 18)) return false;
+  }
+  return true;
+};
+var triangleOpen = (c, pods) => {
+  const center2 = { x: pods.reduce((v, p) => v + p.x, 0) / 3, y: pods.reduce((v, p) => v + p.y, 0) / 3 };
+  return pods.every((p, n) => !collidesWithTiles(c, p.x, p.y, 28) && Array.from({ length: 8 }, (_, i) => i * Math.PI / 4).every((a) => !collidesWithTiles(c, p.x + Math.cos(a) * SPORE_V2_POLICY.podClearancePixels, p.y + Math.sin(a) * SPORE_V2_POLICY.podClearancePixels, SPORE_V2_POLICY.playerHullPixels)) && lineOpen(c, p, pods[(n + 1) % 3]) && lineOpen(c, p, center2));
+};
+function sporeTriangleV2(s, id2) {
+  const runtime = s.d9World.runtime, frameKey = canonicalStringify(runtime.frames ?? []);
+  let cache6 = layouts.get(s);
+  if (cache6?.frameKey !== frameKey) {
+    cache6 = { frameKey, rows: /* @__PURE__ */ new Map() };
+    layouts.set(s, cache6);
+  }
+  const d = runtime.groups.find((g) => g.groupId === id2), c = s.spacesByInstanceId[s.overworldInstanceId].collision;
+  const prior = cache6.rows.get(id2);
+  if (prior?.layout && (prior.pages === c.pages && prior.tiles === c.tiles || triangleOpen(c, prior.layout.pods))) {
+    prior.pages = c.pages;
+    prior.tiles = c.tiles;
+    return prior.layout;
+  }
+  if (prior && !prior.layout && prior.revision === runtime.revision) return null;
+  if (!d) return null;
+  const event = SPORE_EVENTS.find((e) => e.ordinal === s.d9World.episodes[id2]?.geography.anchorOrdinal), clearing = event && runtime.frames?.length ? projectToLocalFrameD9(tileAddress(event.x, event.y), runtime.frames) : null;
+  const points = d.members.map((m) => m.position), xs = points.map((p) => p.x), ys = points.map((p) => p.y), memberBounds = { left: Math.min(...xs) - 32, right: Math.max(...xs) + 32, top: Math.min(...ys) - 32, bottom: Math.max(...ys) + 32 }, memberCenter = { x: (memberBounds.left + memberBounds.right) / 2, y: (memberBounds.top + memberBounds.bottom) / 2 }, bounds = clearing ? { left: Math.min(clearing.x - 192, memberBounds.left), right: Math.max(clearing.x + 192, memberBounds.right), top: Math.min(clearing.y - 192, memberBounds.top), bottom: Math.max(clearing.y + 192, memberBounds.bottom) } : memberBounds, centers = clearing ? [clearing, memberCenter] : [memberCenter];
+  const offsets = [];
+  for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) offsets.push([x * 32, y * 32]);
+  offsets.sort((a, b) => a[0] * a[0] + a[1] * a[1] - b[0] * b[0] - b[1] * b[1] || a[1] - b[1] || a[0] - b[0]);
+  let chosen = null;
+  for (const center2 of centers) {
+    for (const side of SPORE_V2_POLICY.triangleSidesPixels) {
+      for (const [dx, dy] of offsets) {
+        for (let turn = 0; turn < 12; turn++) {
+          const angle = (hash12(id2) % 12 + turn) * Math.PI / 6, radius = side / Math.sqrt(3), pods = Array.from({ length: 3 }, (_, n) => ({ x: center2.x + dx + Math.cos(angle + n * 2 * Math.PI / 3) * radius, y: center2.y + dy + Math.sin(angle + n * 2 * Math.PI / 3) * radius }));
+          const open2 = pods.every((p) => p.x >= bounds.left && p.x <= bounds.right && p.y >= bounds.top && p.y <= bounds.bottom && !collidesWithTiles(c, p.x, p.y, 28) && Array.from({ length: 8 }, (_, n) => n * Math.PI / 4).every((a) => !collidesWithTiles(c, p.x + Math.cos(a) * SPORE_V2_POLICY.podClearancePixels, p.y + Math.sin(a) * SPORE_V2_POLICY.podClearancePixels, SPORE_V2_POLICY.playerHullPixels)));
+          if (!open2 || !pods.every((p, n) => lineOpen(c, p, pods[(n + 1) % 3]))) continue;
+          const mid = { x: pods.reduce((v, p) => v + p.x, 0) / 3, y: pods.reduce((v, p) => v + p.y, 0) / 3 };
+          if (pods.every((p) => lineOpen(c, p, mid))) {
+            chosen = { side, pods, center: mid };
+            break;
+          }
+        }
+        if (chosen) break;
+      }
+      if (chosen) break;
+    }
+    if (chosen) break;
+  }
+  if (chosen) {
+    chosen.pods.forEach(Object.freeze);
+    Object.freeze(chosen.pods);
+    Object.freeze(chosen.center);
+    Object.freeze(chosen);
+  }
+  cache6.rows.set(id2, { revision: runtime.revision, pages: c.pages, tiles: c.tiles, layout: chosen });
+  return chosen;
+}
+function podPositionV2(s, id2, n, fallback) {
+  const r = s.d9World?.worldEvents?.records[id2];
+  if (n === 3 && isSporeV2(r)) {
+    const points = r.pods.map((p) => projectToLocalFrameD9(p.position, s.d9World.runtime.frames));
+    return points.every(Boolean) ? { x: points.reduce((v, p) => v + p.x, 0) / 3, y: points.reduce((v, p) => v + p.y, 0) / 3 } : fallback;
+  }
+  if (isSporeV2(r)) return projectToLocalFrameD9(r.pods[n].position, s.d9World.runtime.frames) ?? fallback;
+  if (!r) {
+    const triangle = sporeTriangleV2(s, id2);
+    return (n === 3 ? triangle?.center : triangle?.pods[n]) ?? fallback;
+  }
+  return fallback;
+}
+function validateSporePodsV2(r) {
+  requireContract(isSporeV2(r), "Unknown spore-pod policy");
+  safeInteger(r.partySize, 1, 4);
+  requireContract(r.podLevel !== void 0 && Array.isArray(r.pods) && r.pods.length === 3, "Spore pod inventory");
+  const expectedMax = combatInteger(multiplyCombat(worldObjectHealth(r.podLevel), 10 * SPORE_V2_POLICY.partyHealthPercent[r.partySize - 1], 100));
+  for (const p of r.pods) {
+    closedRecord(p, ["position", "hp", "maxHp", "lastHitTick", "bursts"], ["lastDamage"]);
+    if (p.lastDamage !== void 0) {
+      validateInteger(p.lastDamage);
+      requireContract(p.lastHitTick !== null && compareCombat(p.lastDamage, 0) > 0 && compareCombat(p.lastDamage, p.maxHp) <= 0, "Invalid pod hit feedback");
+    }
+    validateWorldPosition(p.position);
+    validateInteger(p.hp);
+    validateInteger(p.maxHp);
+    requireContract(canonicalStringify(p.maxHp) === canonicalStringify(expectedMax) && compareCombat(p.hp, p.maxHp) <= 0, "Spore pod health");
+    safeInteger(p.bursts, 0, 3);
+    if (p.lastHitTick !== null) safeInteger(p.lastHitTick, r.startedTick);
+    const expected = SPORE_V2_POLICY.thresholdPercent.filter((t) => compareCombat(multiplyCombat(p.hp, 100), multiplyCombat(p.maxHp, t)) <= 0).length;
+    requireContract(p.bursts === expected, "Spore burst threshold mismatch");
+  }
+  const [a, b, c] = r.pods.map((p) => p.position), relative = (p, q) => ({ x: Number(BigInt(p.chunkX) - BigInt(q.chunkX)) * 1024 + p.localX - q.localX, y: Number(BigInt(p.chunkY) - BigInt(q.chunkY)) * 832 + p.localY - q.localY }), distance5 = (p, q) => {
+    const d = relative(p, q);
+    return Math.hypot(d.x, d.y);
+  }, sides = [distance5(a, b), distance5(b, c), distance5(c, a)];
+  requireContract(SPORE_V2_POLICY.triangleSidesPixels.some((side) => sides.every((s) => Math.abs(s - side) < 1e-6)), "Spore pods must form an equilateral triangle");
+}
+function validateSporePodsProgressV2(a, b) {
+  requireContract(isSporeV2(b) && a.partySize === b.partySize && canonicalStringify(a.podLevel) === canonicalStringify(b.podLevel), "Spore pod scaling changed");
+  a.pods.forEach((p, n) => {
+    const q = b.pods[n];
+    requireContract(canonicalStringify(p.position) === canonicalStringify(q.position) && canonicalStringify(p.maxHp) === canonicalStringify(q.maxHp) && compareCombat(q.hp, p.hp) <= 0 && q.bursts >= p.bursts && (p.lastHitTick === null || q.lastHitTick >= p.lastHitTick), "Spore pod history regressed");
+  });
+}
+
+// src/shared/content/hidden_hollow_safety_v1.js
+var HOLLOW_SAFETY_VERSION = "hidden-hollow-v1-trunk-emergence";
+var HOLLOW_SAFETY_POLICY = Object.freeze({ version: HOLLOW_SAFETY_VERSION, parent: HOLLOW_HASH, collision: "trunk ground contact; open mouth and apron", pads: [[0, 48], [-80, 48], [80, 48], [-112, 80], [112, 80], [0, 112], [-48, 128], [48, 128], [-144, 32], [144, 32]], selection: "member-index rotation; collision, connected path, player and living-member clearance", waves: [6, 6, 1], playerClearance: 64, tellTicks: 45, spawnSpacingTicks: 24, blocked: "wait without spawning or granting invulnerability" });
+var HOLLOW_SAFETY_HASH = "93899adb07ec572303df69bc5838c2e4a644ff23d15bc82dcdd09a1d69561bfc";
+
+// src/shared/content/hidden_hollow_pour_v2.js
+var HOLLOW_POUR_VERSION = "hidden-hollow-v2-mouth-pour";
+var HOLLOW_POUR_POLICY = freezeWire({ version: HOLLOW_POUR_VERSION, parent: HOLLOW_SAFETY_HASH, geometry: "hidden-hollow-trunk-v2-recessed-mouth", mouthPoints: [[24, -30], [30, -28], [18, -28]], fanHomes: [[-64, 64], [64, 64], [-96, 96], [96, 96], [0, 112], [0, 144]], spawnSpacingTicks: 24, firstTellTicks: 45, playerClearance: 64, enemyClearance: "sum of hull radii plus4px", waves: [6, 6, 1], blocked: "wait for a clear mouth, never spawn remotely or on players", movement: "normal authoritative AI and collision; no teleports, emergence invulnerability or artificial visual positions" });
+var HOLLOW_POUR_HASH = "9816586f08d103863eaf586d276e37c35c11afafd11ea18206ea4f97c34a1677";
+
+// src/shared/contracts/hidden_hollow_v1.js
+function validateHollowV1(r) {
+  requireContract(r.kind === "hollow" && [HOLLOW_VERSION, HOLLOW_SAFETY_VERSION, HOLLOW_POUR_VERSION].includes(r.rulesVersion) && r.stages.length === 13, "Hollow policy/membership");
+  closedRecord(r.hollow, ["policyHash", "launchedWaves", "nextWaveElapsed", "nextSpawnElapsed"]);
+  requireContract(r.hollow.policyHash === (r.rulesVersion === HOLLOW_POUR_VERSION ? HOLLOW_POUR_HASH : r.rulesVersion === HOLLOW_SAFETY_VERSION ? HOLLOW_SAFETY_HASH : HOLLOW_HASH), "Hollow commitment");
+  safeInteger(r.hollow.launchedWaves, 0, 3);
+  safeInteger(r.hollow.nextWaveElapsed);
+  safeInteger(r.hollow.nextSpawnElapsed, 0, r.elapsedTicks + HOLLOW_POLICY.emergenceTellTicks);
+  requireContract(r.hollow.nextWaveElapsed <= r.elapsedTicks + HOLLOW_POLICY.intermissionTicks, "Hollow wave schedule");
+  requireContract(r.stages.every((s) => ["pending", "growing", "hatched", "defeated"].includes(s.phase)), "Hollow stage");
+  let offset = 0;
+  for (let wave = 0; wave < 3; wave++) {
+    const rows3 = r.stages.slice(offset, offset + HOLLOW_POLICY.waves[wave]);
+    if (wave < r.hollow.launchedWaves) requireContract(rows3.every((t) => t.phase !== "pending"), "Launched Hollow membership");
+    if (wave >= r.hollow.launchedWaves) requireContract(rows3.every((t) => t.phase === "pending"), "Unlaunched Hollow wave");
+    if (wave < r.hollow.launchedWaves - 1) requireContract(rows3.every((t) => t.phase === "defeated"), "Overlapping Hollow waves");
+    offset += HOLLOW_POLICY.waves[wave];
+  }
+  if (r.status === "completed") requireContract(hollowReadyV1(r), "Incomplete Hollow completion");
+}
+var hollowReadyV1 = (r) => r.hollow.launchedWaves === 3 && r.stages.every((t) => t.phase === "defeated");
+
+// src/shared/contracts/spore_pressure_v3.js
+var isSporeV3 = (r) => [SPORE_V3, SPORE_V4, SPORE_V5].includes(r?.rulesVersion);
+function validateSporePressureV3(r) {
+  if (!isSporeV3(r)) {
+    requireContract(r.pressure === void 0, "Unexpected spore pressure extension");
+    return;
+  }
+  const p = r.pressure;
+  closedRecord(p, ["version", "adoptedTick", "adoptedElapsed", "nextPulseElapsed", "landings"]);
+  requireContract(p.version === SPORE_V3 && r.kind === "spore", "Spore pressure policy");
+  safeInteger(p.adoptedTick, r.startedTick);
+  safeInteger(p.adoptedElapsed, 0, r.elapsedTicks);
+  safeInteger(p.nextPulseElapsed, Math.max(p.adoptedElapsed + 1, r.elapsedTicks + 1), r.elapsedTicks + (isSporeV5(r) ? Math.max(SPORE_V5_POLICY.firstPulseTicks, SPORE_V5_POLICY.pulseTicks) : SPORE_V3_POLICY.pulseTicks));
+  requireContract(Array.isArray(p.landings) && p.landings.length === 12, "Spore landing inventory");
+  p.landings.forEach((point15, n) => {
+    validateWorldPosition(point15);
+    const pod = r.pods[n % 3].position, dx = Number(BigInt(point15.chunkX) - BigInt(pod.chunkX)) * 1024 + point15.localX - pod.localX, dy = Number(BigInt(point15.chunkY) - BigInt(pod.chunkY)) * 832 + point15.localY - pod.localY;
+    requireContract(Math.hypot(dx, dy) <= SPORE_V3_POLICY.maximumLandingDistancePixels + 1e-6, "Spore landing too far from pod");
+  });
+}
+function validateSporePressureProgressV3(a, b, fromTick, toTick) {
+  if (isSporeV5(b) && !isSporeV5(a)) requireContract(adoptingSporeV5(a, b), "Invalid paced spore adoption");
+  if (isSporeV5(a)) requireContract(isSporeV5(b), "Paced spore policy regressed");
+  if (isSporeV3(a)) {
+    requireContract(isSporeV3(b) && a.pressure.adoptedTick === b.pressure.adoptedTick && a.pressure.adoptedElapsed === b.pressure.adoptedElapsed && a.pressure.nextPulseElapsed <= b.pressure.nextPulseElapsed && canonicalStringify(a.pressure.landings) === canonicalStringify(b.pressure.landings), "Spore pressure history changed");
+  } else if (isSporeV3(b)) requireContract(a.rulesVersion === SPORE_V2 && a.status === "active" && b.pressure.adoptedTick >= fromTick && b.pressure.adoptedTick <= toTick, "Invalid spore pressure adoption");
+}
+
 // src/shared/contracts/cursed_shrine_v1.js
 function validateShrineV1(r) {
   requireContract(r.kind === "cursed_shrine" && r.rulesVersion === SHRINE_VERSION && r.stages.length === SHRINE_MEMBERS, "Shrine policy/membership");
@@ -18452,13 +18533,13 @@ function validateTownInteriors(s) {
   const id2 = s.campaign.campaignId, seen = /* @__PURE__ */ new Set();
   for (const [siteId2, q] of Object.entries(r.byId)) {
     closedRecord(q, ["settlementId", "buildingId", "recipe", "floorSpaces", "floorLogicalIds"]);
-    const R2 = TOWN_INTERIOR_RECIPES[q.recipe];
-    requireContract(R2 && typeof q.settlementId === "string" && typeof q.buildingId === "string", "Town interior recipe");
+    const R3 = TOWN_INTERIOR_RECIPES[q.recipe];
+    requireContract(R3 && typeof q.settlementId === "string" && typeof q.buildingId === "string", "Town interior recipe");
     const t = (label2) => token(id2, q.settlementId, q.buildingId, label2);
     requireContract(siteId2 === "loc:" + t("entrance"), "Town interior identity drift");
-    closedRecord(q.floorSpaces, R2.floors);
-    closedRecord(q.floorLogicalIds, R2.floors);
-    for (const floor of R2.floors) {
+    closedRecord(q.floorSpaces, R3.floors);
+    closedRecord(q.floorLogicalIds, R3.floors);
+    for (const floor of R3.floors) {
       requireContract(q.floorSpaces[floor] === "spi:" + t(floor) && q.floorLogicalIds[floor] === "spc:" + t("logical/" + floor) && !seen.has(q.floorSpaces[floor]), "Town interior floor identity drift");
       seen.add(q.floorSpaces[floor]);
       const space = s.spacesByInstanceId[q.floorSpaces[floor]];
@@ -26585,6 +26666,9 @@ function validateCommand(command) {
       closedRecord(a, ["kind", "slots"], ["attack"]);
       requireContract(Array.isArray(a.slots) && a.slots.length === SKILL_SLOT_COUNT && a.slots.every((s) => s === null || s === MOVE_SLOT || CLASS_SKILL_IDS.includes(s)), "Invalid skill wheel");
       requireContract(a.attack === void 0 || a.attack === null || CLASS_SKILL_IDS.includes(a.attack), "Invalid attack skill");
+    } else if (a.kind === "augment.craft") {
+      closedRecord(a, ["kind", "skillId", "index", "npcId"]);
+      requireContract(typeof a.skillId === "string" && a.skillId.length <= 80 && Number.isSafeInteger(a.index) && a.index >= 0 && a.index <= 4 && /^civilian:[a-z0-9:-]{1,100}$/.test(a.npcId), "Invalid augment craft");
     } else if (a.kind === "augment.set") {
       closedRecord(a, ["kind", "skillId", "slots"]);
       requireContract(typeof a.skillId === "string" && a.skillId.length <= 80 && Array.isArray(a.slots) && a.slots.length <= 2 && a.slots.every((i) => Number.isSafeInteger(i) && i >= 0 && i <= 4), "Invalid augments");
@@ -26907,15 +26991,15 @@ function edgePoint(a, b) {
   return [px + dx / d * 7 * S, py + dy / d * 7 * S];
 }
 function bridge(A, B2, hw, seed) {
-  const dx = B2[0] - A[0], dy = B2[1] - A[1], L2 = Math.hypot(dx, dy), nx = -dy / L2, ny = dx / L2, L1 = [], R2 = [];
+  const dx = B2[0] - A[0], dy = B2[1] - A[1], L3 = Math.hypot(dx, dy), nx = -dy / L3, ny = dx / L3, L1 = [], R3 = [];
   for (let k = 0; k <= 12; k++) {
     const u = k / 12, cx = A[0] + dx * u, cy = A[1] + dy * u, w = hw * (1 - 0.22 * Math.sin(Math.PI * u)) * (1 + 0.06 * Math.sin(u * 9 + seed));
     L1.push([cx + nx * w, cy + ny * w]);
-    R2.push([cx - nx * w, cy - ny * w]);
+    R3.push([cx - nx * w, cy - ny * w]);
   }
-  const pts = [[A[0] - dx / L2 * 6 * S, A[1] - dy / L2 * 6 * S], ...L1, [B2[0] + dx / L2 * 6 * S, B2[1] + dy / L2 * 6 * S], ...R2.reverse()];
-  const lower = L1[6][1] > R2[6][1] ? L1 : [...R2].reverse();
-  return Object.freeze({ pts, front: lower.slice(1, -1), A, B: B2, dx: dx / L2, dy: dy / L2, nx, ny, hw });
+  const pts = [[A[0] - dx / L3 * 6 * S, A[1] - dy / L3 * 6 * S], ...L1, [B2[0] + dx / L3 * 6 * S, B2[1] + dy / L3 * 6 * S], ...R3.reverse()];
+  const lower = L1[6][1] > R3[6][1] ? L1 : [...R3].reverse();
+  return Object.freeze({ pts, front: lower.slice(1, -1), A, B: B2, dx: dx / L3, dy: dy / L3, nx, ny, hw });
 }
 var HELL_BRIDGES = Object.freeze(LINKS.map((l, i) => bridge(edgePoint(l[0], l[1]), edgePoint(l[1], l[0]), 8 * S, i + 1)));
 var HELL_WALLS = Object.freeze(["A", "B", "C"].map((k) => {
@@ -27190,8 +27274,8 @@ var DIRS4 = Array.from({ length: 16 }, (_, k) => ({ x: Math.cos(k * Math.PI / 8)
 function nightmareTargetsV1(s) {
   const h = s.trips?.hell, n = h?.nightmare;
   if (!n) return [];
-  const R2 = rulesOf(n), T10 = minionRules(n), list2 = [], space = { spaceInstanceId: h.spaceInstanceId };
-  if (awake2(s, n)) list2.push({ kind: "actor", entityId: nightmareIdV1(s.campaign.campaignId, h.eatTick), team: "hostile", alive: true, hp: n.hp, maxHp: n.maxHp, position: { x: n.x, y: n.y }, hullRadius: R2.hullRadius, combatRadius: R2.hullRadius, residency: space, podResource: { nightmare: "boss" }, tripNightmare: { kind: n.kind, dx: n.dx, born: n.born } });
+  const R3 = rulesOf(n), T10 = minionRules(n), list2 = [], space = { spaceInstanceId: h.spaceInstanceId };
+  if (awake2(s, n)) list2.push({ kind: "actor", entityId: nightmareIdV1(s.campaign.campaignId, h.eatTick), team: "hostile", alive: true, hp: n.hp, maxHp: n.maxHp, position: { x: n.x, y: n.y }, hullRadius: R3.hullRadius, combatRadius: R3.hullRadius, residency: space, podResource: { nightmare: "boss" }, tripNightmare: { kind: n.kind, dx: n.dx, born: n.born } });
   for (const [id2, m] of Object.entries(n.caps)) if (capOut(s, n, m)) list2.push({
     kind: "actor",
     entityId: id2,
@@ -27230,7 +27314,7 @@ function validateNightmareV1(s, h, n) {
     requireContract(n.dead === null && n.move === null && compareCombat(n.hp, n.maxHp) === 0, "Nightmare sunk");
   }
   requireContract(n.version === TRIP_NIGHTMARE_V1 && NIGHTMARE_KINDS.includes(n.kind) && n.kind === nightmareKindForSnackV1(h.snack), "Unknown Nightmare");
-  const R2 = rulesOf(n), T10 = minionRules(n);
+  const R3 = rulesOf(n), T10 = minionRules(n);
   safeInteger(n.level, 1, 50);
   safeInteger(n.born, h.eatTick, s.tick);
   requireContract(n.born >= h.endTick, "Nightmare early");
@@ -27241,7 +27325,7 @@ function validateNightmareV1(s, h, n) {
   requireContract(compareCombat(n.hp, n.maxHp) <= 0, "Nightmare health");
   safeInteger(n.next, n.born, Number.MAX_SAFE_INTEGER);
   safeInteger(n.biteNext, n.born, Number.MAX_SAFE_INTEGER);
-  safeInteger(n.turn, 0, R2.moveOrder.length - 1);
+  safeInteger(n.turn, 0, R3.moveOrder.length - 1);
   if (n.lastHit !== null) safeInteger(n.lastHit, n.born, s.tick);
   if (n.move !== null) {
     const m = n.move;
@@ -27252,7 +27336,7 @@ function validateNightmareV1(s, h, n) {
     requireContract(m.spots === null || Array.isArray(m.spots) && m.spots.length <= 13, "Nightmare move spots");
     for (const q of m.spots ?? []) point13(q, "Nightmare move spot");
     requireContract(m.target === null || typeof m.target === "string", "Nightmare target");
-    if (m.kind === "croak") requireContract(m.spots?.length === R2.croak.gaps.length, "Nightmare croak gaps");
+    if (m.kind === "croak") requireContract(m.spots?.length === R3.croak.gaps.length, "Nightmare croak gaps");
     if (m.kind === "tongue") requireContract(m.spots?.length === 1 || m.spots?.length === 2, "Nightmare tongue");
   }
   safeInteger(n.capN, 0, 1e5);
@@ -27283,11 +27367,11 @@ function validateNightmareV1(s, h, n) {
   }
   for (const [pid, t] of Object.entries(n.legs)) {
     requireContract(s.playersById[pid], "Nightmare legs");
-    safeInteger(t, n.born, s.tick + R2.legsTicks);
+    safeInteger(t, n.born, s.tick + R3.legsTicks);
   }
   if (n.dead === null) requireContract(n.exit === null && compareCombat(n.hp, 0) > 0, "Nightmare alive");
   else {
-    safeInteger(n.dead, n.born + R2.riseTicks, s.tick);
+    safeInteger(n.dead, n.born + R3.riseTicks, s.tick);
     requireContract(compareCombat(n.hp, 0) === 0 && n.move === null, "Nightmare dead");
     point13(n.exit, "Nightmare exit");
   }
@@ -28931,7 +29015,7 @@ function overlayWoodlandCaveFamilyParcelsD12_1(chunk, parcels = []) {
 var WOODLAND_CAVE_FAMILY_PARCEL_D12_2 = "woodland-cave-family-parcel-d12-2-v1";
 var CW5 = 32n;
 var CH5 = 26n;
-var R = 8n;
+var R2 = 8n;
 var W7 = BigInt(WOODLAND_CAVE_EXTERIOR.width);
 var H7 = BigInt(WOODLAND_CAVE_EXTERIOR.height);
 var T8 = 32;
@@ -28961,7 +29045,7 @@ async function planWoodlandCaveRegionD12_2({ seed, origin: origin2, regionX, reg
   if (region.biome !== "woodland") return freezeWire({ version: "woodland-cave-region-plan-d12-2-v1", regionKey: woodlandCaveRegionKeyD12_2(regionX, regionY), regionName: region.name, count: 0, parcels: [] });
   const desired = await woodlandCaveRegionDensityD12_2({ seed, regionX, regionY, guarantee }, sha256);
   if (!desired) return freezeWire({ version: "woodland-cave-region-plan-d12-2-v1", regionKey: woodlandCaveRegionKeyD12_2(regionX, regionY), regionName: region.name, count: 0, parcels: [] });
-  const rx = BigInt(regionX), ry = BigInt(regionY), regionTileX = rx * R * CW5, regionTileY = ry * R * CH5, centerX = regionTileX + R * CW5 / 2n, centerY = regionTileY + R * CH5 / 2n, cache6 = /* @__PURE__ */ new Map(), candidates = [];
+  const rx = BigInt(regionX), ry = BigInt(regionY), regionTileX = rx * R2 * CW5, regionTileY = ry * R2 * CH5, centerX = regionTileX + R2 * CW5 / 2n, centerY = regionTileY + R2 * CH5 / 2n, cache6 = /* @__PURE__ */ new Map(), candidates = [];
   async function chunk(cx, cy) {
     const k = key7(cx, cy);
     if (!cache6.has(k)) {
@@ -28970,12 +29054,12 @@ async function planWoodlandCaveRegionD12_2({ seed, origin: origin2, regionX, reg
     }
     return cache6.get(k);
   }
-  for (let oy = 0n; oy < R; oy++) for (let ox = 0n; ox < R; ox++) {
-    const cx = rx * R + ox, cy = ry * R + oy, page = await chunk(cx, cy);
+  for (let oy = 0n; oy < R2; oy++) for (let ox = 0n; ox < R2; ox++) {
+    const cx = rx * R2 + ox, cy = ry * R2 + oy, page = await chunk(cx, cy);
     if (!page) continue;
     for (let y = H7 + 1n; y < CH5 - 1n; y++) for (let x = 6n; x < CW5 - 6n; x++) if (page.visual.route.centerline[Number(y)]?.[Number(x)] === "1") {
       const left = cx * CW5 + x - 5n, top = cy * CH5 + y - H7;
-      if (left < regionTileX + BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || left + W7 > regionTileX + R * CW5 - BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || top < regionTileY + BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || top + H7 > regionTileY + R * CH5 - BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles)) continue;
+      if (left < regionTileX + BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || left + W7 > regionTileX + R2 * CW5 - BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || top < regionTileY + BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || top + H7 > regionTileY + R2 * CH5 - BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles)) continue;
       let woodland = 0, total = 0, valid = true;
       for (let yy = top - 2n; yy < top + H7 + 2n; yy++) for (let xx = left - 2n; xx < left + W7 + 2n; xx++) {
         const qcx = floorDiv(xx, CW5), qcy = floorDiv(yy, CH5), q = await chunk(qcx, qcy);
