@@ -1434,6 +1434,11 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 #world-inventory #world-progression-view .cs-skill{position:absolute;z-index:1;width:78px;min-height:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;border:0;border-radius:0;background:none;color:#cfd5d6;font:600 11px/1.15 system-ui,sans-serif;text-align:center;cursor:pointer;box-shadow:none}
 .cs-tile{position:relative;width:54px;height:54px;flex:none;border-radius:12px;border:2px solid #3a4654;background:#151d26;display:flex;align-items:center;justify-content:center;box-sizing:border-box;color:#aeb5b6}
 .cs-tile svg{width:24px;height:24px}
+.cs-art{display:flex;align-items:center;justify-content:center;transition:opacity .2s,filter .2s}
+.cs-tile .cs-art svg{width:44px;height:44px}
+.cs-skill[data-kind=active] .cs-tile .cs-art svg{width:46px;height:46px}
+.cs-skill[data-state=available] .cs-art{opacity:.92}
+.cs-skill[data-state=soon] .cs-art,.cs-skill.closed .cs-art{opacity:.42;filter:grayscale(.75)}
 .cs-name{padding:1px 4px;border-radius:4px;background:#121a22}
 .cs-skill[data-kind=active] .cs-tile{border-radius:50%}
 .cs-skill[data-kind=active] .cs-tile::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px dashed var(--tree);opacity:.6}
@@ -1441,6 +1446,9 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 .cs-skill[data-kind=capstone] .cs-tile svg{transform:rotate(-45deg)}
 .cs-rank{position:absolute;right:-9px;bottom:-7px;min-width:26px;padding:2px 4px;border-radius:6px;background:#0c1219;border:1px solid #3a4654;font:800 10px/1 system-ui,sans-serif;color:#aeb5b6;text-align:center;box-sizing:border-box}
 .cs-skill[data-kind=capstone] .cs-rank{transform:rotate(-45deg);top:-10px;right:-14px;bottom:auto}
+.cs-skill[data-kind=capstone] .cs-tile:has(.cs-art){width:62px;height:62px;margin:0 0 3px;transform:none;border-radius:14px;border-color:#e9c46a}
+.cs-skill[data-kind=capstone] .cs-tile:has(.cs-art) svg{width:56px;height:56px;transform:none}
+.cs-skill[data-kind=capstone] .cs-tile:has(.cs-art) .cs-rank{transform:none;top:auto;right:-6px;bottom:-6px}
 .cs-skill[data-state=available] .cs-tile{border-color:#8e979c;color:#eee7d9}
 .cs-skill[data-state=learned] .cs-tile,.cs-skill[data-state=maxed] .cs-tile{border-color:var(--tree);background:#1b1f22;color:var(--tree)}
 .cs-skill[data-state=learned] .cs-rank{border-color:var(--tree);color:#eee7d9}
