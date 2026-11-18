@@ -18652,7 +18652,8 @@ var POTION_BELT_POLICY = Object.freeze({
   // in upgradeGold. The flat prices above only count what older saves already bought.
   capacityMinutes: Object.freeze([20, 45, 90]),
   potencyMinutes: Object.freeze([30, 75]),
-  cooldownTicks: 240,
+  cooldownTicks: 120,
+  /* Sammy 2026-11-18: 2 s after a drink (was 4 s) */
   dropPercent: Object.freeze({ ordinary: 6, elite: 40, boss: 100 }),
   bossBonusPercent: 25,
   /* Sammy 2026-11-13: drop more often (was 4 / 30, boss bonus 25), then "way too often" at 10 / 60 / 50: now 6 / 40 / 25 */
