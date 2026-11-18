@@ -22540,9 +22540,9 @@ function triggerScaledMasteryXp(base, depth) {
 }
 function progressionRewardWitness(state) {
   const r = (id) => finiteNodeRank(state, id);
-  return { version: "personal-reward-modifiers-d8-v1", goldHundredths: 100 + 5 * (r("utility_pioneer") + r("utility_gold")), occurrenceHundredths: 100 + 5 * r("utility_pioneer"), qualityHundredths: 2 * r("utility_quality"), dualEligible: r("tome_spell_weaving") >= 1, triEligible: r("tome_spell_weaving") >= 2 };
+  return { version: "personal-reward-modifiers-d8-v1", goldHundredths: 100, occurrenceHundredths: 100, qualityHundredths: 0, dualEligible: r("tome_spell_weaving") >= 1, triEligible: r("tome_spell_weaving") >= 2 };
 }
-var inventoryIntakeCapacity = (state) => 64 + 5 * finiteNodeRank(state, "utility_bag");
+var inventoryIntakeCapacity = (state) => 64;
 var D8_OWNERSHIP_BOUND = 79;
 function emptyMasteryTransient() {
   return { fortitudeStacks: 0, fortitudeTicks: 0, retaliatoryReady: false, pulseBlocks: 0, colossusAttack: "0", colossusTicks: 0, shadowStepTicks: 0, mainCritStreak: 0, syphonStacks: 0, syphonTicks: 0, weavingStacks: 0, weavingTicks: 0, lastAnchor: null, rotationItemId: null, rotationCursor: 0 };
@@ -28520,7 +28520,7 @@ function resolveMasteryContribution(player, base, { rawBlock, blockCap, rawParry
   const r = (id) => finiteNodeRank(state, id), t = state.transient ?? {}, result = { ...base, attributes: { ...base.attributes }, familyProperties: { ...base.familyProperties } }, f3 = result.familyProperties;
   const defPercent = 300 * (r("shield_def") + r("shield_filler_hp_flat")) + 400 * r("shield_fortified_guard") * (t.fortitudeStacks ?? 0);
   result.defense = times(pct(addCombat(base.defense, 5 * r("shield_filler_flat_def")), defPercent), masteryPower(51, 50, nodeRank(state, "shield_inf_defense")));
-  result.maxHp = pct(addCombat(base.maxHp, 25 * r("shield_filler_flat_def")), 400 * (r("shield_hp") + r("shield_filler_hp_flat")) + 300 * r("utility_vitality"));
+  result.maxHp = pct(addCombat(base.maxHp, 25 * r("shield_filler_flat_def")), 400 * (r("shield_hp") + r("shield_filler_hp_flat")));
   let lateInt = times(pct(base.attributes.int, 400 * r("tome_arcane_syphon") * (t.syphonStacks ?? 0)), masteryPower(51, 50, nodeRank(state, "tome_inf_intel")));
   result.lateInt = lateInt;
   result.attack = times(base.attack, masteryPower(51, 50, nodeRank(state, "tome_inf_intel")));
@@ -28531,7 +28531,7 @@ function resolveMasteryContribution(player, base, { rawBlock, blockCap, rawParry
   const crit = addCombat(base.critChance, combatAmount(15 * (r("dagger_crit_chance") + r("tome_filler_spell_crit")), 1e3));
   result.critChance = minCombat(1, crit);
   result.critMultiplier = times(addCombat(base.critMultiplier, combatAmount(6 * r("dagger_crit_dmg") + 3 * r("dagger_filler_armor_pen"), 100)), masteryPower(51, 50, nodeRank(state, "dagger_inf_crit")));
-  result.moveSpeed = base.moveSpeed + (4 * r("dagger_filler_haste") + 2 * r("utility_vitality")) * 3 / 100;
+  result.moveSpeed = base.moveSpeed + 4 * r("dagger_filler_haste") * 3 / 100;
   if (t.shadowStepTicks > 0) {
     result.moveSpeed *= 1 + 0.15 * r("dagger_shadow_step");
     result.activeHaste = addCombat(base.activeHaste, combatAmount(r("dagger_shadow_step"), 10));
