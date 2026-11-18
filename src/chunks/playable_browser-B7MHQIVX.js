@@ -233367,6 +233367,7 @@ async function createLocalEndlessSessionD9(options) {
   const functionalCommands = createFunctionalSiteCommandPortD9({ clientPort: saveAwarePort, activate: async (command) => {
     try {
       await stream2.settled();
+      await resetSiteBeforeEntry(command.payload.siteId);
       const result = await activateFunctionalSiteD9({ authority, pageBuffer: pages2, playerId: command.playerId ?? localPlayerId, siteId: command.payload.siteId, sha256, entryCommand: command, returnSite: false });
       void save();
       return result;
@@ -233495,29 +233496,53 @@ async function createLocalEndlessSessionD9(options) {
   };
   const SITE_RESET_CHECK_MS = 2e3;
   let lastSiteResetCheckAt = -Infinity, siteResetting = false, siteResets = 0, siteResetError = null;
-  async function autoResetSites() {
-    if (siteResetting) return;
+  let siteResetRun = null;
+  async function resetSiteBeforeEntry(siteId) {
+    try {
+      if (siteResetRun) await siteResetRun;
+      await autoResetSites({ onlySiteId: siteId, saveFirst: true });
+    } catch {
+    }
+  }
+  function autoResetSites(options2) {
+    if (siteResetRun) return siteResetRun;
     siteResetting = true;
+    siteResetRun = runSiteReset(options2).finally(() => {
+      siteResetting = false;
+      siteResetRun = null;
+    });
+    return siteResetRun;
+  }
+  async function runSiteReset({ onlySiteId = null, saveFirst = false } = {}) {
     try {
       let unsaved = false;
-      const siteId = authority.withAuthority((a) => a.withAuthorityState((s) => {
-        for (const id2 of Object.keys(s.d9World?.functionalSitesById ?? {})) {
-          const record2 = resolveSiteRunEpisodeD13B(s, id2);
-          if (record2?.status !== "cleared" || !siteResetEligibilityD13C(s, id2, { transitioningPlayerIds: transitioningPlayersForSiteD13C(authority.readGateway(), id2) }).eligible) continue;
-          if (durabilityFailed || !siteRunIsSavedV1(s, id2, record2, lastSavedTick)) {
-            unsaved = true;
-            continue;
+      const pick4 = () => {
+        unsaved = false;
+        return authority.withAuthority((a) => a.withAuthorityState((s) => {
+          for (const id2 of Object.keys(s.d9World?.functionalSitesById ?? {})) {
+            if (onlySiteId && id2 !== onlySiteId) continue;
+            const record2 = resolveSiteRunEpisodeD13B(s, id2);
+            if (record2?.status !== "cleared" || !siteResetEligibilityD13C(s, id2, { transitioningPlayerIds: transitioningPlayersForSiteD13C(authority.readGateway(), id2) }).eligible) continue;
+            if (durabilityFailed || !siteRunIsSavedV1(s, id2, record2, lastSavedTick)) {
+              unsaved = true;
+              continue;
+            }
+            return id2;
           }
-          return id2;
-        }
-        return null;
-      }));
+          return null;
+        }));
+      };
+      let siteId = pick4();
+      if (!siteId && unsaved && saveFirst && !durabilityFailed) {
+        await save();
+        siteId = pick4();
+      }
       if (!siteId) {
         if (unsaved && !durabilityFailed && savePhase === "idle") void save();
         return;
       }
       await stream2.settled();
-      if (functionalCommands.busy() || authority.getStatus().phase !== "ready") return;
+      if (!onlySiteId && functionalCommands.busy() || authority.getStatus().phase !== "ready") return;
       const snapshot = authority.withAuthority((a) => a.withAuthorityState(copyWire)), transitioningPlayerIds = transitioningPlayersForSiteD13C(authority.readGateway(), siteId);
       if (!siteResetEligibilityD13C(snapshot, siteId, { transitioningPlayerIds }).eligible || durabilityFailed || savePhase !== "idle" || !siteRunIsSavedV1(snapshot, siteId, resolveSiteRunEpisodeD13B(snapshot, siteId), lastSavedTick)) return;
       const plan = await prepareSiteResetD13C(snapshot, siteId, { sha256, transitioningPlayerIds, playerId: localPlayerId });
@@ -233543,8 +233568,6 @@ async function createLocalEndlessSessionD9(options) {
       }
     } catch (error) {
       siteResetError = error.message;
-    } finally {
-      siteResetting = false;
     }
   }
   let groundPreparation = null, groundPreparationError = null, groundPreparationOffers = 0, groundPreparationCompletions = 0;
