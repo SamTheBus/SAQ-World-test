@@ -418,9 +418,11 @@ import {
   aegisTowerHalfAngle,
   affixRollRange,
   albumText,
+  allowDevGiveV1,
   amount,
   appliedClientSequence,
   applyAttunement,
+  applyDevGiveV1,
   applyDropGear,
   applyEpisodeReward,
   applyPrimaryIntent,
@@ -561,6 +563,7 @@ import {
   deriveScopedStream,
   deriveWoodlandCaveFinaleReservationD13D_G,
   deriveWoodlandCaveIdentityD12_2,
+  devGiveProblemV1,
   discoverOverworldActors,
   dropPotions,
   effectiveEquipmentBonuses,
@@ -1148,7 +1151,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-OZ6K2QND.js";
+} from "./chunk-64S553UF.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -135556,7 +135559,7 @@ function validateActivityCommand(command) {
   const { residencyRevision, ...legacy } = command;
   safeInteger(residencyRevision, 1);
   validateCommand(legacy);
-  requireContract(["worldEvent.activate", "discovery.readNote", "quest.act", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.bestiary", "service.buy", "service.sell", "service.rest", "supply.use", "trip.eat", "ferry.travel", "map.travel", "site.transition", "player.respawn", "player.revive", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
+  requireContract(["worldEvent.activate", "discovery.readNote", "quest.act", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.bestiary", "service.buy", "service.sell", "service.rest", "supply.use", "trip.eat", "ferry.travel", "map.travel", "site.transition", "player.respawn", "player.revive", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip", "dev.give"].includes(command.kind), "Unsupported activity command");
   return command;
 }
 function activityContextMatches(state2, c) {
@@ -135587,6 +135590,10 @@ function validateActivityCommandForState(c, s) {
   if (c.kind === "combat.shadowDash") requireContract(s.subweaponCombat && canShadowDash(actor, s.subweaponCombat.actors[actor.entityId], resolvePlayerStats(s.playersById[c.playerId])), "Dash unavailable");
   if (c.kind === "loot.pickup") requireContract(s.playersById[c.playerId].inventory?.revision === c.payload.inventoryRevision && canPickUp(s, s.playersById[c.playerId], c.payload.sourceEntityId, resolvePlayerStats(s.playersById[c.playerId]).pickupRadius), "Loot unavailable: approach your drop");
   if (c.kind === "gear.salvage") requireContract(canSalvage(s, s.playersById[c.playerId], c.payload), "Salvage unavailable");
+  if (c.kind === "dev.give") {
+    const problem = devGiveProblemV1(s, s.playersById[c.playerId], c.payload);
+    requireContract(problem === null, problem ?? "Dev give unavailable");
+  }
   if (c.kind === "gear.drop") requireContract(canDropGear(s, s.playersById[c.playerId], c.payload), "Drop unavailable: item must be carried, unequipped and unprotected");
   if (c.kind === "resource.interact") requireContract(canUseResource(s, manifestForState(s), s.playersById[c.playerId], c.payload), "Resource unavailable: approach it and finish your swing");
   if (c.kind === "forge.attune") requireContract(canAttune(s, s.playersById[c.playerId], c.payload, manifestForState(s)), "Forge unavailable: approach the Forge and check level and costs");
@@ -148184,6 +148191,10 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
         applySalvage(state2, player, command, authorityOrder);
       } else if (command.kind === "gear.drop") {
         applyDropGear(state2, player, command, authorityOrder);
+      } else if (command.kind === "dev.give") {
+        applyDevGiveV1(state2, player, command, authorityOrder);
+        progression.equipmentChanged(player);
+        family.reconcile(actor.entityId);
       } else if (command.kind === "trip.eat") {
         applyTripEatV1(state2, player, command.payload);
       } else if (command.kind.startsWith("service.") || command.kind === "supply.use") {
@@ -175066,14 +175077,20 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   const worldName = name("World update");
   worldName.append(el3("small", null, "Rebuild this world with the newest world rules"));
   const worldLine = line45(worldName, btn("See", "", () => byId("world-refresh")?.click()));
-  const dev = env.__SAQ_DEV_TOOLS_V1__ ?? null, devNote = el3("small", null, "Each one saves and reloads. You wake in Alderwood and quests here restart. Uniques come equipped at 4 stars; All gives one per slot.");
+  const dev = env.__SAQ_DEV_TOOLS_V1__ ?? null, devNote = el3("small", null, "Uniques go in at once, worn, at 4 stars; All gives one per slot. Level and gold save and reload: you wake in Alderwood and quests here restart.");
   let devSec = null;
   if (dev) {
     const run2 = async (button3, change) => {
+      const gives = [change].flat().every((c) => c?.unique !== void 0);
       button3.disabled = true;
-      devNote.textContent = "Saving, then reloading\u2026";
+      devNote.textContent = gives ? "Giving\u2026" : "Saving, then reloading\u2026";
       try {
-        await dev.apply(change);
+        const r = await dev.apply(change);
+        if (r?.given) {
+          const names2 = new Map(dev.uniques().map((u) => [u.id, u.name]));
+          devNote.textContent = (r.given.length === 1 ? names2.get(r.given[0]) ?? r.given[0] : r.given.length + " uniques") + (r.given.length === 1 ? " is" : " are") + " in your bag and worn.";
+          button3.disabled = false;
+        }
       } catch (e) {
         devNote.textContent = String(e?.message ?? e);
         button3.disabled = false;
@@ -234384,6 +234401,22 @@ function devStorageNoteV1(storage) {
   const mb = (n) => (n / 1048576).toFixed(n < 104858 ? 2 : 1) + " MB", top = [...rows].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, n]) => k + " " + mb(n)).join(", ");
   return "This browser\u2019s game storage holds " + mb(total) + (top ? " (most: " + top + ")" : "") + "; Safari allows about 5 MB.";
 }
+async function devGiveNowV1({ port, nextCommandToken, environment }, changes) {
+  const adapter = createClientCommandAdapter({ port, nextCommandToken }), given = [], wait2 = (ms) => new Promise((r) => environment.setTimeout(r, ms));
+  for (const c of changes) {
+    const rev = port.getReadModel().inventory?.revision;
+    if (rev === void 0) throw Error("This hero has no bag yet.");
+    const r = await adapter.issue("dev.give", { unique: c.unique, stars: c.stars ?? 4, equip: c.equip ?? true, inventoryRevision: rev });
+    if (r && !["admitted", "alreadyApplied"].includes(r.status)) throw Error(r.reason ?? "That did not work. Try again.");
+    const t0 = Date.now();
+    while (port.getReadModel().inventory?.revision === rev) {
+      if (Date.now() - t0 > 4e3) throw Error("The give did not land. Try again.");
+      await wait2(50);
+    }
+    given.push(c.unique);
+  }
+  return { given };
+}
 function devApplyV1(passport, changes) {
   let next = passport;
   for (const c of Array.isArray(changes) ? changes : [changes]) {
@@ -239395,6 +239428,7 @@ async function startWorldClient(environment) {
     }
     saveHeroPassport();
   };
+  if (devToolsAllowedV1(environment.location, channel2) && worldBridge && heroId && !coopGuest) allowDevGiveV1(true);
   if (devToolsAllowedV1(environment.location, channel2) && worldBridge && heroId && !coopGuest) environment.__SAQ_DEV_TOOLS_V1__ = Object.freeze({
     uniques: () => devUniquesForV1(session.authority.withAuthority((a) => a.withAuthorityState((s) => ({ d8: { heroClass: s.playersById[opened2.localPlayerId]?.d8?.heroClass } })))),
     level: () => session.authority.withAuthority((a) => a.withAuthorityState((s) => Number(s.playersById[opened2.localPlayerId]?.progression.level ?? 1))),
@@ -239407,7 +239441,10 @@ async function startWorldClient(environment) {
       if (!plannedReview.targets.some((t) => t.id === id2)) plannedReview.targets.push({ id: id2, label: "Dev travel", tile: tile2 });
       return session.plannedTravel(id2);
     },
+    // Uniques alone go in at once (dev give v1, Sammy 2026-11-17: "It can't just grant me it?"): no save, no reload.
     apply: async (changes) => {
+      const list = Array.isArray(changes) ? changes : [changes];
+      if (list.length && list.every((c) => c && Object.keys(c).every((k) => ["unique", "stars", "equip"].includes(k)) && c.unique !== void 0)) return devGiveNowV1({ port: clientPort, nextCommandToken: nextToken, environment }, list);
       await saveNow();
       const passport = readHeroPassport(deviceStorage, channel2, heroId);
       if (!passport) throw Error("This hero has no saved passport yet. Play a few seconds and try again.");

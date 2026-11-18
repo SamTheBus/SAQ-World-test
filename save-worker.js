@@ -18439,6 +18439,23 @@ function validateWorldEventsProgress(a, b) {
   }
 }
 
+// src/shared/contracts/dev_give_v1.js
+var DEV_GIVE_V1 = "dev-give-v1";
+var DEV_GIVE_ORIGIN = /^([a-z0-9-]{1,48})\/([0-4])\/(\d{1,12})$/;
+function h323(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+var devGiveSourceIdV1 = (seedHex, playerId, dev) => "ent:" + [0, 1, 2, 3].map((i) => h323(DEV_GIVE_V1 + "/" + seedHex + "/" + playerId + "/" + dev + "/" + i).toString(16).padStart(8, "0")).join("");
+function validateDevGivePayloadV1(payload) {
+  closedRecord(payload, ["unique", "stars", "equip", "inventoryRevision"]);
+  requireContract(typeof payload.unique === "string" && /^[a-z0-9-]{1,48}$/.test(payload.unique), "Unknown unique");
+  safeInteger(payload.stars, 0, 4);
+  requireContract(typeof payload.equip === "boolean", "Equip must be true or false");
+  safeInteger(payload.inventoryRevision);
+}
+
 // src/shared/contracts/unique_rewards_v1.js
 var HUNT_LANDS = Object.fromEntries(["woodland", "grassland", "desert", "frostland", "wetland", "upland", "tropical", "volcanic"].map((b) => [b, huntChampionOfV1(b)]));
 
@@ -19029,7 +19046,7 @@ function validateSalvage(p, s, validateCommand2) {
     requireContract(item2.itemId === id2 && item2.ownerPlayerId === p.playerId && item2.sourceEntityId !== null && !inv.itemsById[id2] && !inv.renewal.groundBySourceId[item2.sourceEntityId], "Salvage terminal ownership");
     requireContract(!Object.values(inv.subweapons.claims).some((c) => c.sourceEntityId === item2.sourceEntityId), "Provision salvaged");
     if (servicePurchase(p, item2.sourceEntityId)) validateServiceItem(s, p, item2);
-    else if (item2.generated && r.origin?.carried === void 0) validateGeneratedGear(item2.generated, gearSeed(s, p, item2.sourceEntityId), item2.generated.contentDepth);
+    else if (item2.generated && r.origin?.carried === void 0 && r.origin?.dev === void 0) validateGeneratedGear(item2.generated, gearSeed(s, p, item2.sourceEntityId), item2.generated.contentDepth);
     if (r.reward) requireContract(r.reward.sourceEntityId === item2.sourceEntityId && r.reward.claimed && r.reward.definitionId === item2.definitionId && same3(r.reward.generated ?? null, item2.generated ?? null) && r.reward.pickup?.authorityOrder < r.authorityOrder, "Salvage reward ancestry");
     const quote = salvageQuote(p, item2);
     requireContract(same3(r.materials, quote.materials) && (r.command.kind === "service.modify" && r.command.payload.operation === "shatter" || r.command.payload.fingerprint === quote.fingerprint) && r.command.payload.itemId === id2, "Salvage quote mismatch");
@@ -24889,6 +24906,11 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       requireContract(n.arrival && o.carried === n.arrival.heroId && o.sourceEntityId === id2, "Unknown carried provenance");
       return;
     }
+    if (o?.dev !== void 0) {
+      closedRecord(o, ["dev", "sourceEntityId"]);
+      requireContract(typeof o.dev === "string" && DEV_GIVE_ORIGIN.test(o.dev) && o.sourceEntityId === id2 && id2 === devGiveSourceIdV1(state.campaign.seed.seedHex, p.playerId, o.dev), "Unknown dev give provenance");
+      return;
+    }
     if (o?.servicePurchase) {
       validateServiceOrigin(p, o, id2);
       return;
@@ -24928,7 +24950,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
     else requireContract(o.episode === o.archive.sourceEpisode, "Archived gear episode drift");
   }
   function item2(i) {
-    const carried = [n.originsByItemId[i.itemId], n.groundBySourceId[i.sourceEntityId]?.origin, inv.d7?.salvaged[i.itemId]?.origin, inv.d7?.autoSalvaged[i.itemId]?.origin, inv.services?.salesByItemId[i.itemId]?.origin].find((o) => o?.carried !== void 0);
+    const carried = [n.originsByItemId[i.itemId], n.groundBySourceId[i.sourceEntityId]?.origin, inv.d7?.salvaged[i.itemId]?.origin, inv.d7?.autoSalvaged[i.itemId]?.origin, inv.services?.salesByItemId[i.itemId]?.origin].find((o) => o?.carried !== void 0 || o?.dev !== void 0);
     if (carried && i.workshop) {
       closedRecord(i.workshop, ["version", "steps"]);
       workshopResult(i);
@@ -26640,6 +26662,8 @@ function validateCommand(command) {
     closedRecord(command.payload, ["itemId", "inventoryRevision", "fingerprint"]);
     safeInteger(command.payload.inventoryRevision);
     requireContract(typeof command.payload.itemId === "string" && command.payload.itemId.length <= 240 && typeof command.payload.fingerprint === "string" && /^[0-9a-f]{1,8}$/.test(command.payload.fingerprint), "Invalid salvage identity");
+  } else if (command.kind === "dev.give") {
+    validateDevGivePayloadV1(command.payload);
   } else if (command.kind === "gear.drop") {
     closedRecord(command.payload, ["itemId", "inventoryRevision"]);
     requireContract(typeof command.payload.itemId === "string" && /^item:ply:[0-9a-f]{32}:(?:ent:[0-9a-f]{32}|starter)$/.test(command.payload.itemId), "Invalid item ID");
@@ -27251,14 +27275,14 @@ var NIGHTMARE_FROG_RULES = Object.freeze({
   keepTicks: NIGHTMARE_RULES.keepTicks
 });
 var nightmareRulesV1 = (kind2) => kind2 === "frog" ? NIGHTMARE_FROG_RULES : NIGHTMARE_RULES;
-function h323(text) {
+function h324(text) {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
   h = Math.imul(h ^ h >>> 16, 2246822507);
   h = Math.imul(h ^ h >>> 13, 3266489909);
   return (h ^ h >>> 16) >>> 0;
 }
-var id = (label2) => "ent:" + [0, 1, 2, 3].map((i) => h323(TRIP_NIGHTMARE_V1 + "/" + label2 + "/" + i).toString(16).padStart(8, "0")).join("");
+var id = (label2) => "ent:" + [0, 1, 2, 3].map((i) => h324(TRIP_NIGHTMARE_V1 + "/" + label2 + "/" + i).toString(16).padStart(8, "0")).join("");
 var nightmareIdV1 = (campaignId, eatTick) => id("boss/" + campaignId + "/" + eatTick);
 var gazecapIdV1 = (campaignId, eatTick, n) => id("cap/" + campaignId + "/" + eatTick + "/" + n);
 
@@ -32433,7 +32457,7 @@ function validateActivityCommand(command) {
   const { residencyRevision, ...legacy } = command;
   safeInteger(residencyRevision, 1);
   validateCommand(legacy);
-  requireContract(["worldEvent.activate", "discovery.readNote", "quest.act", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.bestiary", "service.buy", "service.sell", "service.rest", "supply.use", "trip.eat", "ferry.travel", "map.travel", "site.transition", "player.respawn", "player.revive", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
+  requireContract(["worldEvent.activate", "discovery.readNote", "quest.act", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.bestiary", "service.buy", "service.sell", "service.rest", "supply.use", "trip.eat", "ferry.travel", "map.travel", "site.transition", "player.respawn", "player.revive", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip", "dev.give"].includes(command.kind), "Unsupported activity command");
   return command;
 }
 var same31 = (a, b) => canonicalStringify(a) === canonicalStringify(b);

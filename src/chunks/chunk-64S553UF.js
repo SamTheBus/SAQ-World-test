@@ -131,13 +131,6 @@ function canonicalStringify(value) {
   return JSON.stringify(copyWire(value));
 }
 
-// src/shared/content/roadside_encounters_v1.js
-var ROADSIDE_VERSION = "world-roadside-encounters-v2";
-var ROADSIDE_HASH = "b45cc8e610b432ef59a91b345c9a0083b1ee8e4557cbf777dbfb6620f8f063c3";
-var ROADSIDE_DATABASE = "saq-world-roadside-v1-b45cc8e6";
-var ROADSIDE_POLICY = freezeWire({ "version": "world-roadside-encounters-v2", "parentCombatHash": "a6bd45764908d58d1e1dff8e55e811a0d10876ee0b24ea4b15aa28ea6c94fc59", "parentAccessHash": "48fd65d60a26a6403b36111e0d3622e366c26f6a07709e9d34ff013a013fcdeb", "packChancePercent": 85, "ordinaryPack": [6, 12], "maximumPacksPerChunk": 1, "protectedReservationChunks": "all original settlement/site/faction/future/origin chunks; unchanged", "wildernessSafetyCollarTiles": 8, "previousCollar": "one whole chunk in every direction (32x26 tiles), including unused neighboring ground", "spawnSafetyRadiusTiles": 32, "ferrySafetyRadiusTiles": 32, "eventCapacity": "all reserved event cells plus two-tile shoulder excluded", "routeSafety": "no member on marked road/trail/bridge or its one-tile shoulder", "actorSafety": "existing 384px activation no-spawn radius unchanged", "simulation": "existing 60Hz, 192 active actors, retention, XP, loot, stats and dungeon rosters unchanged", "selection": "domain-separated global chunk hash, maximum 24 center attempts, max 81 member probes per attempt, same-landmass clearance", "scope": "reusable sampler; opted-in Alpha review only; fresh disposable namespace" });
-var hasRoadsideEncounters = (b) => b?.roadsideVersion === ROADSIDE_VERSION && b?.roadsideHash === ROADSIDE_HASH;
-
 // src/shared/content/world_event_plan_v1.js
 var WORLD_EVENT_PLAN_VERSION = "world-event-plan-v1";
 var WORLD_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "raided_camp", "buried_cache", "trophy_hunt", "wayside_shrine", "den"]);
@@ -201,146 +194,6 @@ function eventAtSlotV1(asset, eventSlotId) {
   let m = atSlot.get(p);
   if (!m) atSlot.set(p, m = new Map(p.map((r) => [r.eventSlotId, r])));
   return m.get(eventSlotId) ?? null;
-}
-
-// src/shared/content/alderwood_access_v1.js
-var ACCESS_VERSION = "alderwood-first-journey-v1";
-var ACCESS_HASH = "48fd65d60a26a6403b36111e0d3622e366c26f6a07709e9d34ff013a013fcdeb";
-var ACCESS_DATABASE = "saq-world-alderwood-access-v1-48fd65d6";
-var FIRST_CAVE_ID = "repeatable-slot:cave:woodland:small:109";
-var FIRST_CAVE_SELECTION = freezeWire({ "id": "repeatable-slot:cave:woodland:small:109", "familyId": "site-family:cave", "tier": "small", "band": 1, "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "anchor": { "x": 54, "y": 133, "key": "54,133" }, "footprint": [{ "x": 108, "y": 267 }], "approach": [{ "x": 109, "y": 267 }], "biome": "woodland", "added": true, "old": false });
-var hasFirstJourney = (b) => b?.accessVersion === ACCESS_VERSION && b?.accessHash === ACCESS_HASH;
-
-// src/shared/content/world_reshape_sites_v1.js
-var RESHAPE_SITES = Object.freeze({
-  "repeatable-slot:cave:frostland:large:01": ["frostland", 3],
-  "repeatable-slot:cave:grassland:small:01": ["woodland", 3],
-  "repeatable-slot:cave:tropical:deep:01": ["frostland", 5],
-  "repeatable-slot:cave:upland:large:01": ["grassland", 2],
-  "repeatable-slot:cave:upland:standard:01": ["frostland", 5],
-  "repeatable-slot:cave:volcanic:deep:01": ["desert", 3],
-  "repeatable-slot:cave:wetland:small:01": ["grassland", 5],
-  "repeatable-slot:cave:wetland:standard:01": ["wetland", 5],
-  "repeatable-slot:cave:woodland:standard:01": ["woodland", 3],
-  "repeatable-slot:crypt:frostland:deep:01": ["desert", 3],
-  "repeatable-slot:crypt:grassland:small:01": ["woodland", 1],
-  "repeatable-slot:crypt:upland:standard:01": ["upland", 2],
-  "repeatable-slot:crypt:wetland:standard:01": ["volcanic", 4],
-  "repeatable-slot:fort:grassland:small:01": ["upland", 4],
-  "repeatable-slot:fort:tropical:large:01": ["tropical", 3],
-  "repeatable-slot:fort:upland:standard:01": ["frostland", 5],
-  "repeatable-slot:fort:wetland:small:01": ["volcanic", 4],
-  "repeatable-slot:fort:woodland:standard:01": ["woodland", 3],
-  "repeatable-slot:ruin:desert:standard:01": ["wetland", 3],
-  "repeatable-slot:ruin:frostland:standard:01": ["volcanic", 4],
-  "repeatable-slot:ruin:tropical:small:01": ["frostland", 5],
-  "repeatable-slot:ruin:upland:standard:01": ["grassland", 3],
-  "repeatable-slot:ruin:wetland:small:01": ["upland", 4],
-  "repeatable-slot:ruin:woodland:small:01": ["woodland", 2],
-  "repeatable-slot:ruin:frostland:deep:01": ["frostland", 3],
-  "repeatable-slot:crypt:frostland:large:01": ["frostland", 3],
-  "repeatable-slot:cave:grassland:small:031": ["woodland", 1],
-  "repeatable-slot:fort:upland:standard:032": ["frostland", 4],
-  "repeatable-slot:ruin:wetland:standard:033": ["wetland", 4],
-  "repeatable-slot:cave:woodland:small:034": ["frostland", 3],
-  "repeatable-slot:cave:volcanic:small:035": ["tropical", 4],
-  "repeatable-slot:cave:desert:small:036": ["desert", 2],
-  "repeatable-slot:ruin:tropical:standard:037": ["tropical", 3],
-  "repeatable-slot:crypt:frostland:small:038": ["desert", 2],
-  "repeatable-slot:fort:grassland:standard:040": ["grassland", 5],
-  "repeatable-slot:cave:desert:small:041": ["wetland", 3],
-  "repeatable-slot:cave:wetland:small:042": ["volcanic", 4],
-  "repeatable-slot:cave:volcanic:small:043": ["tropical", 4],
-  "repeatable-slot:fort:frostland:standard:044": ["upland", 4],
-  "repeatable-slot:cave:woodland:small:045": ["grassland", 2],
-  "repeatable-slot:cave:desert:small:046": ["wetland", 2],
-  "repeatable-slot:crypt:tropical:small:047": ["frostland", 5],
-  "repeatable-slot:fort:grassland:standard:048": ["upland", 2],
-  "repeatable-slot:ruin:upland:standard:049": ["upland", 1],
-  "repeatable-slot:cave:frostland:small:050": ["upland", 4],
-  "repeatable-slot:cave:tropical:small:051": ["wetland", 5],
-  "repeatable-slot:ruin:volcanic:standard:052": ["tropical", 3],
-  "repeatable-slot:fort:grassland:standard:053": ["upland", 3],
-  "repeatable-slot:ruin:woodland:standard:054": ["woodland", 3],
-  "repeatable-slot:cave:woodland:small:055": ["frostland", 4],
-  "repeatable-slot:ruin:woodland:standard:058": ["grassland", 2],
-  "repeatable-slot:crypt:frostland:small:059": ["desert", 3],
-  "repeatable-slot:cave:grassland:small:060": ["upland", 4],
-  "repeatable-slot:fort:volcanic:standard:061": ["grassland", 3],
-  "repeatable-slot:cave:wetland:small:063": ["wetland", 4],
-  "repeatable-slot:fort:grassland:standard:064": ["upland", 3],
-  "repeatable-slot:fort:frostland:standard:065": ["volcanic", 4],
-  "repeatable-slot:ruin:upland:standard:066": ["woodland", 1],
-  "repeatable-slot:ruin:wetland:standard:067": ["grassland", 4],
-  "repeatable-slot:fort:upland:standard:070": ["grassland", 2],
-  "repeatable-slot:ruin:tropical:standard:071": ["frostland", 4],
-  "repeatable-slot:fort:volcanic:standard:072": ["desert", 4],
-  "repeatable-slot:ruin:grassland:standard:073": ["woodland", 3],
-  "repeatable-slot:crypt:wetland:small:074": ["wetland", 5],
-  "repeatable-slot:ruin:grassland:standard:075": ["grassland", 1],
-  "repeatable-slot:ruin:woodland:standard:076": ["woodland", 1],
-  "repeatable-slot:cave:desert:small:077": ["upland", 2],
-  "repeatable-slot:ruin:desert:standard:078": ["tropical", 4],
-  "repeatable-slot:ruin:tropical:standard:079": ["frostland", 4],
-  "repeatable-slot:cave:frostland:small:080": ["frostland", 3],
-  "repeatable-slot:ruin:tropical:standard:081": ["woodland", 1],
-  "repeatable-slot:ruin:upland:standard:082": ["grassland", 2],
-  "repeatable-slot:cave:woodland:small:083": ["frostland", 5],
-  "repeatable-slot:ruin:wetland:standard:084": ["grassland", 2],
-  "repeatable-slot:cave:volcanic:small:085": ["desert", 5],
-  "repeatable-slot:ruin:wetland:standard:086": ["grassland", 2],
-  "repeatable-slot:ruin:tropical:standard:087": ["frostland", 4],
-  "repeatable-slot:ruin:upland:standard:088": ["wetland", 3],
-  "repeatable-slot:crypt:wetland:small:090": ["volcanic", 4],
-  "repeatable-slot:ruin:volcanic:standard:091": ["desert", 3],
-  "repeatable-slot:cave:frostland:small:092": ["wetland", 3],
-  "repeatable-slot:ruin:desert:standard:093": ["upland", 2],
-  "repeatable-slot:crypt:tropical:small:094": ["wetland", 5],
-  "repeatable-slot:fort:grassland:standard:095": ["woodland", 2],
-  "repeatable-slot:cave:frostland:small:097": ["frostland", 4],
-  "repeatable-slot:cave:desert:small:098": ["upland", 2],
-  "repeatable-slot:cave:upland:small:099": ["upland", 4],
-  "repeatable-slot:crypt:wetland:small:100": ["grassland", 5],
-  "repeatable-slot:cave:upland:small:101": ["grassland", 2]
-});
-var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067": "large" });
-
-// src/shared/content/world_reshape_v1.js
-var RESHAPE_VERSION = "world-reshape-v2";
-var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
-var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-dens";
-var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
-var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
-var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
-var moved = (id, biome, band) => {
-  const r = reshapedSite(id);
-  return Boolean(r) && r[0] === biome && r[1] === band;
-};
-var siteFits = (id, biome, band, plannedBand) => typeof id === "string" && biome === id.split(":")[2] && band === plannedBand || moved(id, biome, band);
-var plannedSiteRole = (id, family2, tier, biome, band) => typeof id === "string" && id === `repeatable-slot:${family2}:${id.split(":")[2]}:${tier}:01` && (id.split(":")[2] === biome || moved(id, biome, band));
-
-// src/shared/content/wilderness_v2.js
-var WILDERNESS_VERSION = "wilderness-distribution-v2-native";
-var WILDERNESS_HASH = "ed2f7fcafeac4305b6658242d232d8d79dade9ecb6b43ea74125fc1318cc282f";
-var WILDERNESS_SITE_SELECTIONS = freezeWire([{ "id": "repeatable-slot:cave:grassland:small:031", "anchor": { "key": "65,134", "x": 65, "y": 134 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 131, "y": 269 }], "approach": [{ "x": 132, "y": 269 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:upland:standard:032", "anchor": { "key": "71,10", "x": 71, "y": 10 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 143, "y": 21 }, { "x": 144, "y": 21 }, { "x": 143, "y": 22 }, { "x": 144, "y": 22 }, { "x": 143, "y": 23 }, { "x": 144, "y": 23 }], "approach": [{ "x": 145, "y": 22 }, { "x": 146, "y": 22 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:033", "anchor": { "key": "34,34", "x": 34, "y": 34 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 69, "y": 69 }, { "x": 70, "y": 69 }, { "x": 69, "y": 70 }, { "x": 70, "y": 70 }], "approach": [{ "x": 71, "y": 69 }, { "x": 72, "y": 69 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:034", "anchor": { "key": "116,61", "x": 116, "y": 61 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 233, "y": 123 }], "approach": [{ "x": 234, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:035", "anchor": { "key": "80,38", "x": 80, "y": 38 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 161, "y": 77 }], "approach": [{ "x": 162, "y": 77 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:036", "anchor": { "key": "71,99", "x": 71, "y": 99 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 143, "y": 199 }], "approach": [{ "x": 144, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:037", "anchor": { "key": "117,110", "x": 117, "y": 110 }, "familyId": "site-family:ruin", "tier": "standard", "band": 5, "footprint": [{ "x": 234, "y": 221 }, { "x": 235, "y": 221 }, { "x": 234, "y": 222 }, { "x": 235, "y": 222 }], "approach": [{ "x": 236, "y": 221 }, { "x": 237, "y": 221 }], "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:038", "anchor": { "key": "61,99", "x": 61, "y": 99 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 123, "y": 199 }], "approach": [{ "x": 124, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:039", "anchor": { "key": "55,111", "x": 55, "y": 111 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 111, "y": 223 }], "approach": [{ "x": 112, "y": 223 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:040", "anchor": { "key": "37,47", "x": 37, "y": 47 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 75, "y": 95 }, { "x": 76, "y": 95 }, { "x": 75, "y": 96 }, { "x": 76, "y": 96 }, { "x": 75, "y": 97 }, { "x": 76, "y": 97 }], "approach": [{ "x": 77, "y": 96 }, { "x": 78, "y": 96 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:041", "anchor": { "key": "45,85", "x": 45, "y": 85 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 91, "y": 171 }], "approach": [{ "x": 92, "y": 171 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:cave:wetland:small:042", "anchor": { "key": "39,71", "x": 39, "y": 71 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 79, "y": 143 }], "approach": [{ "x": 80, "y": 143 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:043", "anchor": { "key": "86,33", "x": 86, "y": 33 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 173, "y": 67 }], "approach": [{ "x": 174, "y": 67 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:fort:frostland:standard:044", "anchor": { "key": "111,90", "x": 111, "y": 90 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 223, "y": 181 }, { "x": 224, "y": 181 }, { "x": 223, "y": 182 }, { "x": 224, "y": 182 }, { "x": 223, "y": 183 }, { "x": 224, "y": 183 }], "approach": [{ "x": 225, "y": 182 }, { "x": 226, "y": 182 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:045", "anchor": { "key": "45,108", "x": 45, "y": 108 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 90, "y": 217 }], "approach": [{ "x": 91, "y": 217 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:046", "anchor": { "key": "54,98", "x": 54, "y": 98 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 109, "y": 197 }], "approach": [{ "x": 110, "y": 197 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:crypt:tropical:small:047", "anchor": { "key": "51,29", "x": 51, "y": 29 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 103, "y": 59 }], "approach": [{ "x": 104, "y": 59 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:048", "anchor": { "key": "81,114", "x": 81, "y": 114 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 163, "y": 229 }, { "x": 164, "y": 229 }, { "x": 163, "y": 230 }, { "x": 164, "y": 230 }, { "x": 163, "y": 231 }, { "x": 164, "y": 231 }], "approach": [{ "x": 165, "y": 230 }, { "x": 166, "y": 230 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:049", "anchor": { "key": "55,119", "x": 55, "y": 119 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 111, "y": 239 }, { "x": 112, "y": 239 }, { "x": 111, "y": 240 }, { "x": 112, "y": 240 }], "approach": [{ "x": 113, "y": 239 }, { "x": 114, "y": 239 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:050", "anchor": { "key": "117,86", "x": 117, "y": 86 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 235, "y": 173 }], "approach": [{ "x": 236, "y": 173 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:tropical:small:051", "anchor": { "key": "51,39", "x": 51, "y": 39 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 103, "y": 79 }], "approach": [{ "x": 104, "y": 79 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:volcanic:standard:052", "anchor": { "key": "78,46", "x": 78, "y": 46 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 157, "y": 93 }, { "x": 158, "y": 93 }, { "x": 157, "y": 94 }, { "x": 158, "y": 94 }], "approach": [{ "x": 159, "y": 93 }, { "x": 160, "y": 93 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:053", "anchor": { "key": "85,108", "x": 85, "y": 108 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 171, "y": 217 }, { "x": 172, "y": 217 }, { "x": 171, "y": 218 }, { "x": 172, "y": 218 }, { "x": 171, "y": 219 }, { "x": 172, "y": 219 }], "approach": [{ "x": 173, "y": 218 }, { "x": 174, "y": 218 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:054", "anchor": { "key": "25,119", "x": 25, "y": 119 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 51, "y": 239 }, { "x": 52, "y": 239 }, { "x": 51, "y": 240 }, { "x": 52, "y": 240 }], "approach": [{ "x": 53, "y": 239 }, { "x": 54, "y": 239 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:055", "anchor": { "key": "66,4", "x": 66, "y": 4 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 132, "y": 9 }], "approach": [{ "x": 133, "y": 9 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:056", "anchor": { "key": "116,32", "x": 116, "y": 32 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 233, "y": 65 }, { "x": 234, "y": 65 }, { "x": 233, "y": 66 }, { "x": 234, "y": 66 }], "approach": [{ "x": 235, "y": 65 }, { "x": 236, "y": 65 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:057", "anchor": { "key": "96,35", "x": 96, "y": 35 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 193, "y": 71 }, { "x": 194, "y": 71 }, { "x": 193, "y": 72 }, { "x": 194, "y": 72 }], "approach": [{ "x": 195, "y": 71 }, { "x": 196, "y": 71 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:058", "anchor": { "key": "39,110", "x": 39, "y": 110 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 79, "y": 221 }, { "x": 80, "y": 221 }, { "x": 79, "y": 222 }, { "x": 80, "y": 222 }], "approach": [{ "x": 81, "y": 221 }, { "x": 82, "y": 221 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:059", "anchor": { "key": "63,85", "x": 63, "y": 85 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 127, "y": 171 }], "approach": [{ "x": 128, "y": 171 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:grassland:small:060", "anchor": { "key": "94,43", "x": 94, "y": 43 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 189, "y": 87 }], "approach": [{ "x": 190, "y": 87 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:volcanic:standard:061", "anchor": { "key": "32,99", "x": 32, "y": 99 }, "familyId": "site-family:fort", "tier": "standard", "band": 2, "footprint": [{ "x": 64, "y": 198 }, { "x": 65, "y": 198 }, { "x": 64, "y": 199 }, { "x": 65, "y": 199 }, { "x": 64, "y": 200 }, { "x": 65, "y": 200 }], "approach": [{ "x": 66, "y": 199 }, { "x": 67, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:062", "anchor": { "key": "110,80", "x": 110, "y": 80 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 221, "y": 161 }], "approach": [{ "x": 222, "y": 161 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:wetland:small:063", "anchor": { "key": "38,29", "x": 38, "y": 29 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 76, "y": 59 }], "approach": [{ "x": 77, "y": 59 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:064", "anchor": { "key": "91,105", "x": 91, "y": 105 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 183, "y": 211 }, { "x": 184, "y": 211 }, { "x": 183, "y": 212 }, { "x": 184, "y": 212 }, { "x": 183, "y": 213 }, { "x": 184, "y": 213 }], "approach": [{ "x": 185, "y": 212 }, { "x": 186, "y": 212 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:frostland:standard:065", "anchor": { "key": "28,80", "x": 28, "y": 80 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 56, "y": 161 }, { "x": 57, "y": 161 }, { "x": 56, "y": 162 }, { "x": 57, "y": 162 }, { "x": 56, "y": 163 }, { "x": 57, "y": 163 }], "approach": [{ "x": 58, "y": 162 }, { "x": 59, "y": 162 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:066", "anchor": { "key": "59,130", "x": 59, "y": 130 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 119, "y": 260 }, { "x": 120, "y": 260 }, { "x": 119, "y": 261 }, { "x": 120, "y": 261 }], "approach": [{ "x": 121, "y": 260 }, { "x": 122, "y": 260 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:067", "anchor": { "key": "32,46", "x": 32, "y": 46 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 65, "y": 93 }, { "x": 66, "y": 93 }, { "x": 65, "y": 94 }, { "x": 66, "y": 94 }], "approach": [{ "x": 67, "y": 93 }, { "x": 68, "y": 93 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:068", "anchor": { "key": "124,41", "x": 124, "y": 41 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 249, "y": 83 }], "approach": [{ "x": 250, "y": 83 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:069", "anchor": { "key": "78,102", "x": 78, "y": 102 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 156, "y": 205 }], "approach": [{ "x": 157, "y": 205 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:fort:upland:standard:070", "anchor": { "key": "51,105", "x": 51, "y": 105 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 103, "y": 211 }, { "x": 104, "y": 211 }, { "x": 103, "y": 212 }, { "x": 104, "y": 212 }, { "x": 103, "y": 213 }, { "x": 104, "y": 213 }], "approach": [{ "x": 105, "y": 212 }, { "x": 106, "y": 212 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:071", "anchor": { "key": "119,50", "x": 119, "y": 50 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 239, "y": 101 }, { "x": 240, "y": 101 }, { "x": 239, "y": 102 }, { "x": 240, "y": 102 }], "approach": [{ "x": 241, "y": 101 }, { "x": 242, "y": 101 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:volcanic:standard:072", "anchor": { "key": "80,65", "x": 80, "y": 65 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 161, "y": 131 }, { "x": 162, "y": 131 }, { "x": 161, "y": 132 }, { "x": 162, "y": 132 }, { "x": 161, "y": 133 }, { "x": 162, "y": 133 }], "approach": [{ "x": 163, "y": 132 }, { "x": 164, "y": 132 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:ruin:grassland:standard:073", "anchor": { "key": "108,112", "x": 108, "y": 112 }, "familyId": "site-family:ruin", "tier": "standard", "band": 5, "footprint": [{ "x": 217, "y": 225 }, { "x": 218, "y": 225 }, { "x": 217, "y": 226 }, { "x": 218, "y": 226 }], "approach": [{ "x": 219, "y": 225 }, { "x": 220, "y": 225 }], "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:074", "anchor": { "key": "46,42", "x": 46, "y": 42 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 93, "y": 85 }], "approach": [{ "x": 94, "y": 85 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:grassland:standard:075", "anchor": { "key": "71,135", "x": 71, "y": 135 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 143, "y": 271 }, { "x": 144, "y": 271 }, { "x": 143, "y": 272 }, { "x": 144, "y": 272 }], "approach": [{ "x": 145, "y": 271 }, { "x": 146, "y": 271 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:076", "anchor": { "key": "65,140", "x": 65, "y": 140 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 130, "y": 281 }, { "x": 131, "y": 281 }, { "x": 130, "y": 282 }, { "x": 131, "y": 282 }], "approach": [{ "x": 132, "y": 281 }, { "x": 133, "y": 281 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:077", "anchor": { "key": "67,103", "x": 67, "y": 103 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 135, "y": 207 }], "approach": [{ "x": 136, "y": 207 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:078", "anchor": { "key": "76,31", "x": 76, "y": 31 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 153, "y": 63 }, { "x": 154, "y": 63 }, { "x": 153, "y": 64 }, { "x": 154, "y": 64 }], "approach": [{ "x": 155, "y": 63 }, { "x": 156, "y": 63 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:079", "anchor": { "key": "40,36", "x": 40, "y": 36 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 80, "y": 73 }, { "x": 81, "y": 73 }, { "x": 80, "y": 74 }, { "x": 81, "y": 74 }], "approach": [{ "x": 82, "y": 73 }, { "x": 83, "y": 73 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:080", "anchor": { "key": "121,71", "x": 121, "y": 71 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 242, "y": 143 }], "approach": [{ "x": 243, "y": 143 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:081", "anchor": { "key": "42,127", "x": 42, "y": 127 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 85, "y": 255 }, { "x": 86, "y": 255 }, { "x": 85, "y": 256 }, { "x": 86, "y": 256 }], "approach": [{ "x": 87, "y": 255 }, { "x": 88, "y": 255 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:082", "anchor": { "key": "50,112", "x": 50, "y": 112 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 101, "y": 225 }, { "x": 102, "y": 225 }, { "x": 101, "y": 226 }, { "x": 102, "y": 226 }], "approach": [{ "x": 103, "y": 225 }, { "x": 104, "y": 225 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:083", "anchor": { "key": "57,10", "x": 57, "y": 10 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 115, "y": 21 }], "approach": [{ "x": 116, "y": 21 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:084", "anchor": { "key": "65,152", "x": 65, "y": 152 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 131, "y": 305 }, { "x": 132, "y": 305 }, { "x": 131, "y": 306 }, { "x": 132, "y": 306 }], "approach": [{ "x": 133, "y": 305 }, { "x": 134, "y": 305 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:085", "anchor": { "key": "110,41", "x": 110, "y": 41 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 221, "y": 83 }], "approach": [{ "x": 222, "y": 83 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:086", "anchor": { "key": "71,152", "x": 71, "y": 152 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 143, "y": 305 }, { "x": 144, "y": 305 }, { "x": 143, "y": 306 }, { "x": 144, "y": 306 }], "approach": [{ "x": 145, "y": 305 }, { "x": 146, "y": 305 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:087", "anchor": { "key": "125,61", "x": 125, "y": 61 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 251, "y": 123 }, { "x": 252, "y": 123 }, { "x": 251, "y": 124 }, { "x": 252, "y": 124 }], "approach": [{ "x": 253, "y": 123 }, { "x": 254, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:088", "anchor": { "key": "48,92", "x": 48, "y": 92 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 96, "y": 185 }, { "x": 97, "y": 185 }, { "x": 96, "y": 186 }, { "x": 97, "y": 186 }], "approach": [{ "x": 98, "y": 185 }, { "x": 99, "y": 185 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:089", "anchor": { "key": "46,139", "x": 46, "y": 139 }, "familyId": "site-family:cave", "tier": "small", "band": 1, "footprint": [{ "x": 93, "y": 279 }], "approach": [{ "x": 94, "y": 279 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:090", "anchor": { "key": "22,70", "x": 22, "y": 70 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 45, "y": 141 }], "approach": [{ "x": 46, "y": 141 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:volcanic:standard:091", "anchor": { "key": "74,61", "x": 74, "y": 61 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 149, "y": 123 }, { "x": 150, "y": 123 }, { "x": 149, "y": 124 }, { "x": 150, "y": 124 }], "approach": [{ "x": 151, "y": 123 }, { "x": 152, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:092", "anchor": { "key": "61,78", "x": 61, "y": 78 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 123, "y": 157 }], "approach": [{ "x": 124, "y": 157 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:093", "anchor": { "key": "62,108", "x": 62, "y": 108 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 125, "y": 216 }, { "x": 126, "y": 216 }, { "x": 125, "y": 217 }, { "x": 126, "y": 217 }], "approach": [{ "x": 127, "y": 216 }, { "x": 128, "y": 216 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:crypt:tropical:small:094", "anchor": { "key": "72,40", "x": 72, "y": 40 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 145, "y": 81 }], "approach": [{ "x": 146, "y": 81 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:095", "anchor": { "key": "75,124", "x": 75, "y": 124 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 151, "y": 248 }, { "x": 152, "y": 248 }, { "x": 151, "y": 249 }, { "x": 152, "y": 249 }, { "x": 151, "y": 250 }, { "x": 152, "y": 250 }], "approach": [{ "x": 153, "y": 249 }, { "x": 154, "y": 249 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:woodland:small:096", "anchor": { "key": "31,124", "x": 31, "y": 124 }, "familyId": "site-family:crypt", "tier": "small", "band": 2, "footprint": [{ "x": 63, "y": 249 }], "approach": [{ "x": 64, "y": 249 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:097", "anchor": { "key": "118,95", "x": 118, "y": 95 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 237, "y": 190 }], "approach": [{ "x": 238, "y": 190 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:098", "anchor": { "key": "55,104", "x": 55, "y": 104 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 111, "y": 209 }], "approach": [{ "x": 112, "y": 209 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:099", "anchor": { "key": "89,37", "x": 89, "y": 37 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 178, "y": 75 }], "approach": [{ "x": 179, "y": 75 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:100", "anchor": { "key": "45,55", "x": 45, "y": 55 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 91, "y": 111 }], "approach": [{ "x": 92, "y": 111 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:101", "anchor": { "key": "48,108", "x": 48, "y": 108 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 97, "y": 217 }], "approach": [{ "x": 98, "y": 217 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:102", "anchor": { "key": "30,117", "x": 30, "y": 117 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 61, "y": 234 }, { "x": 62, "y": 234 }, { "x": 61, "y": 235 }, { "x": 62, "y": 235 }], "approach": [{ "x": 63, "y": 234 }, { "x": 64, "y": 234 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:103", "anchor": { "key": "76,89", "x": 76, "y": 89 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 153, "y": 179 }], "approach": [{ "x": 154, "y": 179 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }]);
-var hasWilderness = (b) => b?.wildernessVersion === WILDERNESS_VERSION && b?.wildernessHash === WILDERNESS_HASH;
-var wildernessSelection = (id) => WILDERNESS_SITE_SELECTIONS.find((row2) => row2.id === id) ?? null;
-
-// src/shared/content/seeded_world_v1.js
-var isSeededBindingV1 = (b) => b?.worldMaker !== void 0;
-var seededCommitmentsV1 = (asset) => ({ planHash: asset.upstream.planHash, routeHash: asset.routeHash, planningHash: asset.upstream.planningPolicyHash, physicalHash: asset.upstream.physicalPlanHash, worldMaker: asset.upstream.maker });
-function withSeededWorldV1(base, assetHash, c) {
-  return { ...base, assetHash, planHash: c.planHash, routeHash: c.routeHash, planningHash: c.planningHash, physicalHash: c.physicalHash, worldMaker: c.worldMaker };
-}
-function presentSeededWorldV1(a) {
-  return {
-    ...a,
-    assetId: "alpha",
-    wildernessExtension: a.wildernessExtension && { ...a.wildernessExtension, version: WILDERNESS_VERSION, hash: WILDERNESS_HASH },
-    firstJourney: a.firstJourney && { ...a.firstJourney, version: ACCESS_VERSION, hash: ACCESS_HASH },
-    worldReshape: a.worldReshape && { ...a.worldReshape, version: RESHAPE_VERSION, hash: RESHAPE_HASH }
-  };
 }
 
 // src/shared/content/ferry_plan_v1.js
@@ -3929,2462 +3782,6 @@ function projectBestiaryV1(s, playerId, spaceInstanceId = null, near = null) {
   }) };
 }
 
-// src/shared/content/alpha_hydrology_v1.js
-var HYDROLOGY_VERSION = "alpha-hydrology-plan-v2";
-var HYDROLOGY_HASH = "4fb70faf18fe2ae53ec79c71e4c1c7d70f6f3769649b084dd8f66fce53cd8cc6";
-var HYDROLOGY_DATABASE = "saq-world-hydrology-v2-alpha-4fb70faf";
-var hasHydrologyV1 = (b) => b?.assetId === "alpha" && b.hydrologyVersion === HYDROLOGY_VERSION && b.hydrologyHash === HYDROLOGY_HASH;
-
-// src/shared/content/corrosive_shedding_v4.js
-var CORROSIVE_SHEDDING_V4 = Object.freeze({ version: 4, stepPercent: 8, maxLive: 6, maxDamageSheds: 12, maxLiveSlag: 2, slagEveryChunks: 3, flightTicks: 18, coalescenceTicks: 12 });
-var corrosiveShedKindV4 = (chunkStep, liveSlag) => chunkStep % 3 === 0 && liveSlag < 2 ? "slag" : "slime";
-
-// src/shared/content/recovered_boss_catalog_v4.js
-var RECOVERED_BOSSES2 = Object.freeze({ ...RECOVERED_BOSSES, corrosive_abomination: Object.freeze({ ...RECOVERED_BOSSES.corrosive_abomination, adds: CORROSIVE_SHEDDING_V4.maxDamageSheds, sheddingPolicy: 4 }), ...BIOME_BOSSES_V1 });
-var recoveredBossForId = (id) => RECOVERED_BOSSES2[id] ?? null;
-function recoveredBossForReservation2(reservationId, family2, index2, floorCount, enabled2 = true) {
-  const row2 = recoveredBossForReservation(reservationId, family2, index2, floorCount, enabled2);
-  if (row2) return recoveredBossForId(row2.id);
-  if (!enabled2 || !Number.isInteger(index2) || index2 !== floorCount - 1) return null;
-  const native = BIOME_BOSSES_V1[bossAtSiteV1(reservationId)];
-  return native?.family === family2 ? native : null;
-}
-
-// src/shared/content/boss_hosting_v1.js
-var BOSS_HOSTING_VERSION = "site-boss-hosting-v1";
-var BOSS_HOSTING_POLICY = freezeWire({ version: BOSS_HOSTING_VERSION, parentRuntime: "c36909555b042989", parentGeneration: "core-families-multiroom-v1", playerCount: 4, playerHull: 9, bossHull: 34, roomSelection: "explicit-final-reward", preserveGeometry: true, preserveRosterIdentities: true, preserveAttacks: true, partyStagingSeparation: 64, partyArrivalVersion: "site-party-arrival-v1", missingBoss: "structured-hard-failure", supportHullUpperBound: 20, scope: "constructed-arena-capacity-not-network-or-balance-approval" });
-var BOSS_HOSTING_HASH = "0405745d2de42e6f1e8a5d508d507c5db3379e8efc1ea2db41c4f0dc26352a3e";
-var hasBossHostingV1 = (b) => b?.bossHostingVersion === BOSS_HOSTING_VERSION && b.bossHostingHash === BOSS_HOSTING_HASH;
-var TILE = 32;
-var dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-var key = (p) => p.x + "," + p.y;
-var dirs = [[0, -1], [1, 0], [0, 1], [-1, 0]];
-function box(room2) {
-  return room2.bounds ?? { x: room2.cx - room2.rx, y: room2.cy - room2.ry, width: room2.rx * 2 + 1, height: room2.ry * 2 + 1 };
-}
-function bossRoomCellsV1(recipe, room2, hull = 9) {
-  const b = box(room2), out = [];
-  for (let y = b.y; y < b.y + b.height; y++) for (let x = b.x; x < b.x + b.width; x++) {
-    const p = { x: (x + 0.5) * TILE, y: (y + 0.5) * TILE };
-    if (!collidesWithTiles(recipe.collision, p.x, p.y, hull)) out.push(p);
-  }
-  return out;
-}
-var brimstoneFortHereV1 = (reservationId) => !worldSiteV1(reservationId);
-function bossHostingSpecV1({ family: family2, tier, index: index2, floorCount, reservationId, enabled: enabled2 = true, wilderness = true }) {
-  if (!enabled2 || index2 !== floorCount - 1) return null;
-  const restored = [RECOVERED_BOSSES2[bossAtSiteV1(reservationId)]].find((b) => b?.family === family2);
-  if (restored) return { kind: restored.id, hullRadius: 34, supportCount: restored.adds, liveSupportCount: restored.id === "corrosive_abomination" ? 6 : restored.adds };
-  if (family2 === "fort" && (tier === "standard" || tier === "deep" && wilderness && reservationId === bossSiteV1("aegis_goliath"))) return { kind: "aegis_goliath", hullRadius: 34, supportCount: 3, liveSupportCount: 3 };
-  if (family2 === "fort" && tier === "large" && brimstoneFortHereV1(reservationId) || family2 === "ruin" && wilderness && tier === "large" && reservationId === bossSiteV1("brimstone_colossus")) return { kind: "overlord_iron_vault", hullRadius: 34, supportCount: 0, liveSupportCount: 0 };
-  return null;
-}
-function fieldDistance(allowed, start) {
-  const d = /* @__PURE__ */ new Map([[key(start), 0]]), q = [start];
-  for (let i = 0; i < q.length; i++) for (const [dx, dy] of dirs) {
-    const p = { x: q[i].x + dx * TILE, y: q[i].y + dy * TILE }, k = key(p);
-    if (allowed.has(k) && !d.has(k)) {
-      d.set(k, d.get(key(q[i])) + TILE);
-      q.push(p);
-    }
-  }
-  return d;
-}
-function choosePads(cells3, position, protectedPoints) {
-  const chosen = [];
-  for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
-    const ideal = { x: position.x + sx * 160, y: position.y + sy * 128 };
-    const sorted2 = cells3.filter((p2) => (p2.x - position.x) * sx >= 96 && (p2.y - position.y) * sy >= 64 && protectedPoints.every((q) => dist(p2, q) >= 40)).sort((a, b) => dist(a, ideal) - dist(b, ideal) || a.y - b.y || a.x - b.x);
-    const p = sorted2.find((p2) => chosen.every((q) => dist(p2, q) >= 64));
-    if (!p) return null;
-    chosen.push(p);
-  }
-  return chosen;
-}
-function freeForHero(p, boss, supports) {
-  return !(Math.abs(p.x - boss.x) <= 47 && Math.abs(p.y - boss.y) <= 47) && supports.every((q) => Math.abs(p.x - q.x) > 33 || Math.abs(p.y - q.y) > 33);
-}
-function proveBossArenaV1(recipe, kind2, position, { supportPositions = [], liveSupportCount = 0 } = {}) {
-  const room2 = recipe.graph.rooms.find((r) => r.roomId === recipe.graph.topology.endNodeId);
-  requireContract(room2, "BOSS_HOST:FINAL_ROOM_MISSING");
-  const b = box(room2);
-  requireContract(position.x >= b.x * TILE && position.x < (b.x + b.width) * TILE && position.y >= b.y * TILE && position.y < (b.y + b.height) * TILE && !collidesWithTiles(recipe.collision, position.x, position.y, 34), "BOSS_HOST:UNSAFE_OR_WRONG_CHAMBER");
-  const cells3 = bossRoomCellsV1(recipe, room2, 9), protectedPoints = [recipe.reward?.position, ...Object.values(recipe.stairAnchors ?? {})].filter(Boolean), pads = choosePads(cells3, position, protectedPoints);
-  requireContract(pads?.length === 4, "BOSS_HOST:FOUR_STAGING_POSITIONS_UNAVAILABLE");
-  const physical = cells3.filter((p) => freeForHero(p, position, supportPositions.slice(0, liveSupportCount))), allowed = new Set(physical.map(key)), routes = [];
-  requireContract(pads.every((p) => allowed.has(key(p))), "BOSS_HOST:SUPPORT_STAGING_CONFLICT");
-  for (let i = 0; i < 4; i++) {
-    const d = fieldDistance(allowed, pads[i]), target = pads[(i + 1) % 4];
-    requireContract(d.has(key(target)), "BOSS_HOST:PARTY_CIRCULATION_BLOCKED");
-    const exits = physical.filter((p) => dist(p, pads[i]) >= 73 && d.has(key(p))).map((p) => d.get(key(p)));
-    requireContract(exits.length, "BOSS_HOST:NO_TARGETED_SLAM_ESCAPE");
-    routes.push({ from: i, to: (i + 1) % 4, routePx: d.get(key(target)), targeted64pxSlamEscapePx: Math.min(...exits), idealEscapeTicks: Math.ceil(Math.min(...exits) / 3) });
-  }
-  const central = cells3.filter((p) => freeForHero(p, position, supportPositions.slice(0, liveSupportCount)) && dist(p, position) > 73), centralAllowed = new Set(central.map(key));
-  requireContract(pads.every((p) => centralAllowed.has(key(p))), "BOSS_HOST:CENTRAL_SLAM_STAGING_CONFLICT");
-  const connected4 = fieldDistance(centralAllowed, pads[0]);
-  requireContract(pads.every((p) => connected4.has(key(p))), "BOSS_HOST:CENTRAL_SLAM_ESCAPE_DISCONNECTED");
-  const arms = {};
-  for (const [name, dx, dy] of [["east", 1, 0], ["west", -1, 0], ["north", 0, -1], ["south", 0, 1]]) {
-    let v = 0;
-    for (let n = 4; n <= 300; n += 4) {
-      if (collidesWithTiles(recipe.collision, position.x + dx * n, position.y + dy * n, 34)) break;
-      v = n;
-    }
-    arms[name] = v;
-  }
-  if (kind2 === "cinderhart") requireContract(Math.min(...Object.values(arms)) >= 220, "BOSS_HOST:CHARGE_LANES_TOO_SHORT");
-  if (kind2 === "void_overseer") requireContract(Math.max(arms.east + 34, arms.west + 34) >= 260 && Math.max(arms.north + 34, arms.south + 34) >= 260, "BOSS_HOST:BEAM_AXES_TOO_SHORT");
-  if (kind2 === "ashfang") {
-    for (let y = -7; y <= 7; y++) for (let x = -7; x <= 7; x++) if (Math.abs(x) === 7 || Math.abs(y) === 7) requireContract(!collidesWithTiles(recipe.collision, position.x + x * TILE, position.y + y * TILE, 9), "BOSS_HOST:COLLAPSE_RING_LEAVES_CHAMBER");
-  }
-  return { version: BOSS_HOSTING_VERSION, policyHash: BOSS_HOSTING_HASH, kind: kind2, roomId: room2.roomId, boundsTiles: copyWire(b), stagingPositions: pads, playerHullRadius: 9, bossHullRadius: 34, playerSafeTileCenters: cells3.length, connectedSafeCentersAfterCentral64pxSlam: connected4.size, liveSupportCount, supportHullUpperBound: 20, routes, chargeClearancePx: arms, claims: ["four-distinct-static-staging", "room-contained-player-circulation-with-live-support-bodies", "targeted64px-telegraph-egress", "central64px-slam-connected-safe-space"], limits: ["not-all-possible-hazard-combinations", "not-party-balance-or-network-proof", "native-persistent-hazard-fights-required"] };
-}
-function bossHostingRecipeV1(original, spec) {
-  if (!spec) return original;
-  const recipe = copyWire(original), room2 = recipe.graph.rooms.find((r) => r.roomId === recipe.graph.topology.endNodeId);
-  requireContract(room2, "BOSS_HOST:FINAL_ROOM_MISSING");
-  requireContract(recipe.encounter.members.length >= spec.supportCount + 1, "BOSS_HOST:SUPPORT_ROSTER_CAPACITY");
-  const center3 = { x: (room2.cx + 0.5) * TILE, y: (room2.cy + 0.5) * TILE }, candidates = bossRoomCellsV1(recipe, room2, spec.hullRadius ?? 34).sort((a, b) => dist(a, center3) - dist(b, center3) || a.y - b.y || a.x - b.x);
-  const position = candidates[0];
-  requireContract(position, "BOSS_HOST:SAFE_ANCHOR_UNAVAILABLE");
-  const cells3 = bossRoomCellsV1(recipe, room2, 20), pads = choosePads(bossRoomCellsV1(recipe, room2, 9), position, [recipe.reward?.position, ...Object.values(recipe.stairAnchors ?? {})].filter(Boolean));
-  requireContract(pads, "BOSS_HOST:FOUR_STAGING_POSITIONS_UNAVAILABLE");
-  const supports = [];
-  for (let i = 0; i < spec.supportCount; i++) {
-    const a = i * Math.PI * 2 / spec.supportCount, r = spec.kind === "aegis_goliath" ? 62 : 96, ideal = { x: position.x + Math.cos(a) * r, y: position.y + Math.sin(a) * r };
-    let p = spec.kind === "aegis_goliath" && !collidesWithTiles(recipe.collision, ideal.x, ideal.y, 20) && supports.every((q) => dist(q, ideal) >= 40) ? ideal : null;
-    if (!p) p = cells3.filter((p2) => dist(p2, position) >= 68 && dist(p2, position) <= 176 && supports.every((q) => dist(p2, q) >= 40) && pads.every((q) => dist(p2, q) >= 72)).sort((a2, b) => dist(a2, ideal) - dist(b, ideal) || a2.y - b.y || a2.x - b.x)[0];
-    requireContract(p, "BOSS_HOST:SUPPORT_FOOTPRINT_UNAVAILABLE");
-    supports.push(p);
-  }
-  const used = [position, ...supports];
-  for (let i = 0; i < recipe.encounter.members.length; i++) {
-    const m = recipe.encounter.members[i];
-    if (i === 0 || i <= spec.supportCount) {
-      m.position = copyWire(i ? supports[i - 1] : position);
-      m.roomId = room2.roomId;
-      continue;
-    }
-    if (m.roomId !== room2.roomId) continue;
-    const valid = (p2) => dist(p2, position) >= 92 && supports.every((q) => dist(p2, q) >= 44) && pads.every((q) => dist(p2, q) >= 72) && used.every((q) => dist(p2, q) >= 40) && [recipe.reward.position, ...Object.values(recipe.stairAnchors)].every((q) => dist(p2, q) >= 40);
-    const p = valid(m.position) ? m.position : cells3.filter(valid).sort((a, b) => dist(a, m.position) - dist(b, m.position) || a.y - b.y || a.x - b.x)[0];
-    requireContract(p, "BOSS_HOST:ORDINARY_PACK_CONFLICT");
-    m.position = copyWire(p);
-    used.push(p);
-  }
-  const proof2 = proveBossArenaV1(recipe, spec.kind, position, { supportPositions: supports, liveSupportCount: spec.liveSupportCount ?? spec.supportCount });
-  recipe.encounter.bossHosting = { version: BOSS_HOSTING_VERSION, policyHash: BOSS_HOSTING_HASH, kind: spec.kind, roomId: room2.roomId, position: copyWire(position), supportPositions: copyWire(supports), proof: proof2 };
-  return freezeWire(recipe);
-}
-function expectedBossRecipeV1(recipe, { family: family2, tier, index: index2, floorCount, reservationId }) {
-  return bossHostingRecipeV1(recipe, bossHostingSpecV1({ family: family2, tier, index: index2, floorCount, reservationId, enabled: Boolean(recipe.encounter.combatVersion) }));
-}
-function validateBossFloorBindingV1(state, site, floor) {
-  if (!hasBossHostingV1(state.d9World?.plannedWorld)) return;
-  const spec = bossHostingSpecV1({ family: site.familyId.split(":")[1], tier: site.sizeTier, index: floor.index, floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId, enabled: Boolean(floor.encounter.combatVersion) }), h = floor.encounter.bossHosting;
-  requireContract(Boolean(h) === Boolean(spec), "BOSS_HOST:REQUIRED_HOST_MISSING_OR_UNEXPECTED");
-  if (!spec) return;
-  const id = floor.enemyIds[0], boss = state.bossCombat?.bossesByEntityId?.[id], home = state.groupsById?.[floor.groupId]?.containment?.memberHomesById?.[id];
-  requireContract(h.version === BOSS_HOSTING_VERSION && h.policyHash === BOSS_HOSTING_HASH && h.kind === spec.kind && h.roomId === floor.graph.topology.endNodeId && boss?.bossDefinitionId === spec.kind && boss.roomId === h.roomId && canonicalStringify(boss.homePosition) === canonicalStringify(h.position) && canonicalStringify(home) === canonicalStringify(h.position), "BOSS_HOST:LIVE_BINDING_DRIFT");
-}
-
-// src/shared/content/world_build_balance_v2.js
-var BUILD_BALANCE_VERSION = "world-build-balance-v2";
-var BUILD_BALANCE_HASH = "e666f81238740d6d20121429d4780b073f7f0adf00e2392e81eb7b69de33c2b2";
-var BUILD_BALANCE_POLICY = freezeWire({ version: BUILD_BALANCE_VERSION, parentCombatHash: WORLD_COMBAT_HASH, attributePointsPerHeroLevel: 3, utilityPointsPerHeroLevel: 1, attributes: { commonAttackPerPoint: 1, strHp: 6, shieldBaseHp: 20, dexCritChanceBasisPoints: 25, intSpellPowerBasisPoints: 25, intFlatTomeBarrier: 0.5, barrierBase: "Level and equipment HP, excluding STR HP; mastery capacity applies afterward", familyAttackBasisPoints: 10 }, heroXpMultiplier: 2, masteryXpMultiplier: 4, attributeRespecGold: "0", economy: "Retain ordinary gold, gear, material awards and shop/Forge/Enchanter prices; accelerate skill/hero progression independently. No free gold or gear.", comparison: "Match hero level, gear power/rarity/attunement and legal skill-point budgets. Shield safety, Dagger crit/bleed and Tome ranged/AoE are distinct.", saveBoundary: "Fresh versioned World campaign namespace; previous database remains untouched. No migration.", simulation: "Existing 60 Hz authority, collision, action cadence and catch-up limits unchanged" });
-var usesBuildBalanceV2 = (player) => combatPlayer(player);
-var balancedHeroKillXpV2 = (...args) => String(integerBigInt(worldHeroKillXp(...args)) * BigInt(BUILD_BALANCE_POLICY.heroXpMultiplier));
-var balancedMasteryAwardV2 = (player, amount2) => {
-  const n = typeof amount2 === "bigint" ? amount2 : typeof amount2 === "number" ? BigInt(safeInteger(amount2)) : integerBigInt(amount2);
-  requireContract(n >= 0n, "Negative mastery award");
-  return String(n * (usesBuildBalanceV2(player) ? BigInt(BUILD_BALANCE_POLICY.masteryXpMultiplier) : 1n));
-};
-var buildBalanceDatabaseV2 = (enabled2, plan, legacy) => {
-  if (!enabled2) return legacy;
-  requireContract(typeof plan === "string" && /^[a-z0-9_-]+$/i.test(plan), "Build balance campaign plan");
-  return "saq-world-build-balance-v2-" + plan;
-};
-
-// src/shared/content/world_runtime_policy_d9.js
-var D9_RUNTIME_POLICY = Object.freeze({
-  version: "world-residency-policy-d9-v1",
-  residentChunks: 100,
-  preparedChunks: 196,
-  residentActors: 192,
-  residentGroups: 80,
-  proceduralGroups: 64,
-  frames: 5,
-  handoffChunks: 8,
-  evictChunks: 4,
-  generationBatch: 2,
-  dirtyPages: 256,
-  flushPages: 128,
-  projectedDropsPerParticipant: 128,
-  groundItemsPerCell: 64,
-  groundTransferItems: 256,
-  occupancyRadius: 1500,
-  navigationPendingPages: 128,
-  navigationFlushPages: 2,
-  mapOverviewLevels: 12,
-  mapViewportCells: 64,
-  garbageCollectionPages: 32
-});
-
-// src/storage/world_page_refs_d9.js
-var WORLD_REF_STORE = "worldPageRefsD9";
-function trackWorldPublicationD9(tx, { staged, rootId, previous, references, abort }) {
-  if (!tx.objectStoreNames.contains(WORLD_REF_STORE)) return;
-  const store = tx.objectStore(WORLD_REF_STORE), ids = /* @__PURE__ */ new Set([rootId, ...staged.keys(), ...previous ? [previous] : []]);
-  for (const value of staged.values()) for (const id of references(value)) ids.add(id);
-  const found = /* @__PURE__ */ new Map();
-  let remaining = ids.size;
-  for (const id of ids) {
-    const r = store.get(id);
-    r.onsuccess = () => {
-      found.set(id, r.result ?? null);
-      if (--remaining) return;
-      try {
-        if (previous && !found.get(previous)) {
-          store.put({ reason: "pre-release root lacks reference accounting" }, "untracked");
-          return;
-        }
-        const updates = /* @__PURE__ */ new Map();
-        const value = (id2) => {
-          if (!updates.has(id2)) {
-            const prior = found.get(id2);
-            if (!prior && !staged.has(id2)) throw new Error("World reference graph lacks a referenced page");
-            updates.set(id2, prior ? { ...prior, references: [...prior.references] } : { count: 0, references: references(staged.get(id2)) });
-          }
-          return updates.get(id2);
-        };
-        for (const [id2, doc] of staged) if (!found.get(id2)) {
-          value(id2);
-          for (const ref of references(doc)) value(ref).count++;
-        }
-        value(rootId).count++;
-        if (previous) value(previous).count--;
-        for (const [id2, row2] of updates) {
-          if (!Number.isSafeInteger(row2.count) || row2.count < 0) throw new Error("World reference accounting underflow");
-          store.put(row2, id2);
-        }
-      } catch (e) {
-        abort(e);
-      }
-    };
-  }
-}
-async function collectWorldPagesD9(openDatabase, pageStore, limit = D9_RUNTIME_POLICY.garbageCollectionPages) {
-  const db = await openDatabase();
-  if (!db.objectStoreNames.contains(WORLD_REF_STORE)) {
-    db.close();
-    return { deleted: 0 };
-  }
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction([WORLD_REF_STORE, pageStore], "readwrite"), refs = tx.objectStore(WORLD_REF_STORE);
-    let deleted = 0, failure = null;
-    const guard = refs.get("untracked");
-    guard.onsuccess = () => {
-      if (guard.result) return;
-      const r = refs.index("count").getAllKeys(0, limit);
-      r.onsuccess = () => {
-        const roots = r.result;
-        if (!roots.length) return;
-        const candidates = /* @__PURE__ */ new Map();
-        let pending = roots.length;
-        const ready2 = () => {
-          if (--pending) return;
-          const children = new Set([...candidates.values()].flatMap((v) => v.references)), values = /* @__PURE__ */ new Map();
-          let count2 = children.size;
-          const apply2 = () => {
-            try {
-              for (const row2 of candidates.values()) for (const id of row2.references) {
-                const v = values.get(id);
-                if (!v || v.count <= 0) throw new Error("World GC reference accounting mismatch");
-                v.count--;
-              }
-              for (const [id, row2] of values) refs.put(row2, id);
-              for (const id of candidates.keys()) {
-                refs.delete(id);
-                tx.objectStore(pageStore).delete(id);
-                deleted++;
-              }
-            } catch (e) {
-              failure = e;
-              tx.abort();
-            }
-          };
-          if (!count2) {
-            apply2();
-            return;
-          }
-          for (const id of children) {
-            const q = refs.get(id);
-            q.onsuccess = () => {
-              values.set(id, q.result);
-              if (--count2 === 0) apply2();
-            };
-          }
-        };
-        for (const id of roots) {
-          const q = refs.get(id);
-          q.onsuccess = () => {
-            if (q.result?.count === 0) candidates.set(id, q.result);
-            ready2();
-          };
-        }
-      };
-    };
-    tx.oncomplete = () => {
-      db.close();
-      resolve({ deleted });
-    };
-    tx.onabort = () => {
-      db.close();
-      reject(failure ?? tx.error ?? new Error("World page maintenance aborted"));
-    };
-  });
-}
-
-// src/shared/contracts/identities.js
-var ID_PREFIXES = Object.freeze({
-  campaignId: "cmp",
-  sessionId: "ses",
-  characterId: "chr",
-  playerId: "ply",
-  spaceId: "spc",
-  spaceInstanceId: "spi",
-  entityId: "ent",
-  itemInstanceId: "itm",
-  commandId: "cmd",
-  eventId: "evt",
-  transactionId: "txn",
-  contentDefinitionId: "def",
-  encounterId: "enc",
-  encounterAttemptId: "att",
-  entitlementId: "elt",
-  checkpointId: "chk",
-  locationId: "loc",
-  legendAssignmentId: "lga",
-  recoveryRecordId: "rec",
-  attackActionId: "act",
-  primaryActionId: "pra"
-});
-function validateId(kind2, value) {
-  requireContract(Object.hasOwn(ID_PREFIXES, kind2), "Unknown ID class");
-  requireContract(
-    typeof value === "string" && new RegExp(`^${ID_PREFIXES[kind2]}:[0-9a-f]{32}$`).test(value),
-    `Invalid ${kind2}`
-  );
-  return value;
-}
-function createId(kind2, token6) {
-  requireContract(typeof token6 === "string", "ID token must be a string");
-  requireContract(Object.hasOwn(ID_PREFIXES, kind2), "Unknown ID class");
-  return validateId(kind2, `${ID_PREFIXES[kind2]}:${token6}`);
-}
-function validateRevision(kind2, value) {
-  requireContract(kind2 === "spaceRevision" || kind2 === "saveRevision", "Unknown revision class");
-  return safeInteger(value);
-}
-function createIdMap(kind2, entries = []) {
-  validateWire(entries);
-  requireContract(Array.isArray(entries), "ID entries must be an array");
-  const result = /* @__PURE__ */ Object.create(null);
-  for (const entry of entries) {
-    requireContract(Array.isArray(entry) && entry.length === 2, "Expected ID/value pair");
-    const key5 = validateId(kind2, entry[0]);
-    requireContract(!Object.hasOwn(result, key5), "ID collision");
-    result[key5] = copyWire(entry[1]);
-  }
-  const ordered = /* @__PURE__ */ Object.create(null);
-  for (const key5 of Object.keys(result).sort()) ordered[key5] = result[key5];
-  return ordered;
-}
-function validateIdMap(kind2, value, validateEntry) {
-  validateWire(value);
-  requireContract(Object.hasOwn(ID_PREFIXES, kind2), "Unknown ID class");
-  requireContract(value && typeof value === "object" && !Array.isArray(value), "Expected ID map");
-  for (const [key5, entry] of Object.entries(value)) {
-    validateId(kind2, key5);
-    validateEntry(entry, key5);
-  }
-}
-
-// src/shared/contracts/versions.js
-var PROTOCOL_VERSION = 1;
-var SIMULATION_STATE_SCHEMA_VERSION = 1;
-var SNAPSHOT_WIRE_VERSION = 1;
-var SEED_NORMALIZATION_VERSION = "world-seed-v1";
-var RNG_VERSION = "xoshiro128ss-v1";
-var CONTENT_SCHEMA_VERSION = 1;
-var WORLD_COMBAT_CONTRACT_VERSION = 2;
-var SIMULATION_TICKS_PER_SECOND = 60;
-
-// src/shared/content/class_trees_v1.js
-var CLASS_TREE_TIER_POINTS = 5;
-var CLASS_TREE_POINT_CAP = 49;
-var AUGMENT_SLOTS = 2;
-var AUGMENT_UNLOCK_POINTS = Object.freeze([5, 10, 15, 20, 10]);
-var CLASS_TREES = freezeWire({ "knight": [{ "id": "bastion", "name": "Bastion", "color": "#79b8ec", "tagline": "The Wall: hold Guard and outlast", "rows": [["iron_will", "rallying_cry", "bulwark_stance"], ["iron_wall", "bracing_bash", "heavy_plating"], ["hold_the_line", "war_banner", "rooted"], ["second_breath", "standard_bearer", "last_stand"], ["unyielding", "aegis_pulse", "bastion_ward"], ["bulwark_colossus"]] }, { "id": "breaker", "name": "Breaker", "color": "#f2945f", "tagline": "The Quake: stun the crowd", "rows": [["heavy_hands", "earth_breaker", "momentum"], ["shatterpoint", "concussion", "impact_training"], ["unstoppable", "shield_charge", "reckless"], ["crowd_breaker", "avalanche", "tremor"], ["groundbreaker", "skyfall_leap", "titan"], ["earthshaker"]] }, { "id": "reprisal", "name": "Reprisal", "color": "#e8848c", "tagline": "The Reaver: bleed them, punish them", "rows": [["retaliation", "counter_stance", "spiked_shield"], ["grudge", "unbroken", "serrated_edge"], ["vengeance", "shield_throw", "blood_for_blood"], ["blood_price", "marked_foe", "red_harvest"], ["spite", "retribution", "executioner"], ["thorned_bulwark"]] }], "rogue": [{ "id": "duelist", "name": "Duelist", "color": "#e9c46a", "tagline": "The Fencer: one target, crits and parries", "rows": [["focus", "lunge", "en_garde"], ["fourth_cut", "footwork", "fencers_grace"], ["duel", "riposte", "steel_nerves"], ["coup_de_grace", "marked_for_death", "glass_blade"], ["blade_dance", "thousand_cuts", "flourish"], ["master_duelist"]] }, { "id": "venom", "name": "Venom", "color": "#8fd16a", "tagline": "The Plague: bleeds and poisons that spread", "rows": [["virulence", "toxic_fan", "serrated_cuts"], ["vipers_coating", "paralytic", "open_wounds"], ["lingering_venom", "rupture", "hemorrhage"], ["septic", "contagious", "toxic_blood"], ["bloodletting", "noxious_bloom", "fester"], ["virulent_bloom"]] }, { "id": "skirmish", "name": "Skirmish", "color": "#b08cff", "tagline": "The Phantom: dash in, cut, vanish", "rows": [["light_step", "whirling_blades", "quick_dash"], ["crosscut", "blade_rush", "hit_and_run"], ["evasive", "smoke_veil", "shade"], ["opportunist", "exploit", "restless"], ["afterimage", "shadowstep", "assassinate"], ["shadow_assassin"]] }], "mage": [{ "id": "ember", "name": "Ember", "color": "#f5874f", "tagline": "The Pyromancer: burn it, spread it, blow it up", "rows": [["kindling", "firebloom", "firebrand"], ["fan_the_flames", "searing", "cinder_step"], ["volatile", "flame_wall", "firewalker"], ["spreading_flames", "kindle", "glass_furnace"], ["pyromaniac", "meteor", "molten_ground"], ["phoenix"]] }, { "id": "rime", "name": "Rime", "color": "#8fd0f0", "tagline": "The Frost Warden: freeze them, then spend your Barrier", "rows": [["cold_snap", "flashfreeze", "frostbinder"], ["brittle", "deep_freeze", "frost_step"], ["shatter", "ice_barrier", "steady_mind"], ["arcane_syphon", "frost_ward", "ice_fortress"], ["winters_grasp", "glacial_burst", "echoing_burst"], ["absolute_zero"]] }, { "id": "conduit", "name": "Conduit", "color": "#f2d46b", "tagline": "The Stormcaller: chains and lightning", "rows": [["static_charge", "ball_lightning", "storm_conductor"], ["superconductor", "forked_lightning", "static_step"], ["spell_weaving", "static_field", "live_wire"], ["elemental_overload", "magnetic", "overload"], ["quickening", "thunderfall", "storm_call"], ["living_storm"]] }] });
-var CLASS_TREE_SKILLS = freezeWire({ "iron_will": { "id": "iron_will", "classId": "knight", "tree": "bastion", "tier": 1, "kind": "passive", "name": "Iron Will", "maxRank": 5, "requires": null, "description": "While Guard is up, regain 0.4% of your max HP per rank every second." }, "rallying_cry": { "id": "rallying_cry", "classId": "knight", "tree": "bastion", "tier": 1, "kind": "active", "name": "Rallying Cry", "maxRank": 1, "requires": null, "description": "Shout to heal 15% of your max HP. Nearby enemies deal 20% less damage for 6 seconds." }, "bulwark_stance": { "id": "bulwark_stance", "classId": "knight", "tree": "bastion", "tier": 1, "kind": "passive", "name": "Bulwark Stance", "maxRank": 5, "requires": null, "description": "Each block makes you take 2% less damage per rank for 4 seconds, stacking 3 times." }, "iron_wall": { "id": "iron_wall", "classId": "knight", "tree": "bastion", "tier": 2, "kind": "passive", "name": "Iron Wall", "maxRank": 5, "requires": null, "description": "Guard also covers your sides. Each rank widens it." }, "bracing_bash": { "id": "bracing_bash", "classId": "knight", "tree": "bastion", "tier": 2, "kind": "passive", "name": "Bracing Bash", "maxRank": 5, "requires": null, "description": "Each enemy Shield Bash hits refills 3% of your Guard per rank. Each rank also cuts Shield Bash's cooldown 2%." }, "heavy_plating": { "id": "heavy_plating", "classId": "knight", "tree": "bastion", "tier": 2, "kind": "passive", "name": "Heavy Plating", "maxRank": 1, "requires": null, "description": "+25% Defense, but you move 10% slower.", "tradeOff": true }, "hold_the_line": { "id": "hold_the_line", "classId": "knight", "tree": "bastion", "tier": 3, "kind": "passive", "name": "Hold the Line", "maxRank": 5, "requires": null, "description": "Each hit you block heals 1% of your max HP per rank." }, "war_banner": { "id": "war_banner", "classId": "knight", "tree": "bastion", "tier": 3, "kind": "active", "name": "War Banner", "maxRank": 1, "requires": null, "description": "Plant a banner for 10 seconds. While you stand near it you get +15% Attack and Defense." }, "rooted": { "id": "rooted", "classId": "knight", "tree": "bastion", "tier": 3, "kind": "passive", "name": "Rooted", "maxRank": 5, "requires": null, "description": "After standing still for 1 second, take 4% less damage per rank." }, "second_breath": { "id": "second_breath", "classId": "knight", "tree": "bastion", "tier": 4, "kind": "passive", "name": "Second Breath", "maxRank": 5, "requires": null, "description": "Once a minute, a hit that would kill you leaves you at 1 HP and heals you over 3 seconds. Each rank heals more." }, "standard_bearer": { "id": "standard_bearer", "classId": "knight", "tree": "bastion", "tier": 4, "kind": "passive", "name": "Standard Bearer", "maxRank": 5, "requires": "war_banner", "description": "While you stand near your banner, Guard refills 5% faster per rank." }, "last_stand": { "id": "last_stand", "classId": "knight", "tree": "bastion", "tier": 4, "kind": "passive", "name": "Last Stand", "maxRank": 1, "requires": null, "description": "Below 30% health you take 30% less damage, but deal 15% less.", "tradeOff": true }, "unyielding": { "id": "unyielding", "classId": "knight", "tree": "bastion", "tier": 5, "kind": "passive", "name": "Unyielding", "maxRank": 5, "requires": null, "description": "Guard breaks 5% less easily per rank." }, "aegis_pulse": { "id": "aegis_pulse", "classId": "knight", "tree": "bastion", "tier": 5, "kind": "active", "name": "Aegis Pulse", "maxRank": 1, "requires": null, "description": "Shove every enemy around you away and gain a Barrier worth 20% of your max HP for 6 seconds." }, "bastion_ward": { "id": "bastion_ward", "classId": "knight", "tree": "bastion", "tier": 5, "kind": "passive", "name": "Bastion Ward", "maxRank": 5, "requires": "aegis_pulse", "description": "While Aegis Pulse's Barrier holds, each block restores 2% of it per rank." }, "bulwark_colossus": { "id": "bulwark_colossus", "classId": "knight", "tree": "bastion", "tier": 6, "kind": "capstone", "name": "Bulwark Colossus", "maxRank": 1, "requires": null, "description": "Guard covers every side, and each block sends out a shockwave." }, "heavy_hands": { "id": "heavy_hands", "classId": "knight", "tree": "breaker", "tier": 1, "kind": "passive", "name": "Heavy Hands", "maxRank": 5, "requires": null, "description": "Your stuns last 10% longer per rank." }, "earth_breaker": { "id": "earth_breaker", "classId": "knight", "tree": "breaker", "tier": 1, "kind": "active", "name": "Earth-Breaker", "maxRank": 1, "requires": null, "description": "Slam the ground all around you. Everything hit takes damage and is slowed for 3 seconds." }, "momentum": { "id": "momentum", "classId": "knight", "tree": "breaker", "tier": 1, "kind": "passive", "name": "Momentum", "maxRank": 5, "requires": null, "description": "Each skill you use gives +4% move speed per rank for 3 seconds." }, "shatterpoint": { "id": "shatterpoint", "classId": "knight", "tree": "breaker", "tier": 2, "kind": "passive", "name": "Shatterpoint", "maxRank": 5, "requires": null, "description": "Stunned enemies take 5% more damage from you per rank." }, "concussion": { "id": "concussion", "classId": "knight", "tree": "breaker", "tier": 2, "kind": "passive", "name": "Concussion", "maxRank": 5, "requires": null, "description": "Bosses can't be stunned, so your stuns slow them 6% per rank instead." }, "impact_training": { "id": "impact_training", "classId": "knight", "tree": "breaker", "tier": 2, "kind": "passive", "name": "Impact Training", "maxRank": 5, "requires": null, "description": "Shield Bash and Breaker skills deal 6% more damage per rank. Each rank also cuts Shield Bash's cooldown 2%." }, "unstoppable": { "id": "unstoppable", "classId": "knight", "tree": "breaker", "tier": 3, "kind": "passive", "name": "Unstoppable", "maxRank": 5, "requires": null, "description": "Each enemy you stun takes 0.2 seconds per rank off your Breaker cooldowns." }, "shield_charge": { "id": "shield_charge", "classId": "knight", "tree": "breaker", "tier": 3, "kind": "active", "name": "Shield Charge", "maxRank": 1, "requires": null, "description": "Rush forward behind your shield. Enemies in the way get pushed along and stunned at the end." }, "reckless": { "id": "reckless", "classId": "knight", "tree": "breaker", "tier": 3, "kind": "passive", "name": "Reckless", "maxRank": 1, "requires": null, "description": "Breaker cooldowns are 25% shorter, but you take 15% more damage.", "tradeOff": true }, "crowd_breaker": { "id": "crowd_breaker", "classId": "knight", "tree": "breaker", "tier": 4, "kind": "passive", "name": "Crowd Breaker", "maxRank": 5, "requires": null, "description": "A Breaker skill that hits 3 or more enemies deals 5% more damage per rank." }, "avalanche": { "id": "avalanche", "classId": "knight", "tree": "breaker", "tier": 4, "kind": "passive", "name": "Avalanche", "maxRank": 5, "requires": "shield_charge", "description": "Killing a stunned enemy takes 1 second per rank off Shield Charge." }, "tremor": { "id": "tremor", "classId": "knight", "tree": "breaker", "tier": 4, "kind": "passive", "name": "Tremor", "maxRank": 5, "requires": null, "description": "Hitting a slowed enemy with a Breaker skill stuns it for 0.2 seconds per rank." }, "groundbreaker": { "id": "groundbreaker", "classId": "knight", "tree": "breaker", "tier": 5, "kind": "passive", "name": "Groundbreaker", "maxRank": 5, "requires": null, "description": "Breaker skills leave cracked ground that slows 5% per rank for 3 seconds." }, "skyfall_leap": { "id": "skyfall_leap", "classId": "knight", "tree": "breaker", "tier": 5, "kind": "active", "name": "Skyfall Leap", "maxRank": 1, "requires": null, "description": "Leap to a spot and crash down, damaging and stunning everything around where you land." }, "titan": { "id": "titan", "classId": "knight", "tree": "breaker", "tier": 5, "kind": "passive", "name": "Titan", "maxRank": 5, "requires": "skyfall_leap", "description": "After Skyfall Leap, your next Earth-Breaker within 3 seconds deals 15% more per rank." }, "earthshaker": { "id": "earthshaker", "classId": "knight", "tree": "breaker", "tier": 6, "kind": "capstone", "name": "Earthshaker", "maxRank": 1, "requires": "skyfall_leap", "description": "Shield Charge and Skyfall Leap end with a free Earth-Breaker, augments included." }, "retaliation": { "id": "retaliation", "classId": "knight", "tree": "reprisal", "tier": 1, "kind": "passive", "name": "Retaliation", "maxRank": 5, "requires": null, "description": "Every block hits the attacker back for 10% of your Defense per rank." }, "counter_stance": { "id": "counter_stance", "classId": "knight", "tree": "reprisal", "tier": 1, "kind": "active", "name": "Counter Stance", "maxRank": 1, "requires": null, "description": "Brace for 2 seconds. The next hit does nothing to you, and you strike back for 300% Attack and stun the attacker." }, "spiked_shield": { "id": "spiked_shield", "classId": "knight", "tree": "reprisal", "tier": 1, "kind": "passive", "name": "Spiked Shield", "maxRank": 5, "requires": null, "description": "Shield Bash makes enemies Bleed. Each rank adds 10% Bleed damage. Each rank also cuts Shield Bash's cooldown 2%." }, "grudge": { "id": "grudge", "classId": "knight", "tree": "reprisal", "tier": 2, "kind": "passive", "name": "Grudge", "maxRank": 5, "requires": null, "description": "Enemies that hit you take 3% more damage from you per rank for 4 seconds." }, "unbroken": { "id": "unbroken", "classId": "knight", "tree": "reprisal", "tier": 2, "kind": "passive", "name": "Unbroken", "maxRank": 5, "requires": "counter_stance", "description": "Each block takes 0.3 seconds per rank off Counter Stance." }, "serrated_edge": { "id": "serrated_edge", "classId": "knight", "tree": "reprisal", "tier": 2, "kind": "passive", "name": "Serrated Edge", "maxRank": 5, "requires": "spiked_shield", "description": "Your Bleeds last 10% longer per rank." }, "vengeance": { "id": "vengeance", "classId": "knight", "tree": "reprisal", "tier": 3, "kind": "passive", "name": "Vengeance", "maxRank": 5, "requires": null, "description": "+2% Attack per rank for every 10% of health you're missing." }, "shield_throw": { "id": "shield_throw", "classId": "knight", "tree": "reprisal", "tier": 3, "kind": "active", "name": "Shield Throw", "maxRank": 1, "requires": null, "description": "Throw your shield. It bounces between up to 3 enemies and comes back. You can't Guard until it returns." }, "blood_for_blood": { "id": "blood_for_blood", "classId": "knight", "tree": "reprisal", "tier": 3, "kind": "passive", "name": "Blood for Blood", "maxRank": 5, "requires": "serrated_edge", "description": "Hitting a Bleeding enemy heals you for 0.5% of your max HP per rank." }, "blood_price": { "id": "blood_price", "classId": "knight", "tree": "reprisal", "tier": 4, "kind": "passive", "name": "Blood Price", "maxRank": 1, "requires": null, "description": "You deal 25% more damage, but all healing on you is halved.", "tradeOff": true }, "marked_foe": { "id": "marked_foe", "classId": "knight", "tree": "reprisal", "tier": 4, "kind": "passive", "name": "Marked Foe", "maxRank": 5, "requires": "shield_throw", "description": "Shield Throw's first target takes 4% more damage from you per rank for 5 seconds." }, "red_harvest": { "id": "red_harvest", "classId": "knight", "tree": "reprisal", "tier": 4, "kind": "passive", "name": "Red Harvest", "maxRank": 5, "requires": "blood_for_blood", "description": "A Bleeding enemy that dies passes its Bleed to 1 nearby enemy per rank." }, "spite": { "id": "spite", "classId": "knight", "tree": "reprisal", "tier": 5, "kind": "passive", "name": "Spite", "maxRank": 5, "requires": null, "description": "After a counter, +5% Attack per rank for 5 seconds." }, "retribution": { "id": "retribution", "classId": "knight", "tree": "reprisal", "tier": 5, "kind": "active", "name": "Retribution", "maxRank": 1, "requires": null, "description": "Release every hit you blocked in the last 6 seconds as a blast around you." }, "executioner": { "id": "executioner", "classId": "knight", "tree": "reprisal", "tier": 5, "kind": "passive", "name": "Executioner", "maxRank": 5, "requires": null, "description": "Enemies below 25% health take 6% more damage from you per rank." }, "thorned_bulwark": { "id": "thorned_bulwark", "classId": "knight", "tree": "reprisal", "tier": 6, "kind": "capstone", "name": "Thorned Bulwark", "maxRank": 1, "requires": null, "description": "Every hit you block or counter makes the attacker Bleed." }, "focus": { "id": "focus", "classId": "rogue", "tree": "duelist", "tier": 1, "kind": "passive", "name": "Focus", "maxRank": 5, "requires": null, "description": "Each hit on the same enemy gives +1% crit chance per rank, up to 5 hits. Switching targets resets it." }, "lunge": { "id": "lunge", "classId": "rogue", "tree": "duelist", "tier": 1, "kind": "active", "name": "Lunge", "maxRank": 1, "requires": null, "description": "Lunge at the nearest enemy in front of you and stab it for 250% Attack. Lunge crits twice as often as your other hits." }, "en_garde": { "id": "en_garde", "classId": "rogue", "tree": "duelist", "tier": 1, "kind": "passive", "name": "En Garde", "maxRank": 5, "requires": null, "description": "After you parry, your next hit crits and deals 8% more per rank." }, "fourth_cut": { "id": "fourth_cut", "classId": "rogue", "tree": "duelist", "tier": 2, "kind": "passive", "name": "Fourth Cut", "maxRank": 5, "requires": null, "description": "Flurry has a 10% chance per rank to cut a fourth time." }, "footwork": { "id": "footwork", "classId": "rogue", "tree": "duelist", "tier": 2, "kind": "passive", "name": "Footwork", "maxRank": 5, "requires": "lunge", "description": "When Lunge crits, its cooldown drops by 0.3 seconds per rank." }, "fencers_grace": { "id": "fencers_grace", "classId": "rogue", "tree": "duelist", "tier": 2, "kind": "passive", "name": "Fencer's Grace", "maxRank": 1, "requires": null, "description": "Your crits deal 40% more, but hits that don't crit deal 20% less.", "tradeOff": true }, "duel": { "id": "duel", "classId": "rogue", "tree": "duelist", "tier": 3, "kind": "passive", "name": "Duel", "maxRank": 5, "requires": null, "description": "While only one enemy is near you, +4% Attack per rank." }, "riposte": { "id": "riposte", "classId": "rogue", "tree": "duelist", "tier": 3, "kind": "active", "name": "Riposte", "maxRank": 1, "requires": null, "description": "Ready your blades for 1.5 seconds. Parry the next hit and cut back for 300% Attack. Your next Flurry crits." }, "steel_nerves": { "id": "steel_nerves", "classId": "rogue", "tree": "duelist", "tier": 3, "kind": "passive", "name": "Steel Nerves", "maxRank": 5, "requires": "riposte", "description": "Each parry heals you for 1% of your max HP per rank." }, "coup_de_grace": { "id": "coup_de_grace", "classId": "rogue", "tree": "duelist", "tier": 4, "kind": "passive", "name": "Coup de Gr\xE2ce", "maxRank": 5, "requires": null, "description": "Enemies below 25% health take 6% more crit damage from you per rank." }, "marked_for_death": { "id": "marked_for_death", "classId": "rogue", "tree": "duelist", "tier": 4, "kind": "passive", "name": "Marked for Death", "maxRank": 5, "requires": "riposte", "description": "Riposte marks the attacker: it takes 4% more damage from you per rank for 6 seconds." }, "glass_blade": { "id": "glass_blade", "classId": "rogue", "tree": "duelist", "tier": 4, "kind": "passive", "name": "Glass Blade", "maxRank": 1, "requires": null, "description": "+30% Attack, but you take 20% more damage.", "tradeOff": true }, "blade_dance": { "id": "blade_dance", "classId": "rogue", "tree": "duelist", "tier": 5, "kind": "passive", "name": "Blade Dance", "maxRank": 5, "requires": null, "description": "Crits give Combo 10% sooner per rank." }, "thousand_cuts": { "id": "thousand_cuts", "classId": "rogue", "tree": "duelist", "tier": 5, "kind": "active", "name": "Thousand Cuts", "maxRank": 1, "requires": null, "description": "Strike one enemy 6 times in a blur. Every cut can crit." }, "flourish": { "id": "flourish", "classId": "rogue", "tree": "duelist", "tier": 5, "kind": "passive", "name": "Flourish", "maxRank": 5, "requires": "thousand_cuts", "description": "Each crit during Thousand Cuts heals you for 0.5% of your max HP per rank." }, "master_duelist": { "id": "master_duelist", "classId": "rogue", "tree": "duelist", "tier": 6, "kind": "capstone", "name": "Master Duelist", "maxRank": 1, "requires": null, "description": "Each hit on the same enemy gives +3% damage against it, up to 10 times. Switching targets resets it." }, "virulence": { "id": "virulence", "classId": "rogue", "tree": "venom", "tier": 1, "kind": "passive", "name": "Virulence", "maxRank": 5, "requires": null, "description": "Your poisons deal 6% more damage per rank." }, "toxic_fan": { "id": "toxic_fan", "classId": "rogue", "tree": "venom", "tier": 1, "kind": "active", "name": "Toxic Fan", "maxRank": 1, "requires": null, "description": "Throw a fan of 5 poisoned knives in front of you." }, "serrated_cuts": { "id": "serrated_cuts", "classId": "rogue", "tree": "venom", "tier": 1, "kind": "passive", "name": "Serrated Cuts", "maxRank": 5, "requires": null, "description": "Your Bleeds deal 6% more damage per rank." }, "vipers_coating": { "id": "vipers_coating", "classId": "rogue", "tree": "venom", "tier": 2, "kind": "passive", "name": "Viper's Coating", "maxRank": 5, "requires": null, "description": "Flurry cuts poison enemies 5% of the time per rank." }, "paralytic": { "id": "paralytic", "classId": "rogue", "tree": "venom", "tier": 2, "kind": "passive", "name": "Paralytic", "maxRank": 5, "requires": "toxic_fan", "description": "Poisoned enemies move 4% slower per rank." }, "open_wounds": { "id": "open_wounds", "classId": "rogue", "tree": "venom", "tier": 2, "kind": "passive", "name": "Open Wounds", "maxRank": 5, "requires": null, "description": "Bleeding enemies take 3% more damage from you per rank." }, "lingering_venom": { "id": "lingering_venom", "classId": "rogue", "tree": "venom", "tier": 3, "kind": "passive", "name": "Lingering Venom", "maxRank": 5, "requires": null, "description": "Your poisons and Bleeds last 10% longer per rank." }, "rupture": { "id": "rupture", "classId": "rogue", "tree": "venom", "tier": 3, "kind": "active", "name": "Rupture", "maxRank": 1, "requires": null, "description": "Tear open every Bleed on enemies around you. Each one deals all of its remaining damage at once." }, "hemorrhage": { "id": "hemorrhage", "classId": "rogue", "tree": "venom", "tier": 3, "kind": "passive", "name": "Hemorrhage", "maxRank": 5, "requires": null, "description": "Flurry's cuts Bleed 5% more often per rank." }, "septic": { "id": "septic", "classId": "rogue", "tree": "venom", "tier": 4, "kind": "passive", "name": "Septic", "maxRank": 5, "requires": null, "description": "Poisoned enemies deal 3% less damage per rank." }, "contagious": { "id": "contagious", "classId": "rogue", "tree": "venom", "tier": 4, "kind": "passive", "name": "Contagious", "maxRank": 5, "requires": "rupture", "description": "Rupture gives a fresh Bleed to 1 nearby enemy per rank." }, "toxic_blood": { "id": "toxic_blood", "classId": "rogue", "tree": "venom", "tier": 4, "kind": "passive", "name": "Toxic Blood", "maxRank": 1, "requires": null, "description": "Your Bleeds and poisons deal 40% more, but your direct hits deal 15% less.", "tradeOff": true }, "bloodletting": { "id": "bloodletting", "classId": "rogue", "tree": "venom", "tier": 5, "kind": "passive", "name": "Bloodletting", "maxRank": 5, "requires": null, "description": "Enemies that die while Bleeding or poisoned heal you for 1% of your max HP per rank." }, "noxious_bloom": { "id": "noxious_bloom", "classId": "rogue", "tree": "venom", "tier": 5, "kind": "active", "name": "Noxious Bloom", "maxRank": 1, "requires": null, "description": "A toxic flower bursts at your feet and poisons everything around you." }, "fester": { "id": "fester", "classId": "rogue", "tree": "venom", "tier": 5, "kind": "passive", "name": "Fester", "maxRank": 5, "requires": "noxious_bloom", "description": "Enemies standing in Noxious Bloom take 5% more poison damage per rank." }, "virulent_bloom": { "id": "virulent_bloom", "classId": "rogue", "tree": "venom", "tier": 6, "kind": "capstone", "name": "Virulent Bloom", "maxRank": 1, "requires": "noxious_bloom", "description": "Every enemy that dies while poisoned bursts into a small Noxious Bloom of its own." }, "light_step": { "id": "light_step", "classId": "rogue", "tree": "skirmish", "tier": 1, "kind": "passive", "name": "Light Step", "maxRank": 5, "requires": null, "description": "After a Dash, move 5% faster per rank for 3 seconds." }, "whirling_blades": { "id": "whirling_blades", "classId": "rogue", "tree": "skirmish", "tier": 1, "kind": "active", "name": "Whirling Blades", "maxRank": 1, "requires": null, "description": "Spin and cut everything around you 3 times." }, "quick_dash": { "id": "quick_dash", "classId": "rogue", "tree": "skirmish", "tier": 1, "kind": "passive", "name": "Quick Dash", "maxRank": 5, "requires": null, "description": "Dash's cooldown is 5% shorter per rank." }, "crosscut": { "id": "crosscut", "classId": "rogue", "tree": "skirmish", "tier": 2, "kind": "passive", "name": "Crosscut", "maxRank": 5, "requires": null, "description": "Dash cuts every enemy you pass through for 15% Attack per rank." }, "blade_rush": { "id": "blade_rush", "classId": "rogue", "tree": "skirmish", "tier": 2, "kind": "passive", "name": "Blade Rush", "maxRank": 5, "requires": null, "description": "Each Dash has a 20% chance per rank to give 1 Combo." }, "hit_and_run": { "id": "hit_and_run", "classId": "rogue", "tree": "skirmish", "tier": 2, "kind": "passive", "name": "Hit and Run", "maxRank": 5, "requires": null, "description": "Hits within 3 seconds after a Dash deal 6% more per rank." }, "evasive": { "id": "evasive", "classId": "rogue", "tree": "skirmish", "tier": 3, "kind": "passive", "name": "Evasive", "maxRank": 5, "requires": null, "description": "After a Dash, take 5% less damage per rank for 3 seconds." }, "smoke_veil": { "id": "smoke_veil", "classId": "rogue", "tree": "skirmish", "tier": 3, "kind": "active", "name": "Smoke Veil", "maxRank": 1, "requires": null, "description": "Drop a smoke cloud for 4 seconds. Enemies inside are slowed and Exposed, and you take 30% less damage while you're in it." }, "shade": { "id": "shade", "classId": "rogue", "tree": "skirmish", "tier": 3, "kind": "passive", "name": "Shade", "maxRank": 5, "requires": "smoke_veil", "description": "While you're inside Smoke Veil, Dash recharges 10% faster per rank." }, "opportunist": { "id": "opportunist", "classId": "rogue", "tree": "skirmish", "tier": 4, "kind": "passive", "name": "Opportunist", "maxRank": 5, "requires": null, "description": "Each kill takes 0.3 seconds per rank off Dash's cooldown." }, "exploit": { "id": "exploit", "classId": "rogue", "tree": "skirmish", "tier": 4, "kind": "passive", "name": "Exploit", "maxRank": 5, "requires": "smoke_veil", "description": "Exposed enemies take 3% more damage from you per rank." }, "restless": { "id": "restless", "classId": "rogue", "tree": "skirmish", "tier": 4, "kind": "passive", "name": "Restless", "maxRank": 1, "requires": null, "description": "Dash holds 2 charges, but your skills' cooldowns are 20% longer.", "tradeOff": true }, "afterimage": { "id": "afterimage", "classId": "rogue", "tree": "skirmish", "tier": 5, "kind": "passive", "name": "Afterimage", "maxRank": 5, "requires": null, "description": "Dash leaves an afterimage that bursts for 20% of your Attack per rank." }, "shadowstep": { "id": "shadowstep", "classId": "rogue", "tree": "skirmish", "tier": 5, "kind": "active", "name": "Shadowstep", "maxRank": 1, "requires": null, "description": "Vanish and reappear behind the nearest enemy. Your next hit within 3 seconds is a crit that deals double damage." }, "assassinate": { "id": "assassinate", "classId": "rogue", "tree": "skirmish", "tier": 5, "kind": "passive", "name": "Assassinate", "maxRank": 5, "requires": "shadowstep", "description": "Shadowstep's crit deals 10% more damage per rank." }, "shadow_assassin": { "id": "shadow_assassin", "classId": "rogue", "tree": "skirmish", "tier": 6, "kind": "capstone", "name": "Shadow Assassin", "maxRank": 1, "requires": "shadowstep", "description": "Dash becomes a Shadowstep: it takes you behind the nearest enemy, and your first hit after it always crits." }, "kindling": { "id": "kindling", "classId": "mage", "tree": "ember", "tier": 1, "kind": "passive", "name": "Kindling", "maxRank": 5, "requires": null, "description": "Your burns deal 6% more damage per rank." }, "firebloom": { "id": "firebloom", "classId": "mage", "tree": "ember", "tier": 1, "kind": "active", "name": "Firebloom", "maxRank": 1, "requires": null, "description": "Fire blossoms where you aim and burns everything inside it." }, "firebrand": { "id": "firebrand", "classId": "mage", "tree": "ember", "tier": 1, "kind": "passive", "name": "Firebrand", "maxRank": 5, "requires": null, "description": "Casts from a Fire Tome burn 8% harder per rank." }, "fan_the_flames": { "id": "fan_the_flames", "classId": "mage", "tree": "ember", "tier": 2, "kind": "passive", "name": "Fan the Flames", "maxRank": 5, "requires": null, "description": "Burning enemies take 3% more damage from you per rank." }, "searing": { "id": "searing", "classId": "mage", "tree": "ember", "tier": 2, "kind": "passive", "name": "Searing", "maxRank": 5, "requires": null, "description": "Your burns last 10% longer per rank." }, "cinder_step": { "id": "cinder_step", "classId": "mage", "tree": "ember", "tier": 2, "kind": "passive", "name": "Cinder Step", "maxRank": 5, "requires": null, "description": "Blink leaves a trail of fire that burns enemies for 10% Attack per rank. Each rank also cuts Blink's cooldown 2%." }, "volatile": { "id": "volatile", "classId": "mage", "tree": "ember", "tier": 3, "kind": "passive", "name": "Volatile", "maxRank": 5, "requires": null, "description": "Enemies that die while burning explode for 8% of your Attack per rank." }, "flame_wall": { "id": "flame_wall", "classId": "mage", "tree": "ember", "tier": 3, "kind": "active", "name": "Flame Wall", "maxRank": 1, "requires": null, "description": "Raise a wall of fire in front of you for 5 seconds. Enemies that cross it burn." }, "firewalker": { "id": "firewalker", "classId": "mage", "tree": "ember", "tier": 3, "kind": "passive", "name": "Firewalker", "maxRank": 5, "requires": "flame_wall", "description": "While you stand near your Flame Wall, you deal 4% more damage per rank." }, "spreading_flames": { "id": "spreading_flames", "classId": "mage", "tree": "ember", "tier": 4, "kind": "passive", "name": "Spreading Flames", "maxRank": 5, "requires": null, "description": "Each burn has a 5% chance per rank to catch a nearby enemy too." }, "kindle": { "id": "kindle", "classId": "mage", "tree": "ember", "tier": 4, "kind": "passive", "name": "Kindle", "maxRank": 5, "requires": "flame_wall", "description": "Enemies that cross Flame Wall take 5% more fire damage per rank for 4 seconds." }, "glass_furnace": { "id": "glass_furnace", "classId": "mage", "tree": "ember", "tier": 4, "kind": "passive", "name": "Glass Furnace", "maxRank": 1, "requires": null, "description": "Fire damage +35%, but your max HP is 15% lower.", "tradeOff": true }, "pyromaniac": { "id": "pyromaniac", "classId": "mage", "tree": "ember", "tier": 5, "kind": "passive", "name": "Pyromaniac", "maxRank": 5, "requires": null, "description": "Each burning enemy near you gives +1% Attack per rank, up to 5 enemies." }, "meteor": { "id": "meteor", "classId": "mage", "tree": "ember", "tier": 5, "kind": "active", "name": "Meteor", "maxRank": 1, "requires": null, "description": "Call a meteor onto a spot. It lands a second later and leaves the ground burning for 4 seconds." }, "molten_ground": { "id": "molten_ground", "classId": "mage", "tree": "ember", "tier": 5, "kind": "passive", "name": "Molten Ground", "maxRank": 5, "requires": "meteor", "description": "Meteor's burning ground deals 8% more per rank." }, "phoenix": { "id": "phoenix", "classId": "mage", "tree": "ember", "tier": 6, "kind": "capstone", "name": "Phoenix", "maxRank": 1, "requires": null, "description": "Once every 2 minutes, a hit that would kill you makes you burst into flames instead, burning everything around you and healing you to 40%." }, "cold_snap": { "id": "cold_snap", "classId": "mage", "tree": "rime", "tier": 1, "kind": "passive", "name": "Cold Snap", "maxRank": 5, "requires": null, "description": "Your chills and freezes last 10% longer per rank." }, "flashfreeze": { "id": "flashfreeze", "classId": "mage", "tree": "rime", "tier": 1, "kind": "active", "name": "Flashfreeze", "maxRank": 1, "requires": null, "description": "Freeze everything around you in a flash. Ordinary enemies freeze, elites are chilled, and bosses slow down." }, "frostbinder": { "id": "frostbinder", "classId": "mage", "tree": "rime", "tier": 1, "kind": "passive", "name": "Frostbinder", "maxRank": 5, "requires": null, "description": "Casts from a Frost Tome slow enemies 5% more per rank." }, "brittle": { "id": "brittle", "classId": "mage", "tree": "rime", "tier": 2, "kind": "passive", "name": "Brittle", "maxRank": 5, "requires": null, "description": "Chilled and frozen enemies take 4% more damage from you per rank, whatever hits them." }, "deep_freeze": { "id": "deep_freeze", "classId": "mage", "tree": "rime", "tier": 2, "kind": "passive", "name": "Lingering Cold", "maxRank": 5, "requires": "flashfreeze", "description": "Enemies you freeze stay chilled for 1 second per rank after they thaw." }, "frost_step": { "id": "frost_step", "classId": "mage", "tree": "rime", "tier": 2, "kind": "passive", "name": "Frost Step", "maxRank": 5, "requires": null, "description": "Blink leaves frost along its path for 2 seconds that chills enemies on it. Each rank slows them 10% more and cuts Blink's cooldown 2%." }, "shatter": { "id": "shatter", "classId": "mage", "tree": "rime", "tier": 3, "kind": "passive", "name": "Shatter", "maxRank": 5, "requires": null, "description": "Frozen enemies that die burst into ice, dealing 10% of your Attack per rank around them." }, "ice_barrier": { "id": "ice_barrier", "classId": "mage", "tree": "rime", "tier": 3, "kind": "active", "name": "Ice Barrier", "maxRank": 1, "requires": null, "description": "Wrap yourself in ice: gain a Barrier worth 25% of your max HP for 8 seconds. Enemies that hit it are chilled." }, "steady_mind": { "id": "steady_mind", "classId": "mage", "tree": "rime", "tier": 3, "kind": "passive", "name": "Steady Mind", "maxRank": 5, "requires": null, "description": "Take 2% less damage per rank while you have a Barrier." }, "arcane_syphon": { "id": "arcane_syphon", "classId": "mage", "tree": "rime", "tier": 4, "kind": "passive", "name": "Arcane Syphon", "maxRank": 5, "requires": null, "description": "Cast spends 10% of your Barrier to hit 6% harder per rank." }, "frost_ward": { "id": "frost_ward", "classId": "mage", "tree": "rime", "tier": 4, "kind": "passive", "name": "Frost Ward", "maxRank": 5, "requires": "ice_barrier", "description": "When your Barrier breaks, it chills enemies around you. Each rank adds a stack." }, "ice_fortress": { "id": "ice_fortress", "classId": "mage", "tree": "rime", "tier": 4, "kind": "passive", "name": "Ice Fortress", "maxRank": 1, "requires": null, "description": "Your Barriers are 50% bigger, but you move 15% slower while you have one.", "tradeOff": true }, "winters_grasp": { "id": "winters_grasp", "classId": "mage", "tree": "rime", "tier": 5, "kind": "passive", "name": "Winter's Grasp", "maxRank": 5, "requires": null, "description": "Enemies chilled for 3 seconds straight freeze for 0.2 seconds per rank." }, "glacial_burst": { "id": "glacial_burst", "classId": "mage", "tree": "rime", "tier": 5, "kind": "active", "name": "Glacial Burst", "maxRank": 1, "requires": null, "description": "Spend all your Barrier in a blast of ice around you. It deals twice the Barrier you spent plus a spell hit as damage, and chills everything it hits." }, "echoing_burst": { "id": "echoing_burst", "classId": "mage", "tree": "rime", "tier": 5, "kind": "passive", "name": "Echoing Burst", "maxRank": 5, "requires": "glacial_burst", "description": "Glacial Burst gives back 5% of the Barrier it spent per rank." }, "absolute_zero": { "id": "absolute_zero", "classId": "mage", "tree": "rime", "tier": 6, "kind": "capstone", "name": "Absolute Zero", "maxRank": 1, "requires": null, "description": "Every enemy you freeze gives you a Barrier worth 3% of your max HP." }, "static_charge": { "id": "static_charge", "classId": "mage", "tree": "conduit", "tier": 1, "kind": "passive", "name": "Static Charge", "maxRank": 5, "requires": null, "description": "Each lightning hit gives +1% crit chance per rank for 3 seconds, stacking 5 times." }, "ball_lightning": { "id": "ball_lightning", "classId": "mage", "tree": "conduit", "tier": 1, "kind": "active", "name": "Ball Lightning", "maxRank": 1, "requires": null, "description": "Release a slow orb of lightning that drifts forward for 4 seconds, zapping every enemy near it twice a second." }, "storm_conductor": { "id": "storm_conductor", "classId": "mage", "tree": "conduit", "tier": 1, "kind": "passive", "name": "Storm Conductor", "maxRank": 5, "requires": null, "description": "Casts from a Storm Tome chain to 1 more enemy at ranks 1, 3 and 5, and hit 5% harder per rank. A Cast hits 5 enemies at most." }, "superconductor": { "id": "superconductor", "classId": "mage", "tree": "conduit", "tier": 2, "kind": "passive", "name": "Superconductor", "maxRank": 5, "requires": null, "description": "Your lightning deals 5% more damage per rank to burning or chilled enemies." }, "forked_lightning": { "id": "forked_lightning", "classId": "mage", "tree": "conduit", "tier": 2, "kind": "passive", "name": "Forked Lightning", "maxRank": 5, "requires": "storm_conductor", "description": "Each jump of a Storm Cast has a 10% chance per rank to fork to a second enemy." }, "static_step": { "id": "static_step", "classId": "mage", "tree": "conduit", "tier": 2, "kind": "passive", "name": "Static Step", "maxRank": 5, "requires": null, "description": "Blink leaves a spark where you started. For 2 seconds it zaps up to 2 nearby enemies for 10% Attack per rank. Each rank also cuts Blink's cooldown 2%." }, "spell_weaving": { "id": "spell_weaving", "classId": "mage", "tree": "conduit", "tier": 3, "kind": "passive", "name": "Spell Weaving", "maxRank": 5, "requires": null, "description": "When a skill's element differs from the last skill you used, it's 4% stronger per rank." }, "static_field": { "id": "static_field", "classId": "mage", "tree": "conduit", "tier": 3, "kind": "active", "name": "Static Field", "maxRank": 1, "requires": null, "description": "Charge the ground around you for 6 seconds. Enemies inside take a spark of damage every second, and your Storm Casts jump to enemies inside first." }, "live_wire": { "id": "live_wire", "classId": "mage", "tree": "conduit", "tier": 3, "kind": "passive", "name": "Live Wire", "maxRank": 5, "requires": "static_field", "description": "Enemies inside Static Field take 5% more lightning damage per rank." }, "elemental_overload": { "id": "elemental_overload", "classId": "mage", "tree": "conduit", "tier": 4, "kind": "passive", "name": "Elemental Overload", "maxRank": 5, "requires": null, "description": "Hitting an enemy with an element it wasn't hit by last deals 5% bonus damage per rank." }, "magnetic": { "id": "magnetic", "classId": "mage", "tree": "conduit", "tier": 4, "kind": "passive", "name": "Magnetic", "maxRank": 5, "requires": "static_field", "description": "Static Field pulls enemies toward its center. Each rank pulls harder." }, "overload": { "id": "overload", "classId": "mage", "tree": "conduit", "tier": 4, "kind": "passive", "name": "Overload", "maxRank": 1, "requires": null, "description": "Lightning crits deal double, but Cast costs 1 more Arcana.", "tradeOff": true }, "quickening": { "id": "quickening", "classId": "mage", "tree": "conduit", "tier": 5, "kind": "passive", "name": "Quickening", "maxRank": 5, "requires": null, "description": "Each lightning kill makes your skills recharge 4% faster per rank for 3 seconds." }, "thunderfall": { "id": "thunderfall", "classId": "mage", "tree": "conduit", "tier": 5, "kind": "active", "name": "Thunderfall", "maxRank": 1, "requires": null, "description": "Call lightning down from above onto up to 5 enemies around you." }, "storm_call": { "id": "storm_call", "classId": "mage", "tree": "conduit", "tier": 5, "kind": "passive", "name": "Storm Call", "maxRank": 5, "requires": "thunderfall", "description": "Thunderfall calls 1 more bolt per rank." }, "living_storm": { "id": "living_storm", "classId": "mage", "tree": "conduit", "tier": 6, "kind": "capstone", "name": "Living Storm", "maxRank": 1, "requires": "thunderfall", "description": "After you use Thunderfall, a bolt strikes a nearby enemy every 2 seconds for 6 seconds." } });
-var CLASS_SKILL_AUGMENTS = freezeWire({ "rallying_cry": [{ "name": "Second Wind", "description": "Heals 25% instead of 15%, but weakens nobody." }, { "name": "Rousing Cry", "description": "Heals 1% of max HP more for every enemy near you, up to +10%." }, { "name": "Battle Hymn", "description": "Also gives you +15% Attack for 6 seconds." }, { "name": "Stand Firm", "description": "For 4 seconds nothing can stun, slow or shove you." }, { "name": "Iron Resolve", "description": "Spends all your Grit: heals 3% of max HP more per pip. A full row also refills your Guard." }], "war_banner": [{ "name": "Carried Banner", "description": "You carry the banner on your back. Its bonus follows you, but it is 10% instead of 15%." }, { "name": "Rally Point", "description": "Heals 2% of your max HP each second while you're near it." }, { "name": "Guard Banner", "description": "Guard refills twice as fast near it." }, { "name": "Lance Banner", "description": "Plant it on an enemy: it takes 25% of your Attack each second." }, { "name": "Grit Standard", "description": "Spends all your Grit: stands 2 seconds longer per pip. A full row makes its bonus 25% instead of 15%." }], "aegis_pulse": [{ "name": "Aegis Echo", "description": "When the Barrier breaks, it shoves enemies away again." }, { "name": "Bulwark", "description": "Each enemy shoved adds 3% of max HP to the Barrier, up to +36%." }, { "name": "Repulsor", "description": "Shoves twice as far and stuns ordinary enemies for 1 second." }, { "name": "Mirror Aegis", "description": "While the Barrier holds, blocked arrows and spells fly back." }], "earth_breaker": [{ "name": "Tremor", "description": "Stuns ordinary enemies for 1 second instead of slowing them." }, { "name": "Magnetic Slam", "description": "Pulls enemies in just before it lands." }, { "name": "Aftershock", "description": "Hits again 1 second later for 40% of its damage." }, { "name": "Fault Line", "description": "Leaves burning cracks that hurt enemies for 3 seconds." }, { "name": "Breaking Point", "description": "Spends all your Grit: +20% damage per pip. A full row makes the slam half again as wide." }], "shield_charge": [{ "name": "Wall Slam", "description": "Enemies you carry into a wall, a tree or a rock take 150% Attack and stay stunned twice as long." }, { "name": "Long Charge", "description": "Goes 50% farther." }, { "name": "Juggernaut", "description": "You take 30% less damage for 3 seconds after." }, { "name": "Shield Slam", "description": "Ends in a small Earth-Breaker." }, { "name": "Bull Rush", "description": "Spends all your Grit: +20% damage and a 10% longer rush per pip. A full row makes its stun last twice as long." }], "skyfall_leap": [{ "name": "Crater", "description": "The landing hits an area 40% wider." }, { "name": "Quake Field", "description": "Leaves slowing ground for 4 seconds." }, { "name": "Meteoric Impact", "description": "The farther you leap, the harder you land: up to double damage at full reach, and the stun lasts twice as long." }, { "name": "Double Jump", "description": "The next leap within 3 seconds costs no Grit." }], "counter_stance": [{ "name": "Bloodletting", "description": "The counter makes the attacker Bleed." }, { "name": "Ready Strike", "description": "If no hit comes, the stance ends with the counter anyway, at the nearest enemy, for half damage." }, { "name": "Reprisal Wave", "description": "The counter hits everything around you." }, { "name": "Riposte Chain", "description": "Counters up to 3 hits during the stance." }, { "name": "Iron Reprisal", "description": "Spends all your Grit: the strike back hits 40% harder per pip. A full row stuns every enemy around you." }], "shield_throw": [{ "name": "Ricochet", "description": "Bounces 2 more times." }, { "name": "Boomerang", "description": "Hits again on its way back." }, { "name": "Serrated Rim", "description": "Every hit makes enemies Bleed." }, { "name": "Guard Return", "description": "When the shield comes back, your Guard is full again, and you get a Barrier worth 3% of max HP for each enemy it hit." }, { "name": "Grit Toss", "description": "Spends all your Grit: +1 bounce per pip. A full row stuns every enemy it hits." }], "retribution": [{ "name": "Wrath", "description": "The blast is 40% wider." }, { "name": "Bloodburst", "description": "Bleeding enemies take double." }, { "name": "Last Stand", "description": "The blast deals 1% more for every 1% of Health you are missing." }, { "name": "Retaliate", "description": "Also releases half the damage you took and didn't block." }], "lunge": [{ "name": "Long Lunge", "description": "Reaches 50% farther." }, { "name": "Bleeding Lunge", "description": "The stab makes the target Bleed." }, { "name": "Piercing Lunge", "description": "Hits every enemy in a line." }, { "name": "Double Lunge", "description": "Can lunge again within 2 seconds for half damage." }, { "name": "Final Thrust", "description": "Spends all your Combo: +20% damage per pip. A full row kills an enemy that isn't an elite or boss outright if it's under 20% health." }], "riposte": [{ "name": "Wide Riposte", "description": "The cut back hits every enemy in front of you." }, { "name": "Disengage", "description": "A successful Riposte resets Dash." }, { "name": "Baited Blade", "description": "When you raise your blades, enemies near you rush in at you." }, { "name": "Mirror Edge", "description": "Parries turn arrows and spells back at the shooter." }, { "name": "Perfect Riposte", "description": "Spends all your Combo: the cut back hits 30% harder per pip. A full row Exposes every enemy around you when you parry." }], "thousand_cuts": [{ "name": "Flourish", "description": "Each crit adds one more cut, up to 3." }, { "name": "Fan of Steel", "description": "Every cut also hits 2 enemies nearby." }, { "name": "Final Cut", "description": "The last cut deals triple damage." }, { "name": "Red Ribbons", "description": "Every cut can Bleed." }], "toxic_fan": [{ "name": "Wide Fan", "description": "Throws 2 more knives." }, { "name": "Paralytic", "description": "The knives slow enemies 30% for 2 seconds." }, { "name": "Barbed Knives", "description": "The knives also make enemies Bleed." }, { "name": "Seeking Knives", "description": "The knives curve toward the nearest enemies." }, { "name": "Knife Storm", "description": "Spends all your Combo: +1 knife per pip. A full row makes the knives poison twice as hard." }], "rupture": [{ "name": "Chain Rupture", "description": "Spreads a fresh Bleed to 2 nearby enemies." }, { "name": "Gore Burst", "description": "Each Bleed it tears open splashes 30% of its damage onto enemies near that one." }, { "name": "Vampiric Rupture", "description": "Heals you for 20% of the damage it deals." }, { "name": "Detonate", "description": "Also bursts poisons the same way." }], "noxious_bloom": [{ "name": "Contagion", "description": "When a poisoned enemy dies, its poison jumps to the 2 nearest enemies." }, { "name": "Wide Bloom", "description": "The bloom is 40% wider." }, { "name": "Thorned Bloom", "description": "Enemies inside also Bleed." }, { "name": "Grasping Roots", "description": "Enemies inside are slowed 30%." }], "whirling_blades": [{ "name": "Wide Arc", "description": "Reaches 40% farther." }, { "name": "Undertow", "description": "Draws enemies in as it spins." }, { "name": "Blade Ward", "description": "You take 30% less damage while spinning." }, { "name": "Tornado", "description": "You can move while spinning, and it spins twice as long." }, { "name": "Blade Storm", "description": "Spends all your Combo: +1 cut per pip. A full row flings a ring of 8 knives outward." }], "smoke_veil": [{ "name": "Choking Smoke", "description": "Enemies inside take damage every second." }, { "name": "Smoke Bomb", "description": "The smoke goes off with a bang: ordinary enemies inside are stunned for 1 second." }, { "name": "Smoke Step", "description": "Dash has no cooldown while you're inside." }, { "name": "Blinding Smoke", "description": "Enemies inside deal 30% less damage." }, { "name": "Lingering Veil", "description": "Spends all your Combo: lasts 1 second longer per pip. A full row makes enemies inside lose track of you: their hits miss while you stand in it." }], "shadowstep": [{ "name": "Assassinate", "description": "If the crit kills, Shadowstep is ready again right away." }, { "name": "Double Step", "description": "The next step within 3 seconds costs no Combo." }, { "name": "Shadow Cloak", "description": "You take no damage for 1 second after." }, { "name": "Twin Strike", "description": "After the hit, steps behind a second enemy too." }], "firebloom": [{ "name": "Wildfire", "description": "The bloom is 40% wider." }, { "name": "Twin Bloom", "description": "Blooms on 2 enemies at once." }, { "name": "Lingering Flames", "description": "Its burns last 2 seconds longer." }, { "name": "Seed of Fire", "description": "Blooms again 1 second later at half size." }, { "name": "Firestorm", "description": "Spends all your Arcana: 15% more damage per pip. A full row makes everything it burns burn twice as hard." }], "flame_wall": [{ "name": "Inferno", "description": "The wall's burns are twice as strong." }, { "name": "Ring of Fire", "description": "The wall becomes a ring around you." }, { "name": "Searing Wall", "description": "Enemies that cross it are slowed 30%." }, { "name": "Rolling Wall", "description": "The wall slowly rolls forward." }, { "name": "Pyre", "description": "Spends all your Arcana: stands 1 second longer per pip. A full row makes the wall twice as long." }], "meteor": [{ "name": "Gravity Well", "description": "The burning crater slowly drags enemies toward its center." }, { "name": "Shatterstone", "description": "On impact the meteor splits: 4 burning chunks bounce out and hit enemies around the edge for half." }, { "name": "Molten Core", "description": "The impact stuns ordinary enemies for 1 second." }, { "name": "Comet", "description": "Lands at once, but hits a smaller area." }], "flashfreeze": [{ "name": "Wide Freeze", "description": "Reaches 40% farther." }, { "name": "Fracture", "description": "Frozen enemies take 25% more damage from your other skills." }, { "name": "Shatter Nova", "description": "Frozen enemies take a second burst when they thaw." }, { "name": "Frost Armor", "description": "Gives you a Barrier for each enemy frozen." }, { "name": "Hard Freeze", "description": "Spends all your Arcana: freezes last 0.3 seconds longer per pip. A full row freezes everything but bosses, and chills bosses." }], "ice_barrier": [{ "name": "Thick Ice", "description": "The Barrier is 50% bigger." }, { "name": "Frost Ward", "description": "When it breaks, it freezes enemies around you." }, { "name": "Spiked Ice", "description": "Enemies that hit it take damage." }, { "name": "Regrowth", "description": "Refills to half once when it breaks." }, { "name": "Glacier Heart", "description": "Spends all your Arcana: 10% more Barrier per pip. A full row freezes enemies that hit it." }], "glacial_burst": [{ "name": "Echoing Burst", "description": "Gives back 30% of the Barrier it spent." }, { "name": "Ice Lances", "description": "Fires shards outward that hit farther away." }, { "name": "Permafrost", "description": "Leaves frozen ground that slows for 4 seconds." }, { "name": "Deep Freeze", "description": "Freezes everything it hits for 1 second." }], "ball_lightning": [{ "name": "Twin Orbs", "description": "Releases 2 orbs." }, { "name": "Chain Orb", "description": "Each zap jumps to 1 more enemy." }, { "name": "Overcharged Orb", "description": "Explodes when it fades." }, { "name": "Slow Orb", "description": "Drifts half as fast and lasts twice as long." }, { "name": "Storm Heart", "description": "Spends all your Arcana: zaps hit 15% harder per pip. A full row pulls nearby enemies toward it." }], "static_field": [{ "name": "Ion Field", "description": "Enemies inside take 10% more damage from all your spells." }, { "name": "Magnetic Field", "description": "Pulls enemies toward its center." }, { "name": "Conductor Field", "description": "Storm Casts that hit inside jump twice more, up to 7 enemies." }, { "name": "Mobile Field", "description": "The field follows you." }, { "name": "Tempest Field", "description": "Spends all your Arcana: sparks hit 20% harder per pip. A full row sparks twice a second." }], "thunderfall": [{ "name": "Storm Call", "description": "Calls 2 more bolts." }, { "name": "Thunderclap", "description": "The bolts stun ordinary enemies." }, { "name": "Lightning Rod", "description": "Every bolt hits the strongest enemy." }, { "name": "Rolling Thunder", "description": "Strikes again 1 second later." }] });
-var LIVE_CLASS_SKILLS = Object.freeze(/* @__PURE__ */ new Set(["iron_will", "rallying_cry", "bulwark_stance", "iron_wall", "bracing_bash", "heavy_plating", "heavy_hands", "earth_breaker", "momentum", "shatterpoint", "concussion", "impact_training", "retaliation", "counter_stance", "spiked_shield", "grudge", "unbroken", "serrated_edge", "focus", "lunge", "en_garde", "fourth_cut", "footwork", "fencers_grace", "virulence", "toxic_fan", "serrated_cuts", "vipers_coating", "paralytic", "open_wounds", "light_step", "whirling_blades", "quick_dash", "crosscut", "blade_rush", "hit_and_run", "kindling", "firebloom", "firebrand", "fan_the_flames", "searing", "cinder_step", "cold_snap", "flashfreeze", "frostbinder", "brittle", "deep_freeze", "static_charge", "ball_lightning", "storm_conductor", "superconductor", "forked_lightning", "static_step", "war_banner", "hold_the_line", "rooted", "shield_charge", "reckless", "unstoppable", "shield_throw", "vengeance", "blood_for_blood", "duel", "riposte", "steel_nerves", "lingering_venom", "rupture", "hemorrhage", "evasive", "smoke_veil", "shade", "volatile", "flame_wall", "firewalker", "frost_step", "shatter", "ice_barrier", "steady_mind", "spell_weaving", "static_field", "live_wire", "second_breath", "standard_bearer", "last_stand", "crowd_breaker", "avalanche", "tremor", "blood_price", "marked_foe", "red_harvest", "spreading_flames", "kindle", "glass_furnace", "arcane_syphon", "frost_ward", "ice_fortress", "elemental_overload", "magnetic", "overload", "coup_de_grace", "marked_for_death", "glass_blade", "septic", "contagious", "toxic_blood", "opportunist", "exploit", "restless", "unyielding", "aegis_pulse", "bastion_ward", "groundbreaker", "skyfall_leap", "titan", "spite", "retribution", "executioner", "blade_dance", "thousand_cuts", "flourish", "bloodletting", "noxious_bloom", "fester", "afterimage", "shadowstep", "assassinate", "pyromaniac", "meteor", "molten_ground", "winters_grasp", "glacial_burst", "echoing_burst", "quickening", "thunderfall", "storm_call", "bulwark_colossus", "earthshaker", "thorned_bulwark", "phoenix", "absolute_zero", "living_storm", "master_duelist", "virulent_bloom", "shadow_assassin"]));
-var LIVE_AUGMENTS = freezeWire({ "rallying_cry": 5, "earth_breaker": 5, "counter_stance": 5, "lunge": 5, "toxic_fan": 5, "whirling_blades": 5, "firebloom": 5, "flashfreeze": 5, "ball_lightning": 5, "shield_charge": 5, "shield_throw": 5, "war_banner": 5, "riposte": 5, "rupture": 4, "smoke_veil": 5, "flame_wall": 5, "ice_barrier": 5, "static_field": 5, "aegis_pulse": 4, "skyfall_leap": 4, "retribution": 4, "thousand_cuts": 4, "noxious_bloom": 4, "shadowstep": 4, "meteor": 4, "glacial_burst": 4, "thunderfall": 4 });
-var classTreesFor = (classId) => CLASS_TREES[classId] ?? [];
-var classTreeOf = (classId, treeId) => classTreesFor(classId).find((t) => t.id === treeId) ?? null;
-
-// src/shared/content/augment_crafting_v1.js
-var AUGMENT_CRAFT_VERSION = "augment-craft-v1";
-var GLYPH_DUST = "Glyph Dust";
-var AUGMENT_RARITIES = Object.freeze(["rare", "epic", "legendary"]);
-var AUGMENT_RARITY_NAMES = Object.freeze({ rare: "Rare", epic: "Epic", legendary: "Legendary" });
-var AUGMENT_RARITY_COLORS = Object.freeze({ rare: "#3498db", epic: "#9b59b6", legendary: "#e67e22" });
-var AUGMENT_PRICES = Object.freeze({ rare: 40, epic: 100, legendary: 200 });
-var GLYPH_DUST_DROPS = Object.freeze({
-  elite: Object.freeze({ chance: 25, amount: 2 }),
-  named: Object.freeze({ chance: 100, amount: 4 }),
-  rare: Object.freeze({ chance: 100, amount: 10 }),
-  lesser: Object.freeze({ chance: 100, amount: 6 }),
-  boss: Object.freeze({ chance: 100, amount: 12 }),
-  chest: Object.freeze({ chance: 100, amount: 6 })
-});
-var ELDER_GLYPH_CHANCE = Object.freeze({ boss: 8, lesser: 1 });
-var ELDER_GLYPH_OWN_SKILL = 75;
-var R = "rare";
-var E = "epic";
-var L = "legendary";
-var AUGMENT_RARITY = Object.freeze(Object.fromEntries(Object.entries({
-  rallying_cry: [R, R, E, E, L],
-  war_banner: [L, R, R, E, E],
-  aegis_pulse: [R, R, E, L],
-  earth_breaker: [R, L, E, R, E],
-  shield_charge: [L, R, R, E, E],
-  skyfall_leap: [R, E, L, E],
-  counter_stance: [R, E, E, L, E],
-  shield_throw: [R, R, E, L, E],
-  retribution: [R, E, L, E],
-  firebloom: [R, E, R, E, L],
-  flame_wall: [R, L, R, E, E],
-  meteor: [E, L, R, E],
-  flashfreeze: [R, E, E, R, L],
-  ice_barrier: [R, E, R, E, L],
-  glacial_burst: [R, E, R, L],
-  ball_lightning: [E, R, E, R, L],
-  static_field: [R, E, R, L, E],
-  thunderfall: [R, R, L, E],
-  lunge: [R, R, E, L, E],
-  riposte: [R, R, E, E, L],
-  thousand_cuts: [R, L, E, R],
-  toxic_fan: [R, R, E, L, E],
-  rupture: [E, L, R, E],
-  noxious_bloom: [L, R, E, R],
-  whirling_blades: [R, E, R, L, E],
-  smoke_veil: [R, E, E, R, L],
-  shadowstep: [L, E, R, E]
-}).map(([id, list2]) => [id, Object.freeze(list2)])));
-var augmentRarity = (id, index2) => AUGMENT_RARITY[id]?.[index2] ?? null;
-var legendaryAugmentIndex = (id) => AUGMENT_RARITY[id]?.indexOf(L) ?? -1;
-var augmentPrice = (id, index2) => AUGMENT_PRICES[augmentRarity(id, index2)] ?? null;
-
-// src/shared/contracts/class_tree_progression_v1.js
-var classRank = (d8, id) => d8?.classRanks?.[id] ?? 0;
-var classTierGate = (tier) => (tier - 1) * CLASS_TREE_TIER_POINTS;
-function classTreeSpent(d8, treeId, belowTier = Infinity) {
-  let n = 0;
-  for (const [id, rank] of Object.entries(d8?.classRanks ?? {})) {
-    const s = CLASS_TREE_SKILLS[id];
-    if (s?.tree === treeId && s.tier < belowTier) n += rank;
-  }
-  return n;
-}
-function classTreePoints(d8) {
-  const level = d8?.heroClass ? progressionBigInt(d8.highestHeroLevel) - 1n : 0n, cap3 = BigInt(CLASS_TREE_POINT_CAP), earned = level < cap3 ? level : cap3, spent = BigInt(Object.values(d8?.classRanks ?? {}).reduce((a, b) => a + b, 0));
-  return { earned, spent, unspent: earned - spent, cap: cap3 };
-}
-function learnedClassActives(d8) {
-  if (!d8?.heroClass || !d8.classRanks) return [];
-  return classTreesFor(d8.heroClass).flatMap((t) => t.rows.flat()).filter((id) => CLASS_TREE_SKILLS[id].kind === "active" && classRank(d8, id) > 0);
-}
-function learnAvailability(d8, id) {
-  const s = CLASS_TREE_SKILLS[id];
-  if (!s || !d8?.heroClass || s.classId !== d8.heroClass) return { ok: false, reason: "Not one of your class skills" };
-  const rank = classRank(d8, id), gate = classTierGate(s.tier), tree = classTreeOf(s.classId, s.tree);
-  if (rank >= s.maxRank) return { ok: false, reason: "Maxed", rank };
-  if (!LIVE_CLASS_SKILLS.has(id)) return { ok: false, reason: "Coming soon", rank };
-  if (s.requires && classRank(d8, s.requires) <= 0) return { ok: false, reason: `Learn ${CLASS_TREE_SKILLS[s.requires].name} first`, rank };
-  if (classTreeSpent(d8, s.tree, s.tier) < gate) return { ok: false, reason: `Needs ${gate} points in ${tree.name}`, rank };
-  if (classTreePoints(d8).unspent < 1n) return { ok: false, reason: classTreePoints(d8).earned >= BigInt(CLASS_TREE_POINT_CAP) ? "All 49 points are spent" : "No skill points left", rank };
-  return { ok: true, rank, nextRank: rank + 1 };
-}
-var classAugments = (d8, id) => d8?.classAugments?.[id] ?? [];
-var hasAugment = (d8, id, index2) => classAugments(d8, id).includes(index2);
-var glyphDust = (d8) => d8?.augmentCraft?.dust ?? 0;
-var ownsAugment = (d8, id, index2) => Boolean(d8?.augmentCraft?.owned?.[id]?.includes(index2));
-var holdsElderGlyph = (d8, id) => Boolean(d8?.augmentCraft?.glyphs?.includes(id));
-function storeAugmentCraft(d8, { dust = 0, owned = {}, glyphs = [] }) {
-  const o = Object.fromEntries(Object.entries(owned).filter(([, l]) => l.length).map(([id, l]) => [id, [...new Set(l)].sort((a, b) => a - b)]));
-  if (!dust && !Object.keys(o).length && !glyphs.length) delete d8.augmentCraft;
-  else d8.augmentCraft = { dust, owned: o, glyphs: [...glyphs] };
-}
-var augmentCraftOf = (d8) => ({ dust: glyphDust(d8), owned: { ...d8?.augmentCraft?.owned ?? {} }, glyphs: [...d8?.augmentCraft?.glyphs ?? []] });
-var augmentLive = (id, index2) => index2 < (LIVE_AUGMENTS[id] ?? 0);
-function augmentAvailability(d8, id, index2) {
-  const s = CLASS_TREE_SKILLS[id], a = CLASS_SKILL_AUGMENTS[id]?.[index2];
-  if (!s || !a || s.classId !== d8?.heroClass) return { ok: false, reason: "Not one of your augments" };
-  if (classRank(d8, id) <= 0) return { ok: false, reason: `Learn ${s.name} first` };
-  if (!augmentLive(id, index2)) return { ok: false, reason: "Coming soon" };
-  if (!ownsAugment(d8, id, index2)) return { ok: false, reason: "Craft it at an Enchanter" };
-  return { ok: true };
-}
-function craftAvailability(d8, id, index2) {
-  const s = CLASS_TREE_SKILLS[id], a = CLASS_SKILL_AUGMENTS[id]?.[index2], rarity = augmentRarity(id, index2), price = augmentPrice(id, index2);
-  if (!s || !a || !rarity || s.classId !== d8?.heroClass) return { ok: false, reason: "Not one of your augments" };
-  const base = { rarity, price, needsGlyph: rarity === "legendary" };
-  if (ownsAugment(d8, id, index2)) return { ...base, ok: false, owned: true, reason: "Already yours" };
-  if (classRank(d8, id) <= 0) return { ...base, ok: false, reason: `Learn ${s.name} first` };
-  if (!augmentLive(id, index2)) return { ...base, ok: false, reason: "Coming soon" };
-  if (base.needsGlyph && !holdsElderGlyph(d8, id)) return { ...base, ok: false, reason: "Needs its Elder Glyph" };
-  if (glyphDust(d8) < price) return { ...base, ok: false, reason: `Needs ${price} Glyph Dust` };
-  return { ...base, ok: true };
-}
-function validateAugmentCraft(d8) {
-  const c = d8.augmentCraft;
-  if (c === void 0) return;
-  requireContract(d8.heroClass, "Augments need a class");
-  closedRecord(c, ["dust", "owned", "glyphs"]);
-  safeInteger(c.dust);
-  const mine = Object.keys(CLASS_SKILL_AUGMENTS).filter((id) => CLASS_TREE_SKILLS[id].classId === d8.heroClass);
-  closedRecord(c.owned, [], mine);
-  for (const [id, list2] of Object.entries(c.owned)) {
-    requireContract(Array.isArray(list2) && list2.length > 0, "Empty crafted lists are omitted");
-    list2.forEach((i, n) => {
-      safeInteger(i, 0, CLASS_SKILL_AUGMENTS[id].length - 1);
-      requireContract(n === 0 || i > list2[n - 1], "Crafted augments are listed once, in order");
-    });
-  }
-  requireContract(Array.isArray(c.glyphs) && new Set(c.glyphs).size === c.glyphs.length, "Each Elder Glyph once");
-  for (const id of c.glyphs) {
-    requireContract(mine.includes(id) && legendaryAugmentIndex(id) >= 0, "Not one of your Elder Glyphs");
-    requireContract(!ownsAugment(d8, id, legendaryAugmentIndex(id)), "Elder Glyph for an augment you own");
-  }
-  requireContract(c.dust > 0 || Object.keys(c.owned).length > 0 || c.glyphs.length > 0, "Empty augment craft is omitted");
-}
-function checkAugmentSlots(d8, id, slots2) {
-  requireContract(Array.isArray(slots2) && slots2.length <= AUGMENT_SLOTS && new Set(slots2).size === slots2.length, "Two augments at most, each once");
-  for (const i of slots2) {
-    safeInteger(i, 0, AUGMENT_UNLOCK_POINTS.length - 1);
-    const offer = augmentAvailability(d8, id, i);
-    requireContract(offer.ok, offer.reason);
-  }
-}
-function validateClassRanks(d8) {
-  const ranks = d8.classRanks;
-  if (ranks !== void 0) {
-    requireContract(d8.heroClass, "Class ranks need a class");
-    const own3 = Object.values(CLASS_TREE_SKILLS).filter((s) => s.classId === d8.heroClass).map((s) => s.id);
-    closedRecord(ranks, [], own3);
-    requireContract(Object.keys(ranks).length > 0, "Empty class ranks are omitted");
-    for (const [id, rank] of Object.entries(ranks)) {
-      const s = CLASS_TREE_SKILLS[id];
-      safeInteger(rank, 1, s.maxRank);
-      requireContract(LIVE_CLASS_SKILLS.has(id), "Skill is not available yet");
-      requireContract(!s.requires || classRank(d8, s.requires) > 0, "Missing required skill");
-      requireContract(classTreeSpent(d8, s.tree, s.tier) >= classTierGate(s.tier), "Tier not open");
-    }
-    requireContract(classTreePoints(d8).unspent >= 0n, "Overspent skill points");
-  }
-  const augs = d8.classAugments;
-  if (augs !== void 0) {
-    requireContract(d8.heroClass, "Augments need a class");
-    closedRecord(augs, [], Object.keys(CLASS_SKILL_AUGMENTS).filter((id) => CLASS_TREE_SKILLS[id].classId === d8.heroClass));
-    requireContract(Object.keys(augs).length > 0, "Empty augments are omitted");
-    for (const [id, slots2] of Object.entries(augs)) {
-      requireContract(slots2.length > 0, "Empty augment slots are omitted");
-      checkAugmentSlots(d8, id, slots2);
-    }
-  }
-  validateAugmentCraft(d8);
-}
-function classTreeEffects(d8) {
-  const r = (id) => classRank(d8, id), out = {};
-  for (const [key5, id, percent] of [["defPct", "heavy_plating", 25], ["atkPct", "glass_blade", 30]]) if (r(id)) out[key5] = combatAmount(percent * r(id), 100);
-  return out;
-}
-function classTreeMaxHpScale(d8) {
-  return classRank(d8, "glass_furnace") ? [85, 100] : null;
-}
-function learnClassSkill(next, id) {
-  const offer = learnAvailability(next, id);
-  requireContract(offer.ok, offer.reason);
-  next.classRanks = { ...next.classRanks ?? {}, [id]: offer.nextRank };
-}
-function setClassAugments(next, id, slots2) {
-  requireContract(CLASS_TREE_SKILLS[id]?.kind === "active", "Only actives take augments");
-  checkAugmentSlots(next, id, slots2);
-  const all = { ...next.classAugments ?? {} };
-  if (slots2.length) all[id] = [...slots2];
-  else delete all[id];
-  if (Object.keys(all).length) next.classAugments = all;
-  else delete next.classAugments;
-}
-function craftAugment(next, id, index2) {
-  const offer = craftAvailability(next, id, index2);
-  requireContract(offer.ok, offer.reason);
-  const c = augmentCraftOf(next);
-  c.dust -= offer.price;
-  c.owned[id] = [...c.owned[id] ?? [], index2];
-  if (offer.needsGlyph) c.glyphs = c.glyphs.filter((g) => g !== id);
-  storeAugmentCraft(next, c);
-}
-function resetClassTree(next, treeId) {
-  requireContract(classTreeOf(next.heroClass, treeId), "Unknown class tree");
-  const inTree = (id) => CLASS_TREE_SKILLS[id].tree === treeId, kept = Object.fromEntries(Object.entries(next.classRanks ?? {}).filter(([id]) => !inTree(id)));
-  requireContract(Object.keys(kept).length < Object.keys(next.classRanks ?? {}).length, "Tree already empty");
-  if (Object.keys(kept).length) next.classRanks = kept;
-  else delete next.classRanks;
-  const augs = Object.fromEntries(Object.entries(next.classAugments ?? {}).filter(([id]) => !inTree(id)));
-  if (Object.keys(augs).length) next.classAugments = augs;
-  else delete next.classAugments;
-}
-function fitClassTrees(d8) {
-  if (!d8) return false;
-  const before = JSON.stringify([d8.classRanks, d8.classAugments, d8.augmentCraft]);
-  if (!d8.heroClass) {
-    delete d8.classRanks;
-    delete d8.classAugments;
-    delete d8.augmentCraft;
-    return before !== JSON.stringify([d8.classRanks, d8.classAugments, d8.augmentCraft]);
-  }
-  let ranks = Object.fromEntries(Object.entries(d8.classRanks ?? {}).filter(([id, r]) => {
-    const s = CLASS_TREE_SKILLS[id];
-    return s && s.classId === d8.heroClass && LIVE_CLASS_SKILLS.has(id) && Number.isSafeInteger(r) && r >= 1;
-  }).map(([id, r]) => [id, Math.min(r, CLASS_TREE_SKILLS[id].maxRank)]));
-  for (let guard = 0; guard < 400; guard++) {
-    const probe = { ...d8, classRanks: ranks }, bad = Object.keys(ranks).find((id) => {
-      const s = CLASS_TREE_SKILLS[id];
-      return s.requires && !(ranks[s.requires] > 0) || classTreeSpent(probe, s.tree, s.tier) < classTierGate(s.tier);
-    });
-    if (bad) {
-      delete ranks[bad];
-      continue;
-    }
-    if (classTreePoints(probe).unspent < 0n) {
-      const id = Object.keys(ranks).sort((a, b) => CLASS_TREE_SKILLS[b].tier - CLASS_TREE_SKILLS[a].tier || a.localeCompare(b))[0];
-      if (--ranks[id] <= 0) delete ranks[id];
-      continue;
-    }
-    break;
-  }
-  if (Object.keys(ranks).length) d8.classRanks = ranks;
-  else delete d8.classRanks;
-  {
-    const old = d8.augmentCraft, mine = (id) => CLASS_TREE_SKILLS[id]?.classId === d8.heroClass && AUGMENT_RARITY[id], dust = Number.isSafeInteger(old?.dust) && old.dust > 0 ? old.dust : 0, owned = {};
-    for (const [id, list2] of [...Object.entries(old?.owned ?? {}), ...Object.entries(d8.classAugments ?? {})]) if (mine(id) && Array.isArray(list2)) owned[id] = [...owned[id] ?? [], ...list2.filter((i) => Number.isSafeInteger(i) && i >= 0 && i < CLASS_SKILL_AUGMENTS[id].length)];
-    const glyphs = [...new Set(Array.isArray(old?.glyphs) ? old.glyphs : [])].filter((id) => mine(id) && !owned[id]?.includes(legendaryAugmentIndex(id)));
-    storeAugmentCraft(d8, { dust, owned, glyphs });
-  }
-  const augs = {};
-  for (const [id, slots2] of Object.entries(d8.classAugments ?? {})) {
-    const ok = Array.isArray(slots2) ? [...new Set(slots2)].filter((i) => Number.isSafeInteger(i) && i >= 0 && i < AUGMENT_UNLOCK_POINTS.length && augmentAvailability(d8, id, i).ok).slice(0, AUGMENT_SLOTS) : [];
-    if (ok.length && CLASS_TREE_SKILLS[id]?.kind === "active") augs[id] = ok;
-  }
-  if (Object.keys(augs).length) d8.classAugments = augs;
-  else delete d8.classAugments;
-  return before !== JSON.stringify([d8.classRanks, d8.classAugments, d8.augmentCraft]);
-}
-
-// src/shared/content/hero_classes_v1.js
-var HERO_CLASSES = freezeWire({
-  knight: { id: "knight", name: "Knight", offhand: "shield", signature: "shield_bash", move: { name: "Guard", description: "Hold to block everything from the front." }, color: "#73bedc", role: "The front line: guard, control space, then answer with a deliberate Bash." },
-  rogue: { id: "rogue", name: "Rogue", offhand: "dagger", signature: "flurry", move: { name: "Dash", description: "A quick dash out of trouble." }, color: "#b88cff", role: "Move through openings, focus targets and turn afflictions into crowd damage." },
-  mage: { id: "mage", name: "Mage", offhand: "tome", signature: "cast", move: { name: "Blink", description: "Step a short distance in a flash of arcane light." }, color: "#f0a35a", role: "Choose an elemental style, combine elements and spend Barrier tactically." }
-});
-var HERO_CLASS_IDS = Object.freeze(Object.keys(HERO_CLASSES));
-var CLASS_SKILLS = freezeWire({
-  shield_bash: { id: "shield_bash", name: "Shield Bash", classId: "knight", cooldownTicks: 360, description: "Shove a forward cone: Attack plus Shield damage, knockback and a short stun on ordinary enemies. Every block takes 1 second off its cooldown. A Buckler recharges it faster; a Tower Shield stuns longer and shoves harder." },
-  flurry: { id: "flurry", name: "Flurry", classId: "rogue", cooldownTicks: 300, description: "Costs 1 Combo, no cooldown. Three quick offhand cuts in front of you. Each cut can crit and Bleed. A Main-Gauche readies a parry for the next hit; a Stiletto crits more often; a Kris makes every cut Bleed." },
-  // Class tree actives (the first row of every tree). Their full text lives in class_trees_v1.js.
-  earth_breaker: { id: "earth_breaker", name: "Earth-Breaker", classId: "knight", cooldownTicks: 480, description: "Slam the ground all around you. Everything hit takes damage and is slowed for 3 seconds." },
-  rallying_cry: { id: "rallying_cry", name: "Rallying Cry", classId: "knight", cooldownTicks: 900, description: "Shout to heal 15% of your max HP. Nearby enemies deal 20% less damage for 6 seconds." },
-  counter_stance: { id: "counter_stance", name: "Counter Stance", classId: "knight", cooldownTicks: 600, description: "Brace for 2 seconds. The next hit does nothing to you, and you strike back for 300% Attack and stun the attacker." },
-  // Row three (the third tier of every tree).
-  shield_charge: { id: "shield_charge", name: "Shield Charge", classId: "knight", cooldownTicks: 540, description: "Rush forward behind your shield. Enemies in the way get pushed along and stunned at the end." },
-  shield_throw: { id: "shield_throw", name: "Shield Throw", classId: "knight", cooldownTicks: 480, description: "Throw your shield. It bounces between up to 3 enemies and comes back. You can\u2019t Guard until it returns." },
-  war_banner: { id: "war_banner", name: "War Banner", classId: "knight", cooldownTicks: 1200, description: "Plant a banner for 10 seconds. While you stand near it you get +15% Attack and Defense." },
-  riposte: { id: "riposte", name: "Riposte", classId: "rogue", cooldownTicks: 480, description: "Ready your blades for 1.5 seconds. Parry the next hit and cut back for 300% Attack. Your next Flurry crits." },
-  rupture: { id: "rupture", name: "Rupture", classId: "rogue", cooldownTicks: 600, description: "Tear open every Bleed on enemies around you. Each one deals all of its remaining damage at once." },
-  smoke_veil: { id: "smoke_veil", name: "Smoke Veil", classId: "rogue", cooldownTicks: 900, description: "Drop a smoke cloud for 4 seconds. Enemies inside are slowed and Exposed, and you take 30% less damage while you\u2019re in it." },
-  flame_wall: { id: "flame_wall", name: "Flame Wall", classId: "mage", cooldownTicks: 720, description: "Raise a wall of fire in front of you for 5 seconds. Enemies that cross it burn." },
-  ice_barrier: { id: "ice_barrier", name: "Ice Barrier", classId: "mage", cooldownTicks: 1080, description: "Wrap yourself in ice: gain a Barrier worth 25% of your max HP for 8 seconds. Enemies that hit it are chilled." },
-  static_field: { id: "static_field", name: "Static Field", classId: "mage", cooldownTicks: 900, description: "Charge the ground around you for 6 seconds. Enemies inside take a spark of damage every second, and your Storm Casts jump to enemies inside first." },
-  // Row five (the fifth tier of every tree).
-  aegis_pulse: { id: "aegis_pulse", name: "Aegis Pulse", classId: "knight", cooldownTicks: 900, description: "Shove every enemy around you away and gain a Barrier worth 20% of your max HP for 6 seconds." },
-  skyfall_leap: { id: "skyfall_leap", name: "Skyfall Leap", classId: "knight", cooldownTicks: 720, description: "Leap to a spot and crash down, damaging and stunning everything around where you land." },
-  retribution: { id: "retribution", name: "Retribution", classId: "knight", cooldownTicks: 600, description: "Release every hit you blocked in the last 6 seconds as a blast around you." },
-  thousand_cuts: { id: "thousand_cuts", name: "Thousand Cuts", classId: "rogue", cooldownTicks: 600, description: "Strike one enemy 6 times in a blur. Every cut can crit." },
-  noxious_bloom: { id: "noxious_bloom", name: "Noxious Bloom", classId: "rogue", cooldownTicks: 720, description: "A toxic flower bursts at your feet and poisons everything around you." },
-  shadowstep: { id: "shadowstep", name: "Shadowstep", classId: "rogue", cooldownTicks: 480, description: "Vanish and reappear behind the nearest enemy. Your next hit within 3 seconds is a crit that deals double damage." },
-  meteor: { id: "meteor", name: "Meteor", classId: "mage", cooldownTicks: 900, description: "Call a meteor onto a spot. It lands a second later and leaves the ground burning for 4 seconds." },
-  glacial_burst: { id: "glacial_burst", name: "Glacial Burst", classId: "mage", cooldownTicks: 600, description: "Spend all your Barrier in a blast of ice around you. It deals twice the Barrier you spent plus a spell hit as damage, and chills everything it hits." },
-  thunderfall: { id: "thunderfall", name: "Thunderfall", classId: "mage", cooldownTicks: 720, description: "Call lightning down from above onto up to 5 enemies around you." },
-  lunge: { id: "lunge", name: "Lunge", classId: "rogue", cooldownTicks: 360, description: "Lunge at the nearest enemy in front of you and stab it for 250% Attack. Lunge crits twice as often as your other hits." },
-  toxic_fan: { id: "toxic_fan", name: "Toxic Fan", classId: "rogue", cooldownTicks: 420, description: "Throw a fan of 5 poisoned knives in front of you." },
-  whirling_blades: { id: "whirling_blades", name: "Whirling Blades", classId: "rogue", cooldownTicks: 480, description: "Spin and cut everything around you 3 times." },
-  firebloom: { id: "firebloom", name: "Firebloom", classId: "mage", cooldownTicks: 420, description: "Fire blossoms where you aim and burns everything inside it." },
-  flashfreeze: { id: "flashfreeze", name: "Flashfreeze", classId: "mage", cooldownTicks: 720, description: "Freeze everything around you in a flash. Ordinary enemies freeze, elites are chilled, and bosses slow down." },
-  ball_lightning: { id: "ball_lightning", name: "Ball Lightning", classId: "mage", cooldownTicks: 480, description: "Release a slow orb of lightning that drifts forward for 4 seconds, zapping every enemy near it twice a second." },
-  cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 300, description: "Costs 1 Arcana, no cooldown. A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you: Fire bursts and burns everything near the target, Frost bursts and chills everything near it, Storm chains to up to 4 more enemies, each jump a little weaker." }
-});
-var CLASS_SKILL_IDS = Object.freeze(Object.keys(CLASS_SKILLS));
-var SKILL_SLOT_COUNT = 5;
-var MOVE_SLOT = "move";
-var MAX_SKILL_COOLDOWN_TICKS = 1200;
-var heroClassOf = (d8) => HERO_CLASSES[d8?.heroClass] ?? null;
-var classSkillsFor = (d8) => {
-  const c = heroClassOf(d8);
-  return c ? [c.signature, ...learnedClassActives(d8).filter((id) => CLASS_SKILLS[id])] : [];
-};
-var wheelEntriesFor = (d8) => heroClassOf(d8) ? [MOVE_SLOT, ...classSkillsFor(d8).filter((id) => id !== d8?.attackSkill)] : [];
-function skillLoadout(d8) {
-  const known = wheelEntriesFor(d8), slots2 = Array.from({ length: SKILL_SLOT_COUNT }, (_, i) => {
-    const id = d8?.skillSlots?.[i] ?? null;
-    return known.includes(id) ? id : null;
-  });
-  for (const id of known) if (!slots2.includes(id)) {
-    const free = slots2.indexOf(null);
-    if (free >= 0) slots2[free] = id;
-  }
-  return slots2;
-}
-
-// src/shared/content/hero_looks_v1.js
-var HAIR_STYLES = Object.freeze(["short", "buzz", "spiky", "swept", "shaggy", "undercut", "mullet", "curly", "bob", "long", "mane", "ponytail", "pigtails", "braid", "bun", "dreads", "mohawk", "pixie", "bangs", "waves", "sidebraid", "highpony", "twinbuns", "puff", "crown", "bald"]);
-var FACIAL_HAIR = Object.freeze(["none", "stubble", "mustache", "handlebar", "goatee", "chinstrap", "chops", "short", "long", "bushy", "braided"]);
-var HAIR_COLORS = Object.freeze(["black", "soft-black", "dark-brown", "brown", "light-brown", "auburn", "copper", "strawberry", "dark-blonde", "blonde", "platinum", "gray", "silver", "white", "red", "pink", "blue", "teal", "green", "violet"]);
-var SKIN_TONES = Object.freeze(["porcelain", "fair", "light", "peach", "golden", "olive", "tan", "bronze", "brown", "chestnut", "deep", "ebony"]);
-var FACES = Object.freeze(["classic", "lashes", "rosy", "freckles"]);
-var HERO_NAME_MAX = 16;
-var DEFAULT_LOOK = Object.freeze({ hair: "short", hairColor: "brown", skin: "light", facialHair: "none", helmet: true, name: "", face: "classic" });
-function validHeroName(name) {
-  return typeof name === "string" && name === name.trim() && [...name].length <= HERO_NAME_MAX && /^[\p{L}\p{M}\p{N} '’.-]*$/u.test(name) && !/\s\s/.test(name);
-}
-function validateHeroLook(look) {
-  closedRecord(look, ["hair", "hairColor", "skin", "facialHair", "helmet", "name"], ["face", "accessory"]);
-  requireContract(HAIR_STYLES.includes(look.hair), "Unknown hair style");
-  requireContract(HAIR_COLORS.includes(look.hairColor), "Unknown hair color");
-  requireContract(SKIN_TONES.includes(look.skin), "Unknown skin tone");
-  requireContract(FACIAL_HAIR.includes(look.facialHair), "Unknown facial hair");
-  requireContract(typeof look.helmet === "boolean", "Invalid helmet setting");
-  if (look.face !== void 0) requireContract(FACES.includes(look.face), "Unknown face");
-  requireContract(validHeroName(look.name), "Names use up to 16 letters, numbers, spaces, hyphens or apostrophes");
-  return look;
-}
-var heroLookOf = (d8) => d8?.look ?? DEFAULT_LOOK;
-
-// src/shared/content/trip_snacks_v1.js
-var TRIP_TICKS_PER_SECOND = 60;
-var TRIP_EAT_TICKS = 144;
-var TRIP_TICKS = 120 * 60;
-var TRIP_WEAR_OFF_TICKS = 72;
-var BAD_TRIP_CHANCE = 0.05;
-var TRIP_BAD_PORTAL_TICKS = 126;
-var TRIP_BAD_PULL_TICKS = 150;
-var TRIP_PULL_TO_LAND_TICKS = 108;
-var TRIP_BAD_FALL_TICKS = TRIP_BAD_PULL_TICKS + TRIP_PULL_TO_LAND_TICKS;
-var TRIP_FRIEND_WINDOW_TICKS = TRIP_TICKS - TRIP_PULL_TO_LAND_TICKS;
-var TRIP_PORTAL_STEP_RADIUS = 20;
-var TRIP_HEAVY_LEGS_TICKS = 15 * 60;
-var TRIP_HEAVY_LEGS_SPEED = 0.7;
-var TRIP_SNACKS_V1 = Object.freeze({
-  glowcap: Object.freeze({
-    id: "glowcap",
-    label: "Glowcap",
-    verb: "Eat",
-    buff: "damage",
-    amount: 0.2,
-    pill: "+20% damage",
-    text: "A glowing teal mushroom. Eat it for a trip: usually a good one (+20% damage for 2:00)."
-  }),
-  "frog-leg": Object.freeze({
-    id: "frog-leg",
-    label: "Frog Leg",
-    verb: "Lick",
-    buff: "speed",
-    amount: 0.25,
-    pill: "+25% speed",
-    text: "A tingly blue frog leg. Lick it for a trip: usually a good one (+25% move speed and a hop for 2:00)."
-  })
-});
-var TRIP_SNACK_IDS_V1 = Object.freeze(Object.keys(TRIP_SNACKS_V1));
-var TRIP_SNACK_DROPS_V1 = Object.freeze({
-  sporecrown: Object.freeze({ snack: "glowcap", chance: 1 / 10 }),
-  gulpjaw: Object.freeze({ snack: "frog-leg", chance: 1 / 10 }),
-  croakmaw: Object.freeze({ snack: "frog-leg", chance: 1 / 10 }),
-  dart_frog: Object.freeze({ snack: "frog-leg", chance: 1 / 200 }),
-  bog_frog: Object.freeze({ snack: "frog-leg", chance: 1 / 200 }),
-  // Sammy 2026-11-12: the ordinary mushroom (Eldritch Sprout, spore outbreaks too) drops Glowcaps as often as the frogs drop legs.
-  sprout: Object.freeze({ snack: "glowcap", chance: 1 / 200 })
-});
-function tripBuffV1(trip, tick) {
-  if (!trip || trip.outcome !== "good" || !(tick >= trip.startTick && tick < trip.endTick)) return null;
-  return TRIP_SNACKS_V1[trip.snack] ?? null;
-}
-function tripDamageMultiplierV1(trip, tick) {
-  const b = tripBuffV1(trip, tick);
-  return b?.buff === "damage" ? 1 + b.amount : 1;
-}
-function tripSpeedMultiplierV1(trip, tick) {
-  const b = tripBuffV1(trip, tick);
-  return b?.buff === "speed" ? 1 + b.amount : 1;
-}
-function startTripV1(snack, tick, roll2, badAllowed = true) {
-  const outcome = badAllowed && roll2 < BAD_TRIP_CHANCE ? "bad" : "good", startTick = tick + (outcome === "bad" ? TRIP_BAD_FALL_TICKS : TRIP_EAT_TICKS);
-  return Object.freeze({ snack, outcome, eatTick: tick, startTick, endTick: startTick + TRIP_TICKS });
-}
-function tripExpiredV1(trip, tick) {
-  return !trip || tick >= trip.endTick + TRIP_WEAR_OFF_TICKS;
-}
-
-// src/shared/contracts/hashing.js
-function utf8(value) {
-  requireContract(typeof value === "string" && !value.includes("\0"), "Invalid UTF-8 input");
-  const bytes = [];
-  for (let i = 0; i < value.length; i++) {
-    let point14 = value.charCodeAt(i);
-    if (point14 >= 55296 && point14 <= 56319) {
-      const low = value.charCodeAt(++i);
-      requireContract(low >= 56320 && low <= 57343, "Unpaired surrogate");
-      point14 = 65536 + (point14 - 55296 << 10) + low - 56320;
-    } else requireContract(point14 < 56320 || point14 > 57343, "Unpaired surrogate");
-    if (point14 < 128) bytes.push(point14);
-    else if (point14 < 2048) bytes.push(192 | point14 >>> 6, 128 | point14 & 63);
-    else if (point14 < 65536) bytes.push(224 | point14 >>> 12, 128 | point14 >>> 6 & 63, 128 | point14 & 63);
-    else bytes.push(240 | point14 >>> 18, 128 | point14 >>> 12 & 63, 128 | point14 >>> 6 & 63, 128 | point14 & 63);
-  }
-  return bytes;
-}
-function validateBytes(bytes, size) {
-  requireContract(Number.isSafeInteger(size) && size >= 0 && size <= 16777216 && Array.isArray(bytes) && Object.getPrototypeOf(bytes) === Array.prototype && bytes.length === size, `Expected ${size} bytes`);
-  const keys2 = Reflect.ownKeys(bytes);
-  requireContract(keys2.length === size + 1, "Extended byte array");
-  for (let i = 0; i < size; i++) {
-    const descriptor = Object.getOwnPropertyDescriptor(bytes, String(i));
-    requireContract(descriptor && "value" in descriptor && descriptor.enumerable && Number.isInteger(descriptor.value) && descriptor.value >= 0 && descriptor.value <= 255, "Invalid byte data");
-  }
-  return bytes;
-}
-var textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : null;
-async function hashUtf8(text, sha256) {
-  requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
-  if (!textEncoder || typeof text !== "string" || typeof text.isWellFormed !== "function") return hashBytes(utf8(text), sha256);
-  requireContract(!text.includes("\0"), "Invalid UTF-8 input");
-  requireContract(text.isWellFormed(), "Unpaired surrogate");
-  const bytes = textEncoder.encode(text);
-  requireContract(bytes.length <= 16777216, `Expected ${bytes.length} bytes`);
-  const result = await sha256(bytes);
-  validateBytes(result, 32);
-  return [...result];
-}
-function bytesToHex(bytes) {
-  validateBytes(bytes, bytes.length);
-  return bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-function validateHex(value, bytes) {
-  requireContract(typeof value === "string" && new RegExp(`^[0-9a-f]{${bytes * 2}}$`).test(value), "Invalid canonical hex");
-  return value;
-}
-function frameUtf8(fields) {
-  validateWire(fields);
-  requireContract(Array.isArray(fields) && fields.length <= 32, "Invalid framing fields");
-  const output = [];
-  for (const field2 of fields) {
-    const bytes = utf8(field2);
-    requireContract(bytes.length <= 4096, "Framing field too long");
-    const length = bytes.length;
-    output.push(length >>> 24 & 255, length >>> 16 & 255, length >>> 8 & 255, length & 255, ...bytes);
-  }
-  return output;
-}
-async function hashBytes(bytes, sha256) {
-  requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
-  validateBytes(bytes, bytes.length);
-  const result = await sha256(Object.freeze([...bytes]));
-  validateBytes(result, 32);
-  return [...result];
-}
-
-// src/shared/content/oldward_wood.js
-var REGION_ID = "region:7a01";
-var LAYOUT_VERSION = 1;
-var GEOGRAPHY_DEFINITION_ID = "def:7a0000000000000000000000000000ff";
-var SPACE_IDS = freezeWire({
-  town: "spc:7a000000000000000000000000000001",
-  sw: "spc:7a000000000000000000000000000011",
-  s: "spc:7a000000000000000000000000000012",
-  se: "spc:7a000000000000000000000000000013",
-  w: "spc:7a000000000000000000000000000014",
-  c: "spc:7a000000000000000000000000000015",
-  e: "spc:7a000000000000000000000000000016",
-  nw: "spc:7a000000000000000000000000000017",
-  n: "spc:7a000000000000000000000000000018",
-  ne: "spc:7a000000000000000000000000000019"
-});
-var W = 32;
-var H = 26;
-var TILE2 = 32;
-var sockets = {
-  north: { x: 528, y: 48, anchor: { x: 528, y: 112 }, opposite: "south" },
-  south: { x: 528, y: 784, anchor: { x: 528, y: 720 }, opposite: "north" },
-  west: { x: 48, y: 432, anchor: { x: 112, y: 432 }, opposite: "east" },
-  east: { x: 976, y: 432, anchor: { x: 912, y: 432 }, opposite: "west" }
-};
-var party = (p) => [{ x: p.x - 12, y: p.y - 12 }, { x: p.x + 12, y: p.y - 12 }, { x: p.x - 12, y: p.y + 12 }, { x: p.x + 12, y: p.y + 12 }];
-var OLDWARD_LINKS = freezeWire([
-  ["socket:7101", "town", "north", "socket:7102", "sw", "south", "road:701"],
-  ["socket:7103", "sw", "east", "socket:7104", "s", "west", "road:702"],
-  ["socket:7105", "s", "north", "socket:7106", "c", "south", "road:703"],
-  ["socket:7107", "c", "east", "socket:7108", "e", "west", "road:704"],
-  ["socket:7109", "e", "north", "socket:710a", "ne", "south", "road:705"],
-  ["socket:7111", "sw", "north", "socket:7112", "w", "south", null],
-  ["socket:7113", "w", "north", "socket:7114", "nw", "south", null],
-  ["socket:7115", "w", "east", "socket:7116", "c", "west", null],
-  ["socket:7117", "nw", "east", "socket:7118", "n", "west", null],
-  ["socket:7119", "c", "north", "socket:711a", "n", "south", null],
-  ["socket:711b", "n", "east", "socket:711c", "ne", "west", null],
-  ["socket:711d", "s", "east", "socket:711e", "se", "west", null],
-  ["socket:711f", "se", "north", "socket:7120", "e", "south", null]
-]);
-var links = OLDWARD_LINKS;
-var records = [
-  ["town", "Alderwatch", 0, 3, "anchor:7201"],
-  ["sw", "Oldward Wood \xB7 South Gate", 0, 2, "anchor:7211"],
-  ["s", "Oldward Wood \xB7 Alder Bend", 1, 2, "anchor:7212"],
-  ["se", "Oldward Wood \xB7 Fern Hollow", 2, 2, "anchor:7213"],
-  ["w", "Oldward Wood \xB7 Moss Glade", 0, 1, "anchor:7214"],
-  ["c", "Oldward Wood \xB7 Ward Crossing", 1, 1, "anchor:7215"],
-  ["e", "Oldward Wood \xB7 Stone Rise", 2, 1, "anchor:7216"],
-  ["nw", "Oldward Wood \xB7 High Canopy", 0, 0, "anchor:7217"],
-  ["n", "Oldward Wood \xB7 Amber Clearing", 1, 0, "anchor:7218"],
-  ["ne", "Oldward Wood \xB7 Road's End", 2, 0, "anchor:7219"]
-];
-var names = Object.fromEntries(records.map(([key5, label]) => [key5, label]));
-var definitionIds = {
-  town: "def:7a000000000000000000000000000001",
-  sw: "def:7a000000000000000000000000000011",
-  s: "def:7a000000000000000000000000000012",
-  se: "def:7a000000000000000000000000000013",
-  w: "def:7a000000000000000000000000000014",
-  c: "def:7a000000000000000000000000000015",
-  e: "def:7a000000000000000000000000000016",
-  nw: "def:7a000000000000000000000000000017",
-  n: "def:7a000000000000000000000000000018",
-  ne: "def:7a000000000000000000000000000019"
-};
-var groves = {
-  sw: [[3, 4, 5, 4], [10, 3, 3, 5], [22, 3, 5, 5], [3, 17, 5, 5], [23, 18, 5, 4]],
-  s: [[3, 3, 6, 4], [22, 4, 6, 5], [7, 18, 5, 5], [21, 18, 6, 4], [10, 8, 2, 2]],
-  se: [[4, 4, 5, 5], [22, 3, 5, 6], [3, 18, 5, 4], [21, 18, 7, 4], [10, 7, 2, 2]],
-  w: [[3, 3, 5, 4], [23, 3, 5, 6], [3, 19, 5, 4], [24, 18, 4, 5], [10, 4, 2, 3]],
-  c: [[3, 3, 6, 5], [23, 4, 5, 5], [3, 18, 6, 5], [22, 18, 6, 5]],
-  e: [[3, 3, 6, 4], [23, 4, 5, 5], [3, 19, 6, 4], [23, 18, 5, 5], [10, 7, 2, 2]],
-  nw: [[3, 3, 7, 5], [23, 3, 5, 6], [3, 17, 6, 6], [23, 18, 5, 4]],
-  n: [[4, 4, 5, 4], [23, 3, 5, 6], [3, 18, 6, 5], [22, 18, 6, 5]],
-  ne: [[3, 4, 6, 5], [23, 3, 5, 6], [3, 18, 6, 5], [23, 18, 5, 5]]
-};
-function authorSpace([key5, label, gridX, gridY, anchorId]) {
-  const town = key5 === "town", tiles3 = Array.from({ length: H }, () => Array(W).fill("1"));
-  const terrain2 = Array.from({ length: H }, () => Array(W).fill(town ? "g" : "f"));
-  const blockers2 = [], exits = [];
-  function rect(x, y, width, height, kind2, detail = "") {
-    blockers2.push({ x, y, width, height, kind: kind2, detail });
-    for (let row2 = y; row2 < y + height; row2++) for (let col = x; col < x + width; col++) tiles3[row2][col] = "2";
-  }
-  rect(0, 0, W, 1, town ? "fence" : "thicket");
-  rect(0, H - 1, W, 1, town ? "fence" : "thicket");
-  rect(0, 1, 1, H - 2, town ? "fence" : "thicket");
-  rect(W - 1, 1, 1, H - 2, town ? "fence" : "thicket");
-  for (const link of links) {
-    let [exitId, from, side, reciprocalExitId, to, otherSide, roadSegmentId] = link;
-    if (key5 === to) [exitId, from, side, reciprocalExitId, to, otherSide] = [reciprocalExitId, to, otherSide, exitId, from, side];
-    if (key5 !== from) continue;
-    const socket = sockets[side];
-    exits.push({
-      exitId,
-      side,
-      x: socket.x,
-      y: socket.y,
-      radius: 38,
-      destinationSpaceId: SPACE_IDS[to],
-      reciprocalExitId,
-      anchorId: `${exitId}/arrival`,
-      partyPositions: party(socket.anchor),
-      roadSegmentId,
-      label: to === "town" ? "Enter Alderwatch" : `${roadSegmentId ? "Old Ward Road" : "Woodland path"} \u2192 ${names[to].split(" \xB7 ").at(-1)}`
-    });
-    const horizontal = side === "east" || side === "west", radius = roadSegmentId || town ? 1 : 0;
-    const end = horizontal ? socket.x / TILE2 - 0.5 : socket.y / TILE2 - 0.5, mid = horizontal ? 16 : 13;
-    for (let step = Math.min(mid, end); step <= Math.max(mid, end); step++) for (let d = -radius; d <= radius; d++) {
-      const x = horizontal ? step : 16 + d, y = horizontal ? 13 + d : step;
-      if (terrain2[y][x] !== "r") terrain2[y][x] = roadSegmentId || town ? "r" : "p";
-    }
-  }
-  for (let y = 10; y <= 16; y++) for (let x = 13; x <= 19; x++) if (terrain2[y][x] === "f") terrain2[y][x] = "g";
-  if (town) {
-    for (let y = 1; y < H - 1; y++) for (let x = 15; x <= 17; x++) terrain2[y][x] = "r";
-    for (let x = 1; x < W - 1; x++) for (let y = 12; y <= 14; y++) terrain2[y][x] = "r";
-    [
-      [3, 6, "The Alder Inn"],
-      [12, 6, "Merchant"],
-      [18, 6, "Town Hall"],
-      [26, 6, "Watch House"],
-      [3, 17, "Smith"],
-      [12, 17, "Cottage"],
-      [18, 17, "Vault"],
-      [26, 17, "Cottage"],
-      [3, 10, "Mastery Hall"],
-      [26, 10, "Storehouse"]
-    ].forEach(([x, y, name]) => rect(x, y, 3, town && y === 10 ? 2 : 4, "building", name));
-  } else {
-    groves[key5].forEach(([x, y, w, h]) => rect(x, y, w, h, "trees"));
-    rect(10, 19, 2, 2, "rock");
-    rect(21, 9, 2, 2, "rock");
-  }
-  return {
-    spaceId: SPACE_IDS[key5],
-    contentDefinitionId: definitionIds[key5],
-    regionId: REGION_ID,
-    label,
-    kind: town ? "settlement" : "woodland",
-    grid: { x: gridX, y: gridY },
-    collision: { tileSize: TILE2, width: W, height: H, tiles: tiles3.map((row2) => row2.join("")) },
-    visual: { terrain: terrain2.map((row2) => row2.join("")), blockers: blockers2, atmosphere: town ? "alderwatch" : key5 },
-    anchor: { anchorId, partyPositions: party({ x: 528, y: town ? 368 : 432 }) },
-    exits,
-    safety: {
-      encounterAllowed: !town,
-      settlementSafe: town,
-      exteriorHostileBuffer: town ? 0 : 128,
-      protectedArrivalRadius: 64,
-      townApproach: key5 === "sw" ? { exitId: "socket:7102", exclusionRadius: 192 } : null
-    }
-  };
-}
-var OLDWARD_SPACES = freezeWire(records.map(authorSpace));
-var OLDWARD_ROAD = freezeWire({ roadId: "road:700", label: "Old Ward Road", segments: links.filter((l) => l[6]).map((l) => ({
-  roadSegmentId: l[6],
-  fromSpaceId: SPACE_IDS[l[1]],
-  exitId: l[0],
-  toSpaceId: SPACE_IDS[l[4]],
-  reciprocalExitId: l[3]
-})) });
-var OLDWARD_LAYOUT = freezeWire({ regionId: REGION_ID, layoutVersion: LAYOUT_VERSION, spaces: OLDWARD_SPACES, road: OLDWARD_ROAD });
-var SEAMLESS_MANIFEST_DEFINITION_ID = "def:7a0000000000000000000000000000aa";
-var SEAMLESS_OVERWORLD_SPACE_ID = "spc:7a0000000000000000000000000000aa";
-async function createOldwardSeamlessManifest(sha256) {
-  const chunks = OLDWARD_SPACES.map((space) => ({
-    areaId: space.spaceId,
-    label: space.label,
-    discoveryId: space.spaceId,
-    origin: { x: space.grid.x * W * TILE2, y: space.grid.y * H * TILE2 },
-    dimensions: { width: W * TILE2, height: H * TILE2 },
-    collisionDefinitionId: space.contentDefinitionId,
-    terrainDefinitionId: space.contentDefinitionId
-  }));
-  const seams = links.map(([exitId, from, fromSide, reciprocalExitId, to, toSide, roadSegmentId], index2) => ({
-    seamId: `seam:oldward-${String(index2 + 1).padStart(2, "0")}`,
-    a: { areaId: SPACE_IDS[from], side: fromSide, exitId },
-    b: { areaId: SPACE_IDS[to], side: toSide, exitId: reciprocalExitId },
-    roadSegmentId,
-    openingTiles: 3
-  }));
-  const town = chunks.find((chunk) => chunk.areaId === SPACE_IDS.town);
-  const body = {
-    format: "saq-world-overworld-manifest",
-    manifestVersion: 1,
-    manifestId: "manifest:oldward-reference-v1",
-    sourceKind: "deterministic-reference-fixture",
-    logicalSpaceId: SEAMLESS_OVERWORLD_SPACE_ID,
-    label: "Alderwatch & Oldward Wood",
-    tileSize: TILE2,
-    dimensions: { width: 3 * W * TILE2, height: 4 * H * TILE2 },
-    chunks,
-    seams,
-    roads: [{
-      roadId: OLDWARD_ROAD.roadId,
-      label: OLDWARD_ROAD.label,
-      roadSegmentIds: OLDWARD_ROAD.segments.map((segment) => segment.roadSegmentId)
-    }],
-    safeRegions: [{
-      safeRegionId: "safe:alderwatch",
-      areaId: SPACE_IDS.town,
-      x: town.origin.x,
-      y: town.origin.y,
-      width: town.dimensions.width,
-      height: town.dimensions.height,
-      marker: { x: town.origin.x + 528, y: town.origin.y + 368, label: "ALDERWATCH" }
-    }]
-  };
-  const manifestHash = bytesToHex(await hashBytes(utf8(canonicalStringify(body)), sha256));
-  return freezeWire({ contentDefinitionId: SEAMLESS_MANIFEST_DEFINITION_ID, kind: "overworldManifest", manifestHash, ...body });
-}
-function oldwardAreaDefinition(contentDefinitionId) {
-  const space = OLDWARD_SPACES.find((candidate) => candidate.contentDefinitionId === contentDefinitionId);
-  requireContract(space, "Unknown Oldward area definition");
-  return freezeWire({ collision: space.collision, visual: space.visual });
-}
-function oldwardSpace(spaceId) {
-  const record = OLDWARD_SPACES.find((space) => space.spaceId === spaceId);
-  requireContract(record, "Unknown authored Oldward space");
-  return record;
-}
-function isOldwardExit(exitId) {
-  return OLDWARD_SPACES.some((space) => space.exits.some((exit) => exit.exitId === exitId));
-}
-
-// src/shared/content/manual_primary.js
-var SHIELD_SWORD_PRIMARY = freezeWire({
-  contentDefinitionId: "def:b1000000000000000000000000000010",
-  kind: "primaryProfile",
-  family: "shield-sword-prototype",
-  continuationTicks: 48,
-  forwardDotMinimum: 0.5,
-  steps: [
-    { startup: 6, active: 3, recovery: 13, startupMovement: 0.65, activeMovement: 0.65, recoveryMovement: 0.8 },
-    { startup: 7, active: 3, recovery: 14, startupMovement: 0.65, activeMovement: 0.65, recoveryMovement: 0.8 },
-    { startup: 14, active: 4, recovery: 22, startupMovement: 0.65, activeMovement: 0.65, recoveryMovement: 0.8 }
-  ]
-});
-var SLIME_CLEARING = freezeWire({
-  encounterId: "enc:b1000000000000000000000000000001",
-  label: "Fern Hollow slime clearing",
-  spaceId: "spc:7a000000000000000000000000000013",
-  activation: { x: 464, y: 432, radius: 48 },
-  hostilePosition: { x: 640, y: 432 },
-  hostileProfileId: "def:c1000000000000000000000000000002",
-  acquireRange: 128
-});
-
-// src/shared/contracts/primary.js
-var PRIMARY_RECENT_WINDOW = 16;
-var COMPLETED_COMBAT_WINDOW = 16;
-var same = (a, b) => canonicalStringify(a) === canonicalStringify(b);
-var deepFrozen = (v) => v === null || typeof v !== "object" || Object.isFrozen(v) && Object.values(v).every(deepFrozen);
-var checkedProfiles = /* @__PURE__ */ new WeakSet();
-var supportedProfile = (profile2) => {
-  if (checkedProfiles.has(profile2)) return true;
-  if (!same(profile2, SHIELD_SWORD_PRIMARY)) return false;
-  if (deepFrozen(profile2)) checkedProfiles.add(profile2);
-  return true;
-};
-function validatePrimaryAim(aim) {
-  closedRecord(aim, ["x", "y"]);
-  requireContract(
-    [aim.x, aim.y].every((n) => typeof n === "number" && Number.isFinite(n)) && Math.abs(Math.hypot(aim.x, aim.y) - 1) < 1e-10,
-    "Primary aim must be a normalized direction"
-  );
-}
-function primaryProfile(state, entityId) {
-  const id = state.primary?.actorsById[entityId]?.profileId;
-  const profile2 = state.content?.definitionsById[id];
-  requireContract(profile2?.kind === "primaryProfile" && supportedProfile(profile2), "Unsupported equipped primary profile");
-  return hasWorldCombat(state) ? { ...profile2, forwardDotMinimum: 0.1 } : profile2;
-}
-function initializePrimary(state) {
-  const next = copyWire(state), actorsById = {};
-  for (const p of Object.values(next.playersById)) actorsById[p.entityId] = {
-    profileId: SHIELD_SWORD_PRIMARY.contentDefinitionId,
-    facing: { x: 1, y: 0 },
-    heldCommandId: null,
-    queuedCommandId: null,
-    current: null,
-    nextComboStep: 1,
-    comboDeadline: null,
-    nextSourceSequence: 1,
-    retiredSourceSequence: 0
-  };
-  next.primary = { contractVersion: 1, actorsById, completedById: {}, actionIdHighWatermark: null, eventIdHighWatermark: null };
-  return next;
-}
-function primaryRecords(state) {
-  return state.primary ? [...Object.values(state.primary.completedById), ...Object.values(state.primary.actorsById).map((a) => a.current).filter(Boolean)] : [];
-}
-function primaryPinnedCommands(state) {
-  if (!state.primary) return [];
-  return [...primaryRecords(state).map((a) => a.commandId), ...Object.values(state.primary.actorsById).flatMap((a) => [a.heldCommandId, a.queuedCommandId])].filter(Boolean);
-}
-function resetPrimary(next) {
-  if (!next.primary) return;
-  next.primary.completedById = {};
-  for (const a of Object.values(next.primary.actorsById)) {
-    a.current = null;
-    a.heldCommandId = null;
-    a.queuedCommandId = null;
-    a.nextComboStep = 1;
-    a.comboDeadline = null;
-    a.retiredSourceSequence = a.nextSourceSequence - 1;
-  }
-}
-function clearPrimaryInput(next, entityId) {
-  const a = next.primary?.actorsById[entityId];
-  if (a) {
-    a.heldCommandId = null;
-    a.queuedCommandId = null;
-  }
-}
-function prunePrimaryHistory(next) {
-  if (!next.primary) return;
-  const records2 = Object.values(next.primary.completedById).sort((a, b) => a.completedTick - b.completedTick || a.startEventSequence - b.startEventSequence);
-  for (const record of records2.slice(0, Math.max(0, records2.length - PRIMARY_RECENT_WINDOW))) {
-    next.primary.actorsById[record.sourceEntityId].retiredSourceSequence = record.sourceSequence;
-    delete next.primary.completedById[record.primaryActionId];
-  }
-}
-function primaryPhaseAt(action, profile2, tick) {
-  const t = action.timing ?? profile2.steps[action.comboStep - 1], start = action.startedTick;
-  if (tick < start + t.startup) return { phase: "startup", phaseStartedTick: start, phaseEndsTick: start + t.startup };
-  if (tick < start + t.startup + t.active) return { phase: "active", phaseStartedTick: start + t.startup, phaseEndsTick: start + t.startup + t.active };
-  return { phase: "recovery", phaseStartedTick: start + t.startup + t.active, phaseEndsTick: start + t.startup + t.active + t.recovery };
-}
-function validatePrimaryState(state) {
-  const value = state.primary;
-  requireContract(state.history && state.multiplayer && state.space, "Primary needs bounded plural combat state");
-  closedRecord(value, ["contractVersion", "actorsById", "completedById", "actionIdHighWatermark", "eventIdHighWatermark"]);
-  requireContract(value.contractVersion === 1, "Unsupported primary contract");
-  requireContract(same(Object.keys(value.actorsById).sort(), Object.values(state.playersById).map((p) => p.entityId).sort()), "Primary owner inventory mismatch");
-  for (const [field2, kind2] of [["actionIdHighWatermark", "primaryActionId"], ["eventIdHighWatermark", "eventId"]]) if (value[field2] !== null) validateId(kind2, value[field2]);
-  requireContract(Object.keys(value.completedById).length <= PRIMARY_RECENT_WINDOW, "Completed primary retention bound");
-  requireContract(Object.keys(state.combat.appliedActionsById).length <= COMPLETED_COMBAT_WINDOW, "Manual damage retention bound");
-  const sequences = {}, primaryEvents = [], eventIds = /* @__PURE__ */ new Set();
-  for (const [id, a] of Object.entries(value.actorsById)) {
-    closedRecord(a, ["profileId", "facing", "heldCommandId", "queuedCommandId", "current", "nextComboStep", "comboDeadline", "nextSourceSequence", "retiredSourceSequence"]);
-    const profile2 = primaryProfile(state, id);
-    validatePrimaryAim(a.facing);
-    safeInteger(a.nextComboStep, 1, profile2.steps.length);
-    safeInteger(a.nextSourceSequence, 1);
-    safeInteger(a.retiredSourceSequence, 0, a.nextSourceSequence - 1);
-    sequences[id] = a.retiredSourceSequence;
-    if (a.comboDeadline !== null) safeInteger(a.comboDeadline, 0, state.tick + profile2.continuationTicks);
-    const player = Object.values(state.playersById).find((p) => p.entityId === id);
-    for (const commandId of [a.heldCommandId, a.queuedCommandId]) if (commandId !== null) {
-      validateId("commandId", commandId);
-      const receipt = state.appliedCommandsById[commandId], cmd = receipt && JSON.parse(receipt.commandCanonical);
-      requireContract(
-        cmd?.kind === "combat.primaryIntent" && cmd.payload.pressed && cmd.playerId === player.playerId && receipt.result?.status === "applied",
-        "Primary input needs its applied owner command"
-      );
-    }
-    if (player.connectionStatus === "disconnected") requireContract(a.heldCommandId === null && a.queuedCommandId === null, "Disconnected primary input retained");
-    if (a.current) requireContract(a.comboDeadline === null && a.nextComboStep === a.current.comboStep, "Active combo cursor mismatch");
-    if (state.space.encounterId === null) requireContract(a.current === null && a.heldCommandId === null && a.queuedCommandId === null && a.nextComboStep === 1 && a.comboDeadline === null, "Safe primary must be reset");
-    if (!state.space.entitiesById[id].alive) requireContract(a.current === null && a.nextComboStep === 1 && a.comboDeadline === null && a.heldCommandId === null && a.queuedCommandId === null, "Defeat must reset primary");
-  }
-  const records2 = primaryRecords(state).sort((a, b) => a.startEventSequence - b.startEventSequence);
-  for (const record of records2) {
-    closedRecord(record, [
-      "primaryActionId",
-      "sourceEntityId",
-      "sourceSequence",
-      "commandId",
-      "comboStep",
-      "aim",
-      "startedTick",
-      "phase",
-      "phaseStartedTick",
-      "phaseEndsTick",
-      "hitResolved",
-      "hitAttackActionId",
-      "startEventId",
-      "finishEventId",
-      "startEventSequence",
-      "finishEventSequence",
-      "completedTick",
-      "interrupted"
-    ]);
-    validateId("primaryActionId", record.primaryActionId);
-    validateId("entityId", record.sourceEntityId);
-    validateId("commandId", record.commandId);
-    requireContract(record.primaryActionId <= value.actionIdHighWatermark, "Primary identity exceeds permanent fence");
-    const owner = value.actorsById[record.sourceEntityId], profile2 = primaryProfile(state, record.sourceEntityId);
-    safeInteger(record.sourceSequence, 1);
-    requireContract(record.sourceSequence === sequences[record.sourceEntityId] + 1, "Primary source sequence gap");
-    sequences[record.sourceEntityId] = record.sourceSequence;
-    safeInteger(record.comboStep, 1, profile2.steps.length);
-    validatePrimaryAim(record.aim);
-    safeInteger(record.startedTick, 0, state.tick);
-    safeInteger(record.startEventSequence, 1, state.eventEmission.lastEventSequence);
-    for (const id of [record.startEventId, record.finishEventId]) {
-      validateId("eventId", id);
-      requireContract(id <= value.eventIdHighWatermark && !eventIds.has(id), "Primary event identity collision/fence");
-      eventIds.add(id);
-    }
-    requireContract(typeof record.hitResolved === "boolean" && typeof record.interrupted === "boolean", "Invalid primary hit/completion flags");
-    if (record.hitAttackActionId !== null) validateId("attackActionId", record.hitAttackActionId);
-    const command = state.appliedCommandsById[record.commandId], wire2 = command && JSON.parse(command.commandCanonical);
-    requireContract(
-      wire2?.kind === "combat.primaryIntent" && wire2.payload.pressed && command.tick <= record.startedTick && state.playersById[wire2.playerId]?.entityId === record.sourceEntityId && command.result?.entityId === record.sourceEntityId,
-      "Primary command/action causation mismatch"
-    );
-    const timing = profile2.steps[record.comboStep - 1], ends = record.startedTick + timing.startup + timing.active + timing.recovery;
-    if (record.completedTick === null) {
-      requireContract(owner.current?.primaryActionId === record.primaryActionId && record.finishEventSequence === null && !record.interrupted, "Active primary ownership mismatch");
-      requireContract(state.tick < ends && same(primaryPhaseAt(record, profile2, state.tick), { phase: record.phase, phaseStartedTick: record.phaseStartedTick, phaseEndsTick: record.phaseEndsTick }), "Primary phase timing mismatch");
-      requireContract(record.hitResolved ? state.tick >= record.startedTick + timing.startup : state.tick <= record.startedTick + timing.startup, "Primary hit phase mismatch");
-    } else {
-      requireContract(value.completedById[record.primaryActionId] === record && record.phase === "complete", "Completed primary identity mismatch");
-      safeInteger(record.completedTick, record.startedTick, state.tick);
-      requireContract(record.phaseStartedTick === record.completedTick && record.phaseEndsTick === record.completedTick, "Completed phase timing mismatch");
-      requireContract(record.interrupted ? record.completedTick <= ends : record.completedTick === ends && record.hitResolved, "Primary completion timing mismatch");
-      if (record.finishEventSequence !== null) {
-        safeInteger(record.finishEventSequence, record.startEventSequence + 1, state.eventEmission.lastEventSequence);
-        primaryEvents.push([record.finishEventSequence, record.completedTick]);
-      } else requireContract(record.interrupted, "Completed attack needs finish event");
-    }
-    requireContract(record.hitAttackActionId === null || record.hitResolved, "Unresolved primary has a hit receipt");
-    const hit = record.hitAttackActionId && state.combat.appliedActionsById[record.hitAttackActionId];
-    if (hit) requireContract(JSON.parse(hit.actionCanonical).primary?.primaryActionId === record.primaryActionId, "Primary hit receipt linkage mismatch");
-    else if (record.hitAttackActionId) requireContract(record.hitAttackActionId <= state.history.combatBaseline.attackActionIdHighWatermark, "Missing unretired primary hit");
-    primaryEvents.push([record.startEventSequence, record.startedTick]);
-  }
-  for (const [id, a] of Object.entries(value.actorsById)) requireContract(a.nextSourceSequence === sequences[id] + 1, "Primary source cursor mismatch");
-  for (const [id, a] of Object.entries(value.actorsById)) if (!a.current && a.comboDeadline !== null) {
-    const last = records2.filter((r) => r.sourceEntityId === id).at(-1);
-    requireContract(last && !last.interrupted && a.comboDeadline === last.completedTick + primaryProfile(state, id).continuationTicks && a.nextComboStep === last.comboStep % 3 + 1 && (state.tick < a.comboDeadline || a.heldCommandId || a.queuedCommandId), "Idle combo deadline/cursor mismatch");
-  }
-  for (const receipt of Object.values(state.combat.appliedActionsById)) {
-    for (const id of Object.values(JSON.parse(receipt.actionCanonical).eventIds)) requireContract(!eventIds.has(id), "Damage/primary event identity collision");
-    for (let n = receipt.eventSequenceStart; n <= receipt.eventSequenceEnd; n++) primaryEvents.push([n, receipt.tick]);
-  }
-  if (state.history.combatBaseline.eventSequence > 0) primaryEvents.push([state.history.combatBaseline.eventSequence, state.history.combatBaseline.tick]);
-  primaryEvents.sort((a, b) => a[0] - b[0]);
-  primaryEvents.forEach((event, i) => requireContract(i === 0 || event[0] > primaryEvents[i - 1][0] && event[1] >= primaryEvents[i - 1][1], "Authority event chronology/collision mismatch"));
-}
-
-// src/shared/contracts/commands.js
-function validateSpaceStamp(value) {
-  if (value.spaceInstanceId === null) requireContract(value.spaceRevision === null, "Incomplete command/event space stamp");
-  else {
-    validateId("spaceInstanceId", value.spaceInstanceId);
-    validateRevision("spaceRevision", value.spaceRevision);
-  }
-}
-function validateDiagnosticPayload(payload) {
-  closedRecord(payload, ["tag"]);
-  requireContract(typeof payload.tag === "string" && payload.tag.length <= 64, "Diagnostic payload limit");
-}
-function validateCommand(command) {
-  validateWire(command);
-  closedRecord(command, ["protocolVersion", "campaignId", "sessionId", "playerId", "commandId", "clientSequence", "kind", "payload", "spaceInstanceId", "spaceRevision"], ["expectedSaveRevision"]);
-  exactVersion(command.protocolVersion, PROTOCOL_VERSION);
-  for (const kind2 of ["campaignId", "sessionId", "playerId", "commandId"]) validateId(kind2, command[kind2]);
-  safeInteger(command.clientSequence, 1);
-  if (command.kind === "diagnostic.noop") validateDiagnosticPayload(command.payload);
-  else if (command.kind === "movement.setIntent") {
-    closedRecord(command.payload, ["x", "y"]);
-    requireContract([command.payload.x, command.payload.y].every((n) => typeof n === "number" && Number.isFinite(n) && n >= -1 && n <= 1) && Math.hypot(command.payload.x, command.payload.y) <= 1.000000000001, "Invalid movement command intent");
-  } else if (command.kind === "combat.primaryIntent") {
-    closedRecord(command.payload, ["pressed", "aim"], ["cancelQueued"]);
-    if (Object.hasOwn(command.payload, "cancelQueued")) requireContract(command.payload.pressed === false && typeof command.payload.cancelQueued === "boolean", "Cancel only on release");
-    requireContract(typeof command.payload.pressed === "boolean", "Primary press must be boolean");
-    validatePrimaryAim(command.payload.aim);
-  } else if (command.kind === "worldEvent.activate") {
-    closedRecord(command.payload, ["groupId"]);
-    requireContract(/^ordinary:[a-f0-9]{32}$/.test(command.payload.groupId), "Invalid event identity");
-  } else if (command.kind === "discovery.readNote") {
-    closedRecord(command.payload, ["noteId"]);
-    requireContract(command.payload.noteId === "note:alderwood:woodland-trail-v1", "Unknown discovery note");
-  } else if (command.kind === "quest.act") {
-    closedRecord(command.payload, ["action", "questId"]);
-    requireContract(["take", "abandon", "turnIn", "search", "deliver", "sellEtc"].includes(command.payload.action) && typeof command.payload.questId === "string" && command.payload.questId.length <= 96 && /^q[bfe]:[a-z0-9:-]+$/.test(command.payload.questId), "Invalid quest command");
-  } else if (command.kind === "loot.pickup") {
-    closedRecord(command.payload, ["sourceEntityId", "inventoryRevision"]);
-    validateId("entityId", command.payload.sourceEntityId);
-    safeInteger(command.payload.inventoryRevision);
-  } else if (command.kind === "gear.salvage") {
-    closedRecord(command.payload, ["itemId", "inventoryRevision", "fingerprint"]);
-    safeInteger(command.payload.inventoryRevision);
-    requireContract(typeof command.payload.itemId === "string" && command.payload.itemId.length <= 240 && typeof command.payload.fingerprint === "string" && /^[0-9a-f]{1,8}$/.test(command.payload.fingerprint), "Invalid salvage identity");
-  } else if (command.kind === "gear.drop") {
-    closedRecord(command.payload, ["itemId", "inventoryRevision"]);
-    requireContract(typeof command.payload.itemId === "string" && /^item:ply:[0-9a-f]{32}:(?:ent:[0-9a-f]{32}|starter)$/.test(command.payload.itemId), "Invalid item ID");
-    safeInteger(command.payload.inventoryRevision);
-  } else if (command.kind === "resource.interact") {
-    closedRecord(command.payload, ["groupId", "episode", "ordinal", "inventoryRevision"]);
-    requireContract(typeof command.payload.groupId === "string" && command.payload.groupId.length <= 160, "Invalid encounter identity");
-    safeInteger(command.payload.episode);
-    safeInteger(command.payload.ordinal, 0, 3);
-    safeInteger(command.payload.inventoryRevision);
-  } else if (command.kind === "progression.change") {
-    safeInteger(command.expectedSaveRevision);
-    closedRecord(command.payload, ["progressionRevision", "action"], ["inventoryRevision", "goldQuote"]);
-    safeInteger(command.payload.progressionRevision);
-    const a = command.payload.action;
-    if (a.kind === "allocate") {
-      closedRecord(a, ["kind", "deltas"]);
-      closedRecord(a.deltas, ["str", "dex", "int"]);
-      for (const n of Object.values(a.deltas)) safeInteger(n, 0, 147);
-    } else if (a.kind === "node.purchase") {
-      closedRecord(a, ["kind", "nodeId"]);
-      requireContract(typeof a.nodeId === "string" && a.nodeId.length <= 80, "Invalid node");
-    } else if (a.kind === "skills.arrange") {
-      closedRecord(a, ["kind", "slots"], ["attack"]);
-      requireContract(Array.isArray(a.slots) && a.slots.length === SKILL_SLOT_COUNT && a.slots.every((s) => s === null || s === MOVE_SLOT || CLASS_SKILL_IDS.includes(s)), "Invalid skill wheel");
-      requireContract(a.attack === void 0 || a.attack === null || CLASS_SKILL_IDS.includes(a.attack), "Invalid attack skill");
-    } else if (a.kind === "augment.craft") {
-      closedRecord(a, ["kind", "skillId", "index", "npcId"]);
-      requireContract(typeof a.skillId === "string" && a.skillId.length <= 80 && Number.isSafeInteger(a.index) && a.index >= 0 && a.index <= 4 && /^civilian:[a-z0-9:-]{1,100}$/.test(a.npcId), "Invalid augment craft");
-    } else if (a.kind === "augment.set") {
-      closedRecord(a, ["kind", "skillId", "slots"]);
-      requireContract(typeof a.skillId === "string" && a.skillId.length <= 80 && Array.isArray(a.slots) && a.slots.length <= 2 && a.slots.every((i) => Number.isSafeInteger(i) && i >= 0 && i <= 4), "Invalid augments");
-    } else if (a.kind === "look.set") {
-      closedRecord(a, ["kind", "look"]);
-      validateHeroLook(a.look);
-    } else if (a.kind === "class.choose") {
-      closedRecord(a, ["kind", "heroClass"]);
-      requireContract(HERO_CLASS_IDS.includes(a.heroClass), "Unknown hero class");
-    } else if (a.kind === "tree.reset") {
-      closedRecord(a, ["kind", "tree"]);
-      requireContract(["shield", "dagger", "tome", "utility"].includes(a.tree), "Invalid constellation");
-    } else if (a.kind === "skill.learn") {
-      closedRecord(a, ["kind", "skillId"]);
-      requireContract(typeof a.skillId === "string" && a.skillId.length <= 80, "Invalid skill");
-    } else if (a.kind === "skill.reset") {
-      closedRecord(a, ["kind", "tree"]);
-      requireContract(typeof a.tree === "string" && a.tree.length <= 40, "Invalid class tree");
-    } else {
-      requireContract(a.kind === "attributes.reset", "Unknown progression action");
-      closedRecord(a, ["kind"]);
-      safeInteger(command.payload.inventoryRevision);
-      requireContract(command.payload.goldQuote === "2500", "Invalid Attribute reset quote");
-    }
-  } else if (command.kind === "forge.attune") {
-    closedRecord(command.payload, ["slot", "expectedLevel", "inventoryRevision"]);
-    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "cape"].includes(command.payload.slot), "Unknown Forge slot");
-    safeInteger(command.payload.expectedLevel, 0, 99);
-    safeInteger(command.payload.inventoryRevision);
-  } else if (command.kind === "equipment.equip") {
-    closedRecord(command.payload, ["itemId", "inventoryRevision"], ["slot"]);
-    if (command.payload.slot !== void 0) requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "cape"].includes(command.payload.slot), "Unknown equipment slot");
-    requireContract(typeof command.payload.itemId === "string" && /^item:ply:[0-9a-f]{32}:(?:ent:[0-9a-f]{32}|starter)$/.test(command.payload.itemId), "Invalid item ID");
-    safeInteger(command.payload.inventoryRevision);
-  } else if (command.kind === "equipment.unequip") {
-    closedRecord(command.payload, ["slot", "inventoryRevision"]);
-    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "cape", "armor", "charm"].includes(command.payload.slot), "Unknown equipment slot");
-    safeInteger(command.payload.inventoryRevision);
-  } else if (command.kind === "classkit.claim") {
-    closedRecord(command.payload, ["inventoryRevision"]);
-    safeInteger(command.payload.inventoryRevision);
-  } else if (command.kind === "subweapon.claim") {
-    closedRecord(command.payload, ["subType", "inventoryRevision"]);
-    requireContract(["shield", "dagger", "tome"].includes(command.payload.subType), "Unknown provision");
-    safeInteger(command.payload.inventoryRevision);
-  } else if (command.kind === "combat.guardIntent") {
-    closedRecord(command.payload, ["pressed"]);
-    requireContract(typeof command.payload.pressed === "boolean", "Guard press must be boolean");
-  } else if (command.kind === "combat.shadowDash") {
-    closedRecord(command.payload, ["aim"]);
-    validatePrimaryAim(command.payload.aim);
-  } else if (command.kind === "combat.skill") {
-    closedRecord(command.payload, ["skillId", "aim"]);
-    requireContract(CLASS_SKILL_IDS.includes(command.payload.skillId), "Unknown skill");
-    validatePrimaryAim(command.payload.aim);
-  } else if (command.kind === "player.respawn") {
-    closedRecord(command.payload, [], ["leaveTrip"]);
-    requireContract(command.payload.leaveTrip === void 0 || command.payload.leaveTrip === true, "Invalid respawn");
-  } else if (command.kind === "player.revive") {
-    closedRecord(command.payload, ["targetPlayerId", "holding"]);
-    requireContract(typeof command.payload.targetPlayerId === "string" && command.payload.targetPlayerId.length > 0 && command.payload.targetPlayerId.length <= 120 && typeof command.payload.holding === "boolean", "Invalid revive");
-  } else if (command.kind === "service.bestiary") {
-    closedRecord(command.payload, ["family", "tier", "inventoryRevision"], ["boss"]);
-    requireContract((command.payload.boss === void 0 || command.payload.boss === true) && typeof command.payload.family === "string" && /^[a-z_]{1,40}$/.test(command.payload.family), "Invalid Bestiary page");
-    safeInteger(command.payload.tier, 1, 5);
-    safeInteger(command.payload.inventoryRevision);
-  } else if (command.kind === "service.modify" || command.kind === "service.material" || command.kind === "service.breakdown") {
-    closedRecord(command.payload, ["npcId", "inventoryRevision", ...command.kind === "service.modify" ? ["itemId", "operation", "line"] : ["material", "quantity"]]);
-    safeInteger(command.payload.inventoryRevision);
-    requireContract(/^civilian:[a-z0-9:-]{1,100}$/.test(command.payload.npcId), "Invalid specialist");
-    if (command.kind === "service.modify") {
-      requireContract(/^item:ply:[0-9a-f]{32}:ent:[0-9a-f]{32}$/.test(command.payload.itemId) && ["awaken", "reforge", "enchant", "purge", "resonance", "rebind", "shatter"].includes(command.payload.operation), "Invalid modification");
-      safeInteger(command.payload.line, 0, 4);
-    } else {
-      requireContract(typeof command.payload.material === "string" && command.payload.material.length <= 40, "Invalid material");
-      safeInteger(command.payload.quantity, 1, 1e6);
-    }
-  } else if (["service.buy", "service.sell", "service.rest", "supply.use"].includes(command.kind)) {
-    closedRecord(command.payload, ["inventoryRevision", ...command.kind === "supply.use" ? [] : ["npcId"], ...command.kind === "service.buy" ? ["offerId"] : command.kind === "service.sell" ? ["itemId"] : []]);
-    safeInteger(command.payload.inventoryRevision);
-    if (command.kind !== "supply.use") requireContract(typeof command.payload.npcId === "string" && /^civilian:[a-z0-9:-]{1,100}$/.test(command.payload.npcId), "Invalid civilian identity");
-    if (command.kind === "service.buy") requireContract(typeof command.payload.offerId === "string" && /^(?:[a-z-]{1,50}|daily:\d{1,9}:\d{1,3}:\d{1,3})$/.test(command.payload.offerId), "Invalid offer");
-    if (command.kind === "service.sell") requireContract(typeof command.payload.itemId === "string" && /^item:ply:[0-9a-f]{32}:(?:ent:[0-9a-f]{32}|starter)$/.test(command.payload.itemId), "Invalid sale item");
-  } else if (command.kind === "ferry.travel") {
-    closedRecord(command.payload, ["fromLandingId", "toLandingId"]);
-    requireContract([command.payload.fromLandingId, command.payload.toLandingId].every((id) => /^ferry:(alpha|seeded):[0-9]{2}$/.test(id)) && command.payload.fromLandingId !== command.payload.toLandingId, "Invalid ferry connection");
-  } else if (command.kind === "map.travel") {
-    closedRecord(command.payload, ["destinationId"]);
-    requireContract(typeof command.payload.destinationId === "string" && /^(?:settlement-slot:[a-z-]+:[0-9]{2}|site:[a-f0-9]{32}|player:ply:[0-9a-f]{32})$/.test(command.payload.destinationId), "Invalid fast travel destination");
-  } else if (command.kind === "site.transition") {
-    closedRecord(command.payload, ["siteId", "direction"], ["transitionId", "extractionId"]);
-    requireContract(/^loc:[a-f0-9]{32}$/.test(command.payload.siteId) || /^site:[a-f0-9]{32}$/.test(command.payload.siteId), "Invalid site transition identity");
-    requireContract(["enter", "boss", "exit", "up", "down", "extract"].includes(command.payload.direction), "Invalid site transition direction");
-    if (["up", "down"].includes(command.payload.direction)) requireContract(typeof command.payload.transitionId === "string" && command.payload.transitionId.length <= 180 && command.payload.extractionId === void 0, "Missing floor transition identity");
-    else if (command.payload.direction === "extract") requireContract(typeof command.payload.extractionId === "string" && command.payload.extractionId.length <= 180 && command.payload.transitionId === void 0, "Missing extraction identity");
-    else requireContract(command.payload.transitionId === void 0 && command.payload.extractionId === void 0, "Unexpected site transition identity");
-  } else if (command.kind === "trip.eat") {
-    closedRecord(command.payload, ["snack"]);
-    requireContract(TRIP_SNACK_IDS_V1.includes(command.payload.snack), "Invalid snack");
-  } else if (command.kind === "space.travel") {
-    closedRecord(command.payload, ["exitId"]);
-    requireContract(["field-to-room", "room-to-field"].includes(command.payload.exitId) || isOldwardExit(command.payload.exitId), "Unknown authored or fixture exit");
-  } else {
-    requireContract(command.kind === "combat.basicAttack", "Unsupported command kind");
-    closedRecord(command.payload, ["targetEntityId"]);
-    validateId("entityId", command.payload.targetEntityId);
-  }
-  validateSpaceStamp(command);
-  if (Object.hasOwn(command, "expectedSaveRevision")) validateRevision("saveRevision", command.expectedSaveRevision);
-  return command;
-}
-
-// src/shared/contracts/combat.js
-function validateAttackAction(action) {
-  validateWire(action);
-  closedRecord(action, [
-    "attackActionId",
-    "sourceEntityId",
-    "targetEntityId",
-    "sourceSequence",
-    "spaceInstanceId",
-    "spaceRevision",
-    "eventIds"
-  ], ["causation", "primary"]);
-  if (action.primary) {
-    closedRecord(action.primary, ["primaryActionId", "sourceSequence", "comboStep", "startedTick", "aim"]);
-    validateId("primaryActionId", action.primary.primaryActionId);
-    safeInteger(action.primary.sourceSequence, 1);
-    safeInteger(action.primary.comboStep, 1, 3);
-    safeInteger(action.primary.startedTick);
-    validatePrimaryAim(action.primary.aim);
-    requireContract(action.causation, "Primary hit requires explicit input causation");
-  }
-  if (Object.hasOwn(action, "causation")) {
-    closedRecord(action.causation, ["commandId", "playerId", "characterId", "sessionId"]);
-    for (const kind2 of ["commandId", "playerId", "characterId", "sessionId"]) validateId(kind2, action.causation[kind2]);
-  }
-  validateId("attackActionId", action.attackActionId);
-  validateId("entityId", action.sourceEntityId);
-  validateId("entityId", action.targetEntityId);
-  validateId("spaceInstanceId", action.spaceInstanceId);
-  safeInteger(action.sourceSequence, 1);
-  validateRevision("spaceRevision", action.spaceRevision);
-  closedRecord(action.eventIds, ["attackStartedEventId", "damageAppliedEventId", "actorDefeatedEventId"]);
-  validateId("eventId", action.eventIds.attackStartedEventId);
-  validateId("eventId", action.eventIds.damageAppliedEventId);
-  validateId("eventId", action.eventIds.actorDefeatedEventId);
-  const ids = Object.values(action.eventIds);
-  requireContract(new Set(ids).size === ids.length, "Attack event ID collision");
-  return action;
-}
-function canonicalAttackAction(record) {
-  validateAttackAction(record);
-  return canonicalStringify(record);
-}
-
-// src/shared/contracts/seed.js
-var trimAscii = (value) => value.replace(/^[\u0009-\u000d\u0020]+|[\u0009-\u000d\u0020]+$/g, "");
-function validateStoredSeed(record) {
-  validateWire(record);
-  closedRecord(record, ["seedNormalizationVersion", "seedHex"]);
-  exactVersion(record.seedNormalizationVersion, SEED_NORMALIZATION_VERSION);
-  validateHex(record.seedHex, 16);
-  return record;
-}
-function storedSeed(seedHex) {
-  return freezeWire({ seedNormalizationVersion: SEED_NORMALIZATION_VERSION, seedHex });
-}
-async function normalizeSeedInput(input, { sha256 } = {}) {
-  requireContract(typeof input === "string", "Seed input must be a string");
-  requireContract(utf8(input).length <= 1024, "Seed input exceeds 1024 UTF-8 bytes");
-  let text = trimAscii(input.replace(/\r\n?/g, "\n"));
-  if (text.startsWith("hex:")) {
-    const digits = text.slice(4);
-    requireContract(/^[0-9a-fA-F]{32}$/.test(digits), "hex: requires exactly 32 hex digits (16 bytes)");
-    return storedSeed(digits.toLowerCase());
-  }
-  if (text.startsWith("text:")) text = text.slice(5);
-  text = trimAscii(text).normalize("NFC");
-  requireContract(text.length > 0 && utf8(text).length <= 256, "Text seed must contain 1 to 256 UTF-8 bytes");
-  const digest10 = await hashBytes(frameUtf8(["SAQ-WORLD", SEED_NORMALIZATION_VERSION, text]), sha256);
-  return storedSeed(bytesToHex(digest10.slice(0, 16)));
-}
-async function createRandomSeed({ entropy } = {}) {
-  requireContract(typeof entropy === "function", "Explicit entropy provider required");
-  const bytes = await entropy(16);
-  validateBytes(bytes, 16);
-  return storedSeed(bytesToHex(bytes));
-}
-
-// src/shared/contracts/rng.js
-var UINT32_RANGE = 4294967296;
-var rotateLeft = (value, bits) => (value << bits | value >>> 32 - bits) >>> 0;
-function wordsFromDigest(digest10) {
-  validateBytes(digest10, 32);
-  const words = [0, 4, 8, 12].map((offset) => (digest10[offset] | digest10[offset + 1] << 8 | digest10[offset + 2] << 16 | digest10[offset + 3] << 24) >>> 0);
-  if (words.every((word2) => word2 === 0)) words[0] = 2654435769;
-  return words;
-}
-function validateRngState(state) {
-  validateWire(state);
-  closedRecord(state, ["rngVersion", "words", "drawCount"]);
-  exactVersion(state.rngVersion, RNG_VERSION);
-  requireContract(Array.isArray(state.words) && state.words.length === 4, "Expected four RNG words");
-  state.words.forEach((word2) => safeInteger(word2, 0, 4294967295));
-  requireContract(state.words.some((word2) => word2 !== 0), "Forbidden zero RNG state");
-  safeInteger(state.drawCount);
-  return state;
-}
-function createRngState(words) {
-  const state = { rngVersion: RNG_VERSION, words, drawCount: 0 };
-  validateRngState(state);
-  return freezeWire(state);
-}
-function nextUint32(state) {
-  validateRngState(state);
-  requireContract(state.drawCount < Number.MAX_SAFE_INTEGER, "RNG draw counter exhausted");
-  const words = [...state.words];
-  const value = Math.imul(rotateLeft(Math.imul(words[1], 5) >>> 0, 7), 9) >>> 0;
-  const shifted = words[1] << 9 >>> 0;
-  words[2] = (words[2] ^ words[0]) >>> 0;
-  words[3] = (words[3] ^ words[1]) >>> 0;
-  words[1] = (words[1] ^ words[2]) >>> 0;
-  words[0] = (words[0] ^ words[3]) >>> 0;
-  words[2] = (words[2] ^ shifted) >>> 0;
-  words[3] = rotateLeft(words[3], 11);
-  return freezeWire({ value, state: { rngVersion: RNG_VERSION, words, drawCount: state.drawCount + 1 } });
-}
-function nextBoundedInteger(state, bound) {
-  safeInteger(bound, 1, UINT32_RANGE);
-  const limit = UINT32_RANGE - UINT32_RANGE % bound;
-  let current = state;
-  for (let attempt = 0; attempt < 1024; attempt++) {
-    const result = nextUint32(current);
-    current = result.state;
-    if (result.value < limit) return freezeWire({ value: result.value % bound, state: current });
-  }
-  throw new RangeError("Bounded sampling draw budget exhausted; no biased fallback");
-}
-function validateGenerationIdentity(identity) {
-  validateWire(identity);
-  closedRecord(identity, ["seedHex", "seedNormalizationVersion", "generatorVersion", "contentCatalogHash", "worldRecipeVersion"]);
-  validateHex(identity.seedHex, 16);
-  exactVersion(identity.seedNormalizationVersion, SEED_NORMALIZATION_VERSION);
-  validateHex(identity.contentCatalogHash, 32);
-  for (const key5 of ["generatorVersion", "worldRecipeVersion"]) {
-    requireContract(typeof identity[key5] === "string" && /^[a-zA-Z0-9._-]{1,64}$/.test(identity[key5]), "Invalid generation version token");
-  }
-  return identity;
-}
-function validateStreamScope(scope) {
-  validateWire(scope);
-  closedRecord(scope, ["domain", "keys"]);
-  requireContract(typeof scope.domain === "string" && /^[a-z][a-z0-9._-]{0,63}$/.test(scope.domain), "Invalid stream domain");
-  requireContract(Array.isArray(scope.keys) && scope.keys.length <= 16, "Invalid stream keys");
-  for (const key5 of scope.keys) {
-    closedRecord(key5, ["kind", "value"]);
-    if (key5.kind === "index") safeInteger(key5.value);
-    else {
-      requireContract(key5.kind === "recipe", "Unknown stream key kind");
-      requireContract(typeof key5.value === "string" && /^[a-z][a-z0-9._-]{0,63}$/.test(key5.value), "Invalid recipe key");
-    }
-  }
-  return scope;
-}
-async function deriveScopedStream(identity, scope, { sha256 } = {}) {
-  validateGenerationIdentity(identity);
-  validateStreamScope(scope);
-  const frozenIdentity = freezeWire(identity);
-  const frozenScope = freezeWire(scope);
-  const fields = [
-    "SAQ-WORLD-STREAM-v1",
-    identity.seedHex,
-    identity.generatorVersion,
-    identity.contentCatalogHash,
-    identity.worldRecipeVersion,
-    scope.domain,
-    ...scope.keys.map((key5) => key5.kind === "index" ? String(key5.value) : key5.value)
-  ];
-  const digest10 = await hashBytes(frameUtf8(fields), sha256);
-  return freezeWire({
-    rngVersion: RNG_VERSION,
-    generationIdentity: frozenIdentity,
-    scope: frozenScope,
-    derivationDigest: bytesToHex(digest10),
-    initialState: createRngState(wordsFromDigest(digest10))
-  });
-}
-
-// src/shared/contracts/major_place_names.js
-var MAJOR_NAME_POLICY_VERSION = "major-proper-names-v1";
-var nameKey = (name) => {
-  requireContract(typeof name === "string" && name.trim().length > 0 && name.length <= 64, "Invalid major proper name");
-  return name.trim().toLowerCase();
-};
-function createMajorNameRegistry(reserved = []) {
-  const assigned = /* @__PURE__ */ new Set();
-  function reserve(name) {
-    const key5 = nameKey(name);
-    requireContract(!assigned.has(key5), "Duplicate major proper name");
-    assigned.add(key5);
-    return name;
-  }
-  for (const name of reserved) reserve(name);
-  return Object.freeze({ reserve, assign(candidate, pool) {
-    const start = pool.indexOf(candidate);
-    requireContract(start >= 0, "Major name candidate outside curated pool");
-    for (let offset = 0; offset < pool.length; offset++) {
-      const name = pool[(start + offset) % pool.length];
-      if (!assigned.has(nameKey(name))) return reserve(name);
-    }
-    throw new TypeError("Curated major proper names exhausted");
-  } });
-}
-function validateMajorPlaceNames(manifest) {
-  if (manifest.majorNamePolicyVersion === void 0) {
-    requireContract(!manifest.manifestId.endsWith("-names-v1"), "Missing major name policy");
-    return;
-  }
-  requireContract(manifest.majorNamePolicyVersion === MAJOR_NAME_POLICY_VERSION, "Unknown major name policy");
-  const registry = createMajorNameRegistry();
-  for (const place4 of manifest.settlements) registry.reserve(place4.label);
-  for (const site of manifest.sites) if (site.properName !== void 0) registry.reserve(site.properName);
-}
-
-// src/shared/content/elite_affixes_d12_4.js
-var ELITE_AFFIX_CATALOG_D12_4_VERSION = "elite-affix-catalog-d12.4-v1";
-var VITALITY_WEAVER_AFFIX_ID = "vitality_weaver";
-var SWIFT_COMMANDER_AFFIX_ID = "swift_commander";
-var GLACIAL_WARDEN_AFFIX_ID = "glacial_warden";
-var TOXIC_DECAY_AFFIX_ID = "toxic_decay";
-var IRON_CITADEL_AFFIX_ID = "iron_citadel";
-var BLOOD_BERSERKER_AFFIX_ID = "blood_berserker";
-var NULLIFIER_AFFIX_ID = "nullifier";
-var WEB_WEAVER_AFFIX_ID = "web_weaver";
-var SLAG_SHAPER_AFFIX_ID = "slag_shaper";
-var VITALITY_WEAVER_D12_4 = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: VITALITY_WEAVER_AFFIX_ID,
-  tier: "elite",
-  label: "VITALITY WEAVER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 120, maximumTargets: 3, ordinaryHeal: { numerator: 6, denominator: 100 }, reservedBossHeal: { numerator: 15, denominator: 1e3 } },
-  presentation: { scale: 1.25, accent: "#39d27d", accentDark: "#123e31", accentLight: "#c5f28c" }
-});
-var SWIFT_COMMANDER_D12_4D = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: SWIFT_COMMANDER_AFFIX_ID,
-  tier: "elite",
-  label: "SWIFT COMMANDER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 140, maxStacks: 3, perStackSpeedPercent: 15, lingerTicks: 300, decayTicks: 150 },
-  presentation: { scale: 1.25, accent: "#00d2ff", accentDark: "#123a50", accentLight: "#b9f4ff", commandGold: "#f0c95a" }
-});
-var GLACIAL_WARDEN_D12_4E = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: GLACIAL_WARDEN_AFFIX_ID,
-  tier: "elite",
-  label: "GLACIAL WARDEN",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 120, radius: 110, statusId: "glacial_warden_snare", durationTicks: 60, movementMultiplier: { numerator: 2, denominator: 5 } },
-  presentation: { scale: 1.25, accent: "#38bdf8", accentDark: "#153756", accentLight: "#d9f7ff", iceBlue: "#79d7ff" }
-});
-var TOXIC_DECAY_D12_4F = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: TOXIC_DECAY_AFFIX_ID,
-  tier: "elite",
-  label: "TOXIC DECAY",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 120, statusId: "toxic_decay_poison", durationTicks: 240, tickTicks: 60, maxStacks: 3, damageMaxHp: { numerator: 12, denominator: 1e3 } },
-  presentation: { scale: 1.25, accent: "#69e09b", accentDark: "#241735", accentLight: "#c7ff9a", sludge: "#70408f" }
-});
-var IRON_CITADEL_D12_4G = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: IRON_CITADEL_AFFIX_ID,
-  tier: "elite",
-  label: "IRON CITADEL",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 100, maxStacks: 3, perStackMitigationPercent: 15, lingerTicks: 300, decayTicks: 150 },
-  presentation: { scale: 1.25, accent: "#7196b5", accentDark: "#182a38", accentLight: "#d2e2eb", steel: "#45657d" }
-});
-var BLOOD_BERSERKER_D12_4H_A = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: BLOOD_BERSERKER_AFFIX_ID,
-  tier: "elite",
-  label: "BERSERKER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 110, maxStacks: 3, perStackAttackPercent: 15, lingerTicks: 300, decayTicks: 150, statusId: "blood_berserker_attack" },
-  presentation: { scale: 1.25, accent: "#c83f4f", accentDark: "#35131c", accentLight: "#ffb067", bloodGold: "#e2b85a" }
-});
-var NULLIFIER_D12_4I = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: NULLIFIER_AFFIX_ID,
-  tier: "elite",
-  label: "NULLIFIER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 300, chargeTicks: 60, radius: 90, statusId: "nullified", durationTicks: 120, resistanceTicks: 90 },
-  presentation: { scale: 1.25, accent: "#9b5de5", accentDark: "#251339", accentLight: "#e4c7ff", fracture: "#c98cff" }
-});
-var WEB_WEAVER_D12_4J = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: WEB_WEAVER_AFFIX_ID,
-  tier: "elite",
-  label: "WEB WEAVER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 210, radius: 220, windupTicks: 45, hazardKind: "web_weaver_web", durationTicks: 240, statusId: "webbed", geometry: { kind: "ellipse", radiusX: 75, radiusY: 33.75 }, movementMultiplier: { numerator: 2, denominator: 5 }, maxActivePerSource: 2 },
-  presentation: { scale: 1.25, accent: "#a9f3ff", accentDark: "#241b4b", accentLight: "#f1fdff", thread: "#c7e9ef" }
-});
-var SLAG_SHAPER_D12_4K = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: SLAG_SHAPER_AFFIX_ID,
-  tier: "elite",
-  label: "SLAG SHAPER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 180, windupTicks: 30, hazardKind: "slag_shaper_pool", durationTicks: 300, statusId: "slag_burn", geometry: { kind: "ellipse", radiusX: 12, radiusY: 6 }, damageMaxHp: { numerator: 15, denominator: 1e3 }, damageIntervalTicks: 45, nonlethal: false, maxActivePerSource: 2 },
-  presentation: { scale: 1.25, accent: "#f97316", accentDark: "#25130f", accentLight: "#fff0a8", crust: "#211a19" }
-});
-var ELITE_AFFIX_CATALOG_D12_4 = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  definitionsById: { [VITALITY_WEAVER_AFFIX_ID]: VITALITY_WEAVER_D12_4, [SWIFT_COMMANDER_AFFIX_ID]: SWIFT_COMMANDER_D12_4D, [GLACIAL_WARDEN_AFFIX_ID]: GLACIAL_WARDEN_D12_4E, [TOXIC_DECAY_AFFIX_ID]: TOXIC_DECAY_D12_4F, [IRON_CITADEL_AFFIX_ID]: IRON_CITADEL_D12_4G, [BLOOD_BERSERKER_AFFIX_ID]: BLOOD_BERSERKER_D12_4H_A, [NULLIFIER_AFFIX_ID]: NULLIFIER_D12_4I, [WEB_WEAVER_AFFIX_ID]: WEB_WEAVER_D12_4J, [SLAG_SHAPER_AFFIX_ID]: SLAG_SHAPER_D12_4K }
-});
-function eliteAffixDefinitionD12_4(affixId) {
-  return ELITE_AFFIX_CATALOG_D12_4.definitionsById[affixId] ?? null;
-}
-function applyEliteActorStatsD12_4(profile2, elite) {
-  if (!elite) return profile2;
-  requireContract(elite.tier === "elite" && (elite.affixIds.length === 1 || elite.version === COMPOSITION_ELITE_V1 && elite.affixIds.length <= 3 && elite.affixIds.slice(1).every((id) => PASSIVE_ELITE_TRAITS_V1[id]) && new Set(elite.affixIds).size === elite.affixIds.length), "Unsupported D12.4 elite loadout");
-  const definition = eliteAffixDefinitionD12_4(elite.affixIds[0]);
-  requireContract(definition, "Unsupported D12.4 elite loadout");
-  const d = COMBAT_BALANCE_V3.elite, extra = elite.affixIds.slice(1).map((id) => PASSIVE_ELITE_TRAITS_V1[id]);
-  return {
-    ...profile2,
-    maxHp: combatInteger(extra.reduce((hp, t) => multiplyCombat(hp, t.hp, 100), multiplyCombat(profile2.maxHp, d.maxHp.numerator, d.maxHp.denominator)), "round"),
-    attackDamage: combatInteger(extra.reduce((damage, t) => multiplyCombat(damage, t.damage, 100), multiplyCombat(profile2.attackDamage, d.attackDamage.numerator, d.attackDamage.denominator)), "round")
-  };
-}
-
-// src/shared/content/hidden_hollow_v1.js
-var HOLLOW_VERSION = "hidden-hollow-v1";
-var HOLLOW_LEDGER_VERSION = "world-events-hidden-hollow-v1";
-var HOLLOW_POLICY = freezeWire({ version: HOLLOW_VERSION, parentEventPolicy: "spore-outbreak-v1", maxActive: 4, maximumRecords: 9, waves: [6, 6, 1], firstWaveTicks: 90, intermissionTicks: 150, emergenceTellTicks: 45, emergenceSpacingTicks: 24, playerClearance: 64, triggerRadius: 96, activeRadius: 768, actorBudget: 192, guardian: { family: "golem", rank: "S" }, reset: "one-time V1; manual reset deferred", reward: "one existing ordinary completion chest per eligible participant", simulationHz: 60 });
-var HOLLOW_EVENT = freezeWire({ slotId: "density-v2-event-capacity-064", ordinal: 45, x: 2784, y: 6162, kind: "hidden_hollow", label: "Hidden Hollow", rank: "C", families: ["sprout", "slime", "sprout", "slime", "sprout", "slime", "sprout", "slime", "golem", "sprout", "slime", "sprout", "golem"] });
-var hollowOrdinal = (n) => n === HOLLOW_EVENT.ordinal;
-var HOLLOW_HASH = "4843c693cbb430c877f93108d33d8d78485d15fdf24b4bff89fc819102668a33";
-
-// src/shared/content/starter_village_v1.js
-var STARTER_VERSION = "alderwood-campaign-start-v1";
-var STARTER_VILLAGE_ID = "settlement-slot:village-outpost:01";
-var STARTER_VILLAGE_NAME = "Alderwood";
-var STARTER_VILLAGE_ORIGIN = freezeWire({ x: 3648, y: 6916 });
-var STARTER_ARRIVAL_TILES = freezeWire([{ x: 3682, y: 6946 }, { x: 3683, y: 6946 }, { x: 3682, y: 6947 }, { x: 3683, y: 6947 }]);
-var STARTER_POLICY = freezeWire({ version: STARTER_VERSION, parentRuntime: "143462d57e186816", assetId: "alpha", settlementId: STARTER_VILLAGE_ID, name: STARTER_VILLAGE_NAME, role: "starting-village", biomeId: "biome:woodland", band: 1, template: "village", origin: STARTER_VILLAGE_ORIGIN, dimensions: [64, 52], arrivalTiles: STARTER_ARRIVAL_TILES, start: "fresh-campaign-genesis-and-normal-respawn-only", reopen: "restore-the-actual-saved-position-and-residency", approach: "existing-west-socket-113,266", services: "ordinary-band-1-personal-stock-and-existing-paid-recovery", geographyChanged: false, progressionChanged: false, existingReservationsChanged: false });
-var STARTER_HASH = "f623f142e0a1d76ce8799d8e1d7b658cc67e29cd4c890f7cf778d8876d69ccc4";
-var hasStarterVillage = (value) => {
-  const b = value?.d9World?.plannedWorld ?? value;
-  return b?.startVersion === STARTER_VERSION && b?.startHash === STARTER_HASH;
-};
-var STARTER_NPCS = freezeWire([
-  { id: "civilian:alpha:alderwood:merchant", name: "Alderwood Merchant", role: "general", roleLabel: "General merchant", settlementId: STARTER_VILLAGE_ID, buildingId: "village:roof:002", band: 1, tile: { x: 3665, y: 6934 }, space: "exterior", color: "#58766d" },
-  { id: "civilian:alpha:alderwood:smith", name: "Alderwood Smith", role: "smith", roleLabel: "Equipment merchant", settlementId: STARTER_VILLAGE_ID, buildingId: "village:roof:003", band: 1, tile: { x: 3700, y: 6931 }, space: "exterior", color: "#8d6c49" },
-  { id: "civilian:alpha:alderwood:innkeeper", name: "Alderwood Innkeeper", role: "innkeeper", roleLabel: "Innkeeper \xB7 veranda rest", settlementId: STARTER_VILLAGE_ID, buildingId: "village:roof:002", band: 1, tile: { x: 3667, y: 6934 }, space: "exterior", color: "#81657a" }
-]);
-
-// src/shared/content/spore_outbreak_v1.js
-var SPORE_VERSION = "spore-outbreak-v1";
-var SPORE_POLICY = Object.freeze({ version: SPORE_VERSION, maxActive: 4, pods: 3, mushrooms: 12, living: 6, flightTicks: 60, growthTicks: 90, launchIntervalTicks: 180, activeRadius: 768, triggerRadius: 96, hatchPlayerClearance: 64, reset: "one-time; manual reset deferred", reward: "ordinary mushroom and breakable rewards; one personal completion chest per participant", simulationHz: 60 });
-var SPORE_EVENTS = Object.freeze([
-  { slotId: "density-v2-event-capacity-027", ordinal: 40, x: 3424, y: 6942 },
-  { slotId: "density-v2-event-capacity-123", ordinal: 41, x: 3232, y: 6994 },
-  { slotId: "density-v2-event-capacity-097", ordinal: 42, x: 2784, y: 6994 },
-  { slotId: "density-v2-event-capacity-051", ordinal: 43, x: 2656, y: 7046 },
-  { slotId: "density-v2-event-capacity-153", ordinal: 44, x: 2912, y: 6110 }
-].map((e) => Object.freeze({ ...e, kind: "spore_outbreak", label: "Spore Outbreak", rank: "C", families: Object.freeze(Array(12).fill("sprout")) })));
-var eventOrdinal = (n) => Number.isInteger(n) && n >= 37 && n <= 44;
-var sporeOrdinal = (n) => SPORE_EVENTS.some((e) => e.ordinal === n);
-var protectionCache = /* @__PURE__ */ new WeakMap();
-function worldEventProtectionV1(asset) {
-  let cached = protectionCache.get(asset);
-  if (cached) return cached;
-  const chunks = /* @__PURE__ */ new Set(), protect = (c) => {
-    if (Number.isFinite(c?.x) && Number.isFinite(c?.y)) chunks.add(c.x + "," + c.y);
-  }, keys2 = /* @__PURE__ */ new Set(["core", "expansion", "footprint", "approach", "coreChunks", "expansionChunks", "footprintChunks", "approachChunks", "reservedChunks", "sockets", "campus", "activity", "arrival", "entrance", "landing", "breathing"]);
-  const scan = (o) => {
-    if (!o || typeof o !== "object") return;
-    if (Array.isArray(o)) {
-      for (const v of o) scan(v);
-      return;
-    }
-    for (const [k, v] of Object.entries(o)) {
-      if (keys2.has(k)) {
-        if (Array.isArray(v)) for (const c of v) protect(c);
-        else protect(v);
-      }
-      if (v && typeof v === "object") scan(v);
-    }
-  };
-  for (const list2 of [asset.settlements, asset.sites, asset.futureIslands, asset.factions, asset.populationOverlay]) scan(list2);
-  for (const c of asset.extraProtected ?? []) protect(c);
-  for (const c of asset.originZone?.runtimeChunks ?? []) protect({ x: c.chunkX, y: c.chunkY });
-  cached = (x, y) => {
-    if (STARTER_ARRIVAL_TILES.some((p) => Math.hypot(x - p.x, y - p.y) <= 32) || asset.spawnTile && Math.hypot(x - asset.spawnTile.x, y - asset.spawnTile.y) <= 32 || ferryNetworkV1().landings.some((p) => Math.hypot(x - p.tile.x, y - p.tile.y) <= 32)) return false;
-    const cx = Math.floor(x / 32), cy = Math.floor(y / 26), r = ROADSIDE_POLICY.wildernessSafetyCollarTiles;
-    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-      const xx = cx + dx, yy = cy + dy;
-      if (chunks.has(xx + "," + yy) && x >= xx * 32 - r && x < (xx + 1) * 32 + r && y >= yy * 26 - r && y < (yy + 1) * 26 + r) return false;
-    }
-    return true;
-  };
-  protectionCache.set(asset, cached);
-  return cached;
-}
-
-// src/shared/content/wilderness_ecology_v3.js
-var existingCreature = (family2) => ORDINARY_ENEMIES.some((row2) => row2.family === family2);
-var WILDERNESS_ECOLOGY_BIOMES = Object.freeze(["woodland", "grassland", "wetland", "upland", "desert", "frostland", "tropical", "volcanic"]);
-var WILDERNESS_ECOLOGY_SITE_FAMILIES = Object.freeze(["cave", "ruin", "fort", "crypt"]);
-var WILDERNESS_ECOLOGY_TIERS = Object.freeze(["small", "standard", "large", "deep"]);
-var WILDERNESS_ECOLOGY_V3_MATRIX = freezeWire({
-  woodland: { surface: ["sprout", "slime", "thorn_wyrm"], cave: ["rust_nibbler", "slime", "golem"], ruin: ["cursed_blade", "gargoyle", "sprout"], fort: ["animated_armor", "golem"], crypt: ["cursed_blade", "gargoyle"] },
-  grassland: { surface: ["thorn_wyrm", "tusk_boar", "field_scarecrow", "field_mantis", "meadow_bee"], cave: ["thorn_wyrm", "tusk_boar", "field_mantis"], ruin: ["barrow_wight", "field_scarecrow", "meadow_bee"], fort: ["field_scarecrow", "tusk_boar", "field_mantis"], crypt: ["barrow_wight", "meadow_bee"] },
-  wetland: { surface: ["toxic_fly", "marsh_ghost", "bog_lily", "bog_frog", "leech"], cave: ["swamp_basilisk", "corroded_golem", "leech"], ruin: ["marsh_ghost", "bog_lily"], fort: ["corroded_golem", "bog_frog"], crypt: ["marsh_ghost", "bog_lily"] },
-  upland: { surface: ["wyrmling", "gilded_scuttler", "horn_beetle", "griffling", "cairnling"], cave: ["gilded_scuttler", "wyrmling", "horn_beetle"], ruin: ["mimic_shield", "gilded_scuttler", "cairnling"], fort: ["mimic_shield", "gilded_scuttler", "griffling"], crypt: ["mimic_shield", "cairnling"] },
-  desert: { surface: ["sand_scarab", "dune_scorpion", "antlion", "cactling", "dust_imp"], cave: ["dune_scorpion", "sand_scarab", "antlion"], ruin: ["tomb_mummy", "sand_scarab", "cactling"], fort: ["dune_scorpion", "tomb_mummy", "dust_imp"], crypt: ["tomb_mummy", "sand_scarab", "dust_imp"] },
-  frostland: { surface: ["wyrmling", "gilded_scuttler", "shardling", "young_yeti", "lantern_wisp"], cave: ["wyrmling", "gilded_scuttler", "young_yeti"], ruin: ["mimic_shield", "shardling"], fort: ["mimic_shield", "gilded_scuttler", "lantern_wisp"], crypt: ["mimic_shield", "lantern_wisp"] },
-  tropical: { surface: ["thorn_wyrm", "snapjaw", "dart_frog"], cave: ["thorn_wyrm", "dart_frog"], ruin: ["snapjaw", "dart_frog"], fort: ["dart_frog", "snapjaw"], crypt: ["snapjaw"] },
-  volcanic: { surface: ["hell_bat", "lava_serpent", "cinder_crab", "forge_imp", "ember_newt"], cave: ["slag_slime", "hell_bat", "cinder_crab"], ruin: ["magma_elemental", "slag_slime", "ember_newt"], fort: ["magma_elemental", "lava_serpent", "forge_imp"], crypt: ["forge_imp"] }
-});
-var WILDERNESS_ECOLOGY_BOSS_CANDIDATES = freezeWire({
-  "repeatable-slot:fort:upland:deep:01": { bossId: "aegis_goliath", support: ["mimic_shield"], status: "needs-native-arena-validation" },
-  "repeatable-slot:ruin:volcanic:large:01": { bossId: "brimstone_colossus", support: ["magma_elemental", "slag_slime"], status: "needs-native-arena-validation" }
-});
-var WILDERNESS_ECOLOGY_STARTER_SITES = freezeWire({
-  "starter-cave": { enemyTheme: "rust-nibblers-and-slimes" },
-  "starter-elite-fort": { enemyTheme: "animated-armour-and-golems" },
-  "advanced-ruin": { enemyTheme: "gargoyle-and-cursed-blades" }
-});
-var WILDERNESS_V3_STARTER_POOLS = freezeWire({
-  "starter-cave": { biome: "woodland", family: "cave", tier: "small", melee: ["rust_nibbler", "slime"] },
-  "starter-elite-fort": { biome: "woodland", family: "fort", tier: "standard", melee: ["animated_armor", "golem"] },
-  "advanced-ruin": { biome: "woodland", family: "ruin", tier: "standard", melee: ["cursed_blade", "gargoyle"] }
-});
-function starterWildernessPoolV3(site) {
-  const provenance = site?.socket?.provenance;
-  const reservationId = provenance?.reservationId;
-  const spec = WILDERNESS_V3_STARTER_POOLS[starterRoleAtSiteV1(reservationId)];
-  if (!spec) return null;
-  const rawFamily = site?.familyId?.split(":").at(-1) ?? site?.siteKind?.replace("procedural-", "");
-  const family2 = rawFamily?.includes("cave") ? "cave" : rawFamily;
-  if (site?.socket?.region?.biome !== spec.biome || family2 !== spec.family || site?.sizeTier !== spec.tier)
-    throw Error("V3 starter encounter reservation geometry drift: " + reservationId);
-  return freezeWire({ key: "wilderness-v3-starter:" + reservationId, ranged: [], melee: spec.melee });
-}
-var isWildernessStarterSiteV3 = (site) => Boolean(starterRoleAtSiteV1(site?.socket?.provenance?.reservationId));
-for (const spec of Object.values(WILDERNESS_V3_STARTER_POOLS))
-  for (const family2 of spec.melee) if (!existingCreature(family2)) throw Error("Missing V3 starter mob: " + family2);
-var WILDERNESS_ECOLOGY_RARE_SITE_THEMES = freezeWire({
-  void: ["void_crawler", "void_spectre", "void_wraith", "void_orb", "rift_drifter"],
-  clockwork: ["clockwork_scarab", "clockwork_drone", "temporal_watcher", "star_weaver"],
-  arcane: ["neon_spider", "wireframe_orb", "cyber_wraith", "coin_elemental"]
-});
-for (const [biome, roles] of Object.entries(WILDERNESS_ECOLOGY_V3_MATRIX)) {
-  if (!WILDERNESS_ECOLOGY_BIOMES.includes(biome)) throw Error("Invalid V3 biome " + biome);
-  for (const [role, families] of Object.entries(roles)) {
-    if (role !== "surface" && !WILDERNESS_ECOLOGY_SITE_FAMILIES.includes(role)) throw Error("Invalid V3 role");
-    if (new Set(families).size !== families.length) throw Error("Duplicate V3 family");
-    for (const family2 of families) if (!existingCreature(family2)) throw Error("Unknown existing V3 creature " + family2);
-  }
-}
-for (const f3 of Object.values(WILDERNESS_ECOLOGY_RARE_SITE_THEMES).flat()) if (!existingCreature(f3)) throw Error("Unknown exotic creature " + f3);
-
-// src/shared/content/wilderness_fairness_v3_2.js
-var WILDERNESS_FAIRNESS_V3_2_VERSION = "wilderness-v3-2-level-fairness-1";
-var WILDERNESS_FAIRNESS_V3_2 = Object.freeze({
-  version: WILDERNESS_FAIRNESS_V3_2_VERSION,
-  enemyBaseDamage: "unchanged; no additional multiplier from level difference",
-  enemyDamageAmplification: "boss/elite abilities remain independent of level difference",
-  playerOffense: "preserve exact existing higher-level resistance",
-  historicWorldCombatV1: "immutable; retain published level-gap contract for legacy non-wilderness worlds",
-  eligibility: "world-combat-v1 plus committed wilderness-v2 world binding",
-  pendingSeparateTuning: "cleave reach and simultaneous incoming hit protection"
-});
-var usesWildernessFairnessV3_2 = (state) => hasWorldCombat(state) && hasWilderness(state?.d9World?.plannedWorld);
-function wildernessFairLevelGap(heroLevel, enemyLevel) {
-  const old = worldLevelGapMultiplier(heroLevel, enemyLevel);
-  return { outgoing: old.outgoing, incoming: combatAmount(1) };
-}
-
-// src/shared/content/alpha_site_population_v1.js
-var ALPHA_POPULATION_VERSION = "planned-alpha-site-population-v1";
-var ALPHA_POPULATION_HASH = "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e";
-var ALPHA_POPULATION_PLAN_HASH = "42261b05d1b3b93f91721cf482a8aae0af872615027e5e74d9422f045cb3eca7";
-var ALPHA_POPULATION_ROUTE_HASH = "baf9ea6ed5e392b4879e4d8e53fcd4f194c49f0e5819dbb98bdbe4a13e99e082";
-var ALPHA_POPULATION_BASE_HASH = "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a";
-var ALPHA_POPULATION_SELECTIONS = freezeWire([{ "anchor": { "key": "35,116", "x": 35, "y": 116 }, "approach": [{ "x": 71, "y": 232 }], "band": 2, "familyId": "site-family:cave", "footprint": [{ "x": 70, "y": 232 }], "id": "repeatable-slot:cave:woodland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "woodland", "old": true, "added": false }, { "anchor": { "key": "77,95", "x": 77, "y": 95 }, "approach": [{ "x": 155, "y": 190 }], "band": 3, "familyId": "site-family:cave", "footprint": [{ "x": 154, "y": 190 }], "id": "repeatable-slot:cave:desert:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "desert", "old": true, "added": false }, { "anchor": { "key": "32,110", "x": 32, "y": 110 }, "approach": [{ "x": 65, "y": 220 }], "band": 2, "familyId": "site-family:cave", "footprint": [{ "x": 64, "y": 220 }], "id": "repeatable-slot:cave:upland:large:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "large", "biome": "upland", "old": true, "added": false }, { "anchor": { "key": "58,36", "x": 58, "y": 36 }, "approach": [{ "x": 117, "y": 72 }], "band": 3, "familyId": "site-family:cave", "footprint": [{ "x": 116, "y": 72 }], "id": "repeatable-slot:cave:tropical:deep:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "deep", "biome": "tropical", "old": true, "added": false }, { "anchor": { "key": "88,45", "x": 88, "y": 45 }, "approach": [{ "x": 177, "y": 89 }, { "x": 178, "y": 89 }], "band": 3, "familyId": "site-family:fort", "footprint": [{ "x": 175, "y": 89 }, { "x": 176, "y": 89 }, { "x": 175, "y": 90 }, { "x": 176, "y": 90 }], "id": "repeatable-slot:fort:grassland:small:01", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "tier": "small", "biome": "grassland", "old": true, "added": false }, { "anchor": { "key": "21,128", "x": 21, "y": 128 }, "approach": [{ "x": 43, "y": 255 }, { "x": 44, "y": 255 }], "band": 1, "familyId": "site-family:fort", "footprint": [{ "x": 41, "y": 254 }, { "x": 42, "y": 254 }, { "x": 41, "y": 255 }, { "x": 42, "y": 255 }, { "x": 41, "y": 256 }, { "x": 42, "y": 256 }], "id": "repeatable-slot:fort:woodland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "woodland", "old": true, "added": false }, { "anchor": { "key": "125,110", "x": 125, "y": 110 }, "approach": [{ "x": 249, "y": 223 }, { "x": 249, "y": 224 }, { "x": 249, "y": 225 }], "band": 5, "familyId": "site-family:fort", "footprint": [{ "x": 248, "y": 220 }, { "x": 249, "y": 220 }, { "x": 250, "y": 220 }, { "x": 248, "y": 221 }, { "x": 249, "y": 221 }, { "x": 250, "y": 221 }, { "x": 248, "y": 222 }, { "x": 249, "y": 222 }, { "x": 250, "y": 222 }], "id": "repeatable-slot:fort:tropical:large:01", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "tier": "large", "biome": "tropical", "old": true, "added": false }, { "anchor": { "key": "39,132", "x": 39, "y": 132 }, "approach": [{ "x": 79, "y": 263 }], "band": 1, "familyId": "site-family:ruin", "footprint": [{ "x": 78, "y": 263 }, { "x": 78, "y": 264 }], "id": "repeatable-slot:ruin:woodland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "woodland", "old": true, "added": false }, { "anchor": { "key": "38,100", "x": 38, "y": 100 }, "approach": [{ "x": 77, "y": 199 }, { "x": 78, "y": 199 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 75, "y": 199 }, { "x": 76, "y": 199 }, { "x": 75, "y": 200 }, { "x": 76, "y": 200 }], "id": "repeatable-slot:ruin:upland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "upland", "old": true, "added": false }, { "anchor": { "key": "125,36", "x": 125, "y": 36 }, "approach": [{ "x": 251, "y": 71 }, { "x": 252, "y": 71 }], "band": 4, "familyId": "site-family:ruin", "footprint": [{ "x": 249, "y": 70 }, { "x": 250, "y": 70 }, { "x": 249, "y": 71 }, { "x": 250, "y": 71 }, { "x": 249, "y": 72 }, { "x": 250, "y": 72 }], "id": "repeatable-slot:ruin:volcanic:large:01", "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "tier": "large", "biome": "volcanic", "old": true, "added": false }, { "anchor": { "key": "59,138", "x": 59, "y": 138 }, "approach": [{ "x": 119, "y": 276 }], "band": 2, "familyId": "site-family:crypt", "footprint": [{ "x": 118, "y": 276 }], "id": "repeatable-slot:crypt:grassland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "grassland", "old": true, "added": false }, { "anchor": { "key": "74,111", "x": 74, "y": 111 }, "approach": [{ "x": 149, "y": 222 }], "band": 3, "familyId": "site-family:crypt", "footprint": [{ "x": 148, "y": 222 }], "id": "repeatable-slot:crypt:upland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "upland", "old": true, "added": false }, { "anchor": { "key": "69,78", "x": 69, "y": 78 }, "approach": [{ "x": 138, "y": 157 }], "band": 3, "familyId": "site-family:crypt", "footprint": [{ "x": 138, "y": 156 }], "id": "repeatable-slot:crypt:frostland:deep:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "deep", "biome": "frostland", "old": true, "added": false }, { "anchor": { "key": "72,87", "x": 72, "y": 87 }, "approach": [{ "x": 145, "y": 174 }], "band": 3, "familyId": "site-family:cave", "footprint": [{ "x": 144, "y": 174 }], "id": "repeatable-slot:cave:desert:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "desert", "old": false, "added": false }, { "anchor": { "key": "113,72", "x": 113, "y": 72 }, "approach": [{ "x": 227, "y": 144 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 226, "y": 144 }], "id": "repeatable-slot:cave:frostland:large:01", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "tier": "large", "biome": "frostland", "old": false, "added": false }, { "anchor": { "key": "112,120", "x": 112, "y": 120 }, "approach": [{ "x": 225, "y": 240 }], "band": 5, "familyId": "site-family:cave", "footprint": [{ "x": 224, "y": 240 }], "id": "repeatable-slot:cave:grassland:small:01", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "tier": "small", "biome": "grassland", "old": false, "added": false }, { "anchor": { "key": "63,12", "x": 63, "y": 12 }, "approach": [{ "x": 127, "y": 24 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 126, "y": 24 }], "id": "repeatable-slot:cave:upland:standard:01", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "tier": "standard", "biome": "upland", "old": false, "added": false }, { "anchor": { "key": "79,56", "x": 79, "y": 56 }, "approach": [{ "x": 159, "y": 112 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 158, "y": 112 }], "id": "repeatable-slot:cave:volcanic:deep:01", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "tier": "deep", "biome": "volcanic", "old": false, "added": false }, { "anchor": { "key": "35,55", "x": 35, "y": 55 }, "approach": [{ "x": 71, "y": 110 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 70, "y": 110 }], "id": "repeatable-slot:cave:wetland:small:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "small", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "47,50", "x": 47, "y": 50 }, "approach": [{ "x": 95, "y": 100 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 94, "y": 100 }], "id": "repeatable-slot:cave:wetland:standard:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "standard", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "19,122", "x": 19, "y": 122 }, "approach": [{ "x": 39, "y": 244 }], "band": 1, "familyId": "site-family:cave", "footprint": [{ "x": 38, "y": 244 }], "id": "repeatable-slot:cave:woodland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "woodland", "old": false, "added": false }, { "anchor": { "key": "112,33", "x": 112, "y": 33 }, "approach": [{ "x": 225, "y": 66 }], "band": 4, "familyId": "site-family:crypt", "footprint": [{ "x": 224, "y": 66 }], "id": "repeatable-slot:crypt:desert:small:01", "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "tier": "small", "biome": "desert", "old": false, "added": false }, { "id": "repeatable-slot:crypt:frostland:large:01", "familyId": "site-family:crypt", "tier": "large", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "band": 4, "anchor": { "key": "118,73", "x": 118, "y": 73 }, "footprint": [{ "x": 236, "y": 146 }], "approach": [{ "x": 237, "y": 146 }], "biome": "frostland", "old": false, "added": true }, { "anchor": { "key": "32,70", "x": 32, "y": 70 }, "approach": [{ "x": 65, "y": 140 }], "band": 4, "familyId": "site-family:crypt", "footprint": [{ "x": 64, "y": 140 }], "id": "repeatable-slot:crypt:wetland:standard:01", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "tier": "standard", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "39,122", "x": 39, "y": 122 }, "approach": [{ "x": 79, "y": 244 }], "band": 2, "familyId": "site-family:crypt", "footprint": [{ "x": 78, "y": 244 }], "id": "repeatable-slot:crypt:woodland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "woodland", "old": false, "added": false }, { "anchor": { "key": "68,91", "x": 68, "y": 91 }, "approach": [{ "x": 137, "y": 181 }, { "x": 138, "y": 181 }], "band": 3, "familyId": "site-family:fort", "footprint": [{ "x": 135, "y": 180 }, { "x": 136, "y": 180 }, { "x": 135, "y": 181 }, { "x": 136, "y": 181 }, { "x": 135, "y": 182 }, { "x": 136, "y": 182 }], "id": "repeatable-slot:fort:desert:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "desert", "old": false, "added": false }, { "id": "repeatable-slot:fort:upland:deep:01", "familyId": "site-family:fort", "tier": "deep", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "band": 4, "anchor": { "key": "95,34", "x": 95, "y": 34 }, "footprint": [{ "x": 190, "y": 68 }, { "x": 191, "y": 68 }, { "x": 192, "y": 68 }, { "x": 193, "y": 68 }, { "x": 190, "y": 69 }, { "x": 191, "y": 69 }, { "x": 192, "y": 69 }, { "x": 193, "y": 69 }, { "x": 190, "y": 70 }, { "x": 191, "y": 70 }, { "x": 192, "y": 70 }, { "x": 193, "y": 70 }], "approach": [{ "x": 194, "y": 69 }, { "x": 195, "y": 69 }, { "x": 196, "y": 69 }, { "x": 197, "y": 69 }], "biome": "upland", "old": false, "added": true }, { "anchor": { "key": "75,20", "x": 75, "y": 20 }, "approach": [{ "x": 149, "y": 41 }, { "x": 149, "y": 42 }], "band": 4, "familyId": "site-family:fort", "footprint": [{ "x": 149, "y": 38 }, { "x": 150, "y": 38 }, { "x": 149, "y": 39 }, { "x": 150, "y": 39 }, { "x": 149, "y": 40 }, { "x": 150, "y": 40 }], "id": "repeatable-slot:fort:upland:standard:01", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "tier": "standard", "biome": "upland", "old": false, "added": false }, { "anchor": { "key": "44,76", "x": 44, "y": 76 }, "approach": [{ "x": 89, "y": 151 }, { "x": 90, "y": 151 }], "band": 4, "familyId": "site-family:fort", "footprint": [{ "x": 87, "y": 151 }, { "x": 88, "y": 151 }, { "x": 87, "y": 152 }, { "x": 88, "y": 152 }], "id": "repeatable-slot:fort:wetland:small:01", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "tier": "small", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "57,88", "x": 57, "y": 88 }, "approach": [{ "x": 115, "y": 175 }, { "x": 116, "y": 175 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 113, "y": 175 }, { "x": 114, "y": 175 }, { "x": 113, "y": 176 }, { "x": 114, "y": 176 }], "id": "repeatable-slot:ruin:desert:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "desert", "old": false, "added": false }, { "id": "repeatable-slot:ruin:frostland:deep:01", "familyId": "site-family:ruin", "tier": "deep", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "band": 4, "anchor": { "key": "112,77", "x": 112, "y": 77 }, "footprint": [{ "x": 224, "y": 154 }, { "x": 225, "y": 154 }, { "x": 226, "y": 154 }, { "x": 224, "y": 155 }, { "x": 225, "y": 155 }, { "x": 226, "y": 155 }, { "x": 224, "y": 156 }, { "x": 225, "y": 156 }, { "x": 226, "y": 156 }], "approach": [{ "x": 227, "y": 155 }, { "x": 228, "y": 155 }, { "x": 229, "y": 155 }], "biome": "frostland", "old": false, "added": true }, { "anchor": { "key": "28,73", "x": 28, "y": 73 }, "approach": [{ "x": 57, "y": 145 }, { "x": 58, "y": 145 }], "band": 4, "familyId": "site-family:ruin", "footprint": [{ "x": 55, "y": 145 }, { "x": 56, "y": 145 }, { "x": 55, "y": 146 }, { "x": 56, "y": 146 }], "id": "repeatable-slot:ruin:frostland:standard:01", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "tier": "standard", "biome": "frostland", "old": false, "added": false }, { "anchor": { "key": "73,144", "x": 73, "y": 144 }, "approach": [{ "x": 147, "y": 287 }], "band": 2, "familyId": "site-family:ruin", "footprint": [{ "x": 146, "y": 287 }, { "x": 146, "y": 288 }], "id": "repeatable-slot:ruin:grassland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "grassland", "old": false, "added": false }, { "anchor": { "key": "44,31", "x": 44, "y": 31 }, "approach": [{ "x": 88, "y": 63 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 88, "y": 61 }, { "x": 88, "y": 62 }], "id": "repeatable-slot:ruin:tropical:small:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "small", "biome": "tropical", "old": false, "added": false }, { "anchor": { "key": "102,89", "x": 102, "y": 89 }, "approach": [{ "x": 205, "y": 177 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 204, "y": 177 }, { "x": 204, "y": 178 }], "id": "repeatable-slot:ruin:wetland:small:01", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "tier": "small", "biome": "wetland", "old": false, "added": false }]);
-var hasAlphaPopulation = (b) => b?.sitePopulation === ALPHA_POPULATION_VERSION && b.sitePopulationHash === ALPHA_POPULATION_HASH;
-var seededSites = () => {
-  const s = worldSitesV1();
-  requireContract(s, "Seeded world sites not loaded");
-  return s;
-};
-var populationIds = (b, family2) => hasAlphaPopulation(b) ? (isSeededBindingV1(b) ? seededSites() : [...ALPHA_POPULATION_SELECTIONS, ...hasWilderness(b) ? WILDERNESS_SITE_SELECTIONS : [], ...hasFirstJourney(b) ? [FIRST_CAVE_SELECTION] : []]).filter((s) => s.familyId === "site-family:" + family2).map((s) => s.id) : null;
-var newPopulationSelection = (id) => worldSitesV1() ? worldSiteV1(id) : ALPHA_POPULATION_SELECTIONS.find((s) => s.id === id && !s.old) ?? wildernessSelection(id) ?? (id === FIRST_CAVE_SELECTION.id ? FIRST_CAVE_SELECTION : null);
-
-// src/shared/content/world_loot_v3.js
-var WORLD_LOOT_V3_VERSION = "world-loot-v3";
-var WORLD_LOOT_V3_HASH = "5945f4f6a6c02522b745889a88f4cd1034d8e4b89266517a2c31825741ef5cdf";
-var WORLD_LOOT_V3_POLICY = freezeWire({
-  version: WORLD_LOOT_V3_VERSION,
-  parentCombatHash: WORLD_COMBAT_HASH,
-  unlockLevels: [1, 1, 10, 20, 35, 50],
-  // gearPerMille: chance this source drops gear; uncommon: basis points of non-rare gear;
-  // rare: [level, basis points] anchors, linear between them, 0 before the first, flat after the last.
-  sources: {
-    ordinary: { gearPerMille: 15, uncommon: 2e3, rare: [[10, 100], [50, 200]], rich: false },
-    elite: { gearPerMille: 250, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
-    smallEnd: { gearPerMille: 500, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
-    mini: { gearPerMille: 1e3, uncommon: 6e3, rare: [[10, 800], [50, 1500]], rich: false },
-    boss: { gearPerMille: 1e3, uncommon: 8e3, rare: [[10, 1500], [20, 2e3], [30, 2800], [40, 3500]], rich: true },
-    smallChest: { gearPerMille: 150, uncommon: 2500, rare: [], rich: false },
-    standardChest: { gearPerMille: 400, uncommon: 5e3, rare: [[10, 300], [50, 800]], rich: false },
-    bossChest: { gearPerMille: 1e3, uncommon: 7e3, rare: [[10, 1e3], [20, 1500], [30, 2200], [40, 3e3]], rich: true }
-  },
-  // How Rare-or-better gear splits into Rare / Epic / Legendary / Mythic (basis points).
-  split: [
-    { minimumLevel: 1, plain: [1e4, 0, 0, 0], rich: [1e4, 0, 0, 0] },
-    { minimumLevel: 20, plain: [9e3, 1e3, 0, 0], rich: [8e3, 2e3, 0, 0] },
-    { minimumLevel: 35, plain: [8200, 1500, 300, 0], rich: [6800, 2500, 700, 0] },
-    { minimumLevel: 50, plain: [7700, 1700, 500, 100], rich: [6e3, 2800, 1e3, 200] }
-  ],
-  qualityFromLevel: 30,
-  gate: "min(frozen encounter level, personal hero level when the reward is captured). Pickup, reopen and portal use never reroll."
-});
-var SOURCES = WORLD_LOOT_V3_POLICY.sources;
-function lootSourceV3(role, siteReward = null) {
-  if (role === "ordinary" || role === "elite") return role;
-  if (role === "boss") return siteReward === "site-end-elite" ? "smallEnd" : siteReward === "mini-boss" ? "mini" : "boss";
-  requireContract(role === "completion", "Loot v3 role");
-  return siteReward === "lair-chest" ? "bossChest" : siteReward === "standard-chest" ? "standardChest" : "smallChest";
-}
-function lootGearPerMilleV3(role, siteReward = null, occurrenceHundredths = 100) {
-  return Math.min(1e3, Math.floor(SOURCES[lootSourceV3(role, siteReward)].gearPerMille * occurrenceHundredths / 100));
-}
-function rareShare(anchors2, level) {
-  if (!anchors2.length || level < BigInt(anchors2[0][0])) return 0n;
-  for (let i = 1; i < anchors2.length; i++) {
-    const [a, va] = anchors2[i - 1], [b, vb] = anchors2[i];
-    if (level < BigInt(b)) return BigInt(va) + (BigInt(vb) - BigInt(va)) * (level - BigInt(a)) / BigInt(b - a);
-  }
-  return BigInt(anchors2.at(-1)[1]);
-}
-function worldLootWeightsV3(encounter, hero, role, siteReward = null, qualityHundredths = 0) {
-  positiveProgression(encounter);
-  positiveProgression(hero);
-  const a = progressionBigInt(encounter), b = progressionBigInt(hero), level = a < b ? a : b, q = progressionBigInt(qualityHundredths);
-  requireContract(q >= 0n, "Loot v3 quality");
-  const src = SOURCES[lootSourceV3(role, siteReward)], rare = rareShare(src.rare, level), rest = 10000n - rare, u = rest * BigInt(src.uncommon) / 10000n;
-  const row2 = [...WORLD_LOOT_V3_POLICY.split].reverse().find((r) => level >= BigInt(r.minimumLevel))[src.rich ? "rich" : "plain"];
-  const top = row2.slice(1).map((w2) => rare * BigInt(w2) / 10000n), w = [rest - u, u, rare - top.reduce((x, y) => x + y, 0n), ...top];
-  const boost = level >= BigInt(WORLD_LOOT_V3_POLICY.qualityFromLevel) ? q : 0n;
-  return w.map((n, i) => level < BigInt(WORLD_LOOT_V3_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
-}
-function worldGearRarityV3(encounter, hero, role, siteReward, draw2, qualityHundredths = 0) {
-  requireContract(Number.isFinite(draw2) && draw2 >= 0 && draw2 < 1, "Loot v3 draw");
-  const weights = worldLootWeightsV3(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw2 * 4294967296)) * total;
-  let sum2 = 0n;
-  for (let i = 0; i < weights.length; i++) {
-    sum2 += weights[i];
-    if (roll2 < sum2 * 4294967296n) return i;
-  }
-  requireContract(false, "Loot v3 weights failed");
-}
-
-// src/shared/content/world_loot_v4.js
-var WORLD_LOOT_V4_VERSION = "world-loot-v4";
-var WORLD_LOOT_V4_HASH = "4322b61b219906b7d6792c64bdef13dcbb1c2e09cb5ddb21a38047f108de4c92";
-var WORLD_LOOT_V4_POLICY = freezeWire({
-  version: WORLD_LOOT_V4_VERSION,
-  parentCombatHash: WORLD_COMBAT_HASH,
-  unlockLevels: [1, 1, 10, 20, 35, 50],
-  sources: {
-    ordinary: { gearPerMille: 40, common: [[1, 8e3], [10, 5e3], [20, 0]], rare: [[9, 0], [10, 200], [20, 1e3], [30, 4500], [40, 1e4]], rich: false },
-    elite: { gearPerMille: 500, common: [[1, 5500], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 400], [20, 1500], [30, 5e3], [40, 1e4]], rich: false },
-    smallEnd: { gearPerMille: 700, common: [[1, 5500], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 400], [20, 1500], [30, 5e3], [40, 1e4]], rich: false },
-    mini: { gearPerMille: 1e3, common: [[1, 4e3], [10, 2e3], [20, 0]], rare: [[9, 0], [10, 800], [20, 2e3], [30, 5500], [40, 1e4]], rich: false },
-    boss: { gearPerMille: 1e3, common: [[1, 2e3], [10, 0]], rare: [[9, 0], [10, 1500], [20, 4e3], [30, 1e4]], rich: true },
-    smallChest: { gearPerMille: 350, common: [[1, 7500], [10, 5e3], [20, 0]], rare: [[20, 0], [30, 3e3], [40, 1e4]], rich: false },
-    standardChest: { gearPerMille: 650, common: [[1, 5e3], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 300], [20, 1200], [30, 5e3], [40, 1e4]], rich: false },
-    bossChest: { gearPerMille: 1e3, common: [[1, 3e3], [10, 0]], rare: [[9, 0], [10, 1e3], [20, 3500], [30, 1e4]], rich: true }
-  },
-  split: [
-    { minimumLevel: 1, plain: [1e4, 0, 0, 0], rich: [1e4, 0, 0, 0] },
-    { minimumLevel: 20, plain: [9e3, 1e3, 0, 0], rich: [8e3, 2e3, 0, 0] },
-    { minimumLevel: 35, plain: [8200, 1500, 300, 0], rich: [6800, 2500, 700, 0] },
-    { minimumLevel: 50, plain: [7700, 1700, 500, 100], rich: [6e3, 2800, 1e3, 200] }
-  ],
-  qualityFromLevel: 30,
-  gate: "min(frozen encounter level, personal hero level when the reward is captured). Pickup, reopen and portal use never reroll."
-});
-var SOURCES2 = WORLD_LOOT_V4_POLICY.sources;
-function lootGearPerMilleV4(role, siteReward = null, occurrenceHundredths = 100) {
-  return Math.min(1e3, Math.floor(SOURCES2[lootSourceV3(role, siteReward)].gearPerMille * occurrenceHundredths / 100));
-}
-function curve(anchors2, level) {
-  if (level <= BigInt(anchors2[0][0])) return BigInt(anchors2[0][1]);
-  for (let i = 1; i < anchors2.length; i++) {
-    const [a, va] = anchors2[i - 1], [b, vb] = anchors2[i];
-    if (level < BigInt(b)) return BigInt(va) + (BigInt(vb) - BigInt(va)) * (level - BigInt(a)) / BigInt(b - a);
-  }
-  return BigInt(anchors2.at(-1)[1]);
-}
-function worldLootWeightsV4(encounter, hero, role, siteReward = null, qualityHundredths = 0) {
-  positiveProgression(encounter);
-  positiveProgression(hero);
-  const a = progressionBigInt(encounter), b = progressionBigInt(hero), level = a < b ? a : b, q = progressionBigInt(qualityHundredths);
-  requireContract(q >= 0n, "Loot v4 quality");
-  const src = SOURCES2[lootSourceV3(role, siteReward)], common = curve(src.common, level), rare = curve(src.rare, level), uncommon = 10000n - common - rare;
-  requireContract(uncommon >= 0n, "Loot v4 shares");
-  const row2 = [...WORLD_LOOT_V4_POLICY.split].reverse().find((r) => level >= BigInt(r.minimumLevel))[src.rich ? "rich" : "plain"];
-  const top = row2.slice(1).map((w2) => rare * BigInt(w2) / 10000n), w = [common, uncommon, rare - top.reduce((x, y) => x + y, 0n), ...top];
-  const boost = level >= BigInt(WORLD_LOOT_V4_POLICY.qualityFromLevel) ? q : 0n;
-  return w.map((n, i) => level < BigInt(WORLD_LOOT_V4_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
-}
-function worldGearRarityV4(encounter, hero, role, siteReward, draw2, qualityHundredths = 0) {
-  requireContract(Number.isFinite(draw2) && draw2 >= 0 && draw2 < 1, "Loot v4 draw");
-  const weights = worldLootWeightsV4(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw2 * 4294967296)) * total;
-  let sum2 = 0n;
-  requireContract(total > 0n, "Loot v4 weights empty");
-  for (let i = 0; i < weights.length; i++) {
-    sum2 += weights[i];
-    if (roll2 < sum2 * 4294967296n) return i;
-  }
-  requireContract(false, "Loot v4 weights failed");
-}
-var isSourceLootV4 = (hash17) => hash17 === WORLD_LOOT_V3_HASH || hash17 === WORLD_LOOT_V4_HASH;
-function lootGearPerMilleFor(hash17, role, siteReward = null, occurrenceHundredths = 100) {
-  requireContract(isSourceLootV4(hash17), "Loot table");
-  return (hash17 === WORLD_LOOT_V4_HASH ? lootGearPerMilleV4 : lootGearPerMilleV3)(role, siteReward, occurrenceHundredths);
-}
-function worldGearRarityFor(hash17, encounter, hero, role, siteReward, draw2, qualityHundredths = 0) {
-  requireContract(isSourceLootV4(hash17), "Loot table");
-  return (hash17 === WORLD_LOOT_V4_HASH ? worldGearRarityV4 : worldGearRarityV3)(encounter, hero, role, siteReward, draw2, qualityHundredths);
-}
-
-// src/shared/content/quest_gear_v1.js
-var QUEST_GEAR_VERSION = "quest-gear-v1";
-var QUEST_GEAR_GROUPS = Object.freeze({ any: null, weapons: Object.freeze(["weapon", "subweapon"]), armor: Object.freeze(["helmet", "chest", "leggings", "overall", "gloves", "boots"]), accessories: Object.freeze(["ring", "cape"]) });
-var questGearFamiliesV1 = (families, group) => {
-  const keep = QUEST_GEAR_GROUPS[group];
-  return keep ? families.filter((f3) => keep.includes(f3)) : families;
-};
-function h32(text) {
-  let h = 2166136261;
-  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
-  h = Math.imul(h ^ h >>> 16, 2246822507);
-  h = Math.imul(h ^ h >>> 13, 3266489909);
-  return (h ^ h >>> 16) >>> 0;
-}
-var questGearSourceIdV1 = (seedHex, playerId, questId) => "ent:" + [0, 1, 2, 3].map((i) => h32(QUEST_GEAR_VERSION + "/" + seedHex + "/" + playerId + "/" + questId + "/" + i).toString(16).padStart(8, "0")).join("");
-
-// src/shared/content/trip_imps_v1.js
-var TRIP_IMPS_V1 = "trip-imps-v1";
-var IMP_RULES = Object.freeze({
-  coinPerIsland: Object.freeze([6, 10]),
-  treasureOneIn: 3,
-  // The second half of an island's imps (and its treasure imp) climb out this long after the first.
-  waveGapTicks: 4 * 60,
-  climbTicks: 42,
-  // A hero this close (or a hit) gives an imp a fright: "!" and a cackle, then it bolts.
-  scareRadius: Object.freeze({ coin: 120, rare: 140 }),
-  alarmTicks: 24,
-  // It keeps running while any hero is this close; farther off it stops to catch its breath.
-  calmRadius: 300,
-  speed: Object.freeze({ coin: 2.5, rare: 2.85 }),
-  hullRadius: 7,
-  // From its first fright it has this long before it tears a rift and dives in (Escaping! shows for the last 1.4 s).
-  escapeTicks: Object.freeze({ coin: 8 * 60, rare: 12 * 60 }),
-  warnTicks: 84,
-  riftTicks: 54,
-  // Health: the C-rank object curve (like Nests) times this.
-  hpTimes: Object.freeze({ coin: Object.freeze([6, 5]), rare: Object.freeze([4, 1]) }),
-  // Gold in quarters of a kill's gold at the hero's level: each of the first few hits, then the kill.
-  goldQuarters: Object.freeze({ coin: Object.freeze({ hit: 1, hitsPaid: 4, kill: 8 }), rare: Object.freeze({ hit: 2, hitsPaid: 4, kill: 16 }) }),
-  starshardPerMille: Object.freeze({ coin: 30, rare: 200 }),
-  gearPieces: Object.freeze({ coin: 0, rare: 2 }),
-  // XP for the kill, in ordinary kills at the hero's level (like the gold), for every hero close by.
-  xpKills: Object.freeze({ coin: 3, rare: 6 }),
-  // Ended imps (killed or escaped) stay in the record this long so every screen can show the poof or rift.
-  keepTicks: 3 * 60,
-  // Recent personal gains (coins to the purse, Scrap to the Bag) kept for the screen.
-  gainTicks: 4 * 60,
-  gainsKept: 10
-});
-var IMP_SCRAP = Object.freeze([[1, "Common Scrap", "Uncommon Scrap", 350], [10, "Uncommon Scrap", "Rare Scrap", 350], [20, "Rare Scrap", "Epic Scrap", 350], [35, "Epic Scrap", "Legendary Scrap", 350], [50, "Legendary Scrap", "Mythic Scrap", 200]]);
-function impScrapBandV1(level) {
-  let band = IMP_SCRAP[0];
-  for (const b of IMP_SCRAP) if (level >= b[0]) band = b;
-  return band;
-}
-function h322(text) {
-  let h = 2166136261;
-  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
-  h = Math.imul(h ^ h >>> 16, 2246822507);
-  h = Math.imul(h ^ h >>> 13, 3266489909);
-  return (h ^ h >>> 16) >>> 0;
-}
-var impHashV1 = (text) => h322(TRIP_IMPS_V1 + "/" + text);
-var impIdV1 = (campaignId, eatTick, n) => "ent:" + [0, 1, 2, 3].map((i) => h322(TRIP_IMPS_V1 + "/imp/" + campaignId + "/" + eatTick + "/" + n + "/" + i).toString(16).padStart(8, "0")).join("");
-var TRIP_GEAR_TRIP = /^(\d{1,15})\/(\d{1,3})\/([01])$/;
-var tripGearSourceIdV1 = (seedHex, playerId, trip) => "ent:" + [0, 1, 2, 3].map((i) => h322(TRIP_IMPS_V1 + "/gear/" + seedHex + "/" + playerId + "/" + trip + "/" + i).toString(16).padStart(8, "0")).join("");
-var TRIP_GEAR_KINDS = Object.freeze(["best", "any"]);
-
-// src/shared/content/world_rarity_v2.js
-var WORLD_RARITY_VERSION = "world-rarity-rewards-v2";
-var WORLD_RARITY_HASH = "4a10af2db8e7a9a8ffd8e4d7e7b7334e4b2f5dd88254e198f73024bde4edc684";
-var WORLD_RARITY_POLICY = freezeWire({
-  version: WORLD_RARITY_VERSION,
-  parentCombatHash: WORLD_COMBAT_HASH,
-  unlockHeroAndEncounterLevels: [1, 1, 1, 15, 30, 45],
-  // Basis points conditional on an equipment drop. Boss + chest are TWO rolls,
-  // not a third combined bonus. Existing 10% ordinary / guaranteed elite,
-  // boss and chest equipment occurrence is retained.
-  bands: [
-    { minimumLevel: 1, ordinary: [7200, 2300, 500, 0, 0, 0], elite: [3e3, 5e3, 2e3, 0, 0, 0], boss: [1e3, 5500, 3500, 0, 0, 0], completion: [0, 6e3, 4e3, 0, 0, 0] },
-    { minimumLevel: 15, ordinary: [7e3, 2300, 600, 100, 0, 0], elite: [2500, 4500, 2500, 500, 0, 0], boss: [500, 4500, 3500, 1500, 0, 0], completion: [0, 5e3, 4e3, 1e3, 0, 0] },
-    { minimumLevel: 30, ordinary: [6900, 2300, 650, 140, 10, 0], elite: [2e3, 4500, 2700, 750, 50, 0], boss: [500, 4e3, 3500, 1800, 200, 0], completion: [0, 4500, 4e3, 1400, 100, 0] },
-    { minimumLevel: 45, ordinary: [6800, 2300, 700, 175, 24, 1], elite: [2e3, 4e3, 3e3, 850, 140, 10], boss: [500, 3500, 3500, 2e3, 450, 50], completion: [0, 4e3, 4e3, 1700, 280, 20] }
-  ],
-  gate: "min(frozen encounter/item power level, personal hero level when reward is generated). Pickup, reopen and portal use never reroll.",
-  quality: "Retain accepted per-tier quality weighting, applied only to unlocked positive weights. No unlock bypass.",
-  scope: "New World natural drops only. Preserve existing generated items and parent rolls; shops, authored/unique rewards and paid Awaken remain explicit separate acquisition paths.",
-  ownership: "One personal boss reward and one existing personal completion-chest reward per source/episode. Keep existing eligibility, reset and ownership rules."
-});
-var hasWorldRarityV2 = (p) => p?.rarityPolicyHash !== void 0;
-function rarityLevelV2(encounter, hero) {
-  positiveProgression(encounter);
-  positiveProgression(hero);
-  const a = progressionBigInt(encounter), b = progressionBigInt(hero);
-  return a < b ? a : b;
-}
-function worldRarityWeightsV2(encounter, hero, role, qualityHundredths = 0) {
-  const level = rarityLevelV2(encounter, hero), q = progressionBigInt(qualityHundredths);
-  requireContract(q >= 0n && ["ordinary", "elite", "boss", "completion"].includes(role), "World rarity role/quality");
-  const band = [...WORLD_RARITY_POLICY.bands].reverse().find((b) => level >= BigInt(b.minimumLevel));
-  return band[role].map((w, i) => level < BigInt(WORLD_RARITY_POLICY.unlockHeroAndEncounterLevels[i]) ? 0n : BigInt(w) * (10000n + q * BigInt(i * 10)));
-}
-function worldGearRarityV2(encounter, hero, role, draw2, qualityHundredths = 0) {
-  requireContract(Number.isFinite(draw2) && draw2 >= 0 && draw2 < 1, "World rarity draw");
-  const weights = worldRarityWeightsV2(encounter, hero, role, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw2 * 4294967296)) * total;
-  let sum2 = 0n;
-  for (let i = 0; i < weights.length; i++) {
-    sum2 += weights[i];
-    if (roll2 < sum2 * 4294967296n) return i;
-  }
-  requireContract(false, "World rarity weights failed");
-}
-function validateWorldRarityProgressionV2(p) {
-  if (!hasWorldRarityV2(p)) {
-    requireContract(p.rarityHeroLevel === void 0 && p.rarityRole === void 0, "Rarity fields require policy commitment");
-    return p;
-  }
-  requireContract([WORLD_RARITY_HASH, WORLD_LOOT_V3_HASH, WORLD_LOOT_V4_HASH].includes(p.rarityPolicyHash) && p.combatHash === WORLD_COMBAT_HASH, "World rarity policy commitment");
-  positiveProgression(p.rarityHeroLevel);
-  requireContract(["ordinary", "elite", "boss", "completion"].includes(p.rarityRole) && p.combatQuality === (p.rarityRole === "boss" ? "elite" : p.rarityRole), "World rarity source role");
-  return p;
-}
-function rewardRarityRoleV2(state, source10, spawnEntityId = null) {
-  if (source10.kind === "chest") return roadsideChestV1(state, source10) ? "elite" : "completion";
-  const id = spawnEntityId ?? state.groupsById[source10.groupId]?.entityIds[source10.spawnOrdinal ?? source10.ordinal];
-  return source10.kind === "enemy" && state.bossCombat?.bossesByEntityId[id] ? "boss" : source10.kind === "enemy" && (state.eliteCombat?.elitesByEntityId[id] || isRareV1(state, id)) ? "elite" : "ordinary";
-}
-function captureWorldRarityV2(state, player, source10, progression) {
-  if (progression.combatHash !== WORLD_COMBAT_HASH) return progression;
-  requireContract(!hasWorldRarityV2(progression), "Reward rarity already captured");
-  return { ...progression, rarityPolicyHash: WORLD_LOOT_V4_HASH, rarityHeroLevel: progressionWire(progressionBigInt(player.progression.level)), rarityRole: rewardRarityRoleV2(state, source10) };
-}
-
-// src/shared/content/site_rewards_v1.js
-var SITE_REWARDS_VERSION = "site-rewards-v1";
-var SITE_REWARDS_POLICY = freezeWire({
-  version: SITE_REWARDS_VERSION,
-  kinds: { "site-end-elite": { role: "boss", floor: 1, quality: 0 }, "mini-boss": { role: "boss", floor: 0, quality: 0 }, "lair-boss": { role: "boss", floor: 2, quality: 0 }, "lair-chest": { role: "completion", floor: 0, quality: 300 }, "standard-chest": { role: "completion", floor: 0, quality: 0 } }
-});
-var kind = (k) => SITE_REWARDS_POLICY.kinds[k];
-var siteRewardRoleV1 = (k) => k ? kind(k).role : null;
-var siteRewardQualityV1 = (k) => k ? kind(k).quality : 0;
-var siteRewardRarityV1 = (k, tier) => k ? Math.max(tier, kind(k).floor) : tier;
-function validateSiteRewardProgressionV1(p) {
-  if (p.siteReward === void 0) return p;
-  requireContract(Object.hasOwn(SITE_REWARDS_POLICY.kinds, p.siteReward) && p.rarityPolicyHash !== void 0 && p.rarityRole === kind(p.siteReward).role, "Site reward rule");
-  return p;
-}
-
-// src/shared/content/class_gear_v1.js
-var CLASS_GEAR_FAMILIES = Object.freeze(["weapon", "subweapon", "helmet", "overall", "gloves", "boots", "ring"]);
-var WARDROBE_V1 = "capes-v1";
-var CLASS_GEAR_FAMILIES_V2 = Object.freeze([...CLASS_GEAR_FAMILIES, "cape"]);
-var CAPE_NOUNS = Object.freeze(["Cape", "Cloak", "Mantle"]);
-var SHARED_HELMET_NOUNS = Object.freeze(["Backwards Cap"]);
-var sharedGear = (family2, noun) => family2 === "cape" || family2 === "helmet" && SHARED_HELMET_NOUNS.includes(noun);
-var set = (helmet, overall, gloves, boots) => Object.freeze({ helmet, overall, gloves, boots });
-var CLASS_GEAR = Object.freeze({
-  knight: Object.freeze({
-    offhand: "shield",
-    weapon: ["Longsword", "Battleaxe", "Warhammer"],
-    subweapon: ["Buckler", "Kite Shield", "Tower Shield"],
-    sets: [set("Chain Coif", "Chain Mail", "Chain Gloves", "Chain Boots"), set("Great Helm", "Plate Armor", "Gauntlets", "Plate Boots")]
-  }),
-  rogue: Object.freeze({
-    offhand: "dagger",
-    weapon: ["Rapier", "Saber", "Scimitar"],
-    subweapon: ["Main-Gauche", "Stiletto", "Kris"],
-    sets: [set("Skullcap", "Leather Armor", "Leather Gloves", "Leather Boots"), set("Hood", "Studded Armor", "Studded Gloves", "Studded Boots")]
-  }),
-  mage: Object.freeze({
-    offhand: "tome",
-    weapon: ["Wand", "Scepter", "Staff"],
-    subweapon: ["Fire Tome", "Frost Tome", "Storm Tome"],
-    sets: [set("Cowl", "Cloth Robe", "Cloth Wraps", "Cloth Slippers"), set("Wizard Hat", "Silk Robe", "Silk Wraps", "Silk Slippers")]
-  })
-});
-var CLASS_GEAR_IDS = Object.freeze(Object.keys(CLASS_GEAR));
-var TOME_NOUN_ELEMENTS = Object.freeze({ "Fire Tome": "fire", "Frost Tome": "frost", "Storm Tome": "lightning" });
-function classGearNouns(cls, family2) {
-  const g = CLASS_GEAR[cls];
-  if (!g) return null;
-  if (family2 === "weapon" || family2 === "subweapon") return g[family2];
-  return ["helmet", "overall", "gloves", "boots"].includes(family2) ? g.sets.map((s) => s[family2]) : null;
-}
-function classGearFlavor(cls, family2, noun) {
-  const g = CLASS_GEAR[cls];
-  if (!g) return {};
-  if (family2 === "weapon") return [{ critChance: 0.05 }, { critDamage: 0.15 }, { attackScale: [6, 5] }][g.weapon.indexOf(noun)] ?? {};
-  if (["helmet", "overall", "gloves", "boots"].includes(family2)) return [{ maxHpScale: [5, 4] }, { defenseScale: [5, 4] }][g.sets.findIndex((s) => s[family2] === noun)] ?? {};
-  return {};
-}
-
-// src/shared/content/gear_affixes_v2.js
-var AFFIXES_V2 = "affixes-v2";
-var NEW_AFFIX_POOLS = freezeWire({
-  weapon: ["mainDmg", "classDmg", "skillDmg", "eliteDmg", "lifeHit"],
-  shield: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
-  dagger: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
-  tome: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
-  helmet: ["classDmg", "passiveRank", "cdr"],
-  gloves: ["mainDmg", "offDmg", "cdr", "lifeHit"],
-  overall: ["lifeKill"],
-  boots: ["maxHp", "def", "lifeKill"],
-  cape: ["lifeKill"],
-  ring: ["mainDmg", "offDmg", "cdr", "eliteDmg", "lifeHit"]
-});
-var CLASS_DAMAGE = freezeWire({ knight: ["shockDmg", "counterDmg"], rogue: ["bleedDmg", "poisonDmg"], mage: ["fireDmg", "frostDmg", "lightningDmg"] });
-var TOME_DAMAGE = freezeWire({ fire: "fireDmg", frost: "frostDmg", lightning: "lightningDmg" });
-var NEW_AFFIX_KEYS = Object.freeze(["mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "passiveRank", "cdr", "eliteDmg", "lifeHit", "lifeKill"]);
-var isNewAffix = (key5) => NEW_AFFIX_KEYS.includes(key5);
-var NEW_AFFIX_RANGES = freezeWire({ mainDmg: [40, 100], offDmg: [40, 100], fireDmg: [50, 130], frostDmg: [50, 130], lightningDmg: [50, 130], bleedDmg: [50, 130], poisonDmg: [50, 130], shockDmg: [50, 130], counterDmg: [50, 130], skillDmg: [80, 150], cdr: [30, 60], eliteDmg: [50, 120], lifeKill: [10, 30] });
-var PERCENT_STAT_OF = freezeWire({ atk: "atkPct", def: "defPct", maxHp: "maxHpPct" });
-var PERCENT_STAT_RANGES = freezeWire({ atkPct: [30, 60], maxHpPct: [40, 80], defPct: [40, 80] });
-var CDR_CAP = 0.3;
-var byClass = (cls, f3) => Object.values(CLASS_TREE_SKILLS).filter((x) => x.classId === cls && f3(x)).map((x) => x.id).sort();
-var ACTIVES = {};
-var PASSIVES = {};
-var classActives = (cls) => ACTIVES[cls] ??= Object.freeze(byClass(cls, (x) => x.kind === "active"));
-var classRankPassives = (cls) => PASSIVES[cls] ??= Object.freeze(byClass(cls, (x) => x.kind === "passive" && x.maxRank === 5));
-function affixPoolV2(oldPool, slotKey, rarityTier) {
-  return [...new Set([...oldPool, ...(NEW_AFFIX_POOLS[slotKey] ?? []).filter((k) => !oldPool.includes(k) && (k !== "passiveRank" || rarityTier >= 2))].map((k) => PERCENT_STAT_OF[k] ?? k))];
-}
-function resolveNewAffix(key5, cls, spellType, random) {
-  if (key5 !== "classDmg") return key5;
-  if (spellType && TOME_DAMAGE[spellType]) return TOME_DAMAGE[spellType];
-  const list2 = CLASS_DAMAGE[cls];
-  return list2[Math.floor(random() * list2.length)];
-}
-function affixSkill(key5, cls, random) {
-  const list2 = key5 === "skillDmg" ? classActives(cls) : key5 === "passiveRank" ? classRankPassives(cls) : null;
-  return list2 ? list2[Math.floor(random() * list2.length)] : null;
-}
-
-// src/shared/content/gear_affixes_v3.js
-var AFFIXES_V3 = "affixes-v3";
-var isAffixesV2Plus = (v) => v === AFFIXES_V2 || v === AFFIXES_V3;
-var SKILL_GROUPS = freezeWire({
-  move: { knight: ["shield_charge", "skyfall_leap"], rogue: ["dash", "lunge", "shadowstep"], mage: ["dash"] },
-  def: { knight: ["guard", "counter_stance", "rallying_cry", "aegis_pulse"], rogue: ["riposte", "smoke_veil"], mage: ["ice_barrier"] },
-  ranged: { knight: ["shield_throw"], rogue: ["toxic_fan"], mage: ["cast", "ball_lightning", "firebloom", "meteor"] },
-  area: { knight: ["shield_bash", "earth_breaker", "retribution", "skyfall_leap"], rogue: ["whirling_blades", "rupture", "noxious_bloom"], mage: ["flashfreeze", "flame_wall", "static_field", "glacial_burst", "thunderfall"] },
-  finisher: { knight: ["retribution", "skyfall_leap", "aegis_pulse"], rogue: ["shadowstep", "thousand_cuts", "rupture", "noxious_bloom"], mage: ["glacial_burst", "meteor", "thunderfall"] }
-});
-var inGroup = (group, cls, id) => Boolean(SKILL_GROUPS[group]?.[cls]?.includes(id));
-var DAMAGE_GROUPS = { rangedDmg: "ranged", areaDmg: "area", finisherDmg: "finisher" };
-var COOLDOWN_GROUPS = { moveCdr: "move", defCdr: "def" };
-var groupsFor = (cls, keys2) => Object.keys(keys2).filter((k) => (SKILL_GROUPS[keys2[k]][cls]?.length ?? 0) >= 2);
-var V3_POOLS = freezeWire({
-  weapon: ["critChance", "critDamage", "activeSpd", "mainDmg", "classDmg", "skillDmg", "eliteDmg", "lifeHit", "groupDmg", "killCdr"],
-  shield: ["block", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "controlDur", "branchRank", "maxPip"],
-  dagger: ["parry", "critChance", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "ailmentDur", "branchRank", "maxPip"],
-  tome: ["critDamage", "critChance", "bonusAreaRadius", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "branchRank", "maxPip"],
-  helmet: ["critChance", "activeSpd", "bonusAreaRadius", "classDmg", "passiveRank", "cdr", "controlDur", "ailmentDur", "branchRank", "startPips"],
-  gloves: ["atkPct", "critChance", "activeSpd", "attr", "mainDmg", "offDmg", "cdr", "lifeHit", "rangeDmg", "keepPip", "sigWindow", "sigDmg"],
-  overall: ["maxHpPct", "defPct", "attr", "lifeKill", "eliteDr", "areaDr", "hitCdr", "lowDmg", "sigDmg"],
-  boots: ["moveSpeed", "activeSpd", "maxHpPct", "defPct", "lifeKill", "stunDr", "potionHeal", "hitCdr", "groupCdr", "sigWindow", "sigCdr"],
-  ring: ["atkPct", "critChance", "attr", "cdr", "eliteDmg", "lifeHit", "ccDmg", "ailingDmg", "healthDmg", "groupDmg", "maxPip"],
-  cape: ["maxHpPct", "defPct", "attr", "moveSpeed", "lifeKill", "rangeDmg", "healthDmg", "areaDr", "groupDmg", "killCdr", "startPips", "keepPip"]
-});
-var SIGNATURE_LINES = freezeWire({
-  knight: { sigWindow: "perfectWindow", sigDmg: "perfectDmg", sigCdr: "perfectCdr" },
-  rogue: { sigWindow: "exposeTime", sigDmg: "exposeDmg", sigCdr: "exposeCdr" },
-  mage: { sigWindow: "weaveDmg", sigDmg: "blinkDmg", sigCdr: "blinkCdr" }
-});
-var RETIRED_V3 = Object.freeze(["shatterEase", "shatterDmg", "shatterCdr", "heldDmg"]);
-var RARE_LINES = Object.freeze(["branchRank", "killCdr", "maxPip"]);
-function affixPoolV3(slotKey, rarityTier, cls) {
-  return (V3_POOLS[slotKey] ?? []).filter((k) => (k !== "passiveRank" || rarityTier >= 2) && (!RARE_LINES.includes(k) || rarityTier >= 4) && (!k.startsWith("sig") || Boolean(SIGNATURE_LINES[cls])) && (k !== "groupCdr" || groupsFor(cls, COOLDOWN_GROUPS).length > 0));
-}
-var V3_RANGES = freezeWire({ rangedDmg: [50, 100], areaDmg: [50, 100], finisherDmg: [50, 100], moveCdr: [40, 80], defCdr: [40, 80], heldDmg: [60, 120], ailingDmg: [50, 110], closeDmg: [50, 100], farDmg: [50, 100], fullDmg: [60, 120], lowDmg: [80, 150], controlDur: [80, 160], ailmentDur: [80, 160], eliteDr: [30, 60], areaDr: [40, 80], stunDr: [100, 200], potionHeal: [100, 200], keepPip: [100, 200], perfectDmg: [80, 150], exposeDmg: [60, 120], shatterDmg: [150, 300], ccDmg: [60, 120], blinkDmg: [80, 150], weaveDmg: [80, 150] });
-var V3_FIXED = freezeWire({ hitCdr: { lo: 6, hi: 12, step: [1, 20] }, killCdr: { lo: 4, hi: 8, step: [1, 20] }, perfectWindow: { lo: 5, hi: 10, step: [1, 100] }, perfectCdr: { lo: 10, hi: 20, step: [1, 10] }, exposeTime: { lo: 5, hi: 10, step: [1, 10] }, exposeCdr: { lo: 10, hi: 20, step: [1, 10] }, shatterEase: { lo: 10, hi: 20, step: [1, 100] }, shatterCdr: { lo: 10, hi: 20, step: [1, 10] }, blinkCdr: { lo: 5, hi: 10, step: [1, 10] }, startPips: { lo: 1, hi: 2, step: [1, 1] }, maxPip: { lo: 1, hi: 1, step: [1, 1] }, branchRank: { lo: 1, hi: 1, step: [1, 1] } });
-var V3_KEYS = Object.freeze([...Object.keys(V3_RANGES), ...Object.keys(V3_FIXED)]);
-var isV3Affix = (key5) => V3_KEYS.includes(key5);
-var isFixedV3 = (key5) => Object.hasOwn(V3_FIXED, key5);
-var WHOLE_V3 = Object.freeze(["startPips", "maxPip", "branchRank"]);
-var STUN_DR_CAP = 0.5;
-var PERFECT_WINDOW_CAP = 0.2;
-var MAX_PIP_GEAR = 2;
-var EXPOSE_TIME_CAP = 2;
-var SHATTER_EASE_CAP = 0.5;
-var CLOSE_REACH = 48;
-var FAR_REACH = 160;
-var TREES = {};
-var classTrees = (cls) => TREES[cls] ??= Object.freeze([...new Set(Object.values(CLASS_TREE_SKILLS).filter((x) => x.classId === cls).map((x) => x.tree))].sort());
-function resolveV3Affix(key5, cls, slotKey, random) {
-  const pick6 = (list2) => list2[Math.floor(random() * list2.length)];
-  if (key5 === "attr") return [pick6(["str", "dex", "int"]), null];
-  if (key5 === "mainAttr") return [{ knight: "str", rogue: "dex", mage: "int" }[cls] ?? pick6(["str", "dex", "int"]), null];
-  if (key5 === "groupDmg") {
-    const list2 = slotKey === "ring" || slotKey === "cape" ? ["areaDmg", "finisherDmg"] : groupsFor(cls, DAMAGE_GROUPS);
-    return [pick6(list2), null];
-  }
-  if (key5 === "groupCdr") return [pick6(groupsFor(cls, COOLDOWN_GROUPS)), null];
-  if (key5 === "rangeDmg") return [pick6(["closeDmg", "farDmg"]), null];
-  if (key5 === "healthDmg") return [pick6(["fullDmg", "lowDmg"]), null];
-  if (key5 === "branchRank") return [key5, pick6(classTrees(cls))];
-  if (key5 === "startPips" || key5 === "keepPip" || key5 === "maxPip") return [key5, cls];
-  if (key5.startsWith("sig")) return [SIGNATURE_LINES[cls][key5], null];
-  return [key5, null];
-}
-var POOL_KEY = { str: "attr", dex: "attr", int: "attr", rangedDmg: "groupDmg", areaDmg: "groupDmg", finisherDmg: "groupDmg", moveCdr: "groupCdr", defCdr: "groupCdr", closeDmg: "rangeDmg", farDmg: "rangeDmg", fullDmg: "healthDmg", lowDmg: "healthDmg", perfectWindow: "sigWindow", exposeTime: "sigWindow", shatterEase: "sigWindow", perfectDmg: "sigDmg", exposeDmg: "sigDmg", shatterDmg: "sigDmg", perfectCdr: "sigCdr", exposeCdr: "sigCdr", shatterCdr: "sigCdr", weaveDmg: "sigWindow", blinkDmg: "sigDmg", blinkCdr: "sigCdr" };
-var v3PoolKeyOf = (key5, slotKey) => slotKey === "overall" && key5 === "lowDmg" ? key5 : POOL_KEY[key5] ?? key5;
-function fixedV3Value(key5, k) {
-  const x = V3_FIXED[key5], n = k * x.step[0], d = x.step[1];
-  if (d === 1) return String(n);
-  return String(Number((Math.round(n * 1e4 / d) / 1e4).toFixed(4)));
-}
-
 // src/shared/content/uniques_v1.js
 var unique = (id, name, family2, subType, noun, cls, from, biome, effect, flavor) => ({ id, name, family: family2, subType, noun, cls, look: id, from, biome, effect, flavor });
 var trophy = (...args) => ({ ...unique(...args), trophy: true });
@@ -7221,6 +4618,79 @@ function uniqueDropV1({ from = null, biome = null, cls }, chance, pick6) {
   return pool.length && chance >= 1 - UNIQUE_DROP_CHANCE.world ? pool[Math.floor(pick6 * pool.length)] : null;
 }
 
+// src/shared/content/class_gear_v1.js
+var CLASS_GEAR_FAMILIES = Object.freeze(["weapon", "subweapon", "helmet", "overall", "gloves", "boots", "ring"]);
+var WARDROBE_V1 = "capes-v1";
+var CLASS_GEAR_FAMILIES_V2 = Object.freeze([...CLASS_GEAR_FAMILIES, "cape"]);
+var CAPE_NOUNS = Object.freeze(["Cape", "Cloak", "Mantle"]);
+var SHARED_HELMET_NOUNS = Object.freeze(["Backwards Cap"]);
+var sharedGear = (family2, noun) => family2 === "cape" || family2 === "helmet" && SHARED_HELMET_NOUNS.includes(noun);
+var set = (helmet, overall, gloves, boots) => Object.freeze({ helmet, overall, gloves, boots });
+var CLASS_GEAR = Object.freeze({
+  knight: Object.freeze({
+    offhand: "shield",
+    weapon: ["Longsword", "Battleaxe", "Warhammer"],
+    subweapon: ["Buckler", "Kite Shield", "Tower Shield"],
+    sets: [set("Chain Coif", "Chain Mail", "Chain Gloves", "Chain Boots"), set("Great Helm", "Plate Armor", "Gauntlets", "Plate Boots")]
+  }),
+  rogue: Object.freeze({
+    offhand: "dagger",
+    weapon: ["Rapier", "Saber", "Scimitar"],
+    subweapon: ["Main-Gauche", "Stiletto", "Kris"],
+    sets: [set("Skullcap", "Leather Armor", "Leather Gloves", "Leather Boots"), set("Hood", "Studded Armor", "Studded Gloves", "Studded Boots")]
+  }),
+  mage: Object.freeze({
+    offhand: "tome",
+    weapon: ["Wand", "Scepter", "Staff"],
+    subweapon: ["Fire Tome", "Frost Tome", "Storm Tome"],
+    sets: [set("Cowl", "Cloth Robe", "Cloth Wraps", "Cloth Slippers"), set("Wizard Hat", "Silk Robe", "Silk Wraps", "Silk Slippers")]
+  })
+});
+var CLASS_GEAR_IDS = Object.freeze(Object.keys(CLASS_GEAR));
+var TOME_NOUN_ELEMENTS = Object.freeze({ "Fire Tome": "fire", "Frost Tome": "frost", "Storm Tome": "lightning" });
+function classGearNouns(cls, family2) {
+  const g = CLASS_GEAR[cls];
+  if (!g) return null;
+  if (family2 === "weapon" || family2 === "subweapon") return g[family2];
+  return ["helmet", "overall", "gloves", "boots"].includes(family2) ? g.sets.map((s) => s[family2]) : null;
+}
+function classGearFlavor(cls, family2, noun) {
+  const g = CLASS_GEAR[cls];
+  if (!g) return {};
+  if (family2 === "weapon") return [{ critChance: 0.05 }, { critDamage: 0.15 }, { attackScale: [6, 5] }][g.weapon.indexOf(noun)] ?? {};
+  if (["helmet", "overall", "gloves", "boots"].includes(family2)) return [{ maxHpScale: [5, 4] }, { defenseScale: [5, 4] }][g.sets.findIndex((s) => s[family2] === noun)] ?? {};
+  return {};
+}
+
+// src/shared/content/quest_gear_v1.js
+var QUEST_GEAR_VERSION = "quest-gear-v1";
+var QUEST_GEAR_GROUPS = Object.freeze({ any: null, weapons: Object.freeze(["weapon", "subweapon"]), armor: Object.freeze(["helmet", "chest", "leggings", "overall", "gloves", "boots"]), accessories: Object.freeze(["ring", "cape"]) });
+var questGearFamiliesV1 = (families, group) => {
+  const keep = QUEST_GEAR_GROUPS[group];
+  return keep ? families.filter((f3) => keep.includes(f3)) : families;
+};
+function h32(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  h = Math.imul(h ^ h >>> 16, 2246822507);
+  h = Math.imul(h ^ h >>> 13, 3266489909);
+  return (h ^ h >>> 16) >>> 0;
+}
+var questGearSourceIdV1 = (seedHex, playerId, questId) => "ent:" + [0, 1, 2, 3].map((i) => h32(QUEST_GEAR_VERSION + "/" + seedHex + "/" + playerId + "/" + questId + "/" + i).toString(16).padStart(8, "0")).join("");
+
+// src/shared/content/class_trees_v1.js
+var CLASS_TREE_TIER_POINTS = 5;
+var CLASS_TREE_POINT_CAP = 49;
+var AUGMENT_SLOTS = 2;
+var AUGMENT_UNLOCK_POINTS = Object.freeze([5, 10, 15, 20, 10]);
+var CLASS_TREES = freezeWire({ "knight": [{ "id": "bastion", "name": "Bastion", "color": "#79b8ec", "tagline": "The Wall: hold Guard and outlast", "rows": [["iron_will", "rallying_cry", "bulwark_stance"], ["iron_wall", "bracing_bash", "heavy_plating"], ["hold_the_line", "war_banner", "rooted"], ["second_breath", "standard_bearer", "last_stand"], ["unyielding", "aegis_pulse", "bastion_ward"], ["bulwark_colossus"]] }, { "id": "breaker", "name": "Breaker", "color": "#f2945f", "tagline": "The Quake: stun the crowd", "rows": [["heavy_hands", "earth_breaker", "momentum"], ["shatterpoint", "concussion", "impact_training"], ["unstoppable", "shield_charge", "reckless"], ["crowd_breaker", "avalanche", "tremor"], ["groundbreaker", "skyfall_leap", "titan"], ["earthshaker"]] }, { "id": "reprisal", "name": "Reprisal", "color": "#e8848c", "tagline": "The Reaver: bleed them, punish them", "rows": [["retaliation", "counter_stance", "spiked_shield"], ["grudge", "unbroken", "serrated_edge"], ["vengeance", "shield_throw", "blood_for_blood"], ["blood_price", "marked_foe", "red_harvest"], ["spite", "retribution", "executioner"], ["thorned_bulwark"]] }], "rogue": [{ "id": "duelist", "name": "Duelist", "color": "#e9c46a", "tagline": "The Fencer: one target, crits and parries", "rows": [["focus", "lunge", "en_garde"], ["fourth_cut", "footwork", "fencers_grace"], ["duel", "riposte", "steel_nerves"], ["coup_de_grace", "marked_for_death", "glass_blade"], ["blade_dance", "thousand_cuts", "flourish"], ["master_duelist"]] }, { "id": "venom", "name": "Venom", "color": "#8fd16a", "tagline": "The Plague: bleeds and poisons that spread", "rows": [["virulence", "toxic_fan", "serrated_cuts"], ["vipers_coating", "paralytic", "open_wounds"], ["lingering_venom", "rupture", "hemorrhage"], ["septic", "contagious", "toxic_blood"], ["bloodletting", "noxious_bloom", "fester"], ["virulent_bloom"]] }, { "id": "skirmish", "name": "Skirmish", "color": "#b08cff", "tagline": "The Phantom: dash in, cut, vanish", "rows": [["light_step", "whirling_blades", "quick_dash"], ["crosscut", "blade_rush", "hit_and_run"], ["evasive", "smoke_veil", "shade"], ["opportunist", "exploit", "restless"], ["afterimage", "shadowstep", "assassinate"], ["shadow_assassin"]] }], "mage": [{ "id": "ember", "name": "Ember", "color": "#f5874f", "tagline": "The Pyromancer: burn it, spread it, blow it up", "rows": [["kindling", "firebloom", "firebrand"], ["fan_the_flames", "searing", "cinder_step"], ["volatile", "flame_wall", "firewalker"], ["spreading_flames", "kindle", "glass_furnace"], ["pyromaniac", "meteor", "molten_ground"], ["phoenix"]] }, { "id": "rime", "name": "Rime", "color": "#8fd0f0", "tagline": "The Frost Warden: freeze them, then spend your Barrier", "rows": [["cold_snap", "flashfreeze", "frostbinder"], ["brittle", "deep_freeze", "frost_step"], ["shatter", "ice_barrier", "steady_mind"], ["arcane_syphon", "frost_ward", "ice_fortress"], ["winters_grasp", "glacial_burst", "echoing_burst"], ["absolute_zero"]] }, { "id": "conduit", "name": "Conduit", "color": "#f2d46b", "tagline": "The Stormcaller: chains and lightning", "rows": [["static_charge", "ball_lightning", "storm_conductor"], ["superconductor", "forked_lightning", "static_step"], ["spell_weaving", "static_field", "live_wire"], ["elemental_overload", "magnetic", "overload"], ["quickening", "thunderfall", "storm_call"], ["living_storm"]] }] });
+var CLASS_TREE_SKILLS = freezeWire({ "iron_will": { "id": "iron_will", "classId": "knight", "tree": "bastion", "tier": 1, "kind": "passive", "name": "Iron Will", "maxRank": 5, "requires": null, "description": "While Guard is up, regain 0.4% of your max HP per rank every second." }, "rallying_cry": { "id": "rallying_cry", "classId": "knight", "tree": "bastion", "tier": 1, "kind": "active", "name": "Rallying Cry", "maxRank": 1, "requires": null, "description": "Shout to heal 15% of your max HP. Nearby enemies deal 20% less damage for 6 seconds." }, "bulwark_stance": { "id": "bulwark_stance", "classId": "knight", "tree": "bastion", "tier": 1, "kind": "passive", "name": "Bulwark Stance", "maxRank": 5, "requires": null, "description": "Each block makes you take 2% less damage per rank for 4 seconds, stacking 3 times." }, "iron_wall": { "id": "iron_wall", "classId": "knight", "tree": "bastion", "tier": 2, "kind": "passive", "name": "Iron Wall", "maxRank": 5, "requires": null, "description": "Guard also covers your sides. Each rank widens it." }, "bracing_bash": { "id": "bracing_bash", "classId": "knight", "tree": "bastion", "tier": 2, "kind": "passive", "name": "Bracing Bash", "maxRank": 5, "requires": null, "description": "Each enemy Shield Bash hits refills 3% of your Guard per rank. Each rank also cuts Shield Bash's cooldown 2%." }, "heavy_plating": { "id": "heavy_plating", "classId": "knight", "tree": "bastion", "tier": 2, "kind": "passive", "name": "Heavy Plating", "maxRank": 1, "requires": null, "description": "+25% Defense, but you move 10% slower.", "tradeOff": true }, "hold_the_line": { "id": "hold_the_line", "classId": "knight", "tree": "bastion", "tier": 3, "kind": "passive", "name": "Hold the Line", "maxRank": 5, "requires": null, "description": "Each hit you block heals 1% of your max HP per rank." }, "war_banner": { "id": "war_banner", "classId": "knight", "tree": "bastion", "tier": 3, "kind": "active", "name": "War Banner", "maxRank": 1, "requires": null, "description": "Plant a banner for 10 seconds. While you stand near it you get +15% Attack and Defense." }, "rooted": { "id": "rooted", "classId": "knight", "tree": "bastion", "tier": 3, "kind": "passive", "name": "Rooted", "maxRank": 5, "requires": null, "description": "After standing still for 1 second, take 4% less damage per rank." }, "second_breath": { "id": "second_breath", "classId": "knight", "tree": "bastion", "tier": 4, "kind": "passive", "name": "Second Breath", "maxRank": 5, "requires": null, "description": "Once a minute, a hit that would kill you leaves you at 1 HP and heals you over 3 seconds. Each rank heals more." }, "standard_bearer": { "id": "standard_bearer", "classId": "knight", "tree": "bastion", "tier": 4, "kind": "passive", "name": "Standard Bearer", "maxRank": 5, "requires": "war_banner", "description": "While you stand near your banner, Guard refills 5% faster per rank." }, "last_stand": { "id": "last_stand", "classId": "knight", "tree": "bastion", "tier": 4, "kind": "passive", "name": "Last Stand", "maxRank": 1, "requires": null, "description": "Below 30% health you take 30% less damage, but deal 15% less.", "tradeOff": true }, "unyielding": { "id": "unyielding", "classId": "knight", "tree": "bastion", "tier": 5, "kind": "passive", "name": "Unyielding", "maxRank": 5, "requires": null, "description": "Guard breaks 5% less easily per rank." }, "aegis_pulse": { "id": "aegis_pulse", "classId": "knight", "tree": "bastion", "tier": 5, "kind": "active", "name": "Aegis Pulse", "maxRank": 1, "requires": null, "description": "Shove every enemy around you away and gain a Barrier worth 20% of your max HP for 6 seconds." }, "bastion_ward": { "id": "bastion_ward", "classId": "knight", "tree": "bastion", "tier": 5, "kind": "passive", "name": "Bastion Ward", "maxRank": 5, "requires": "aegis_pulse", "description": "While Aegis Pulse's Barrier holds, each block restores 2% of it per rank." }, "bulwark_colossus": { "id": "bulwark_colossus", "classId": "knight", "tree": "bastion", "tier": 6, "kind": "capstone", "name": "Bulwark Colossus", "maxRank": 1, "requires": null, "description": "Guard covers every side, and each block sends out a shockwave." }, "heavy_hands": { "id": "heavy_hands", "classId": "knight", "tree": "breaker", "tier": 1, "kind": "passive", "name": "Heavy Hands", "maxRank": 5, "requires": null, "description": "Your stuns last 10% longer per rank." }, "earth_breaker": { "id": "earth_breaker", "classId": "knight", "tree": "breaker", "tier": 1, "kind": "active", "name": "Earth-Breaker", "maxRank": 1, "requires": null, "description": "Slam the ground all around you. Everything hit takes damage and is slowed for 3 seconds." }, "momentum": { "id": "momentum", "classId": "knight", "tree": "breaker", "tier": 1, "kind": "passive", "name": "Momentum", "maxRank": 5, "requires": null, "description": "Each skill you use gives +4% move speed per rank for 3 seconds." }, "shatterpoint": { "id": "shatterpoint", "classId": "knight", "tree": "breaker", "tier": 2, "kind": "passive", "name": "Shatterpoint", "maxRank": 5, "requires": null, "description": "Stunned enemies take 5% more damage from you per rank." }, "concussion": { "id": "concussion", "classId": "knight", "tree": "breaker", "tier": 2, "kind": "passive", "name": "Concussion", "maxRank": 5, "requires": null, "description": "Bosses can't be stunned, so your stuns slow them 6% per rank instead." }, "impact_training": { "id": "impact_training", "classId": "knight", "tree": "breaker", "tier": 2, "kind": "passive", "name": "Impact Training", "maxRank": 5, "requires": null, "description": "Shield Bash and Breaker skills deal 6% more damage per rank. Each rank also cuts Shield Bash's cooldown 2%." }, "unstoppable": { "id": "unstoppable", "classId": "knight", "tree": "breaker", "tier": 3, "kind": "passive", "name": "Unstoppable", "maxRank": 5, "requires": null, "description": "Each enemy you stun takes 0.2 seconds per rank off your Breaker cooldowns." }, "shield_charge": { "id": "shield_charge", "classId": "knight", "tree": "breaker", "tier": 3, "kind": "active", "name": "Shield Charge", "maxRank": 1, "requires": null, "description": "Rush forward behind your shield. Enemies in the way get pushed along and stunned at the end." }, "reckless": { "id": "reckless", "classId": "knight", "tree": "breaker", "tier": 3, "kind": "passive", "name": "Reckless", "maxRank": 1, "requires": null, "description": "Breaker cooldowns are 25% shorter, but you take 15% more damage.", "tradeOff": true }, "crowd_breaker": { "id": "crowd_breaker", "classId": "knight", "tree": "breaker", "tier": 4, "kind": "passive", "name": "Crowd Breaker", "maxRank": 5, "requires": null, "description": "A Breaker skill that hits 3 or more enemies deals 5% more damage per rank." }, "avalanche": { "id": "avalanche", "classId": "knight", "tree": "breaker", "tier": 4, "kind": "passive", "name": "Avalanche", "maxRank": 5, "requires": "shield_charge", "description": "Killing a stunned enemy takes 1 second per rank off Shield Charge." }, "tremor": { "id": "tremor", "classId": "knight", "tree": "breaker", "tier": 4, "kind": "passive", "name": "Tremor", "maxRank": 5, "requires": null, "description": "Hitting a slowed enemy with a Breaker skill stuns it for 0.2 seconds per rank." }, "groundbreaker": { "id": "groundbreaker", "classId": "knight", "tree": "breaker", "tier": 5, "kind": "passive", "name": "Groundbreaker", "maxRank": 5, "requires": null, "description": "Breaker skills leave cracked ground that slows 5% per rank for 3 seconds." }, "skyfall_leap": { "id": "skyfall_leap", "classId": "knight", "tree": "breaker", "tier": 5, "kind": "active", "name": "Skyfall Leap", "maxRank": 1, "requires": null, "description": "Leap to a spot and crash down, damaging and stunning everything around where you land." }, "titan": { "id": "titan", "classId": "knight", "tree": "breaker", "tier": 5, "kind": "passive", "name": "Titan", "maxRank": 5, "requires": "skyfall_leap", "description": "After Skyfall Leap, your next Earth-Breaker within 3 seconds deals 15% more per rank." }, "earthshaker": { "id": "earthshaker", "classId": "knight", "tree": "breaker", "tier": 6, "kind": "capstone", "name": "Earthshaker", "maxRank": 1, "requires": "skyfall_leap", "description": "Shield Charge and Skyfall Leap end with a free Earth-Breaker, augments included." }, "retaliation": { "id": "retaliation", "classId": "knight", "tree": "reprisal", "tier": 1, "kind": "passive", "name": "Retaliation", "maxRank": 5, "requires": null, "description": "Every block hits the attacker back for 10% of your Defense per rank." }, "counter_stance": { "id": "counter_stance", "classId": "knight", "tree": "reprisal", "tier": 1, "kind": "active", "name": "Counter Stance", "maxRank": 1, "requires": null, "description": "Brace for 2 seconds. The next hit does nothing to you, and you strike back for 300% Attack and stun the attacker." }, "spiked_shield": { "id": "spiked_shield", "classId": "knight", "tree": "reprisal", "tier": 1, "kind": "passive", "name": "Spiked Shield", "maxRank": 5, "requires": null, "description": "Shield Bash makes enemies Bleed. Each rank adds 10% Bleed damage. Each rank also cuts Shield Bash's cooldown 2%." }, "grudge": { "id": "grudge", "classId": "knight", "tree": "reprisal", "tier": 2, "kind": "passive", "name": "Grudge", "maxRank": 5, "requires": null, "description": "Enemies that hit you take 3% more damage from you per rank for 4 seconds." }, "unbroken": { "id": "unbroken", "classId": "knight", "tree": "reprisal", "tier": 2, "kind": "passive", "name": "Unbroken", "maxRank": 5, "requires": "counter_stance", "description": "Each block takes 0.3 seconds per rank off Counter Stance." }, "serrated_edge": { "id": "serrated_edge", "classId": "knight", "tree": "reprisal", "tier": 2, "kind": "passive", "name": "Serrated Edge", "maxRank": 5, "requires": "spiked_shield", "description": "Your Bleeds last 10% longer per rank." }, "vengeance": { "id": "vengeance", "classId": "knight", "tree": "reprisal", "tier": 3, "kind": "passive", "name": "Vengeance", "maxRank": 5, "requires": null, "description": "+2% Attack per rank for every 10% of health you're missing." }, "shield_throw": { "id": "shield_throw", "classId": "knight", "tree": "reprisal", "tier": 3, "kind": "active", "name": "Shield Throw", "maxRank": 1, "requires": null, "description": "Throw your shield. It bounces between up to 3 enemies and comes back. You can't Guard until it returns." }, "blood_for_blood": { "id": "blood_for_blood", "classId": "knight", "tree": "reprisal", "tier": 3, "kind": "passive", "name": "Blood for Blood", "maxRank": 5, "requires": "serrated_edge", "description": "Hitting a Bleeding enemy heals you for 0.5% of your max HP per rank." }, "blood_price": { "id": "blood_price", "classId": "knight", "tree": "reprisal", "tier": 4, "kind": "passive", "name": "Blood Price", "maxRank": 1, "requires": null, "description": "You deal 25% more damage, but all healing on you is halved.", "tradeOff": true }, "marked_foe": { "id": "marked_foe", "classId": "knight", "tree": "reprisal", "tier": 4, "kind": "passive", "name": "Marked Foe", "maxRank": 5, "requires": "shield_throw", "description": "Shield Throw's first target takes 4% more damage from you per rank for 5 seconds." }, "red_harvest": { "id": "red_harvest", "classId": "knight", "tree": "reprisal", "tier": 4, "kind": "passive", "name": "Red Harvest", "maxRank": 5, "requires": "blood_for_blood", "description": "A Bleeding enemy that dies passes its Bleed to 1 nearby enemy per rank." }, "spite": { "id": "spite", "classId": "knight", "tree": "reprisal", "tier": 5, "kind": "passive", "name": "Spite", "maxRank": 5, "requires": null, "description": "After a counter, +5% Attack per rank for 5 seconds." }, "retribution": { "id": "retribution", "classId": "knight", "tree": "reprisal", "tier": 5, "kind": "active", "name": "Retribution", "maxRank": 1, "requires": null, "description": "Release every hit you blocked in the last 6 seconds as a blast around you." }, "executioner": { "id": "executioner", "classId": "knight", "tree": "reprisal", "tier": 5, "kind": "passive", "name": "Executioner", "maxRank": 5, "requires": null, "description": "Enemies below 25% health take 6% more damage from you per rank." }, "thorned_bulwark": { "id": "thorned_bulwark", "classId": "knight", "tree": "reprisal", "tier": 6, "kind": "capstone", "name": "Thorned Bulwark", "maxRank": 1, "requires": null, "description": "Every hit you block or counter makes the attacker Bleed." }, "focus": { "id": "focus", "classId": "rogue", "tree": "duelist", "tier": 1, "kind": "passive", "name": "Focus", "maxRank": 5, "requires": null, "description": "Each hit on the same enemy gives +1% crit chance per rank, up to 5 hits. Switching targets resets it." }, "lunge": { "id": "lunge", "classId": "rogue", "tree": "duelist", "tier": 1, "kind": "active", "name": "Lunge", "maxRank": 1, "requires": null, "description": "Lunge at the nearest enemy in front of you and stab it for 250% Attack. Lunge crits twice as often as your other hits." }, "en_garde": { "id": "en_garde", "classId": "rogue", "tree": "duelist", "tier": 1, "kind": "passive", "name": "En Garde", "maxRank": 5, "requires": null, "description": "After you parry, your next hit crits and deals 8% more per rank." }, "fourth_cut": { "id": "fourth_cut", "classId": "rogue", "tree": "duelist", "tier": 2, "kind": "passive", "name": "Fourth Cut", "maxRank": 5, "requires": null, "description": "Flurry has a 10% chance per rank to cut a fourth time." }, "footwork": { "id": "footwork", "classId": "rogue", "tree": "duelist", "tier": 2, "kind": "passive", "name": "Footwork", "maxRank": 5, "requires": "lunge", "description": "When Lunge crits, its cooldown drops by 0.3 seconds per rank." }, "fencers_grace": { "id": "fencers_grace", "classId": "rogue", "tree": "duelist", "tier": 2, "kind": "passive", "name": "Fencer's Grace", "maxRank": 1, "requires": null, "description": "Your crits deal 40% more, but hits that don't crit deal 20% less.", "tradeOff": true }, "duel": { "id": "duel", "classId": "rogue", "tree": "duelist", "tier": 3, "kind": "passive", "name": "Duel", "maxRank": 5, "requires": null, "description": "While only one enemy is near you, +4% Attack per rank." }, "riposte": { "id": "riposte", "classId": "rogue", "tree": "duelist", "tier": 3, "kind": "active", "name": "Riposte", "maxRank": 1, "requires": null, "description": "Ready your blades for 1.5 seconds. Parry the next hit and cut back for 300% Attack. Your next Flurry crits." }, "steel_nerves": { "id": "steel_nerves", "classId": "rogue", "tree": "duelist", "tier": 3, "kind": "passive", "name": "Steel Nerves", "maxRank": 5, "requires": "riposte", "description": "Each parry heals you for 1% of your max HP per rank." }, "coup_de_grace": { "id": "coup_de_grace", "classId": "rogue", "tree": "duelist", "tier": 4, "kind": "passive", "name": "Coup de Gr\xE2ce", "maxRank": 5, "requires": null, "description": "Enemies below 25% health take 6% more crit damage from you per rank." }, "marked_for_death": { "id": "marked_for_death", "classId": "rogue", "tree": "duelist", "tier": 4, "kind": "passive", "name": "Marked for Death", "maxRank": 5, "requires": "riposte", "description": "Riposte marks the attacker: it takes 4% more damage from you per rank for 6 seconds." }, "glass_blade": { "id": "glass_blade", "classId": "rogue", "tree": "duelist", "tier": 4, "kind": "passive", "name": "Glass Blade", "maxRank": 1, "requires": null, "description": "+30% Attack, but you take 20% more damage.", "tradeOff": true }, "blade_dance": { "id": "blade_dance", "classId": "rogue", "tree": "duelist", "tier": 5, "kind": "passive", "name": "Blade Dance", "maxRank": 5, "requires": null, "description": "Crits give Combo 10% sooner per rank." }, "thousand_cuts": { "id": "thousand_cuts", "classId": "rogue", "tree": "duelist", "tier": 5, "kind": "active", "name": "Thousand Cuts", "maxRank": 1, "requires": null, "description": "Strike one enemy 6 times in a blur. Every cut can crit." }, "flourish": { "id": "flourish", "classId": "rogue", "tree": "duelist", "tier": 5, "kind": "passive", "name": "Flourish", "maxRank": 5, "requires": "thousand_cuts", "description": "Each crit during Thousand Cuts heals you for 0.5% of your max HP per rank." }, "master_duelist": { "id": "master_duelist", "classId": "rogue", "tree": "duelist", "tier": 6, "kind": "capstone", "name": "Master Duelist", "maxRank": 1, "requires": null, "description": "Each hit on the same enemy gives +3% damage against it, up to 10 times. Switching targets resets it." }, "virulence": { "id": "virulence", "classId": "rogue", "tree": "venom", "tier": 1, "kind": "passive", "name": "Virulence", "maxRank": 5, "requires": null, "description": "Your poisons deal 6% more damage per rank." }, "toxic_fan": { "id": "toxic_fan", "classId": "rogue", "tree": "venom", "tier": 1, "kind": "active", "name": "Toxic Fan", "maxRank": 1, "requires": null, "description": "Throw a fan of 5 poisoned knives in front of you." }, "serrated_cuts": { "id": "serrated_cuts", "classId": "rogue", "tree": "venom", "tier": 1, "kind": "passive", "name": "Serrated Cuts", "maxRank": 5, "requires": null, "description": "Your Bleeds deal 6% more damage per rank." }, "vipers_coating": { "id": "vipers_coating", "classId": "rogue", "tree": "venom", "tier": 2, "kind": "passive", "name": "Viper's Coating", "maxRank": 5, "requires": null, "description": "Flurry cuts poison enemies 5% of the time per rank." }, "paralytic": { "id": "paralytic", "classId": "rogue", "tree": "venom", "tier": 2, "kind": "passive", "name": "Paralytic", "maxRank": 5, "requires": "toxic_fan", "description": "Poisoned enemies move 4% slower per rank." }, "open_wounds": { "id": "open_wounds", "classId": "rogue", "tree": "venom", "tier": 2, "kind": "passive", "name": "Open Wounds", "maxRank": 5, "requires": null, "description": "Bleeding enemies take 3% more damage from you per rank." }, "lingering_venom": { "id": "lingering_venom", "classId": "rogue", "tree": "venom", "tier": 3, "kind": "passive", "name": "Lingering Venom", "maxRank": 5, "requires": null, "description": "Your poisons and Bleeds last 10% longer per rank." }, "rupture": { "id": "rupture", "classId": "rogue", "tree": "venom", "tier": 3, "kind": "active", "name": "Rupture", "maxRank": 1, "requires": null, "description": "Tear open every Bleed on enemies around you. Each one deals all of its remaining damage at once." }, "hemorrhage": { "id": "hemorrhage", "classId": "rogue", "tree": "venom", "tier": 3, "kind": "passive", "name": "Hemorrhage", "maxRank": 5, "requires": null, "description": "Flurry's cuts Bleed 5% more often per rank." }, "septic": { "id": "septic", "classId": "rogue", "tree": "venom", "tier": 4, "kind": "passive", "name": "Septic", "maxRank": 5, "requires": null, "description": "Poisoned enemies deal 3% less damage per rank." }, "contagious": { "id": "contagious", "classId": "rogue", "tree": "venom", "tier": 4, "kind": "passive", "name": "Contagious", "maxRank": 5, "requires": "rupture", "description": "Rupture gives a fresh Bleed to 1 nearby enemy per rank." }, "toxic_blood": { "id": "toxic_blood", "classId": "rogue", "tree": "venom", "tier": 4, "kind": "passive", "name": "Toxic Blood", "maxRank": 1, "requires": null, "description": "Your Bleeds and poisons deal 40% more, but your direct hits deal 15% less.", "tradeOff": true }, "bloodletting": { "id": "bloodletting", "classId": "rogue", "tree": "venom", "tier": 5, "kind": "passive", "name": "Bloodletting", "maxRank": 5, "requires": null, "description": "Enemies that die while Bleeding or poisoned heal you for 1% of your max HP per rank." }, "noxious_bloom": { "id": "noxious_bloom", "classId": "rogue", "tree": "venom", "tier": 5, "kind": "active", "name": "Noxious Bloom", "maxRank": 1, "requires": null, "description": "A toxic flower bursts at your feet and poisons everything around you." }, "fester": { "id": "fester", "classId": "rogue", "tree": "venom", "tier": 5, "kind": "passive", "name": "Fester", "maxRank": 5, "requires": "noxious_bloom", "description": "Enemies standing in Noxious Bloom take 5% more poison damage per rank." }, "virulent_bloom": { "id": "virulent_bloom", "classId": "rogue", "tree": "venom", "tier": 6, "kind": "capstone", "name": "Virulent Bloom", "maxRank": 1, "requires": "noxious_bloom", "description": "Every enemy that dies while poisoned bursts into a small Noxious Bloom of its own." }, "light_step": { "id": "light_step", "classId": "rogue", "tree": "skirmish", "tier": 1, "kind": "passive", "name": "Light Step", "maxRank": 5, "requires": null, "description": "After a Dash, move 5% faster per rank for 3 seconds." }, "whirling_blades": { "id": "whirling_blades", "classId": "rogue", "tree": "skirmish", "tier": 1, "kind": "active", "name": "Whirling Blades", "maxRank": 1, "requires": null, "description": "Spin and cut everything around you 3 times." }, "quick_dash": { "id": "quick_dash", "classId": "rogue", "tree": "skirmish", "tier": 1, "kind": "passive", "name": "Quick Dash", "maxRank": 5, "requires": null, "description": "Dash's cooldown is 5% shorter per rank." }, "crosscut": { "id": "crosscut", "classId": "rogue", "tree": "skirmish", "tier": 2, "kind": "passive", "name": "Crosscut", "maxRank": 5, "requires": null, "description": "Dash cuts every enemy you pass through for 15% Attack per rank." }, "blade_rush": { "id": "blade_rush", "classId": "rogue", "tree": "skirmish", "tier": 2, "kind": "passive", "name": "Blade Rush", "maxRank": 5, "requires": null, "description": "Each Dash has a 20% chance per rank to give 1 Combo." }, "hit_and_run": { "id": "hit_and_run", "classId": "rogue", "tree": "skirmish", "tier": 2, "kind": "passive", "name": "Hit and Run", "maxRank": 5, "requires": null, "description": "Hits within 3 seconds after a Dash deal 6% more per rank." }, "evasive": { "id": "evasive", "classId": "rogue", "tree": "skirmish", "tier": 3, "kind": "passive", "name": "Evasive", "maxRank": 5, "requires": null, "description": "After a Dash, take 5% less damage per rank for 3 seconds." }, "smoke_veil": { "id": "smoke_veil", "classId": "rogue", "tree": "skirmish", "tier": 3, "kind": "active", "name": "Smoke Veil", "maxRank": 1, "requires": null, "description": "Drop a smoke cloud for 4 seconds. Enemies inside are slowed and Exposed, and you take 30% less damage while you're in it." }, "shade": { "id": "shade", "classId": "rogue", "tree": "skirmish", "tier": 3, "kind": "passive", "name": "Shade", "maxRank": 5, "requires": "smoke_veil", "description": "While you're inside Smoke Veil, Dash recharges 10% faster per rank." }, "opportunist": { "id": "opportunist", "classId": "rogue", "tree": "skirmish", "tier": 4, "kind": "passive", "name": "Opportunist", "maxRank": 5, "requires": null, "description": "Each kill takes 0.3 seconds per rank off Dash's cooldown." }, "exploit": { "id": "exploit", "classId": "rogue", "tree": "skirmish", "tier": 4, "kind": "passive", "name": "Exploit", "maxRank": 5, "requires": "smoke_veil", "description": "Exposed enemies take 3% more damage from you per rank." }, "restless": { "id": "restless", "classId": "rogue", "tree": "skirmish", "tier": 4, "kind": "passive", "name": "Restless", "maxRank": 1, "requires": null, "description": "Dash holds 2 charges, but your skills' cooldowns are 20% longer.", "tradeOff": true }, "afterimage": { "id": "afterimage", "classId": "rogue", "tree": "skirmish", "tier": 5, "kind": "passive", "name": "Afterimage", "maxRank": 5, "requires": null, "description": "Dash leaves an afterimage that bursts for 20% of your Attack per rank." }, "shadowstep": { "id": "shadowstep", "classId": "rogue", "tree": "skirmish", "tier": 5, "kind": "active", "name": "Shadowstep", "maxRank": 1, "requires": null, "description": "Vanish and reappear behind the nearest enemy. Your next hit within 3 seconds is a crit that deals double damage." }, "assassinate": { "id": "assassinate", "classId": "rogue", "tree": "skirmish", "tier": 5, "kind": "passive", "name": "Assassinate", "maxRank": 5, "requires": "shadowstep", "description": "Shadowstep's crit deals 10% more damage per rank." }, "shadow_assassin": { "id": "shadow_assassin", "classId": "rogue", "tree": "skirmish", "tier": 6, "kind": "capstone", "name": "Shadow Assassin", "maxRank": 1, "requires": "shadowstep", "description": "Dash becomes a Shadowstep: it takes you behind the nearest enemy, and your first hit after it always crits." }, "kindling": { "id": "kindling", "classId": "mage", "tree": "ember", "tier": 1, "kind": "passive", "name": "Kindling", "maxRank": 5, "requires": null, "description": "Your burns deal 6% more damage per rank." }, "firebloom": { "id": "firebloom", "classId": "mage", "tree": "ember", "tier": 1, "kind": "active", "name": "Firebloom", "maxRank": 1, "requires": null, "description": "Fire blossoms where you aim and burns everything inside it." }, "firebrand": { "id": "firebrand", "classId": "mage", "tree": "ember", "tier": 1, "kind": "passive", "name": "Firebrand", "maxRank": 5, "requires": null, "description": "Casts from a Fire Tome burn 8% harder per rank." }, "fan_the_flames": { "id": "fan_the_flames", "classId": "mage", "tree": "ember", "tier": 2, "kind": "passive", "name": "Fan the Flames", "maxRank": 5, "requires": null, "description": "Burning enemies take 3% more damage from you per rank." }, "searing": { "id": "searing", "classId": "mage", "tree": "ember", "tier": 2, "kind": "passive", "name": "Searing", "maxRank": 5, "requires": null, "description": "Your burns last 10% longer per rank." }, "cinder_step": { "id": "cinder_step", "classId": "mage", "tree": "ember", "tier": 2, "kind": "passive", "name": "Cinder Step", "maxRank": 5, "requires": null, "description": "Blink leaves a trail of fire that burns enemies for 10% Attack per rank. Each rank also cuts Blink's cooldown 2%." }, "volatile": { "id": "volatile", "classId": "mage", "tree": "ember", "tier": 3, "kind": "passive", "name": "Volatile", "maxRank": 5, "requires": null, "description": "Enemies that die while burning explode for 8% of your Attack per rank." }, "flame_wall": { "id": "flame_wall", "classId": "mage", "tree": "ember", "tier": 3, "kind": "active", "name": "Flame Wall", "maxRank": 1, "requires": null, "description": "Raise a wall of fire in front of you for 5 seconds. Enemies that cross it burn." }, "firewalker": { "id": "firewalker", "classId": "mage", "tree": "ember", "tier": 3, "kind": "passive", "name": "Firewalker", "maxRank": 5, "requires": "flame_wall", "description": "While you stand near your Flame Wall, you deal 4% more damage per rank." }, "spreading_flames": { "id": "spreading_flames", "classId": "mage", "tree": "ember", "tier": 4, "kind": "passive", "name": "Spreading Flames", "maxRank": 5, "requires": null, "description": "Each burn has a 5% chance per rank to catch a nearby enemy too." }, "kindle": { "id": "kindle", "classId": "mage", "tree": "ember", "tier": 4, "kind": "passive", "name": "Kindle", "maxRank": 5, "requires": "flame_wall", "description": "Enemies that cross Flame Wall take 5% more fire damage per rank for 4 seconds." }, "glass_furnace": { "id": "glass_furnace", "classId": "mage", "tree": "ember", "tier": 4, "kind": "passive", "name": "Glass Furnace", "maxRank": 1, "requires": null, "description": "Fire damage +35%, but your max HP is 15% lower.", "tradeOff": true }, "pyromaniac": { "id": "pyromaniac", "classId": "mage", "tree": "ember", "tier": 5, "kind": "passive", "name": "Pyromaniac", "maxRank": 5, "requires": null, "description": "Each burning enemy near you gives +1% Attack per rank, up to 5 enemies." }, "meteor": { "id": "meteor", "classId": "mage", "tree": "ember", "tier": 5, "kind": "active", "name": "Meteor", "maxRank": 1, "requires": null, "description": "Call a meteor onto a spot. It lands a second later and leaves the ground burning for 4 seconds." }, "molten_ground": { "id": "molten_ground", "classId": "mage", "tree": "ember", "tier": 5, "kind": "passive", "name": "Molten Ground", "maxRank": 5, "requires": "meteor", "description": "Meteor's burning ground deals 8% more per rank." }, "phoenix": { "id": "phoenix", "classId": "mage", "tree": "ember", "tier": 6, "kind": "capstone", "name": "Phoenix", "maxRank": 1, "requires": null, "description": "Once every 2 minutes, a hit that would kill you makes you burst into flames instead, burning everything around you and healing you to 40%." }, "cold_snap": { "id": "cold_snap", "classId": "mage", "tree": "rime", "tier": 1, "kind": "passive", "name": "Cold Snap", "maxRank": 5, "requires": null, "description": "Your chills and freezes last 10% longer per rank." }, "flashfreeze": { "id": "flashfreeze", "classId": "mage", "tree": "rime", "tier": 1, "kind": "active", "name": "Flashfreeze", "maxRank": 1, "requires": null, "description": "Freeze everything around you in a flash. Ordinary enemies freeze, elites are chilled, and bosses slow down." }, "frostbinder": { "id": "frostbinder", "classId": "mage", "tree": "rime", "tier": 1, "kind": "passive", "name": "Frostbinder", "maxRank": 5, "requires": null, "description": "Casts from a Frost Tome slow enemies 5% more per rank." }, "brittle": { "id": "brittle", "classId": "mage", "tree": "rime", "tier": 2, "kind": "passive", "name": "Brittle", "maxRank": 5, "requires": null, "description": "Chilled and frozen enemies take 4% more damage from you per rank, whatever hits them." }, "deep_freeze": { "id": "deep_freeze", "classId": "mage", "tree": "rime", "tier": 2, "kind": "passive", "name": "Lingering Cold", "maxRank": 5, "requires": "flashfreeze", "description": "Enemies you freeze stay chilled for 1 second per rank after they thaw." }, "frost_step": { "id": "frost_step", "classId": "mage", "tree": "rime", "tier": 2, "kind": "passive", "name": "Frost Step", "maxRank": 5, "requires": null, "description": "Blink leaves frost along its path for 2 seconds that chills enemies on it. Each rank slows them 10% more and cuts Blink's cooldown 2%." }, "shatter": { "id": "shatter", "classId": "mage", "tree": "rime", "tier": 3, "kind": "passive", "name": "Shatter", "maxRank": 5, "requires": null, "description": "Frozen enemies that die burst into ice, dealing 10% of your Attack per rank around them." }, "ice_barrier": { "id": "ice_barrier", "classId": "mage", "tree": "rime", "tier": 3, "kind": "active", "name": "Ice Barrier", "maxRank": 1, "requires": null, "description": "Wrap yourself in ice: gain a Barrier worth 25% of your max HP for 8 seconds. Enemies that hit it are chilled." }, "steady_mind": { "id": "steady_mind", "classId": "mage", "tree": "rime", "tier": 3, "kind": "passive", "name": "Steady Mind", "maxRank": 5, "requires": null, "description": "Take 2% less damage per rank while you have a Barrier." }, "arcane_syphon": { "id": "arcane_syphon", "classId": "mage", "tree": "rime", "tier": 4, "kind": "passive", "name": "Arcane Syphon", "maxRank": 5, "requires": null, "description": "Cast spends 10% of your Barrier to hit 6% harder per rank." }, "frost_ward": { "id": "frost_ward", "classId": "mage", "tree": "rime", "tier": 4, "kind": "passive", "name": "Frost Ward", "maxRank": 5, "requires": "ice_barrier", "description": "When your Barrier breaks, it chills enemies around you. Each rank adds a stack." }, "ice_fortress": { "id": "ice_fortress", "classId": "mage", "tree": "rime", "tier": 4, "kind": "passive", "name": "Ice Fortress", "maxRank": 1, "requires": null, "description": "Your Barriers are 50% bigger, but you move 15% slower while you have one.", "tradeOff": true }, "winters_grasp": { "id": "winters_grasp", "classId": "mage", "tree": "rime", "tier": 5, "kind": "passive", "name": "Winter's Grasp", "maxRank": 5, "requires": null, "description": "Enemies chilled for 3 seconds straight freeze for 0.2 seconds per rank." }, "glacial_burst": { "id": "glacial_burst", "classId": "mage", "tree": "rime", "tier": 5, "kind": "active", "name": "Glacial Burst", "maxRank": 1, "requires": null, "description": "Spend all your Barrier in a blast of ice around you. It deals twice the Barrier you spent plus a spell hit as damage, and chills everything it hits." }, "echoing_burst": { "id": "echoing_burst", "classId": "mage", "tree": "rime", "tier": 5, "kind": "passive", "name": "Echoing Burst", "maxRank": 5, "requires": "glacial_burst", "description": "Glacial Burst gives back 5% of the Barrier it spent per rank." }, "absolute_zero": { "id": "absolute_zero", "classId": "mage", "tree": "rime", "tier": 6, "kind": "capstone", "name": "Absolute Zero", "maxRank": 1, "requires": null, "description": "Every enemy you freeze gives you a Barrier worth 3% of your max HP." }, "static_charge": { "id": "static_charge", "classId": "mage", "tree": "conduit", "tier": 1, "kind": "passive", "name": "Static Charge", "maxRank": 5, "requires": null, "description": "Each lightning hit gives +1% crit chance per rank for 3 seconds, stacking 5 times." }, "ball_lightning": { "id": "ball_lightning", "classId": "mage", "tree": "conduit", "tier": 1, "kind": "active", "name": "Ball Lightning", "maxRank": 1, "requires": null, "description": "Release a slow orb of lightning that drifts forward for 4 seconds, zapping every enemy near it twice a second." }, "storm_conductor": { "id": "storm_conductor", "classId": "mage", "tree": "conduit", "tier": 1, "kind": "passive", "name": "Storm Conductor", "maxRank": 5, "requires": null, "description": "Casts from a Storm Tome chain to 1 more enemy at ranks 1, 3 and 5, and hit 5% harder per rank. A Cast hits 5 enemies at most." }, "superconductor": { "id": "superconductor", "classId": "mage", "tree": "conduit", "tier": 2, "kind": "passive", "name": "Superconductor", "maxRank": 5, "requires": null, "description": "Your lightning deals 5% more damage per rank to burning or chilled enemies." }, "forked_lightning": { "id": "forked_lightning", "classId": "mage", "tree": "conduit", "tier": 2, "kind": "passive", "name": "Forked Lightning", "maxRank": 5, "requires": "storm_conductor", "description": "Each jump of a Storm Cast has a 10% chance per rank to fork to a second enemy." }, "static_step": { "id": "static_step", "classId": "mage", "tree": "conduit", "tier": 2, "kind": "passive", "name": "Static Step", "maxRank": 5, "requires": null, "description": "Blink leaves a spark where you started. For 2 seconds it zaps up to 2 nearby enemies for 10% Attack per rank. Each rank also cuts Blink's cooldown 2%." }, "spell_weaving": { "id": "spell_weaving", "classId": "mage", "tree": "conduit", "tier": 3, "kind": "passive", "name": "Spell Weaving", "maxRank": 5, "requires": null, "description": "When a skill's element differs from the last skill you used, it's 4% stronger per rank." }, "static_field": { "id": "static_field", "classId": "mage", "tree": "conduit", "tier": 3, "kind": "active", "name": "Static Field", "maxRank": 1, "requires": null, "description": "Charge the ground around you for 6 seconds. Enemies inside take a spark of damage every second, and your Storm Casts jump to enemies inside first." }, "live_wire": { "id": "live_wire", "classId": "mage", "tree": "conduit", "tier": 3, "kind": "passive", "name": "Live Wire", "maxRank": 5, "requires": "static_field", "description": "Enemies inside Static Field take 5% more lightning damage per rank." }, "elemental_overload": { "id": "elemental_overload", "classId": "mage", "tree": "conduit", "tier": 4, "kind": "passive", "name": "Elemental Overload", "maxRank": 5, "requires": null, "description": "Hitting an enemy with an element it wasn't hit by last deals 5% bonus damage per rank." }, "magnetic": { "id": "magnetic", "classId": "mage", "tree": "conduit", "tier": 4, "kind": "passive", "name": "Magnetic", "maxRank": 5, "requires": "static_field", "description": "Static Field pulls enemies toward its center. Each rank pulls harder." }, "overload": { "id": "overload", "classId": "mage", "tree": "conduit", "tier": 4, "kind": "passive", "name": "Overload", "maxRank": 1, "requires": null, "description": "Lightning crits deal double, but Cast costs 1 more Arcana.", "tradeOff": true }, "quickening": { "id": "quickening", "classId": "mage", "tree": "conduit", "tier": 5, "kind": "passive", "name": "Quickening", "maxRank": 5, "requires": null, "description": "Each lightning kill makes your skills recharge 4% faster per rank for 3 seconds." }, "thunderfall": { "id": "thunderfall", "classId": "mage", "tree": "conduit", "tier": 5, "kind": "active", "name": "Thunderfall", "maxRank": 1, "requires": null, "description": "Call lightning down from above onto up to 5 enemies around you." }, "storm_call": { "id": "storm_call", "classId": "mage", "tree": "conduit", "tier": 5, "kind": "passive", "name": "Storm Call", "maxRank": 5, "requires": "thunderfall", "description": "Thunderfall calls 1 more bolt per rank." }, "living_storm": { "id": "living_storm", "classId": "mage", "tree": "conduit", "tier": 6, "kind": "capstone", "name": "Living Storm", "maxRank": 1, "requires": "thunderfall", "description": "After you use Thunderfall, a bolt strikes a nearby enemy every 2 seconds for 6 seconds." } });
+var CLASS_SKILL_AUGMENTS = freezeWire({ "rallying_cry": [{ "name": "Second Wind", "description": "Heals 25% instead of 15%, but weakens nobody." }, { "name": "Rousing Cry", "description": "Heals 1% of max HP more for every enemy near you, up to +10%." }, { "name": "Battle Hymn", "description": "Also gives you +15% Attack for 6 seconds." }, { "name": "Stand Firm", "description": "For 4 seconds nothing can stun, slow or shove you." }, { "name": "Iron Resolve", "description": "Spends all your Grit: heals 3% of max HP more per pip. A full row also refills your Guard." }], "war_banner": [{ "name": "Carried Banner", "description": "You carry the banner on your back. Its bonus follows you, but it is 10% instead of 15%." }, { "name": "Rally Point", "description": "Heals 2% of your max HP each second while you're near it." }, { "name": "Guard Banner", "description": "Guard refills twice as fast near it." }, { "name": "Lance Banner", "description": "Plant it on an enemy: it takes 25% of your Attack each second." }, { "name": "Grit Standard", "description": "Spends all your Grit: stands 2 seconds longer per pip. A full row makes its bonus 25% instead of 15%." }], "aegis_pulse": [{ "name": "Aegis Echo", "description": "When the Barrier breaks, it shoves enemies away again." }, { "name": "Bulwark", "description": "Each enemy shoved adds 3% of max HP to the Barrier, up to +36%." }, { "name": "Repulsor", "description": "Shoves twice as far and stuns ordinary enemies for 1 second." }, { "name": "Mirror Aegis", "description": "While the Barrier holds, blocked arrows and spells fly back." }], "earth_breaker": [{ "name": "Tremor", "description": "Stuns ordinary enemies for 1 second instead of slowing them." }, { "name": "Magnetic Slam", "description": "Pulls enemies in just before it lands." }, { "name": "Aftershock", "description": "Hits again 1 second later for 40% of its damage." }, { "name": "Fault Line", "description": "Leaves burning cracks that hurt enemies for 3 seconds." }, { "name": "Breaking Point", "description": "Spends all your Grit: +20% damage per pip. A full row makes the slam half again as wide." }], "shield_charge": [{ "name": "Wall Slam", "description": "Enemies you carry into a wall, a tree or a rock take 150% Attack and stay stunned twice as long." }, { "name": "Long Charge", "description": "Goes 50% farther." }, { "name": "Juggernaut", "description": "You take 30% less damage for 3 seconds after." }, { "name": "Shield Slam", "description": "Ends in a small Earth-Breaker." }, { "name": "Bull Rush", "description": "Spends all your Grit: +20% damage and a 10% longer rush per pip. A full row makes its stun last twice as long." }], "skyfall_leap": [{ "name": "Crater", "description": "The landing hits an area 40% wider." }, { "name": "Quake Field", "description": "Leaves slowing ground for 4 seconds." }, { "name": "Meteoric Impact", "description": "The farther you leap, the harder you land: up to double damage at full reach, and the stun lasts twice as long." }, { "name": "Double Jump", "description": "The next leap within 3 seconds costs no Grit." }], "counter_stance": [{ "name": "Bloodletting", "description": "The counter makes the attacker Bleed." }, { "name": "Ready Strike", "description": "If no hit comes, the stance ends with the counter anyway, at the nearest enemy, for half damage." }, { "name": "Reprisal Wave", "description": "The counter hits everything around you." }, { "name": "Riposte Chain", "description": "Counters up to 3 hits during the stance." }, { "name": "Iron Reprisal", "description": "Spends all your Grit: the strike back hits 40% harder per pip. A full row stuns every enemy around you." }], "shield_throw": [{ "name": "Ricochet", "description": "Bounces 2 more times." }, { "name": "Boomerang", "description": "Hits again on its way back." }, { "name": "Serrated Rim", "description": "Every hit makes enemies Bleed." }, { "name": "Guard Return", "description": "When the shield comes back, your Guard is full again, and you get a Barrier worth 3% of max HP for each enemy it hit." }, { "name": "Grit Toss", "description": "Spends all your Grit: +1 bounce per pip. A full row stuns every enemy it hits." }], "retribution": [{ "name": "Wrath", "description": "The blast is 40% wider." }, { "name": "Bloodburst", "description": "Bleeding enemies take double." }, { "name": "Last Stand", "description": "The blast deals 1% more for every 1% of Health you are missing." }, { "name": "Retaliate", "description": "Also releases half the damage you took and didn't block." }], "lunge": [{ "name": "Long Lunge", "description": "Reaches 50% farther." }, { "name": "Bleeding Lunge", "description": "The stab makes the target Bleed." }, { "name": "Piercing Lunge", "description": "Hits every enemy in a line." }, { "name": "Double Lunge", "description": "Can lunge again within 2 seconds for half damage." }, { "name": "Final Thrust", "description": "Spends all your Combo: +20% damage per pip. A full row kills an enemy that isn't an elite or boss outright if it's under 20% health." }], "riposte": [{ "name": "Wide Riposte", "description": "The cut back hits every enemy in front of you." }, { "name": "Disengage", "description": "A successful Riposte resets Dash." }, { "name": "Baited Blade", "description": "When you raise your blades, enemies near you rush in at you." }, { "name": "Mirror Edge", "description": "Parries turn arrows and spells back at the shooter." }, { "name": "Perfect Riposte", "description": "Spends all your Combo: the cut back hits 30% harder per pip. A full row Exposes every enemy around you when you parry." }], "thousand_cuts": [{ "name": "Flourish", "description": "Each crit adds one more cut, up to 3." }, { "name": "Fan of Steel", "description": "Every cut also hits 2 enemies nearby." }, { "name": "Final Cut", "description": "The last cut deals triple damage." }, { "name": "Red Ribbons", "description": "Every cut can Bleed." }], "toxic_fan": [{ "name": "Wide Fan", "description": "Throws 2 more knives." }, { "name": "Paralytic", "description": "The knives slow enemies 30% for 2 seconds." }, { "name": "Barbed Knives", "description": "The knives also make enemies Bleed." }, { "name": "Seeking Knives", "description": "The knives curve toward the nearest enemies." }, { "name": "Knife Storm", "description": "Spends all your Combo: +1 knife per pip. A full row makes the knives poison twice as hard." }], "rupture": [{ "name": "Chain Rupture", "description": "Spreads a fresh Bleed to 2 nearby enemies." }, { "name": "Gore Burst", "description": "Each Bleed it tears open splashes 30% of its damage onto enemies near that one." }, { "name": "Vampiric Rupture", "description": "Heals you for 20% of the damage it deals." }, { "name": "Detonate", "description": "Also bursts poisons the same way." }], "noxious_bloom": [{ "name": "Contagion", "description": "When a poisoned enemy dies, its poison jumps to the 2 nearest enemies." }, { "name": "Wide Bloom", "description": "The bloom is 40% wider." }, { "name": "Thorned Bloom", "description": "Enemies inside also Bleed." }, { "name": "Grasping Roots", "description": "Enemies inside are slowed 30%." }], "whirling_blades": [{ "name": "Wide Arc", "description": "Reaches 40% farther." }, { "name": "Undertow", "description": "Draws enemies in as it spins." }, { "name": "Blade Ward", "description": "You take 30% less damage while spinning." }, { "name": "Tornado", "description": "You can move while spinning, and it spins twice as long." }, { "name": "Blade Storm", "description": "Spends all your Combo: +1 cut per pip. A full row flings a ring of 8 knives outward." }], "smoke_veil": [{ "name": "Choking Smoke", "description": "Enemies inside take damage every second." }, { "name": "Smoke Bomb", "description": "The smoke goes off with a bang: ordinary enemies inside are stunned for 1 second." }, { "name": "Smoke Step", "description": "Dash has no cooldown while you're inside." }, { "name": "Blinding Smoke", "description": "Enemies inside deal 30% less damage." }, { "name": "Lingering Veil", "description": "Spends all your Combo: lasts 1 second longer per pip. A full row makes enemies inside lose track of you: their hits miss while you stand in it." }], "shadowstep": [{ "name": "Assassinate", "description": "If the crit kills, Shadowstep is ready again right away." }, { "name": "Double Step", "description": "The next step within 3 seconds costs no Combo." }, { "name": "Shadow Cloak", "description": "You take no damage for 1 second after." }, { "name": "Twin Strike", "description": "After the hit, steps behind a second enemy too." }], "firebloom": [{ "name": "Wildfire", "description": "The bloom is 40% wider." }, { "name": "Twin Bloom", "description": "Blooms on 2 enemies at once." }, { "name": "Lingering Flames", "description": "Its burns last 2 seconds longer." }, { "name": "Seed of Fire", "description": "Blooms again 1 second later at half size." }, { "name": "Firestorm", "description": "Spends all your Arcana: 15% more damage per pip. A full row makes everything it burns burn twice as hard." }], "flame_wall": [{ "name": "Inferno", "description": "The wall's burns are twice as strong." }, { "name": "Ring of Fire", "description": "The wall becomes a ring around you." }, { "name": "Searing Wall", "description": "Enemies that cross it are slowed 30%." }, { "name": "Rolling Wall", "description": "The wall slowly rolls forward." }, { "name": "Pyre", "description": "Spends all your Arcana: stands 1 second longer per pip. A full row makes the wall twice as long." }], "meteor": [{ "name": "Gravity Well", "description": "The burning crater slowly drags enemies toward its center." }, { "name": "Shatterstone", "description": "On impact the meteor splits: 4 burning chunks bounce out and hit enemies around the edge for half." }, { "name": "Molten Core", "description": "The impact stuns ordinary enemies for 1 second." }, { "name": "Comet", "description": "Lands at once, but hits a smaller area." }], "flashfreeze": [{ "name": "Wide Freeze", "description": "Reaches 40% farther." }, { "name": "Fracture", "description": "Frozen enemies take 25% more damage from your other skills." }, { "name": "Shatter Nova", "description": "Frozen enemies take a second burst when they thaw." }, { "name": "Frost Armor", "description": "Gives you a Barrier for each enemy frozen." }, { "name": "Hard Freeze", "description": "Spends all your Arcana: freezes last 0.3 seconds longer per pip. A full row freezes everything but bosses, and chills bosses." }], "ice_barrier": [{ "name": "Thick Ice", "description": "The Barrier is 50% bigger." }, { "name": "Frost Ward", "description": "When it breaks, it freezes enemies around you." }, { "name": "Spiked Ice", "description": "Enemies that hit it take damage." }, { "name": "Regrowth", "description": "Refills to half once when it breaks." }, { "name": "Glacier Heart", "description": "Spends all your Arcana: 10% more Barrier per pip. A full row freezes enemies that hit it." }], "glacial_burst": [{ "name": "Echoing Burst", "description": "Gives back 30% of the Barrier it spent." }, { "name": "Ice Lances", "description": "Fires shards outward that hit farther away." }, { "name": "Permafrost", "description": "Leaves frozen ground that slows for 4 seconds." }, { "name": "Deep Freeze", "description": "Freezes everything it hits for 1 second." }], "ball_lightning": [{ "name": "Twin Orbs", "description": "Releases 2 orbs." }, { "name": "Chain Orb", "description": "Each zap jumps to 1 more enemy." }, { "name": "Overcharged Orb", "description": "Explodes when it fades." }, { "name": "Slow Orb", "description": "Drifts half as fast and lasts twice as long." }, { "name": "Storm Heart", "description": "Spends all your Arcana: zaps hit 15% harder per pip. A full row pulls nearby enemies toward it." }], "static_field": [{ "name": "Ion Field", "description": "Enemies inside take 10% more damage from all your spells." }, { "name": "Magnetic Field", "description": "Pulls enemies toward its center." }, { "name": "Conductor Field", "description": "Storm Casts that hit inside jump twice more, up to 7 enemies." }, { "name": "Mobile Field", "description": "The field follows you." }, { "name": "Tempest Field", "description": "Spends all your Arcana: sparks hit 20% harder per pip. A full row sparks twice a second." }], "thunderfall": [{ "name": "Storm Call", "description": "Calls 2 more bolts." }, { "name": "Thunderclap", "description": "The bolts stun ordinary enemies." }, { "name": "Lightning Rod", "description": "Every bolt hits the strongest enemy." }, { "name": "Rolling Thunder", "description": "Strikes again 1 second later." }] });
+var LIVE_CLASS_SKILLS = Object.freeze(/* @__PURE__ */ new Set(["iron_will", "rallying_cry", "bulwark_stance", "iron_wall", "bracing_bash", "heavy_plating", "heavy_hands", "earth_breaker", "momentum", "shatterpoint", "concussion", "impact_training", "retaliation", "counter_stance", "spiked_shield", "grudge", "unbroken", "serrated_edge", "focus", "lunge", "en_garde", "fourth_cut", "footwork", "fencers_grace", "virulence", "toxic_fan", "serrated_cuts", "vipers_coating", "paralytic", "open_wounds", "light_step", "whirling_blades", "quick_dash", "crosscut", "blade_rush", "hit_and_run", "kindling", "firebloom", "firebrand", "fan_the_flames", "searing", "cinder_step", "cold_snap", "flashfreeze", "frostbinder", "brittle", "deep_freeze", "static_charge", "ball_lightning", "storm_conductor", "superconductor", "forked_lightning", "static_step", "war_banner", "hold_the_line", "rooted", "shield_charge", "reckless", "unstoppable", "shield_throw", "vengeance", "blood_for_blood", "duel", "riposte", "steel_nerves", "lingering_venom", "rupture", "hemorrhage", "evasive", "smoke_veil", "shade", "volatile", "flame_wall", "firewalker", "frost_step", "shatter", "ice_barrier", "steady_mind", "spell_weaving", "static_field", "live_wire", "second_breath", "standard_bearer", "last_stand", "crowd_breaker", "avalanche", "tremor", "blood_price", "marked_foe", "red_harvest", "spreading_flames", "kindle", "glass_furnace", "arcane_syphon", "frost_ward", "ice_fortress", "elemental_overload", "magnetic", "overload", "coup_de_grace", "marked_for_death", "glass_blade", "septic", "contagious", "toxic_blood", "opportunist", "exploit", "restless", "unyielding", "aegis_pulse", "bastion_ward", "groundbreaker", "skyfall_leap", "titan", "spite", "retribution", "executioner", "blade_dance", "thousand_cuts", "flourish", "bloodletting", "noxious_bloom", "fester", "afterimage", "shadowstep", "assassinate", "pyromaniac", "meteor", "molten_ground", "winters_grasp", "glacial_burst", "echoing_burst", "quickening", "thunderfall", "storm_call", "bulwark_colossus", "earthshaker", "thorned_bulwark", "phoenix", "absolute_zero", "living_storm", "master_duelist", "virulent_bloom", "shadow_assassin"]));
+var LIVE_AUGMENTS = freezeWire({ "rallying_cry": 5, "earth_breaker": 5, "counter_stance": 5, "lunge": 5, "toxic_fan": 5, "whirling_blades": 5, "firebloom": 5, "flashfreeze": 5, "ball_lightning": 5, "shield_charge": 5, "shield_throw": 5, "war_banner": 5, "riposte": 5, "rupture": 4, "smoke_veil": 5, "flame_wall": 5, "ice_barrier": 5, "static_field": 5, "aegis_pulse": 4, "skyfall_leap": 4, "retribution": 4, "thousand_cuts": 4, "noxious_bloom": 4, "shadowstep": 4, "meteor": 4, "glacial_burst": 4, "thunderfall": 4 });
+var classTreesFor = (classId) => CLASS_TREES[classId] ?? [];
+var classTreeOf = (classId, treeId) => classTreesFor(classId).find((t) => t.id === treeId) ?? null;
+
 // src/shared/content/smart_offhand_v1.js
 var TREE_OFFHANDS = Object.freeze({
   bastion: "Kite Shield",
@@ -7263,69 +4733,325 @@ function smartOffhandNoun(cls, tree, random) {
   return rest[Math.floor(random() * rest.length)];
 }
 
-// src/shared/content/reward_modifiers.js
-function validateRewardModifiers(v) {
-  closedRecord(v, ["version", "goldHundredths", "occurrenceHundredths", "qualityHundredths", "dualEligible", "triEligible"]);
-  requireContract(v.version === "personal-reward-modifiers-d8-v1", "Reward modifier version");
-  safeInteger(v.goldHundredths, 100, 130);
-  safeInteger(v.occurrenceHundredths, 100, 105);
-  safeInteger(v.qualityHundredths, 0, 10);
-  requireContract(v.goldHundredths % 5 === 0 && [100, 105].includes(v.occurrenceHundredths) && v.qualityHundredths % 2 === 0 && typeof v.dualEligible === "boolean" && typeof v.triEligible === "boolean" && (!v.triEligible || v.dualEligible), "Invalid reward modifiers");
-  return v;
+// src/shared/content/world_loot_v3.js
+var WORLD_LOOT_V3_VERSION = "world-loot-v3";
+var WORLD_LOOT_V3_HASH = "5945f4f6a6c02522b745889a88f4cd1034d8e4b89266517a2c31825741ef5cdf";
+var WORLD_LOOT_V3_POLICY = freezeWire({
+  version: WORLD_LOOT_V3_VERSION,
+  parentCombatHash: WORLD_COMBAT_HASH,
+  unlockLevels: [1, 1, 10, 20, 35, 50],
+  // gearPerMille: chance this source drops gear; uncommon: basis points of non-rare gear;
+  // rare: [level, basis points] anchors, linear between them, 0 before the first, flat after the last.
+  sources: {
+    ordinary: { gearPerMille: 15, uncommon: 2e3, rare: [[10, 100], [50, 200]], rich: false },
+    elite: { gearPerMille: 250, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
+    smallEnd: { gearPerMille: 500, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
+    mini: { gearPerMille: 1e3, uncommon: 6e3, rare: [[10, 800], [50, 1500]], rich: false },
+    boss: { gearPerMille: 1e3, uncommon: 8e3, rare: [[10, 1500], [20, 2e3], [30, 2800], [40, 3500]], rich: true },
+    smallChest: { gearPerMille: 150, uncommon: 2500, rare: [], rich: false },
+    standardChest: { gearPerMille: 400, uncommon: 5e3, rare: [[10, 300], [50, 800]], rich: false },
+    bossChest: { gearPerMille: 1e3, uncommon: 7e3, rare: [[10, 1e3], [20, 1500], [30, 2200], [40, 3e3]], rich: true }
+  },
+  // How Rare-or-better gear splits into Rare / Epic / Legendary / Mythic (basis points).
+  split: [
+    { minimumLevel: 1, plain: [1e4, 0, 0, 0], rich: [1e4, 0, 0, 0] },
+    { minimumLevel: 20, plain: [9e3, 1e3, 0, 0], rich: [8e3, 2e3, 0, 0] },
+    { minimumLevel: 35, plain: [8200, 1500, 300, 0], rich: [6800, 2500, 700, 0] },
+    { minimumLevel: 50, plain: [7700, 1700, 500, 100], rich: [6e3, 2800, 1e3, 200] }
+  ],
+  qualityFromLevel: 30,
+  gate: "min(frozen encounter level, personal hero level when the reward is captured). Pickup, reopen and portal use never reroll."
+});
+var SOURCES = WORLD_LOOT_V3_POLICY.sources;
+function lootSourceV3(role, siteReward = null) {
+  if (role === "ordinary" || role === "elite") return role;
+  if (role === "boss") return siteReward === "site-end-elite" ? "smallEnd" : siteReward === "mini-boss" ? "mini" : "boss";
+  requireContract(role === "completion", "Loot v3 role");
+  return siteReward === "lair-chest" ? "bossChest" : siteReward === "standard-chest" ? "standardChest" : "smallChest";
+}
+function lootGearPerMilleV3(role, siteReward = null, occurrenceHundredths = 100) {
+  return Math.min(1e3, Math.floor(SOURCES[lootSourceV3(role, siteReward)].gearPerMille * occurrenceHundredths / 100));
+}
+function rareShare(anchors2, level) {
+  if (!anchors2.length || level < BigInt(anchors2[0][0])) return 0n;
+  for (let i = 1; i < anchors2.length; i++) {
+    const [a, va] = anchors2[i - 1], [b, vb] = anchors2[i];
+    if (level < BigInt(b)) return BigInt(va) + (BigInt(vb) - BigInt(va)) * (level - BigInt(a)) / BigInt(b - a);
+  }
+  return BigInt(anchors2.at(-1)[1]);
+}
+function worldLootWeightsV3(encounter, hero, role, siteReward = null, qualityHundredths = 0) {
+  positiveProgression(encounter);
+  positiveProgression(hero);
+  const a = progressionBigInt(encounter), b = progressionBigInt(hero), level = a < b ? a : b, q = progressionBigInt(qualityHundredths);
+  requireContract(q >= 0n, "Loot v3 quality");
+  const src = SOURCES[lootSourceV3(role, siteReward)], rare = rareShare(src.rare, level), rest = 10000n - rare, u = rest * BigInt(src.uncommon) / 10000n;
+  const row2 = [...WORLD_LOOT_V3_POLICY.split].reverse().find((r) => level >= BigInt(r.minimumLevel))[src.rich ? "rich" : "plain"];
+  const top = row2.slice(1).map((w2) => rare * BigInt(w2) / 10000n), w = [rest - u, u, rare - top.reduce((x, y) => x + y, 0n), ...top];
+  const boost = level >= BigInt(WORLD_LOOT_V3_POLICY.qualityFromLevel) ? q : 0n;
+  return w.map((n, i) => level < BigInt(WORLD_LOOT_V3_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
+}
+function worldGearRarityV3(encounter, hero, role, siteReward, draw2, qualityHundredths = 0) {
+  requireContract(Number.isFinite(draw2) && draw2 >= 0 && draw2 < 1, "Loot v3 draw");
+  const weights = worldLootWeightsV3(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw2 * 4294967296)) * total;
+  let sum2 = 0n;
+  for (let i = 0; i < weights.length; i++) {
+    sum2 += weights[i];
+    if (roll2 < sum2 * 4294967296n) return i;
+  }
+  requireContract(false, "Loot v3 weights failed");
 }
 
-// src/shared/content/reward_progression_d9.js
-var D9_REWARD_PROGRESSION = "reward-progression-d9-v1";
-function rewardProgressionD9(depth, sourceId) {
-  return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
+// src/shared/content/world_loot_v4.js
+var WORLD_LOOT_V4_VERSION = "world-loot-v4";
+var WORLD_LOOT_V4_HASH = "4322b61b219906b7d6792c64bdef13dcbb1c2e09cb5ddb21a38047f108de4c92";
+var WORLD_LOOT_V4_POLICY = freezeWire({
+  version: WORLD_LOOT_V4_VERSION,
+  parentCombatHash: WORLD_COMBAT_HASH,
+  unlockLevels: [1, 1, 10, 20, 35, 50],
+  sources: {
+    ordinary: { gearPerMille: 40, common: [[1, 8e3], [10, 5e3], [20, 0]], rare: [[9, 0], [10, 200], [20, 1e3], [30, 4500], [40, 1e4]], rich: false },
+    elite: { gearPerMille: 500, common: [[1, 5500], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 400], [20, 1500], [30, 5e3], [40, 1e4]], rich: false },
+    smallEnd: { gearPerMille: 700, common: [[1, 5500], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 400], [20, 1500], [30, 5e3], [40, 1e4]], rich: false },
+    mini: { gearPerMille: 1e3, common: [[1, 4e3], [10, 2e3], [20, 0]], rare: [[9, 0], [10, 800], [20, 2e3], [30, 5500], [40, 1e4]], rich: false },
+    boss: { gearPerMille: 1e3, common: [[1, 2e3], [10, 0]], rare: [[9, 0], [10, 1500], [20, 4e3], [30, 1e4]], rich: true },
+    smallChest: { gearPerMille: 350, common: [[1, 7500], [10, 5e3], [20, 0]], rare: [[20, 0], [30, 3e3], [40, 1e4]], rich: false },
+    standardChest: { gearPerMille: 650, common: [[1, 5e3], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 300], [20, 1200], [30, 5e3], [40, 1e4]], rich: false },
+    bossChest: { gearPerMille: 1e3, common: [[1, 3e3], [10, 0]], rare: [[9, 0], [10, 1e3], [20, 3500], [30, 1e4]], rich: true }
+  },
+  split: [
+    { minimumLevel: 1, plain: [1e4, 0, 0, 0], rich: [1e4, 0, 0, 0] },
+    { minimumLevel: 20, plain: [9e3, 1e3, 0, 0], rich: [8e3, 2e3, 0, 0] },
+    { minimumLevel: 35, plain: [8200, 1500, 300, 0], rich: [6800, 2500, 700, 0] },
+    { minimumLevel: 50, plain: [7700, 1700, 500, 100], rich: [6e3, 2800, 1e3, 200] }
+  ],
+  qualityFromLevel: 30,
+  gate: "min(frozen encounter level, personal hero level when the reward is captured). Pickup, reopen and portal use never reroll."
+});
+var SOURCES2 = WORLD_LOOT_V4_POLICY.sources;
+function lootGearPerMilleV4(role, siteReward = null, occurrenceHundredths = 100) {
+  return Math.min(1e3, Math.floor(SOURCES2[lootSourceV3(role, siteReward)].gearPerMille * occurrenceHundredths / 100));
 }
-function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth", "questGear", "mainTree", "tripGear"]);
-  requireContract(v.tripGear === void 0 || TRIP_GEAR_KINDS.includes(v.tripGear) && v.rarityPolicyHash !== void 0, "Trip gear policy");
-  requireContract(v.mainTree === void 0 || v.gearClass !== void 0 && isClassTree(v.gearClass, v.mainTree), "Main tree policy");
-  requireContract(v.questGear === void 0 || Object.hasOwn(QUEST_GEAR_GROUPS, v.questGear) && v.rarityPolicyHash !== void 0, "Quest gear policy");
-  requireContract(v.lockedDepth === void 0 || v.episodeSnapshotId !== void 0 && progressionBigInt(v.lockedDepth) >= 1n, "Co-op reward depth policy");
-  requireContract(v.bestiaryQuality === void 0 || Number.isSafeInteger(v.bestiaryQuality) && v.bestiaryQuality > 0 && v.bestiaryQuality <= 1e4 && v.rarityPolicyHash !== void 0, "Bestiary quality policy");
-  requireContract(v.swiftKill === void 0 || v.swiftKill === true && v.rarityPolicyHash !== void 0, "Swift kill reward policy");
-  requireContract(v.affixes === void 0 || isAffixesV2Plus(v.affixes) && v.gearClass !== void 0, "Affix pool policy");
-  requireContract(v.boon === void 0 || v.boon === "fortune" && v.rarityPolicyHash !== void 0, "Boon reward policy");
-  requireContract(v.quickClear === void 0 || v.quickClear === true && v.rarityPolicyHash !== void 0 && v.combatQuality === "completion", "Quick clear reward policy");
-  requireContract(v.armor === void 0 || v.armor === "overall" && v.gearClass === void 0 && v.combatHash === WORLD_COMBAT_HASH, "One-piece armor policy");
-  requireContract(v.wardrobe === void 0 || v.wardrobe === WARDROBE_V1 && v.gearClass !== void 0, "Wardrobe policy");
-  requireContract(v.unique === void 0 || Object.hasOwn(UNIQUE_ITEMS, v.unique) && v.wardrobe === WARDROBE_V1 && (UNIQUE_ITEMS[v.unique].cls === null || UNIQUE_ITEMS[v.unique].cls === v.gearClass), "Unique policy");
-  requireContract(v.version === D9_REWARD_PROGRESSION && v.policy === D9_PROFILE.progressionPolicy, "D9 reward progression version");
-  positiveProgression(v.sourceDepth);
-  requireContract(typeof v.sourceId === "string" && v.sourceId.length > 0 && v.sourceId.length <= 240, "Invalid reward source");
-  if (v.combatHash === void 0) requireContract(v.combatQuality === void 0, "Combat quality requires policy commitment");
-  if (v.combatHash !== void 0) requireContract(v.combatHash === WORLD_COMBAT_HASH && ["ordinary", "elite", "completion"].includes(v.combatQuality), "Unknown combat reward policy");
-  if (v.modifiers) validateRewardModifiers(v.modifiers);
-  requireContract(v.quality === (v.modifiers ? 1 + v.modifiers.qualityHundredths / 100 : 1) && v.tomeEligibility === (v.modifiers ? "personal-tome-d8-v1" : "base-single-d7-v1"), "D9 reward modifier witness");
-  validateWorldRarityProgressionV2(v);
-  validateSiteRewardProgressionV1(v);
-  requireContract(v.gearClass === void 0 || ["knight", "rogue", "mage"].includes(v.gearClass) && v.combatHash === WORLD_COMBAT_HASH, "Unknown gear class");
-  return v;
+function curve(anchors2, level) {
+  if (level <= BigInt(anchors2[0][0])) return BigInt(anchors2[0][1]);
+  for (let i = 1; i < anchors2.length; i++) {
+    const [a, va] = anchors2[i - 1], [b, vb] = anchors2[i];
+    if (level < BigInt(b)) return BigInt(va) + (BigInt(vb) - BigInt(va)) * (level - BigInt(a)) / BigInt(b - a);
+  }
+  return BigInt(anchors2.at(-1)[1]);
+}
+function worldLootWeightsV4(encounter, hero, role, siteReward = null, qualityHundredths = 0) {
+  positiveProgression(encounter);
+  positiveProgression(hero);
+  const a = progressionBigInt(encounter), b = progressionBigInt(hero), level = a < b ? a : b, q = progressionBigInt(qualityHundredths);
+  requireContract(q >= 0n, "Loot v4 quality");
+  const src = SOURCES2[lootSourceV3(role, siteReward)], common = curve(src.common, level), rare = curve(src.rare, level), uncommon = 10000n - common - rare;
+  requireContract(uncommon >= 0n, "Loot v4 shares");
+  const row2 = [...WORLD_LOOT_V4_POLICY.split].reverse().find((r) => level >= BigInt(r.minimumLevel))[src.rich ? "rich" : "plain"];
+  const top = row2.slice(1).map((w2) => rare * BigInt(w2) / 10000n), w = [common, uncommon, rare - top.reduce((x, y) => x + y, 0n), ...top];
+  const boost = level >= BigInt(WORLD_LOOT_V4_POLICY.qualityFromLevel) ? q : 0n;
+  return w.map((n, i) => level < BigInt(WORLD_LOOT_V4_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
+}
+function worldGearRarityV4(encounter, hero, role, siteReward, draw2, qualityHundredths = 0) {
+  requireContract(Number.isFinite(draw2) && draw2 >= 0 && draw2 < 1, "Loot v4 draw");
+  const weights = worldLootWeightsV4(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw2 * 4294967296)) * total;
+  let sum2 = 0n;
+  requireContract(total > 0n, "Loot v4 weights empty");
+  for (let i = 0; i < weights.length; i++) {
+    sum2 += weights[i];
+    if (roll2 < sum2 * 4294967296n) return i;
+  }
+  requireContract(false, "Loot v4 weights failed");
+}
+var isSourceLootV4 = (hash17) => hash17 === WORLD_LOOT_V3_HASH || hash17 === WORLD_LOOT_V4_HASH;
+function lootGearPerMilleFor(hash17, role, siteReward = null, occurrenceHundredths = 100) {
+  requireContract(isSourceLootV4(hash17), "Loot table");
+  return (hash17 === WORLD_LOOT_V4_HASH ? lootGearPerMilleV4 : lootGearPerMilleV3)(role, siteReward, occurrenceHundredths);
+}
+function worldGearRarityFor(hash17, encounter, hero, role, siteReward, draw2, qualityHundredths = 0) {
+  requireContract(isSourceLootV4(hash17), "Loot table");
+  return (hash17 === WORLD_LOOT_V4_HASH ? worldGearRarityV4 : worldGearRarityV3)(encounter, hero, role, siteReward, draw2, qualityHundredths);
 }
 
-// src/shared/content/reward_progression.js
-var PROTOTYPE_PROGRESSION_POLICY = "prototype-rank-depth-v1";
-var CURRENT_DEPTH = Object.freeze({ C: 1, B: 3, A: 5, S: 7 });
-function prototypeRewardProgression(rank, sourceId) {
-  requireContract(Object.hasOwn(CURRENT_DEPTH, rank), "Unknown prototype rank");
-  return rewardProgression(CURRENT_DEPTH[rank], sourceId, PROTOTYPE_PROGRESSION_POLICY);
+// src/shared/content/world_rarity_v2.js
+var WORLD_RARITY_VERSION = "world-rarity-rewards-v2";
+var WORLD_RARITY_HASH = "4a10af2db8e7a9a8ffd8e4d7e7b7334e4b2f5dd88254e198f73024bde4edc684";
+var WORLD_RARITY_POLICY = freezeWire({
+  version: WORLD_RARITY_VERSION,
+  parentCombatHash: WORLD_COMBAT_HASH,
+  unlockHeroAndEncounterLevels: [1, 1, 1, 15, 30, 45],
+  // Basis points conditional on an equipment drop. Boss + chest are TWO rolls,
+  // not a third combined bonus. Existing 10% ordinary / guaranteed elite,
+  // boss and chest equipment occurrence is retained.
+  bands: [
+    { minimumLevel: 1, ordinary: [7200, 2300, 500, 0, 0, 0], elite: [3e3, 5e3, 2e3, 0, 0, 0], boss: [1e3, 5500, 3500, 0, 0, 0], completion: [0, 6e3, 4e3, 0, 0, 0] },
+    { minimumLevel: 15, ordinary: [7e3, 2300, 600, 100, 0, 0], elite: [2500, 4500, 2500, 500, 0, 0], boss: [500, 4500, 3500, 1500, 0, 0], completion: [0, 5e3, 4e3, 1e3, 0, 0] },
+    { minimumLevel: 30, ordinary: [6900, 2300, 650, 140, 10, 0], elite: [2e3, 4500, 2700, 750, 50, 0], boss: [500, 4e3, 3500, 1800, 200, 0], completion: [0, 4500, 4e3, 1400, 100, 0] },
+    { minimumLevel: 45, ordinary: [6800, 2300, 700, 175, 24, 1], elite: [2e3, 4e3, 3e3, 850, 140, 10], boss: [500, 3500, 3500, 2e3, 450, 50], completion: [0, 4e3, 4e3, 1700, 280, 20] }
+  ],
+  gate: "min(frozen encounter/item power level, personal hero level when reward is generated). Pickup, reopen and portal use never reroll.",
+  quality: "Retain accepted per-tier quality weighting, applied only to unlocked positive weights. No unlock bypass.",
+  scope: "New World natural drops only. Preserve existing generated items and parent rolls; shops, authored/unique rewards and paid Awaken remain explicit separate acquisition paths.",
+  ownership: "One personal boss reward and one existing personal completion-chest reward per source/episode. Keep existing eligibility, reset and ownership rules."
+});
+var hasWorldRarityV2 = (p) => p?.rarityPolicyHash !== void 0;
+function rarityLevelV2(encounter, hero) {
+  positiveProgression(encounter);
+  positiveProgression(hero);
+  const a = progressionBigInt(encounter), b = progressionBigInt(hero);
+  return a < b ? a : b;
 }
-function rewardProgression(sourceDepth, sourceId, policy = "explicit-content-depth-v1") {
-  const value = { version: "reward-progression-v1", policy, sourceDepth, quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" };
-  validateRewardProgression(value);
-  return freezeWire(value);
+function worldRarityWeightsV2(encounter, hero, role, qualityHundredths = 0) {
+  const level = rarityLevelV2(encounter, hero), q = progressionBigInt(qualityHundredths);
+  requireContract(q >= 0n && ["ordinary", "elite", "boss", "completion"].includes(role), "World rarity role/quality");
+  const band = [...WORLD_RARITY_POLICY.bands].reverse().find((b) => level >= BigInt(b.minimumLevel));
+  return band[role].map((w, i) => level < BigInt(WORLD_RARITY_POLICY.unlockHeroAndEncounterLevels[i]) ? 0n : BigInt(w) * (10000n + q * BigInt(i * 10)));
 }
-function validateRewardProgression(v) {
-  if (v?.version === "reward-progression-d9-v1") return validateRewardProgressionD9(v);
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers"]);
-  requireContract(v.version === "reward-progression-v1" && [PROTOTYPE_PROGRESSION_POLICY, "explicit-content-depth-v1"].includes(v.policy), "Unknown progression policy");
-  safeInteger(v.sourceDepth, 1, 1e4);
-  requireContract((v.modifiers ? v.quality === 1 + v.modifiers.qualityHundredths / 100 : v.quality === 1) && typeof v.sourceId === "string" && v.sourceId.length > 0 && (v.modifiers ? v.tomeEligibility === "personal-tome-d8-v1" : v.tomeEligibility === "base-single-d7-v1"), "Invalid reward progression/eligibility");
-  if (v.modifiers) validateRewardModifiers(v.modifiers);
-  return v;
+function worldGearRarityV2(encounter, hero, role, draw2, qualityHundredths = 0) {
+  requireContract(Number.isFinite(draw2) && draw2 >= 0 && draw2 < 1, "World rarity draw");
+  const weights = worldRarityWeightsV2(encounter, hero, role, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll2 = BigInt(Math.floor(draw2 * 4294967296)) * total;
+  let sum2 = 0n;
+  for (let i = 0; i < weights.length; i++) {
+    sum2 += weights[i];
+    if (roll2 < sum2 * 4294967296n) return i;
+  }
+  requireContract(false, "World rarity weights failed");
+}
+function validateWorldRarityProgressionV2(p) {
+  if (!hasWorldRarityV2(p)) {
+    requireContract(p.rarityHeroLevel === void 0 && p.rarityRole === void 0, "Rarity fields require policy commitment");
+    return p;
+  }
+  requireContract([WORLD_RARITY_HASH, WORLD_LOOT_V3_HASH, WORLD_LOOT_V4_HASH].includes(p.rarityPolicyHash) && p.combatHash === WORLD_COMBAT_HASH, "World rarity policy commitment");
+  positiveProgression(p.rarityHeroLevel);
+  requireContract(["ordinary", "elite", "boss", "completion"].includes(p.rarityRole) && p.combatQuality === (p.rarityRole === "boss" ? "elite" : p.rarityRole), "World rarity source role");
+  return p;
+}
+function rewardRarityRoleV2(state, source10, spawnEntityId = null) {
+  if (source10.kind === "chest") return roadsideChestV1(state, source10) ? "elite" : "completion";
+  const id = spawnEntityId ?? state.groupsById[source10.groupId]?.entityIds[source10.spawnOrdinal ?? source10.ordinal];
+  return source10.kind === "enemy" && state.bossCombat?.bossesByEntityId[id] ? "boss" : source10.kind === "enemy" && (state.eliteCombat?.elitesByEntityId[id] || isRareV1(state, id)) ? "elite" : "ordinary";
+}
+function captureWorldRarityV2(state, player, source10, progression) {
+  if (progression.combatHash !== WORLD_COMBAT_HASH) return progression;
+  requireContract(!hasWorldRarityV2(progression), "Reward rarity already captured");
+  return { ...progression, rarityPolicyHash: WORLD_LOOT_V4_HASH, rarityHeroLevel: progressionWire(progressionBigInt(player.progression.level)), rarityRole: rewardRarityRoleV2(state, source10) };
+}
+
+// src/shared/content/gear_affixes_v2.js
+var AFFIXES_V2 = "affixes-v2";
+var NEW_AFFIX_POOLS = freezeWire({
+  weapon: ["mainDmg", "classDmg", "skillDmg", "eliteDmg", "lifeHit"],
+  shield: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
+  dagger: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
+  tome: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
+  helmet: ["classDmg", "passiveRank", "cdr"],
+  gloves: ["mainDmg", "offDmg", "cdr", "lifeHit"],
+  overall: ["lifeKill"],
+  boots: ["maxHp", "def", "lifeKill"],
+  cape: ["lifeKill"],
+  ring: ["mainDmg", "offDmg", "cdr", "eliteDmg", "lifeHit"]
+});
+var CLASS_DAMAGE = freezeWire({ knight: ["shockDmg", "counterDmg"], rogue: ["bleedDmg", "poisonDmg"], mage: ["fireDmg", "frostDmg", "lightningDmg"] });
+var TOME_DAMAGE = freezeWire({ fire: "fireDmg", frost: "frostDmg", lightning: "lightningDmg" });
+var NEW_AFFIX_KEYS = Object.freeze(["mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "passiveRank", "cdr", "eliteDmg", "lifeHit", "lifeKill"]);
+var isNewAffix = (key5) => NEW_AFFIX_KEYS.includes(key5);
+var NEW_AFFIX_RANGES = freezeWire({ mainDmg: [40, 100], offDmg: [40, 100], fireDmg: [50, 130], frostDmg: [50, 130], lightningDmg: [50, 130], bleedDmg: [50, 130], poisonDmg: [50, 130], shockDmg: [50, 130], counterDmg: [50, 130], skillDmg: [80, 150], cdr: [30, 60], eliteDmg: [50, 120], lifeKill: [10, 30] });
+var PERCENT_STAT_OF = freezeWire({ atk: "atkPct", def: "defPct", maxHp: "maxHpPct" });
+var PERCENT_STAT_RANGES = freezeWire({ atkPct: [30, 60], maxHpPct: [40, 80], defPct: [40, 80] });
+var CDR_CAP = 0.3;
+var byClass = (cls, f3) => Object.values(CLASS_TREE_SKILLS).filter((x) => x.classId === cls && f3(x)).map((x) => x.id).sort();
+var ACTIVES = {};
+var PASSIVES = {};
+var classActives = (cls) => ACTIVES[cls] ??= Object.freeze(byClass(cls, (x) => x.kind === "active"));
+var classRankPassives = (cls) => PASSIVES[cls] ??= Object.freeze(byClass(cls, (x) => x.kind === "passive" && x.maxRank === 5));
+function affixPoolV2(oldPool, slotKey, rarityTier) {
+  return [...new Set([...oldPool, ...(NEW_AFFIX_POOLS[slotKey] ?? []).filter((k) => !oldPool.includes(k) && (k !== "passiveRank" || rarityTier >= 2))].map((k) => PERCENT_STAT_OF[k] ?? k))];
+}
+function resolveNewAffix(key5, cls, spellType, random) {
+  if (key5 !== "classDmg") return key5;
+  if (spellType && TOME_DAMAGE[spellType]) return TOME_DAMAGE[spellType];
+  const list2 = CLASS_DAMAGE[cls];
+  return list2[Math.floor(random() * list2.length)];
+}
+function affixSkill(key5, cls, random) {
+  const list2 = key5 === "skillDmg" ? classActives(cls) : key5 === "passiveRank" ? classRankPassives(cls) : null;
+  return list2 ? list2[Math.floor(random() * list2.length)] : null;
+}
+
+// src/shared/content/gear_affixes_v3.js
+var AFFIXES_V3 = "affixes-v3";
+var isAffixesV2Plus = (v) => v === AFFIXES_V2 || v === AFFIXES_V3;
+var SKILL_GROUPS = freezeWire({
+  move: { knight: ["shield_charge", "skyfall_leap"], rogue: ["dash", "lunge", "shadowstep"], mage: ["dash"] },
+  def: { knight: ["guard", "counter_stance", "rallying_cry", "aegis_pulse"], rogue: ["riposte", "smoke_veil"], mage: ["ice_barrier"] },
+  ranged: { knight: ["shield_throw"], rogue: ["toxic_fan"], mage: ["cast", "ball_lightning", "firebloom", "meteor"] },
+  area: { knight: ["shield_bash", "earth_breaker", "retribution", "skyfall_leap"], rogue: ["whirling_blades", "rupture", "noxious_bloom"], mage: ["flashfreeze", "flame_wall", "static_field", "glacial_burst", "thunderfall"] },
+  finisher: { knight: ["retribution", "skyfall_leap", "aegis_pulse"], rogue: ["shadowstep", "thousand_cuts", "rupture", "noxious_bloom"], mage: ["glacial_burst", "meteor", "thunderfall"] }
+});
+var inGroup = (group, cls, id) => Boolean(SKILL_GROUPS[group]?.[cls]?.includes(id));
+var DAMAGE_GROUPS = { rangedDmg: "ranged", areaDmg: "area", finisherDmg: "finisher" };
+var COOLDOWN_GROUPS = { moveCdr: "move", defCdr: "def" };
+var groupsFor = (cls, keys2) => Object.keys(keys2).filter((k) => (SKILL_GROUPS[keys2[k]][cls]?.length ?? 0) >= 2);
+var V3_POOLS = freezeWire({
+  weapon: ["critChance", "critDamage", "activeSpd", "mainDmg", "classDmg", "skillDmg", "eliteDmg", "lifeHit", "groupDmg", "killCdr"],
+  shield: ["block", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "controlDur", "branchRank", "maxPip"],
+  dagger: ["parry", "critChance", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "ailmentDur", "branchRank", "maxPip"],
+  tome: ["critDamage", "critChance", "bonusAreaRadius", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "branchRank", "maxPip"],
+  helmet: ["critChance", "activeSpd", "bonusAreaRadius", "classDmg", "passiveRank", "cdr", "controlDur", "ailmentDur", "branchRank", "startPips"],
+  gloves: ["atkPct", "critChance", "activeSpd", "attr", "mainDmg", "offDmg", "cdr", "lifeHit", "rangeDmg", "keepPip", "sigWindow", "sigDmg"],
+  overall: ["maxHpPct", "defPct", "attr", "lifeKill", "eliteDr", "areaDr", "hitCdr", "lowDmg", "sigDmg"],
+  boots: ["moveSpeed", "activeSpd", "maxHpPct", "defPct", "lifeKill", "stunDr", "potionHeal", "hitCdr", "groupCdr", "sigWindow", "sigCdr"],
+  ring: ["atkPct", "critChance", "attr", "cdr", "eliteDmg", "lifeHit", "ccDmg", "ailingDmg", "healthDmg", "groupDmg", "maxPip"],
+  cape: ["maxHpPct", "defPct", "attr", "moveSpeed", "lifeKill", "rangeDmg", "healthDmg", "areaDr", "groupDmg", "killCdr", "startPips", "keepPip"]
+});
+var SIGNATURE_LINES = freezeWire({
+  knight: { sigWindow: "perfectWindow", sigDmg: "perfectDmg", sigCdr: "perfectCdr" },
+  rogue: { sigWindow: "exposeTime", sigDmg: "exposeDmg", sigCdr: "exposeCdr" },
+  mage: { sigWindow: "weaveDmg", sigDmg: "blinkDmg", sigCdr: "blinkCdr" }
+});
+var RETIRED_V3 = Object.freeze(["shatterEase", "shatterDmg", "shatterCdr", "heldDmg"]);
+var RARE_LINES = Object.freeze(["branchRank", "killCdr", "maxPip"]);
+function affixPoolV3(slotKey, rarityTier, cls) {
+  return (V3_POOLS[slotKey] ?? []).filter((k) => (k !== "passiveRank" || rarityTier >= 2) && (!RARE_LINES.includes(k) || rarityTier >= 4) && (!k.startsWith("sig") || Boolean(SIGNATURE_LINES[cls])) && (k !== "groupCdr" || groupsFor(cls, COOLDOWN_GROUPS).length > 0));
+}
+var V3_RANGES = freezeWire({ rangedDmg: [50, 100], areaDmg: [50, 100], finisherDmg: [50, 100], moveCdr: [40, 80], defCdr: [40, 80], heldDmg: [60, 120], ailingDmg: [50, 110], closeDmg: [50, 100], farDmg: [50, 100], fullDmg: [60, 120], lowDmg: [80, 150], controlDur: [80, 160], ailmentDur: [80, 160], eliteDr: [30, 60], areaDr: [40, 80], stunDr: [100, 200], potionHeal: [100, 200], keepPip: [100, 200], perfectDmg: [80, 150], exposeDmg: [60, 120], shatterDmg: [150, 300], ccDmg: [60, 120], blinkDmg: [80, 150], weaveDmg: [80, 150] });
+var V3_FIXED = freezeWire({ hitCdr: { lo: 6, hi: 12, step: [1, 20] }, killCdr: { lo: 4, hi: 8, step: [1, 20] }, perfectWindow: { lo: 5, hi: 10, step: [1, 100] }, perfectCdr: { lo: 10, hi: 20, step: [1, 10] }, exposeTime: { lo: 5, hi: 10, step: [1, 10] }, exposeCdr: { lo: 10, hi: 20, step: [1, 10] }, shatterEase: { lo: 10, hi: 20, step: [1, 100] }, shatterCdr: { lo: 10, hi: 20, step: [1, 10] }, blinkCdr: { lo: 5, hi: 10, step: [1, 10] }, startPips: { lo: 1, hi: 2, step: [1, 1] }, maxPip: { lo: 1, hi: 1, step: [1, 1] }, branchRank: { lo: 1, hi: 1, step: [1, 1] } });
+var V3_KEYS = Object.freeze([...Object.keys(V3_RANGES), ...Object.keys(V3_FIXED)]);
+var isV3Affix = (key5) => V3_KEYS.includes(key5);
+var isFixedV3 = (key5) => Object.hasOwn(V3_FIXED, key5);
+var WHOLE_V3 = Object.freeze(["startPips", "maxPip", "branchRank"]);
+var STUN_DR_CAP = 0.5;
+var PERFECT_WINDOW_CAP = 0.2;
+var MAX_PIP_GEAR = 2;
+var EXPOSE_TIME_CAP = 2;
+var SHATTER_EASE_CAP = 0.5;
+var CLOSE_REACH = 48;
+var FAR_REACH = 160;
+var TREES = {};
+var classTrees = (cls) => TREES[cls] ??= Object.freeze([...new Set(Object.values(CLASS_TREE_SKILLS).filter((x) => x.classId === cls).map((x) => x.tree))].sort());
+function resolveV3Affix(key5, cls, slotKey, random) {
+  const pick6 = (list2) => list2[Math.floor(random() * list2.length)];
+  if (key5 === "attr") return [pick6(["str", "dex", "int"]), null];
+  if (key5 === "mainAttr") return [{ knight: "str", rogue: "dex", mage: "int" }[cls] ?? pick6(["str", "dex", "int"]), null];
+  if (key5 === "groupDmg") {
+    const list2 = slotKey === "ring" || slotKey === "cape" ? ["areaDmg", "finisherDmg"] : groupsFor(cls, DAMAGE_GROUPS);
+    return [pick6(list2), null];
+  }
+  if (key5 === "groupCdr") return [pick6(groupsFor(cls, COOLDOWN_GROUPS)), null];
+  if (key5 === "rangeDmg") return [pick6(["closeDmg", "farDmg"]), null];
+  if (key5 === "healthDmg") return [pick6(["fullDmg", "lowDmg"]), null];
+  if (key5 === "branchRank") return [key5, pick6(classTrees(cls))];
+  if (key5 === "startPips" || key5 === "keepPip" || key5 === "maxPip") return [key5, cls];
+  if (key5.startsWith("sig")) return [SIGNATURE_LINES[cls][key5], null];
+  return [key5, null];
+}
+var POOL_KEY = { str: "attr", dex: "attr", int: "attr", rangedDmg: "groupDmg", areaDmg: "groupDmg", finisherDmg: "groupDmg", moveCdr: "groupCdr", defCdr: "groupCdr", closeDmg: "rangeDmg", farDmg: "rangeDmg", fullDmg: "healthDmg", lowDmg: "healthDmg", perfectWindow: "sigWindow", exposeTime: "sigWindow", shatterEase: "sigWindow", perfectDmg: "sigDmg", exposeDmg: "sigDmg", shatterDmg: "sigDmg", perfectCdr: "sigCdr", exposeCdr: "sigCdr", shatterCdr: "sigCdr", weaveDmg: "sigWindow", blinkDmg: "sigDmg", blinkCdr: "sigCdr" };
+var v3PoolKeyOf = (key5, slotKey) => slotKey === "overall" && key5 === "lowDmg" ? key5 : POOL_KEY[key5] ?? key5;
+function fixedV3Value(key5, k) {
+  const x = V3_FIXED[key5], n = k * x.step[0], d = x.step[1];
+  if (d === 1) return String(n);
+  return String(Number((Math.round(n * 1e4 / d) / 1e4).toFixed(4)));
 }
 
 // src/shared/contracts/event_boons_v1.js
@@ -7364,6 +5090,22 @@ function syncVigorV1(s) {
     }
   }
   return changed;
+}
+
+// src/shared/content/site_rewards_v1.js
+var SITE_REWARDS_VERSION = "site-rewards-v1";
+var SITE_REWARDS_POLICY = freezeWire({
+  version: SITE_REWARDS_VERSION,
+  kinds: { "site-end-elite": { role: "boss", floor: 1, quality: 0 }, "mini-boss": { role: "boss", floor: 0, quality: 0 }, "lair-boss": { role: "boss", floor: 2, quality: 0 }, "lair-chest": { role: "completion", floor: 0, quality: 300 }, "standard-chest": { role: "completion", floor: 0, quality: 0 } }
+});
+var kind = (k) => SITE_REWARDS_POLICY.kinds[k];
+var siteRewardRoleV1 = (k) => k ? kind(k).role : null;
+var siteRewardQualityV1 = (k) => k ? kind(k).quality : 0;
+var siteRewardRarityV1 = (k, tier) => k ? Math.max(tier, kind(k).floor) : tier;
+function validateSiteRewardProgressionV1(p) {
+  if (p.siteReward === void 0) return p;
+  requireContract(Object.hasOwn(SITE_REWARDS_POLICY.kinds, p.siteReward) && p.rarityPolicyHash !== void 0 && p.rarityRole === kind(p.siteReward).role, "Site reward rule");
+  return p;
 }
 
 // src/shared/content/gear_numbers_d9.js
@@ -7662,6 +5404,101 @@ function dungeonItemBasesD9(item, stageScale, c) {
   return item;
 }
 
+// src/shared/content/trip_imps_v1.js
+var TRIP_IMPS_V1 = "trip-imps-v1";
+var IMP_RULES = Object.freeze({
+  coinPerIsland: Object.freeze([6, 10]),
+  treasureOneIn: 3,
+  // The second half of an island's imps (and its treasure imp) climb out this long after the first.
+  waveGapTicks: 4 * 60,
+  climbTicks: 42,
+  // A hero this close (or a hit) gives an imp a fright: "!" and a cackle, then it bolts.
+  scareRadius: Object.freeze({ coin: 120, rare: 140 }),
+  alarmTicks: 24,
+  // It keeps running while any hero is this close; farther off it stops to catch its breath.
+  calmRadius: 300,
+  speed: Object.freeze({ coin: 2.5, rare: 2.85 }),
+  hullRadius: 7,
+  // From its first fright it has this long before it tears a rift and dives in (Escaping! shows for the last 1.4 s).
+  escapeTicks: Object.freeze({ coin: 8 * 60, rare: 12 * 60 }),
+  warnTicks: 84,
+  riftTicks: 54,
+  // Health: the C-rank object curve (like Nests) times this.
+  hpTimes: Object.freeze({ coin: Object.freeze([6, 5]), rare: Object.freeze([4, 1]) }),
+  // Gold in quarters of a kill's gold at the hero's level: each of the first few hits, then the kill.
+  goldQuarters: Object.freeze({ coin: Object.freeze({ hit: 1, hitsPaid: 4, kill: 8 }), rare: Object.freeze({ hit: 2, hitsPaid: 4, kill: 16 }) }),
+  starshardPerMille: Object.freeze({ coin: 30, rare: 200 }),
+  gearPieces: Object.freeze({ coin: 0, rare: 2 }),
+  // XP for the kill, in ordinary kills at the hero's level (like the gold), for every hero close by.
+  xpKills: Object.freeze({ coin: 3, rare: 6 }),
+  // Ended imps (killed or escaped) stay in the record this long so every screen can show the poof or rift.
+  keepTicks: 3 * 60,
+  // Recent personal gains (coins to the purse, Scrap to the Bag) kept for the screen.
+  gainTicks: 4 * 60,
+  gainsKept: 10
+});
+var IMP_SCRAP = Object.freeze([[1, "Common Scrap", "Uncommon Scrap", 350], [10, "Uncommon Scrap", "Rare Scrap", 350], [20, "Rare Scrap", "Epic Scrap", 350], [35, "Epic Scrap", "Legendary Scrap", 350], [50, "Legendary Scrap", "Mythic Scrap", 200]]);
+function impScrapBandV1(level) {
+  let band = IMP_SCRAP[0];
+  for (const b of IMP_SCRAP) if (level >= b[0]) band = b;
+  return band;
+}
+function h322(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  h = Math.imul(h ^ h >>> 16, 2246822507);
+  h = Math.imul(h ^ h >>> 13, 3266489909);
+  return (h ^ h >>> 16) >>> 0;
+}
+var impHashV1 = (text) => h322(TRIP_IMPS_V1 + "/" + text);
+var impIdV1 = (campaignId, eatTick, n) => "ent:" + [0, 1, 2, 3].map((i) => h322(TRIP_IMPS_V1 + "/imp/" + campaignId + "/" + eatTick + "/" + n + "/" + i).toString(16).padStart(8, "0")).join("");
+var TRIP_GEAR_TRIP = /^(\d{1,15})\/(\d{1,3})\/([01])$/;
+var tripGearSourceIdV1 = (seedHex, playerId, trip) => "ent:" + [0, 1, 2, 3].map((i) => h322(TRIP_IMPS_V1 + "/gear/" + seedHex + "/" + playerId + "/" + trip + "/" + i).toString(16).padStart(8, "0")).join("");
+var TRIP_GEAR_KINDS = Object.freeze(["best", "any"]);
+
+// src/shared/content/reward_modifiers.js
+function validateRewardModifiers(v) {
+  closedRecord(v, ["version", "goldHundredths", "occurrenceHundredths", "qualityHundredths", "dualEligible", "triEligible"]);
+  requireContract(v.version === "personal-reward-modifiers-d8-v1", "Reward modifier version");
+  safeInteger(v.goldHundredths, 100, 130);
+  safeInteger(v.occurrenceHundredths, 100, 105);
+  safeInteger(v.qualityHundredths, 0, 10);
+  requireContract(v.goldHundredths % 5 === 0 && [100, 105].includes(v.occurrenceHundredths) && v.qualityHundredths % 2 === 0 && typeof v.dualEligible === "boolean" && typeof v.triEligible === "boolean" && (!v.triEligible || v.dualEligible), "Invalid reward modifiers");
+  return v;
+}
+
+// src/shared/content/reward_progression_d9.js
+var D9_REWARD_PROGRESSION = "reward-progression-d9-v1";
+function rewardProgressionD9(depth, sourceId) {
+  return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
+}
+function validateRewardProgressionD9(v) {
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth", "questGear", "mainTree", "tripGear"]);
+  requireContract(v.tripGear === void 0 || TRIP_GEAR_KINDS.includes(v.tripGear) && v.rarityPolicyHash !== void 0, "Trip gear policy");
+  requireContract(v.mainTree === void 0 || v.gearClass !== void 0 && isClassTree(v.gearClass, v.mainTree), "Main tree policy");
+  requireContract(v.questGear === void 0 || Object.hasOwn(QUEST_GEAR_GROUPS, v.questGear) && v.rarityPolicyHash !== void 0, "Quest gear policy");
+  requireContract(v.lockedDepth === void 0 || v.episodeSnapshotId !== void 0 && progressionBigInt(v.lockedDepth) >= 1n, "Co-op reward depth policy");
+  requireContract(v.bestiaryQuality === void 0 || Number.isSafeInteger(v.bestiaryQuality) && v.bestiaryQuality > 0 && v.bestiaryQuality <= 1e4 && v.rarityPolicyHash !== void 0, "Bestiary quality policy");
+  requireContract(v.swiftKill === void 0 || v.swiftKill === true && v.rarityPolicyHash !== void 0, "Swift kill reward policy");
+  requireContract(v.affixes === void 0 || isAffixesV2Plus(v.affixes) && v.gearClass !== void 0, "Affix pool policy");
+  requireContract(v.boon === void 0 || v.boon === "fortune" && v.rarityPolicyHash !== void 0, "Boon reward policy");
+  requireContract(v.quickClear === void 0 || v.quickClear === true && v.rarityPolicyHash !== void 0 && v.combatQuality === "completion", "Quick clear reward policy");
+  requireContract(v.armor === void 0 || v.armor === "overall" && v.gearClass === void 0 && v.combatHash === WORLD_COMBAT_HASH, "One-piece armor policy");
+  requireContract(v.wardrobe === void 0 || v.wardrobe === WARDROBE_V1 && v.gearClass !== void 0, "Wardrobe policy");
+  requireContract(v.unique === void 0 || Object.hasOwn(UNIQUE_ITEMS, v.unique) && v.wardrobe === WARDROBE_V1 && (UNIQUE_ITEMS[v.unique].cls === null || UNIQUE_ITEMS[v.unique].cls === v.gearClass), "Unique policy");
+  requireContract(v.version === D9_REWARD_PROGRESSION && v.policy === D9_PROFILE.progressionPolicy, "D9 reward progression version");
+  positiveProgression(v.sourceDepth);
+  requireContract(typeof v.sourceId === "string" && v.sourceId.length > 0 && v.sourceId.length <= 240, "Invalid reward source");
+  if (v.combatHash === void 0) requireContract(v.combatQuality === void 0, "Combat quality requires policy commitment");
+  if (v.combatHash !== void 0) requireContract(v.combatHash === WORLD_COMBAT_HASH && ["ordinary", "elite", "completion"].includes(v.combatQuality), "Unknown combat reward policy");
+  if (v.modifiers) validateRewardModifiers(v.modifiers);
+  requireContract(v.quality === (v.modifiers ? 1 + v.modifiers.qualityHundredths / 100 : 1) && v.tomeEligibility === (v.modifiers ? "personal-tome-d8-v1" : "base-single-d7-v1"), "D9 reward modifier witness");
+  validateWorldRarityProgressionV2(v);
+  validateSiteRewardProgressionV1(v);
+  requireContract(v.gearClass === void 0 || ["knight", "rogue", "mage"].includes(v.gearClass) && v.combatHash === WORLD_COMBAT_HASH, "Unknown gear class");
+  return v;
+}
+
 // src/shared/content/tome_profiles.js
 var BASE_TOME_ELEMENTS = Object.freeze(["fire", "lightning", "frost"]);
 function selectBaseTomeElement(power2, random, eligibility = "base-single-d7-v1") {
@@ -7688,6 +5525,183 @@ function selectD8TomeElement(power2, stars, random, witness) {
   if (roll2 < 0.2) return witness.triEligible ? "tri" : single();
   if (roll2 < 0.6) return witness.dualEligible ? duals[Math.floor(random() * 3)] : single();
   return single();
+}
+
+// src/shared/contracts/versions.js
+var PROTOCOL_VERSION = 1;
+var SIMULATION_STATE_SCHEMA_VERSION = 1;
+var SNAPSHOT_WIRE_VERSION = 1;
+var SEED_NORMALIZATION_VERSION = "world-seed-v1";
+var RNG_VERSION = "xoshiro128ss-v1";
+var CONTENT_SCHEMA_VERSION = 1;
+var WORLD_COMBAT_CONTRACT_VERSION = 2;
+var SIMULATION_TICKS_PER_SECOND = 60;
+
+// src/shared/contracts/hashing.js
+function utf8(value) {
+  requireContract(typeof value === "string" && !value.includes("\0"), "Invalid UTF-8 input");
+  const bytes = [];
+  for (let i = 0; i < value.length; i++) {
+    let point14 = value.charCodeAt(i);
+    if (point14 >= 55296 && point14 <= 56319) {
+      const low = value.charCodeAt(++i);
+      requireContract(low >= 56320 && low <= 57343, "Unpaired surrogate");
+      point14 = 65536 + (point14 - 55296 << 10) + low - 56320;
+    } else requireContract(point14 < 56320 || point14 > 57343, "Unpaired surrogate");
+    if (point14 < 128) bytes.push(point14);
+    else if (point14 < 2048) bytes.push(192 | point14 >>> 6, 128 | point14 & 63);
+    else if (point14 < 65536) bytes.push(224 | point14 >>> 12, 128 | point14 >>> 6 & 63, 128 | point14 & 63);
+    else bytes.push(240 | point14 >>> 18, 128 | point14 >>> 12 & 63, 128 | point14 >>> 6 & 63, 128 | point14 & 63);
+  }
+  return bytes;
+}
+function validateBytes(bytes, size) {
+  requireContract(Number.isSafeInteger(size) && size >= 0 && size <= 16777216 && Array.isArray(bytes) && Object.getPrototypeOf(bytes) === Array.prototype && bytes.length === size, `Expected ${size} bytes`);
+  const keys2 = Reflect.ownKeys(bytes);
+  requireContract(keys2.length === size + 1, "Extended byte array");
+  for (let i = 0; i < size; i++) {
+    const descriptor = Object.getOwnPropertyDescriptor(bytes, String(i));
+    requireContract(descriptor && "value" in descriptor && descriptor.enumerable && Number.isInteger(descriptor.value) && descriptor.value >= 0 && descriptor.value <= 255, "Invalid byte data");
+  }
+  return bytes;
+}
+var textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : null;
+async function hashUtf8(text, sha256) {
+  requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
+  if (!textEncoder || typeof text !== "string" || typeof text.isWellFormed !== "function") return hashBytes(utf8(text), sha256);
+  requireContract(!text.includes("\0"), "Invalid UTF-8 input");
+  requireContract(text.isWellFormed(), "Unpaired surrogate");
+  const bytes = textEncoder.encode(text);
+  requireContract(bytes.length <= 16777216, `Expected ${bytes.length} bytes`);
+  const result = await sha256(bytes);
+  validateBytes(result, 32);
+  return [...result];
+}
+function bytesToHex(bytes) {
+  validateBytes(bytes, bytes.length);
+  return bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+function validateHex(value, bytes) {
+  requireContract(typeof value === "string" && new RegExp(`^[0-9a-f]{${bytes * 2}}$`).test(value), "Invalid canonical hex");
+  return value;
+}
+function frameUtf8(fields) {
+  validateWire(fields);
+  requireContract(Array.isArray(fields) && fields.length <= 32, "Invalid framing fields");
+  const output = [];
+  for (const field2 of fields) {
+    const bytes = utf8(field2);
+    requireContract(bytes.length <= 4096, "Framing field too long");
+    const length = bytes.length;
+    output.push(length >>> 24 & 255, length >>> 16 & 255, length >>> 8 & 255, length & 255, ...bytes);
+  }
+  return output;
+}
+async function hashBytes(bytes, sha256) {
+  requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
+  validateBytes(bytes, bytes.length);
+  const result = await sha256(Object.freeze([...bytes]));
+  validateBytes(result, 32);
+  return [...result];
+}
+
+// src/shared/contracts/rng.js
+var UINT32_RANGE = 4294967296;
+var rotateLeft = (value, bits) => (value << bits | value >>> 32 - bits) >>> 0;
+function wordsFromDigest(digest10) {
+  validateBytes(digest10, 32);
+  const words = [0, 4, 8, 12].map((offset) => (digest10[offset] | digest10[offset + 1] << 8 | digest10[offset + 2] << 16 | digest10[offset + 3] << 24) >>> 0);
+  if (words.every((word2) => word2 === 0)) words[0] = 2654435769;
+  return words;
+}
+function validateRngState(state) {
+  validateWire(state);
+  closedRecord(state, ["rngVersion", "words", "drawCount"]);
+  exactVersion(state.rngVersion, RNG_VERSION);
+  requireContract(Array.isArray(state.words) && state.words.length === 4, "Expected four RNG words");
+  state.words.forEach((word2) => safeInteger(word2, 0, 4294967295));
+  requireContract(state.words.some((word2) => word2 !== 0), "Forbidden zero RNG state");
+  safeInteger(state.drawCount);
+  return state;
+}
+function createRngState(words) {
+  const state = { rngVersion: RNG_VERSION, words, drawCount: 0 };
+  validateRngState(state);
+  return freezeWire(state);
+}
+function nextUint32(state) {
+  validateRngState(state);
+  requireContract(state.drawCount < Number.MAX_SAFE_INTEGER, "RNG draw counter exhausted");
+  const words = [...state.words];
+  const value = Math.imul(rotateLeft(Math.imul(words[1], 5) >>> 0, 7), 9) >>> 0;
+  const shifted = words[1] << 9 >>> 0;
+  words[2] = (words[2] ^ words[0]) >>> 0;
+  words[3] = (words[3] ^ words[1]) >>> 0;
+  words[1] = (words[1] ^ words[2]) >>> 0;
+  words[0] = (words[0] ^ words[3]) >>> 0;
+  words[2] = (words[2] ^ shifted) >>> 0;
+  words[3] = rotateLeft(words[3], 11);
+  return freezeWire({ value, state: { rngVersion: RNG_VERSION, words, drawCount: state.drawCount + 1 } });
+}
+function nextBoundedInteger(state, bound) {
+  safeInteger(bound, 1, UINT32_RANGE);
+  const limit = UINT32_RANGE - UINT32_RANGE % bound;
+  let current = state;
+  for (let attempt = 0; attempt < 1024; attempt++) {
+    const result = nextUint32(current);
+    current = result.state;
+    if (result.value < limit) return freezeWire({ value: result.value % bound, state: current });
+  }
+  throw new RangeError("Bounded sampling draw budget exhausted; no biased fallback");
+}
+function validateGenerationIdentity(identity) {
+  validateWire(identity);
+  closedRecord(identity, ["seedHex", "seedNormalizationVersion", "generatorVersion", "contentCatalogHash", "worldRecipeVersion"]);
+  validateHex(identity.seedHex, 16);
+  exactVersion(identity.seedNormalizationVersion, SEED_NORMALIZATION_VERSION);
+  validateHex(identity.contentCatalogHash, 32);
+  for (const key5 of ["generatorVersion", "worldRecipeVersion"]) {
+    requireContract(typeof identity[key5] === "string" && /^[a-zA-Z0-9._-]{1,64}$/.test(identity[key5]), "Invalid generation version token");
+  }
+  return identity;
+}
+function validateStreamScope(scope) {
+  validateWire(scope);
+  closedRecord(scope, ["domain", "keys"]);
+  requireContract(typeof scope.domain === "string" && /^[a-z][a-z0-9._-]{0,63}$/.test(scope.domain), "Invalid stream domain");
+  requireContract(Array.isArray(scope.keys) && scope.keys.length <= 16, "Invalid stream keys");
+  for (const key5 of scope.keys) {
+    closedRecord(key5, ["kind", "value"]);
+    if (key5.kind === "index") safeInteger(key5.value);
+    else {
+      requireContract(key5.kind === "recipe", "Unknown stream key kind");
+      requireContract(typeof key5.value === "string" && /^[a-z][a-z0-9._-]{0,63}$/.test(key5.value), "Invalid recipe key");
+    }
+  }
+  return scope;
+}
+async function deriveScopedStream(identity, scope, { sha256 } = {}) {
+  validateGenerationIdentity(identity);
+  validateStreamScope(scope);
+  const frozenIdentity = freezeWire(identity);
+  const frozenScope = freezeWire(scope);
+  const fields = [
+    "SAQ-WORLD-STREAM-v1",
+    identity.seedHex,
+    identity.generatorVersion,
+    identity.contentCatalogHash,
+    identity.worldRecipeVersion,
+    scope.domain,
+    ...scope.keys.map((key5) => key5.kind === "index" ? String(key5.value) : key5.value)
+  ];
+  const digest10 = await hashBytes(frameUtf8(fields), sha256);
+  return freezeWire({
+    rngVersion: RNG_VERSION,
+    generationIdentity: frozenIdentity,
+    scope: frozenScope,
+    derivationDigest: bytesToHex(digest10),
+    initialState: createRngState(wordsFromDigest(digest10))
+  });
 }
 
 // src/shared/contracts/d9_numeric_expression.js
@@ -8493,6 +6507,28 @@ function generateGear(seed, depth, { tier = null, family: family2 = null, subTyp
   return freezeWire({ version: GEAR_VERSION2, seed, contentDepth: depth, itemPower: power2, rarityTier, definition, affixes, rng: rng3.state(), salvage: salvagePayload2(seed, rarityTier) });
 }
 
+// src/shared/content/reward_progression.js
+var PROTOTYPE_PROGRESSION_POLICY = "prototype-rank-depth-v1";
+var CURRENT_DEPTH = Object.freeze({ C: 1, B: 3, A: 5, S: 7 });
+function prototypeRewardProgression(rank, sourceId) {
+  requireContract(Object.hasOwn(CURRENT_DEPTH, rank), "Unknown prototype rank");
+  return rewardProgression(CURRENT_DEPTH[rank], sourceId, PROTOTYPE_PROGRESSION_POLICY);
+}
+function rewardProgression(sourceDepth, sourceId, policy = "explicit-content-depth-v1") {
+  const value = { version: "reward-progression-v1", policy, sourceDepth, quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" };
+  validateRewardProgression(value);
+  return freezeWire(value);
+}
+function validateRewardProgression(v) {
+  if (v?.version === "reward-progression-d9-v1") return validateRewardProgressionD9(v);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers"]);
+  requireContract(v.version === "reward-progression-v1" && [PROTOTYPE_PROGRESSION_POLICY, "explicit-content-depth-v1"].includes(v.policy), "Unknown progression policy");
+  safeInteger(v.sourceDepth, 1, 1e4);
+  requireContract((v.modifiers ? v.quality === 1 + v.modifiers.qualityHundredths / 100 : v.quality === 1) && typeof v.sourceId === "string" && v.sourceId.length > 0 && (v.modifiers ? v.tomeEligibility === "personal-tome-d8-v1" : v.tomeEligibility === "base-single-d7-v1"), "Invalid reward progression/eligibility");
+  if (v.modifiers) validateRewardModifiers(v.modifiers);
+  return v;
+}
+
 // src/shared/content/dungeon_item_bases.js
 var canonicalNoun2 = (value) => String(value ?? "").trim().toLowerCase().replace(/[\s_-]+/g, "_");
 function dungeonItemBases2(item, stageScale) {
@@ -8941,6 +6977,330 @@ function validateGeneratedGear(g, seed, input) {
   return g;
 }
 
+// src/shared/content/augment_crafting_v1.js
+var AUGMENT_CRAFT_VERSION = "augment-craft-v1";
+var GLYPH_DUST = "Glyph Dust";
+var AUGMENT_RARITIES = Object.freeze(["rare", "epic", "legendary"]);
+var AUGMENT_RARITY_NAMES = Object.freeze({ rare: "Rare", epic: "Epic", legendary: "Legendary" });
+var AUGMENT_RARITY_COLORS = Object.freeze({ rare: "#3498db", epic: "#9b59b6", legendary: "#e67e22" });
+var AUGMENT_PRICES = Object.freeze({ rare: 40, epic: 100, legendary: 200 });
+var GLYPH_DUST_DROPS = Object.freeze({
+  elite: Object.freeze({ chance: 25, amount: 2 }),
+  named: Object.freeze({ chance: 100, amount: 4 }),
+  rare: Object.freeze({ chance: 100, amount: 10 }),
+  lesser: Object.freeze({ chance: 100, amount: 6 }),
+  boss: Object.freeze({ chance: 100, amount: 12 }),
+  chest: Object.freeze({ chance: 100, amount: 6 })
+});
+var ELDER_GLYPH_CHANCE = Object.freeze({ boss: 8, lesser: 1 });
+var ELDER_GLYPH_OWN_SKILL = 75;
+var R = "rare";
+var E = "epic";
+var L = "legendary";
+var AUGMENT_RARITY = Object.freeze(Object.fromEntries(Object.entries({
+  rallying_cry: [R, R, E, E, L],
+  war_banner: [L, R, R, E, E],
+  aegis_pulse: [R, R, E, L],
+  earth_breaker: [R, L, E, R, E],
+  shield_charge: [L, R, R, E, E],
+  skyfall_leap: [R, E, L, E],
+  counter_stance: [R, E, E, L, E],
+  shield_throw: [R, R, E, L, E],
+  retribution: [R, E, L, E],
+  firebloom: [R, E, R, E, L],
+  flame_wall: [R, L, R, E, E],
+  meteor: [E, L, R, E],
+  flashfreeze: [R, E, E, R, L],
+  ice_barrier: [R, E, R, E, L],
+  glacial_burst: [R, E, R, L],
+  ball_lightning: [E, R, E, R, L],
+  static_field: [R, E, R, L, E],
+  thunderfall: [R, R, L, E],
+  lunge: [R, R, E, L, E],
+  riposte: [R, R, E, E, L],
+  thousand_cuts: [R, L, E, R],
+  toxic_fan: [R, R, E, L, E],
+  rupture: [E, L, R, E],
+  noxious_bloom: [L, R, E, R],
+  whirling_blades: [R, E, R, L, E],
+  smoke_veil: [R, E, E, R, L],
+  shadowstep: [L, E, R, E]
+}).map(([id, list2]) => [id, Object.freeze(list2)])));
+var augmentRarity = (id, index2) => AUGMENT_RARITY[id]?.[index2] ?? null;
+var legendaryAugmentIndex = (id) => AUGMENT_RARITY[id]?.indexOf(L) ?? -1;
+var augmentPrice = (id, index2) => AUGMENT_PRICES[augmentRarity(id, index2)] ?? null;
+
+// src/shared/contracts/class_tree_progression_v1.js
+var classRank = (d8, id) => d8?.classRanks?.[id] ?? 0;
+var classTierGate = (tier) => (tier - 1) * CLASS_TREE_TIER_POINTS;
+function classTreeSpent(d8, treeId, belowTier = Infinity) {
+  let n = 0;
+  for (const [id, rank] of Object.entries(d8?.classRanks ?? {})) {
+    const s = CLASS_TREE_SKILLS[id];
+    if (s?.tree === treeId && s.tier < belowTier) n += rank;
+  }
+  return n;
+}
+function classTreePoints(d8) {
+  const level = d8?.heroClass ? progressionBigInt(d8.highestHeroLevel) - 1n : 0n, cap3 = BigInt(CLASS_TREE_POINT_CAP), earned = level < cap3 ? level : cap3, spent = BigInt(Object.values(d8?.classRanks ?? {}).reduce((a, b) => a + b, 0));
+  return { earned, spent, unspent: earned - spent, cap: cap3 };
+}
+function learnedClassActives(d8) {
+  if (!d8?.heroClass || !d8.classRanks) return [];
+  return classTreesFor(d8.heroClass).flatMap((t) => t.rows.flat()).filter((id) => CLASS_TREE_SKILLS[id].kind === "active" && classRank(d8, id) > 0);
+}
+function learnAvailability(d8, id) {
+  const s = CLASS_TREE_SKILLS[id];
+  if (!s || !d8?.heroClass || s.classId !== d8.heroClass) return { ok: false, reason: "Not one of your class skills" };
+  const rank = classRank(d8, id), gate = classTierGate(s.tier), tree = classTreeOf(s.classId, s.tree);
+  if (rank >= s.maxRank) return { ok: false, reason: "Maxed", rank };
+  if (!LIVE_CLASS_SKILLS.has(id)) return { ok: false, reason: "Coming soon", rank };
+  if (s.requires && classRank(d8, s.requires) <= 0) return { ok: false, reason: `Learn ${CLASS_TREE_SKILLS[s.requires].name} first`, rank };
+  if (classTreeSpent(d8, s.tree, s.tier) < gate) return { ok: false, reason: `Needs ${gate} points in ${tree.name}`, rank };
+  if (classTreePoints(d8).unspent < 1n) return { ok: false, reason: classTreePoints(d8).earned >= BigInt(CLASS_TREE_POINT_CAP) ? "All 49 points are spent" : "No skill points left", rank };
+  return { ok: true, rank, nextRank: rank + 1 };
+}
+var classAugments = (d8, id) => d8?.classAugments?.[id] ?? [];
+var hasAugment = (d8, id, index2) => classAugments(d8, id).includes(index2);
+var glyphDust = (d8) => d8?.augmentCraft?.dust ?? 0;
+var ownsAugment = (d8, id, index2) => Boolean(d8?.augmentCraft?.owned?.[id]?.includes(index2));
+var holdsElderGlyph = (d8, id) => Boolean(d8?.augmentCraft?.glyphs?.includes(id));
+function storeAugmentCraft(d8, { dust = 0, owned = {}, glyphs = [] }) {
+  const o = Object.fromEntries(Object.entries(owned).filter(([, l]) => l.length).map(([id, l]) => [id, [...new Set(l)].sort((a, b) => a - b)]));
+  if (!dust && !Object.keys(o).length && !glyphs.length) delete d8.augmentCraft;
+  else d8.augmentCraft = { dust, owned: o, glyphs: [...glyphs] };
+}
+var augmentCraftOf = (d8) => ({ dust: glyphDust(d8), owned: { ...d8?.augmentCraft?.owned ?? {} }, glyphs: [...d8?.augmentCraft?.glyphs ?? []] });
+var augmentLive = (id, index2) => index2 < (LIVE_AUGMENTS[id] ?? 0);
+function augmentAvailability(d8, id, index2) {
+  const s = CLASS_TREE_SKILLS[id], a = CLASS_SKILL_AUGMENTS[id]?.[index2];
+  if (!s || !a || s.classId !== d8?.heroClass) return { ok: false, reason: "Not one of your augments" };
+  if (classRank(d8, id) <= 0) return { ok: false, reason: `Learn ${s.name} first` };
+  if (!augmentLive(id, index2)) return { ok: false, reason: "Coming soon" };
+  if (!ownsAugment(d8, id, index2)) return { ok: false, reason: "Craft it at an Enchanter" };
+  return { ok: true };
+}
+function craftAvailability(d8, id, index2) {
+  const s = CLASS_TREE_SKILLS[id], a = CLASS_SKILL_AUGMENTS[id]?.[index2], rarity = augmentRarity(id, index2), price = augmentPrice(id, index2);
+  if (!s || !a || !rarity || s.classId !== d8?.heroClass) return { ok: false, reason: "Not one of your augments" };
+  const base = { rarity, price, needsGlyph: rarity === "legendary" };
+  if (ownsAugment(d8, id, index2)) return { ...base, ok: false, owned: true, reason: "Already yours" };
+  if (classRank(d8, id) <= 0) return { ...base, ok: false, reason: `Learn ${s.name} first` };
+  if (!augmentLive(id, index2)) return { ...base, ok: false, reason: "Coming soon" };
+  if (base.needsGlyph && !holdsElderGlyph(d8, id)) return { ...base, ok: false, reason: "Needs its Elder Glyph" };
+  if (glyphDust(d8) < price) return { ...base, ok: false, reason: `Needs ${price} Glyph Dust` };
+  return { ...base, ok: true };
+}
+function validateAugmentCraft(d8) {
+  const c = d8.augmentCraft;
+  if (c === void 0) return;
+  requireContract(d8.heroClass, "Augments need a class");
+  closedRecord(c, ["dust", "owned", "glyphs"]);
+  safeInteger(c.dust);
+  const mine = Object.keys(CLASS_SKILL_AUGMENTS).filter((id) => CLASS_TREE_SKILLS[id].classId === d8.heroClass);
+  closedRecord(c.owned, [], mine);
+  for (const [id, list2] of Object.entries(c.owned)) {
+    requireContract(Array.isArray(list2) && list2.length > 0, "Empty crafted lists are omitted");
+    list2.forEach((i, n) => {
+      safeInteger(i, 0, CLASS_SKILL_AUGMENTS[id].length - 1);
+      requireContract(n === 0 || i > list2[n - 1], "Crafted augments are listed once, in order");
+    });
+  }
+  requireContract(Array.isArray(c.glyphs) && new Set(c.glyphs).size === c.glyphs.length, "Each Elder Glyph once");
+  for (const id of c.glyphs) {
+    requireContract(mine.includes(id) && legendaryAugmentIndex(id) >= 0, "Not one of your Elder Glyphs");
+    requireContract(!ownsAugment(d8, id, legendaryAugmentIndex(id)), "Elder Glyph for an augment you own");
+  }
+  requireContract(c.dust > 0 || Object.keys(c.owned).length > 0 || c.glyphs.length > 0, "Empty augment craft is omitted");
+}
+function checkAugmentSlots(d8, id, slots2) {
+  requireContract(Array.isArray(slots2) && slots2.length <= AUGMENT_SLOTS && new Set(slots2).size === slots2.length, "Two augments at most, each once");
+  for (const i of slots2) {
+    safeInteger(i, 0, AUGMENT_UNLOCK_POINTS.length - 1);
+    const offer = augmentAvailability(d8, id, i);
+    requireContract(offer.ok, offer.reason);
+  }
+}
+function validateClassRanks(d8) {
+  const ranks = d8.classRanks;
+  if (ranks !== void 0) {
+    requireContract(d8.heroClass, "Class ranks need a class");
+    const own3 = Object.values(CLASS_TREE_SKILLS).filter((s) => s.classId === d8.heroClass).map((s) => s.id);
+    closedRecord(ranks, [], own3);
+    requireContract(Object.keys(ranks).length > 0, "Empty class ranks are omitted");
+    for (const [id, rank] of Object.entries(ranks)) {
+      const s = CLASS_TREE_SKILLS[id];
+      safeInteger(rank, 1, s.maxRank);
+      requireContract(LIVE_CLASS_SKILLS.has(id), "Skill is not available yet");
+      requireContract(!s.requires || classRank(d8, s.requires) > 0, "Missing required skill");
+      requireContract(classTreeSpent(d8, s.tree, s.tier) >= classTierGate(s.tier), "Tier not open");
+    }
+    requireContract(classTreePoints(d8).unspent >= 0n, "Overspent skill points");
+  }
+  const augs = d8.classAugments;
+  if (augs !== void 0) {
+    requireContract(d8.heroClass, "Augments need a class");
+    closedRecord(augs, [], Object.keys(CLASS_SKILL_AUGMENTS).filter((id) => CLASS_TREE_SKILLS[id].classId === d8.heroClass));
+    requireContract(Object.keys(augs).length > 0, "Empty augments are omitted");
+    for (const [id, slots2] of Object.entries(augs)) {
+      requireContract(slots2.length > 0, "Empty augment slots are omitted");
+      checkAugmentSlots(d8, id, slots2);
+    }
+  }
+  validateAugmentCraft(d8);
+}
+function classTreeEffects(d8) {
+  const r = (id) => classRank(d8, id), out = {};
+  for (const [key5, id, percent] of [["defPct", "heavy_plating", 25], ["atkPct", "glass_blade", 30]]) if (r(id)) out[key5] = combatAmount(percent * r(id), 100);
+  return out;
+}
+function classTreeMaxHpScale(d8) {
+  return classRank(d8, "glass_furnace") ? [85, 100] : null;
+}
+function learnClassSkill(next, id) {
+  const offer = learnAvailability(next, id);
+  requireContract(offer.ok, offer.reason);
+  next.classRanks = { ...next.classRanks ?? {}, [id]: offer.nextRank };
+}
+function setClassAugments(next, id, slots2) {
+  requireContract(CLASS_TREE_SKILLS[id]?.kind === "active", "Only actives take augments");
+  checkAugmentSlots(next, id, slots2);
+  const all = { ...next.classAugments ?? {} };
+  if (slots2.length) all[id] = [...slots2];
+  else delete all[id];
+  if (Object.keys(all).length) next.classAugments = all;
+  else delete next.classAugments;
+}
+function craftAugment(next, id, index2) {
+  const offer = craftAvailability(next, id, index2);
+  requireContract(offer.ok, offer.reason);
+  const c = augmentCraftOf(next);
+  c.dust -= offer.price;
+  c.owned[id] = [...c.owned[id] ?? [], index2];
+  if (offer.needsGlyph) c.glyphs = c.glyphs.filter((g) => g !== id);
+  storeAugmentCraft(next, c);
+}
+function resetClassTree(next, treeId) {
+  requireContract(classTreeOf(next.heroClass, treeId), "Unknown class tree");
+  const inTree = (id) => CLASS_TREE_SKILLS[id].tree === treeId, kept = Object.fromEntries(Object.entries(next.classRanks ?? {}).filter(([id]) => !inTree(id)));
+  requireContract(Object.keys(kept).length < Object.keys(next.classRanks ?? {}).length, "Tree already empty");
+  if (Object.keys(kept).length) next.classRanks = kept;
+  else delete next.classRanks;
+  const augs = Object.fromEntries(Object.entries(next.classAugments ?? {}).filter(([id]) => !inTree(id)));
+  if (Object.keys(augs).length) next.classAugments = augs;
+  else delete next.classAugments;
+}
+function fitClassTrees(d8) {
+  if (!d8) return false;
+  const before = JSON.stringify([d8.classRanks, d8.classAugments, d8.augmentCraft]);
+  if (!d8.heroClass) {
+    delete d8.classRanks;
+    delete d8.classAugments;
+    delete d8.augmentCraft;
+    return before !== JSON.stringify([d8.classRanks, d8.classAugments, d8.augmentCraft]);
+  }
+  let ranks = Object.fromEntries(Object.entries(d8.classRanks ?? {}).filter(([id, r]) => {
+    const s = CLASS_TREE_SKILLS[id];
+    return s && s.classId === d8.heroClass && LIVE_CLASS_SKILLS.has(id) && Number.isSafeInteger(r) && r >= 1;
+  }).map(([id, r]) => [id, Math.min(r, CLASS_TREE_SKILLS[id].maxRank)]));
+  for (let guard = 0; guard < 400; guard++) {
+    const probe = { ...d8, classRanks: ranks }, bad = Object.keys(ranks).find((id) => {
+      const s = CLASS_TREE_SKILLS[id];
+      return s.requires && !(ranks[s.requires] > 0) || classTreeSpent(probe, s.tree, s.tier) < classTierGate(s.tier);
+    });
+    if (bad) {
+      delete ranks[bad];
+      continue;
+    }
+    if (classTreePoints(probe).unspent < 0n) {
+      const id = Object.keys(ranks).sort((a, b) => CLASS_TREE_SKILLS[b].tier - CLASS_TREE_SKILLS[a].tier || a.localeCompare(b))[0];
+      if (--ranks[id] <= 0) delete ranks[id];
+      continue;
+    }
+    break;
+  }
+  if (Object.keys(ranks).length) d8.classRanks = ranks;
+  else delete d8.classRanks;
+  {
+    const old = d8.augmentCraft, mine = (id) => CLASS_TREE_SKILLS[id]?.classId === d8.heroClass && AUGMENT_RARITY[id], dust = Number.isSafeInteger(old?.dust) && old.dust > 0 ? old.dust : 0, owned = {};
+    for (const [id, list2] of [...Object.entries(old?.owned ?? {}), ...Object.entries(d8.classAugments ?? {})]) if (mine(id) && Array.isArray(list2)) owned[id] = [...owned[id] ?? [], ...list2.filter((i) => Number.isSafeInteger(i) && i >= 0 && i < CLASS_SKILL_AUGMENTS[id].length)];
+    const glyphs = [...new Set(Array.isArray(old?.glyphs) ? old.glyphs : [])].filter((id) => mine(id) && !owned[id]?.includes(legendaryAugmentIndex(id)));
+    storeAugmentCraft(d8, { dust, owned, glyphs });
+  }
+  const augs = {};
+  for (const [id, slots2] of Object.entries(d8.classAugments ?? {})) {
+    const ok = Array.isArray(slots2) ? [...new Set(slots2)].filter((i) => Number.isSafeInteger(i) && i >= 0 && i < AUGMENT_UNLOCK_POINTS.length && augmentAvailability(d8, id, i).ok).slice(0, AUGMENT_SLOTS) : [];
+    if (ok.length && CLASS_TREE_SKILLS[id]?.kind === "active") augs[id] = ok;
+  }
+  if (Object.keys(augs).length) d8.classAugments = augs;
+  else delete d8.classAugments;
+  return before !== JSON.stringify([d8.classRanks, d8.classAugments, d8.augmentCraft]);
+}
+
+// src/shared/content/hero_classes_v1.js
+var HERO_CLASSES = freezeWire({
+  knight: { id: "knight", name: "Knight", offhand: "shield", signature: "shield_bash", move: { name: "Guard", description: "Hold to block everything from the front." }, color: "#73bedc", role: "The front line: guard, control space, then answer with a deliberate Bash." },
+  rogue: { id: "rogue", name: "Rogue", offhand: "dagger", signature: "flurry", move: { name: "Dash", description: "A quick dash out of trouble." }, color: "#b88cff", role: "Move through openings, focus targets and turn afflictions into crowd damage." },
+  mage: { id: "mage", name: "Mage", offhand: "tome", signature: "cast", move: { name: "Blink", description: "Step a short distance in a flash of arcane light." }, color: "#f0a35a", role: "Choose an elemental style, combine elements and spend Barrier tactically." }
+});
+var HERO_CLASS_IDS = Object.freeze(Object.keys(HERO_CLASSES));
+var CLASS_SKILLS = freezeWire({
+  shield_bash: { id: "shield_bash", name: "Shield Bash", classId: "knight", cooldownTicks: 360, description: "Shove a forward cone: Attack plus Shield damage, knockback and a short stun on ordinary enemies. Every block takes 1 second off its cooldown. A Buckler recharges it faster; a Tower Shield stuns longer and shoves harder." },
+  flurry: { id: "flurry", name: "Flurry", classId: "rogue", cooldownTicks: 300, description: "Costs 1 Combo, no cooldown. Three quick offhand cuts in front of you. Each cut can crit and Bleed. A Main-Gauche readies a parry for the next hit; a Stiletto crits more often; a Kris makes every cut Bleed." },
+  // Class tree actives (the first row of every tree). Their full text lives in class_trees_v1.js.
+  earth_breaker: { id: "earth_breaker", name: "Earth-Breaker", classId: "knight", cooldownTicks: 480, description: "Slam the ground all around you. Everything hit takes damage and is slowed for 3 seconds." },
+  rallying_cry: { id: "rallying_cry", name: "Rallying Cry", classId: "knight", cooldownTicks: 900, description: "Shout to heal 15% of your max HP. Nearby enemies deal 20% less damage for 6 seconds." },
+  counter_stance: { id: "counter_stance", name: "Counter Stance", classId: "knight", cooldownTicks: 600, description: "Brace for 2 seconds. The next hit does nothing to you, and you strike back for 300% Attack and stun the attacker." },
+  // Row three (the third tier of every tree).
+  shield_charge: { id: "shield_charge", name: "Shield Charge", classId: "knight", cooldownTicks: 540, description: "Rush forward behind your shield. Enemies in the way get pushed along and stunned at the end." },
+  shield_throw: { id: "shield_throw", name: "Shield Throw", classId: "knight", cooldownTicks: 480, description: "Throw your shield. It bounces between up to 3 enemies and comes back. You can\u2019t Guard until it returns." },
+  war_banner: { id: "war_banner", name: "War Banner", classId: "knight", cooldownTicks: 1200, description: "Plant a banner for 10 seconds. While you stand near it you get +15% Attack and Defense." },
+  riposte: { id: "riposte", name: "Riposte", classId: "rogue", cooldownTicks: 480, description: "Ready your blades for 1.5 seconds. Parry the next hit and cut back for 300% Attack. Your next Flurry crits." },
+  rupture: { id: "rupture", name: "Rupture", classId: "rogue", cooldownTicks: 600, description: "Tear open every Bleed on enemies around you. Each one deals all of its remaining damage at once." },
+  smoke_veil: { id: "smoke_veil", name: "Smoke Veil", classId: "rogue", cooldownTicks: 900, description: "Drop a smoke cloud for 4 seconds. Enemies inside are slowed and Exposed, and you take 30% less damage while you\u2019re in it." },
+  flame_wall: { id: "flame_wall", name: "Flame Wall", classId: "mage", cooldownTicks: 720, description: "Raise a wall of fire in front of you for 5 seconds. Enemies that cross it burn." },
+  ice_barrier: { id: "ice_barrier", name: "Ice Barrier", classId: "mage", cooldownTicks: 1080, description: "Wrap yourself in ice: gain a Barrier worth 25% of your max HP for 8 seconds. Enemies that hit it are chilled." },
+  static_field: { id: "static_field", name: "Static Field", classId: "mage", cooldownTicks: 900, description: "Charge the ground around you for 6 seconds. Enemies inside take a spark of damage every second, and your Storm Casts jump to enemies inside first." },
+  // Row five (the fifth tier of every tree).
+  aegis_pulse: { id: "aegis_pulse", name: "Aegis Pulse", classId: "knight", cooldownTicks: 900, description: "Shove every enemy around you away and gain a Barrier worth 20% of your max HP for 6 seconds." },
+  skyfall_leap: { id: "skyfall_leap", name: "Skyfall Leap", classId: "knight", cooldownTicks: 720, description: "Leap to a spot and crash down, damaging and stunning everything around where you land." },
+  retribution: { id: "retribution", name: "Retribution", classId: "knight", cooldownTicks: 600, description: "Release every hit you blocked in the last 6 seconds as a blast around you." },
+  thousand_cuts: { id: "thousand_cuts", name: "Thousand Cuts", classId: "rogue", cooldownTicks: 600, description: "Strike one enemy 6 times in a blur. Every cut can crit." },
+  noxious_bloom: { id: "noxious_bloom", name: "Noxious Bloom", classId: "rogue", cooldownTicks: 720, description: "A toxic flower bursts at your feet and poisons everything around you." },
+  shadowstep: { id: "shadowstep", name: "Shadowstep", classId: "rogue", cooldownTicks: 480, description: "Vanish and reappear behind the nearest enemy. Your next hit within 3 seconds is a crit that deals double damage." },
+  meteor: { id: "meteor", name: "Meteor", classId: "mage", cooldownTicks: 900, description: "Call a meteor onto a spot. It lands a second later and leaves the ground burning for 4 seconds." },
+  glacial_burst: { id: "glacial_burst", name: "Glacial Burst", classId: "mage", cooldownTicks: 600, description: "Spend all your Barrier in a blast of ice around you. It deals twice the Barrier you spent plus a spell hit as damage, and chills everything it hits." },
+  thunderfall: { id: "thunderfall", name: "Thunderfall", classId: "mage", cooldownTicks: 720, description: "Call lightning down from above onto up to 5 enemies around you." },
+  lunge: { id: "lunge", name: "Lunge", classId: "rogue", cooldownTicks: 360, description: "Lunge at the nearest enemy in front of you and stab it for 250% Attack. Lunge crits twice as often as your other hits." },
+  toxic_fan: { id: "toxic_fan", name: "Toxic Fan", classId: "rogue", cooldownTicks: 420, description: "Throw a fan of 5 poisoned knives in front of you." },
+  whirling_blades: { id: "whirling_blades", name: "Whirling Blades", classId: "rogue", cooldownTicks: 480, description: "Spin and cut everything around you 3 times." },
+  firebloom: { id: "firebloom", name: "Firebloom", classId: "mage", cooldownTicks: 420, description: "Fire blossoms where you aim and burns everything inside it." },
+  flashfreeze: { id: "flashfreeze", name: "Flashfreeze", classId: "mage", cooldownTicks: 720, description: "Freeze everything around you in a flash. Ordinary enemies freeze, elites are chilled, and bosses slow down." },
+  ball_lightning: { id: "ball_lightning", name: "Ball Lightning", classId: "mage", cooldownTicks: 480, description: "Release a slow orb of lightning that drifts forward for 4 seconds, zapping every enemy near it twice a second." },
+  cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 300, description: "Costs 1 Arcana, no cooldown. A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you: Fire bursts and burns everything near the target, Frost bursts and chills everything near it, Storm chains to up to 4 more enemies, each jump a little weaker." }
+});
+var CLASS_SKILL_IDS = Object.freeze(Object.keys(CLASS_SKILLS));
+var SKILL_SLOT_COUNT = 5;
+var MOVE_SLOT = "move";
+var MAX_SKILL_COOLDOWN_TICKS = 1200;
+var heroClassOf = (d8) => HERO_CLASSES[d8?.heroClass] ?? null;
+var classSkillsFor = (d8) => {
+  const c = heroClassOf(d8);
+  return c ? [c.signature, ...learnedClassActives(d8).filter((id) => CLASS_SKILLS[id])] : [];
+};
+var wheelEntriesFor = (d8) => heroClassOf(d8) ? [MOVE_SLOT, ...classSkillsFor(d8).filter((id) => id !== d8?.attackSkill)] : [];
+function skillLoadout(d8) {
+  const known = wheelEntriesFor(d8), slots2 = Array.from({ length: SKILL_SLOT_COUNT }, (_, i) => {
+    const id = d8?.skillSlots?.[i] ?? null;
+    return known.includes(id) ? id : null;
+  });
+  for (const id of known) if (!slots2.includes(id)) {
+    const free = slots2.indexOf(null);
+    if (free >= 0) slots2[free] = id;
+  }
+  return slots2;
+}
+
 // src/shared/content/workshop_gear_v2.js
 var WORKSHOP_VERSION = "settlement-workshop-v2";
 var MAX_WORKSHOP_ITEMS = 64;
@@ -9342,6 +7702,1706 @@ function equipmentBonuses(p) {
   }
   return result;
 }
+
+// src/shared/contracts/dev_give_v1.js
+var DEV_GIVE_V1 = "dev-give-v1";
+var allowed = false;
+var allowDevGiveV1 = (on) => {
+  allowed = on === true;
+  return allowed;
+};
+var DEV_GIVE_ORIGIN = /^([a-z0-9-]{1,48})\/([0-4])\/(\d{1,12})$/;
+function h323(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+var devGiveSourceIdV1 = (seedHex, playerId, dev) => "ent:" + [0, 1, 2, 3].map((i) => h323(DEV_GIVE_V1 + "/" + seedHex + "/" + playerId + "/" + dev + "/" + i).toString(16).padStart(8, "0")).join("");
+function validateDevGivePayloadV1(payload) {
+  closedRecord(payload, ["unique", "stars", "equip", "inventoryRevision"]);
+  requireContract(typeof payload.unique === "string" && /^[a-z0-9-]{1,48}$/.test(payload.unique), "Unknown unique");
+  safeInteger(payload.stars, 0, 4);
+  requireContract(typeof payload.equip === "boolean", "Equip must be true or false");
+  safeInteger(payload.inventoryRevision);
+}
+function devGiveProblemV1(state, p, payload) {
+  if (!allowed) return "Dev tools are off here";
+  const inv = p?.inventory, u = UNIQUE_ITEMS[payload.unique];
+  if (!inv?.renewal || !inv.d7) return "This hero has no bag yet";
+  if (!u) return "No unique called " + payload.unique;
+  const cls = heroClassOf(p.d8)?.id ?? null;
+  if (u.cls && u.cls !== cls) return u.name + " is for another class";
+  if (inv.revision !== payload.inventoryRevision) return "The bag changed. Try again.";
+  if (inv.itemsById[devGivePieceV1(state, p, payload).item.itemId]) return "Already given. Try again.";
+  return null;
+}
+function devGivePieceV1(state, p, { unique: unique2, stars, inventoryRevision }) {
+  const dev = unique2 + "/" + stars + "/" + inventoryRevision, sourceEntityId = devGiveSourceIdV1(state.campaign.seed.seedHex, p.playerId, dev), cls = heroClassOf(p.d8)?.id ?? null, level = Math.max(1, Number(p.progression?.level) || 1);
+  const g = generateGear3("dev-tools/" + unique2 + "/" + sourceEntityId, { ...rewardProgressionD9(level, "dev-tools:" + unique2), combatHash: WORLD_COMBAT_HASH, combatQuality: "elite", gearClass: cls, wardrobe: WARDROBE_V1, unique: unique2 });
+  const generated = { ...g, definition: { ...g.definition, rarityTier: stars } };
+  return { item: { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: generated.definition.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) }, origin: { dev, sourceEntityId } };
+}
+function applyDevGiveV1(state, p, command, authorityOrder) {
+  const inv = p.inventory, { item, origin: origin2 } = devGivePieceV1(state, p, command.payload);
+  inv.itemsById[item.itemId] = item;
+  inv.renewal.originsByItemId[item.itemId] = origin2;
+  let equipped = null;
+  if (command.payload.equip) {
+    const d = itemDefinition(item);
+    let slot = d?.slot;
+    if (slot === "ring") slot = inv.equipped.ring1 != null && inv.equipped.ring2 == null ? "ring2" : "ring1";
+    equipped = equipmentAfter(inv, item.itemId, slot);
+    if (equipped) {
+      inv.equipped = equipped;
+      if (Object.hasOwn(inv.equipped, "cape") && inv.economy && !Object.hasOwn(inv.economy.slotLevels, "cape")) inv.economy.slotLevels.cape = 0;
+    }
+  }
+  inv.revision++;
+  if (equipped) inv.lastEquipmentChange = { command: copyWire(command), authorityOrder, tick: state.tick, revision: inv.revision };
+  return item;
+}
+
+// src/shared/content/roadside_encounters_v1.js
+var ROADSIDE_VERSION = "world-roadside-encounters-v2";
+var ROADSIDE_HASH = "b45cc8e610b432ef59a91b345c9a0083b1ee8e4557cbf777dbfb6620f8f063c3";
+var ROADSIDE_DATABASE = "saq-world-roadside-v1-b45cc8e6";
+var ROADSIDE_POLICY = freezeWire({ "version": "world-roadside-encounters-v2", "parentCombatHash": "a6bd45764908d58d1e1dff8e55e811a0d10876ee0b24ea4b15aa28ea6c94fc59", "parentAccessHash": "48fd65d60a26a6403b36111e0d3622e366c26f6a07709e9d34ff013a013fcdeb", "packChancePercent": 85, "ordinaryPack": [6, 12], "maximumPacksPerChunk": 1, "protectedReservationChunks": "all original settlement/site/faction/future/origin chunks; unchanged", "wildernessSafetyCollarTiles": 8, "previousCollar": "one whole chunk in every direction (32x26 tiles), including unused neighboring ground", "spawnSafetyRadiusTiles": 32, "ferrySafetyRadiusTiles": 32, "eventCapacity": "all reserved event cells plus two-tile shoulder excluded", "routeSafety": "no member on marked road/trail/bridge or its one-tile shoulder", "actorSafety": "existing 384px activation no-spawn radius unchanged", "simulation": "existing 60Hz, 192 active actors, retention, XP, loot, stats and dungeon rosters unchanged", "selection": "domain-separated global chunk hash, maximum 24 center attempts, max 81 member probes per attempt, same-landmass clearance", "scope": "reusable sampler; opted-in Alpha review only; fresh disposable namespace" });
+var hasRoadsideEncounters = (b) => b?.roadsideVersion === ROADSIDE_VERSION && b?.roadsideHash === ROADSIDE_HASH;
+
+// src/shared/content/alderwood_access_v1.js
+var ACCESS_VERSION = "alderwood-first-journey-v1";
+var ACCESS_HASH = "48fd65d60a26a6403b36111e0d3622e366c26f6a07709e9d34ff013a013fcdeb";
+var ACCESS_DATABASE = "saq-world-alderwood-access-v1-48fd65d6";
+var FIRST_CAVE_ID = "repeatable-slot:cave:woodland:small:109";
+var FIRST_CAVE_SELECTION = freezeWire({ "id": "repeatable-slot:cave:woodland:small:109", "familyId": "site-family:cave", "tier": "small", "band": 1, "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "anchor": { "x": 54, "y": 133, "key": "54,133" }, "footprint": [{ "x": 108, "y": 267 }], "approach": [{ "x": 109, "y": 267 }], "biome": "woodland", "added": true, "old": false });
+var hasFirstJourney = (b) => b?.accessVersion === ACCESS_VERSION && b?.accessHash === ACCESS_HASH;
+
+// src/shared/content/world_reshape_sites_v1.js
+var RESHAPE_SITES = Object.freeze({
+  "repeatable-slot:cave:frostland:large:01": ["frostland", 3],
+  "repeatable-slot:cave:grassland:small:01": ["woodland", 3],
+  "repeatable-slot:cave:tropical:deep:01": ["frostland", 5],
+  "repeatable-slot:cave:upland:large:01": ["grassland", 2],
+  "repeatable-slot:cave:upland:standard:01": ["frostland", 5],
+  "repeatable-slot:cave:volcanic:deep:01": ["desert", 3],
+  "repeatable-slot:cave:wetland:small:01": ["grassland", 5],
+  "repeatable-slot:cave:wetland:standard:01": ["wetland", 5],
+  "repeatable-slot:cave:woodland:standard:01": ["woodland", 3],
+  "repeatable-slot:crypt:frostland:deep:01": ["desert", 3],
+  "repeatable-slot:crypt:grassland:small:01": ["woodland", 1],
+  "repeatable-slot:crypt:upland:standard:01": ["upland", 2],
+  "repeatable-slot:crypt:wetland:standard:01": ["volcanic", 4],
+  "repeatable-slot:fort:grassland:small:01": ["upland", 4],
+  "repeatable-slot:fort:tropical:large:01": ["tropical", 3],
+  "repeatable-slot:fort:upland:standard:01": ["frostland", 5],
+  "repeatable-slot:fort:wetland:small:01": ["volcanic", 4],
+  "repeatable-slot:fort:woodland:standard:01": ["woodland", 3],
+  "repeatable-slot:ruin:desert:standard:01": ["wetland", 3],
+  "repeatable-slot:ruin:frostland:standard:01": ["volcanic", 4],
+  "repeatable-slot:ruin:tropical:small:01": ["frostland", 5],
+  "repeatable-slot:ruin:upland:standard:01": ["grassland", 3],
+  "repeatable-slot:ruin:wetland:small:01": ["upland", 4],
+  "repeatable-slot:ruin:woodland:small:01": ["woodland", 2],
+  "repeatable-slot:ruin:frostland:deep:01": ["frostland", 3],
+  "repeatable-slot:crypt:frostland:large:01": ["frostland", 3],
+  "repeatable-slot:cave:grassland:small:031": ["woodland", 1],
+  "repeatable-slot:fort:upland:standard:032": ["frostland", 4],
+  "repeatable-slot:ruin:wetland:standard:033": ["wetland", 4],
+  "repeatable-slot:cave:woodland:small:034": ["frostland", 3],
+  "repeatable-slot:cave:volcanic:small:035": ["tropical", 4],
+  "repeatable-slot:cave:desert:small:036": ["desert", 2],
+  "repeatable-slot:ruin:tropical:standard:037": ["tropical", 3],
+  "repeatable-slot:crypt:frostland:small:038": ["desert", 2],
+  "repeatable-slot:fort:grassland:standard:040": ["grassland", 5],
+  "repeatable-slot:cave:desert:small:041": ["wetland", 3],
+  "repeatable-slot:cave:wetland:small:042": ["volcanic", 4],
+  "repeatable-slot:cave:volcanic:small:043": ["tropical", 4],
+  "repeatable-slot:fort:frostland:standard:044": ["upland", 4],
+  "repeatable-slot:cave:woodland:small:045": ["grassland", 2],
+  "repeatable-slot:cave:desert:small:046": ["wetland", 2],
+  "repeatable-slot:crypt:tropical:small:047": ["frostland", 5],
+  "repeatable-slot:fort:grassland:standard:048": ["upland", 2],
+  "repeatable-slot:ruin:upland:standard:049": ["upland", 1],
+  "repeatable-slot:cave:frostland:small:050": ["upland", 4],
+  "repeatable-slot:cave:tropical:small:051": ["wetland", 5],
+  "repeatable-slot:ruin:volcanic:standard:052": ["tropical", 3],
+  "repeatable-slot:fort:grassland:standard:053": ["upland", 3],
+  "repeatable-slot:ruin:woodland:standard:054": ["woodland", 3],
+  "repeatable-slot:cave:woodland:small:055": ["frostland", 4],
+  "repeatable-slot:ruin:woodland:standard:058": ["grassland", 2],
+  "repeatable-slot:crypt:frostland:small:059": ["desert", 3],
+  "repeatable-slot:cave:grassland:small:060": ["upland", 4],
+  "repeatable-slot:fort:volcanic:standard:061": ["grassland", 3],
+  "repeatable-slot:cave:wetland:small:063": ["wetland", 4],
+  "repeatable-slot:fort:grassland:standard:064": ["upland", 3],
+  "repeatable-slot:fort:frostland:standard:065": ["volcanic", 4],
+  "repeatable-slot:ruin:upland:standard:066": ["woodland", 1],
+  "repeatable-slot:ruin:wetland:standard:067": ["grassland", 4],
+  "repeatable-slot:fort:upland:standard:070": ["grassland", 2],
+  "repeatable-slot:ruin:tropical:standard:071": ["frostland", 4],
+  "repeatable-slot:fort:volcanic:standard:072": ["desert", 4],
+  "repeatable-slot:ruin:grassland:standard:073": ["woodland", 3],
+  "repeatable-slot:crypt:wetland:small:074": ["wetland", 5],
+  "repeatable-slot:ruin:grassland:standard:075": ["grassland", 1],
+  "repeatable-slot:ruin:woodland:standard:076": ["woodland", 1],
+  "repeatable-slot:cave:desert:small:077": ["upland", 2],
+  "repeatable-slot:ruin:desert:standard:078": ["tropical", 4],
+  "repeatable-slot:ruin:tropical:standard:079": ["frostland", 4],
+  "repeatable-slot:cave:frostland:small:080": ["frostland", 3],
+  "repeatable-slot:ruin:tropical:standard:081": ["woodland", 1],
+  "repeatable-slot:ruin:upland:standard:082": ["grassland", 2],
+  "repeatable-slot:cave:woodland:small:083": ["frostland", 5],
+  "repeatable-slot:ruin:wetland:standard:084": ["grassland", 2],
+  "repeatable-slot:cave:volcanic:small:085": ["desert", 5],
+  "repeatable-slot:ruin:wetland:standard:086": ["grassland", 2],
+  "repeatable-slot:ruin:tropical:standard:087": ["frostland", 4],
+  "repeatable-slot:ruin:upland:standard:088": ["wetland", 3],
+  "repeatable-slot:crypt:wetland:small:090": ["volcanic", 4],
+  "repeatable-slot:ruin:volcanic:standard:091": ["desert", 3],
+  "repeatable-slot:cave:frostland:small:092": ["wetland", 3],
+  "repeatable-slot:ruin:desert:standard:093": ["upland", 2],
+  "repeatable-slot:crypt:tropical:small:094": ["wetland", 5],
+  "repeatable-slot:fort:grassland:standard:095": ["woodland", 2],
+  "repeatable-slot:cave:frostland:small:097": ["frostland", 4],
+  "repeatable-slot:cave:desert:small:098": ["upland", 2],
+  "repeatable-slot:cave:upland:small:099": ["upland", 4],
+  "repeatable-slot:crypt:wetland:small:100": ["grassland", 5],
+  "repeatable-slot:cave:upland:small:101": ["grassland", 2]
+});
+var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067": "large" });
+
+// src/shared/content/world_reshape_v1.js
+var RESHAPE_VERSION = "world-reshape-v2";
+var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
+var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-dens";
+var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
+var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
+var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
+var moved = (id, biome, band) => {
+  const r = reshapedSite(id);
+  return Boolean(r) && r[0] === biome && r[1] === band;
+};
+var siteFits = (id, biome, band, plannedBand) => typeof id === "string" && biome === id.split(":")[2] && band === plannedBand || moved(id, biome, band);
+var plannedSiteRole = (id, family2, tier, biome, band) => typeof id === "string" && id === `repeatable-slot:${family2}:${id.split(":")[2]}:${tier}:01` && (id.split(":")[2] === biome || moved(id, biome, band));
+
+// src/shared/content/wilderness_v2.js
+var WILDERNESS_VERSION = "wilderness-distribution-v2-native";
+var WILDERNESS_HASH = "ed2f7fcafeac4305b6658242d232d8d79dade9ecb6b43ea74125fc1318cc282f";
+var WILDERNESS_SITE_SELECTIONS = freezeWire([{ "id": "repeatable-slot:cave:grassland:small:031", "anchor": { "key": "65,134", "x": 65, "y": 134 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 131, "y": 269 }], "approach": [{ "x": 132, "y": 269 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:upland:standard:032", "anchor": { "key": "71,10", "x": 71, "y": 10 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 143, "y": 21 }, { "x": 144, "y": 21 }, { "x": 143, "y": 22 }, { "x": 144, "y": 22 }, { "x": 143, "y": 23 }, { "x": 144, "y": 23 }], "approach": [{ "x": 145, "y": 22 }, { "x": 146, "y": 22 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:033", "anchor": { "key": "34,34", "x": 34, "y": 34 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 69, "y": 69 }, { "x": 70, "y": 69 }, { "x": 69, "y": 70 }, { "x": 70, "y": 70 }], "approach": [{ "x": 71, "y": 69 }, { "x": 72, "y": 69 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:034", "anchor": { "key": "116,61", "x": 116, "y": 61 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 233, "y": 123 }], "approach": [{ "x": 234, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:035", "anchor": { "key": "80,38", "x": 80, "y": 38 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 161, "y": 77 }], "approach": [{ "x": 162, "y": 77 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:036", "anchor": { "key": "71,99", "x": 71, "y": 99 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 143, "y": 199 }], "approach": [{ "x": 144, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:037", "anchor": { "key": "117,110", "x": 117, "y": 110 }, "familyId": "site-family:ruin", "tier": "standard", "band": 5, "footprint": [{ "x": 234, "y": 221 }, { "x": 235, "y": 221 }, { "x": 234, "y": 222 }, { "x": 235, "y": 222 }], "approach": [{ "x": 236, "y": 221 }, { "x": 237, "y": 221 }], "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:038", "anchor": { "key": "61,99", "x": 61, "y": 99 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 123, "y": 199 }], "approach": [{ "x": 124, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:039", "anchor": { "key": "55,111", "x": 55, "y": 111 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 111, "y": 223 }], "approach": [{ "x": 112, "y": 223 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:040", "anchor": { "key": "37,47", "x": 37, "y": 47 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 75, "y": 95 }, { "x": 76, "y": 95 }, { "x": 75, "y": 96 }, { "x": 76, "y": 96 }, { "x": 75, "y": 97 }, { "x": 76, "y": 97 }], "approach": [{ "x": 77, "y": 96 }, { "x": 78, "y": 96 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:041", "anchor": { "key": "45,85", "x": 45, "y": 85 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 91, "y": 171 }], "approach": [{ "x": 92, "y": 171 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:cave:wetland:small:042", "anchor": { "key": "39,71", "x": 39, "y": 71 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 79, "y": 143 }], "approach": [{ "x": 80, "y": 143 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:043", "anchor": { "key": "86,33", "x": 86, "y": 33 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 173, "y": 67 }], "approach": [{ "x": 174, "y": 67 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:fort:frostland:standard:044", "anchor": { "key": "111,90", "x": 111, "y": 90 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 223, "y": 181 }, { "x": 224, "y": 181 }, { "x": 223, "y": 182 }, { "x": 224, "y": 182 }, { "x": 223, "y": 183 }, { "x": 224, "y": 183 }], "approach": [{ "x": 225, "y": 182 }, { "x": 226, "y": 182 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:045", "anchor": { "key": "45,108", "x": 45, "y": 108 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 90, "y": 217 }], "approach": [{ "x": 91, "y": 217 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:046", "anchor": { "key": "54,98", "x": 54, "y": 98 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 109, "y": 197 }], "approach": [{ "x": 110, "y": 197 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:crypt:tropical:small:047", "anchor": { "key": "51,29", "x": 51, "y": 29 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 103, "y": 59 }], "approach": [{ "x": 104, "y": 59 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:048", "anchor": { "key": "81,114", "x": 81, "y": 114 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 163, "y": 229 }, { "x": 164, "y": 229 }, { "x": 163, "y": 230 }, { "x": 164, "y": 230 }, { "x": 163, "y": 231 }, { "x": 164, "y": 231 }], "approach": [{ "x": 165, "y": 230 }, { "x": 166, "y": 230 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:049", "anchor": { "key": "55,119", "x": 55, "y": 119 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 111, "y": 239 }, { "x": 112, "y": 239 }, { "x": 111, "y": 240 }, { "x": 112, "y": 240 }], "approach": [{ "x": 113, "y": 239 }, { "x": 114, "y": 239 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:050", "anchor": { "key": "117,86", "x": 117, "y": 86 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 235, "y": 173 }], "approach": [{ "x": 236, "y": 173 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:tropical:small:051", "anchor": { "key": "51,39", "x": 51, "y": 39 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 103, "y": 79 }], "approach": [{ "x": 104, "y": 79 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:volcanic:standard:052", "anchor": { "key": "78,46", "x": 78, "y": 46 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 157, "y": 93 }, { "x": 158, "y": 93 }, { "x": 157, "y": 94 }, { "x": 158, "y": 94 }], "approach": [{ "x": 159, "y": 93 }, { "x": 160, "y": 93 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:053", "anchor": { "key": "85,108", "x": 85, "y": 108 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 171, "y": 217 }, { "x": 172, "y": 217 }, { "x": 171, "y": 218 }, { "x": 172, "y": 218 }, { "x": 171, "y": 219 }, { "x": 172, "y": 219 }], "approach": [{ "x": 173, "y": 218 }, { "x": 174, "y": 218 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:054", "anchor": { "key": "25,119", "x": 25, "y": 119 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 51, "y": 239 }, { "x": 52, "y": 239 }, { "x": 51, "y": 240 }, { "x": 52, "y": 240 }], "approach": [{ "x": 53, "y": 239 }, { "x": 54, "y": 239 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:055", "anchor": { "key": "66,4", "x": 66, "y": 4 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 132, "y": 9 }], "approach": [{ "x": 133, "y": 9 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:056", "anchor": { "key": "116,32", "x": 116, "y": 32 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 233, "y": 65 }, { "x": 234, "y": 65 }, { "x": 233, "y": 66 }, { "x": 234, "y": 66 }], "approach": [{ "x": 235, "y": 65 }, { "x": 236, "y": 65 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:057", "anchor": { "key": "96,35", "x": 96, "y": 35 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 193, "y": 71 }, { "x": 194, "y": 71 }, { "x": 193, "y": 72 }, { "x": 194, "y": 72 }], "approach": [{ "x": 195, "y": 71 }, { "x": 196, "y": 71 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:058", "anchor": { "key": "39,110", "x": 39, "y": 110 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 79, "y": 221 }, { "x": 80, "y": 221 }, { "x": 79, "y": 222 }, { "x": 80, "y": 222 }], "approach": [{ "x": 81, "y": 221 }, { "x": 82, "y": 221 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:059", "anchor": { "key": "63,85", "x": 63, "y": 85 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 127, "y": 171 }], "approach": [{ "x": 128, "y": 171 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:grassland:small:060", "anchor": { "key": "94,43", "x": 94, "y": 43 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 189, "y": 87 }], "approach": [{ "x": 190, "y": 87 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:volcanic:standard:061", "anchor": { "key": "32,99", "x": 32, "y": 99 }, "familyId": "site-family:fort", "tier": "standard", "band": 2, "footprint": [{ "x": 64, "y": 198 }, { "x": 65, "y": 198 }, { "x": 64, "y": 199 }, { "x": 65, "y": 199 }, { "x": 64, "y": 200 }, { "x": 65, "y": 200 }], "approach": [{ "x": 66, "y": 199 }, { "x": 67, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:062", "anchor": { "key": "110,80", "x": 110, "y": 80 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 221, "y": 161 }], "approach": [{ "x": 222, "y": 161 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:wetland:small:063", "anchor": { "key": "38,29", "x": 38, "y": 29 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 76, "y": 59 }], "approach": [{ "x": 77, "y": 59 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:064", "anchor": { "key": "91,105", "x": 91, "y": 105 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 183, "y": 211 }, { "x": 184, "y": 211 }, { "x": 183, "y": 212 }, { "x": 184, "y": 212 }, { "x": 183, "y": 213 }, { "x": 184, "y": 213 }], "approach": [{ "x": 185, "y": 212 }, { "x": 186, "y": 212 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:frostland:standard:065", "anchor": { "key": "28,80", "x": 28, "y": 80 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 56, "y": 161 }, { "x": 57, "y": 161 }, { "x": 56, "y": 162 }, { "x": 57, "y": 162 }, { "x": 56, "y": 163 }, { "x": 57, "y": 163 }], "approach": [{ "x": 58, "y": 162 }, { "x": 59, "y": 162 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:066", "anchor": { "key": "59,130", "x": 59, "y": 130 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 119, "y": 260 }, { "x": 120, "y": 260 }, { "x": 119, "y": 261 }, { "x": 120, "y": 261 }], "approach": [{ "x": 121, "y": 260 }, { "x": 122, "y": 260 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:067", "anchor": { "key": "32,46", "x": 32, "y": 46 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 65, "y": 93 }, { "x": 66, "y": 93 }, { "x": 65, "y": 94 }, { "x": 66, "y": 94 }], "approach": [{ "x": 67, "y": 93 }, { "x": 68, "y": 93 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:068", "anchor": { "key": "124,41", "x": 124, "y": 41 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 249, "y": 83 }], "approach": [{ "x": 250, "y": 83 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:069", "anchor": { "key": "78,102", "x": 78, "y": 102 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 156, "y": 205 }], "approach": [{ "x": 157, "y": 205 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:fort:upland:standard:070", "anchor": { "key": "51,105", "x": 51, "y": 105 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 103, "y": 211 }, { "x": 104, "y": 211 }, { "x": 103, "y": 212 }, { "x": 104, "y": 212 }, { "x": 103, "y": 213 }, { "x": 104, "y": 213 }], "approach": [{ "x": 105, "y": 212 }, { "x": 106, "y": 212 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:071", "anchor": { "key": "119,50", "x": 119, "y": 50 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 239, "y": 101 }, { "x": 240, "y": 101 }, { "x": 239, "y": 102 }, { "x": 240, "y": 102 }], "approach": [{ "x": 241, "y": 101 }, { "x": 242, "y": 101 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:volcanic:standard:072", "anchor": { "key": "80,65", "x": 80, "y": 65 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 161, "y": 131 }, { "x": 162, "y": 131 }, { "x": 161, "y": 132 }, { "x": 162, "y": 132 }, { "x": 161, "y": 133 }, { "x": 162, "y": 133 }], "approach": [{ "x": 163, "y": 132 }, { "x": 164, "y": 132 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:ruin:grassland:standard:073", "anchor": { "key": "108,112", "x": 108, "y": 112 }, "familyId": "site-family:ruin", "tier": "standard", "band": 5, "footprint": [{ "x": 217, "y": 225 }, { "x": 218, "y": 225 }, { "x": 217, "y": 226 }, { "x": 218, "y": 226 }], "approach": [{ "x": 219, "y": 225 }, { "x": 220, "y": 225 }], "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:074", "anchor": { "key": "46,42", "x": 46, "y": 42 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 93, "y": 85 }], "approach": [{ "x": 94, "y": 85 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:grassland:standard:075", "anchor": { "key": "71,135", "x": 71, "y": 135 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 143, "y": 271 }, { "x": 144, "y": 271 }, { "x": 143, "y": 272 }, { "x": 144, "y": 272 }], "approach": [{ "x": 145, "y": 271 }, { "x": 146, "y": 271 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:076", "anchor": { "key": "65,140", "x": 65, "y": 140 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 130, "y": 281 }, { "x": 131, "y": 281 }, { "x": 130, "y": 282 }, { "x": 131, "y": 282 }], "approach": [{ "x": 132, "y": 281 }, { "x": 133, "y": 281 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:077", "anchor": { "key": "67,103", "x": 67, "y": 103 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 135, "y": 207 }], "approach": [{ "x": 136, "y": 207 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:078", "anchor": { "key": "76,31", "x": 76, "y": 31 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 153, "y": 63 }, { "x": 154, "y": 63 }, { "x": 153, "y": 64 }, { "x": 154, "y": 64 }], "approach": [{ "x": 155, "y": 63 }, { "x": 156, "y": 63 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:079", "anchor": { "key": "40,36", "x": 40, "y": 36 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 80, "y": 73 }, { "x": 81, "y": 73 }, { "x": 80, "y": 74 }, { "x": 81, "y": 74 }], "approach": [{ "x": 82, "y": 73 }, { "x": 83, "y": 73 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:080", "anchor": { "key": "121,71", "x": 121, "y": 71 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 242, "y": 143 }], "approach": [{ "x": 243, "y": 143 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:081", "anchor": { "key": "42,127", "x": 42, "y": 127 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 85, "y": 255 }, { "x": 86, "y": 255 }, { "x": 85, "y": 256 }, { "x": 86, "y": 256 }], "approach": [{ "x": 87, "y": 255 }, { "x": 88, "y": 255 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:082", "anchor": { "key": "50,112", "x": 50, "y": 112 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 101, "y": 225 }, { "x": 102, "y": 225 }, { "x": 101, "y": 226 }, { "x": 102, "y": 226 }], "approach": [{ "x": 103, "y": 225 }, { "x": 104, "y": 225 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:083", "anchor": { "key": "57,10", "x": 57, "y": 10 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 115, "y": 21 }], "approach": [{ "x": 116, "y": 21 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:084", "anchor": { "key": "65,152", "x": 65, "y": 152 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 131, "y": 305 }, { "x": 132, "y": 305 }, { "x": 131, "y": 306 }, { "x": 132, "y": 306 }], "approach": [{ "x": 133, "y": 305 }, { "x": 134, "y": 305 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:085", "anchor": { "key": "110,41", "x": 110, "y": 41 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 221, "y": 83 }], "approach": [{ "x": 222, "y": 83 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:086", "anchor": { "key": "71,152", "x": 71, "y": 152 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 143, "y": 305 }, { "x": 144, "y": 305 }, { "x": 143, "y": 306 }, { "x": 144, "y": 306 }], "approach": [{ "x": 145, "y": 305 }, { "x": 146, "y": 305 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:087", "anchor": { "key": "125,61", "x": 125, "y": 61 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 251, "y": 123 }, { "x": 252, "y": 123 }, { "x": 251, "y": 124 }, { "x": 252, "y": 124 }], "approach": [{ "x": 253, "y": 123 }, { "x": 254, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:088", "anchor": { "key": "48,92", "x": 48, "y": 92 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 96, "y": 185 }, { "x": 97, "y": 185 }, { "x": 96, "y": 186 }, { "x": 97, "y": 186 }], "approach": [{ "x": 98, "y": 185 }, { "x": 99, "y": 185 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:089", "anchor": { "key": "46,139", "x": 46, "y": 139 }, "familyId": "site-family:cave", "tier": "small", "band": 1, "footprint": [{ "x": 93, "y": 279 }], "approach": [{ "x": 94, "y": 279 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:090", "anchor": { "key": "22,70", "x": 22, "y": 70 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 45, "y": 141 }], "approach": [{ "x": 46, "y": 141 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:volcanic:standard:091", "anchor": { "key": "74,61", "x": 74, "y": 61 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 149, "y": 123 }, { "x": 150, "y": 123 }, { "x": 149, "y": 124 }, { "x": 150, "y": 124 }], "approach": [{ "x": 151, "y": 123 }, { "x": 152, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:092", "anchor": { "key": "61,78", "x": 61, "y": 78 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 123, "y": 157 }], "approach": [{ "x": 124, "y": 157 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:093", "anchor": { "key": "62,108", "x": 62, "y": 108 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 125, "y": 216 }, { "x": 126, "y": 216 }, { "x": 125, "y": 217 }, { "x": 126, "y": 217 }], "approach": [{ "x": 127, "y": 216 }, { "x": 128, "y": 216 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:crypt:tropical:small:094", "anchor": { "key": "72,40", "x": 72, "y": 40 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 145, "y": 81 }], "approach": [{ "x": 146, "y": 81 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:095", "anchor": { "key": "75,124", "x": 75, "y": 124 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 151, "y": 248 }, { "x": 152, "y": 248 }, { "x": 151, "y": 249 }, { "x": 152, "y": 249 }, { "x": 151, "y": 250 }, { "x": 152, "y": 250 }], "approach": [{ "x": 153, "y": 249 }, { "x": 154, "y": 249 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:woodland:small:096", "anchor": { "key": "31,124", "x": 31, "y": 124 }, "familyId": "site-family:crypt", "tier": "small", "band": 2, "footprint": [{ "x": 63, "y": 249 }], "approach": [{ "x": 64, "y": 249 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:097", "anchor": { "key": "118,95", "x": 118, "y": 95 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 237, "y": 190 }], "approach": [{ "x": 238, "y": 190 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:098", "anchor": { "key": "55,104", "x": 55, "y": 104 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 111, "y": 209 }], "approach": [{ "x": 112, "y": 209 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:099", "anchor": { "key": "89,37", "x": 89, "y": 37 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 178, "y": 75 }], "approach": [{ "x": 179, "y": 75 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:100", "anchor": { "key": "45,55", "x": 45, "y": 55 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 91, "y": 111 }], "approach": [{ "x": 92, "y": 111 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:101", "anchor": { "key": "48,108", "x": 48, "y": 108 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 97, "y": 217 }], "approach": [{ "x": 98, "y": 217 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:102", "anchor": { "key": "30,117", "x": 30, "y": 117 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 61, "y": 234 }, { "x": 62, "y": 234 }, { "x": 61, "y": 235 }, { "x": 62, "y": 235 }], "approach": [{ "x": 63, "y": 234 }, { "x": 64, "y": 234 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:103", "anchor": { "key": "76,89", "x": 76, "y": 89 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 153, "y": 179 }], "approach": [{ "x": 154, "y": 179 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }]);
+var hasWilderness = (b) => b?.wildernessVersion === WILDERNESS_VERSION && b?.wildernessHash === WILDERNESS_HASH;
+var wildernessSelection = (id) => WILDERNESS_SITE_SELECTIONS.find((row2) => row2.id === id) ?? null;
+
+// src/shared/content/seeded_world_v1.js
+var isSeededBindingV1 = (b) => b?.worldMaker !== void 0;
+var seededCommitmentsV1 = (asset) => ({ planHash: asset.upstream.planHash, routeHash: asset.routeHash, planningHash: asset.upstream.planningPolicyHash, physicalHash: asset.upstream.physicalPlanHash, worldMaker: asset.upstream.maker });
+function withSeededWorldV1(base, assetHash, c) {
+  return { ...base, assetHash, planHash: c.planHash, routeHash: c.routeHash, planningHash: c.planningHash, physicalHash: c.physicalHash, worldMaker: c.worldMaker };
+}
+function presentSeededWorldV1(a) {
+  return {
+    ...a,
+    assetId: "alpha",
+    wildernessExtension: a.wildernessExtension && { ...a.wildernessExtension, version: WILDERNESS_VERSION, hash: WILDERNESS_HASH },
+    firstJourney: a.firstJourney && { ...a.firstJourney, version: ACCESS_VERSION, hash: ACCESS_HASH },
+    worldReshape: a.worldReshape && { ...a.worldReshape, version: RESHAPE_VERSION, hash: RESHAPE_HASH }
+  };
+}
+
+// src/shared/content/alpha_hydrology_v1.js
+var HYDROLOGY_VERSION = "alpha-hydrology-plan-v2";
+var HYDROLOGY_HASH = "4fb70faf18fe2ae53ec79c71e4c1c7d70f6f3769649b084dd8f66fce53cd8cc6";
+var HYDROLOGY_DATABASE = "saq-world-hydrology-v2-alpha-4fb70faf";
+var hasHydrologyV1 = (b) => b?.assetId === "alpha" && b.hydrologyVersion === HYDROLOGY_VERSION && b.hydrologyHash === HYDROLOGY_HASH;
+
+// src/shared/content/corrosive_shedding_v4.js
+var CORROSIVE_SHEDDING_V4 = Object.freeze({ version: 4, stepPercent: 8, maxLive: 6, maxDamageSheds: 12, maxLiveSlag: 2, slagEveryChunks: 3, flightTicks: 18, coalescenceTicks: 12 });
+var corrosiveShedKindV4 = (chunkStep, liveSlag) => chunkStep % 3 === 0 && liveSlag < 2 ? "slag" : "slime";
+
+// src/shared/content/recovered_boss_catalog_v4.js
+var RECOVERED_BOSSES2 = Object.freeze({ ...RECOVERED_BOSSES, corrosive_abomination: Object.freeze({ ...RECOVERED_BOSSES.corrosive_abomination, adds: CORROSIVE_SHEDDING_V4.maxDamageSheds, sheddingPolicy: 4 }), ...BIOME_BOSSES_V1 });
+var recoveredBossForId = (id) => RECOVERED_BOSSES2[id] ?? null;
+function recoveredBossForReservation2(reservationId, family2, index2, floorCount, enabled2 = true) {
+  const row2 = recoveredBossForReservation(reservationId, family2, index2, floorCount, enabled2);
+  if (row2) return recoveredBossForId(row2.id);
+  if (!enabled2 || !Number.isInteger(index2) || index2 !== floorCount - 1) return null;
+  const native = BIOME_BOSSES_V1[bossAtSiteV1(reservationId)];
+  return native?.family === family2 ? native : null;
+}
+
+// src/shared/content/boss_hosting_v1.js
+var BOSS_HOSTING_VERSION = "site-boss-hosting-v1";
+var BOSS_HOSTING_POLICY = freezeWire({ version: BOSS_HOSTING_VERSION, parentRuntime: "c36909555b042989", parentGeneration: "core-families-multiroom-v1", playerCount: 4, playerHull: 9, bossHull: 34, roomSelection: "explicit-final-reward", preserveGeometry: true, preserveRosterIdentities: true, preserveAttacks: true, partyStagingSeparation: 64, partyArrivalVersion: "site-party-arrival-v1", missingBoss: "structured-hard-failure", supportHullUpperBound: 20, scope: "constructed-arena-capacity-not-network-or-balance-approval" });
+var BOSS_HOSTING_HASH = "0405745d2de42e6f1e8a5d508d507c5db3379e8efc1ea2db41c4f0dc26352a3e";
+var hasBossHostingV1 = (b) => b?.bossHostingVersion === BOSS_HOSTING_VERSION && b.bossHostingHash === BOSS_HOSTING_HASH;
+var TILE = 32;
+var dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+var key = (p) => p.x + "," + p.y;
+var dirs = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+function box(room2) {
+  return room2.bounds ?? { x: room2.cx - room2.rx, y: room2.cy - room2.ry, width: room2.rx * 2 + 1, height: room2.ry * 2 + 1 };
+}
+function bossRoomCellsV1(recipe, room2, hull = 9) {
+  const b = box(room2), out = [];
+  for (let y = b.y; y < b.y + b.height; y++) for (let x = b.x; x < b.x + b.width; x++) {
+    const p = { x: (x + 0.5) * TILE, y: (y + 0.5) * TILE };
+    if (!collidesWithTiles(recipe.collision, p.x, p.y, hull)) out.push(p);
+  }
+  return out;
+}
+var brimstoneFortHereV1 = (reservationId) => !worldSiteV1(reservationId);
+function bossHostingSpecV1({ family: family2, tier, index: index2, floorCount, reservationId, enabled: enabled2 = true, wilderness = true }) {
+  if (!enabled2 || index2 !== floorCount - 1) return null;
+  const restored = [RECOVERED_BOSSES2[bossAtSiteV1(reservationId)]].find((b) => b?.family === family2);
+  if (restored) return { kind: restored.id, hullRadius: 34, supportCount: restored.adds, liveSupportCount: restored.id === "corrosive_abomination" ? 6 : restored.adds };
+  if (family2 === "fort" && (tier === "standard" || tier === "deep" && wilderness && reservationId === bossSiteV1("aegis_goliath"))) return { kind: "aegis_goliath", hullRadius: 34, supportCount: 3, liveSupportCount: 3 };
+  if (family2 === "fort" && tier === "large" && brimstoneFortHereV1(reservationId) || family2 === "ruin" && wilderness && tier === "large" && reservationId === bossSiteV1("brimstone_colossus")) return { kind: "overlord_iron_vault", hullRadius: 34, supportCount: 0, liveSupportCount: 0 };
+  return null;
+}
+function fieldDistance(allowed2, start) {
+  const d = /* @__PURE__ */ new Map([[key(start), 0]]), q = [start];
+  for (let i = 0; i < q.length; i++) for (const [dx, dy] of dirs) {
+    const p = { x: q[i].x + dx * TILE, y: q[i].y + dy * TILE }, k = key(p);
+    if (allowed2.has(k) && !d.has(k)) {
+      d.set(k, d.get(key(q[i])) + TILE);
+      q.push(p);
+    }
+  }
+  return d;
+}
+function choosePads(cells3, position, protectedPoints) {
+  const chosen = [];
+  for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+    const ideal = { x: position.x + sx * 160, y: position.y + sy * 128 };
+    const sorted2 = cells3.filter((p2) => (p2.x - position.x) * sx >= 96 && (p2.y - position.y) * sy >= 64 && protectedPoints.every((q) => dist(p2, q) >= 40)).sort((a, b) => dist(a, ideal) - dist(b, ideal) || a.y - b.y || a.x - b.x);
+    const p = sorted2.find((p2) => chosen.every((q) => dist(p2, q) >= 64));
+    if (!p) return null;
+    chosen.push(p);
+  }
+  return chosen;
+}
+function freeForHero(p, boss, supports) {
+  return !(Math.abs(p.x - boss.x) <= 47 && Math.abs(p.y - boss.y) <= 47) && supports.every((q) => Math.abs(p.x - q.x) > 33 || Math.abs(p.y - q.y) > 33);
+}
+function proveBossArenaV1(recipe, kind2, position, { supportPositions = [], liveSupportCount = 0 } = {}) {
+  const room2 = recipe.graph.rooms.find((r) => r.roomId === recipe.graph.topology.endNodeId);
+  requireContract(room2, "BOSS_HOST:FINAL_ROOM_MISSING");
+  const b = box(room2);
+  requireContract(position.x >= b.x * TILE && position.x < (b.x + b.width) * TILE && position.y >= b.y * TILE && position.y < (b.y + b.height) * TILE && !collidesWithTiles(recipe.collision, position.x, position.y, 34), "BOSS_HOST:UNSAFE_OR_WRONG_CHAMBER");
+  const cells3 = bossRoomCellsV1(recipe, room2, 9), protectedPoints = [recipe.reward?.position, ...Object.values(recipe.stairAnchors ?? {})].filter(Boolean), pads = choosePads(cells3, position, protectedPoints);
+  requireContract(pads?.length === 4, "BOSS_HOST:FOUR_STAGING_POSITIONS_UNAVAILABLE");
+  const physical = cells3.filter((p) => freeForHero(p, position, supportPositions.slice(0, liveSupportCount))), allowed2 = new Set(physical.map(key)), routes = [];
+  requireContract(pads.every((p) => allowed2.has(key(p))), "BOSS_HOST:SUPPORT_STAGING_CONFLICT");
+  for (let i = 0; i < 4; i++) {
+    const d = fieldDistance(allowed2, pads[i]), target = pads[(i + 1) % 4];
+    requireContract(d.has(key(target)), "BOSS_HOST:PARTY_CIRCULATION_BLOCKED");
+    const exits = physical.filter((p) => dist(p, pads[i]) >= 73 && d.has(key(p))).map((p) => d.get(key(p)));
+    requireContract(exits.length, "BOSS_HOST:NO_TARGETED_SLAM_ESCAPE");
+    routes.push({ from: i, to: (i + 1) % 4, routePx: d.get(key(target)), targeted64pxSlamEscapePx: Math.min(...exits), idealEscapeTicks: Math.ceil(Math.min(...exits) / 3) });
+  }
+  const central = cells3.filter((p) => freeForHero(p, position, supportPositions.slice(0, liveSupportCount)) && dist(p, position) > 73), centralAllowed = new Set(central.map(key));
+  requireContract(pads.every((p) => centralAllowed.has(key(p))), "BOSS_HOST:CENTRAL_SLAM_STAGING_CONFLICT");
+  const connected4 = fieldDistance(centralAllowed, pads[0]);
+  requireContract(pads.every((p) => connected4.has(key(p))), "BOSS_HOST:CENTRAL_SLAM_ESCAPE_DISCONNECTED");
+  const arms = {};
+  for (const [name, dx, dy] of [["east", 1, 0], ["west", -1, 0], ["north", 0, -1], ["south", 0, 1]]) {
+    let v = 0;
+    for (let n = 4; n <= 300; n += 4) {
+      if (collidesWithTiles(recipe.collision, position.x + dx * n, position.y + dy * n, 34)) break;
+      v = n;
+    }
+    arms[name] = v;
+  }
+  if (kind2 === "cinderhart") requireContract(Math.min(...Object.values(arms)) >= 220, "BOSS_HOST:CHARGE_LANES_TOO_SHORT");
+  if (kind2 === "void_overseer") requireContract(Math.max(arms.east + 34, arms.west + 34) >= 260 && Math.max(arms.north + 34, arms.south + 34) >= 260, "BOSS_HOST:BEAM_AXES_TOO_SHORT");
+  if (kind2 === "ashfang") {
+    for (let y = -7; y <= 7; y++) for (let x = -7; x <= 7; x++) if (Math.abs(x) === 7 || Math.abs(y) === 7) requireContract(!collidesWithTiles(recipe.collision, position.x + x * TILE, position.y + y * TILE, 9), "BOSS_HOST:COLLAPSE_RING_LEAVES_CHAMBER");
+  }
+  return { version: BOSS_HOSTING_VERSION, policyHash: BOSS_HOSTING_HASH, kind: kind2, roomId: room2.roomId, boundsTiles: copyWire(b), stagingPositions: pads, playerHullRadius: 9, bossHullRadius: 34, playerSafeTileCenters: cells3.length, connectedSafeCentersAfterCentral64pxSlam: connected4.size, liveSupportCount, supportHullUpperBound: 20, routes, chargeClearancePx: arms, claims: ["four-distinct-static-staging", "room-contained-player-circulation-with-live-support-bodies", "targeted64px-telegraph-egress", "central64px-slam-connected-safe-space"], limits: ["not-all-possible-hazard-combinations", "not-party-balance-or-network-proof", "native-persistent-hazard-fights-required"] };
+}
+function bossHostingRecipeV1(original, spec) {
+  if (!spec) return original;
+  const recipe = copyWire(original), room2 = recipe.graph.rooms.find((r) => r.roomId === recipe.graph.topology.endNodeId);
+  requireContract(room2, "BOSS_HOST:FINAL_ROOM_MISSING");
+  requireContract(recipe.encounter.members.length >= spec.supportCount + 1, "BOSS_HOST:SUPPORT_ROSTER_CAPACITY");
+  const center3 = { x: (room2.cx + 0.5) * TILE, y: (room2.cy + 0.5) * TILE }, candidates = bossRoomCellsV1(recipe, room2, spec.hullRadius ?? 34).sort((a, b) => dist(a, center3) - dist(b, center3) || a.y - b.y || a.x - b.x);
+  const position = candidates[0];
+  requireContract(position, "BOSS_HOST:SAFE_ANCHOR_UNAVAILABLE");
+  const cells3 = bossRoomCellsV1(recipe, room2, 20), pads = choosePads(bossRoomCellsV1(recipe, room2, 9), position, [recipe.reward?.position, ...Object.values(recipe.stairAnchors ?? {})].filter(Boolean));
+  requireContract(pads, "BOSS_HOST:FOUR_STAGING_POSITIONS_UNAVAILABLE");
+  const supports = [];
+  for (let i = 0; i < spec.supportCount; i++) {
+    const a = i * Math.PI * 2 / spec.supportCount, r = spec.kind === "aegis_goliath" ? 62 : 96, ideal = { x: position.x + Math.cos(a) * r, y: position.y + Math.sin(a) * r };
+    let p = spec.kind === "aegis_goliath" && !collidesWithTiles(recipe.collision, ideal.x, ideal.y, 20) && supports.every((q) => dist(q, ideal) >= 40) ? ideal : null;
+    if (!p) p = cells3.filter((p2) => dist(p2, position) >= 68 && dist(p2, position) <= 176 && supports.every((q) => dist(p2, q) >= 40) && pads.every((q) => dist(p2, q) >= 72)).sort((a2, b) => dist(a2, ideal) - dist(b, ideal) || a2.y - b.y || a2.x - b.x)[0];
+    requireContract(p, "BOSS_HOST:SUPPORT_FOOTPRINT_UNAVAILABLE");
+    supports.push(p);
+  }
+  const used = [position, ...supports];
+  for (let i = 0; i < recipe.encounter.members.length; i++) {
+    const m = recipe.encounter.members[i];
+    if (i === 0 || i <= spec.supportCount) {
+      m.position = copyWire(i ? supports[i - 1] : position);
+      m.roomId = room2.roomId;
+      continue;
+    }
+    if (m.roomId !== room2.roomId) continue;
+    const valid = (p2) => dist(p2, position) >= 92 && supports.every((q) => dist(p2, q) >= 44) && pads.every((q) => dist(p2, q) >= 72) && used.every((q) => dist(p2, q) >= 40) && [recipe.reward.position, ...Object.values(recipe.stairAnchors)].every((q) => dist(p2, q) >= 40);
+    const p = valid(m.position) ? m.position : cells3.filter(valid).sort((a, b) => dist(a, m.position) - dist(b, m.position) || a.y - b.y || a.x - b.x)[0];
+    requireContract(p, "BOSS_HOST:ORDINARY_PACK_CONFLICT");
+    m.position = copyWire(p);
+    used.push(p);
+  }
+  const proof2 = proveBossArenaV1(recipe, spec.kind, position, { supportPositions: supports, liveSupportCount: spec.liveSupportCount ?? spec.supportCount });
+  recipe.encounter.bossHosting = { version: BOSS_HOSTING_VERSION, policyHash: BOSS_HOSTING_HASH, kind: spec.kind, roomId: room2.roomId, position: copyWire(position), supportPositions: copyWire(supports), proof: proof2 };
+  return freezeWire(recipe);
+}
+function expectedBossRecipeV1(recipe, { family: family2, tier, index: index2, floorCount, reservationId }) {
+  return bossHostingRecipeV1(recipe, bossHostingSpecV1({ family: family2, tier, index: index2, floorCount, reservationId, enabled: Boolean(recipe.encounter.combatVersion) }));
+}
+function validateBossFloorBindingV1(state, site, floor) {
+  if (!hasBossHostingV1(state.d9World?.plannedWorld)) return;
+  const spec = bossHostingSpecV1({ family: site.familyId.split(":")[1], tier: site.sizeTier, index: floor.index, floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId, enabled: Boolean(floor.encounter.combatVersion) }), h = floor.encounter.bossHosting;
+  requireContract(Boolean(h) === Boolean(spec), "BOSS_HOST:REQUIRED_HOST_MISSING_OR_UNEXPECTED");
+  if (!spec) return;
+  const id = floor.enemyIds[0], boss = state.bossCombat?.bossesByEntityId?.[id], home = state.groupsById?.[floor.groupId]?.containment?.memberHomesById?.[id];
+  requireContract(h.version === BOSS_HOSTING_VERSION && h.policyHash === BOSS_HOSTING_HASH && h.kind === spec.kind && h.roomId === floor.graph.topology.endNodeId && boss?.bossDefinitionId === spec.kind && boss.roomId === h.roomId && canonicalStringify(boss.homePosition) === canonicalStringify(h.position) && canonicalStringify(home) === canonicalStringify(h.position), "BOSS_HOST:LIVE_BINDING_DRIFT");
+}
+
+// src/shared/content/world_build_balance_v2.js
+var BUILD_BALANCE_VERSION = "world-build-balance-v2";
+var BUILD_BALANCE_HASH = "e666f81238740d6d20121429d4780b073f7f0adf00e2392e81eb7b69de33c2b2";
+var BUILD_BALANCE_POLICY = freezeWire({ version: BUILD_BALANCE_VERSION, parentCombatHash: WORLD_COMBAT_HASH, attributePointsPerHeroLevel: 3, utilityPointsPerHeroLevel: 1, attributes: { commonAttackPerPoint: 1, strHp: 6, shieldBaseHp: 20, dexCritChanceBasisPoints: 25, intSpellPowerBasisPoints: 25, intFlatTomeBarrier: 0.5, barrierBase: "Level and equipment HP, excluding STR HP; mastery capacity applies afterward", familyAttackBasisPoints: 10 }, heroXpMultiplier: 2, masteryXpMultiplier: 4, attributeRespecGold: "0", economy: "Retain ordinary gold, gear, material awards and shop/Forge/Enchanter prices; accelerate skill/hero progression independently. No free gold or gear.", comparison: "Match hero level, gear power/rarity/attunement and legal skill-point budgets. Shield safety, Dagger crit/bleed and Tome ranged/AoE are distinct.", saveBoundary: "Fresh versioned World campaign namespace; previous database remains untouched. No migration.", simulation: "Existing 60 Hz authority, collision, action cadence and catch-up limits unchanged" });
+var usesBuildBalanceV2 = (player) => combatPlayer(player);
+var balancedHeroKillXpV2 = (...args) => String(integerBigInt(worldHeroKillXp(...args)) * BigInt(BUILD_BALANCE_POLICY.heroXpMultiplier));
+var balancedMasteryAwardV2 = (player, amount2) => {
+  const n = typeof amount2 === "bigint" ? amount2 : typeof amount2 === "number" ? BigInt(safeInteger(amount2)) : integerBigInt(amount2);
+  requireContract(n >= 0n, "Negative mastery award");
+  return String(n * (usesBuildBalanceV2(player) ? BigInt(BUILD_BALANCE_POLICY.masteryXpMultiplier) : 1n));
+};
+var buildBalanceDatabaseV2 = (enabled2, plan, legacy) => {
+  if (!enabled2) return legacy;
+  requireContract(typeof plan === "string" && /^[a-z0-9_-]+$/i.test(plan), "Build balance campaign plan");
+  return "saq-world-build-balance-v2-" + plan;
+};
+
+// src/shared/content/world_runtime_policy_d9.js
+var D9_RUNTIME_POLICY = Object.freeze({
+  version: "world-residency-policy-d9-v1",
+  residentChunks: 100,
+  preparedChunks: 196,
+  residentActors: 192,
+  residentGroups: 80,
+  proceduralGroups: 64,
+  frames: 5,
+  handoffChunks: 8,
+  evictChunks: 4,
+  generationBatch: 2,
+  dirtyPages: 256,
+  flushPages: 128,
+  projectedDropsPerParticipant: 128,
+  groundItemsPerCell: 64,
+  groundTransferItems: 256,
+  occupancyRadius: 1500,
+  navigationPendingPages: 128,
+  navigationFlushPages: 2,
+  mapOverviewLevels: 12,
+  mapViewportCells: 64,
+  garbageCollectionPages: 32
+});
+
+// src/storage/world_page_refs_d9.js
+var WORLD_REF_STORE = "worldPageRefsD9";
+function trackWorldPublicationD9(tx, { staged, rootId, previous, references, abort }) {
+  if (!tx.objectStoreNames.contains(WORLD_REF_STORE)) return;
+  const store = tx.objectStore(WORLD_REF_STORE), ids = /* @__PURE__ */ new Set([rootId, ...staged.keys(), ...previous ? [previous] : []]);
+  for (const value of staged.values()) for (const id of references(value)) ids.add(id);
+  const found = /* @__PURE__ */ new Map();
+  let remaining = ids.size;
+  for (const id of ids) {
+    const r = store.get(id);
+    r.onsuccess = () => {
+      found.set(id, r.result ?? null);
+      if (--remaining) return;
+      try {
+        if (previous && !found.get(previous)) {
+          store.put({ reason: "pre-release root lacks reference accounting" }, "untracked");
+          return;
+        }
+        const updates = /* @__PURE__ */ new Map();
+        const value = (id2) => {
+          if (!updates.has(id2)) {
+            const prior = found.get(id2);
+            if (!prior && !staged.has(id2)) throw new Error("World reference graph lacks a referenced page");
+            updates.set(id2, prior ? { ...prior, references: [...prior.references] } : { count: 0, references: references(staged.get(id2)) });
+          }
+          return updates.get(id2);
+        };
+        for (const [id2, doc] of staged) if (!found.get(id2)) {
+          value(id2);
+          for (const ref of references(doc)) value(ref).count++;
+        }
+        value(rootId).count++;
+        if (previous) value(previous).count--;
+        for (const [id2, row2] of updates) {
+          if (!Number.isSafeInteger(row2.count) || row2.count < 0) throw new Error("World reference accounting underflow");
+          store.put(row2, id2);
+        }
+      } catch (e) {
+        abort(e);
+      }
+    };
+  }
+}
+async function collectWorldPagesD9(openDatabase, pageStore, limit = D9_RUNTIME_POLICY.garbageCollectionPages) {
+  const db = await openDatabase();
+  if (!db.objectStoreNames.contains(WORLD_REF_STORE)) {
+    db.close();
+    return { deleted: 0 };
+  }
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([WORLD_REF_STORE, pageStore], "readwrite"), refs = tx.objectStore(WORLD_REF_STORE);
+    let deleted = 0, failure = null;
+    const guard = refs.get("untracked");
+    guard.onsuccess = () => {
+      if (guard.result) return;
+      const r = refs.index("count").getAllKeys(0, limit);
+      r.onsuccess = () => {
+        const roots = r.result;
+        if (!roots.length) return;
+        const candidates = /* @__PURE__ */ new Map();
+        let pending = roots.length;
+        const ready2 = () => {
+          if (--pending) return;
+          const children = new Set([...candidates.values()].flatMap((v) => v.references)), values = /* @__PURE__ */ new Map();
+          let count2 = children.size;
+          const apply2 = () => {
+            try {
+              for (const row2 of candidates.values()) for (const id of row2.references) {
+                const v = values.get(id);
+                if (!v || v.count <= 0) throw new Error("World GC reference accounting mismatch");
+                v.count--;
+              }
+              for (const [id, row2] of values) refs.put(row2, id);
+              for (const id of candidates.keys()) {
+                refs.delete(id);
+                tx.objectStore(pageStore).delete(id);
+                deleted++;
+              }
+            } catch (e) {
+              failure = e;
+              tx.abort();
+            }
+          };
+          if (!count2) {
+            apply2();
+            return;
+          }
+          for (const id of children) {
+            const q = refs.get(id);
+            q.onsuccess = () => {
+              values.set(id, q.result);
+              if (--count2 === 0) apply2();
+            };
+          }
+        };
+        for (const id of roots) {
+          const q = refs.get(id);
+          q.onsuccess = () => {
+            if (q.result?.count === 0) candidates.set(id, q.result);
+            ready2();
+          };
+        }
+      };
+    };
+    tx.oncomplete = () => {
+      db.close();
+      resolve({ deleted });
+    };
+    tx.onabort = () => {
+      db.close();
+      reject(failure ?? tx.error ?? new Error("World page maintenance aborted"));
+    };
+  });
+}
+
+// src/shared/contracts/identities.js
+var ID_PREFIXES = Object.freeze({
+  campaignId: "cmp",
+  sessionId: "ses",
+  characterId: "chr",
+  playerId: "ply",
+  spaceId: "spc",
+  spaceInstanceId: "spi",
+  entityId: "ent",
+  itemInstanceId: "itm",
+  commandId: "cmd",
+  eventId: "evt",
+  transactionId: "txn",
+  contentDefinitionId: "def",
+  encounterId: "enc",
+  encounterAttemptId: "att",
+  entitlementId: "elt",
+  checkpointId: "chk",
+  locationId: "loc",
+  legendAssignmentId: "lga",
+  recoveryRecordId: "rec",
+  attackActionId: "act",
+  primaryActionId: "pra"
+});
+function validateId(kind2, value) {
+  requireContract(Object.hasOwn(ID_PREFIXES, kind2), "Unknown ID class");
+  requireContract(
+    typeof value === "string" && new RegExp(`^${ID_PREFIXES[kind2]}:[0-9a-f]{32}$`).test(value),
+    `Invalid ${kind2}`
+  );
+  return value;
+}
+function createId(kind2, token6) {
+  requireContract(typeof token6 === "string", "ID token must be a string");
+  requireContract(Object.hasOwn(ID_PREFIXES, kind2), "Unknown ID class");
+  return validateId(kind2, `${ID_PREFIXES[kind2]}:${token6}`);
+}
+function validateRevision(kind2, value) {
+  requireContract(kind2 === "spaceRevision" || kind2 === "saveRevision", "Unknown revision class");
+  return safeInteger(value);
+}
+function createIdMap(kind2, entries = []) {
+  validateWire(entries);
+  requireContract(Array.isArray(entries), "ID entries must be an array");
+  const result = /* @__PURE__ */ Object.create(null);
+  for (const entry of entries) {
+    requireContract(Array.isArray(entry) && entry.length === 2, "Expected ID/value pair");
+    const key5 = validateId(kind2, entry[0]);
+    requireContract(!Object.hasOwn(result, key5), "ID collision");
+    result[key5] = copyWire(entry[1]);
+  }
+  const ordered = /* @__PURE__ */ Object.create(null);
+  for (const key5 of Object.keys(result).sort()) ordered[key5] = result[key5];
+  return ordered;
+}
+function validateIdMap(kind2, value, validateEntry) {
+  validateWire(value);
+  requireContract(Object.hasOwn(ID_PREFIXES, kind2), "Unknown ID class");
+  requireContract(value && typeof value === "object" && !Array.isArray(value), "Expected ID map");
+  for (const [key5, entry] of Object.entries(value)) {
+    validateId(kind2, key5);
+    validateEntry(entry, key5);
+  }
+}
+
+// src/shared/content/hero_looks_v1.js
+var HAIR_STYLES = Object.freeze(["short", "buzz", "spiky", "swept", "shaggy", "undercut", "mullet", "curly", "bob", "long", "mane", "ponytail", "pigtails", "braid", "bun", "dreads", "mohawk", "pixie", "bangs", "waves", "sidebraid", "highpony", "twinbuns", "puff", "crown", "bald"]);
+var FACIAL_HAIR = Object.freeze(["none", "stubble", "mustache", "handlebar", "goatee", "chinstrap", "chops", "short", "long", "bushy", "braided"]);
+var HAIR_COLORS = Object.freeze(["black", "soft-black", "dark-brown", "brown", "light-brown", "auburn", "copper", "strawberry", "dark-blonde", "blonde", "platinum", "gray", "silver", "white", "red", "pink", "blue", "teal", "green", "violet"]);
+var SKIN_TONES = Object.freeze(["porcelain", "fair", "light", "peach", "golden", "olive", "tan", "bronze", "brown", "chestnut", "deep", "ebony"]);
+var FACES = Object.freeze(["classic", "lashes", "rosy", "freckles"]);
+var HERO_NAME_MAX = 16;
+var DEFAULT_LOOK = Object.freeze({ hair: "short", hairColor: "brown", skin: "light", facialHair: "none", helmet: true, name: "", face: "classic" });
+function validHeroName(name) {
+  return typeof name === "string" && name === name.trim() && [...name].length <= HERO_NAME_MAX && /^[\p{L}\p{M}\p{N} '’.-]*$/u.test(name) && !/\s\s/.test(name);
+}
+function validateHeroLook(look) {
+  closedRecord(look, ["hair", "hairColor", "skin", "facialHair", "helmet", "name"], ["face", "accessory"]);
+  requireContract(HAIR_STYLES.includes(look.hair), "Unknown hair style");
+  requireContract(HAIR_COLORS.includes(look.hairColor), "Unknown hair color");
+  requireContract(SKIN_TONES.includes(look.skin), "Unknown skin tone");
+  requireContract(FACIAL_HAIR.includes(look.facialHair), "Unknown facial hair");
+  requireContract(typeof look.helmet === "boolean", "Invalid helmet setting");
+  if (look.face !== void 0) requireContract(FACES.includes(look.face), "Unknown face");
+  requireContract(validHeroName(look.name), "Names use up to 16 letters, numbers, spaces, hyphens or apostrophes");
+  return look;
+}
+var heroLookOf = (d8) => d8?.look ?? DEFAULT_LOOK;
+
+// src/shared/content/trip_snacks_v1.js
+var TRIP_TICKS_PER_SECOND = 60;
+var TRIP_EAT_TICKS = 144;
+var TRIP_TICKS = 120 * 60;
+var TRIP_WEAR_OFF_TICKS = 72;
+var BAD_TRIP_CHANCE = 0.05;
+var TRIP_BAD_PORTAL_TICKS = 126;
+var TRIP_BAD_PULL_TICKS = 150;
+var TRIP_PULL_TO_LAND_TICKS = 108;
+var TRIP_BAD_FALL_TICKS = TRIP_BAD_PULL_TICKS + TRIP_PULL_TO_LAND_TICKS;
+var TRIP_FRIEND_WINDOW_TICKS = TRIP_TICKS - TRIP_PULL_TO_LAND_TICKS;
+var TRIP_PORTAL_STEP_RADIUS = 20;
+var TRIP_HEAVY_LEGS_TICKS = 15 * 60;
+var TRIP_HEAVY_LEGS_SPEED = 0.7;
+var TRIP_SNACKS_V1 = Object.freeze({
+  glowcap: Object.freeze({
+    id: "glowcap",
+    label: "Glowcap",
+    verb: "Eat",
+    buff: "damage",
+    amount: 0.2,
+    pill: "+20% damage",
+    text: "A glowing teal mushroom. Eat it for a trip: usually a good one (+20% damage for 2:00)."
+  }),
+  "frog-leg": Object.freeze({
+    id: "frog-leg",
+    label: "Frog Leg",
+    verb: "Lick",
+    buff: "speed",
+    amount: 0.25,
+    pill: "+25% speed",
+    text: "A tingly blue frog leg. Lick it for a trip: usually a good one (+25% move speed and a hop for 2:00)."
+  })
+});
+var TRIP_SNACK_IDS_V1 = Object.freeze(Object.keys(TRIP_SNACKS_V1));
+var TRIP_SNACK_DROPS_V1 = Object.freeze({
+  sporecrown: Object.freeze({ snack: "glowcap", chance: 1 / 10 }),
+  gulpjaw: Object.freeze({ snack: "frog-leg", chance: 1 / 10 }),
+  croakmaw: Object.freeze({ snack: "frog-leg", chance: 1 / 10 }),
+  dart_frog: Object.freeze({ snack: "frog-leg", chance: 1 / 200 }),
+  bog_frog: Object.freeze({ snack: "frog-leg", chance: 1 / 200 }),
+  // Sammy 2026-11-12: the ordinary mushroom (Eldritch Sprout, spore outbreaks too) drops Glowcaps as often as the frogs drop legs.
+  sprout: Object.freeze({ snack: "glowcap", chance: 1 / 200 })
+});
+function tripBuffV1(trip, tick) {
+  if (!trip || trip.outcome !== "good" || !(tick >= trip.startTick && tick < trip.endTick)) return null;
+  return TRIP_SNACKS_V1[trip.snack] ?? null;
+}
+function tripDamageMultiplierV1(trip, tick) {
+  const b = tripBuffV1(trip, tick);
+  return b?.buff === "damage" ? 1 + b.amount : 1;
+}
+function tripSpeedMultiplierV1(trip, tick) {
+  const b = tripBuffV1(trip, tick);
+  return b?.buff === "speed" ? 1 + b.amount : 1;
+}
+function startTripV1(snack, tick, roll2, badAllowed = true) {
+  const outcome = badAllowed && roll2 < BAD_TRIP_CHANCE ? "bad" : "good", startTick = tick + (outcome === "bad" ? TRIP_BAD_FALL_TICKS : TRIP_EAT_TICKS);
+  return Object.freeze({ snack, outcome, eatTick: tick, startTick, endTick: startTick + TRIP_TICKS });
+}
+function tripExpiredV1(trip, tick) {
+  return !trip || tick >= trip.endTick + TRIP_WEAR_OFF_TICKS;
+}
+
+// src/shared/content/oldward_wood.js
+var REGION_ID = "region:7a01";
+var LAYOUT_VERSION = 1;
+var GEOGRAPHY_DEFINITION_ID = "def:7a0000000000000000000000000000ff";
+var SPACE_IDS = freezeWire({
+  town: "spc:7a000000000000000000000000000001",
+  sw: "spc:7a000000000000000000000000000011",
+  s: "spc:7a000000000000000000000000000012",
+  se: "spc:7a000000000000000000000000000013",
+  w: "spc:7a000000000000000000000000000014",
+  c: "spc:7a000000000000000000000000000015",
+  e: "spc:7a000000000000000000000000000016",
+  nw: "spc:7a000000000000000000000000000017",
+  n: "spc:7a000000000000000000000000000018",
+  ne: "spc:7a000000000000000000000000000019"
+});
+var W = 32;
+var H = 26;
+var TILE2 = 32;
+var sockets = {
+  north: { x: 528, y: 48, anchor: { x: 528, y: 112 }, opposite: "south" },
+  south: { x: 528, y: 784, anchor: { x: 528, y: 720 }, opposite: "north" },
+  west: { x: 48, y: 432, anchor: { x: 112, y: 432 }, opposite: "east" },
+  east: { x: 976, y: 432, anchor: { x: 912, y: 432 }, opposite: "west" }
+};
+var party = (p) => [{ x: p.x - 12, y: p.y - 12 }, { x: p.x + 12, y: p.y - 12 }, { x: p.x - 12, y: p.y + 12 }, { x: p.x + 12, y: p.y + 12 }];
+var OLDWARD_LINKS = freezeWire([
+  ["socket:7101", "town", "north", "socket:7102", "sw", "south", "road:701"],
+  ["socket:7103", "sw", "east", "socket:7104", "s", "west", "road:702"],
+  ["socket:7105", "s", "north", "socket:7106", "c", "south", "road:703"],
+  ["socket:7107", "c", "east", "socket:7108", "e", "west", "road:704"],
+  ["socket:7109", "e", "north", "socket:710a", "ne", "south", "road:705"],
+  ["socket:7111", "sw", "north", "socket:7112", "w", "south", null],
+  ["socket:7113", "w", "north", "socket:7114", "nw", "south", null],
+  ["socket:7115", "w", "east", "socket:7116", "c", "west", null],
+  ["socket:7117", "nw", "east", "socket:7118", "n", "west", null],
+  ["socket:7119", "c", "north", "socket:711a", "n", "south", null],
+  ["socket:711b", "n", "east", "socket:711c", "ne", "west", null],
+  ["socket:711d", "s", "east", "socket:711e", "se", "west", null],
+  ["socket:711f", "se", "north", "socket:7120", "e", "south", null]
+]);
+var links = OLDWARD_LINKS;
+var records = [
+  ["town", "Alderwatch", 0, 3, "anchor:7201"],
+  ["sw", "Oldward Wood \xB7 South Gate", 0, 2, "anchor:7211"],
+  ["s", "Oldward Wood \xB7 Alder Bend", 1, 2, "anchor:7212"],
+  ["se", "Oldward Wood \xB7 Fern Hollow", 2, 2, "anchor:7213"],
+  ["w", "Oldward Wood \xB7 Moss Glade", 0, 1, "anchor:7214"],
+  ["c", "Oldward Wood \xB7 Ward Crossing", 1, 1, "anchor:7215"],
+  ["e", "Oldward Wood \xB7 Stone Rise", 2, 1, "anchor:7216"],
+  ["nw", "Oldward Wood \xB7 High Canopy", 0, 0, "anchor:7217"],
+  ["n", "Oldward Wood \xB7 Amber Clearing", 1, 0, "anchor:7218"],
+  ["ne", "Oldward Wood \xB7 Road's End", 2, 0, "anchor:7219"]
+];
+var names = Object.fromEntries(records.map(([key5, label]) => [key5, label]));
+var definitionIds = {
+  town: "def:7a000000000000000000000000000001",
+  sw: "def:7a000000000000000000000000000011",
+  s: "def:7a000000000000000000000000000012",
+  se: "def:7a000000000000000000000000000013",
+  w: "def:7a000000000000000000000000000014",
+  c: "def:7a000000000000000000000000000015",
+  e: "def:7a000000000000000000000000000016",
+  nw: "def:7a000000000000000000000000000017",
+  n: "def:7a000000000000000000000000000018",
+  ne: "def:7a000000000000000000000000000019"
+};
+var groves = {
+  sw: [[3, 4, 5, 4], [10, 3, 3, 5], [22, 3, 5, 5], [3, 17, 5, 5], [23, 18, 5, 4]],
+  s: [[3, 3, 6, 4], [22, 4, 6, 5], [7, 18, 5, 5], [21, 18, 6, 4], [10, 8, 2, 2]],
+  se: [[4, 4, 5, 5], [22, 3, 5, 6], [3, 18, 5, 4], [21, 18, 7, 4], [10, 7, 2, 2]],
+  w: [[3, 3, 5, 4], [23, 3, 5, 6], [3, 19, 5, 4], [24, 18, 4, 5], [10, 4, 2, 3]],
+  c: [[3, 3, 6, 5], [23, 4, 5, 5], [3, 18, 6, 5], [22, 18, 6, 5]],
+  e: [[3, 3, 6, 4], [23, 4, 5, 5], [3, 19, 6, 4], [23, 18, 5, 5], [10, 7, 2, 2]],
+  nw: [[3, 3, 7, 5], [23, 3, 5, 6], [3, 17, 6, 6], [23, 18, 5, 4]],
+  n: [[4, 4, 5, 4], [23, 3, 5, 6], [3, 18, 6, 5], [22, 18, 6, 5]],
+  ne: [[3, 4, 6, 5], [23, 3, 5, 6], [3, 18, 6, 5], [23, 18, 5, 5]]
+};
+function authorSpace([key5, label, gridX, gridY, anchorId]) {
+  const town = key5 === "town", tiles3 = Array.from({ length: H }, () => Array(W).fill("1"));
+  const terrain2 = Array.from({ length: H }, () => Array(W).fill(town ? "g" : "f"));
+  const blockers2 = [], exits = [];
+  function rect(x, y, width, height, kind2, detail = "") {
+    blockers2.push({ x, y, width, height, kind: kind2, detail });
+    for (let row2 = y; row2 < y + height; row2++) for (let col = x; col < x + width; col++) tiles3[row2][col] = "2";
+  }
+  rect(0, 0, W, 1, town ? "fence" : "thicket");
+  rect(0, H - 1, W, 1, town ? "fence" : "thicket");
+  rect(0, 1, 1, H - 2, town ? "fence" : "thicket");
+  rect(W - 1, 1, 1, H - 2, town ? "fence" : "thicket");
+  for (const link of links) {
+    let [exitId, from, side, reciprocalExitId, to, otherSide, roadSegmentId] = link;
+    if (key5 === to) [exitId, from, side, reciprocalExitId, to, otherSide] = [reciprocalExitId, to, otherSide, exitId, from, side];
+    if (key5 !== from) continue;
+    const socket = sockets[side];
+    exits.push({
+      exitId,
+      side,
+      x: socket.x,
+      y: socket.y,
+      radius: 38,
+      destinationSpaceId: SPACE_IDS[to],
+      reciprocalExitId,
+      anchorId: `${exitId}/arrival`,
+      partyPositions: party(socket.anchor),
+      roadSegmentId,
+      label: to === "town" ? "Enter Alderwatch" : `${roadSegmentId ? "Old Ward Road" : "Woodland path"} \u2192 ${names[to].split(" \xB7 ").at(-1)}`
+    });
+    const horizontal = side === "east" || side === "west", radius = roadSegmentId || town ? 1 : 0;
+    const end = horizontal ? socket.x / TILE2 - 0.5 : socket.y / TILE2 - 0.5, mid = horizontal ? 16 : 13;
+    for (let step = Math.min(mid, end); step <= Math.max(mid, end); step++) for (let d = -radius; d <= radius; d++) {
+      const x = horizontal ? step : 16 + d, y = horizontal ? 13 + d : step;
+      if (terrain2[y][x] !== "r") terrain2[y][x] = roadSegmentId || town ? "r" : "p";
+    }
+  }
+  for (let y = 10; y <= 16; y++) for (let x = 13; x <= 19; x++) if (terrain2[y][x] === "f") terrain2[y][x] = "g";
+  if (town) {
+    for (let y = 1; y < H - 1; y++) for (let x = 15; x <= 17; x++) terrain2[y][x] = "r";
+    for (let x = 1; x < W - 1; x++) for (let y = 12; y <= 14; y++) terrain2[y][x] = "r";
+    [
+      [3, 6, "The Alder Inn"],
+      [12, 6, "Merchant"],
+      [18, 6, "Town Hall"],
+      [26, 6, "Watch House"],
+      [3, 17, "Smith"],
+      [12, 17, "Cottage"],
+      [18, 17, "Vault"],
+      [26, 17, "Cottage"],
+      [3, 10, "Mastery Hall"],
+      [26, 10, "Storehouse"]
+    ].forEach(([x, y, name]) => rect(x, y, 3, town && y === 10 ? 2 : 4, "building", name));
+  } else {
+    groves[key5].forEach(([x, y, w, h]) => rect(x, y, w, h, "trees"));
+    rect(10, 19, 2, 2, "rock");
+    rect(21, 9, 2, 2, "rock");
+  }
+  return {
+    spaceId: SPACE_IDS[key5],
+    contentDefinitionId: definitionIds[key5],
+    regionId: REGION_ID,
+    label,
+    kind: town ? "settlement" : "woodland",
+    grid: { x: gridX, y: gridY },
+    collision: { tileSize: TILE2, width: W, height: H, tiles: tiles3.map((row2) => row2.join("")) },
+    visual: { terrain: terrain2.map((row2) => row2.join("")), blockers: blockers2, atmosphere: town ? "alderwatch" : key5 },
+    anchor: { anchorId, partyPositions: party({ x: 528, y: town ? 368 : 432 }) },
+    exits,
+    safety: {
+      encounterAllowed: !town,
+      settlementSafe: town,
+      exteriorHostileBuffer: town ? 0 : 128,
+      protectedArrivalRadius: 64,
+      townApproach: key5 === "sw" ? { exitId: "socket:7102", exclusionRadius: 192 } : null
+    }
+  };
+}
+var OLDWARD_SPACES = freezeWire(records.map(authorSpace));
+var OLDWARD_ROAD = freezeWire({ roadId: "road:700", label: "Old Ward Road", segments: links.filter((l) => l[6]).map((l) => ({
+  roadSegmentId: l[6],
+  fromSpaceId: SPACE_IDS[l[1]],
+  exitId: l[0],
+  toSpaceId: SPACE_IDS[l[4]],
+  reciprocalExitId: l[3]
+})) });
+var OLDWARD_LAYOUT = freezeWire({ regionId: REGION_ID, layoutVersion: LAYOUT_VERSION, spaces: OLDWARD_SPACES, road: OLDWARD_ROAD });
+var SEAMLESS_MANIFEST_DEFINITION_ID = "def:7a0000000000000000000000000000aa";
+var SEAMLESS_OVERWORLD_SPACE_ID = "spc:7a0000000000000000000000000000aa";
+async function createOldwardSeamlessManifest(sha256) {
+  const chunks = OLDWARD_SPACES.map((space) => ({
+    areaId: space.spaceId,
+    label: space.label,
+    discoveryId: space.spaceId,
+    origin: { x: space.grid.x * W * TILE2, y: space.grid.y * H * TILE2 },
+    dimensions: { width: W * TILE2, height: H * TILE2 },
+    collisionDefinitionId: space.contentDefinitionId,
+    terrainDefinitionId: space.contentDefinitionId
+  }));
+  const seams = links.map(([exitId, from, fromSide, reciprocalExitId, to, toSide, roadSegmentId], index2) => ({
+    seamId: `seam:oldward-${String(index2 + 1).padStart(2, "0")}`,
+    a: { areaId: SPACE_IDS[from], side: fromSide, exitId },
+    b: { areaId: SPACE_IDS[to], side: toSide, exitId: reciprocalExitId },
+    roadSegmentId,
+    openingTiles: 3
+  }));
+  const town = chunks.find((chunk) => chunk.areaId === SPACE_IDS.town);
+  const body = {
+    format: "saq-world-overworld-manifest",
+    manifestVersion: 1,
+    manifestId: "manifest:oldward-reference-v1",
+    sourceKind: "deterministic-reference-fixture",
+    logicalSpaceId: SEAMLESS_OVERWORLD_SPACE_ID,
+    label: "Alderwatch & Oldward Wood",
+    tileSize: TILE2,
+    dimensions: { width: 3 * W * TILE2, height: 4 * H * TILE2 },
+    chunks,
+    seams,
+    roads: [{
+      roadId: OLDWARD_ROAD.roadId,
+      label: OLDWARD_ROAD.label,
+      roadSegmentIds: OLDWARD_ROAD.segments.map((segment) => segment.roadSegmentId)
+    }],
+    safeRegions: [{
+      safeRegionId: "safe:alderwatch",
+      areaId: SPACE_IDS.town,
+      x: town.origin.x,
+      y: town.origin.y,
+      width: town.dimensions.width,
+      height: town.dimensions.height,
+      marker: { x: town.origin.x + 528, y: town.origin.y + 368, label: "ALDERWATCH" }
+    }]
+  };
+  const manifestHash = bytesToHex(await hashBytes(utf8(canonicalStringify(body)), sha256));
+  return freezeWire({ contentDefinitionId: SEAMLESS_MANIFEST_DEFINITION_ID, kind: "overworldManifest", manifestHash, ...body });
+}
+function oldwardAreaDefinition(contentDefinitionId) {
+  const space = OLDWARD_SPACES.find((candidate) => candidate.contentDefinitionId === contentDefinitionId);
+  requireContract(space, "Unknown Oldward area definition");
+  return freezeWire({ collision: space.collision, visual: space.visual });
+}
+function oldwardSpace(spaceId) {
+  const record = OLDWARD_SPACES.find((space) => space.spaceId === spaceId);
+  requireContract(record, "Unknown authored Oldward space");
+  return record;
+}
+function isOldwardExit(exitId) {
+  return OLDWARD_SPACES.some((space) => space.exits.some((exit) => exit.exitId === exitId));
+}
+
+// src/shared/content/manual_primary.js
+var SHIELD_SWORD_PRIMARY = freezeWire({
+  contentDefinitionId: "def:b1000000000000000000000000000010",
+  kind: "primaryProfile",
+  family: "shield-sword-prototype",
+  continuationTicks: 48,
+  forwardDotMinimum: 0.5,
+  steps: [
+    { startup: 6, active: 3, recovery: 13, startupMovement: 0.65, activeMovement: 0.65, recoveryMovement: 0.8 },
+    { startup: 7, active: 3, recovery: 14, startupMovement: 0.65, activeMovement: 0.65, recoveryMovement: 0.8 },
+    { startup: 14, active: 4, recovery: 22, startupMovement: 0.65, activeMovement: 0.65, recoveryMovement: 0.8 }
+  ]
+});
+var SLIME_CLEARING = freezeWire({
+  encounterId: "enc:b1000000000000000000000000000001",
+  label: "Fern Hollow slime clearing",
+  spaceId: "spc:7a000000000000000000000000000013",
+  activation: { x: 464, y: 432, radius: 48 },
+  hostilePosition: { x: 640, y: 432 },
+  hostileProfileId: "def:c1000000000000000000000000000002",
+  acquireRange: 128
+});
+
+// src/shared/contracts/primary.js
+var PRIMARY_RECENT_WINDOW = 16;
+var COMPLETED_COMBAT_WINDOW = 16;
+var same = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var deepFrozen = (v) => v === null || typeof v !== "object" || Object.isFrozen(v) && Object.values(v).every(deepFrozen);
+var checkedProfiles = /* @__PURE__ */ new WeakSet();
+var supportedProfile = (profile2) => {
+  if (checkedProfiles.has(profile2)) return true;
+  if (!same(profile2, SHIELD_SWORD_PRIMARY)) return false;
+  if (deepFrozen(profile2)) checkedProfiles.add(profile2);
+  return true;
+};
+function validatePrimaryAim(aim) {
+  closedRecord(aim, ["x", "y"]);
+  requireContract(
+    [aim.x, aim.y].every((n) => typeof n === "number" && Number.isFinite(n)) && Math.abs(Math.hypot(aim.x, aim.y) - 1) < 1e-10,
+    "Primary aim must be a normalized direction"
+  );
+}
+function primaryProfile(state, entityId) {
+  const id = state.primary?.actorsById[entityId]?.profileId;
+  const profile2 = state.content?.definitionsById[id];
+  requireContract(profile2?.kind === "primaryProfile" && supportedProfile(profile2), "Unsupported equipped primary profile");
+  return hasWorldCombat(state) ? { ...profile2, forwardDotMinimum: 0.1 } : profile2;
+}
+function initializePrimary(state) {
+  const next = copyWire(state), actorsById = {};
+  for (const p of Object.values(next.playersById)) actorsById[p.entityId] = {
+    profileId: SHIELD_SWORD_PRIMARY.contentDefinitionId,
+    facing: { x: 1, y: 0 },
+    heldCommandId: null,
+    queuedCommandId: null,
+    current: null,
+    nextComboStep: 1,
+    comboDeadline: null,
+    nextSourceSequence: 1,
+    retiredSourceSequence: 0
+  };
+  next.primary = { contractVersion: 1, actorsById, completedById: {}, actionIdHighWatermark: null, eventIdHighWatermark: null };
+  return next;
+}
+function primaryRecords(state) {
+  return state.primary ? [...Object.values(state.primary.completedById), ...Object.values(state.primary.actorsById).map((a) => a.current).filter(Boolean)] : [];
+}
+function primaryPinnedCommands(state) {
+  if (!state.primary) return [];
+  return [...primaryRecords(state).map((a) => a.commandId), ...Object.values(state.primary.actorsById).flatMap((a) => [a.heldCommandId, a.queuedCommandId])].filter(Boolean);
+}
+function resetPrimary(next) {
+  if (!next.primary) return;
+  next.primary.completedById = {};
+  for (const a of Object.values(next.primary.actorsById)) {
+    a.current = null;
+    a.heldCommandId = null;
+    a.queuedCommandId = null;
+    a.nextComboStep = 1;
+    a.comboDeadline = null;
+    a.retiredSourceSequence = a.nextSourceSequence - 1;
+  }
+}
+function clearPrimaryInput(next, entityId) {
+  const a = next.primary?.actorsById[entityId];
+  if (a) {
+    a.heldCommandId = null;
+    a.queuedCommandId = null;
+  }
+}
+function prunePrimaryHistory(next) {
+  if (!next.primary) return;
+  const records2 = Object.values(next.primary.completedById).sort((a, b) => a.completedTick - b.completedTick || a.startEventSequence - b.startEventSequence);
+  for (const record of records2.slice(0, Math.max(0, records2.length - PRIMARY_RECENT_WINDOW))) {
+    next.primary.actorsById[record.sourceEntityId].retiredSourceSequence = record.sourceSequence;
+    delete next.primary.completedById[record.primaryActionId];
+  }
+}
+function primaryPhaseAt(action, profile2, tick) {
+  const t = action.timing ?? profile2.steps[action.comboStep - 1], start = action.startedTick;
+  if (tick < start + t.startup) return { phase: "startup", phaseStartedTick: start, phaseEndsTick: start + t.startup };
+  if (tick < start + t.startup + t.active) return { phase: "active", phaseStartedTick: start + t.startup, phaseEndsTick: start + t.startup + t.active };
+  return { phase: "recovery", phaseStartedTick: start + t.startup + t.active, phaseEndsTick: start + t.startup + t.active + t.recovery };
+}
+function validatePrimaryState(state) {
+  const value = state.primary;
+  requireContract(state.history && state.multiplayer && state.space, "Primary needs bounded plural combat state");
+  closedRecord(value, ["contractVersion", "actorsById", "completedById", "actionIdHighWatermark", "eventIdHighWatermark"]);
+  requireContract(value.contractVersion === 1, "Unsupported primary contract");
+  requireContract(same(Object.keys(value.actorsById).sort(), Object.values(state.playersById).map((p) => p.entityId).sort()), "Primary owner inventory mismatch");
+  for (const [field2, kind2] of [["actionIdHighWatermark", "primaryActionId"], ["eventIdHighWatermark", "eventId"]]) if (value[field2] !== null) validateId(kind2, value[field2]);
+  requireContract(Object.keys(value.completedById).length <= PRIMARY_RECENT_WINDOW, "Completed primary retention bound");
+  requireContract(Object.keys(state.combat.appliedActionsById).length <= COMPLETED_COMBAT_WINDOW, "Manual damage retention bound");
+  const sequences = {}, primaryEvents = [], eventIds = /* @__PURE__ */ new Set();
+  for (const [id, a] of Object.entries(value.actorsById)) {
+    closedRecord(a, ["profileId", "facing", "heldCommandId", "queuedCommandId", "current", "nextComboStep", "comboDeadline", "nextSourceSequence", "retiredSourceSequence"]);
+    const profile2 = primaryProfile(state, id);
+    validatePrimaryAim(a.facing);
+    safeInteger(a.nextComboStep, 1, profile2.steps.length);
+    safeInteger(a.nextSourceSequence, 1);
+    safeInteger(a.retiredSourceSequence, 0, a.nextSourceSequence - 1);
+    sequences[id] = a.retiredSourceSequence;
+    if (a.comboDeadline !== null) safeInteger(a.comboDeadline, 0, state.tick + profile2.continuationTicks);
+    const player = Object.values(state.playersById).find((p) => p.entityId === id);
+    for (const commandId of [a.heldCommandId, a.queuedCommandId]) if (commandId !== null) {
+      validateId("commandId", commandId);
+      const receipt = state.appliedCommandsById[commandId], cmd = receipt && JSON.parse(receipt.commandCanonical);
+      requireContract(
+        cmd?.kind === "combat.primaryIntent" && cmd.payload.pressed && cmd.playerId === player.playerId && receipt.result?.status === "applied",
+        "Primary input needs its applied owner command"
+      );
+    }
+    if (player.connectionStatus === "disconnected") requireContract(a.heldCommandId === null && a.queuedCommandId === null, "Disconnected primary input retained");
+    if (a.current) requireContract(a.comboDeadline === null && a.nextComboStep === a.current.comboStep, "Active combo cursor mismatch");
+    if (state.space.encounterId === null) requireContract(a.current === null && a.heldCommandId === null && a.queuedCommandId === null && a.nextComboStep === 1 && a.comboDeadline === null, "Safe primary must be reset");
+    if (!state.space.entitiesById[id].alive) requireContract(a.current === null && a.nextComboStep === 1 && a.comboDeadline === null && a.heldCommandId === null && a.queuedCommandId === null, "Defeat must reset primary");
+  }
+  const records2 = primaryRecords(state).sort((a, b) => a.startEventSequence - b.startEventSequence);
+  for (const record of records2) {
+    closedRecord(record, [
+      "primaryActionId",
+      "sourceEntityId",
+      "sourceSequence",
+      "commandId",
+      "comboStep",
+      "aim",
+      "startedTick",
+      "phase",
+      "phaseStartedTick",
+      "phaseEndsTick",
+      "hitResolved",
+      "hitAttackActionId",
+      "startEventId",
+      "finishEventId",
+      "startEventSequence",
+      "finishEventSequence",
+      "completedTick",
+      "interrupted"
+    ]);
+    validateId("primaryActionId", record.primaryActionId);
+    validateId("entityId", record.sourceEntityId);
+    validateId("commandId", record.commandId);
+    requireContract(record.primaryActionId <= value.actionIdHighWatermark, "Primary identity exceeds permanent fence");
+    const owner = value.actorsById[record.sourceEntityId], profile2 = primaryProfile(state, record.sourceEntityId);
+    safeInteger(record.sourceSequence, 1);
+    requireContract(record.sourceSequence === sequences[record.sourceEntityId] + 1, "Primary source sequence gap");
+    sequences[record.sourceEntityId] = record.sourceSequence;
+    safeInteger(record.comboStep, 1, profile2.steps.length);
+    validatePrimaryAim(record.aim);
+    safeInteger(record.startedTick, 0, state.tick);
+    safeInteger(record.startEventSequence, 1, state.eventEmission.lastEventSequence);
+    for (const id of [record.startEventId, record.finishEventId]) {
+      validateId("eventId", id);
+      requireContract(id <= value.eventIdHighWatermark && !eventIds.has(id), "Primary event identity collision/fence");
+      eventIds.add(id);
+    }
+    requireContract(typeof record.hitResolved === "boolean" && typeof record.interrupted === "boolean", "Invalid primary hit/completion flags");
+    if (record.hitAttackActionId !== null) validateId("attackActionId", record.hitAttackActionId);
+    const command = state.appliedCommandsById[record.commandId], wire2 = command && JSON.parse(command.commandCanonical);
+    requireContract(
+      wire2?.kind === "combat.primaryIntent" && wire2.payload.pressed && command.tick <= record.startedTick && state.playersById[wire2.playerId]?.entityId === record.sourceEntityId && command.result?.entityId === record.sourceEntityId,
+      "Primary command/action causation mismatch"
+    );
+    const timing = profile2.steps[record.comboStep - 1], ends = record.startedTick + timing.startup + timing.active + timing.recovery;
+    if (record.completedTick === null) {
+      requireContract(owner.current?.primaryActionId === record.primaryActionId && record.finishEventSequence === null && !record.interrupted, "Active primary ownership mismatch");
+      requireContract(state.tick < ends && same(primaryPhaseAt(record, profile2, state.tick), { phase: record.phase, phaseStartedTick: record.phaseStartedTick, phaseEndsTick: record.phaseEndsTick }), "Primary phase timing mismatch");
+      requireContract(record.hitResolved ? state.tick >= record.startedTick + timing.startup : state.tick <= record.startedTick + timing.startup, "Primary hit phase mismatch");
+    } else {
+      requireContract(value.completedById[record.primaryActionId] === record && record.phase === "complete", "Completed primary identity mismatch");
+      safeInteger(record.completedTick, record.startedTick, state.tick);
+      requireContract(record.phaseStartedTick === record.completedTick && record.phaseEndsTick === record.completedTick, "Completed phase timing mismatch");
+      requireContract(record.interrupted ? record.completedTick <= ends : record.completedTick === ends && record.hitResolved, "Primary completion timing mismatch");
+      if (record.finishEventSequence !== null) {
+        safeInteger(record.finishEventSequence, record.startEventSequence + 1, state.eventEmission.lastEventSequence);
+        primaryEvents.push([record.finishEventSequence, record.completedTick]);
+      } else requireContract(record.interrupted, "Completed attack needs finish event");
+    }
+    requireContract(record.hitAttackActionId === null || record.hitResolved, "Unresolved primary has a hit receipt");
+    const hit = record.hitAttackActionId && state.combat.appliedActionsById[record.hitAttackActionId];
+    if (hit) requireContract(JSON.parse(hit.actionCanonical).primary?.primaryActionId === record.primaryActionId, "Primary hit receipt linkage mismatch");
+    else if (record.hitAttackActionId) requireContract(record.hitAttackActionId <= state.history.combatBaseline.attackActionIdHighWatermark, "Missing unretired primary hit");
+    primaryEvents.push([record.startEventSequence, record.startedTick]);
+  }
+  for (const [id, a] of Object.entries(value.actorsById)) requireContract(a.nextSourceSequence === sequences[id] + 1, "Primary source cursor mismatch");
+  for (const [id, a] of Object.entries(value.actorsById)) if (!a.current && a.comboDeadline !== null) {
+    const last = records2.filter((r) => r.sourceEntityId === id).at(-1);
+    requireContract(last && !last.interrupted && a.comboDeadline === last.completedTick + primaryProfile(state, id).continuationTicks && a.nextComboStep === last.comboStep % 3 + 1 && (state.tick < a.comboDeadline || a.heldCommandId || a.queuedCommandId), "Idle combo deadline/cursor mismatch");
+  }
+  for (const receipt of Object.values(state.combat.appliedActionsById)) {
+    for (const id of Object.values(JSON.parse(receipt.actionCanonical).eventIds)) requireContract(!eventIds.has(id), "Damage/primary event identity collision");
+    for (let n = receipt.eventSequenceStart; n <= receipt.eventSequenceEnd; n++) primaryEvents.push([n, receipt.tick]);
+  }
+  if (state.history.combatBaseline.eventSequence > 0) primaryEvents.push([state.history.combatBaseline.eventSequence, state.history.combatBaseline.tick]);
+  primaryEvents.sort((a, b) => a[0] - b[0]);
+  primaryEvents.forEach((event, i) => requireContract(i === 0 || event[0] > primaryEvents[i - 1][0] && event[1] >= primaryEvents[i - 1][1], "Authority event chronology/collision mismatch"));
+}
+
+// src/shared/contracts/commands.js
+function validateSpaceStamp(value) {
+  if (value.spaceInstanceId === null) requireContract(value.spaceRevision === null, "Incomplete command/event space stamp");
+  else {
+    validateId("spaceInstanceId", value.spaceInstanceId);
+    validateRevision("spaceRevision", value.spaceRevision);
+  }
+}
+function validateDiagnosticPayload(payload) {
+  closedRecord(payload, ["tag"]);
+  requireContract(typeof payload.tag === "string" && payload.tag.length <= 64, "Diagnostic payload limit");
+}
+function validateCommand(command) {
+  validateWire(command);
+  closedRecord(command, ["protocolVersion", "campaignId", "sessionId", "playerId", "commandId", "clientSequence", "kind", "payload", "spaceInstanceId", "spaceRevision"], ["expectedSaveRevision"]);
+  exactVersion(command.protocolVersion, PROTOCOL_VERSION);
+  for (const kind2 of ["campaignId", "sessionId", "playerId", "commandId"]) validateId(kind2, command[kind2]);
+  safeInteger(command.clientSequence, 1);
+  if (command.kind === "diagnostic.noop") validateDiagnosticPayload(command.payload);
+  else if (command.kind === "movement.setIntent") {
+    closedRecord(command.payload, ["x", "y"]);
+    requireContract([command.payload.x, command.payload.y].every((n) => typeof n === "number" && Number.isFinite(n) && n >= -1 && n <= 1) && Math.hypot(command.payload.x, command.payload.y) <= 1.000000000001, "Invalid movement command intent");
+  } else if (command.kind === "combat.primaryIntent") {
+    closedRecord(command.payload, ["pressed", "aim"], ["cancelQueued"]);
+    if (Object.hasOwn(command.payload, "cancelQueued")) requireContract(command.payload.pressed === false && typeof command.payload.cancelQueued === "boolean", "Cancel only on release");
+    requireContract(typeof command.payload.pressed === "boolean", "Primary press must be boolean");
+    validatePrimaryAim(command.payload.aim);
+  } else if (command.kind === "worldEvent.activate") {
+    closedRecord(command.payload, ["groupId"]);
+    requireContract(/^ordinary:[a-f0-9]{32}$/.test(command.payload.groupId), "Invalid event identity");
+  } else if (command.kind === "discovery.readNote") {
+    closedRecord(command.payload, ["noteId"]);
+    requireContract(command.payload.noteId === "note:alderwood:woodland-trail-v1", "Unknown discovery note");
+  } else if (command.kind === "quest.act") {
+    closedRecord(command.payload, ["action", "questId"]);
+    requireContract(["take", "abandon", "turnIn", "search", "deliver", "sellEtc"].includes(command.payload.action) && typeof command.payload.questId === "string" && command.payload.questId.length <= 96 && /^q[bfe]:[a-z0-9:-]+$/.test(command.payload.questId), "Invalid quest command");
+  } else if (command.kind === "loot.pickup") {
+    closedRecord(command.payload, ["sourceEntityId", "inventoryRevision"]);
+    validateId("entityId", command.payload.sourceEntityId);
+    safeInteger(command.payload.inventoryRevision);
+  } else if (command.kind === "gear.salvage") {
+    closedRecord(command.payload, ["itemId", "inventoryRevision", "fingerprint"]);
+    safeInteger(command.payload.inventoryRevision);
+    requireContract(typeof command.payload.itemId === "string" && command.payload.itemId.length <= 240 && typeof command.payload.fingerprint === "string" && /^[0-9a-f]{1,8}$/.test(command.payload.fingerprint), "Invalid salvage identity");
+  } else if (command.kind === "dev.give") {
+    validateDevGivePayloadV1(command.payload);
+  } else if (command.kind === "gear.drop") {
+    closedRecord(command.payload, ["itemId", "inventoryRevision"]);
+    requireContract(typeof command.payload.itemId === "string" && /^item:ply:[0-9a-f]{32}:(?:ent:[0-9a-f]{32}|starter)$/.test(command.payload.itemId), "Invalid item ID");
+    safeInteger(command.payload.inventoryRevision);
+  } else if (command.kind === "resource.interact") {
+    closedRecord(command.payload, ["groupId", "episode", "ordinal", "inventoryRevision"]);
+    requireContract(typeof command.payload.groupId === "string" && command.payload.groupId.length <= 160, "Invalid encounter identity");
+    safeInteger(command.payload.episode);
+    safeInteger(command.payload.ordinal, 0, 3);
+    safeInteger(command.payload.inventoryRevision);
+  } else if (command.kind === "progression.change") {
+    safeInteger(command.expectedSaveRevision);
+    closedRecord(command.payload, ["progressionRevision", "action"], ["inventoryRevision", "goldQuote"]);
+    safeInteger(command.payload.progressionRevision);
+    const a = command.payload.action;
+    if (a.kind === "allocate") {
+      closedRecord(a, ["kind", "deltas"]);
+      closedRecord(a.deltas, ["str", "dex", "int"]);
+      for (const n of Object.values(a.deltas)) safeInteger(n, 0, 147);
+    } else if (a.kind === "node.purchase") {
+      closedRecord(a, ["kind", "nodeId"]);
+      requireContract(typeof a.nodeId === "string" && a.nodeId.length <= 80, "Invalid node");
+    } else if (a.kind === "skills.arrange") {
+      closedRecord(a, ["kind", "slots"], ["attack"]);
+      requireContract(Array.isArray(a.slots) && a.slots.length === SKILL_SLOT_COUNT && a.slots.every((s) => s === null || s === MOVE_SLOT || CLASS_SKILL_IDS.includes(s)), "Invalid skill wheel");
+      requireContract(a.attack === void 0 || a.attack === null || CLASS_SKILL_IDS.includes(a.attack), "Invalid attack skill");
+    } else if (a.kind === "augment.craft") {
+      closedRecord(a, ["kind", "skillId", "index", "npcId"]);
+      requireContract(typeof a.skillId === "string" && a.skillId.length <= 80 && Number.isSafeInteger(a.index) && a.index >= 0 && a.index <= 4 && /^civilian:[a-z0-9:-]{1,100}$/.test(a.npcId), "Invalid augment craft");
+    } else if (a.kind === "augment.set") {
+      closedRecord(a, ["kind", "skillId", "slots"]);
+      requireContract(typeof a.skillId === "string" && a.skillId.length <= 80 && Array.isArray(a.slots) && a.slots.length <= 2 && a.slots.every((i) => Number.isSafeInteger(i) && i >= 0 && i <= 4), "Invalid augments");
+    } else if (a.kind === "look.set") {
+      closedRecord(a, ["kind", "look"]);
+      validateHeroLook(a.look);
+    } else if (a.kind === "class.choose") {
+      closedRecord(a, ["kind", "heroClass"]);
+      requireContract(HERO_CLASS_IDS.includes(a.heroClass), "Unknown hero class");
+    } else if (a.kind === "tree.reset") {
+      closedRecord(a, ["kind", "tree"]);
+      requireContract(["shield", "dagger", "tome", "utility"].includes(a.tree), "Invalid constellation");
+    } else if (a.kind === "skill.learn") {
+      closedRecord(a, ["kind", "skillId"]);
+      requireContract(typeof a.skillId === "string" && a.skillId.length <= 80, "Invalid skill");
+    } else if (a.kind === "skill.reset") {
+      closedRecord(a, ["kind", "tree"]);
+      requireContract(typeof a.tree === "string" && a.tree.length <= 40, "Invalid class tree");
+    } else {
+      requireContract(a.kind === "attributes.reset", "Unknown progression action");
+      closedRecord(a, ["kind"]);
+      safeInteger(command.payload.inventoryRevision);
+      requireContract(command.payload.goldQuote === "2500", "Invalid Attribute reset quote");
+    }
+  } else if (command.kind === "forge.attune") {
+    closedRecord(command.payload, ["slot", "expectedLevel", "inventoryRevision"]);
+    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "cape"].includes(command.payload.slot), "Unknown Forge slot");
+    safeInteger(command.payload.expectedLevel, 0, 99);
+    safeInteger(command.payload.inventoryRevision);
+  } else if (command.kind === "equipment.equip") {
+    closedRecord(command.payload, ["itemId", "inventoryRevision"], ["slot"]);
+    if (command.payload.slot !== void 0) requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "cape"].includes(command.payload.slot), "Unknown equipment slot");
+    requireContract(typeof command.payload.itemId === "string" && /^item:ply:[0-9a-f]{32}:(?:ent:[0-9a-f]{32}|starter)$/.test(command.payload.itemId), "Invalid item ID");
+    safeInteger(command.payload.inventoryRevision);
+  } else if (command.kind === "equipment.unequip") {
+    closedRecord(command.payload, ["slot", "inventoryRevision"]);
+    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "cape", "armor", "charm"].includes(command.payload.slot), "Unknown equipment slot");
+    safeInteger(command.payload.inventoryRevision);
+  } else if (command.kind === "classkit.claim") {
+    closedRecord(command.payload, ["inventoryRevision"]);
+    safeInteger(command.payload.inventoryRevision);
+  } else if (command.kind === "subweapon.claim") {
+    closedRecord(command.payload, ["subType", "inventoryRevision"]);
+    requireContract(["shield", "dagger", "tome"].includes(command.payload.subType), "Unknown provision");
+    safeInteger(command.payload.inventoryRevision);
+  } else if (command.kind === "combat.guardIntent") {
+    closedRecord(command.payload, ["pressed"]);
+    requireContract(typeof command.payload.pressed === "boolean", "Guard press must be boolean");
+  } else if (command.kind === "combat.shadowDash") {
+    closedRecord(command.payload, ["aim"]);
+    validatePrimaryAim(command.payload.aim);
+  } else if (command.kind === "combat.skill") {
+    closedRecord(command.payload, ["skillId", "aim"]);
+    requireContract(CLASS_SKILL_IDS.includes(command.payload.skillId), "Unknown skill");
+    validatePrimaryAim(command.payload.aim);
+  } else if (command.kind === "player.respawn") {
+    closedRecord(command.payload, [], ["leaveTrip"]);
+    requireContract(command.payload.leaveTrip === void 0 || command.payload.leaveTrip === true, "Invalid respawn");
+  } else if (command.kind === "player.revive") {
+    closedRecord(command.payload, ["targetPlayerId", "holding"]);
+    requireContract(typeof command.payload.targetPlayerId === "string" && command.payload.targetPlayerId.length > 0 && command.payload.targetPlayerId.length <= 120 && typeof command.payload.holding === "boolean", "Invalid revive");
+  } else if (command.kind === "service.bestiary") {
+    closedRecord(command.payload, ["family", "tier", "inventoryRevision"], ["boss"]);
+    requireContract((command.payload.boss === void 0 || command.payload.boss === true) && typeof command.payload.family === "string" && /^[a-z_]{1,40}$/.test(command.payload.family), "Invalid Bestiary page");
+    safeInteger(command.payload.tier, 1, 5);
+    safeInteger(command.payload.inventoryRevision);
+  } else if (command.kind === "service.modify" || command.kind === "service.material" || command.kind === "service.breakdown") {
+    closedRecord(command.payload, ["npcId", "inventoryRevision", ...command.kind === "service.modify" ? ["itemId", "operation", "line"] : ["material", "quantity"]]);
+    safeInteger(command.payload.inventoryRevision);
+    requireContract(/^civilian:[a-z0-9:-]{1,100}$/.test(command.payload.npcId), "Invalid specialist");
+    if (command.kind === "service.modify") {
+      requireContract(/^item:ply:[0-9a-f]{32}:ent:[0-9a-f]{32}$/.test(command.payload.itemId) && ["awaken", "reforge", "enchant", "purge", "resonance", "rebind", "shatter"].includes(command.payload.operation), "Invalid modification");
+      safeInteger(command.payload.line, 0, 4);
+    } else {
+      requireContract(typeof command.payload.material === "string" && command.payload.material.length <= 40, "Invalid material");
+      safeInteger(command.payload.quantity, 1, 1e6);
+    }
+  } else if (["service.buy", "service.sell", "service.rest", "supply.use"].includes(command.kind)) {
+    closedRecord(command.payload, ["inventoryRevision", ...command.kind === "supply.use" ? [] : ["npcId"], ...command.kind === "service.buy" ? ["offerId"] : command.kind === "service.sell" ? ["itemId"] : []]);
+    safeInteger(command.payload.inventoryRevision);
+    if (command.kind !== "supply.use") requireContract(typeof command.payload.npcId === "string" && /^civilian:[a-z0-9:-]{1,100}$/.test(command.payload.npcId), "Invalid civilian identity");
+    if (command.kind === "service.buy") requireContract(typeof command.payload.offerId === "string" && /^(?:[a-z-]{1,50}|daily:\d{1,9}:\d{1,3}:\d{1,3})$/.test(command.payload.offerId), "Invalid offer");
+    if (command.kind === "service.sell") requireContract(typeof command.payload.itemId === "string" && /^item:ply:[0-9a-f]{32}:(?:ent:[0-9a-f]{32}|starter)$/.test(command.payload.itemId), "Invalid sale item");
+  } else if (command.kind === "ferry.travel") {
+    closedRecord(command.payload, ["fromLandingId", "toLandingId"]);
+    requireContract([command.payload.fromLandingId, command.payload.toLandingId].every((id) => /^ferry:(alpha|seeded):[0-9]{2}$/.test(id)) && command.payload.fromLandingId !== command.payload.toLandingId, "Invalid ferry connection");
+  } else if (command.kind === "map.travel") {
+    closedRecord(command.payload, ["destinationId"]);
+    requireContract(typeof command.payload.destinationId === "string" && /^(?:settlement-slot:[a-z-]+:[0-9]{2}|site:[a-f0-9]{32}|player:ply:[0-9a-f]{32})$/.test(command.payload.destinationId), "Invalid fast travel destination");
+  } else if (command.kind === "site.transition") {
+    closedRecord(command.payload, ["siteId", "direction"], ["transitionId", "extractionId"]);
+    requireContract(/^loc:[a-f0-9]{32}$/.test(command.payload.siteId) || /^site:[a-f0-9]{32}$/.test(command.payload.siteId), "Invalid site transition identity");
+    requireContract(["enter", "boss", "exit", "up", "down", "extract"].includes(command.payload.direction), "Invalid site transition direction");
+    if (["up", "down"].includes(command.payload.direction)) requireContract(typeof command.payload.transitionId === "string" && command.payload.transitionId.length <= 180 && command.payload.extractionId === void 0, "Missing floor transition identity");
+    else if (command.payload.direction === "extract") requireContract(typeof command.payload.extractionId === "string" && command.payload.extractionId.length <= 180 && command.payload.transitionId === void 0, "Missing extraction identity");
+    else requireContract(command.payload.transitionId === void 0 && command.payload.extractionId === void 0, "Unexpected site transition identity");
+  } else if (command.kind === "trip.eat") {
+    closedRecord(command.payload, ["snack"]);
+    requireContract(TRIP_SNACK_IDS_V1.includes(command.payload.snack), "Invalid snack");
+  } else if (command.kind === "space.travel") {
+    closedRecord(command.payload, ["exitId"]);
+    requireContract(["field-to-room", "room-to-field"].includes(command.payload.exitId) || isOldwardExit(command.payload.exitId), "Unknown authored or fixture exit");
+  } else {
+    requireContract(command.kind === "combat.basicAttack", "Unsupported command kind");
+    closedRecord(command.payload, ["targetEntityId"]);
+    validateId("entityId", command.payload.targetEntityId);
+  }
+  validateSpaceStamp(command);
+  if (Object.hasOwn(command, "expectedSaveRevision")) validateRevision("saveRevision", command.expectedSaveRevision);
+  return command;
+}
+
+// src/shared/contracts/combat.js
+function validateAttackAction(action) {
+  validateWire(action);
+  closedRecord(action, [
+    "attackActionId",
+    "sourceEntityId",
+    "targetEntityId",
+    "sourceSequence",
+    "spaceInstanceId",
+    "spaceRevision",
+    "eventIds"
+  ], ["causation", "primary"]);
+  if (action.primary) {
+    closedRecord(action.primary, ["primaryActionId", "sourceSequence", "comboStep", "startedTick", "aim"]);
+    validateId("primaryActionId", action.primary.primaryActionId);
+    safeInteger(action.primary.sourceSequence, 1);
+    safeInteger(action.primary.comboStep, 1, 3);
+    safeInteger(action.primary.startedTick);
+    validatePrimaryAim(action.primary.aim);
+    requireContract(action.causation, "Primary hit requires explicit input causation");
+  }
+  if (Object.hasOwn(action, "causation")) {
+    closedRecord(action.causation, ["commandId", "playerId", "characterId", "sessionId"]);
+    for (const kind2 of ["commandId", "playerId", "characterId", "sessionId"]) validateId(kind2, action.causation[kind2]);
+  }
+  validateId("attackActionId", action.attackActionId);
+  validateId("entityId", action.sourceEntityId);
+  validateId("entityId", action.targetEntityId);
+  validateId("spaceInstanceId", action.spaceInstanceId);
+  safeInteger(action.sourceSequence, 1);
+  validateRevision("spaceRevision", action.spaceRevision);
+  closedRecord(action.eventIds, ["attackStartedEventId", "damageAppliedEventId", "actorDefeatedEventId"]);
+  validateId("eventId", action.eventIds.attackStartedEventId);
+  validateId("eventId", action.eventIds.damageAppliedEventId);
+  validateId("eventId", action.eventIds.actorDefeatedEventId);
+  const ids = Object.values(action.eventIds);
+  requireContract(new Set(ids).size === ids.length, "Attack event ID collision");
+  return action;
+}
+function canonicalAttackAction(record) {
+  validateAttackAction(record);
+  return canonicalStringify(record);
+}
+
+// src/shared/contracts/seed.js
+var trimAscii = (value) => value.replace(/^[\u0009-\u000d\u0020]+|[\u0009-\u000d\u0020]+$/g, "");
+function validateStoredSeed(record) {
+  validateWire(record);
+  closedRecord(record, ["seedNormalizationVersion", "seedHex"]);
+  exactVersion(record.seedNormalizationVersion, SEED_NORMALIZATION_VERSION);
+  validateHex(record.seedHex, 16);
+  return record;
+}
+function storedSeed(seedHex) {
+  return freezeWire({ seedNormalizationVersion: SEED_NORMALIZATION_VERSION, seedHex });
+}
+async function normalizeSeedInput(input, { sha256 } = {}) {
+  requireContract(typeof input === "string", "Seed input must be a string");
+  requireContract(utf8(input).length <= 1024, "Seed input exceeds 1024 UTF-8 bytes");
+  let text = trimAscii(input.replace(/\r\n?/g, "\n"));
+  if (text.startsWith("hex:")) {
+    const digits = text.slice(4);
+    requireContract(/^[0-9a-fA-F]{32}$/.test(digits), "hex: requires exactly 32 hex digits (16 bytes)");
+    return storedSeed(digits.toLowerCase());
+  }
+  if (text.startsWith("text:")) text = text.slice(5);
+  text = trimAscii(text).normalize("NFC");
+  requireContract(text.length > 0 && utf8(text).length <= 256, "Text seed must contain 1 to 256 UTF-8 bytes");
+  const digest10 = await hashBytes(frameUtf8(["SAQ-WORLD", SEED_NORMALIZATION_VERSION, text]), sha256);
+  return storedSeed(bytesToHex(digest10.slice(0, 16)));
+}
+async function createRandomSeed({ entropy } = {}) {
+  requireContract(typeof entropy === "function", "Explicit entropy provider required");
+  const bytes = await entropy(16);
+  validateBytes(bytes, 16);
+  return storedSeed(bytesToHex(bytes));
+}
+
+// src/shared/contracts/major_place_names.js
+var MAJOR_NAME_POLICY_VERSION = "major-proper-names-v1";
+var nameKey = (name) => {
+  requireContract(typeof name === "string" && name.trim().length > 0 && name.length <= 64, "Invalid major proper name");
+  return name.trim().toLowerCase();
+};
+function createMajorNameRegistry(reserved = []) {
+  const assigned = /* @__PURE__ */ new Set();
+  function reserve(name) {
+    const key5 = nameKey(name);
+    requireContract(!assigned.has(key5), "Duplicate major proper name");
+    assigned.add(key5);
+    return name;
+  }
+  for (const name of reserved) reserve(name);
+  return Object.freeze({ reserve, assign(candidate, pool) {
+    const start = pool.indexOf(candidate);
+    requireContract(start >= 0, "Major name candidate outside curated pool");
+    for (let offset = 0; offset < pool.length; offset++) {
+      const name = pool[(start + offset) % pool.length];
+      if (!assigned.has(nameKey(name))) return reserve(name);
+    }
+    throw new TypeError("Curated major proper names exhausted");
+  } });
+}
+function validateMajorPlaceNames(manifest) {
+  if (manifest.majorNamePolicyVersion === void 0) {
+    requireContract(!manifest.manifestId.endsWith("-names-v1"), "Missing major name policy");
+    return;
+  }
+  requireContract(manifest.majorNamePolicyVersion === MAJOR_NAME_POLICY_VERSION, "Unknown major name policy");
+  const registry = createMajorNameRegistry();
+  for (const place4 of manifest.settlements) registry.reserve(place4.label);
+  for (const site of manifest.sites) if (site.properName !== void 0) registry.reserve(site.properName);
+}
+
+// src/shared/content/elite_affixes_d12_4.js
+var ELITE_AFFIX_CATALOG_D12_4_VERSION = "elite-affix-catalog-d12.4-v1";
+var VITALITY_WEAVER_AFFIX_ID = "vitality_weaver";
+var SWIFT_COMMANDER_AFFIX_ID = "swift_commander";
+var GLACIAL_WARDEN_AFFIX_ID = "glacial_warden";
+var TOXIC_DECAY_AFFIX_ID = "toxic_decay";
+var IRON_CITADEL_AFFIX_ID = "iron_citadel";
+var BLOOD_BERSERKER_AFFIX_ID = "blood_berserker";
+var NULLIFIER_AFFIX_ID = "nullifier";
+var WEB_WEAVER_AFFIX_ID = "web_weaver";
+var SLAG_SHAPER_AFFIX_ID = "slag_shaper";
+var VITALITY_WEAVER_D12_4 = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: VITALITY_WEAVER_AFFIX_ID,
+  tier: "elite",
+  label: "VITALITY WEAVER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 120, maximumTargets: 3, ordinaryHeal: { numerator: 6, denominator: 100 }, reservedBossHeal: { numerator: 15, denominator: 1e3 } },
+  presentation: { scale: 1.25, accent: "#39d27d", accentDark: "#123e31", accentLight: "#c5f28c" }
+});
+var SWIFT_COMMANDER_D12_4D = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: SWIFT_COMMANDER_AFFIX_ID,
+  tier: "elite",
+  label: "SWIFT COMMANDER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 140, maxStacks: 3, perStackSpeedPercent: 15, lingerTicks: 300, decayTicks: 150 },
+  presentation: { scale: 1.25, accent: "#00d2ff", accentDark: "#123a50", accentLight: "#b9f4ff", commandGold: "#f0c95a" }
+});
+var GLACIAL_WARDEN_D12_4E = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: GLACIAL_WARDEN_AFFIX_ID,
+  tier: "elite",
+  label: "GLACIAL WARDEN",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 120, radius: 110, statusId: "glacial_warden_snare", durationTicks: 60, movementMultiplier: { numerator: 2, denominator: 5 } },
+  presentation: { scale: 1.25, accent: "#38bdf8", accentDark: "#153756", accentLight: "#d9f7ff", iceBlue: "#79d7ff" }
+});
+var TOXIC_DECAY_D12_4F = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: TOXIC_DECAY_AFFIX_ID,
+  tier: "elite",
+  label: "TOXIC DECAY",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 120, statusId: "toxic_decay_poison", durationTicks: 240, tickTicks: 60, maxStacks: 3, damageMaxHp: { numerator: 12, denominator: 1e3 } },
+  presentation: { scale: 1.25, accent: "#69e09b", accentDark: "#241735", accentLight: "#c7ff9a", sludge: "#70408f" }
+});
+var IRON_CITADEL_D12_4G = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: IRON_CITADEL_AFFIX_ID,
+  tier: "elite",
+  label: "IRON CITADEL",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 100, maxStacks: 3, perStackMitigationPercent: 15, lingerTicks: 300, decayTicks: 150 },
+  presentation: { scale: 1.25, accent: "#7196b5", accentDark: "#182a38", accentLight: "#d2e2eb", steel: "#45657d" }
+});
+var BLOOD_BERSERKER_D12_4H_A = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: BLOOD_BERSERKER_AFFIX_ID,
+  tier: "elite",
+  label: "BERSERKER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 110, maxStacks: 3, perStackAttackPercent: 15, lingerTicks: 300, decayTicks: 150, statusId: "blood_berserker_attack" },
+  presentation: { scale: 1.25, accent: "#c83f4f", accentDark: "#35131c", accentLight: "#ffb067", bloodGold: "#e2b85a" }
+});
+var NULLIFIER_D12_4I = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: NULLIFIER_AFFIX_ID,
+  tier: "elite",
+  label: "NULLIFIER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 300, chargeTicks: 60, radius: 90, statusId: "nullified", durationTicks: 120, resistanceTicks: 90 },
+  presentation: { scale: 1.25, accent: "#9b5de5", accentDark: "#251339", accentLight: "#e4c7ff", fracture: "#c98cff" }
+});
+var WEB_WEAVER_D12_4J = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: WEB_WEAVER_AFFIX_ID,
+  tier: "elite",
+  label: "WEB WEAVER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 210, radius: 220, windupTicks: 45, hazardKind: "web_weaver_web", durationTicks: 240, statusId: "webbed", geometry: { kind: "ellipse", radiusX: 75, radiusY: 33.75 }, movementMultiplier: { numerator: 2, denominator: 5 }, maxActivePerSource: 2 },
+  presentation: { scale: 1.25, accent: "#a9f3ff", accentDark: "#241b4b", accentLight: "#f1fdff", thread: "#c7e9ef" }
+});
+var SLAG_SHAPER_D12_4K = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: SLAG_SHAPER_AFFIX_ID,
+  tier: "elite",
+  label: "SLAG SHAPER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 180, windupTicks: 30, hazardKind: "slag_shaper_pool", durationTicks: 300, statusId: "slag_burn", geometry: { kind: "ellipse", radiusX: 12, radiusY: 6 }, damageMaxHp: { numerator: 15, denominator: 1e3 }, damageIntervalTicks: 45, nonlethal: false, maxActivePerSource: 2 },
+  presentation: { scale: 1.25, accent: "#f97316", accentDark: "#25130f", accentLight: "#fff0a8", crust: "#211a19" }
+});
+var ELITE_AFFIX_CATALOG_D12_4 = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  definitionsById: { [VITALITY_WEAVER_AFFIX_ID]: VITALITY_WEAVER_D12_4, [SWIFT_COMMANDER_AFFIX_ID]: SWIFT_COMMANDER_D12_4D, [GLACIAL_WARDEN_AFFIX_ID]: GLACIAL_WARDEN_D12_4E, [TOXIC_DECAY_AFFIX_ID]: TOXIC_DECAY_D12_4F, [IRON_CITADEL_AFFIX_ID]: IRON_CITADEL_D12_4G, [BLOOD_BERSERKER_AFFIX_ID]: BLOOD_BERSERKER_D12_4H_A, [NULLIFIER_AFFIX_ID]: NULLIFIER_D12_4I, [WEB_WEAVER_AFFIX_ID]: WEB_WEAVER_D12_4J, [SLAG_SHAPER_AFFIX_ID]: SLAG_SHAPER_D12_4K }
+});
+function eliteAffixDefinitionD12_4(affixId) {
+  return ELITE_AFFIX_CATALOG_D12_4.definitionsById[affixId] ?? null;
+}
+function applyEliteActorStatsD12_4(profile2, elite) {
+  if (!elite) return profile2;
+  requireContract(elite.tier === "elite" && (elite.affixIds.length === 1 || elite.version === COMPOSITION_ELITE_V1 && elite.affixIds.length <= 3 && elite.affixIds.slice(1).every((id) => PASSIVE_ELITE_TRAITS_V1[id]) && new Set(elite.affixIds).size === elite.affixIds.length), "Unsupported D12.4 elite loadout");
+  const definition = eliteAffixDefinitionD12_4(elite.affixIds[0]);
+  requireContract(definition, "Unsupported D12.4 elite loadout");
+  const d = COMBAT_BALANCE_V3.elite, extra = elite.affixIds.slice(1).map((id) => PASSIVE_ELITE_TRAITS_V1[id]);
+  return {
+    ...profile2,
+    maxHp: combatInteger(extra.reduce((hp, t) => multiplyCombat(hp, t.hp, 100), multiplyCombat(profile2.maxHp, d.maxHp.numerator, d.maxHp.denominator)), "round"),
+    attackDamage: combatInteger(extra.reduce((damage, t) => multiplyCombat(damage, t.damage, 100), multiplyCombat(profile2.attackDamage, d.attackDamage.numerator, d.attackDamage.denominator)), "round")
+  };
+}
+
+// src/shared/content/hidden_hollow_v1.js
+var HOLLOW_VERSION = "hidden-hollow-v1";
+var HOLLOW_LEDGER_VERSION = "world-events-hidden-hollow-v1";
+var HOLLOW_POLICY = freezeWire({ version: HOLLOW_VERSION, parentEventPolicy: "spore-outbreak-v1", maxActive: 4, maximumRecords: 9, waves: [6, 6, 1], firstWaveTicks: 90, intermissionTicks: 150, emergenceTellTicks: 45, emergenceSpacingTicks: 24, playerClearance: 64, triggerRadius: 96, activeRadius: 768, actorBudget: 192, guardian: { family: "golem", rank: "S" }, reset: "one-time V1; manual reset deferred", reward: "one existing ordinary completion chest per eligible participant", simulationHz: 60 });
+var HOLLOW_EVENT = freezeWire({ slotId: "density-v2-event-capacity-064", ordinal: 45, x: 2784, y: 6162, kind: "hidden_hollow", label: "Hidden Hollow", rank: "C", families: ["sprout", "slime", "sprout", "slime", "sprout", "slime", "sprout", "slime", "golem", "sprout", "slime", "sprout", "golem"] });
+var hollowOrdinal = (n) => n === HOLLOW_EVENT.ordinal;
+var HOLLOW_HASH = "4843c693cbb430c877f93108d33d8d78485d15fdf24b4bff89fc819102668a33";
+
+// src/shared/content/starter_village_v1.js
+var STARTER_VERSION = "alderwood-campaign-start-v1";
+var STARTER_VILLAGE_ID = "settlement-slot:village-outpost:01";
+var STARTER_VILLAGE_NAME = "Alderwood";
+var STARTER_VILLAGE_ORIGIN = freezeWire({ x: 3648, y: 6916 });
+var STARTER_ARRIVAL_TILES = freezeWire([{ x: 3682, y: 6946 }, { x: 3683, y: 6946 }, { x: 3682, y: 6947 }, { x: 3683, y: 6947 }]);
+var STARTER_POLICY = freezeWire({ version: STARTER_VERSION, parentRuntime: "143462d57e186816", assetId: "alpha", settlementId: STARTER_VILLAGE_ID, name: STARTER_VILLAGE_NAME, role: "starting-village", biomeId: "biome:woodland", band: 1, template: "village", origin: STARTER_VILLAGE_ORIGIN, dimensions: [64, 52], arrivalTiles: STARTER_ARRIVAL_TILES, start: "fresh-campaign-genesis-and-normal-respawn-only", reopen: "restore-the-actual-saved-position-and-residency", approach: "existing-west-socket-113,266", services: "ordinary-band-1-personal-stock-and-existing-paid-recovery", geographyChanged: false, progressionChanged: false, existingReservationsChanged: false });
+var STARTER_HASH = "f623f142e0a1d76ce8799d8e1d7b658cc67e29cd4c890f7cf778d8876d69ccc4";
+var hasStarterVillage = (value) => {
+  const b = value?.d9World?.plannedWorld ?? value;
+  return b?.startVersion === STARTER_VERSION && b?.startHash === STARTER_HASH;
+};
+var STARTER_NPCS = freezeWire([
+  { id: "civilian:alpha:alderwood:merchant", name: "Alderwood Merchant", role: "general", roleLabel: "General merchant", settlementId: STARTER_VILLAGE_ID, buildingId: "village:roof:002", band: 1, tile: { x: 3665, y: 6934 }, space: "exterior", color: "#58766d" },
+  { id: "civilian:alpha:alderwood:smith", name: "Alderwood Smith", role: "smith", roleLabel: "Equipment merchant", settlementId: STARTER_VILLAGE_ID, buildingId: "village:roof:003", band: 1, tile: { x: 3700, y: 6931 }, space: "exterior", color: "#8d6c49" },
+  { id: "civilian:alpha:alderwood:innkeeper", name: "Alderwood Innkeeper", role: "innkeeper", roleLabel: "Innkeeper \xB7 veranda rest", settlementId: STARTER_VILLAGE_ID, buildingId: "village:roof:002", band: 1, tile: { x: 3667, y: 6934 }, space: "exterior", color: "#81657a" }
+]);
+
+// src/shared/content/spore_outbreak_v1.js
+var SPORE_VERSION = "spore-outbreak-v1";
+var SPORE_POLICY = Object.freeze({ version: SPORE_VERSION, maxActive: 4, pods: 3, mushrooms: 12, living: 6, flightTicks: 60, growthTicks: 90, launchIntervalTicks: 180, activeRadius: 768, triggerRadius: 96, hatchPlayerClearance: 64, reset: "one-time; manual reset deferred", reward: "ordinary mushroom and breakable rewards; one personal completion chest per participant", simulationHz: 60 });
+var SPORE_EVENTS = Object.freeze([
+  { slotId: "density-v2-event-capacity-027", ordinal: 40, x: 3424, y: 6942 },
+  { slotId: "density-v2-event-capacity-123", ordinal: 41, x: 3232, y: 6994 },
+  { slotId: "density-v2-event-capacity-097", ordinal: 42, x: 2784, y: 6994 },
+  { slotId: "density-v2-event-capacity-051", ordinal: 43, x: 2656, y: 7046 },
+  { slotId: "density-v2-event-capacity-153", ordinal: 44, x: 2912, y: 6110 }
+].map((e) => Object.freeze({ ...e, kind: "spore_outbreak", label: "Spore Outbreak", rank: "C", families: Object.freeze(Array(12).fill("sprout")) })));
+var eventOrdinal = (n) => Number.isInteger(n) && n >= 37 && n <= 44;
+var sporeOrdinal = (n) => SPORE_EVENTS.some((e) => e.ordinal === n);
+var protectionCache = /* @__PURE__ */ new WeakMap();
+function worldEventProtectionV1(asset) {
+  let cached = protectionCache.get(asset);
+  if (cached) return cached;
+  const chunks = /* @__PURE__ */ new Set(), protect = (c) => {
+    if (Number.isFinite(c?.x) && Number.isFinite(c?.y)) chunks.add(c.x + "," + c.y);
+  }, keys2 = /* @__PURE__ */ new Set(["core", "expansion", "footprint", "approach", "coreChunks", "expansionChunks", "footprintChunks", "approachChunks", "reservedChunks", "sockets", "campus", "activity", "arrival", "entrance", "landing", "breathing"]);
+  const scan = (o) => {
+    if (!o || typeof o !== "object") return;
+    if (Array.isArray(o)) {
+      for (const v of o) scan(v);
+      return;
+    }
+    for (const [k, v] of Object.entries(o)) {
+      if (keys2.has(k)) {
+        if (Array.isArray(v)) for (const c of v) protect(c);
+        else protect(v);
+      }
+      if (v && typeof v === "object") scan(v);
+    }
+  };
+  for (const list2 of [asset.settlements, asset.sites, asset.futureIslands, asset.factions, asset.populationOverlay]) scan(list2);
+  for (const c of asset.extraProtected ?? []) protect(c);
+  for (const c of asset.originZone?.runtimeChunks ?? []) protect({ x: c.chunkX, y: c.chunkY });
+  cached = (x, y) => {
+    if (STARTER_ARRIVAL_TILES.some((p) => Math.hypot(x - p.x, y - p.y) <= 32) || asset.spawnTile && Math.hypot(x - asset.spawnTile.x, y - asset.spawnTile.y) <= 32 || ferryNetworkV1().landings.some((p) => Math.hypot(x - p.tile.x, y - p.tile.y) <= 32)) return false;
+    const cx = Math.floor(x / 32), cy = Math.floor(y / 26), r = ROADSIDE_POLICY.wildernessSafetyCollarTiles;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const xx = cx + dx, yy = cy + dy;
+      if (chunks.has(xx + "," + yy) && x >= xx * 32 - r && x < (xx + 1) * 32 + r && y >= yy * 26 - r && y < (yy + 1) * 26 + r) return false;
+    }
+    return true;
+  };
+  protectionCache.set(asset, cached);
+  return cached;
+}
+
+// src/shared/content/wilderness_ecology_v3.js
+var existingCreature = (family2) => ORDINARY_ENEMIES.some((row2) => row2.family === family2);
+var WILDERNESS_ECOLOGY_BIOMES = Object.freeze(["woodland", "grassland", "wetland", "upland", "desert", "frostland", "tropical", "volcanic"]);
+var WILDERNESS_ECOLOGY_SITE_FAMILIES = Object.freeze(["cave", "ruin", "fort", "crypt"]);
+var WILDERNESS_ECOLOGY_TIERS = Object.freeze(["small", "standard", "large", "deep"]);
+var WILDERNESS_ECOLOGY_V3_MATRIX = freezeWire({
+  woodland: { surface: ["sprout", "slime", "thorn_wyrm"], cave: ["rust_nibbler", "slime", "golem"], ruin: ["cursed_blade", "gargoyle", "sprout"], fort: ["animated_armor", "golem"], crypt: ["cursed_blade", "gargoyle"] },
+  grassland: { surface: ["thorn_wyrm", "tusk_boar", "field_scarecrow", "field_mantis", "meadow_bee"], cave: ["thorn_wyrm", "tusk_boar", "field_mantis"], ruin: ["barrow_wight", "field_scarecrow", "meadow_bee"], fort: ["field_scarecrow", "tusk_boar", "field_mantis"], crypt: ["barrow_wight", "meadow_bee"] },
+  wetland: { surface: ["toxic_fly", "marsh_ghost", "bog_lily", "bog_frog", "leech"], cave: ["swamp_basilisk", "corroded_golem", "leech"], ruin: ["marsh_ghost", "bog_lily"], fort: ["corroded_golem", "bog_frog"], crypt: ["marsh_ghost", "bog_lily"] },
+  upland: { surface: ["wyrmling", "gilded_scuttler", "horn_beetle", "griffling", "cairnling"], cave: ["gilded_scuttler", "wyrmling", "horn_beetle"], ruin: ["mimic_shield", "gilded_scuttler", "cairnling"], fort: ["mimic_shield", "gilded_scuttler", "griffling"], crypt: ["mimic_shield", "cairnling"] },
+  desert: { surface: ["sand_scarab", "dune_scorpion", "antlion", "cactling", "dust_imp"], cave: ["dune_scorpion", "sand_scarab", "antlion"], ruin: ["tomb_mummy", "sand_scarab", "cactling"], fort: ["dune_scorpion", "tomb_mummy", "dust_imp"], crypt: ["tomb_mummy", "sand_scarab", "dust_imp"] },
+  frostland: { surface: ["wyrmling", "gilded_scuttler", "shardling", "young_yeti", "lantern_wisp"], cave: ["wyrmling", "gilded_scuttler", "young_yeti"], ruin: ["mimic_shield", "shardling"], fort: ["mimic_shield", "gilded_scuttler", "lantern_wisp"], crypt: ["mimic_shield", "lantern_wisp"] },
+  tropical: { surface: ["thorn_wyrm", "snapjaw", "dart_frog"], cave: ["thorn_wyrm", "dart_frog"], ruin: ["snapjaw", "dart_frog"], fort: ["dart_frog", "snapjaw"], crypt: ["snapjaw"] },
+  volcanic: { surface: ["hell_bat", "lava_serpent", "cinder_crab", "forge_imp", "ember_newt"], cave: ["slag_slime", "hell_bat", "cinder_crab"], ruin: ["magma_elemental", "slag_slime", "ember_newt"], fort: ["magma_elemental", "lava_serpent", "forge_imp"], crypt: ["forge_imp"] }
+});
+var WILDERNESS_ECOLOGY_BOSS_CANDIDATES = freezeWire({
+  "repeatable-slot:fort:upland:deep:01": { bossId: "aegis_goliath", support: ["mimic_shield"], status: "needs-native-arena-validation" },
+  "repeatable-slot:ruin:volcanic:large:01": { bossId: "brimstone_colossus", support: ["magma_elemental", "slag_slime"], status: "needs-native-arena-validation" }
+});
+var WILDERNESS_ECOLOGY_STARTER_SITES = freezeWire({
+  "starter-cave": { enemyTheme: "rust-nibblers-and-slimes" },
+  "starter-elite-fort": { enemyTheme: "animated-armour-and-golems" },
+  "advanced-ruin": { enemyTheme: "gargoyle-and-cursed-blades" }
+});
+var WILDERNESS_V3_STARTER_POOLS = freezeWire({
+  "starter-cave": { biome: "woodland", family: "cave", tier: "small", melee: ["rust_nibbler", "slime"] },
+  "starter-elite-fort": { biome: "woodland", family: "fort", tier: "standard", melee: ["animated_armor", "golem"] },
+  "advanced-ruin": { biome: "woodland", family: "ruin", tier: "standard", melee: ["cursed_blade", "gargoyle"] }
+});
+function starterWildernessPoolV3(site) {
+  const provenance = site?.socket?.provenance;
+  const reservationId = provenance?.reservationId;
+  const spec = WILDERNESS_V3_STARTER_POOLS[starterRoleAtSiteV1(reservationId)];
+  if (!spec) return null;
+  const rawFamily = site?.familyId?.split(":").at(-1) ?? site?.siteKind?.replace("procedural-", "");
+  const family2 = rawFamily?.includes("cave") ? "cave" : rawFamily;
+  if (site?.socket?.region?.biome !== spec.biome || family2 !== spec.family || site?.sizeTier !== spec.tier)
+    throw Error("V3 starter encounter reservation geometry drift: " + reservationId);
+  return freezeWire({ key: "wilderness-v3-starter:" + reservationId, ranged: [], melee: spec.melee });
+}
+var isWildernessStarterSiteV3 = (site) => Boolean(starterRoleAtSiteV1(site?.socket?.provenance?.reservationId));
+for (const spec of Object.values(WILDERNESS_V3_STARTER_POOLS))
+  for (const family2 of spec.melee) if (!existingCreature(family2)) throw Error("Missing V3 starter mob: " + family2);
+var WILDERNESS_ECOLOGY_RARE_SITE_THEMES = freezeWire({
+  void: ["void_crawler", "void_spectre", "void_wraith", "void_orb", "rift_drifter"],
+  clockwork: ["clockwork_scarab", "clockwork_drone", "temporal_watcher", "star_weaver"],
+  arcane: ["neon_spider", "wireframe_orb", "cyber_wraith", "coin_elemental"]
+});
+for (const [biome, roles] of Object.entries(WILDERNESS_ECOLOGY_V3_MATRIX)) {
+  if (!WILDERNESS_ECOLOGY_BIOMES.includes(biome)) throw Error("Invalid V3 biome " + biome);
+  for (const [role, families] of Object.entries(roles)) {
+    if (role !== "surface" && !WILDERNESS_ECOLOGY_SITE_FAMILIES.includes(role)) throw Error("Invalid V3 role");
+    if (new Set(families).size !== families.length) throw Error("Duplicate V3 family");
+    for (const family2 of families) if (!existingCreature(family2)) throw Error("Unknown existing V3 creature " + family2);
+  }
+}
+for (const f3 of Object.values(WILDERNESS_ECOLOGY_RARE_SITE_THEMES).flat()) if (!existingCreature(f3)) throw Error("Unknown exotic creature " + f3);
+
+// src/shared/content/wilderness_fairness_v3_2.js
+var WILDERNESS_FAIRNESS_V3_2_VERSION = "wilderness-v3-2-level-fairness-1";
+var WILDERNESS_FAIRNESS_V3_2 = Object.freeze({
+  version: WILDERNESS_FAIRNESS_V3_2_VERSION,
+  enemyBaseDamage: "unchanged; no additional multiplier from level difference",
+  enemyDamageAmplification: "boss/elite abilities remain independent of level difference",
+  playerOffense: "preserve exact existing higher-level resistance",
+  historicWorldCombatV1: "immutable; retain published level-gap contract for legacy non-wilderness worlds",
+  eligibility: "world-combat-v1 plus committed wilderness-v2 world binding",
+  pendingSeparateTuning: "cleave reach and simultaneous incoming hit protection"
+});
+var usesWildernessFairnessV3_2 = (state) => hasWorldCombat(state) && hasWilderness(state?.d9World?.plannedWorld);
+function wildernessFairLevelGap(heroLevel, enemyLevel) {
+  const old = worldLevelGapMultiplier(heroLevel, enemyLevel);
+  return { outgoing: old.outgoing, incoming: combatAmount(1) };
+}
+
+// src/shared/content/alpha_site_population_v1.js
+var ALPHA_POPULATION_VERSION = "planned-alpha-site-population-v1";
+var ALPHA_POPULATION_HASH = "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e";
+var ALPHA_POPULATION_PLAN_HASH = "42261b05d1b3b93f91721cf482a8aae0af872615027e5e74d9422f045cb3eca7";
+var ALPHA_POPULATION_ROUTE_HASH = "baf9ea6ed5e392b4879e4d8e53fcd4f194c49f0e5819dbb98bdbe4a13e99e082";
+var ALPHA_POPULATION_BASE_HASH = "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a";
+var ALPHA_POPULATION_SELECTIONS = freezeWire([{ "anchor": { "key": "35,116", "x": 35, "y": 116 }, "approach": [{ "x": 71, "y": 232 }], "band": 2, "familyId": "site-family:cave", "footprint": [{ "x": 70, "y": 232 }], "id": "repeatable-slot:cave:woodland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "woodland", "old": true, "added": false }, { "anchor": { "key": "77,95", "x": 77, "y": 95 }, "approach": [{ "x": 155, "y": 190 }], "band": 3, "familyId": "site-family:cave", "footprint": [{ "x": 154, "y": 190 }], "id": "repeatable-slot:cave:desert:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "desert", "old": true, "added": false }, { "anchor": { "key": "32,110", "x": 32, "y": 110 }, "approach": [{ "x": 65, "y": 220 }], "band": 2, "familyId": "site-family:cave", "footprint": [{ "x": 64, "y": 220 }], "id": "repeatable-slot:cave:upland:large:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "large", "biome": "upland", "old": true, "added": false }, { "anchor": { "key": "58,36", "x": 58, "y": 36 }, "approach": [{ "x": 117, "y": 72 }], "band": 3, "familyId": "site-family:cave", "footprint": [{ "x": 116, "y": 72 }], "id": "repeatable-slot:cave:tropical:deep:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "deep", "biome": "tropical", "old": true, "added": false }, { "anchor": { "key": "88,45", "x": 88, "y": 45 }, "approach": [{ "x": 177, "y": 89 }, { "x": 178, "y": 89 }], "band": 3, "familyId": "site-family:fort", "footprint": [{ "x": 175, "y": 89 }, { "x": 176, "y": 89 }, { "x": 175, "y": 90 }, { "x": 176, "y": 90 }], "id": "repeatable-slot:fort:grassland:small:01", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "tier": "small", "biome": "grassland", "old": true, "added": false }, { "anchor": { "key": "21,128", "x": 21, "y": 128 }, "approach": [{ "x": 43, "y": 255 }, { "x": 44, "y": 255 }], "band": 1, "familyId": "site-family:fort", "footprint": [{ "x": 41, "y": 254 }, { "x": 42, "y": 254 }, { "x": 41, "y": 255 }, { "x": 42, "y": 255 }, { "x": 41, "y": 256 }, { "x": 42, "y": 256 }], "id": "repeatable-slot:fort:woodland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "woodland", "old": true, "added": false }, { "anchor": { "key": "125,110", "x": 125, "y": 110 }, "approach": [{ "x": 249, "y": 223 }, { "x": 249, "y": 224 }, { "x": 249, "y": 225 }], "band": 5, "familyId": "site-family:fort", "footprint": [{ "x": 248, "y": 220 }, { "x": 249, "y": 220 }, { "x": 250, "y": 220 }, { "x": 248, "y": 221 }, { "x": 249, "y": 221 }, { "x": 250, "y": 221 }, { "x": 248, "y": 222 }, { "x": 249, "y": 222 }, { "x": 250, "y": 222 }], "id": "repeatable-slot:fort:tropical:large:01", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "tier": "large", "biome": "tropical", "old": true, "added": false }, { "anchor": { "key": "39,132", "x": 39, "y": 132 }, "approach": [{ "x": 79, "y": 263 }], "band": 1, "familyId": "site-family:ruin", "footprint": [{ "x": 78, "y": 263 }, { "x": 78, "y": 264 }], "id": "repeatable-slot:ruin:woodland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "woodland", "old": true, "added": false }, { "anchor": { "key": "38,100", "x": 38, "y": 100 }, "approach": [{ "x": 77, "y": 199 }, { "x": 78, "y": 199 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 75, "y": 199 }, { "x": 76, "y": 199 }, { "x": 75, "y": 200 }, { "x": 76, "y": 200 }], "id": "repeatable-slot:ruin:upland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "upland", "old": true, "added": false }, { "anchor": { "key": "125,36", "x": 125, "y": 36 }, "approach": [{ "x": 251, "y": 71 }, { "x": 252, "y": 71 }], "band": 4, "familyId": "site-family:ruin", "footprint": [{ "x": 249, "y": 70 }, { "x": 250, "y": 70 }, { "x": 249, "y": 71 }, { "x": 250, "y": 71 }, { "x": 249, "y": 72 }, { "x": 250, "y": 72 }], "id": "repeatable-slot:ruin:volcanic:large:01", "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "tier": "large", "biome": "volcanic", "old": true, "added": false }, { "anchor": { "key": "59,138", "x": 59, "y": 138 }, "approach": [{ "x": 119, "y": 276 }], "band": 2, "familyId": "site-family:crypt", "footprint": [{ "x": 118, "y": 276 }], "id": "repeatable-slot:crypt:grassland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "grassland", "old": true, "added": false }, { "anchor": { "key": "74,111", "x": 74, "y": 111 }, "approach": [{ "x": 149, "y": 222 }], "band": 3, "familyId": "site-family:crypt", "footprint": [{ "x": 148, "y": 222 }], "id": "repeatable-slot:crypt:upland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "upland", "old": true, "added": false }, { "anchor": { "key": "69,78", "x": 69, "y": 78 }, "approach": [{ "x": 138, "y": 157 }], "band": 3, "familyId": "site-family:crypt", "footprint": [{ "x": 138, "y": 156 }], "id": "repeatable-slot:crypt:frostland:deep:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "deep", "biome": "frostland", "old": true, "added": false }, { "anchor": { "key": "72,87", "x": 72, "y": 87 }, "approach": [{ "x": 145, "y": 174 }], "band": 3, "familyId": "site-family:cave", "footprint": [{ "x": 144, "y": 174 }], "id": "repeatable-slot:cave:desert:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "desert", "old": false, "added": false }, { "anchor": { "key": "113,72", "x": 113, "y": 72 }, "approach": [{ "x": 227, "y": 144 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 226, "y": 144 }], "id": "repeatable-slot:cave:frostland:large:01", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "tier": "large", "biome": "frostland", "old": false, "added": false }, { "anchor": { "key": "112,120", "x": 112, "y": 120 }, "approach": [{ "x": 225, "y": 240 }], "band": 5, "familyId": "site-family:cave", "footprint": [{ "x": 224, "y": 240 }], "id": "repeatable-slot:cave:grassland:small:01", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "tier": "small", "biome": "grassland", "old": false, "added": false }, { "anchor": { "key": "63,12", "x": 63, "y": 12 }, "approach": [{ "x": 127, "y": 24 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 126, "y": 24 }], "id": "repeatable-slot:cave:upland:standard:01", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "tier": "standard", "biome": "upland", "old": false, "added": false }, { "anchor": { "key": "79,56", "x": 79, "y": 56 }, "approach": [{ "x": 159, "y": 112 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 158, "y": 112 }], "id": "repeatable-slot:cave:volcanic:deep:01", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "tier": "deep", "biome": "volcanic", "old": false, "added": false }, { "anchor": { "key": "35,55", "x": 35, "y": 55 }, "approach": [{ "x": 71, "y": 110 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 70, "y": 110 }], "id": "repeatable-slot:cave:wetland:small:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "small", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "47,50", "x": 47, "y": 50 }, "approach": [{ "x": 95, "y": 100 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 94, "y": 100 }], "id": "repeatable-slot:cave:wetland:standard:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "standard", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "19,122", "x": 19, "y": 122 }, "approach": [{ "x": 39, "y": 244 }], "band": 1, "familyId": "site-family:cave", "footprint": [{ "x": 38, "y": 244 }], "id": "repeatable-slot:cave:woodland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "woodland", "old": false, "added": false }, { "anchor": { "key": "112,33", "x": 112, "y": 33 }, "approach": [{ "x": 225, "y": 66 }], "band": 4, "familyId": "site-family:crypt", "footprint": [{ "x": 224, "y": 66 }], "id": "repeatable-slot:crypt:desert:small:01", "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "tier": "small", "biome": "desert", "old": false, "added": false }, { "id": "repeatable-slot:crypt:frostland:large:01", "familyId": "site-family:crypt", "tier": "large", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "band": 4, "anchor": { "key": "118,73", "x": 118, "y": 73 }, "footprint": [{ "x": 236, "y": 146 }], "approach": [{ "x": 237, "y": 146 }], "biome": "frostland", "old": false, "added": true }, { "anchor": { "key": "32,70", "x": 32, "y": 70 }, "approach": [{ "x": 65, "y": 140 }], "band": 4, "familyId": "site-family:crypt", "footprint": [{ "x": 64, "y": 140 }], "id": "repeatable-slot:crypt:wetland:standard:01", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "tier": "standard", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "39,122", "x": 39, "y": 122 }, "approach": [{ "x": 79, "y": 244 }], "band": 2, "familyId": "site-family:crypt", "footprint": [{ "x": 78, "y": 244 }], "id": "repeatable-slot:crypt:woodland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "woodland", "old": false, "added": false }, { "anchor": { "key": "68,91", "x": 68, "y": 91 }, "approach": [{ "x": 137, "y": 181 }, { "x": 138, "y": 181 }], "band": 3, "familyId": "site-family:fort", "footprint": [{ "x": 135, "y": 180 }, { "x": 136, "y": 180 }, { "x": 135, "y": 181 }, { "x": 136, "y": 181 }, { "x": 135, "y": 182 }, { "x": 136, "y": 182 }], "id": "repeatable-slot:fort:desert:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "desert", "old": false, "added": false }, { "id": "repeatable-slot:fort:upland:deep:01", "familyId": "site-family:fort", "tier": "deep", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "band": 4, "anchor": { "key": "95,34", "x": 95, "y": 34 }, "footprint": [{ "x": 190, "y": 68 }, { "x": 191, "y": 68 }, { "x": 192, "y": 68 }, { "x": 193, "y": 68 }, { "x": 190, "y": 69 }, { "x": 191, "y": 69 }, { "x": 192, "y": 69 }, { "x": 193, "y": 69 }, { "x": 190, "y": 70 }, { "x": 191, "y": 70 }, { "x": 192, "y": 70 }, { "x": 193, "y": 70 }], "approach": [{ "x": 194, "y": 69 }, { "x": 195, "y": 69 }, { "x": 196, "y": 69 }, { "x": 197, "y": 69 }], "biome": "upland", "old": false, "added": true }, { "anchor": { "key": "75,20", "x": 75, "y": 20 }, "approach": [{ "x": 149, "y": 41 }, { "x": 149, "y": 42 }], "band": 4, "familyId": "site-family:fort", "footprint": [{ "x": 149, "y": 38 }, { "x": 150, "y": 38 }, { "x": 149, "y": 39 }, { "x": 150, "y": 39 }, { "x": 149, "y": 40 }, { "x": 150, "y": 40 }], "id": "repeatable-slot:fort:upland:standard:01", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "tier": "standard", "biome": "upland", "old": false, "added": false }, { "anchor": { "key": "44,76", "x": 44, "y": 76 }, "approach": [{ "x": 89, "y": 151 }, { "x": 90, "y": 151 }], "band": 4, "familyId": "site-family:fort", "footprint": [{ "x": 87, "y": 151 }, { "x": 88, "y": 151 }, { "x": 87, "y": 152 }, { "x": 88, "y": 152 }], "id": "repeatable-slot:fort:wetland:small:01", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "tier": "small", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "57,88", "x": 57, "y": 88 }, "approach": [{ "x": 115, "y": 175 }, { "x": 116, "y": 175 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 113, "y": 175 }, { "x": 114, "y": 175 }, { "x": 113, "y": 176 }, { "x": 114, "y": 176 }], "id": "repeatable-slot:ruin:desert:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "desert", "old": false, "added": false }, { "id": "repeatable-slot:ruin:frostland:deep:01", "familyId": "site-family:ruin", "tier": "deep", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "band": 4, "anchor": { "key": "112,77", "x": 112, "y": 77 }, "footprint": [{ "x": 224, "y": 154 }, { "x": 225, "y": 154 }, { "x": 226, "y": 154 }, { "x": 224, "y": 155 }, { "x": 225, "y": 155 }, { "x": 226, "y": 155 }, { "x": 224, "y": 156 }, { "x": 225, "y": 156 }, { "x": 226, "y": 156 }], "approach": [{ "x": 227, "y": 155 }, { "x": 228, "y": 155 }, { "x": 229, "y": 155 }], "biome": "frostland", "old": false, "added": true }, { "anchor": { "key": "28,73", "x": 28, "y": 73 }, "approach": [{ "x": 57, "y": 145 }, { "x": 58, "y": 145 }], "band": 4, "familyId": "site-family:ruin", "footprint": [{ "x": 55, "y": 145 }, { "x": 56, "y": 145 }, { "x": 55, "y": 146 }, { "x": 56, "y": 146 }], "id": "repeatable-slot:ruin:frostland:standard:01", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "tier": "standard", "biome": "frostland", "old": false, "added": false }, { "anchor": { "key": "73,144", "x": 73, "y": 144 }, "approach": [{ "x": 147, "y": 287 }], "band": 2, "familyId": "site-family:ruin", "footprint": [{ "x": 146, "y": 287 }, { "x": 146, "y": 288 }], "id": "repeatable-slot:ruin:grassland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "grassland", "old": false, "added": false }, { "anchor": { "key": "44,31", "x": 44, "y": 31 }, "approach": [{ "x": 88, "y": 63 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 88, "y": 61 }, { "x": 88, "y": 62 }], "id": "repeatable-slot:ruin:tropical:small:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "small", "biome": "tropical", "old": false, "added": false }, { "anchor": { "key": "102,89", "x": 102, "y": 89 }, "approach": [{ "x": 205, "y": 177 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 204, "y": 177 }, { "x": 204, "y": 178 }], "id": "repeatable-slot:ruin:wetland:small:01", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "tier": "small", "biome": "wetland", "old": false, "added": false }]);
+var hasAlphaPopulation = (b) => b?.sitePopulation === ALPHA_POPULATION_VERSION && b.sitePopulationHash === ALPHA_POPULATION_HASH;
+var seededSites = () => {
+  const s = worldSitesV1();
+  requireContract(s, "Seeded world sites not loaded");
+  return s;
+};
+var populationIds = (b, family2) => hasAlphaPopulation(b) ? (isSeededBindingV1(b) ? seededSites() : [...ALPHA_POPULATION_SELECTIONS, ...hasWilderness(b) ? WILDERNESS_SITE_SELECTIONS : [], ...hasFirstJourney(b) ? [FIRST_CAVE_SELECTION] : []]).filter((s) => s.familyId === "site-family:" + family2).map((s) => s.id) : null;
+var newPopulationSelection = (id) => worldSitesV1() ? worldSiteV1(id) : ALPHA_POPULATION_SELECTIONS.find((s) => s.id === id && !s.old) ?? wildernessSelection(id) ?? (id === FIRST_CAVE_SELECTION.id ? FIRST_CAVE_SELECTION : null);
 
 // src/shared/content/economy_rewards.js
 var CONTENT_REWARD_VERSION = "world-content-depth-d5-eco-v1";
@@ -9990,10 +10050,10 @@ function assertReleasedActorFootprintsD9(state, releaseChunks, detachedGroupIds 
 var views = /* @__PURE__ */ new WeakMap();
 var positionCaptures = /* @__PURE__ */ new WeakMap();
 var frameKeys = /* @__PURE__ */ new Set(["id", "chunkX", "chunkY", "offsetX", "offsetY", "playerIds", "originBounds"]);
-function dataRecord(value, required, allowed = required) {
+function dataRecord(value, required, allowed2 = required) {
   if (!value || typeof value !== "object" || ![Object.prototype, null].includes(Object.getPrototypeOf(value))) return null;
   const descriptors = Object.getOwnPropertyDescriptors(value), keys2 = Reflect.ownKeys(descriptors);
-  if (keys2.some((key5) => typeof key5 !== "string" || !allowed.has(key5)) || [...required].some((key5) => !Object.hasOwn(descriptors, key5))) return null;
+  if (keys2.some((key5) => typeof key5 !== "string" || !allowed2.has(key5)) || [...required].some((key5) => !Object.hasOwn(descriptors, key5))) return null;
   return keys2.every((key5) => Object.hasOwn(descriptors[key5], "value")) ? descriptors : null;
 }
 var frameRequired = /* @__PURE__ */ new Set(["id", "chunkX", "chunkY", "offsetX", "offsetY", "playerIds"]);
@@ -21458,13 +21518,13 @@ function roomCells(floor, room2) {
   return out;
 }
 function reachableWithin(cells3, start, goal) {
-  const allowed = new Set(cells3.map(cellKey)), seen = /* @__PURE__ */ new Set([cellKey(start)]), queue = [start];
+  const allowed2 = new Set(cells3.map(cellKey)), seen = /* @__PURE__ */ new Set([cellKey(start)]), queue = [start];
   for (let i = 0; i < queue.length; i++) {
     const p = queue[i];
     if (p.x === goal.x && p.y === goal.y) return true;
     for (const [dx, dy] of [[0, -1], [-1, 0], [1, 0], [0, 1]]) {
       const q = { x: p.x + dx, y: p.y + dy }, k = cellKey(q);
-      if (allowed.has(k) && !seen.has(k)) {
+      if (allowed2.has(k) && !seen.has(k)) {
         seen.add(k);
         queue.push(q);
       }
@@ -21555,7 +21615,7 @@ function deriveWoodlandCaveFinaleReservationD13D_E(site) {
   return freezeWire({ ...prior, version: SITE_FINALE_RESERVATION_D13D_E, rewardBinding: { version: STANDARD_CAVE_FINALE_REWARD_D13D_E, profileId: STANDARD_CAVE_FINALE_REWARD_PROFILE_D13D_E, rewardClass: BOSS_COMPLETION_REWARD_CLASS } });
 }
 function largeElitePlacement(site, positions2, family2) {
-  const { finalFloor: floor, endRoom, reward } = geometry(site), hull = actorHull(family2), tile = floor.collision.tileSize, raw = roomCells(floor, endRoom), allowed = new Set(raw.map(cellKey)), cell = (p) => ({ x: Math.floor(p.x / tile), y: Math.floor(p.y / tile) }), bossCell = cell(positions2.boss), safe = raw.filter((c) => {
+  const { finalFloor: floor, endRoom, reward } = geometry(site), hull = actorHull(family2), tile = floor.collision.tileSize, raw = roomCells(floor, endRoom), allowed2 = new Set(raw.map(cellKey)), cell = (p) => ({ x: Math.floor(p.x / tile), y: Math.floor(p.y / tile) }), bossCell = cell(positions2.boss), safe = raw.filter((c) => {
     const p = center(floor, c);
     return !collidesWithTiles(floor.collision, p.x, p.y, hull);
   }), reserved = [floor.entrance, ...Object.values(floor.transitions ?? {}).filter(Boolean).map((row2) => row2.anchor), reward.position], decorations3 = (floor.visual?.decorations ?? []).map((row2) => ({ x: row2.x * tile, y: row2.y * tile }));
@@ -21564,7 +21624,7 @@ function largeElitePlacement(site, positions2, family2) {
       const q = center(floor, c);
       return !collidesWithTiles(floor.collision, q.x, q.y, h);
     });
-    return allowed.has(cellKey(cell(p))) && reachableWithin(walk, bossCell, cell(p));
+    return allowed2.has(cellKey(cell(p))) && reachableWithin(walk, bossCell, cell(p));
   })) return null;
   const candidates = safe.filter((c) => {
     const p = center(floor, c);
@@ -23928,7 +23988,7 @@ function validateSalvage(p, s, validateCommand2) {
     requireContract(item.itemId === id && item.ownerPlayerId === p.playerId && item.sourceEntityId !== null && !inv.itemsById[id] && !inv.renewal.groundBySourceId[item.sourceEntityId], "Salvage terminal ownership");
     requireContract(!Object.values(inv.subweapons.claims).some((c) => c.sourceEntityId === item.sourceEntityId), "Provision salvaged");
     if (servicePurchase(p, item.sourceEntityId)) validateServiceItem(s, p, item);
-    else if (item.generated && r.origin?.carried === void 0) validateGeneratedGear(item.generated, gearSeed(s, p, item.sourceEntityId), item.generated.contentDepth);
+    else if (item.generated && r.origin?.carried === void 0 && r.origin?.dev === void 0) validateGeneratedGear(item.generated, gearSeed(s, p, item.sourceEntityId), item.generated.contentDepth);
     if (r.reward) requireContract(r.reward.sourceEntityId === item.sourceEntityId && r.reward.claimed && r.reward.definitionId === item.definitionId && same17(r.reward.generated ?? null, item.generated ?? null) && r.reward.pickup?.authorityOrder < r.authorityOrder, "Salvage reward ancestry");
     const quote = salvageQuote(p, item);
     requireContract(same17(r.materials, quote.materials) && (r.command.kind === "service.modify" && r.command.payload.operation === "shatter" || r.command.payload.fingerprint === quote.fingerprint) && r.command.payload.itemId === id, "Salvage quote mismatch");
@@ -25034,14 +25094,14 @@ var CONQUEST_TIERS = Object.freeze(["C", "B", "A", "S"]);
 var SEMANTIC_POLICY_VERSION = "connected-regions-tier-capacity-v1";
 var SEAM_POLICY_VERSION = "open-world-spans-v1";
 function requireConnectedSubset(ids, adjacency, message) {
-  const allowed = new Set(ids), visited = /* @__PURE__ */ new Set(), pending = [ids[0]];
+  const allowed2 = new Set(ids), visited = /* @__PURE__ */ new Set(), pending = [ids[0]];
   while (pending.length) {
     const id = pending.pop();
     if (visited.has(id)) continue;
     visited.add(id);
-    for (const next of adjacency.get(id)) if (allowed.has(next) && !visited.has(next)) pending.push(next);
+    for (const next of adjacency.get(id)) if (allowed2.has(next) && !visited.has(next)) pending.push(next);
   }
-  requireContract(visited.size === allowed.size, message);
+  requireContract(visited.size === allowed2.size, message);
 }
 function validateVisual(visual2, width, height) {
   closedRecord(visual2, ["terrain", "blockers", "atmosphere"]);
@@ -29370,6 +29430,11 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       requireContract(n.arrival && o.carried === n.arrival.heroId && o.sourceEntityId === id, "Unknown carried provenance");
       return;
     }
+    if (o?.dev !== void 0) {
+      closedRecord(o, ["dev", "sourceEntityId"]);
+      requireContract(typeof o.dev === "string" && DEV_GIVE_ORIGIN.test(o.dev) && o.sourceEntityId === id && id === devGiveSourceIdV1(state.campaign.seed.seedHex, p.playerId, o.dev), "Unknown dev give provenance");
+      return;
+    }
     if (o?.servicePurchase) {
       validateServiceOrigin(p, o, id);
       return;
@@ -29409,7 +29474,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
     else requireContract(o.episode === o.archive.sourceEpisode, "Archived gear episode drift");
   }
   function item(i) {
-    const carried = [n.originsByItemId[i.itemId], n.groundBySourceId[i.sourceEntityId]?.origin, inv.d7?.salvaged[i.itemId]?.origin, inv.d7?.autoSalvaged[i.itemId]?.origin, inv.services?.salesByItemId[i.itemId]?.origin].find((o) => o?.carried !== void 0);
+    const carried = [n.originsByItemId[i.itemId], n.groundBySourceId[i.sourceEntityId]?.origin, inv.d7?.salvaged[i.itemId]?.origin, inv.d7?.autoSalvaged[i.itemId]?.origin, inv.services?.salesByItemId[i.itemId]?.origin].find((o) => o?.carried !== void 0 || o?.dev !== void 0);
     if (carried && i.workshop) {
       closedRecord(i.workshop, ["version", "steps"]);
       workshopResult(i);
@@ -31995,28 +32060,61 @@ export {
   createOldwardSeamlessManifest,
   oldwardAreaDefinition,
   oldwardSpace,
-  integerRoot,
-  STAT_PERKS_V1,
-  goldUnit,
-  rewardSourceV1,
-  minutesGold,
-  WORLD_COMBAT_VERSION,
-  WORLD_COMBAT_HASH,
-  hasWorldCombat,
-  combatPlayer,
-  worldEnemyStats,
-  worldObjectHealth,
-  worldLevelGapMultiplier,
-  COMBAT_RUNTIME_VERSION,
-  SHIELD_SWORD_PRIMARY,
-  SLIME_CLEARING,
-  validatePrimaryAim,
-  primaryProfile,
-  initializePrimary,
-  primaryRecords,
-  primaryPinnedCommands,
-  primaryPhaseAt,
-  validateCommand,
+  UNIQUE_ITEMS,
+  UNIQUE_TIERS,
+  UNIQUE_LINE_UNLOCKS,
+  UNIQUE_LINES_V3,
+  UNIQUE_SIGNATURE_LINE,
+  rerollableUniqueV3,
+  uniquePoolV3,
+  uniqueLineKeyV3,
+  uniqueStarValue,
+  uniqueEffectText,
+  uniqueOf,
+  nightmareUniqueV1,
+  WARDROBE_V1,
+  CLASS_GEAR,
+  QUEST_GEAR_GROUPS,
+  questGearSourceIdV1,
+  FERRY_VERSION,
+  FERRY_HASH,
+  FERRY_NETWORK,
+  hasFerries,
+  useWorldRolesV1,
+  worldRolesV1,
+  ferryNetworkV1,
+  settlementV1,
+  worldSitesV1,
+  worldSiteV1,
+  worldRevisionV1,
+  BIOME_BOSSES_V1,
+  BIOME_BOSS_DAMAGE_V1,
+  BIOME_BOSS_REACH_V1,
+  BIOME_BOSS_POOLS_V1,
+  sunfallDiscsV1,
+  SOLAR_BEAM_SWEEP_V1,
+  solarBeamStrikeV1,
+  BOSS_PAGE_IDS,
+  BOSS_PAGE_NAMES,
+  bossPageFor,
+  TIERS,
+  TIER_COLORS,
+  TIER_CARDS,
+  BOSS_TIER_CARDS,
+  BESTIARY_STATS,
+  HUNTER_DAMAGE,
+  BESTIARY_GROUPS,
+  BESTIARY_CARDS,
+  CARD_BY_FAMILY,
+  setLadder,
+  BOSS_SET,
+  normalizeAlbum,
+  albumText,
+  nextTier,
+  setTier,
+  bossSetTier,
+  COMPOSITION_ELITE_V1,
+  compositionHashV1,
   BASELINE_PROGRESSION_POWER,
   DUNGEON_MOBS_V1_VERSION,
   DUNGEON_MOBS_V1_SOURCE_COMMIT,
@@ -32058,63 +32156,10 @@ export {
   DUNGEON_MOBS_V1_PROFILES,
   DUNGEON_MOBS_V2_PROFILES,
   ordinaryEnemyForProfile,
-  MAJOR_NAME_POLICY_VERSION,
-  createMajorNameRegistry,
-  D9_PROFILE,
-  COMPOSITION_ELITE_V1,
-  compositionHashV1,
-  VITALITY_WEAVER_AFFIX_ID,
-  SWIFT_COMMANDER_AFFIX_ID,
-  GLACIAL_WARDEN_AFFIX_ID,
-  TOXIC_DECAY_AFFIX_ID,
-  IRON_CITADEL_AFFIX_ID,
-  BLOOD_BERSERKER_AFFIX_ID,
-  NULLIFIER_AFFIX_ID,
-  WEB_WEAVER_AFFIX_ID,
-  SLAG_SHAPER_AFFIX_ID,
-  VITALITY_WEAVER_D12_4,
-  SWIFT_COMMANDER_D12_4D,
-  GLACIAL_WARDEN_D12_4E,
-  TOXIC_DECAY_D12_4F,
-  IRON_CITADEL_D12_4G,
-  BLOOD_BERSERKER_D12_4H_A,
-  NULLIFIER_D12_4I,
-  WEB_WEAVER_D12_4J,
-  SLAG_SHAPER_D12_4K,
-  eliteAffixDefinitionD12_4,
-  HOLLOW_VERSION,
-  HOLLOW_LEDGER_VERSION,
-  HOLLOW_POLICY,
-  HOLLOW_EVENT,
-  hollowOrdinal,
-  HOLLOW_HASH,
-  FERRY_VERSION,
-  FERRY_HASH,
-  FERRY_NETWORK,
-  hasFerries,
-  useWorldRolesV1,
-  worldRolesV1,
-  ferryNetworkV1,
-  settlementV1,
-  worldSitesV1,
-  worldSiteV1,
-  worldRevisionV1,
-  STARTER_VERSION,
-  STARTER_VILLAGE_ID,
-  STARTER_VILLAGE_NAME,
-  STARTER_HASH,
-  hasStarterVillage,
-  ROADSIDE_VERSION,
-  ROADSIDE_HASH,
-  ROADSIDE_DATABASE,
-  ROADSIDE_POLICY,
-  hasRoadsideEncounters,
-  SPORE_VERSION,
-  SPORE_POLICY,
-  SPORE_EVENTS,
-  eventOrdinal,
-  sporeOrdinal,
-  worldEventProtectionV1,
+  NAMED_ELITES_V1,
+  NAMED_ELITE_TRICKS_V1,
+  NAMED_ENDS_V1,
+  siteEndRoleV1,
   eventPlanV1,
   useEventLinksV1,
   eventCacheTileV1,
@@ -32164,84 +32209,22 @@ export {
   DEN_MEMBERS,
   denLandV1,
   denOfV1,
-  WILDERNESS_ECOLOGY_V3_MATRIX,
-  WILDERNESS_VERSION,
-  WILDERNESS_HASH,
-  hasWilderness,
-  usesWildernessFairnessV3_2,
-  wildernessFairLevelGap,
-  ACCESS_VERSION,
-  ACCESS_HASH,
-  ACCESS_DATABASE,
-  FIRST_CAVE_ID,
-  FIRST_CAVE_SELECTION,
-  hasFirstJourney,
-  RESHAPE_VERSION,
-  RESHAPE_HASH,
-  RESHAPE_HYDROLOGY_HASH,
-  RESHAPE_DATABASE,
-  hasWorldReshape,
-  isSeededBindingV1,
-  seededCommitmentsV1,
-  withSeededWorldV1,
-  presentSeededWorldV1,
-  ALPHA_POPULATION_VERSION,
-  ALPHA_POPULATION_HASH,
-  ALPHA_POPULATION_PLAN_HASH,
-  ALPHA_POPULATION_ROUTE_HASH,
-  ALPHA_POPULATION_BASE_HASH,
-  ALPHA_POPULATION_SELECTIONS,
-  hasAlphaPopulation,
-  newPopulationSelection,
-  WORLD_LOOT_V4_HASH,
-  worldLootWeightsV4,
+  integerRoot,
+  STAT_PERKS_V1,
+  goldUnit,
+  rewardSourceV1,
+  minutesGold,
+  WORLD_COMBAT_VERSION,
+  WORLD_COMBAT_HASH,
+  hasWorldCombat,
+  combatPlayer,
+  worldEnemyStats,
+  worldObjectHealth,
+  worldLevelGapMultiplier,
+  COMBAT_RUNTIME_VERSION,
   formatLarge,
   integerRatio,
-  amount,
-  addAmount,
-  subtractAmount,
-  compareAmount,
-  multiplyAmount,
-  wholeAmount,
-  formatAmount,
-  QUEST_GEAR_GROUPS,
-  questGearSourceIdV1,
-  TRIP_IMPS_V1,
-  IMP_RULES,
-  impScrapBandV1,
-  impHashV1,
-  impIdV1,
-  tripGearSourceIdV1,
-  BIOME_BOSSES_V1,
-  BIOME_BOSS_DAMAGE_V1,
-  BIOME_BOSS_REACH_V1,
-  BIOME_BOSS_POOLS_V1,
-  sunfallDiscsV1,
-  SOLAR_BEAM_SWEEP_V1,
-  solarBeamStrikeV1,
-  BOSS_PAGE_IDS,
-  BOSS_PAGE_NAMES,
-  bossPageFor,
-  TIERS,
-  TIER_COLORS,
-  TIER_CARDS,
-  BOSS_TIER_CARDS,
-  BESTIARY_STATS,
-  HUNTER_DAMAGE,
-  BESTIARY_GROUPS,
-  BESTIARY_CARDS,
-  CARD_BY_FAMILY,
-  setLadder,
-  BOSS_SET,
-  normalizeAlbum,
-  albumText,
-  nextTier,
-  setTier,
-  bossSetTier,
-  NAMED_ELITES_V1,
-  NAMED_ELITE_TRICKS_V1,
-  NAMED_ENDS_V1,
-  siteEndRoleV1,
+  D9_PROFILE,
   signedAddress,
   addressWire,
   floorDiv,
@@ -32311,6 +32294,13 @@ export {
   sporeReinforcementV4,
   validateSporeGenerationV4,
   validateSporeGenerationProgressV4,
+  amount,
+  addAmount,
+  subtractAmount,
+  compareAmount,
+  multiplyAmount,
+  wholeAmount,
+  formatAmount,
   playerAlbumV1,
   validateBestiaryBonusV1,
   installBestiaryAlbumV1,
@@ -32321,30 +32311,14 @@ export {
   collectGroundCardsV1,
   validateBestiaryRootV1,
   projectBestiaryV1,
-  WARDROBE_V1,
-  CLASS_GEAR,
+  WORLD_LOOT_V4_HASH,
+  worldLootWeightsV4,
   CDR_CAP,
   AFFIXES_V3,
   SKILL_GROUPS,
   inGroup,
   CLOSE_REACH,
   FAR_REACH,
-  UNIQUE_ITEMS,
-  UNIQUE_TIERS,
-  UNIQUE_LINE_UNLOCKS,
-  UNIQUE_LINES_V3,
-  UNIQUE_SIGNATURE_LINE,
-  rerollableUniqueV3,
-  uniquePoolV3,
-  uniqueLineKeyV3,
-  uniqueStarValue,
-  uniqueEffectText,
-  uniqueOf,
-  nightmareUniqueV1,
-  rewardProgressionD9,
-  validateRewardProgressionD9,
-  prototypeRewardProgression,
-  rewardProgression,
   boonOfV1,
   wrathDamageV1,
   insightXpV1,
@@ -32352,11 +32326,21 @@ export {
   swiftMoveV1,
   focusCooldownV1,
   syncVigorV1,
+  TRIP_IMPS_V1,
+  IMP_RULES,
+  impScrapBandV1,
+  impHashV1,
+  impIdV1,
+  tripGearSourceIdV1,
+  rewardProgressionD9,
+  validateRewardProgressionD9,
   BASE_TOME_ELEMENTS,
   tomeProfile,
   TOME_ELEMENTS,
   tomeElements,
   certifyNumeric,
+  prototypeRewardProgression,
+  rewardProgression,
   RARITY_NAMES4 as RARITY_NAMES,
   RARITY_COLORS4 as RARITY_COLORS,
   gearHash4 as gearHash,
@@ -32384,6 +32368,90 @@ export {
   retiredGear,
   listedEquipmentSlots,
   equipmentAfter,
+  allowDevGiveV1,
+  devGiveProblemV1,
+  applyDevGiveV1,
+  SHIELD_SWORD_PRIMARY,
+  SLIME_CLEARING,
+  validatePrimaryAim,
+  primaryProfile,
+  initializePrimary,
+  primaryRecords,
+  primaryPinnedCommands,
+  primaryPhaseAt,
+  validateCommand,
+  MAJOR_NAME_POLICY_VERSION,
+  createMajorNameRegistry,
+  VITALITY_WEAVER_AFFIX_ID,
+  SWIFT_COMMANDER_AFFIX_ID,
+  GLACIAL_WARDEN_AFFIX_ID,
+  TOXIC_DECAY_AFFIX_ID,
+  IRON_CITADEL_AFFIX_ID,
+  BLOOD_BERSERKER_AFFIX_ID,
+  NULLIFIER_AFFIX_ID,
+  WEB_WEAVER_AFFIX_ID,
+  SLAG_SHAPER_AFFIX_ID,
+  VITALITY_WEAVER_D12_4,
+  SWIFT_COMMANDER_D12_4D,
+  GLACIAL_WARDEN_D12_4E,
+  TOXIC_DECAY_D12_4F,
+  IRON_CITADEL_D12_4G,
+  BLOOD_BERSERKER_D12_4H_A,
+  NULLIFIER_D12_4I,
+  WEB_WEAVER_D12_4J,
+  SLAG_SHAPER_D12_4K,
+  eliteAffixDefinitionD12_4,
+  HOLLOW_VERSION,
+  HOLLOW_LEDGER_VERSION,
+  HOLLOW_POLICY,
+  HOLLOW_EVENT,
+  hollowOrdinal,
+  HOLLOW_HASH,
+  STARTER_VERSION,
+  STARTER_VILLAGE_ID,
+  STARTER_VILLAGE_NAME,
+  STARTER_HASH,
+  hasStarterVillage,
+  ROADSIDE_VERSION,
+  ROADSIDE_HASH,
+  ROADSIDE_DATABASE,
+  ROADSIDE_POLICY,
+  hasRoadsideEncounters,
+  SPORE_VERSION,
+  SPORE_POLICY,
+  SPORE_EVENTS,
+  eventOrdinal,
+  sporeOrdinal,
+  worldEventProtectionV1,
+  WILDERNESS_ECOLOGY_V3_MATRIX,
+  WILDERNESS_VERSION,
+  WILDERNESS_HASH,
+  hasWilderness,
+  usesWildernessFairnessV3_2,
+  wildernessFairLevelGap,
+  ACCESS_VERSION,
+  ACCESS_HASH,
+  ACCESS_DATABASE,
+  FIRST_CAVE_ID,
+  FIRST_CAVE_SELECTION,
+  hasFirstJourney,
+  RESHAPE_VERSION,
+  RESHAPE_HASH,
+  RESHAPE_HYDROLOGY_HASH,
+  RESHAPE_DATABASE,
+  hasWorldReshape,
+  isSeededBindingV1,
+  seededCommitmentsV1,
+  withSeededWorldV1,
+  presentSeededWorldV1,
+  ALPHA_POPULATION_VERSION,
+  ALPHA_POPULATION_HASH,
+  ALPHA_POPULATION_PLAN_HASH,
+  ALPHA_POPULATION_ROUTE_HASH,
+  ALPHA_POPULATION_BASE_HASH,
+  ALPHA_POPULATION_SELECTIONS,
+  hasAlphaPopulation,
+  newPopulationSelection,
   CONTENT_REWARD_VERSION,
   hashReward,
   episodeRewardId,
