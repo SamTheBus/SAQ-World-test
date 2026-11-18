@@ -174178,8 +174178,8 @@ function createSettlementServicesMenu2(options) {
  #settlement-services .tn-x{width:44px;height:44px;border-radius:12px;border:1px solid var(--tn-line);background:#0e141acc;display:grid;place-items:center;flex:none;padding:0}
  #settlement-services .tn-wallet{display:flex;gap:6px;padding:0 16px 12px;flex:none;flex-wrap:wrap}#settlement-services .tn-wallet .tn-chipv:first-child{border-color:#c9a45c66;color:var(--tn-gold)}
  #settlement-services .tn-chipv{display:flex;align-items:center;gap:6px;height:30px;padding:0 11px 0 8px;border-radius:15px;background:#0b1015;border:1px solid var(--tn-line2);font:700 13px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums}
- #settlement-services .tn-coin{display:inline-block;width:14px;height:14px;flex:none;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe9a0,#e0a92e 60%,#a06d12);box-shadow:0 0 0 1px #6b4a0c}
- #settlement-services .tn-mat-art{width:18px;height:18px;flex:none;vertical-align:middle}#settlement-services .tn-break{display:flex;align-items:center;gap:8px}#settlement-services .tn-break p{display:flex;align-items:center;gap:4px;margin:2px 0}#settlement-services .tn-mat{display:inline-block;width:14px;height:14px;flex:none;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:radial-gradient(circle at 40% 40%,#e6d4ff,var(--m,#9a6bff) 60%,#2b1a55)}
+ #settlement-services .tn-coin{display:inline-grid;width:16px;height:16px;flex:none}#settlement-services .tn-coin svg{width:100%;height:100%;display:block}
+ #settlement-services .tn-mat-art{width:22px;height:22px;flex:none;vertical-align:middle;image-rendering:pixelated}#settlement-services .tn-chipv .tn-coin{width:18px;height:18px}#settlement-services .tn-break{display:flex;align-items:center;gap:8px}#settlement-services .tn-break p{display:flex;align-items:center;gap:4px;margin:2px 0}#settlement-services .tn-mat{display:inline-block;width:14px;height:14px;flex:none;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:radial-gradient(circle at 40% 40%,#e6d4ff,var(--m,#9a6bff) 60%,#2b1a55)}
  #settlement-services .tn-tabs{display:flex;gap:2px;margin:0 16px 12px;border-bottom:1px solid var(--tn-line);flex:none;overflow-x:auto;scrollbar-width:none}
  #settlement-services .tn-tab{position:relative;flex:1 0 auto;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;color:var(--tn-dim);font:700 12px/1 system-ui,sans-serif;padding:8px 8px 10px;white-space:nowrap}#settlement-services .tn-tab svg{width:20px;height:20px;opacity:.7}
  #settlement-services .tn-tab[aria-pressed=true]{color:#f6ecd6;background:none}#settlement-services .tn-tab[aria-pressed=true] svg{opacity:1}#settlement-services .tn-tab[aria-pressed=true]::after{content:"";position:absolute;left:18%;right:18%;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#c9963a,#f0c862,#c9963a);box-shadow:0 0 10px #f0c86266}
@@ -174205,7 +174205,7 @@ function createSettlementServicesMenu2(options) {
  #settlement-services .tn-card{background:var(--tn-card);border:1px solid var(--tn-line);border-radius:16px;padding:12px}
  #settlement-services .tn-sect{margin:0 0 6px;font:700 10px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--tn-label)}
  #settlement-services .tn-btn{min-height:48px;border-radius:14px;border:1px solid #3a4654;background:var(--tn-card2);color:var(--tn-text);font:800 15px/1 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 16px}
- #settlement-services .tn-btn.is-gold{flex:1;background:linear-gradient(#f3d27a,#d6a845 55%,#b88a2f);color:#2a1c05;border-color:#f6dc8f;box-shadow:inset 0 1px 0 #fff8,0 6px 16px #d6a84533}#settlement-services .tn-btn.is-gold small{font-weight:700;opacity:.75}#settlement-services .tn-btn.is-gold .tn-coin{box-shadow:0 0 0 1px #2a1c05}
+ #settlement-services .tn-btn.is-gold{flex:1;background:linear-gradient(#f3d27a,#d6a845 55%,#b88a2f);color:#2a1c05;border-color:#f6dc8f;box-shadow:inset 0 1px 0 #fff8,0 6px 16px #d6a84533}#settlement-services .tn-btn.is-gold small{font-weight:700;opacity:.75}
  #settlement-services .tn-btn.is-small{min-height:42px;flex:none;padding:0 12px}
  #settlement-services .tn-btn:disabled{opacity:.45}#settlement-services .tn-btn.is-gold:disabled{opacity:1;filter:saturate(.3) brightness(.62);box-shadow:none}
  #settlement-services .tn-foot{position:relative;display:flex;align-items:center;gap:12px;padding:12px 16px 16px;border-top:1px solid var(--tn-line2);background:linear-gradient(#0e141a00,#0b0f14);flex:none}#settlement-services .tn-foot>.tn-btn{min-height:50px}#settlement-services .tn-why{max-width:40%;font:600 12px/1.3 system-ui,sans-serif;color:#ffb0a0}
@@ -174255,7 +174255,7 @@ function createSettlementServicesMenu2(options) {
  #settlement-services .tn-radio[aria-pressed=true]{border-color:var(--tn-accent);background:linear-gradient(90deg,#d9b25f1c,#d9b25f08)}#settlement-services .tn-radio[aria-pressed=true] .tn-dot{border:5px solid var(--tn-gold)}
  #settlement-services .tn-radio>span:last-child{display:flex;align-items:center;gap:8px}
  #settlement-services .tn-costs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
- #settlement-services .tn-cost{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;align-items:center;padding:9px 12px;border-radius:12px;background:#0c1117;border:1px solid var(--tn-line2);font:800 14px/1.1 system-ui,sans-serif;font-variant-numeric:tabular-nums}#settlement-services .tn-cost>:first-child{grid-row:span 2;width:24px;height:24px}#settlement-services .tn-cost>i.tn-mat{width:18px;height:18px;margin:3px}
+ #settlement-services .tn-cost{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;align-items:center;padding:9px 12px;border-radius:12px;background:#0c1117;border:1px solid var(--tn-line2);font:800 14px/1.1 system-ui,sans-serif;font-variant-numeric:tabular-nums}#settlement-services .tn-cost>:first-child{grid-row:span 2;width:30px;height:30px}#settlement-services .tn-cost>i.tn-mat{width:20px;height:20px;margin:5px}
  #settlement-services .tn-cost small{color:var(--tn-up);font:600 11px/1.2 system-ui,sans-serif}#settlement-services .tn-cost.is-short{border-color:#7a3b3b;background:#1a1012}#settlement-services .tn-cost.is-short small{color:#ffb0a0}
  #settlement-services .tn-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}#settlement-services .tn-link{display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:0 12px 0 8px;border:1px solid color-mix(in srgb,var(--tn-gold) 45%,transparent);border-radius:999px;background:color-mix(in srgb,var(--tn-gold) 10%,transparent);font:700 12px/1 system-ui,sans-serif;color:var(--tn-gold)}#settlement-services .tn-link:disabled{opacity:.45}#settlement-services .tn-link img,#settlement-services .tn-link svg{width:16px;height:16px}
  #settlement-services .tn-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
@@ -174388,10 +174388,11 @@ function createSettlementServicesMenu2(options) {
   const PICK_ORDER = ["weapon", "subweapon", "helmet", "overall", "top", "bottom", "cape", "gloves", "boots", "ring1", "ring2", "ring", "necklace", "earring", "belt"];
   const MATS = { "Glyph Dust": "#b98cff", "Monster Soul": "#9a6bff", "Wakestone": "#ff6fb5", "Overlord's Sigil": "#ff6b5a", "Astral Essence": "#6fc3ff" };
   const FILTERS = [["all", "All"], ["weapon", "Weapons"], ["offhand", "Offhand"], ["armor", "Armor"], ["ring", "Rings"]];
+  const GOLD_SVG = '<svg aria-hidden="true" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="9" ry="10" fill="#b96d17" stroke="#140d20" stroke-width="2.5"/><ellipse cx="11" cy="10" rx="6" ry="7" fill="#ffd43c"/><path d="M7 5h5v3H7Z" fill="#fff4a4"/><path d="M13 10h3v7h-3Z" fill="#d88a17"/></svg>';
   const markup = (e, html) => {
     e.innerHTML = html;
     return e;
-  }, coin3 = () => el3("i", void 0, "tn-coin"), tierOf2 = (d) => d?.rarityTier ?? 0;
+  }, coin3 = () => markup(el3("i", void 0, "tn-coin"), GOLD_SVG), tierOf2 = (d) => d?.rarityTier ?? 0;
   const mat = (k) => {
     if (SALVAGE_MATERIAL_ART[k]) {
       const img = el3("img", void 0, "tn-mat-art");
