@@ -3104,6 +3104,11 @@ function collisionBlockDetail(collision2, x, y, radius) {
 var MOTHER = NEST_POLICY.motherMember;
 var clutchMembersV1 = (e) => [NEST_POLICY.broodlings[e], ...Array.from({ length: NEST_POLICY.hatchlingsPerEgg }, (_, k) => NEST_POLICY.firstHatchling + e * NEST_POLICY.hatchlingsPerEgg + k)];
 var CLUTCH_OF = new Map([0, 1, 2].flatMap((e) => clutchMembersV1(e).map((n) => [n, e])));
+function nestRageProfileV1(s, group, actor, profile2) {
+  const r = s.d9World?.worldEvents?.records?.[group?.groupId];
+  if (!profile2 || r?.kind !== "nests" || !r.nest?.rage || r.stages[MOTHER]?.phase !== "hatched" || group.entityIds[MOTHER] !== actor.entityId) return profile2;
+  return { ...profile2, attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, NEST_POLICY.rage.damagePercent, 100)), moveSpeed: profile2.moveSpeed * NEST_POLICY.rage.speedPercent / 100 };
+}
 var nestHealthV1 = (level, party2) => combatInteger(multiplyCombat(worldObjectHealth(level), NEST_POLICY.nestHealth * NEST_POLICY.partyHealthPercent[party2 - 1], 100));
 var burst = (h) => h.hp.every((hp) => compareCombat(hp, 0) === 0);
 var awake = (r) => ["hatched", "defeated"].includes(r.stages[MOTHER].phase);
@@ -4230,7 +4235,7 @@ function encounterActorProfile(state, group, actor) {
     profile2 = { ...state.content.definitionsById[actor.contentDefinitionId], maxHp: stats.maxHp, attackDamage: stats.attackDamage };
   } else profile2 = enemy2 && level !== void 0 ? resolveOrdinaryProfile(enemy2, ordinaryTier(actor.contentDefinitionId), level) : state.content.definitionsById[actor.contentDefinitionId];
   if (hasWorldCombat(state) && profile2?.isBoss && level !== void 0) profile2 = { ...profile2, ...worldBossStats(level) };
-  const out2 = rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, denAlphaProfileV1(state, group, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2)))))));
+  const out2 = nestRageProfileV1(state, group, actor, rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, denAlphaProfileV1(state, group, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2))))))));
   const party2 = partyHealthPercentV1(group.threatSnapshot);
   return party2 !== 100 && state.subweaponCombat && out2?.maxHp !== void 0 ? { ...out2, maxHp: combatInteger(multiplyCombat(out2.maxHp, party2, 100)) } : out2;
 }

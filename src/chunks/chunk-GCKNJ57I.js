@@ -2717,6 +2717,11 @@ function isActorInReach(source10, target) {
 var MOTHER = NEST_POLICY.motherMember;
 var clutchMembersV1 = (e) => [NEST_POLICY.broodlings[e], ...Array.from({ length: NEST_POLICY.hatchlingsPerEgg }, (_, k) => NEST_POLICY.firstHatchling + e * NEST_POLICY.hatchlingsPerEgg + k)];
 var CLUTCH_OF = new Map([0, 1, 2].flatMap((e) => clutchMembersV1(e).map((n) => [n, e])));
+function nestRageProfileV1(s, group, actor, profile2) {
+  const r = s.d9World?.worldEvents?.records?.[group?.groupId];
+  if (!profile2 || r?.kind !== "nests" || !r.nest?.rage || r.stages[MOTHER]?.phase !== "hatched" || group.entityIds[MOTHER] !== actor.entityId) return profile2;
+  return { ...profile2, attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, NEST_POLICY.rage.damagePercent, 100)), moveSpeed: profile2.moveSpeed * NEST_POLICY.rage.speedPercent / 100 };
+}
 var nestHealthV1 = (level, party2) => combatInteger(multiplyCombat(worldObjectHealth(level), NEST_POLICY.nestHealth * NEST_POLICY.partyHealthPercent[party2 - 1], 100));
 function initialNestsV1(s, id, anchor) {
   const near = Object.values(s.playersById).filter((p) => {
@@ -2821,6 +2826,7 @@ function advanceNestsV1(s, r, g, d, { activeActors, hardActors }) {
   }
   if (h.waiting) return changed;
   if (r.stages[MOTHER].phase === "defeated") {
+    if (h.rage && calm(s, g, h, { keep: true })) changed = true;
     for (let n2 = 0; n2 < NEST_MEMBERS; n2++) if (r.stages[n2].phase === "pending") {
       retire(s, g, n2);
       r.stages[n2] = { phase: "cancelled", at: r.elapsedTicks };
@@ -2854,6 +2860,13 @@ function advanceNestsV1(s, r, g, d, { activeActors, hardActors }) {
   }
   return changed;
 }
+function calm(s, g, h, { keep = false } = {}) {
+  const a = s.entitiesById[g.entityIds[MOTHER]], moved3 = a.attackDamage !== h.rage.attackDamage || a.moveSpeed !== h.rage.moveSpeed;
+  a.attackDamage = copyWire(h.rage.attackDamage);
+  a.moveSpeed = h.rage.moveSpeed;
+  if (!keep) h.rage = null;
+  return moved3 || !keep;
+}
 function resetNestsV1(s, r, g, d) {
   const h = r.nest;
   if (r.status !== "active" || h.waiting || r.stages[MOTHER].phase === "defeated") return false;
@@ -2868,12 +2881,7 @@ function resetNestsV1(s, r, g, d) {
     a.hp = copyWire(a.maxHp);
     r.stages[n] = { phase: "pending", at: r.elapsedTicks };
   }
-  if (h.rage) {
-    const a = s.entitiesById[g.entityIds[MOTHER]];
-    a.attackDamage = copyWire(h.rage.attackDamage);
-    a.moveSpeed = h.rage.moveSpeed;
-    h.rage = null;
-  }
+  if (h.rage) calm(s, g, h);
   h.hp = h.hp.map(() => copyWire(h.maxHp));
   h.clutches = ["egg", "egg", "egg"];
   h.waiting = true;
@@ -17146,7 +17154,7 @@ function encounterActorProfile(state, group, actor) {
     profile2 = { ...state.content.definitionsById[actor.contentDefinitionId], maxHp: stats.maxHp, attackDamage: stats.attackDamage };
   } else profile2 = enemy2 && level !== void 0 ? resolveOrdinaryProfile(enemy2, ordinaryTier(actor.contentDefinitionId), level) : state.content.definitionsById[actor.contentDefinitionId];
   if (hasWorldCombat(state) && profile2?.isBoss && level !== void 0) profile2 = { ...profile2, ...worldBossStats(level) };
-  const out = rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, denAlphaProfileV1(state, group, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2)))))));
+  const out = nestRageProfileV1(state, group, actor, rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, denAlphaProfileV1(state, group, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2))))))));
   const party2 = partyHealthPercentV1(group.threatSnapshot);
   return party2 !== 100 && state.subweaponCombat && out?.maxHp !== void 0 ? { ...out, maxHp: combatInteger(multiplyCombat(out.maxHp, party2, 100)) } : out;
 }
