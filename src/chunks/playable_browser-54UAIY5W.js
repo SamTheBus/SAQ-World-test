@@ -173832,7 +173832,6 @@ function interactionIconV2(kind = "", label7 = "") {
   if (/boss/i.test(label7)) return "skull";
   return KIND_ICONS[kind] ?? (/ascend|up/i.test(label7) ? "up" : "door");
 }
-var TAP_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.2 3.6a1.9 1.9 0 0 1 3.8 0V10.4l.6-.3a1.9 1.9 0 0 1 2.4.8l.2.3.5-.2a1.9 1.9 0 0 1 2.5 1.1l.3.9v3.4c0 3.4-2.6 6.1-6 6.1h-1.3c-1.8 0-3.3-.8-4.4-2.1L5 16.2a1.9 1.9 0 0 1 2.7-2.6l2.5 2.1z" fill="#2a1c05"/><path d="M14 11.2v3M17 11.6v2.6" stroke="#e8b64c" stroke-width="1.3" stroke-linecap="round"/><path d="M6.6 5.6 8 6.5M17.6 5.6l-1.4.9" stroke="#2a1c05" stroke-width="1.7" stroke-linecap="round"/></svg>';
 var iconSvg = (name, color28) => `<svg viewBox="0 0 24 24" fill="none" stroke="${color28}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICON_PATHS2[name] ?? ICON_PATHS2.door}"/></svg>`;
 var REVIVE_CONTEXT_V2 = "rpg-context:revive:";
 var CLASS_NAMES4 = Object.freeze({ shield: "Knight", dagger: "Rogue", tome: "Mage" });
@@ -173873,7 +173872,7 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
   button3.dataset.gameplayHud = "";
   const key4 = doc.createElement("kbd"), keyE = doc.createElement("b"), keyHand = doc.createElement("i"), icon2 = doc.createElement("span"), copy4 = doc.createElement("span"), kind = doc.createElement("small"), label7 = doc.createElement("strong"), tap = doc.createElement("span"), bar2 = doc.createElement("span"), fill9 = doc.createElement("i");
   keyE.textContent = "E";
-  keyHand.innerHTML = TAP_SVG;
+  keyHand.textContent = "TAP";
   key4.append(keyE, keyHand);
   icon2.className = "interaction-icon";
   bar2.className = "interaction-bar";
