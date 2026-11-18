@@ -165744,7 +165744,9 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     const p = local8(m), c = m.subweapon, heroClass = heroClassOf(p?.d8);
     return Boolean(CLASS_SKILLS[skillId] && heroClass && c && !c.suppressed && m.entitiesById[p.entityId]?.alive && p.stats.subType === heroClass.offhand && !c.skills?.cooldowns?.[skillId] && affords(c, heroClass, skillId, p?.d8?.classRanks) && !c.skills?.flurry && m.persistence.phase === "encounter");
   }
-  function activate(index) {
+  let pending = null;
+  const HOLD_TICKS = 27, HOLD_MS = 450;
+  function activate(index, held = false) {
     if (isBlocked()) return;
     const m = readModel(), p = local8(m), entry2 = entries(m)[index];
     if (entry2 === "pick") {
@@ -165752,9 +165754,15 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
       return;
     }
     if (!ready(m, entry2)) {
-      if (m.subweapon?.skills?.cooldowns?.[entry2]) attackV2.denied(slots2[index].b);
+      const k = m.subweapon?.skills, left = k?.cooldowns?.[entry2] ?? 0;
+      if (!held && CLASS_SKILLS[entry2] && (left > 0 && left <= HOLD_TICKS || !left && (k?.flurry || k?.sunk))) {
+        pending = { index, entry: entry2, until: now3() + HOLD_MS };
+        return;
+      }
+      if (!held && CLASS_SKILLS[entry2]) attackV2.denied(slots2[index].b);
       return;
     }
+    pending = null;
     try {
       adapter.issue("combat.skill", { skillId: entry2, aim: m.primary.actorsById[p.entityId].facing }, m)?.catch?.((e) => reportError(e.message));
     } catch (e) {
@@ -165833,7 +165841,31 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   }
   const flip = () => document2.documentElement.dataset.hand === "left" ? -1 : 1;
   const angleAt = (e) => Math.atan2(e.clientY - geometry.cy - geometry.top, (e.clientX - geometry.cx - geometry.left) * flip()) * 180 / Math.PI;
+  const nearSlot = (e) => {
+    let best = -1, bestD = Infinity;
+    const list = entries(readModel());
+    slots2.forEach((s, i) => {
+      if (s.b.hidden || !(CLASS_SKILLS[list[i]] || list[i] === "pick")) return;
+      const r = s.b.getBoundingClientRect();
+      if (!r.width) return;
+      const d = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+      if (d <= r.width / 2 + 16 && d < bestD) {
+        best = i;
+        bestD = d;
+      }
+    });
+    return best;
+  };
   listen(ring10, "pointerdown", (e) => {
+    const hit2 = nearSlot(e);
+    if (hit2 >= 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.button !== 0) return;
+      if (arranging) arrangeTap(hit2);
+      else activate(hit2);
+      return;
+    }
     if (!geometry || WHEEL_PAGES < 2) return;
     e.preventDefault();
     e.stopPropagation();
@@ -165965,6 +165997,14 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   };
   function refresh(m, visible3 = true) {
     lastModel2 = m;
+    if (pending) {
+      if (now3() > pending.until || isBlocked() || entries(m)[pending.index] !== pending.entry) pending = null;
+      else if (ready(m, pending.entry)) {
+        const { index: index2 } = pending;
+        pending = null;
+        activate(index2, true);
+      }
+    }
     const p = local8(m), heroClass = heroClassOf(p?.d8), c = m.subweapon, t = now3(), blocked3 = isBlocked();
     if (arranging && (blocked3 || !heroClass || !visible3)) stopArranging(true);
     const list = entries(m), keys2 = wheelKeysV1(list);
@@ -173849,12 +173889,21 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
   const holder = doc.getElementById("world-view").parentElement;
   holder.append(alt);
   let altKey = "";
-  alt.addEventListener?.("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const altGo = () => {
     if (isBlocked() || alt.hidden) return;
     const chosen = interactionChoiceV2(readModel());
     if (chosen?.alt) activate(chosen.exitId, true);
+  };
+  alt.addEventListener?.("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    altGo();
+  });
+  alt.addEventListener?.("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.detail === 0) altGo();
   });
   const place4 = () => {
     const r = button3.getBoundingClientRect?.(), p = holder.getBoundingClientRect?.();
@@ -174337,9 +174386,16 @@ function createSettlementServicesMenu2(options) {
     key4 = null;
     refresh(readModel());
   }
+  let drinkHeld = 0;
+  const clock8 = () => globalThis.performance?.now?.() ?? Date.now();
   async function drink() {
     const m = readModel();
+    if (m.potions?.count && m.potions.cooldownTicks > 0 && m.potions.cooldownTicks <= 27 && !busy) {
+      drinkHeld = clock8() + 450;
+      return;
+    }
     if (!m.potions?.count || m.potions.cooldownTicks > 0 || busy) return;
+    drinkHeld = 0;
     try {
       const result = await adapter.issue("supply.use", { inventoryRevision: m.inventory.revision });
       if (!["admitted", "alreadyApplied"].includes(result?.status)) throw Error("Could not drink the potion. Try again.");
@@ -175102,7 +175158,14 @@ function createSettlementServicesMenu2(options) {
   function refresh(m) {
     craftToasts(m);
     supplyButton.hidden = !m.potions?.enabled;
-    if (supplyButton.hidden) return;
+    if (supplyButton.hidden) {
+      drinkHeld = 0;
+      return;
+    }
+    if (drinkHeld) {
+      if (clock8() > drinkHeld) drinkHeld = 0;
+      else if (!m.potions.cooldownTicks) drink();
+    }
     const belt2 = m.potions, cooling = belt2.cooldownTicks > 0, seconds = cooling ? String(Math.ceil(belt2.cooldownTicks / 60)) : "";
     if (potionHave.textContent !== String(belt2.count)) potionHave.textContent = belt2.count;
     if (potionOf.textContent !== "/" + belt2.capacity) potionOf.textContent = "/" + belt2.capacity;
