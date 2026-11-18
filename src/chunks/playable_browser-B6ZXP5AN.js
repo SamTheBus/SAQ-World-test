@@ -170009,7 +170009,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     e.classList.toggle("endless", n.maxRank === "infinite");
     e.style.setProperty("--art", PROGRESSION_ICONS[n.iconKey]?.color ?? CONSTELLATIONS[n.tree].color);
   }
-  const rankText2 = (n, rank) => n.maxRank === "infinite" ? `${formatLarge(rank)}/\u221E` : `${formatLarge(rank)}/${n.maxRank}`;
+  const rankText = (n, rank) => n.maxRank === "infinite" ? `${formatLarge(rank)}/\u221E` : `${formatLarge(rank)}/${n.maxRank}`;
   function build2(name) {
     const layout = skillTreeLayoutV2(name), wrap3 = el3("div", "", "skills-tree"), plane = el3("div", "", "skills-plane"), svg3 = svgEl("svg"), items3 = {}, lines2 = [];
     wrap3.style.setProperty("--rows", String(layout.rows));
@@ -170125,8 +170125,8 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
       const s = skillStateV2(d, item2.n), before = lastRanks[item2.n.id];
       stateClasses(item2.b, item2.n, s);
       item2.b.classList.toggle("selected", item2.n.id === selected && open3);
-      if (item2.rank) item2.rank.textContent = rankText2(item2.n, s.rank);
-      item2.b.setAttribute("aria-label", `${item2.n.name}, rank ${rankText2(item2.n, s.rank)}${s.maxed ? ", mastered" : s.available ? ", can learn" : s.owned ? "" : ", locked"}`);
+      if (item2.rank) item2.rank.textContent = rankText(item2.n, s.rank);
+      item2.b.setAttribute("aria-label", `${item2.n.name}, rank ${rankText(item2.n, s.rank)}${s.maxed ? ", mastered" : s.available ? ", can learn" : s.owned ? "" : ", locked"}`);
       if (before !== void 0 && integerBigInt(s.rank) > integerBigInt(before)) retrigger(item2.b, "learned");
       lastRanks[item2.n.id] = s.rank;
     }
@@ -170151,7 +170151,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
       stateClasses(row2, n, s);
       row2.classList.toggle("selected", n.id === selected && open3);
       text3.append(el3("strong", n.name), el3("small", s.maxed ? nodeEffect(n, s.rank) : `${s.owned ? "Next" : "Learn"}: ${nodeEffect(n, integerWire(integerBigInt(s.rank) + 1n))}`));
-      row2.append(disc4(n, false).wrap, text3, el3("em", s.maxed ? "Max" : s.available ? s.owned ? "Upgrade" : "Learn" : rankText2(n, s.rank)));
+      row2.append(disc4(n, false).wrap, text3, el3("em", s.maxed ? "Max" : s.available ? s.owned ? "Upgrade" : "Learn" : rankText(n, s.rank)));
       row2.onclick = () => select(n.id);
       rows.push(row2);
     }
@@ -170191,7 +170191,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     }
     const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el3("div", "", "sheet-head"), icon2 = disc4(n, false), title12 = el3("div"), tags = el3("div", "", "sheet-tags");
     stateClasses(headRow, n, s);
-    tags.append(el3("span", tree2 === "utility" ? "Utility" : TIER_TAGS[n.tier]), el3("span", s.maxed ? "Mastered" : `Rank ${rankText2(n, s.rank)}`, s.maxed ? "done" : ""));
+    tags.append(el3("span", tree2 === "utility" ? "Utility" : TIER_TAGS[n.tier]), el3("span", s.maxed ? "Mastered" : `Rank ${rankText(n, s.rank)}`, s.maxed ? "done" : ""));
     title12.append(el3("h3", n.name), tags);
     headRow.append(icon2.wrap, title12, button3("\xD7", "sheet-close", close));
     const parts = [headRow, el3("p", nodeDescription(n), "sheet-desc")], effect = (label7, text3, cls = "") => {
@@ -170369,19 +170369,17 @@ function rankValue(line45, rank) {
   if (rank <= 0) return 0;
   return Array.isArray(step3) ? step3[Math.min(rank, step3.length) - 1] : base3 + step3 * rank;
 }
-function rankText(line45, rank, withStep = false) {
-  const v = rankValue(line45, rank), add2 = v - rankValue(line45, rank - 1);
-  const text3 = line45[0].replace("{v}", tidy(v)).replace(/\{([^|}]*)\|([^}]*)\}/g, (m, one, many) => v === 1 ? one : many);
-  if (!withStep || rank <= 1 || !add2) return text3;
-  const unit16 = /\{v\}°/.test(line45[0]) ? "\xB0" : /\{v\}%/.test(line45[0]) ? "%" : /\{v\}s/.test(line45[0]) ? "s" : "";
-  return `${text3} (+${tidy(add2)}${unit16})`;
+function rankParts(line45, rank, withStep = false) {
+  const v = rankValue(line45, rank), add2 = v - rankValue(line45, rank - 1), plural3 = (t) => t.replace(/\{([^|}]*)\|([^}]*)\}/g, (m, one, many) => v === 1 ? one : many);
+  const at9 = line45[0].indexOf("{v}"), unit16 = /^[%°s]/.test(line45[0].slice(at9 + 3)) ? line45[0][at9 + 3] : "";
+  return { pre: plural3(line45[0].slice(0, at9)), value: tidy(v) + unit16, post: plural3(line45[0].slice(at9 + 3 + unit16.length)), step: withStep && rank > 1 && add2 ? `(+${tidy(add2)}${unit16})` : "", changed: rank <= 1 || add2 !== 0 };
 }
 function rankRows(id2, rank, maxRank) {
   const lines2 = CLASS_TREE_RANKS[id2];
   if (!lines2 || maxRank <= 1) return [];
-  if (rank <= 0) return [{ label: "Rank 1", lines: lines2.map((l) => rankText(l, 1)) }];
-  const now3 = { label: rank >= maxRank ? "Now \xB7 max" : `Now \xB7 rank ${rank}`, lines: lines2.map((l) => rankText(l, rank)) };
-  return rank >= maxRank ? [now3] : [now3, { label: "Next rank", lines: lines2.map((l) => rankText(l, rank + 1, true)) }];
+  if (rank <= 0) return [{ label: "Rank 1", kind: "preview", lines: lines2.map((l) => rankParts(l, 1)) }];
+  const now3 = { label: rank >= maxRank ? "Now \xB7 max" : `Now \xB7 rank ${rank}`, kind: "now", lines: lines2.map((l) => rankParts(l, rank)) };
+  return rank >= maxRank ? [now3] : [now3, { label: "Next rank", kind: "next", lines: lines2.map((l) => rankParts(l, rank + 1, true)) }];
 }
 
 // src/client/class_skills_view_v1.js
@@ -170613,9 +170611,16 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
       const box6 = el3("div", "cs-ranks");
       for (const r of rows) {
         const row3 = el3("div", "cs-rank-row");
+        row3.dataset.kind = r.kind;
         row3.append(el3("span", "cs-rank-label", r.label));
         const list = el3("span", "cs-rank-lines");
-        for (const t of r.lines) list.append(el3("span", "", t));
+        for (const p of r.lines) {
+          const line45 = el3("span");
+          line45.dataset.changed = String(p.changed);
+          line45.append(document2.createTextNode(p.pre), el3("b", "cs-rank-num", p.value), document2.createTextNode(p.post));
+          if (p.step) line45.append(el3("i", "cs-rank-step", p.step));
+          list.append(line45);
+        }
         row3.append(list);
         box6.append(row3);
       }
