@@ -1472,6 +1472,11 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 .cs-req{font:700 11px/1.2 system-ui,sans-serif;color:#d9c49a}
 .cs-req.met{color:#86d9a0}
 .cs-desc{font-size:13px;line-height:1.45;color:#dfe3e4}
+.cs-ranks{display:grid;gap:5px;padding:7px 9px;border-radius:9px;background:rgba(0,0,0,.24);border:1px solid rgba(183,160,119,.22)}
+.cs-rank-row{display:grid;grid-template-columns:92px 1fr;gap:8px;align-items:baseline}
+.cs-rank-label{font:800 10px/1.3 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#b7a077}
+.cs-rank-row+.cs-rank-row .cs-rank-label{color:#86d9a0}
+.cs-rank-lines{display:grid;gap:2px;font:600 12px/1.35 system-ui,sans-serif;color:#eef1f2;min-width:0}
 .cs-note,.cs-why{font-size:12px;color:#aeb5b6}
 #world-inventory #world-progression-view .cs-learn{min-height:44px;border:0;border-radius:12px;background:#b7a077;color:#14100a;font:700 14px/1 system-ui,sans-serif;box-shadow:none}
 #world-inventory #world-progression-view .cs-learn:disabled{border:1px solid #2f3a46;background:#1b2530;color:#8e979c;opacity:1;cursor:default}

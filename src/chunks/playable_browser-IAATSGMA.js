@@ -169590,8 +169590,8 @@ var ARROW_DOWN = '<svg width="9" height="9" viewBox="0 0 12 12" aria-hidden="tru
 function characterStatGroupsV3(model) {
   const p = model.playersById[model.localPlayerId], s = p.stats, f = s.familyProperties ?? {}, groups = [];
   const value2 = (v) => v === void 0 ? "\u2014" : statText(v, true), pct3 = (v) => v === void 0 ? "\u2014" : statText(statScale(v, 100), true) + "%", mult = (v) => v === void 0 ? "\u2014" : statText(v, true) + "\xD7";
-  const tidy = (t) => t.replace(/\d[\d,]*\.\d{3,}/, (m) => String(Math.round(Number(m.replace(/,/g, "")) * 100) / 100));
-  const group = (title12, rows) => groups.push({ title: title12, rows: rows.filter((r) => r[1] !== void 0).map(([label7, v, format = value2]) => ({ label: label7, value: tidy(format(v)) })) });
+  const tidy2 = (t) => t.replace(/\d[\d,]*\.\d{3,}/, (m) => String(Math.round(Number(m.replace(/,/g, "")) * 100) / 100));
+  const group = (title12, rows) => groups.push({ title: title12, rows: rows.filter((r) => r[1] !== void 0).map(([label7, v, format = value2]) => ({ label: label7, value: tidy2(format(v)) })) });
   group("Combat", [
     ["Attack", s.attack],
     ["Defense", s.defense],
@@ -170009,7 +170009,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     e.classList.toggle("endless", n.maxRank === "infinite");
     e.style.setProperty("--art", PROGRESSION_ICONS[n.iconKey]?.color ?? CONSTELLATIONS[n.tree].color);
   }
-  const rankText = (n, rank) => n.maxRank === "infinite" ? `${formatLarge(rank)}/\u221E` : `${formatLarge(rank)}/${n.maxRank}`;
+  const rankText2 = (n, rank) => n.maxRank === "infinite" ? `${formatLarge(rank)}/\u221E` : `${formatLarge(rank)}/${n.maxRank}`;
   function build2(name) {
     const layout = skillTreeLayoutV2(name), wrap3 = el3("div", "", "skills-tree"), plane = el3("div", "", "skills-plane"), svg3 = svgEl("svg"), items3 = {}, lines2 = [];
     wrap3.style.setProperty("--rows", String(layout.rows));
@@ -170125,8 +170125,8 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
       const s = skillStateV2(d, item2.n), before = lastRanks[item2.n.id];
       stateClasses(item2.b, item2.n, s);
       item2.b.classList.toggle("selected", item2.n.id === selected && open3);
-      if (item2.rank) item2.rank.textContent = rankText(item2.n, s.rank);
-      item2.b.setAttribute("aria-label", `${item2.n.name}, rank ${rankText(item2.n, s.rank)}${s.maxed ? ", mastered" : s.available ? ", can learn" : s.owned ? "" : ", locked"}`);
+      if (item2.rank) item2.rank.textContent = rankText2(item2.n, s.rank);
+      item2.b.setAttribute("aria-label", `${item2.n.name}, rank ${rankText2(item2.n, s.rank)}${s.maxed ? ", mastered" : s.available ? ", can learn" : s.owned ? "" : ", locked"}`);
       if (before !== void 0 && integerBigInt(s.rank) > integerBigInt(before)) retrigger(item2.b, "learned");
       lastRanks[item2.n.id] = s.rank;
     }
@@ -170151,7 +170151,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
       stateClasses(row2, n, s);
       row2.classList.toggle("selected", n.id === selected && open3);
       text3.append(el3("strong", n.name), el3("small", s.maxed ? nodeEffect(n, s.rank) : `${s.owned ? "Next" : "Learn"}: ${nodeEffect(n, integerWire(integerBigInt(s.rank) + 1n))}`));
-      row2.append(disc4(n, false).wrap, text3, el3("em", s.maxed ? "Max" : s.available ? s.owned ? "Upgrade" : "Learn" : rankText(n, s.rank)));
+      row2.append(disc4(n, false).wrap, text3, el3("em", s.maxed ? "Max" : s.available ? s.owned ? "Upgrade" : "Learn" : rankText2(n, s.rank)));
       row2.onclick = () => select(n.id);
       rows.push(row2);
     }
@@ -170191,7 +170191,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     }
     const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el3("div", "", "sheet-head"), icon2 = disc4(n, false), title12 = el3("div"), tags = el3("div", "", "sheet-tags");
     stateClasses(headRow, n, s);
-    tags.append(el3("span", tree2 === "utility" ? "Utility" : TIER_TAGS[n.tier]), el3("span", s.maxed ? "Mastered" : `Rank ${rankText(n, s.rank)}`, s.maxed ? "done" : ""));
+    tags.append(el3("span", tree2 === "utility" ? "Utility" : TIER_TAGS[n.tier]), el3("span", s.maxed ? "Mastered" : `Rank ${rankText2(n, s.rank)}`, s.maxed ? "done" : ""));
     title12.append(el3("h3", n.name), tags);
     headRow.append(icon2.wrap, title12, button3("\xD7", "sheet-close", close));
     const parts = [headRow, el3("p", nodeDescription(n), "sheet-desc")], effect = (label7, text3, cls = "") => {
@@ -170260,6 +170260,128 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     lastRanks = {};
     lastXp = null;
   }, inspect: () => ({ tree: tree2, view: view3, selected, open: open3 }) });
+}
+
+// src/shared/content/class_tree_ranks_v1.js
+var CD = (s) => [`${s} cooldown {v}% shorter`, 2];
+var CLASS_TREE_RANKS = freezeWire({
+  afterimage: [["Afterimage bursts for {v}% of your Attack", 20]],
+  arcane_syphon: [["Cast hits {v}% harder (spends 10% Barrier)", 6]],
+  assassinate: [["Shadowstep\u2019s crit deals {v}% more", 10]],
+  avalanche: [["{v}s off Shield Charge per stunned kill", 1]],
+  bastion_ward: [["Each block restores {v}% of the Barrier", 2]],
+  blade_dance: [["Crits give Combo {v}% sooner", 10]],
+  blade_rush: [["{v}% chance per Dash to gain 1 Combo", 20]],
+  blood_for_blood: [["Hits on Bleeding enemies heal {v}% of max HP", 0.5]],
+  bloodletting: [["Bleeding or poisoned kills heal {v}% of max HP", 1]],
+  bracing_bash: [["Refills {v}% Guard per enemy hit", 3], CD("Shield Bash")],
+  brittle: [["Chilled and frozen enemies take {v}% more damage", 4]],
+  bulwark_stance: [["Each block: {v}% less damage taken (stacks 3 times)", 2]],
+  cinder_step: [["Fire trail burns for {v}% Attack", 10], CD("Blink")],
+  cold_snap: [["Chills last {v}% longer", 10]],
+  concussion: [["Stuns slow bosses {v}%", 6]],
+  contagious: [["Rupture spreads Bleed to {v} {enemy|enemies}", 1]],
+  coup_de_grace: [["Below 25% health: {v}% more crit damage", 6]],
+  crosscut: [["Dash cuts for {v}% Attack", 15]],
+  crowd_breaker: [["Breaker hits on 3+ enemies deal {v}% more", 5]],
+  deep_freeze: [["Freezes last {v}% longer", 10]],
+  duel: [["One enemy near: +{v}% Attack", 4]],
+  echoing_burst: [["Glacial Burst gives back {v}% of its Barrier", 5]],
+  elemental_overload: [["New-element hits deal {v}% bonus damage", 5]],
+  en_garde: [["After a parry, the next hit crits for {v}% more", 8]],
+  evasive: [["After a Dash: {v}% less damage taken", 5]],
+  executioner: [["Below 25% health: {v}% more damage", 6]],
+  exploit: [["Exposed enemies take {v}% more damage", 3]],
+  fan_the_flames: [["Burning enemies take {v}% more damage", 3]],
+  fester: [["Noxious Bloom poison {v}% stronger", 5]],
+  firebrand: [["Fire Tome Casts burn {v}% harder", 8]],
+  firewalker: [["Near Flame Wall: {v}% more damage", 4]],
+  flourish: [["Thousand Cuts crits heal {v}% of max HP", 0.5]],
+  focus: [["+{v}% crit chance per hit on one enemy (up to 5 hits)", 1]],
+  footwork: [["Lunge crits take {v}s off its cooldown", 0.3]],
+  forked_lightning: [["{v}% chance per jump to fork", 10]],
+  fourth_cut: [["{v}% chance of a fourth cut", 10]],
+  frost_step: [["Frost trail slows {v}% more", 10], CD("Blink")],
+  frost_ward: [["A breaking Barrier chills {v} {stack|stacks}", 1]],
+  frostbinder: [["Frost Tome Casts slow {v}% more", 5]],
+  groundbreaker: [["Cracked ground slows {v}%", 5]],
+  grudge: [["Enemies that hit you take {v}% more damage", 3]],
+  heavy_hands: [["Stuns last {v}% longer", 10]],
+  hemorrhage: [["Flurry\u2019s cuts Bleed {v}% more often", 5]],
+  hit_and_run: [["Hits after a Dash deal {v}% more", 6]],
+  hold_the_line: [["Each block heals {v}% of max HP", 1]],
+  impact_training: [["Shield Bash and Breaker skills deal {v}% more", 6], CD("Shield Bash")],
+  iron_wall: [["Guard covers {v}\xB0 around you", 18, 180]],
+  iron_will: [["Guard up: regain {v}% of max HP a second", 0.4]],
+  kindle: [["Flame Wall crossers take {v}% more fire damage", 5]],
+  kindling: [["Burns deal {v}% more damage", 6]],
+  light_step: [["After a Dash: move {v}% faster", 5]],
+  lingering_venom: [["Poisons and Bleeds last {v}% longer", 10]],
+  live_wire: [["In Static Field: {v}% more lightning damage", 5]],
+  magnetic: [["Static Field pull strength {v}", 4]],
+  marked_foe: [["The first target takes {v}% more damage", 4]],
+  marked_for_death: [["The marked attacker takes {v}% more damage", 4]],
+  molten_ground: [["Meteor\u2019s burning ground deals {v}% more", 8]],
+  momentum: [["Each skill: +{v}% move speed", 4]],
+  open_wounds: [["Bleeding enemies take {v}% more damage", 3]],
+  opportunist: [["Each kill takes {v}s off Dash", 0.3]],
+  paralytic: [["Poisoned enemies move {v}% slower", 4]],
+  pyromaniac: [["+{v}% Attack per burning enemy near (up to 5)", 1]],
+  quick_dash: [["Dash cooldown {v}% shorter", 5]],
+  quickening: [["Lightning kills: skills recharge {v}% faster", 4]],
+  red_harvest: [["Bleed passes to {v} nearby {enemy|enemies}", 1]],
+  retaliation: [["Blocks hit back for {v}% of your Defense", 10]],
+  rooted: [["Standing still: {v}% less damage taken", 4]],
+  searing: [["Burns last {v}% longer", 10]],
+  second_breath: [["Heals {v}% of max HP over 3 seconds", 6]],
+  septic: [["Poisoned enemies deal {v}% less damage", 3]],
+  serrated_cuts: [["Bleeds deal {v}% more damage", 6]],
+  serrated_edge: [["Bleeds last {v}% longer", 10]],
+  shade: [["In Smoke Veil: Dash recharges {v}% faster", 10]],
+  shatter: [["Ice burst for {v}% of your Attack", 10]],
+  shatterpoint: [["Stunned enemies take {v}% more damage", 5]],
+  spell_weaving: [["Element switch: {v}% stronger", 4]],
+  spiked_shield: [["Bleed damage +{v}%", 10], CD("Shield Bash")],
+  spite: [["After a counter: +{v}% Attack", 5]],
+  spreading_flames: [["{v}% chance a burn spreads", 5]],
+  standard_bearer: [["Near your banner: Guard refills {v}% faster", 5]],
+  static_charge: [["+{v}% crit chance per lightning hit (stacks 5 times)", 1]],
+  static_step: [["Spark zaps for {v}% Attack", 10], CD("Blink")],
+  steady_mind: [["With a Barrier: {v}% less damage taken", 2]],
+  steel_nerves: [["Each parry heals {v}% of max HP", 1]],
+  storm_call: [["Thunderfall calls {v} more {bolt|bolts}", 1]],
+  storm_conductor: [["Storm Casts chain to {v} more {enemy|enemies}", [1, 1, 2, 2, 3]], ["Storm Casts hit {v}% harder", 5]],
+  superconductor: [["Lightning deals {v}% more to burning or chilled enemies", 5]],
+  titan: [["The next Earth-Breaker deals {v}% more", 15]],
+  tremor: [["Breaker hits stun slowed enemies for {v}s", 0.2]],
+  unbroken: [["Each block takes {v}s off Counter Stance", 0.3]],
+  unstoppable: [["Each stun takes {v}s off Breaker cooldowns", 0.2]],
+  unyielding: [["Guard breaks {v}% less easily", 5]],
+  vengeance: [["+{v}% Attack per 10% health missing", 2]],
+  vipers_coating: [["Flurry poisons {v}% of the time", 5]],
+  virulence: [["Poisons deal {v}% more damage", 6]],
+  volatile: [["Burning deaths explode for {v}% of your Attack", 8]],
+  winters_grasp: [["After 3s chilled, freeze for {v}s", 0.2]]
+});
+var tidy = (n) => String(Math.round(n * 100) / 100);
+function rankValue(line45, rank) {
+  const [, step3, base3 = 0] = line45;
+  if (rank <= 0) return 0;
+  return Array.isArray(step3) ? step3[Math.min(rank, step3.length) - 1] : base3 + step3 * rank;
+}
+function rankText(line45, rank, withStep = false) {
+  const v = rankValue(line45, rank), add2 = v - rankValue(line45, rank - 1);
+  const text3 = line45[0].replace("{v}", tidy(v)).replace(/\{([^|}]*)\|([^}]*)\}/g, (m, one, many) => v === 1 ? one : many);
+  if (!withStep || rank <= 1 || !add2) return text3;
+  const unit16 = /\{v\}°/.test(line45[0]) ? "\xB0" : /\{v\}%/.test(line45[0]) ? "%" : /\{v\}s/.test(line45[0]) ? "s" : "";
+  return `${text3} (+${tidy(add2)}${unit16})`;
+}
+function rankRows(id2, rank, maxRank) {
+  const lines2 = CLASS_TREE_RANKS[id2];
+  if (!lines2 || maxRank <= 1) return [];
+  if (rank <= 0) return [{ label: "Rank 1", lines: lines2.map((l) => rankText(l, 1)) }];
+  const now3 = { label: rank >= maxRank ? "Now \xB7 max" : `Now \xB7 rank ${rank}`, lines: lines2.map((l) => rankText(l, rank)) };
+  return rank >= maxRank ? [now3] : [now3, { label: "Next rank", lines: lines2.map((l) => rankText(l, rank + 1, true)) }];
 }
 
 // src/client/class_skills_view_v1.js
@@ -170486,6 +170608,19 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
       parts.push(req);
     }
     parts.push(el3("p", "cs-desc", s.description));
+    const rows = rankRows(id2, st.rank, s.maxRank);
+    if (rows.length) {
+      const box6 = el3("div", "cs-ranks");
+      for (const r of rows) {
+        const row3 = el3("div", "cs-rank-row");
+        row3.append(el3("span", "cs-rank-label", r.label));
+        const list = el3("span", "cs-rank-lines");
+        for (const t of r.lines) list.append(el3("span", "", t));
+        row3.append(list);
+        box6.append(row3);
+      }
+      parts.push(box6);
+    }
     if (s.kind === "active" && CLASS_SKILL_AUGMENTS[id2]) parts.push(augmentList(id2, s, st));
     if (s.kind === "active" && st.learned) {
       const onAttack = d.attackSkill === id2, onWheel = skillLoadout(d).includes(id2);
