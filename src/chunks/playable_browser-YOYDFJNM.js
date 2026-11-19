@@ -1185,13 +1185,13 @@ var PARTY_SLOT_LIMIT = 8;
 var isPartySlot = (slot) => Number.isInteger(slot) && slot > PARTY_SLOT_BASE && slot <= PARTY_SLOT_BASE + PARTY_SLOT_LIMIT;
 var isWorldSlot = (slot) => Number.isInteger(slot) && slot >= 1 && slot <= HERO_SLOT_LIMIT || isPartySlot(slot);
 var heroSavePrefix = (slot) => isPartySlot(slot) ? `saq-party-${slot - PARTY_SLOT_BASE}:` : Number.isInteger(slot) && slot > 1 && slot <= HERO_SLOT_LIMIT ? `saq-hero-${slot}:` : "";
-function channelIndexedDb(indexedDB, prefix2) {
-  if (!prefix2 || !indexedDB) return indexedDB;
+function channelIndexedDb(indexedDB, prefix) {
+  if (!prefix || !indexedDB) return indexedDB;
   return Object.freeze({
-    open: (name, ...version) => indexedDB.open(prefix2 + name, ...version),
-    deleteDatabase: (name) => indexedDB.deleteDatabase(prefix2 + name),
+    open: (name, ...version) => indexedDB.open(prefix + name, ...version),
+    deleteDatabase: (name) => indexedDB.deleteDatabase(prefix + name),
     cmp: (a, b) => indexedDB.cmp(a, b),
-    ...typeof indexedDB.databases === "function" ? { databases: async () => (await indexedDB.databases()).filter((d) => d.name?.startsWith(prefix2)).map((d) => ({ ...d, name: d.name.slice(prefix2.length) })) } : {}
+    ...typeof indexedDB.databases === "function" ? { databases: async () => (await indexedDB.databases()).filter((d) => d.name?.startsWith(prefix)).map((d) => ({ ...d, name: d.name.slice(prefix.length) })) } : {}
   });
 }
 
@@ -127785,8 +127785,8 @@ function seedWords(text3) {
   if (words.every((x) => x === 0)) words[0] = 1;
   return words;
 }
-function mint(state2, prefix2 = "ent") {
-  return `${prefix2}:${safeInteger(++state2.identitySequence, 1).toString(16).padStart(32, "0")}`;
+function mint(state2, prefix = "ent") {
+  return `${prefix}:${safeInteger(++state2.identitySequence, 1).toString(16).padStart(32, "0")}`;
 }
 var WORKSHOP_KEYS = ["records", "materialPurchases", "materialReceipts", "materialGold", "scrapBreaks", "scrapReceipts"];
 function arriveHeroPassport(state2, playerId, passport) {
@@ -130272,13 +130272,13 @@ async function plannedReviewTargetsV1(environment, assetId, { get, binding }, { 
   }
   if (binding.townPrototype) targets.unshift({ id: "art:woodland-wide", label: "V2 coverage - woodland beyond old corridor", tile: { x: 3872, y: 338 } }, { id: "art:woodland-wide-2", label: "V2 coverage - second woodland beyond old corridor", tile: { x: 3936, y: 338 } }, { id: "town:start", label: "Town campaign arrival (inspection only)", tile: { x: 5871, y: 5760 } }, { id: "town:countryside", label: "Populated open town - countryside approach", tile: { x: 5807, y: 5733 } }, { id: "town:entrance", label: "Populated open town - street entrance", tile: { x: 5826, y: 5764 } }, { id: "town:tavern", label: "Populated town - Tavern frontage", tile: { x: 5874, y: 5740 } });
   for (const r of [...caveReservations].reverse()) {
-    const e = r.socket.entrance, p = r.socket.provenance, d = asset.routes.destinations.find((d2) => d2.id === p.reservationId), prefix2 = newPopulationSelection(p.reservationId) ? p.reservationId : p.sizeTier === "standard" ? "cave" : "cave:" + p.sizeTier;
-    targets.unshift({ id: prefix2 + ":approach", label: "Playable " + r.parcel.label + " / " + p.sizeTier + " / Band " + p.band + " - approach (inspection)", tile: d.point }, { id: prefix2 + ":entrance", label: "Playable " + r.parcel.label + " / " + p.sizeTier + " / Band " + p.band + " - mouth (inspection)", tile: { x: (Number(e.chunkX) - 1024) * 32 + e.localX / 32 - 0.5, y: (Number(e.chunkY) - 1024) * 26 + e.localY / 32 - 0.5 } });
+    const e = r.socket.entrance, p = r.socket.provenance, d = asset.routes.destinations.find((d2) => d2.id === p.reservationId), prefix = newPopulationSelection(p.reservationId) ? p.reservationId : p.sizeTier === "standard" ? "cave" : "cave:" + p.sizeTier;
+    targets.unshift({ id: prefix + ":approach", label: "Playable " + r.parcel.label + " / " + p.sizeTier + " / Band " + p.band + " - approach (inspection)", tile: d.point }, { id: prefix + ":entrance", label: "Playable " + r.parcel.label + " / " + p.sizeTier + " / Band " + p.band + " - mouth (inspection)", tile: { x: (Number(e.chunkX) - 1024) * 32 + e.localX / 32 - 0.5, y: (Number(e.chunkY) - 1024) * 26 + e.localY / 32 - 0.5 } });
   }
   for (const r of cryptReservations) {
     const road = asset.routes.destinations.find((d) => d.id === r.socket.provenance.reservationId).point, s = r.socket.entrance;
-    const tier2 = r.parcel.tier, prefix2 = newPopulationSelection(r.socket.provenance.reservationId) ? r.socket.provenance.reservationId : tier2 === "small" ? "crypt" : "crypt:" + tier2, Tier = tier2[0].toUpperCase() + tier2.slice(1), label7 = r.parcel.label.startsWith(Tier + " ") ? r.parcel.label : Tier + " " + r.parcel.label;
-    targets.unshift({ id: prefix2 + ":approach", label: label7 + " / Band " + r.socket.provenance.band + " / existing approach", tile: road }, { id: prefix2 + ":entrance", label: label7 + " / PLAYABLE entrance", tile: { x: (Number(s.chunkX) - 1024) * 32 + s.localX / 32 - 0.5, y: (Number(s.chunkY) - 1024) * 26 + s.localY / 32 - 0.5 } });
+    const tier2 = r.parcel.tier, prefix = newPopulationSelection(r.socket.provenance.reservationId) ? r.socket.provenance.reservationId : tier2 === "small" ? "crypt" : "crypt:" + tier2, Tier = tier2[0].toUpperCase() + tier2.slice(1), label7 = r.parcel.label.startsWith(Tier + " ") ? r.parcel.label : Tier + " " + r.parcel.label;
+    targets.unshift({ id: prefix + ":approach", label: label7 + " / Band " + r.socket.provenance.band + " / existing approach", tile: road }, { id: prefix + ":entrance", label: label7 + " / PLAYABLE entrance", tile: { x: (Number(s.chunkX) - 1024) * 32 + s.localX / 32 - 0.5, y: (Number(s.chunkY) - 1024) * 26 + s.localY / 32 - 0.5 } });
   }
   if (binding.ferryVersion) for (const l of ferryNetworkV1().landings) targets.push({ id: l.id, label: "FERRY " + l.name + " / " + l.biomeId + " / Band " + l.band, tile: l.tile });
   if (binding.hydrologyHash) targets.unshift(...HYDROLOGY_REVIEW_TARGETS);
@@ -133207,8 +133207,15 @@ function withinRetainedSiteBudgetsD9(state2) {
   return c.actors <= (hasWorldCombat(state2) ? 4096 : ALPHA_POPULATION_RETENTION.retainedSiteActors) && c.groups <= (hasWorldCombat(state2) ? 128 : ALPHA_POPULATION_RETENTION.retainedSiteGroups) && Object.keys(state2.entitiesById).length - c.actors <= worldRetentionBudgets(state2).actors && Object.keys(state2.groupsById).length - c.groups <= worldRetentionBudgets(state2).groups;
 }
 
+// src/shared/contracts/pod_target_id_v4.js
+var h325 = (t) => {
+  let h = 2166136261;
+  for (let i = 0; i < t.length; i++) h = Math.imul(h ^ t.charCodeAt(i), 16777619) >>> 0;
+  return h;
+};
+var podTargetIdV4 = (groupId, n) => "ent:" + [0, 1, 2, 3].map((i) => h325("event-pod/" + groupId + "/" + n + "/" + i).toString(16).padStart(8, "0")).join("");
+
 // src/shared/contracts/spore_combat_targets_v4.js
-var prefix = "event-pod/";
 var isPodCombatTargetV4 = (a) => a?.podResource !== void 0;
 function podCombatTargetsV4(s) {
   const out4 = [];
@@ -133217,14 +133224,14 @@ function podCombatTargetsV4(s) {
       if (r.status !== "active" || r.nest.waiting) continue;
       const d = s.d9World.runtime.groups.find((g2) => g2.groupId === r.groupId);
       if (!d) continue;
-      NEST_POLICY.nests.forEach(([x, y], n) => out4.push({ kind: "actor", entityId: prefix + r.groupId + "/" + n, team: "hostile", alive: nestTargetableV1(r, n), hp: r.nest.hp[n], maxHp: r.nest.maxHp, position: { x: d.anchor.x + x, y: d.anchor.y + y }, hullRadius: NEST_POLICY.nestRadius, combatRadius: NEST_POLICY.nestRadius, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n, nest: true } }));
+      NEST_POLICY.nests.forEach(([x, y], n) => out4.push({ kind: "actor", entityId: podTargetIdV4(r.groupId, n), team: "hostile", alive: nestTargetableV1(r, n), hp: r.nest.hp[n], maxHp: r.nest.maxHp, position: { x: d.anchor.x + x, y: d.anchor.y + y }, hullRadius: NEST_POLICY.nestRadius, combatRadius: NEST_POLICY.nestRadius, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n, nest: true } }));
       continue;
     }
     if (r.kind !== "spore" || !isSporePodV2(s, r.groupId, 0)) continue;
     for (let n = 0; n < 3; n++) {
       const p = r.pods[n], position3 = podPositionV2(s, r.groupId, n, null);
       if (!position3) continue;
-      out4.push({ kind: "actor", entityId: prefix + r.groupId + "/" + n, team: "hostile", alive: r.status === "active" && compareCombat(p.hp, 0) > 0, hp: p.hp, maxHp: p.maxHp, position: position3, hullRadius: 20, combatRadius: 20, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n } });
+      out4.push({ kind: "actor", entityId: podTargetIdV4(r.groupId, n), team: "hostile", alive: r.status === "active" && compareCombat(p.hp, 0) > 0, hp: p.hp, maxHp: p.maxHp, position: position3, hullRadius: 20, combatRadius: 20, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n } });
     }
   }
   if (s.trips?.hell?.imps) out4.push(...hellImpTargetsV1(s));
@@ -133232,7 +133239,7 @@ function podCombatTargetsV4(s) {
   return out4;
 }
 function combatTargetV4(s, id2) {
-  return s.entitiesById[id2] ?? (typeof id2 === "string" && id2.startsWith(prefix) ? podCombatTargetsV4(s).find((p) => p.entityId === id2) : s.trips?.hell?.imps?.list[id2] ? hellImpTargetV1(s, id2) : isNightmareTargetIdV1(s, id2) ? nightmareTargetV1(s, id2) : void 0);
+  return s.entitiesById[id2] ?? (s.trips?.hell?.imps?.list[id2] ? hellImpTargetV1(s, id2) : isNightmareTargetIdV1(s, id2) ? nightmareTargetV1(s, id2) : typeof id2 === "string" && id2.startsWith("ent:") ? podCombatTargetsV4(s).find((p) => p.entityId === id2) : void 0);
 }
 var combatTargetsV4 = (s) => [...Object.values(s.entitiesById), ...podCombatTargetsV4(s)];
 
@@ -135314,14 +135321,14 @@ function hasDungeonMobCatalog(state2) {
   return additions.every((d) => same5(state2.content.definitionsById[d.contentDefinitionId], d));
 }
 function validateOrdinaryCatalog(state2) {
-  const prefix2 = dungeonMobV1CatalogPrefix(state2), defs = prefix2.definitionsById, full = hasDungeonMobCatalog(state2);
+  const prefix = dungeonMobV1CatalogPrefix(state2), defs = prefix.definitionsById, full = hasDungeonMobCatalog(state2);
   requireContract(full || !additions.some((d) => Object.hasOwn(defs, d.contentDefinitionId)), "Partial Dungeon mob catalog");
   for (const d of full ? [...DUNGEON_MOBS_V1_CATALOG_ENEMIES, ...DUNGEON_MOBS_V1_CATALOG_PROFILES] : [...LEGACY_ORDINARY_ENEMIES, ...LEGACY_ORDINARY_PROFILES]) requireContract(same5(defs[d.contentDefinitionId], d), "Ordinary content drift");
   const receipt = state2.hostileCombat?.catalogUpgrade;
   if (receipt) {
     closedRecord(receipt, ["version", "appliedTick", "fromFingerprint", "toFingerprint"]);
     requireContract(!hasLaterEntries(state2) || state2.hostileCombat?.catalogUpgradeV2, "Missing later catalog prefix receipt");
-    requireContract(full && receipt.version === DUNGEON_MOB_CATALOG_UPGRADE && /^[a-f0-9]{64}$/.test(receipt.fromFingerprint) && receipt.toFingerprint === prefix2.fingerprint && receipt.fromFingerprint !== receipt.toFingerprint, "Dungeon mob catalog upgrade receipt");
+    requireContract(full && receipt.version === DUNGEON_MOB_CATALOG_UPGRADE && /^[a-f0-9]{64}$/.test(receipt.fromFingerprint) && receipt.toFingerprint === prefix.fingerprint && receipt.fromFingerprint !== receipt.toFingerprint, "Dungeon mob catalog upgrade receipt");
     safeInteger(receipt.appliedTick, 0, state2.tick);
   }
   return full;
@@ -139162,15 +139169,15 @@ function createInteriorNavigationD12_3A(state2, { eligible: eligible2 = (source3
 var WORLD_SEAT_LIMIT = 4;
 var WAITING_ROOM_VERSION = "world-waiting-room-v1";
 var ROOM = 8;
-function mint2(state2, prefix2) {
-  const text3 = `${state2.campaign.campaignId}/${prefix2}/${safeInteger(++state2.identitySequence, 1)}`;
+function mint2(state2, prefix) {
+  const text3 = `${state2.campaign.campaignId}/${prefix}/${safeInteger(++state2.identitySequence, 1)}`;
   let hex6 = "";
   for (let j = 0; j < 4; j++) {
     let h = 2166136261 ^ j;
     for (let i = 0; i < text3.length; i++) h = Math.imul(h ^ text3.charCodeAt(i), 16777619) >>> 0;
     hex6 += h.toString(16).padStart(8, "0");
   }
-  return `${prefix2}:${hex6}`;
+  return `${prefix}:${hex6}`;
 }
 var actorOf = (state2, pid) => state2.entitiesById[state2.playersById[pid].entityId];
 function waitingRoomId(state2) {
@@ -147722,7 +147729,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
   } }), bossCombat = createBossCombatD12_5A(state2, { eligible: (source3, target) => canActivityApplyDamage(state2, manifest, source3, target), applyDirectDamage: (source3, target, amount2, mechanic, packet = {}) => damage(source3, target, amount2, mechanic, null, { scripted: true, directEnemyAttack: "melee", trigger: null, ...packet }) }), namedElites = createNamedEliteCombatV1(state2, { active: (id2) => activeIds.includes(id2) && !denHeldV1(state2, id2), chill: (e, target) => eliteCombat.chill(e, target), eligible: (source3, target) => canActivityApplyDamage(state2, manifest, source3, target), lineClear: (source3, target) => meleeLineClear(state2.spacesByInstanceId[source3.residency.spaceInstanceId].collision, source3, target), applyDirectDamage: (source3, target, amount2, mechanic) => damage(source3, target, amount2, mechanic, null, { scripted: true, directEnemyAttack: "melee", trigger: null }) }), eliteMoves = createEliteMovesV2(state2, { active: (id2) => activeIds.includes(id2) && !denHeldV1(state2, id2), eligible: (source3, target) => canActivityApplyDamage(state2, manifest, source3, target), lineClear: (source3, target) => meleeLineClear(state2.spacesByInstanceId[source3.residency.spaceInstanceId].collision, source3, target), chill: (e, target) => eliteCombat.chill(e, target), applyDirectDamage: (source3, target, amount2, mechanic) => damage(source3, target, amount2, mechanic, null, { scripted: true, directEnemyAttack: "melee", trigger: null }) });
   let activeIds = [], events = [], version = startVersion, lastUpdated = [], clearedGroups = Object.values(state2.groupsById).filter((g2) => g2.cleared).length;
   let renewal = createEncounterRenewal(state2, manifest, (g2) => scheduler.renewGroup(g2));
-  const identity2 = (prefix2) => `${prefix2}:${safeInteger(++state2.identitySequence, 1).toString(16).padStart(32, "0")}`;
+  const identity2 = (prefix) => `${prefix}:${safeInteger(++state2.identitySequence, 1).toString(16).padStart(32, "0")}`;
   function emit(event) {
     events.push(event);
     if (events.length > 64) events.shift();
@@ -147779,6 +147786,17 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
   const mastery = createMasteryAwards(state2);
   const family = createSubweaponSimulation(state2, { damage, mastery, eligible: (a, b) => canActivityApplyDamage(state2, manifest, a, b), identity: identity2, getStats: progression.resolvedStats, refreshStats: progression.equipmentChanged });
   const hostileProjectiles = createHostileProjectileSimulation(state2, { damage, identity: identity2, lineClear: meleeLineClear, getSourceLevel: progression.combatLevel, canAct: (a) => frostMovement(state2, a) > 0 && !bossCombat.frozen(a.entityId), eligible: (a, b) => canActivityApplyDamage(state2, manifest, a, b), canLaunch: (a, b) => canActivityApplyDamage(state2, manifest, a, b) && (!containment.groupForActor(a.entityId) || containment.targetStillValid(a, b, (source3, target) => canActivityApplyDamage(state2, manifest, source3, target))) });
+  function podHitEvents(source3, target, p, dealt, after, defeated, critical, mechanic, causationCommandId, attribution) {
+    const context = actorContext(state2, source3.entityId), attackActionId = identity2("act"), sourceItem = attribution?.sourceItem ?? damageSourceItem(p, mechanic);
+    const common = { protocolVersion: state2.protocolVersion, campaignId: state2.campaign.campaignId, sessionId: state2.session.sessionId, tick: state2.tick, causation: { commandId: causationCommandId, playerId: p?.playerId ?? null }, source: { playerId: p?.playerId ?? null, characterId: source3.ownerCharacterId, entityId: source3.entityId }, subject: { entityId: target.entityId }, spaceInstanceId: context.spaceInstanceId, spaceRevision: context.spaceRevision };
+    for (const kind of ["combat.attackStarted", "combat.damageApplied", ...defeated ? ["combat.actorDefeated"] : []]) emit(createEvent({
+      ...common,
+      eventId: identity2("evt"),
+      eventSequence: ++state2.eventEmission.lastEventSequence,
+      kind,
+      payload: kind === "combat.attackStarted" ? { attackActionId, sourceEntityId: source3.entityId, targetEntityId: target.entityId } : { attackActionId, sourceEntityId: source3.entityId, sourceCharacterId: source3.ownerCharacterId, targetEntityId: target.entityId, damage: dealt, resultingHp: after, targetAlive: !defeated, combatVersion: "combat-integer-v2", barrierAbsorption: null, sourceItem, ...attribution?.chainFrom ? { chainFrom: attribution.chainFrom } : {}, ...attribution?.mark ? { skillMark: attribution.mark } : {}, trigger: attribution?.trigger ?? null, critical, defenseKind: null, mechanic }
+    }));
+  }
   function damage(source3, target, requested = null, mechanic = "main", causationCommandId = null, attribution = null) {
     const askedMechanic = mechanic;
     if (isPodCombatTargetV4(target) && (target.podResource.imp || target.podResource.nightmare)) {
@@ -147804,15 +147822,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       target.hp = hit2.after;
       target.alive = !hit2.defeated;
       if (hit2.defeated) cancelSubweaponResidency(state2, target.entityId);
-      const context2 = actorContext(state2, source3.entityId), attackActionId2 = identity2("act"), sourceItem2 = attribution?.sourceItem ?? damageSourceItem(p, mechanic);
-      const common2 = { protocolVersion: state2.protocolVersion, campaignId: state2.campaign.campaignId, sessionId: state2.session.sessionId, tick: state2.tick, causation: { commandId: causationCommandId, playerId: p?.playerId ?? null }, source: { playerId: p?.playerId ?? null, characterId: source3.ownerCharacterId, entityId: source3.entityId }, subject: { entityId: target.entityId }, spaceInstanceId: context2.spaceInstanceId, spaceRevision: context2.spaceRevision };
-      for (const kind of ["combat.attackStarted", "combat.damageApplied", ...hit2.defeated ? ["combat.actorDefeated"] : []]) emit(createEvent({
-        ...common2,
-        eventId: identity2("evt"),
-        eventSequence: ++state2.eventEmission.lastEventSequence,
-        kind,
-        payload: kind === "combat.attackStarted" ? { attackActionId: attackActionId2, sourceEntityId: source3.entityId, targetEntityId: target.entityId } : { attackActionId: attackActionId2, sourceEntityId: source3.entityId, sourceCharacterId: source3.ownerCharacterId, targetEntityId: target.entityId, damage: hit2.damage, resultingHp: hit2.after, targetAlive: !hit2.defeated, combatVersion: "combat-integer-v2", barrierAbsorption: null, sourceItem: sourceItem2, ...attribution?.chainFrom ? { chainFrom: attribution.chainFrom } : {}, ...attribution?.mark ? { skillMark: attribution.mark } : {}, trigger: attribution?.trigger ?? null, critical: packet.critical, defenseKind: null, mechanic }
-      }));
+      podHitEvents(source3, target, p, hit2.damage, hit2.after, hit2.defeated, packet.critical, mechanic, causationCommandId, attribution);
       return { critical: packet.critical, attemptedDamage: packet.damage, damage: hit2.damage, defeated: hit2.defeated, targetAlive: !hit2.defeated };
     }
     if (isPodCombatTargetV4(target)) {
@@ -147828,7 +147838,9 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
         target.hp = hp;
         target.alive = compareCombat(hp, 0) > 0;
         if (!target.alive) cancelSubweaponResidency(state2, target.entityId);
-        return { critical: packet.critical, attemptedDamage: packet.damage, damage: combatInteger(subtractCombat(before, hp)), defeated: !target.alive, targetAlive: target.alive };
+        const dealt2 = combatInteger(subtractCombat(before, hp));
+        podHitEvents(source3, target, p, dealt2, hp, !target.alive, packet.critical, mechanic, causationCommandId, attribution);
+        return { critical: packet.critical, attemptedDamage: packet.damage, damage: dealt2, defeated: !target.alive, targetAlive: target.alive };
       }
       const resource = economicResources(state2, manifest).find((r) => r.groupId === target.podResource.groupId && r.ordinal === target.podResource.ordinal && !r.used);
       if (!resource) return;
@@ -147838,7 +147850,9 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       target.hp = pod3.hp;
       target.alive = compareCombat(pod3.hp, 0) > 0;
       if (!target.alive) cancelSubweaponResidency(state2, target.entityId);
-      return { critical: packet.critical, attemptedDamage: packet.damage, damage: combatInteger(subtractCombat(before, pod3.hp)), defeated: !target.alive, targetAlive: target.alive };
+      const dealt = combatInteger(subtractCombat(before, pod3.hp));
+      podHitEvents(source3, target, p, dealt, pod3.hp, !target.alive, packet.critical, mechanic, causationCommandId, attribution);
+      return { critical: packet.critical, attemptedDamage: packet.damage, damage: dealt, defeated: !target.alive, targetAlive: target.alive };
     }
     const periodic = attribution?.periodic === true, resolvedComponent = attribution?.bossComponentImpact === true && attribution?.aegisResolvedDamage === true;
     if (!periodic && !canActivityApplyDamage(state2, manifest, source3, target, attribution)) return;
@@ -149906,6 +149920,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
             visualSeed: deterministicCreatureVisualSeed(a.entityId),
             groundAnchorY: creature?.presentation.groundAnchor.y ?? creature?.body.groundAnchorY ?? a.hullRadius * 0.45,
             weaponVisual: a.team === "party" ? equippedWeaponVisual(Object.values(state2.playersById).find((p2) => p2.entityId === a.entityId)) : null,
+            ...a.podResource && !a.podResource.imp && !a.podResource.nightmare ? { eventPodTarget: true } : {},
             ...a.tripImp ? { tripImp: { ...a.tripImp, rift: a.tripImp.rift ? { ...a.tripImp.rift } : null } } : {},
             ...a.tripNightmare ? { tripNightmare: { ...a.tripNightmare } } : {},
             ...a.tripGazecap ? { tripGazecap: { ...a.tripGazecap } } : {}
@@ -157446,6 +157461,23 @@ function sprite4(key4, box6, paint4) {
   while (sprites5.size > LIMIT4) sprites5.delete(sprites5.keys().next().value);
   return s;
 }
+var whites = /* @__PURE__ */ new Map();
+function whiteOf(key4, s) {
+  if (!s) return null;
+  let w = whites.get(key4);
+  if (w && w.src === s.canvas) return w;
+  const cv = s.canvas.ownerDocument?.createElement ? s.canvas.ownerDocument.createElement("canvas") : new OffscreenCanvas(1, 1);
+  cv.width = s.canvas.width;
+  cv.height = s.canvas.height;
+  const c = cv.getContext("2d");
+  c.drawImage(s.canvas, 0, 0);
+  c.globalCompositeOperation = "source-in";
+  c.fillStyle = "#fff";
+  c.fillRect(0, 0, cv.width, cv.height);
+  w = { canvas: cv, box: s.box, src: s.canvas };
+  whites.set(key4, w);
+  return w;
+}
 function stamp3(ctx, s, x, y) {
   if (!s) return;
   const [l, t, r, b] = s.box;
@@ -157638,12 +157670,34 @@ function drawNestGroundV1(ctx, e, time3) {
     ctx.restore();
   }
 }
-function nestUprightsV1(e, time3) {
+function nestUprightsV1(e, time3, hitFor = null) {
   const { x, y } = e.position, b = e.biome, S18 = nestSkinV1(b), L = NEST_LAYOUT_V1, paint4 = PAINT2[b] ?? sporePod, out4 = [], id2 = e.groupId ?? "nest", pulse3 = 0.75 + 0.25 * Math.sin(time3 * 3.2), ms = motherStateV1(e);
   L.nests.forEach((n, i) => {
     const st = nestState(e.nests?.[i]);
     out4.push({ id: id2 + "/nest/" + i, anchorX: x + n.x, anchorY: y + n.y, draw(ctx) {
-      stamp3(ctx, sprite4("nest/" + b + "/" + st, BOX2.nest, (c) => paint4(c, st, S18)), x + n.x, y + n.y);
+      const hit2 = st !== "burst" ? hitFor?.(i) : null, egg5 = sprite4("nest/" + b + "/" + st, BOX2.nest, (c) => paint4(c, st, S18));
+      if (hit2) {
+        ctx.save();
+        ctx.translate(hit2.offsetX, hit2.offsetY);
+      }
+      stamp3(ctx, egg5, x + n.x, y + n.y);
+      if (hit2?.flash) {
+        ctx.save();
+        ctx.globalAlpha = 0.55;
+        stamp3(ctx, whiteOf("nest/" + b + "/" + st, egg5), x + n.x, y + n.y);
+        ctx.restore();
+      }
+      if (hit2) ctx.restore();
+      const hp = e.nests?.[i]?.hp ?? 1;
+      if (st !== "burst" && hp < 1 && e.phase !== "won") {
+        const bw = 34, bx = x + n.x - bw / 2, by = y + n.y + (b === "desert" ? -62 : b === "frostland" ? -44 : -54);
+        ctx.fillStyle = "rgba(12,8,14,.82)";
+        ctx.fillRect(bx - 1, by - 1, bw + 2, 6);
+        ctx.fillStyle = "#e0455a";
+        ctx.fillRect(bx, by, bw * Math.max(0, hp), 4);
+        ctx.fillStyle = "rgba(255,255,255,.28)";
+        ctx.fillRect(bx, by, bw * Math.max(0, hp), 1.5);
+      }
       if (st !== "burst") {
         const top = b === "desert" ? -30 : b === "frostland" ? -16 : b === "wetland" ? -26 : -22;
         lightA(ctx, x + n.x, y + n.y + top, 26, 22, S18.glow, (st === "cracked" ? 0.5 : 0.32) * pulse3);
@@ -165298,7 +165352,7 @@ function drawPlannedEventGroundV1(ctx, model, viewport, time3) {
     for (const m of e.shrine?.emergences ?? []) riftSwirlV1(ctx, m.position.x, m.position.y, 18, 5, t, 1 - m.ageTicks / 50, false);
   }
 }
-function plannedEventDepthItemsV1(model, viewport, time3) {
+function plannedEventDepthItemsV1(model, viewport, time3, reactionFor = null) {
   const t = time3 / 1e3, out4 = [];
   for (const e of model.worldEvents ?? []) {
     if (ROADSIDE2.has(e.kind)) {
@@ -165318,7 +165372,7 @@ function plannedEventDepthItemsV1(model, viewport, time3) {
       continue;
     }
     if (e.kind === "nests" && inView(e, viewport, 360)) {
-      for (const p of nestUprightsV1(nestView(e), t)) out4.push(depthItem({ id: p.id, anchorX: p.anchorX, anchorY: p.anchorY, draw: p.draw }));
+      for (const p of nestUprightsV1(nestView(e), t, reactionFor ? (i) => reactionFor(podTargetIdV4(e.groupId, i)) : null)) out4.push(depthItem({ id: p.id, anchorX: p.anchorX, anchorY: p.anchorY, draw: p.draw }));
       continue;
     }
     if (e.kind !== "cursed_shrine" || !inView(e, viewport, 360)) continue;
@@ -229665,7 +229719,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     ambientMarks = !model.space.visual ? 0 : drawEnvironmentAmbient(ctx, model.space, { x: cam.x, y: cam.y, width: canvas.width / cam.zoom, height: canvas.height / cam.zoom }, time3);
     if (collisionDebug && seamless && !model.space.site) drawCollisionCoverageDebug(ctx, model.space, viewport);
     depthItems2.push(...environmentArt?.reviewDepthItems?.(model, viewport) ?? []);
-    depthItems2.push(...sporeDepthItems(model, viewport, environmentArt?.sporeArt), ...hollowDepthItems(model, viewport, environmentArt?.hollowArt), ...plannedEventDepthItemsV1(model, viewport, time3));
+    depthItems2.push(...sporeDepthItems(model, viewport, environmentArt?.sporeArt), ...hollowDepthItems(model, viewport, environmentArt?.hollowArt), ...plannedEventDepthItemsV1(model, viewport, time3, (id2) => feedback.reaction(id2, time3)));
     depthItems2.push(...resourceArt.depthItems({ ...model, resources: model.resources.filter((r) => !r.eventPod && r.art !== "camp_crate") }, time3, viewport));
     depthItems2.push(...portalArt.depthItems(model, viewport), ...aegisMimicTetherDepthItems(visualModel, model.tick), ...unified ? biomeBossReleaseDepthItemsV1(ctx, visualModel, model.tick) : []);
     if (model.space.visual) {
@@ -229808,7 +229862,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
           if (drawn.boss) {
             if (!drawRecoveredBossV1(ctx2, drawn, model.tick, Boolean(reaction?.flash)) && !drawBrimstoneColossus(ctx2, drawn, model.tick, Boolean(reaction?.flash)) && !drawShieldWarden(ctx2, drawn.boss.bossDefinitionId === "aegis_goliath" ? { ...drawn, wardenFx: wardenView.wardenFx } : drawn, model.tick, Boolean(reaction?.flash))) drawArachnidTreantD12_5A(ctx2, drawn, model.tick, Boolean(reaction?.flash));
           } else if (drawAttachedAegisMimic(ctx2, drawn, model.tick, Boolean(reaction?.flash))) {
-          } else if (drawn.bossSummon?.stage === "dormant") {
+          } else if (drawn.bossSummon?.stage === "dormant" || drawn.eventPodTarget) {
           } else if (drawRecoveredSummonV1(ctx2, drawn.bossSummon?.kind === "reflection" ? { ...drawn, entityId: id2 } : drawn, model.tick, Boolean(reaction?.flash))) {
           } else if (drawn.bossSummon?.stage === "cocoon") drawTreantCocoonD12_5A(ctx2, drawn, model.tick, Boolean(reaction?.flash));
           else if (drawn.tripImp) drawTripImpV1(ctx2, drawn, id2, visualModel, time3, Boolean(reaction?.flash));
@@ -237887,7 +237941,7 @@ var FIELD2 = /^[\x21-\x7e]+$/;
 function compactSdpV1(type, sdp) {
   if (type !== "offer" && type !== "answer") throw Error("Unknown SDP type");
   const lines2 = String(sdp).split(/\r?\n/);
-  const pick4 = (prefix2) => lines2.find((l) => l.startsWith(prefix2))?.slice(prefix2.length).trim() ?? null;
+  const pick4 = (prefix) => lines2.find((l) => l.startsWith(prefix))?.slice(prefix.length).trim() ?? null;
   const ufrag = pick4("a=ice-ufrag:"), pwd = pick4("a=ice-pwd:"), fp = pick4("a=fingerprint:sha-256 "), setup = pick4("a=setup:");
   if (!ufrag || !pwd || !fp || !setup) throw Error("Connection details incomplete");
   const hex6 = fp.replace(/:/g, "").toLowerCase();
@@ -240220,13 +240274,13 @@ async function startWorldClient(environment) {
       const record2 = readHeroSlots(deviceStorage, channel2);
       if (worldInUse(record2, slot)) throw Error("Another hero is playing in this world. Send them home first.");
       const gone = record2.heroes.find((h) => h.slot === slot)?.heroId;
-      const prefix2 = heroSavePrefix(slot), indexedDB = channelIndexedDb(environment.indexedDB, channel2 + prefix2), names2 = /* @__PURE__ */ new Set([activity ? databaseName : WORLD_CAMPAIGN_DATABASE_NAME]);
-      if (prefix2 && typeof environment.indexedDB?.databases === "function") {
-        for (const d of await environment.indexedDB.databases()) if (d.name?.startsWith(channel2 + prefix2)) names2.add(d.name.slice(channel2.length + prefix2.length));
+      const prefix = heroSavePrefix(slot), indexedDB = channelIndexedDb(environment.indexedDB, channel2 + prefix), names2 = /* @__PURE__ */ new Set([activity ? databaseName : WORLD_CAMPAIGN_DATABASE_NAME]);
+      if (prefix && typeof environment.indexedDB?.databases === "function") {
+        for (const d of await environment.indexedDB.databases()) if (d.name?.startsWith(channel2 + prefix)) names2.add(d.name.slice(channel2.length + prefix.length));
       }
       for (const name of names2) await deleteLocalWorldCampaignDatabase({ indexedDB, databaseName: name });
       try {
-        launcherCapability(environment, prefix2).removeItem(launcherKey);
+        launcherCapability(environment, prefix).removeItem(launcherKey);
       } catch {
       }
       forgetWorld(deviceStorage, channel2, slot);

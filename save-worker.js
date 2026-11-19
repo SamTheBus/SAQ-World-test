@@ -12,13 +12,13 @@ function heroSlotFromUrl(location) {
   const slot = Number(new URL(location.href).searchParams.get("hero"));
   return heroSavePrefix(slot) ? slot : 1;
 }
-function channelIndexedDb(indexedDB, prefix2) {
-  if (!prefix2 || !indexedDB) return indexedDB;
+function channelIndexedDb(indexedDB, prefix) {
+  if (!prefix || !indexedDB) return indexedDB;
   return Object.freeze({
-    open: (name, ...version) => indexedDB.open(prefix2 + name, ...version),
-    deleteDatabase: (name) => indexedDB.deleteDatabase(prefix2 + name),
+    open: (name, ...version) => indexedDB.open(prefix + name, ...version),
+    deleteDatabase: (name) => indexedDB.deleteDatabase(prefix + name),
     cmp: (a, b) => indexedDB.cmp(a, b),
-    ...typeof indexedDB.databases === "function" ? { databases: async () => (await indexedDB.databases()).filter((d) => d.name?.startsWith(prefix2)).map((d) => ({ ...d, name: d.name.slice(prefix2.length) })) } : {}
+    ...typeof indexedDB.databases === "function" ? { databases: async () => (await indexedDB.databases()).filter((d) => d.name?.startsWith(prefix)).map((d) => ({ ...d, name: d.name.slice(prefix.length) })) } : {}
   });
 }
 
@@ -28410,8 +28410,15 @@ function withinRetainedSiteBudgetsD9(state) {
   return c.actors <= (hasWorldCombat(state) ? 4096 : ALPHA_POPULATION_RETENTION.retainedSiteActors) && c.groups <= (hasWorldCombat(state) ? 128 : ALPHA_POPULATION_RETENTION.retainedSiteGroups) && Object.keys(state.entitiesById).length - c.actors <= worldRetentionBudgets(state).actors && Object.keys(state.groupsById).length - c.groups <= worldRetentionBudgets(state).groups;
 }
 
+// src/shared/contracts/pod_target_id_v4.js
+var h325 = (t) => {
+  let h = 2166136261;
+  for (let i = 0; i < t.length; i++) h = Math.imul(h ^ t.charCodeAt(i), 16777619) >>> 0;
+  return h;
+};
+var podTargetIdV4 = (groupId, n) => "ent:" + [0, 1, 2, 3].map((i) => h325("event-pod/" + groupId + "/" + n + "/" + i).toString(16).padStart(8, "0")).join("");
+
 // src/shared/contracts/spore_combat_targets_v4.js
-var prefix = "event-pod/";
 function podCombatTargetsV4(s) {
   const out2 = [];
   for (const r of Object.values(s.d9World?.worldEvents?.records ?? {})) {
@@ -28419,14 +28426,14 @@ function podCombatTargetsV4(s) {
       if (r.status !== "active" || r.nest.waiting) continue;
       const d = s.d9World.runtime.groups.find((g) => g.groupId === r.groupId);
       if (!d) continue;
-      NEST_POLICY.nests.forEach(([x, y], n) => out2.push({ kind: "actor", entityId: prefix + r.groupId + "/" + n, team: "hostile", alive: nestTargetableV1(r, n), hp: r.nest.hp[n], maxHp: r.nest.maxHp, position: { x: d.anchor.x + x, y: d.anchor.y + y }, hullRadius: NEST_POLICY.nestRadius, combatRadius: NEST_POLICY.nestRadius, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n, nest: true } }));
+      NEST_POLICY.nests.forEach(([x, y], n) => out2.push({ kind: "actor", entityId: podTargetIdV4(r.groupId, n), team: "hostile", alive: nestTargetableV1(r, n), hp: r.nest.hp[n], maxHp: r.nest.maxHp, position: { x: d.anchor.x + x, y: d.anchor.y + y }, hullRadius: NEST_POLICY.nestRadius, combatRadius: NEST_POLICY.nestRadius, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n, nest: true } }));
       continue;
     }
     if (r.kind !== "spore" || !isSporePodV2(s, r.groupId, 0)) continue;
     for (let n = 0; n < 3; n++) {
       const p = r.pods[n], position2 = podPositionV2(s, r.groupId, n, null);
       if (!position2) continue;
-      out2.push({ kind: "actor", entityId: prefix + r.groupId + "/" + n, team: "hostile", alive: r.status === "active" && compareCombat(p.hp, 0) > 0, hp: p.hp, maxHp: p.maxHp, position: position2, hullRadius: 20, combatRadius: 20, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n } });
+      out2.push({ kind: "actor", entityId: podTargetIdV4(r.groupId, n), team: "hostile", alive: r.status === "active" && compareCombat(p.hp, 0) > 0, hp: p.hp, maxHp: p.maxHp, position: position2, hullRadius: 20, combatRadius: 20, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n } });
     }
   }
   if (s.trips?.hell?.imps) out2.push(...hellImpTargetsV1(s));
@@ -28434,7 +28441,7 @@ function podCombatTargetsV4(s) {
   return out2;
 }
 function combatTargetV4(s, id2) {
-  return s.entitiesById[id2] ?? (typeof id2 === "string" && id2.startsWith(prefix) ? podCombatTargetsV4(s).find((p) => p.entityId === id2) : s.trips?.hell?.imps?.list[id2] ? hellImpTargetV1(s, id2) : isNightmareTargetIdV1(s, id2) ? nightmareTargetV1(s, id2) : void 0);
+  return s.entitiesById[id2] ?? (s.trips?.hell?.imps?.list[id2] ? hellImpTargetV1(s, id2) : isNightmareTargetIdV1(s, id2) ? nightmareTargetV1(s, id2) : typeof id2 === "string" && id2.startsWith("ent:") ? podCombatTargetsV4(s).find((p) => p.entityId === id2) : void 0);
 }
 
 // src/shared/contracts/combat_attribution.js
@@ -32155,14 +32162,14 @@ function hasDungeonMobCatalog(state) {
   return additions.every((d) => same29(state.content.definitionsById[d.contentDefinitionId], d));
 }
 function validateOrdinaryCatalog(state) {
-  const prefix2 = dungeonMobV1CatalogPrefix(state), defs = prefix2.definitionsById, full = hasDungeonMobCatalog(state);
+  const prefix = dungeonMobV1CatalogPrefix(state), defs = prefix.definitionsById, full = hasDungeonMobCatalog(state);
   requireContract(full || !additions.some((d) => Object.hasOwn(defs, d.contentDefinitionId)), "Partial Dungeon mob catalog");
   for (const d of full ? [...DUNGEON_MOBS_V1_CATALOG_ENEMIES, ...DUNGEON_MOBS_V1_CATALOG_PROFILES] : [...LEGACY_ORDINARY_ENEMIES, ...LEGACY_ORDINARY_PROFILES]) requireContract(same29(defs[d.contentDefinitionId], d), "Ordinary content drift");
   const receipt = state.hostileCombat?.catalogUpgrade;
   if (receipt) {
     closedRecord(receipt, ["version", "appliedTick", "fromFingerprint", "toFingerprint"]);
     requireContract(!hasLaterEntries(state) || state.hostileCombat?.catalogUpgradeV2, "Missing later catalog prefix receipt");
-    requireContract(full && receipt.version === DUNGEON_MOB_CATALOG_UPGRADE && /^[a-f0-9]{64}$/.test(receipt.fromFingerprint) && receipt.toFingerprint === prefix2.fingerprint && receipt.fromFingerprint !== receipt.toFingerprint, "Dungeon mob catalog upgrade receipt");
+    requireContract(full && receipt.version === DUNGEON_MOB_CATALOG_UPGRADE && /^[a-f0-9]{64}$/.test(receipt.fromFingerprint) && receipt.toFingerprint === prefix.fingerprint && receipt.fromFingerprint !== receipt.toFingerprint, "Dungeon mob catalog upgrade receipt");
     safeInteger(receipt.appliedTick, 0, state.tick);
   }
   return full;
@@ -32170,8 +32177,8 @@ function validateOrdinaryCatalog(state) {
 function previousDungeonMobCatalog(state) {
   const receipt = state.hostileCombat?.catalogUpgrade;
   if (!receipt || !hasDungeonMobCatalog(state)) return null;
-  const prefix2 = dungeonMobV1CatalogPrefix(state);
-  return { ...copyWire(prefix2), fingerprint: receipt.fromFingerprint, definitionsById: Object.fromEntries(Object.entries(prefix2.definitionsById).filter(([id2]) => !addedIds.has(id2)).map(([id2, d]) => [id2, copyWire(d)])) };
+  const prefix = dungeonMobV1CatalogPrefix(state);
+  return { ...copyWire(prefix), fingerprint: receipt.fromFingerprint, definitionsById: Object.fromEntries(Object.entries(prefix.definitionsById).filter(([id2]) => !addedIds.has(id2)).map(([id2, d]) => [id2, copyWire(d)])) };
 }
 function isDungeonMobCatalogUpgrade(before, after) {
   try {
@@ -33649,8 +33656,8 @@ function createPageTransaction({ root: root3 = null, readPage, sha256 }) {
   async function range({ after = null, through = "f".repeat(64), limit = 64 } = {}) {
     requireContract((after === null || /^[a-f0-9]{64}$/.test(after)) && /^[a-f0-9]{64}$/.test(through) && Number.isSafeInteger(limit) && limit >= 1 && limit <= 128, "Invalid page range");
     const entries = [];
-    async function visit(id2, prefix2) {
-      if (!id2 || entries.length > limit || prefix2.padEnd(64, "0") > through || after !== null && prefix2.padEnd(64, "f") <= after) return;
+    async function visit(id2, prefix) {
+      if (!id2 || entries.length > limit || prefix.padEnd(64, "0") > through || after !== null && prefix.padEnd(64, "f") <= after) return;
       const node = await load(id2);
       if (node.kind === "leaf") {
         for (const key9 of Object.keys(node.values).sort()) {
@@ -33660,7 +33667,7 @@ function createPageTransaction({ root: root3 = null, readPage, sha256 }) {
           }
         }
       } else for (const edge of Object.keys(node.children).sort()) {
-        await visit(node.children[edge], prefix2 + edge);
+        await visit(node.children[edge], prefix + edge);
         if (entries.length > limit) return;
       }
     }
