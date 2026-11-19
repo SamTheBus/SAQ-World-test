@@ -134250,9 +134250,16 @@ function advanceSubweaponTimers(actor, combat, stats3, { suppressed = false } = 
     combat.barrierRechargeRemainder = compareCombat(combat.barrier, stats3.maxBarrier) === 0 ? 0 : Number(accrued % 600n);
   }
 }
-function criticalDamagePacket(combat, stats3, base3, mechanic, forced = false) {
-  const critical = combatRoll(combat, stats3.critChance) || forced;
-  return { damage: outgoingCombat(critical ? multiplyCombat(base3, stats3.critMultiplier.n, stats3.critMultiplier.d) : base3), critical, mechanic };
+var DAMAGE_SPREAD_PERCENT = 10;
+var spreadNow = DAMAGE_SPREAD_PERCENT;
+function spreadPercent(combat) {
+  const draw = nextUint32(combat.rng);
+  combat.rng = copyWire(draw.state);
+  return spreadNow ? 100 - spreadNow + draw.value % (2 * spreadNow + 1) : 100;
+}
+function criticalDamagePacket(combat, stats3, base3, mechanic, forced = false, spread = false) {
+  const critical = combatRoll(combat, stats3.critChance) || forced, hit2 = critical ? multiplyCombat(base3, stats3.critMultiplier.n, stats3.critMultiplier.d) : base3, pct3 = spread ? spreadPercent(combat) : 100;
+  return { damage: outgoingCombat(pct3 === 100 ? hit2 : multiplyCombat(hit2, pct3, 100)), critical, mechanic };
 }
 var shieldPacket = (stats3) => {
   const f = stats3.familyProperties, defense = addCombat(f?.reflect ?? combatAmount(1), f?.bashDefense ?? combatAmount(0)), base3 = addCombat(multiplyCombat(stats3.defense, defense.n, defense.d), multiplyCombat(stats3.attack, f?.bashAttack?.n ?? 0, f?.bashAttack?.d ?? 1)), scale = f?.bashMultiplier ?? combatAmount(1);
@@ -147801,7 +147808,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     const askedMechanic = mechanic;
     if (isPodCombatTargetV4(target) && (target.podResource.imp || target.podResource.nightmare)) {
       if (!canActivityApplyDamage(state2, manifest, source3, target) || source3.team !== "party") return;
-      const p = playerFor(source3.entityId), combat = state2.subweaponCombat.actors[source3.entityId], roll9 = { rng: combat.rng }, packet = criticalDamagePacket(roll9, progression.resolvedStats(source3.entityId), requested ?? source3.attackDamage, mechanic, false);
+      const p = playerFor(source3.entityId), combat = state2.subweaponCombat.actors[source3.entityId], roll9 = { rng: combat.rng }, packet = criticalDamagePacket(roll9, progression.resolvedStats(source3.entityId), requested ?? source3.attackDamage, mechanic, false, attribution?.periodic !== true && attribution?.trigger !== "periodic");
       if (compareCombat(packet.damage, 0) <= 0) return;
       const hit2 = target.podResource.imp ? hitHellImpV1(state2, p, target.podResource.imp, packet.damage) : hitNightmareV1(state2, p, target.entityId, packet.damage);
       if (!hit2) return;
@@ -147827,7 +147834,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     }
     if (isPodCombatTargetV4(target)) {
       if (!canActivityApplyDamage(state2, manifest, source3, target) || source3.team !== "party") return;
-      const p = playerFor(source3.entityId), combat = state2.subweaponCombat.actors[source3.entityId], roll9 = { rng: combat.rng }, packet = criticalDamagePacket(roll9, progression.resolvedStats(source3.entityId), requested ?? source3.attackDamage, mechanic, false), before = target.hp;
+      const p = playerFor(source3.entityId), combat = state2.subweaponCombat.actors[source3.entityId], roll9 = { rng: combat.rng }, packet = criticalDamagePacket(roll9, progression.resolvedStats(source3.entityId), requested ?? source3.attackDamage, mechanic, false, attribution?.periodic !== true && attribution?.trigger !== "periodic"), before = target.hp;
       if (compareCombat(packet.damage, 0) <= 0) return;
       if (target.podResource.nest) {
         const nest2 = state2.d9World?.worldEvents?.records[target.podResource.groupId];
@@ -147904,7 +147911,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
         if (state2.d9World) pendingForcedTransient = transient;
         else transient.retaliatoryReady = false;
       }
-      const resolved = progression.resolvedStats(source3.entityId), treeCrit = family.classHooks.critBonus(source3, target), critChance = [attribution?.critBonus, treeCrit].filter(Boolean).reduce((sum2, bonus) => addCombat(sum2, bonus), resolved.critChance), packet = criticalDamagePacket(roll9, critChance === resolved.critChance ? resolved : { ...resolved, critChance }, raw, mechanic, forced || family.classHooks.forceCrit(source3, target, attribution?.trigger));
+      const resolved = progression.resolvedStats(source3.entityId), treeCrit = family.classHooks.critBonus(source3, target), critChance = [attribution?.critBonus, treeCrit].filter(Boolean).reduce((sum2, bonus) => addCombat(sum2, bonus), resolved.critChance), packet = criticalDamagePacket(roll9, critChance === resolved.critChance ? resolved : { ...resolved, critChance }, raw, mechanic, forced || family.classHooks.forceCrit(source3, target, attribution?.trigger), !periodic && attribution?.trigger !== "periodic");
       if (state2.d9World) pendingPlayerRng = roll9.rng;
       raw = family.classHooks.outgoing(source3, target, packet.damage, mechanic, attribution?.trigger, packet.critical);
       raw = wrathDamageV1(state2, playerFor(source3.entityId)?.playerId, raw);
@@ -231561,35 +231568,81 @@ var BLACKBOX_LAST_KEY = "saq-blackbox-last-v1";
 var BLACKBOX_BEAT_KEY = "saq-blackbox-beat-v1";
 var BLACKBOX_VERSION = "session-blackbox-v1";
 var BLACKBOX_TREND_ROWS = 180;
-function watchCanvasesV1(doc) {
+var creatorOf = () => {
+  try {
+    const lines2 = String(new Error().stack ?? "").split("\n").filter((l) => /:\d+:\d+\)?\s*$/.test(l));
+    const f = lines2[3] ?? lines2[lines2.length - 1] ?? "";
+    const m = /([^\/\s(@]+):(\d+):(\d+)\)?\s*$/.exec(f);
+    return m ? m[1].replace(/\?.*$/, "") + ":" + m[2] + ":" + m[3] : "?";
+  } catch {
+    return "?";
+  }
+};
+function watchCanvasesV1(doc, scope = globalThis) {
   if (!doc?.createElement || typeof WeakRef !== "function") return () => null;
   if (doc.__saqCanvasCensusV1) return doc.__saqCanvasCensusV1;
   const refs = [], original = doc.createElement;
-  let made2 = 0;
+  let made2 = 0, offscreen = 0;
+  const track4 = (el3, kind) => {
+    made2++;
+    if (kind) offscreen++;
+    refs.push({ ref: new WeakRef(el3), by: creatorOf(), kind });
+  };
   doc.createElement = function(tag2, ...rest2) {
     const el3 = original.call(this, tag2, ...rest2);
     try {
-      if (typeof tag2 === "string" && tag2.toLowerCase() === "canvas") {
-        made2++;
-        refs.push(new WeakRef(el3));
-      }
+      if (typeof tag2 === "string" && tag2.toLowerCase() === "canvas") track4(el3, 0);
     } catch {
     }
     return el3;
   };
-  const read3 = () => {
-    let alive = 0, bytes = 0, big = 0, keep8 = 0;
+  try {
+    const O16 = scope?.OffscreenCanvas;
+    if (typeof O16 === "function" && !O16.__saqCounted) {
+      const Counted = class extends O16 {
+        constructor(...a) {
+          super(...a);
+          try {
+            track4(this, 1);
+          } catch {
+          }
+        }
+      };
+      Object.defineProperty(Counted, "__saqCounted", { value: true });
+      Object.defineProperty(Counted, "name", { value: "OffscreenCanvas" });
+      scope.OffscreenCanvas = Counted;
+    }
+  } catch {
+  }
+  const read3 = (detail = false) => {
+    let alive = 0, bytes = 0, big = 0, keep8 = 0, off = 0;
+    const by = detail ? /* @__PURE__ */ new Map() : null, bigs = detail ? [] : null;
     for (let i = 0; i < refs.length; i++) {
-      const c = refs[i].deref();
+      const e = refs[i], c = e.ref.deref();
       if (!c) continue;
-      refs[keep8++] = refs[i];
+      refs[keep8++] = e;
       alive++;
-      const b = c.width * c.height * 4;
+      if (e.kind) off++;
+      const b = (c.width | 0) * (c.height | 0) * 4;
       bytes += b;
-      if (b >= 4194304) big++;
+      if (b >= 4194304) {
+        big++;
+        if (bigs && bigs.length < 24) bigs.push({ by: e.by, w: c.width, h: c.height, off: e.kind });
+      }
+      if (by) {
+        const t = by.get(e.by) ?? { by: e.by, n: 0, bytes: 0 };
+        t.n++;
+        t.bytes += b;
+        by.set(e.by, t);
+      }
     }
     refs.length = keep8;
-    return { made: made2, alive, mb: Math.round(bytes / 104857.6) / 10, big };
+    const out4 = { made: made2, alive, mb: Math.round(bytes / 104857.6) / 10, big, off, offMade: offscreen };
+    if (detail) {
+      out4.top = [...by.values()].sort((a, b) => b.bytes - a.bytes).slice(0, 8).map((t) => ({ by: t.by, n: t.n, mb: Math.round(t.bytes / 104857.6) / 10 }));
+      out4.bigs = bigs;
+    }
+    return out4;
   };
   try {
     Object.defineProperty(doc, "__saqCanvasCensusV1", { value: read3, configurable: true });
@@ -231666,7 +231719,7 @@ function startBlackboxV1({ environment: env, storage, channel: channel2 = "", re
       }
     }
   }
-  const record2 = { version: BLACKBOX_VERSION, build: build2, startedAt: now3(), at: now3(), clean: false, exit: null, writes: 0, errors: [], notes: [], trend: [], storage: null, snapshot: null };
+  const record2 = { version: BLACKBOX_VERSION, build: build2, startedAt: now3(), at: now3(), clean: false, exit: null, writes: 0, errors: [], notes: [], trend: [], storage: null, canvases: null, snapshot: null };
   const write4 = () => {
     record2.at = now3();
     record2.writes++;
@@ -231711,6 +231764,7 @@ function startBlackboxV1({ environment: env, storage, channel: channel2 = "", re
       r.cvMb = c.mb;
       r.cvMade = c.made;
       r.cvBig = c.big;
+      r.cvOff = c.off;
     }
     if (mem?.usedJSHeapSize) r.heapMb = Math.round(mem.usedJSHeapSize / 1048576);
     try {
@@ -231751,6 +231805,11 @@ function startBlackboxV1({ environment: env, storage, channel: channel2 = "", re
       record2.snapshot = { error: String(e?.message ?? e) };
     }
     row2(trendPicksV1(record2.snapshot));
+    try {
+      const d = census(true);
+      if (d) record2.canvases = { at: Math.round((now3() - record2.startedAt) / 1e3), top: d.top, bigs: d.bigs, offMade: d.offMade };
+    } catch {
+    }
     fresh = [];
     if (record2.writes % 4 === 0) askStorage();
     return write4();
