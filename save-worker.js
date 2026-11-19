@@ -19505,6 +19505,17 @@ var WOODLAND_FORT_TEMPLATE = freezeWire({
 var WOODLAND_FORT_DEFINITION = freezeWire({ package: WOODLAND_FORT_PACKAGE, template: WOODLAND_FORT_TEMPLATE, groupSuffix: "fort-courtyard" });
 var buildWoodlandFortD10 = (state, parcel2, binding, options) => buildDefinedWorldCompoundD10(state, parcel2, binding, WOODLAND_FORT_DEFINITION, options);
 
+// src/shared/rules/site_boss_down_v1.js
+function siteBossIdsV1(state, site) {
+  const floor = Array.isArray(site?.floors) ? site.floors.at(-1) : null;
+  if (!floor) return [];
+  return (floor.enemyIds ?? []).filter((id2, i) => state.bossCombat?.bossesByEntityId?.[id2] || i === 0 && siteEndRoleV1(floor, id2));
+}
+function siteBossDownV1(state, site) {
+  const ids = siteBossIdsV1(state, site);
+  return ids.length > 0 && ids.every((id2) => !state.entitiesById?.[id2]?.alive);
+}
+
 // src/shared/content/wilderness_fairness_v3_2.js
 var WILDERNESS_FAIRNESS_V3_2_VERSION = "wilderness-v3-2-level-fairness-1";
 var WILDERNESS_FAIRNESS_V3_2 = Object.freeze({
@@ -23602,17 +23613,6 @@ function validateSiteFinaleCompletionRewardSourceD13D_C(state, source11) {
   return source11;
 }
 
-// src/shared/rules/site_boss_down_v1.js
-function siteBossIdsV1(state, site) {
-  const floor = Array.isArray(site?.floors) ? site.floors.at(-1) : null;
-  if (!floor) return [];
-  return (floor.enemyIds ?? []).filter((id2, i) => state.bossCombat?.bossesByEntityId?.[id2] || i === 0 && siteEndRoleV1(floor, id2));
-}
-function siteBossDownV1(state, site) {
-  const ids = siteBossIdsV1(state, site);
-  return ids.length > 0 && ids.every((id2) => !state.entitiesById?.[id2]?.alive);
-}
-
 // src/shared/contracts/site_run_episode_d13b.js
 var LEGACY_SITE_RUN_EPISODE_D13B = "site-run-episode-d13b-v1";
 var LEGACY_SITE_RUN_EPISODE_D13C = "site-run-episode-d13c-v1";
@@ -24156,7 +24156,8 @@ function validateFunctionalSiteStateD9(state) {
       }
       if (siteSupportsResetD13C(state, f3.siteId)) {
         const run = resolveSiteRunEpisodeD13B(state, f3.siteId), retired = (run?.historyArchive?.archivedEpisodes ?? 0) + (run?.completionHistory?.length ?? 0);
-        requireContract(Boolean(run) && run.status === "cleared" === (run.episode > 1 ? Boolean(state.groupsById[f3.floors.at(-1).groupId]?.cleared) : cleared) && f3.conqueredTick !== null === (retired > 0 || run.status === "cleared"), "Resettable Cave completion drift");
+        requireContract(Boolean(run) && run.status === "cleared" === /* boss kill ends a run (2026-11-17), whatever else still stands */
+        (siteBossDownV1(state, f3) || (run.episode > 1 ? Boolean(state.groupsById[f3.floors.at(-1).groupId]?.cleared) : cleared)) && f3.conqueredTick !== null === (retired > 0 || run.status === "cleared"), "Resettable Cave completion drift");
       } else requireContract(f3.conqueredTick !== null === cleared, "Generated cave completion drift");
       continue;
     }

@@ -16047,6 +16047,17 @@ function townInteriorFrontageForSpace(s, spaceId) {
   return q ? townInteriorFrontage(q.record) : null;
 }
 
+// src/shared/rules/site_boss_down_v1.js
+function siteBossIdsV1(state, site) {
+  const floor = Array.isArray(site?.floors) ? site.floors.at(-1) : null;
+  if (!floor) return [];
+  return (floor.enemyIds ?? []).filter((id, i) => state.bossCombat?.bossesByEntityId?.[id] || i === 0 && siteEndRoleV1(floor, id));
+}
+function siteBossDownV1(state, site) {
+  const ids = siteBossIdsV1(state, site);
+  return ids.length > 0 && ids.every((id) => !state.entitiesById?.[id]?.alive);
+}
+
 // src/shared/contracts/named_elite_tricks_v1.js
 var CHARGE_PHASES = ["ready", "windup", "charging", "recover"];
 var point = (p) => {
@@ -24072,17 +24083,6 @@ function validateSalvageProgress(a, b, before, after = null) {
   }
 }
 
-// src/shared/rules/site_boss_down_v1.js
-function siteBossIdsV1(state, site) {
-  const floor = Array.isArray(site?.floors) ? site.floors.at(-1) : null;
-  if (!floor) return [];
-  return (floor.enemyIds ?? []).filter((id, i) => state.bossCombat?.bossesByEntityId?.[id] || i === 0 && siteEndRoleV1(floor, id));
-}
-function siteBossDownV1(state, site) {
-  const ids = siteBossIdsV1(state, site);
-  return ids.length > 0 && ids.every((id) => !state.entitiesById?.[id]?.alive);
-}
-
 // src/shared/contracts/site_run_episode_d13b.js
 var LEGACY_SITE_RUN_EPISODE_D13B = "site-run-episode-d13b-v1";
 var LEGACY_SITE_RUN_EPISODE_D13C = "site-run-episode-d13c-v1";
@@ -24835,7 +24835,8 @@ function validateFunctionalSiteStateD9(state) {
       }
       if (siteSupportsResetD13C(state, f3.siteId)) {
         const run = resolveSiteRunEpisodeD13B(state, f3.siteId), retired = (run?.historyArchive?.archivedEpisodes ?? 0) + (run?.completionHistory?.length ?? 0);
-        requireContract(Boolean(run) && run.status === "cleared" === (run.episode > 1 ? Boolean(state.groupsById[f3.floors.at(-1).groupId]?.cleared) : cleared) && f3.conqueredTick !== null === (retired > 0 || run.status === "cleared"), "Resettable Cave completion drift");
+        requireContract(Boolean(run) && run.status === "cleared" === /* boss kill ends a run (2026-11-17), whatever else still stands */
+        (siteBossDownV1(state, f3) || (run.episode > 1 ? Boolean(state.groupsById[f3.floors.at(-1).groupId]?.cleared) : cleared)) && f3.conqueredTick !== null === (retired > 0 || run.status === "cleared"), "Resettable Cave completion drift");
       } else requireContract(f3.conqueredTick !== null === cleared, "Generated cave completion drift");
       continue;
     }
@@ -32670,6 +32671,7 @@ export {
   townInteriorExits,
   validateTownInteriors,
   townInteriorFrontageForSpace,
+  siteBossDownV1,
   ELITE_TYPES_V2,
   eliteTypeV2For,
   ELITE_HASTE_D12_4D_VERSION,
@@ -32913,7 +32915,6 @@ export {
   salvageQuote,
   canSalvage,
   applySalvage,
-  siteBossDownV1,
   siteSupportsResetD13C,
   siteOccupantsD13C,
   retireSiteEpisodeAuthorityD13C1,
