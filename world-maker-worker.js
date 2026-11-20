@@ -549,7 +549,7 @@ var RECOVERED_BOSSES = Object.freeze({
     color: "#ffd16a",
     secondary: "#aa3155",
     adds: 0,
-    attacks: Object.freeze({ vault_crush: 75, gold_fall: 75, taxation: 240 })
+    attacks: Object.freeze({ vault_crush: 75, gold_fall: 75, taxation: 300, lid_chomp: 30 })
   }),
   marcus: Object.freeze({
     id: "marcus",
