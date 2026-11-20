@@ -125564,14 +125564,24 @@ function drawBlockyHero(c, spec, pose3 = {}) {
     shieldOf(c, w.off, offA, red);
     c.restore();
     if (w.off === "barkheart" && spec.charge?.bark) drawBarkPlates(c, spec.charge.bark, t);
+  } else if (w.offFamily === "shield") {
+    const ox = pose3.offX ?? 0, oy = pose3.offY ?? 0;
+    c.save();
+    c.translate(ox, oy);
+    farArm();
+    c.restore();
+    pauldron2(c, w, true);
+    c.save();
+    c.translate(ox, oy);
+    shieldOf(c, w.off, offA, red);
+    c.restore();
   } else {
     c.save();
     c.translate(pose3.offX ?? 0, pose3.offY ?? 0);
     farArm();
-    if (w.offFamily === "shield") shieldOf(c, w.off, offA, red);
     c.restore();
   }
-  pauldron2(c, w, true);
+  if (guard || w.offFamily !== "shield") pauldron2(c, w, true);
   if (pose3.active && !pose3.trail && !STAVES[w.main]) {
     c.save();
     c.translate(4.6, 3.6);
