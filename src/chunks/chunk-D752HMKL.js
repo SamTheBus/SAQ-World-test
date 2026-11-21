@@ -4191,6 +4191,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "Using a skill flips the band\u2019s little hourglass. A moment later the sand runs back and that skill\u2019s cooldown resets, so you can use it again. Once every {0}.",
     "Again. And again."
   ),
+  // Gilded Vault Keeper (Sammy 2026-11-20, the set page and all four passes approved): its lid chomp on your Counter
+  // Stance, its spinning coins off Thousand Cuts, its bomb coins out of the Flame Wall, and its Taxation drain on your hits.
+  unique(
+    "vaultlid",
+    "Vaultlid",
+    "subweapon",
+    "shield",
+    "Buckler",
+    "knight",
+    "gilded_vault_keeper",
+    "upland",
+    "When Counter Stance catches a hit, a gilded chest lid snaps shut in front of you instead of the strike back, biting every enemy in front of you for {0} of your Attack and stunning them.",
+    "Everything inside is spoken for."
+  ),
+  unique(
+    "spendthrift",
+    "Spendthrift",
+    "weapon",
+    null,
+    "Scimitar",
+    "rogue",
+    "gilded_vault_keeper",
+    "upland",
+    "The last cut of Thousand Cuts flicks a spinning crown coin off the enemy. It rolls for 3 s, bouncing from enemy to enemy and off walls, and hits each enemy it touches for {0} of your Attack (once a second each).",
+    "Easy come, easy go."
+  ),
+  unique(
+    "burning-ledger",
+    "Burning Ledger",
+    "subweapon",
+    "tome",
+    "Fire Tome",
+    "mage",
+    "gilded_vault_keeper",
+    "upland",
+    "Flame Wall spits three bomb coins out of its far side. Each burns a 1 s fuse, then bursts, hitting everything close by for {0} of your Attack and setting it burning.",
+    "Every debt is paid in fire."
+  ),
+  unique(
+    "tithe-grips",
+    "Tithe Grips",
+    "gloves",
+    null,
+    "Gloves",
+    null,
+    "gilded_vault_keeper",
+    "upland",
+    "Every 8 s your next hit taxes the enemy: a ruby tether drains it for {0} of your Attack every second for 4 s and heals you for the damage it does. It snaps if you get too far away.",
+    "A cut of everything."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -4477,6 +4527,11 @@ var UNIQUE_TIERS = freezeWire({
   "second-hand": { lines: ["mainDmg", "dex", "critChance", "critDamage", "eliteDmg"], stars: [30, 40, 50, 65], unit: "pct" },
   "stillhour-tome": { lines: ["offDmg", "int", "frostDmg", "cdr", "eliteDmg"], stars: [40, 50, 60, 75], unit: "ticks" },
   "turnback-band": { lines: ["atkPct", "maxHpPct", "cdr", "critChance", "defPct"], stars: [1440, 1320, 1200, 1080], unit: "ticks" },
+  // Gilded Vault Keeper (v3 lines below; these five are the v2 fallback).
+  "vaultlid": { lines: ["skillDmg:counter_stance", "block", "counterDmg", "controlDur", "eliteDmg"], stars: [300, 340, 380, 450], unit: "pct" },
+  "spendthrift": { lines: ["skillDmg:thousand_cuts", "dex", "critChance", "critDamage", "eliteDmg"], stars: [40, 50, 60, 75], unit: "pct" },
+  "burning-ledger": { lines: ["skillDmg:flame_wall", "int", "fireDmg", "critChance", "eliteDmg"], stars: [60, 80, 100, 125], unit: "pct" },
+  "tithe-grips": { lines: ["atkPct", "critChance", "lifeHit", "maxHpPct", "eliteDmg"], stars: [15, 20, 25, 32], unit: "pct" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["skillDmg:toxic_fan", "critChance", "critDamage", "dex", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
@@ -4543,6 +4598,13 @@ var UNIQUE_LINES_V3 = freezeWire({
   "second-hand": { always: "skillDmg:whirling_blades", pool: ["areaDmg", "dex", "critChance", "critDamage", "closeDmg", "eliteDmg"], leg: ["killCdr"] },
   "stillhour-tome": { always: "controlDur", pool: ["offDmg", "int", "frostDmg", "ccDmg", "cdr", "eliteDr"], leg: ["maxPip"] },
   "turnback-band": { always: "cdr", pool: ["atkPct", "maxHpPct", "defPct", "critChance", "lifeHit", "eliteDmg", "stunDr"], leg: [] },
+  // Gilded Vault Keeper set (Sammy 2026-11-20). Under the unique damage rule the lid is Counter Stance damage (it answers
+  // a hit: Counter), the coin is Thousand Cuts damage (Finisher), the bomb coins are Flame Wall damage (Area, Fire); the
+  // Tithe Grips' drain is armor's: no slot, so Attack feeds it.
+  "vaultlid": { always: "skillDmg:counter_stance", pool: ["block", "counterDmg", "controlDur", "defCdr", "ccDmg", "eliteDmg"], leg: ["maxPip"] },
+  "spendthrift": { always: "skillDmg:thousand_cuts", pool: ["finisherDmg", "dex", "critChance", "critDamage", "ccDmg", "eliteDmg"], leg: ["killCdr"] },
+  "burning-ledger": { always: "skillDmg:flame_wall", pool: ["areaDmg", "fireDmg", "int", "critChance", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
+  "tithe-grips": { always: "atkPct", pool: ["critChance", "lifeHit", "maxHpPct", "defPct", "eliteDmg", "closeDmg", "mainAttr"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "skillDmg:toxic_fan", pool: ["rangedDmg", "critChance", "critDamage", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -4612,7 +4674,7 @@ function uniqueEffectText(unique2, tier) {
 var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
 var uniquesFrom = (source10, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source10 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
 var trophyFromV1 = (biome) => Object.values(UNIQUE_ITEMS).find((u) => u.trophy && u.biome === biome)?.from ?? null;
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator", "gilded_vault_keeper"]);
 function nightmareUniqueV1(cls, pick6, source10 = "nightmare_sporecrown") {
   const own3 = cls ? uniquesFrom(source10, cls) : [], mine = own3.find((id) => UNIQUE_ITEMS[id].cls === cls), any = own3.find((id) => UNIQUE_ITEMS[id].cls === null);
   if (!mine) return null;
@@ -29099,6 +29161,7 @@ var BY_NOUN = Object.freeze({
   "Backwards Cap": "backwards-cap",
   "Cloth Wraps": "wraps",
   Wraps: "wraps",
+  Gloves: "gloves",
   Treads: "boots",
   "Cloth Slippers": "apprentice-slippers",
   "Wizard Hat": "hat",

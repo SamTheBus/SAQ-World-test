@@ -15507,6 +15507,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "Using a skill flips the band\u2019s little hourglass. A moment later the sand runs back and that skill\u2019s cooldown resets, so you can use it again. Once every {0}.",
     "Again. And again."
   ),
+  // Gilded Vault Keeper (Sammy 2026-11-20, the set page and all four passes approved): its lid chomp on your Counter
+  // Stance, its spinning coins off Thousand Cuts, its bomb coins out of the Flame Wall, and its Taxation drain on your hits.
+  unique(
+    "vaultlid",
+    "Vaultlid",
+    "subweapon",
+    "shield",
+    "Buckler",
+    "knight",
+    "gilded_vault_keeper",
+    "upland",
+    "When Counter Stance catches a hit, a gilded chest lid snaps shut in front of you instead of the strike back, biting every enemy in front of you for {0} of your Attack and stunning them.",
+    "Everything inside is spoken for."
+  ),
+  unique(
+    "spendthrift",
+    "Spendthrift",
+    "weapon",
+    null,
+    "Scimitar",
+    "rogue",
+    "gilded_vault_keeper",
+    "upland",
+    "The last cut of Thousand Cuts flicks a spinning crown coin off the enemy. It rolls for 3 s, bouncing from enemy to enemy and off walls, and hits each enemy it touches for {0} of your Attack (once a second each).",
+    "Easy come, easy go."
+  ),
+  unique(
+    "burning-ledger",
+    "Burning Ledger",
+    "subweapon",
+    "tome",
+    "Fire Tome",
+    "mage",
+    "gilded_vault_keeper",
+    "upland",
+    "Flame Wall spits three bomb coins out of its far side. Each burns a 1 s fuse, then bursts, hitting everything close by for {0} of your Attack and setting it burning.",
+    "Every debt is paid in fire."
+  ),
+  unique(
+    "tithe-grips",
+    "Tithe Grips",
+    "gloves",
+    null,
+    "Gloves",
+    null,
+    "gilded_vault_keeper",
+    "upland",
+    "Every 8 s your next hit taxes the enemy: a ruby tether drains it for {0} of your Attack every second for 4 s and heals you for the damage it does. It snaps if you get too far away.",
+    "A cut of everything."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -15793,6 +15843,11 @@ var UNIQUE_TIERS = freezeWire({
   "second-hand": { lines: ["mainDmg", "dex", "critChance", "critDamage", "eliteDmg"], stars: [30, 40, 50, 65], unit: "pct" },
   "stillhour-tome": { lines: ["offDmg", "int", "frostDmg", "cdr", "eliteDmg"], stars: [40, 50, 60, 75], unit: "ticks" },
   "turnback-band": { lines: ["atkPct", "maxHpPct", "cdr", "critChance", "defPct"], stars: [1440, 1320, 1200, 1080], unit: "ticks" },
+  // Gilded Vault Keeper (v3 lines below; these five are the v2 fallback).
+  "vaultlid": { lines: ["skillDmg:counter_stance", "block", "counterDmg", "controlDur", "eliteDmg"], stars: [300, 340, 380, 450], unit: "pct" },
+  "spendthrift": { lines: ["skillDmg:thousand_cuts", "dex", "critChance", "critDamage", "eliteDmg"], stars: [40, 50, 60, 75], unit: "pct" },
+  "burning-ledger": { lines: ["skillDmg:flame_wall", "int", "fireDmg", "critChance", "eliteDmg"], stars: [60, 80, 100, 125], unit: "pct" },
+  "tithe-grips": { lines: ["atkPct", "critChance", "lifeHit", "maxHpPct", "eliteDmg"], stars: [15, 20, 25, 32], unit: "pct" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["skillDmg:toxic_fan", "critChance", "critDamage", "dex", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
@@ -15859,6 +15914,13 @@ var UNIQUE_LINES_V3 = freezeWire({
   "second-hand": { always: "skillDmg:whirling_blades", pool: ["areaDmg", "dex", "critChance", "critDamage", "closeDmg", "eliteDmg"], leg: ["killCdr"] },
   "stillhour-tome": { always: "controlDur", pool: ["offDmg", "int", "frostDmg", "ccDmg", "cdr", "eliteDr"], leg: ["maxPip"] },
   "turnback-band": { always: "cdr", pool: ["atkPct", "maxHpPct", "defPct", "critChance", "lifeHit", "eliteDmg", "stunDr"], leg: [] },
+  // Gilded Vault Keeper set (Sammy 2026-11-20). Under the unique damage rule the lid is Counter Stance damage (it answers
+  // a hit: Counter), the coin is Thousand Cuts damage (Finisher), the bomb coins are Flame Wall damage (Area, Fire); the
+  // Tithe Grips' drain is armor's: no slot, so Attack feeds it.
+  "vaultlid": { always: "skillDmg:counter_stance", pool: ["block", "counterDmg", "controlDur", "defCdr", "ccDmg", "eliteDmg"], leg: ["maxPip"] },
+  "spendthrift": { always: "skillDmg:thousand_cuts", pool: ["finisherDmg", "dex", "critChance", "critDamage", "ccDmg", "eliteDmg"], leg: ["killCdr"] },
+  "burning-ledger": { always: "skillDmg:flame_wall", pool: ["areaDmg", "fireDmg", "int", "critChance", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
+  "tithe-grips": { always: "atkPct", pool: ["critChance", "lifeHit", "maxHpPct", "defPct", "eliteDmg", "closeDmg", "mainAttr"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "skillDmg:toxic_fan", pool: ["rangedDmg", "critChance", "critDamage", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -15909,7 +15971,7 @@ function uniqueLineKeyV3(id2, affix) {
   return affix.key;
 }
 var NTH = Object.freeze({ 2: "second", 3: "third", 4: "fourth", 5: "fifth" });
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator", "gilded_vault_keeper"]);
 var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.25, named: 0.1, world: 2e-3 });
 
 // src/shared/content/smart_offhand_v1.js
@@ -25782,6 +25844,7 @@ var BY_NOUN = Object.freeze({
   "Backwards Cap": "backwards-cap",
   "Cloth Wraps": "wraps",
   Wraps: "wraps",
+  Gloves: "gloves",
   Treads: "boots",
   "Cloth Slippers": "apprentice-slippers",
   "Wizard Hat": "hat",
@@ -27787,6 +27850,14 @@ var SH_TICKS = 115;
 var CLOCK_TICKS = 240;
 var TB_SHOW = 80;
 var TB_EVERY_MAX = 1440;
+var LID_TICKS = 90;
+var ST_END = 266;
+var ST_SEEN_MAX = 24;
+var BL_COINS = 3;
+var BL_END = 254;
+var TITHE_EVERY = 480;
+var TITHE_TICKS = 240;
+var TITHE_FADE = 18;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
@@ -27818,7 +27889,7 @@ var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
-var LIVE = ["hfGlass", "shEcho", "clock", "tbCd", "turn", "pane", "ssCd", "mirrors", "splN", "splinters", "gvCd", "glass", "glassPop", "scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardUp", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["lidBite", "stCoin", "blCoins", "titheCd", "tithe", "hfGlass", "shEcho", "clock", "tbCd", "turn", "pane", "ssCd", "mirrors", "splN", "splinters", "gvCd", "glass", "glassPop", "scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardUp", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 var ZIP_TICKS = 120;
 var PERF_READY_TICKS = 180;
 function prune(combat) {
@@ -28408,6 +28479,38 @@ function validateClassSkillState(s, combat, actor) {
       closedRecord(k.turn, ["skill", "age"]);
       requireContract(CLASS_SKILL_IDS.includes(k.turn.skill), "Invalid turn back");
       safeInteger(k.turn.age, 0, TB_SHOW - 1);
+    }
+    if (k.lidBite !== void 0) {
+      const b = k.lidBite;
+      closedRecord(b, ["x", "y", "dx", "dy", "age", "src", "grit"]);
+      requireContract(pos2(b) && Number.isFinite(b.dx) && Number.isFinite(b.dy) && typeof b.src === "string" && b.src.length <= 240, "Invalid vault lid");
+      safeInteger(b.age, 0, LID_TICKS - 1);
+      safeInteger(b.grit, 0, 99);
+    }
+    if (k.stCoin !== void 0) {
+      const q = k.stCoin, ids2 = (m) => m && typeof m === "object" && !Array.isArray(m) && Object.keys(m).length <= ST_SEEN_MAX && Object.entries(m).every(([id3, t]) => id3.length <= 240 && Number.isSafeInteger(t));
+      closedRecord(q, ["ox", "oy", "x", "y", "vx", "vy", "age", "last", "touch", "seen", "hitAt"]);
+      requireContract(pos2(q) && [q.ox, q.oy, q.vx, q.vy].every(Number.isFinite) && typeof q.last === "string" && q.last.length <= 240 && ids2(q.seen) && ids2(q.hitAt), "Invalid spinning coin");
+      safeInteger(q.age, 0, ST_END - 1);
+      safeInteger(q.touch, 0, ST_END);
+    }
+    if (k.blCoins !== void 0) {
+      const b = k.blCoins;
+      closedRecord(b, ["age", "coins"]);
+      requireContract(Array.isArray(b.coins) && b.coins.length >= 1 && b.coins.length <= BL_COINS, "Invalid bomb coins");
+      for (const q of b.coins) {
+        closedRecord(q, ["fx", "fy", "x", "y"]);
+        requireContract(pos2(q) && Number.isFinite(q.fx) && Number.isFinite(q.fy), "Invalid bomb coin");
+      }
+      safeInteger(b.age, 0, BL_END - 1);
+    }
+    if (k.titheCd !== void 0) safeInteger(k.titheCd, 1, TITHE_EVERY);
+    if (k.tithe !== void 0) {
+      const t = k.tithe;
+      closedRecord(t, ["target", "x", "y", "age", "end"], ["snap"]);
+      requireContract(pos2(t) && typeof t.target === "string" && t.target.length <= 240 && (t.snap === void 0 || t.snap === true), "Invalid tithe tether");
+      safeInteger(t.age, 0, TITHE_TICKS + TITHE_FADE);
+      safeInteger(t.end, 0, TITHE_TICKS);
     }
     for (const [key9, max2] of [["oathCd", OATH_EVERY], ["plate", PLATE_TICKS], ["plateCd", PLATE_EVERY]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
     if (k.lode !== void 0) {
