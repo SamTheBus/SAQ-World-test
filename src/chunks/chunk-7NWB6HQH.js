@@ -304,7 +304,7 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   nexus_overseer: Object.freeze({
     id: "nexus_overseer",
-    label: "NEXUS OVERSEER",
+    label: "SHIFTING PRISM",
     site: "repeatable-slot:ruin:tropical:standard:037",
     family: "ruin",
     biome: "tropical",
@@ -4241,6 +4241,57 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "Every 8 s your next hit taxes the enemy: a ruby tether drains it for {0} of your Attack every second for 4 s and heals you for the damage it does. It snaps if you get too far away.",
     "A cut of everything."
   ),
+  // Shifting Prism (nexus_overseer; Sammy 2026-11-20, the set page and all four passes approved): its sealed crystal shell
+  // on your Aegis Pulse, its Crystal Cage around your Noxious Bloom, its morphing crystal splitting your Thunderfall, and its
+  // Mirror Lattice under your feet.
+  unique(
+    "sealbrand",
+    "Sealbrand",
+    "weapon",
+    null,
+    "Longsword",
+    "knight",
+    "nexus_overseer",
+    "tropical",
+    "Aegis Pulse seals you in a crystal shell. When its Barrier breaks or runs out, the shell bursts into shards that hit every enemy close by for {0} of your Attack.",
+    "Sealed, then shattered."
+  ),
+  unique(
+    "facetcage",
+    "Facetcage",
+    "subweapon",
+    "dagger",
+    "Main-Gauche",
+    "rogue",
+    "nexus_overseer",
+    "tropical",
+    "Noxious Bloom also throws six crystal shards into a ring inside the flower. Light walls rise between them, then the cage collapses inward, hitting every enemy inside for {0} of your Attack.",
+    "Every side a wall."
+  ),
+  unique(
+    "splitlight-tome",
+    "Splitlight Tome",
+    "subweapon",
+    "tome",
+    "Storm Tome",
+    "mage",
+    "nexus_overseer",
+    "tropical",
+    "A little crystal floats over the open book. Thunderfall\u2019s bolt drops into it and splits into beams, and a moment later a shard jumps from every enemy it struck to the nearest other one for {0} of your Attack.",
+    "One light, many paths."
+  ),
+  unique(
+    "mirrorstep",
+    "Mirrorstep",
+    "boots",
+    null,
+    "Treads",
+    null,
+    "nexus_overseer",
+    "tropical",
+    "When an enemy hits you, a mirror lattice flips under your feet and throws the strike back as a crystal shard, hitting that enemy for {0} of your Attack. Once every 4 s.",
+    "What you send comes back."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -4532,6 +4583,11 @@ var UNIQUE_TIERS = freezeWire({
   "spendthrift": { lines: ["skillDmg:thousand_cuts", "dex", "critChance", "critDamage", "eliteDmg"], stars: [40, 50, 60, 75], unit: "pct" },
   "burning-ledger": { lines: ["skillDmg:flame_wall", "int", "fireDmg", "critChance", "eliteDmg"], stars: [60, 80, 100, 125], unit: "pct" },
   "tithe-grips": { lines: ["atkPct", "critChance", "lifeHit", "maxHpPct", "eliteDmg"], stars: [15, 20, 25, 32], unit: "pct" },
+  // Shifting Prism (v3 lines below; these five are the v2 fallback).
+  "sealbrand": { lines: ["skillDmg:aegis_pulse", "str", "critDamage", "finisherDmg", "eliteDmg"], stars: [400, 460, 530, 600], unit: "pct" },
+  "facetcage": { lines: ["skillDmg:noxious_bloom", "dex", "critChance", "areaDmg", "eliteDmg"], stars: [360, 420, 480, 540], unit: "pct" },
+  "splitlight-tome": { lines: ["skillDmg:thunderfall", "int", "lightningDmg", "critChance", "eliteDmg"], stars: [120, 140, 160, 180], unit: "pct" },
+  "mirrorstep": { lines: ["atkPct", "moveSpeed", "maxHpPct", "defPct", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["skillDmg:toxic_fan", "critChance", "critDamage", "dex", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
@@ -4605,6 +4661,13 @@ var UNIQUE_LINES_V3 = freezeWire({
   "spendthrift": { always: "skillDmg:thousand_cuts", pool: ["finisherDmg", "dex", "critChance", "critDamage", "ccDmg", "eliteDmg"], leg: ["killCdr"] },
   "burning-ledger": { always: "skillDmg:flame_wall", pool: ["areaDmg", "fireDmg", "int", "critChance", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "tithe-grips": { always: "atkPct", pool: ["critChance", "lifeHit", "maxHpPct", "defPct", "eliteDmg", "closeDmg", "mainAttr"], leg: [] },
+  // Shifting Prism set (Sammy 2026-11-20). Under the unique damage rule the shell burst is Aegis Pulse damage (Finisher), the
+  // cage Noxious Bloom damage (Area, Finisher), the shards Thunderfall damage (Area, Finisher, Lightning); the Mirrorstep
+  // reflect is armor's: no slot, no skill, so Attack feeds it.
+  "sealbrand": { always: "skillDmg:aegis_pulse", pool: ["finisherDmg", "str", "critChance", "critDamage", "defCdr", "eliteDmg"], leg: ["maxPip"] },
+  "facetcage": { always: "skillDmg:noxious_bloom", pool: ["areaDmg", "finisherDmg", "dex", "critChance", "poisonDmg", "eliteDmg"], leg: ["killCdr"] },
+  "splitlight-tome": { always: "skillDmg:thunderfall", pool: ["areaDmg", "lightningDmg", "int", "critChance", "critDamage", "eliteDmg"], leg: ["maxPip"] },
+  "mirrorstep": { always: "atkPct", pool: ["moveSpeed", "maxHpPct", "defPct", "closeDmg", "stunDr", "eliteDmg"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "skillDmg:toxic_fan", pool: ["rangedDmg", "critChance", "critDamage", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -4674,7 +4737,7 @@ function uniqueEffectText(unique2, tier) {
 var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
 var uniquesFrom = (source10, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source10 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
 var trophyFromV1 = (biome) => Object.values(UNIQUE_ITEMS).find((u) => u.trophy && u.biome === biome)?.from ?? null;
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator", "gilded_vault_keeper"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator", "gilded_vault_keeper", "nexus_overseer"]);
 function nightmareUniqueV1(cls, pick6, source10 = "nightmare_sporecrown") {
   const own3 = cls ? uniquesFrom(source10, cls) : [], mine = own3.find((id) => UNIQUE_ITEMS[id].cls === cls), any = own3.find((id) => UNIQUE_ITEMS[id].cls === null);
   if (!mine) return null;
@@ -18111,7 +18174,7 @@ var ARCHIVED_FIGHT_PROFILES = Object.freeze({
   }),
   nexus_overseer: Object.freeze({
     originalContentSha: "7bb6421365be1900a9c0c62cc91532bd8671fbd363c58c182e1fd15814fdfff7",
-    attack: Object.freeze({ prism_collapse: 75, control_glitch: 60, prism_slam: 75 }),
+    attack: Object.freeze({ prism_collapse: 75, control_glitch: 80, prism_slam: 75 }),
     cage: Object.freeze({ radius: 64, damageMultiplier: 1.8 }),
     glitch: Object.freeze({ radius: 180, durationTicks: 180 }),
     decoy: Object.freeze({ max: 2, hullRadius: 12, range: 220, speed: 1.35, projectileSpeed: 4.2, projectileRadius: 6, projectileLifeTicks: 180 })

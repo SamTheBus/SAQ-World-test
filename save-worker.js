@@ -2571,7 +2571,7 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   nexus_overseer: Object.freeze({
     id: "nexus_overseer",
-    label: "NEXUS OVERSEER",
+    label: "SHIFTING PRISM",
     site: "repeatable-slot:ruin:tropical:standard:037",
     family: "ruin",
     biome: "tropical",
@@ -15557,6 +15557,57 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "Every 8 s your next hit taxes the enemy: a ruby tether drains it for {0} of your Attack every second for 4 s and heals you for the damage it does. It snaps if you get too far away.",
     "A cut of everything."
   ),
+  // Shifting Prism (nexus_overseer; Sammy 2026-11-20, the set page and all four passes approved): its sealed crystal shell
+  // on your Aegis Pulse, its Crystal Cage around your Noxious Bloom, its morphing crystal splitting your Thunderfall, and its
+  // Mirror Lattice under your feet.
+  unique(
+    "sealbrand",
+    "Sealbrand",
+    "weapon",
+    null,
+    "Longsword",
+    "knight",
+    "nexus_overseer",
+    "tropical",
+    "Aegis Pulse seals you in a crystal shell. When its Barrier breaks or runs out, the shell bursts into shards that hit every enemy close by for {0} of your Attack.",
+    "Sealed, then shattered."
+  ),
+  unique(
+    "facetcage",
+    "Facetcage",
+    "subweapon",
+    "dagger",
+    "Main-Gauche",
+    "rogue",
+    "nexus_overseer",
+    "tropical",
+    "Noxious Bloom also throws six crystal shards into a ring inside the flower. Light walls rise between them, then the cage collapses inward, hitting every enemy inside for {0} of your Attack.",
+    "Every side a wall."
+  ),
+  unique(
+    "splitlight-tome",
+    "Splitlight Tome",
+    "subweapon",
+    "tome",
+    "Storm Tome",
+    "mage",
+    "nexus_overseer",
+    "tropical",
+    "A little crystal floats over the open book. Thunderfall\u2019s bolt drops into it and splits into beams, and a moment later a shard jumps from every enemy it struck to the nearest other one for {0} of your Attack.",
+    "One light, many paths."
+  ),
+  unique(
+    "mirrorstep",
+    "Mirrorstep",
+    "boots",
+    null,
+    "Treads",
+    null,
+    "nexus_overseer",
+    "tropical",
+    "When an enemy hits you, a mirror lattice flips under your feet and throws the strike back as a crystal shard, hitting that enemy for {0} of your Attack. Once every 4 s.",
+    "What you send comes back."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -15848,6 +15899,11 @@ var UNIQUE_TIERS = freezeWire({
   "spendthrift": { lines: ["skillDmg:thousand_cuts", "dex", "critChance", "critDamage", "eliteDmg"], stars: [40, 50, 60, 75], unit: "pct" },
   "burning-ledger": { lines: ["skillDmg:flame_wall", "int", "fireDmg", "critChance", "eliteDmg"], stars: [60, 80, 100, 125], unit: "pct" },
   "tithe-grips": { lines: ["atkPct", "critChance", "lifeHit", "maxHpPct", "eliteDmg"], stars: [15, 20, 25, 32], unit: "pct" },
+  // Shifting Prism (v3 lines below; these five are the v2 fallback).
+  "sealbrand": { lines: ["skillDmg:aegis_pulse", "str", "critDamage", "finisherDmg", "eliteDmg"], stars: [400, 460, 530, 600], unit: "pct" },
+  "facetcage": { lines: ["skillDmg:noxious_bloom", "dex", "critChance", "areaDmg", "eliteDmg"], stars: [360, 420, 480, 540], unit: "pct" },
+  "splitlight-tome": { lines: ["skillDmg:thunderfall", "int", "lightningDmg", "critChance", "eliteDmg"], stars: [120, 140, 160, 180], unit: "pct" },
+  "mirrorstep": { lines: ["atkPct", "moveSpeed", "maxHpPct", "defPct", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["skillDmg:toxic_fan", "critChance", "critDamage", "dex", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
@@ -15921,6 +15977,13 @@ var UNIQUE_LINES_V3 = freezeWire({
   "spendthrift": { always: "skillDmg:thousand_cuts", pool: ["finisherDmg", "dex", "critChance", "critDamage", "ccDmg", "eliteDmg"], leg: ["killCdr"] },
   "burning-ledger": { always: "skillDmg:flame_wall", pool: ["areaDmg", "fireDmg", "int", "critChance", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "tithe-grips": { always: "atkPct", pool: ["critChance", "lifeHit", "maxHpPct", "defPct", "eliteDmg", "closeDmg", "mainAttr"], leg: [] },
+  // Shifting Prism set (Sammy 2026-11-20). Under the unique damage rule the shell burst is Aegis Pulse damage (Finisher), the
+  // cage Noxious Bloom damage (Area, Finisher), the shards Thunderfall damage (Area, Finisher, Lightning); the Mirrorstep
+  // reflect is armor's: no slot, no skill, so Attack feeds it.
+  "sealbrand": { always: "skillDmg:aegis_pulse", pool: ["finisherDmg", "str", "critChance", "critDamage", "defCdr", "eliteDmg"], leg: ["maxPip"] },
+  "facetcage": { always: "skillDmg:noxious_bloom", pool: ["areaDmg", "finisherDmg", "dex", "critChance", "poisonDmg", "eliteDmg"], leg: ["killCdr"] },
+  "splitlight-tome": { always: "skillDmg:thunderfall", pool: ["areaDmg", "lightningDmg", "int", "critChance", "critDamage", "eliteDmg"], leg: ["maxPip"] },
+  "mirrorstep": { always: "atkPct", pool: ["moveSpeed", "maxHpPct", "defPct", "closeDmg", "stunDr", "eliteDmg"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "skillDmg:toxic_fan", pool: ["rangedDmg", "critChance", "critDamage", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -15971,7 +16034,7 @@ function uniqueLineKeyV3(id2, affix) {
   return affix.key;
 }
 var NTH = Object.freeze({ 2: "second", 3: "third", 4: "fourth", 5: "fifth" });
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator", "gilded_vault_keeper"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator", "gilded_vault_keeper", "nexus_overseer"]);
 var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.25, named: 0.1, world: 2e-3 });
 
 // src/shared/content/smart_offhand_v1.js
@@ -20322,7 +20385,7 @@ var ARCHIVED_FIGHT_PROFILES = Object.freeze({
   }),
   nexus_overseer: Object.freeze({
     originalContentSha: "7bb6421365be1900a9c0c62cc91532bd8671fbd363c58c182e1fd15814fdfff7",
-    attack: Object.freeze({ prism_collapse: 75, control_glitch: 60, prism_slam: 75 }),
+    attack: Object.freeze({ prism_collapse: 75, control_glitch: 80, prism_slam: 75 }),
     cage: Object.freeze({ radius: 64, damageMultiplier: 1.8 }),
     glitch: Object.freeze({ radius: 180, durationTicks: 180 }),
     decoy: Object.freeze({ max: 2, hullRadius: 12, range: 220, speed: 1.35, projectileSpeed: 4.2, projectileRadius: 6, projectileLifeTicks: 180 })
@@ -27858,6 +27921,13 @@ var BL_END = 254;
 var TITHE_EVERY = 480;
 var TITHE_TICKS = 240;
 var TITHE_FADE = 18;
+var SEAL_MAX = 7200;
+var SEAL_SHOW = 40;
+var FC_TICKS = 112;
+var SL_END = 46;
+var SL_MAX = 24;
+var MS_EVERY = 240;
+var MS_TICKS = 34;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
@@ -27889,7 +27959,7 @@ var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
-var LIVE = ["lidBite", "stCoin", "blCoins", "titheCd", "tithe", "hfGlass", "shEcho", "clock", "tbCd", "turn", "pane", "ssCd", "mirrors", "splN", "splinters", "gvCd", "glass", "glassPop", "scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardUp", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["seal", "sealBurst", "fcCage", "slShards", "msCd", "msHit", "lidBite", "stCoin", "blCoins", "titheCd", "tithe", "hfGlass", "shEcho", "clock", "tbCd", "turn", "pane", "ssCd", "mirrors", "splN", "splinters", "gvCd", "glass", "glassPop", "scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardUp", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 var ZIP_TICKS = 120;
 var PERF_READY_TICKS = 180;
 function prune(combat) {
@@ -28511,6 +28581,33 @@ function validateClassSkillState(s, combat, actor) {
       requireContract(pos2(t) && typeof t.target === "string" && t.target.length <= 240 && (t.snap === void 0 || t.snap === true), "Invalid tithe tether");
       safeInteger(t.age, 0, TITHE_TICKS + TITHE_FADE);
       safeInteger(t.end, 0, TITHE_TICKS);
+    }
+    if (k.seal !== void 0) safeInteger(k.seal, 1, SEAL_MAX);
+    if (k.sealBurst !== void 0) {
+      closedRecord(k.sealBurst, ["x", "y", "age"]);
+      requireContract(pos2(k.sealBurst), "Invalid seal burst");
+      safeInteger(k.sealBurst.age, 0, SEAL_SHOW - 1);
+    }
+    if (k.fcCage !== void 0) {
+      closedRecord(k.fcCage, ["x", "y", "r", "age"]);
+      requireContract(pos2(k.fcCage), "Invalid crystal cage");
+      safeInteger(k.fcCage.r, 1, 400);
+      safeInteger(k.fcCage.age, 0, FC_TICKS - 1);
+    }
+    if (k.slShards !== void 0) {
+      requireContract(Array.isArray(k.slShards) && k.slShards.length >= 1 && k.slShards.length <= SL_MAX, "Invalid split bolts");
+      for (const q of k.slShards) {
+        closedRecord(q, ["from", "x", "y", "age"], ["to", "tx", "ty"]);
+        requireContract(pos2(q) && typeof q.from === "string" && q.from.length <= 240 && (q.to === void 0 ? q.tx === void 0 && q.ty === void 0 : typeof q.to === "string" && q.to.length <= 240 && Number.isFinite(q.tx) && Number.isFinite(q.ty)), "Invalid split bolt");
+        safeInteger(q.age, 0, SL_END - 1);
+      }
+    }
+    if (k.msCd !== void 0) safeInteger(k.msCd, 1, MS_EVERY);
+    if (k.msHit !== void 0) {
+      const h = k.msHit;
+      closedRecord(h, ["src", "x", "y", "age"]);
+      requireContract(pos2(h) && typeof h.src === "string" && h.src.length <= 240, "Invalid mirror strike");
+      safeInteger(h.age, 0, MS_TICKS - 1);
     }
     for (const [key9, max2] of [["oathCd", OATH_EVERY], ["plate", PLATE_TICKS], ["plateCd", PLATE_EVERY]]) if (k[key9] !== void 0) safeInteger(k[key9], 1, max2);
     if (k.lode !== void 0) {

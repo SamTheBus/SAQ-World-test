@@ -531,7 +531,7 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   nexus_overseer: Object.freeze({
     id: "nexus_overseer",
-    label: "NEXUS OVERSEER",
+    label: "SHIFTING PRISM",
     site: "repeatable-slot:ruin:tropical:standard:037",
     family: "ruin",
     biome: "tropical",
