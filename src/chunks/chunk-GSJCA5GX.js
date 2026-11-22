@@ -3854,7 +3854,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "sun_pharaoh",
     "desert",
-    "Each block with Guard stores sunlight, up to {0}. Shield Throw carries it: each enemy the shield hits sends a beam of sunlight on through the enemies behind it, for 60% of your Attack per stored sun.",
+    "Each block with Guard stores sunlight, up to {0}. Shield Throw carries it: each enemy the shield hits sends a beam of searing sunlight on through the enemies behind it, burning them for 60% of your Attack per stored sun (Fire).",
     "Look upon it. Then look away."
   ),
   unique(
@@ -3952,7 +3952,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "overlord_iron_vault",
     "volcanic",
-    "Retribution slams down: the ground splits all around you and lava spits up the cracks for {0} of your Attack. The cracks burn for 2 s, burning enemies who stand in them.",
+    "Retribution slams down: the ground splits all around you and lava spits up the cracks for {0} of your Attack as Fire. The cracks burn for 2 s, burning enemies who stand in them.",
     "It was a fist once. The rest of him is still in the fort."
   ),
   unique(
@@ -4064,7 +4064,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "cinderhart",
     "woodland",
-    "Smoke Veil wakes three ember bunnies out of the smoke. Each hops at the nearest enemies four times. Every landing hits the enemies under it for {0} of your Attack and leaves a patch of smoldering cinders whose gray-green smoke poisons for 3 s. Then it bursts into embers.",
+    "Smoke Veil wakes three ember bunnies out of the smoke. Each hops at the nearest enemies four times. Every landing hits the enemies under it for {0} of your Attack and leaves a patch of smoldering cinders that sets enemies burning (Fire) for 3 s. Then it bursts into embers.",
     "Every warren has a fire at the bottom."
   ),
   unique(
@@ -4291,6 +4291,57 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "tropical",
     "When an enemy hits you, a mirror lattice flips under your feet and throws the strike back as a crystal shard, hitting that enemy for {0} of your Attack. Once every 4 s.",
     "What you send comes back."
+  ),
+  // Corrosive Abomination (Sammy 2026-11-21/22, the set page and all four passes approved): its acid slam on your third
+  // combo hit, its Bile Spit on your Shadowstep, its spore pods (frosted) on your Glacial Burst, and its boglings shed when
+  // you're hit (one in four a molten slagling).
+  unique(
+    "mirecleaver",
+    "Mirecleaver",
+    "weapon",
+    null,
+    "Battleaxe",
+    "knight",
+    "corrosive_abomination",
+    "wetland",
+    "The third hit of your combo slams the axe\u2019s acid down: a ring of bog acid bursts around the target, hitting every enemy in it for {0} of your Attack and slowing them 30% for 2 s. Once every 4 s.",
+    "It eats through the shield first."
+  ),
+  unique(
+    "sludgefang",
+    "Sludgefang",
+    "subweapon",
+    "dagger",
+    "Kris",
+    "rogue",
+    "corrosive_abomination",
+    "wetland",
+    "Shadowstep spits a glob of bile from where you stood onto the enemy you step behind. It splashes for {0} of your Attack and leaves a puddle that poisons enemies standing in it for 3 s.",
+    "The sac is never empty for long."
+  ),
+  unique(
+    "frostspore-staff",
+    "Frostspore Staff",
+    "weapon",
+    null,
+    "Staff",
+    "mage",
+    "corrosive_abomination",
+    "wetland",
+    "Glacial Burst also throws the three frozen spore pods out of the staff\u2019s orb. They land near the edge of the burst and pop a moment later (sooner if an enemy touches one), each hitting and chilling everything close by for {0} of your Attack. The pods grow back with Glacial Burst.",
+    "Frozen, but still growing."
+  ),
+  unique(
+    "bogheart-vest",
+    "Bogheart Vest",
+    "overall",
+    null,
+    "Vest",
+    null,
+    "corrosive_abomination",
+    "wetland",
+    "When you\u2019re hit, 20% chance to throw a bogling out of you (once every 2 s). It lands a few tiles away and slithers back; gulp it to heal {0} of your max Life. One in four is a slagling: its molten trail burns enemies standing on it for {1} of your Attack every second for 3 s. Up to 3 at once; each melts after 5 s.",
+    "Something in there is still beating."
   ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
@@ -4565,7 +4616,7 @@ var UNIQUE_TIERS = freezeWire({
   "wardenplate": { lines: ["maxHpPct", "defPct", "lifeKill", "cdr", "atkPct"], stars: [30, 40, 50, 65], unit: "pct" },
   // Cinderhart (v3 lines below; these five are the v2 fallback). The Emberhare's and the Kindleheart's stars are their waits.
   "cinderhorn": { lines: ["block", "skillDmg:shield_charge", "fireDmg", "cdr", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
-  "emberhare": { lines: ["skillDmg:smoke_veil", "critChance", "poisonDmg", "dex", "eliteDmg"], stars: [50, 65, 80, 100], unit: "pct" },
+  "emberhare": { lines: ["skillDmg:smoke_veil", "critChance", "fireDmg", "dex", "eliteDmg"], stars: [50, 65, 80, 100], unit: "pct" },
   "kindleheart-tome": { lines: ["offDmg", "int", "fireDmg", "bonusAreaRadius", "eliteDmg"], stars: [600, 480, 360, 240], unit: "ticks" },
   "emberantler-crown": { lines: ["maxHpPct", "defPct", "fireDmg", "lifeHit", "cdr"], stars: [60, 80, 100, 130], unit: "pct" },
   // Hollowglass (v3 lines below; these five are the v2 fallback).
@@ -4588,6 +4639,11 @@ var UNIQUE_TIERS = freezeWire({
   "facetcage": { lines: ["skillDmg:noxious_bloom", "dex", "critChance", "areaDmg", "eliteDmg"], stars: [360, 420, 480, 540], unit: "pct" },
   "splitlight-tome": { lines: ["skillDmg:thunderfall", "int", "lightningDmg", "critChance", "eliteDmg"], stars: [120, 140, 160, 180], unit: "pct" },
   "mirrorstep": { lines: ["atkPct", "moveSpeed", "maxHpPct", "defPct", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
+  // Corrosive Abomination (v3 lines below; these five are the v2 fallback).
+  "mirecleaver": { lines: ["areaDmg", "mainDmg", "str", "critChance", "eliteDmg"], stars: [80, 110, 140, 180], unit: "pct" },
+  "sludgefang": { lines: ["skillDmg:shadowstep", "poisonDmg", "dex", "critChance", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
+  "frostspore-staff": { lines: ["skillDmg:glacial_burst", "frostDmg", "int", "critChance", "eliteDmg"], stars: [50, 65, 80, 100], unit: "pct" },
+  "bogheart-vest": { lines: ["maxHpPct", "defPct", "lifeHit", "cdr", "atkPct"], stars: [[20, 30], [25, 40], [30, 50], [40, 60]], unit: "bog" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["skillDmg:toxic_fan", "critChance", "critDamage", "dex", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
@@ -4614,7 +4670,7 @@ var UNIQUE_TIERS = freezeWire({
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
 var UNIQUE_LINES_V3 = freezeWire({
-  "sunshield": { always: "block", pool: ["skillDmg:shield_throw", "rangedDmg", "ailingDmg", "perfectDmg", "defCdr", "critChance"], leg: ["maxPip"] },
+  "sunshield": { always: "block", pool: ["skillDmg:shield_throw", "rangedDmg", "ailingDmg", "perfectDmg", "defCdr", "critChance", "fireDmg"], leg: ["maxPip"] },
   "pharaoh-khopesh": { always: "moveCdr", pool: ["poisonDmg", "areaDmg", "ailingDmg", "ailmentDur", "critDamage", "eliteDmg"], leg: ["killCdr"] },
   "undying-sun-staff": { always: "skillDmg:meteor", pool: ["rangedDmg", "finisherDmg", "fireDmg", "bonusAreaRadius", "critChance", "eliteDmg"], leg: ["killCdr"] },
   "eye-of-the-sun": { always: "ailmentDur", pool: ["atkPct", "critChance", "ailingDmg", "areaDmg", "eliteDmg", "lifeHit"], leg: ["maxPip"] },
@@ -4624,10 +4680,10 @@ var UNIQUE_LINES_V3 = freezeWire({
   "silkspinner": { always: "skillDmg:static_field", pool: ["areaDmg", "lightningDmg", "critChance", "controlDur", "ccDmg", "eliteDmg"], leg: ["killCdr"] },
   "cocoonsilk": { always: "ccDmg", pool: ["atkPct", "critChance", "lifeHit", "closeDmg", "keepPip", "areaDmg", "sigDmg"], leg: [] },
   // Brimstone set (Sammy 2026-11-12).
-  "slagmaul": { always: "skillDmg:retribution", pool: ["areaDmg", "finisherDmg", "counterDmg", "ailingDmg", "str", "eliteDmg"], leg: ["maxPip"] },
+  "slagmaul": { always: "skillDmg:retribution", pool: ["areaDmg", "finisherDmg", "counterDmg", "ailingDmg", "str", "eliteDmg", "fireDmg"], leg: ["maxPip"] },
   "ventcutter": { always: "skillDmg:rupture", pool: ["areaDmg", "finisherDmg", "critChance", "poisonDmg", "ailmentDur", "eliteDmg"], leg: ["killCdr"] },
   "coreheart": { always: "fireDmg", pool: ["rangedDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
-  "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
+  "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "fireDmg"], leg: [] },
   // Barrow King set (set page AJnYRRRF..., Sammy 2026-11-14).
   "gravecleaver": { always: "skillDmg:skyfall_leap", pool: ["areaDmg", "finisherDmg", "critDamage", "ailingDmg", "moveCdr", "eliteDmg"], leg: ["branchRank:breaker"] },
   "wightfang": { always: "controlDur", pool: ["offDmg", "critChance", "ailmentDur", "ailingDmg", "parry", "eliteDmg"], leg: ["killCdr"] },
@@ -4639,7 +4695,7 @@ var UNIQUE_LINES_V3 = freezeWire({
   "wardenplate": { always: "eliteDr", pool: ["maxHpPct", "defPct", "mainAttr", "lifeKill", "areaDr", "hitCdr", "lowDmg"], leg: [] },
   // Cinderhart set (Sammy 2026-11-15/16): the Cinderhorn's +1 goes to the Breaker branch.
   "cinderhorn": { always: "skillDmg:shield_charge", pool: ["block", "fireDmg", "moveCdr", "ailingDmg", "critChance", "eliteDmg"], leg: ["branchRank:breaker"] },
-  "emberhare": { always: "skillDmg:smoke_veil", pool: ["critChance", "poisonDmg", "ailmentDur", "ailingDmg", "defCdr", "eliteDmg"], leg: ["killCdr"] },
+  "emberhare": { always: "skillDmg:smoke_veil", pool: ["critChance", "fireDmg", "ailmentDur", "ailingDmg", "defCdr", "eliteDmg"], leg: ["killCdr"] },
   "kindleheart-tome": { always: "fireDmg", pool: ["offDmg", "mainAttr", "bonusAreaRadius", "areaDmg", "closeDmg", "eliteDr"], leg: ["maxPip"] },
   "emberantler-crown": { always: "ailmentDur", pool: ["maxHpPct", "defPct", "counterDmg", "eliteDr", "lifeHit", "stunDr", "fireDmg"], leg: [] },
   // Hollowglass set (Sammy 2026-11-16). The Twinpane copy's bash is a Shield Bash; the Silverstep shatter and the
@@ -4668,6 +4724,13 @@ var UNIQUE_LINES_V3 = freezeWire({
   "facetcage": { always: "skillDmg:noxious_bloom", pool: ["areaDmg", "finisherDmg", "dex", "critChance", "poisonDmg", "eliteDmg"], leg: ["killCdr"] },
   "splitlight-tome": { always: "skillDmg:thunderfall", pool: ["areaDmg", "lightningDmg", "int", "critChance", "critDamage", "eliteDmg"], leg: ["maxPip"] },
   "mirrorstep": { always: "atkPct", pool: ["moveSpeed", "maxHpPct", "defPct", "closeDmg", "stunDr", "eliteDmg"], leg: [] },
+  // Corrosive Abomination set (Sammy 2026-11-21 'Trim it'). Mirecleaver's ring is the axe's: Main hand, Area, a slam (Shockwave);
+  // Sludgefang's glob and puddle are Shadowstep damage (the puddle a Poison); Frostspore's pods are Glacial Burst damage (Area,
+  // Frost: the skill's element, not the tome's); Bogheart's slagling trail is Fire, Area (elements are for any class).
+  "mirecleaver": { always: "areaDmg", pool: ["mainDmg", "str", "critChance", "critDamage", "controlDur", "eliteDmg"], leg: ["maxPip"] },
+  "sludgefang": { always: "skillDmg:shadowstep", pool: ["poisonDmg", "ailmentDur", "dex", "critChance", "moveCdr", "eliteDmg"], leg: ["killCdr"] },
+  "frostspore-staff": { always: "skillDmg:glacial_burst", pool: ["frostDmg", "areaDmg", "int", "critChance", "controlDur", "eliteDmg"], leg: ["maxPip"] },
+  "bogheart-vest": { always: "maxHpPct", pool: ["defPct", "lifeHit", "eliteDr", "areaDr", "defCdr", "mainAttr", "fireDmg"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "skillDmg:toxic_fan", pool: ["rangedDmg", "critChance", "critDamage", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -4731,13 +4794,13 @@ function uniqueEffectText(unique2, tier) {
   const t = UNIQUE_TIERS[unique2?.id];
   if (!t) return unique2?.effect ?? "";
   const v = uniqueStarValue(unique2.id, tier);
-  const shown = t.unit === "pct" ? [v + "%"] : t.unit === "permille" ? [v / 10 + "%"] : t.unit === "ticks" ? [seconds(v)] : t.unit === "mins" ? [Math.round(v / 360) / 10 + " min"] : t.unit === "nth" ? [NTH[v] ?? v + "th"] : t.unit === "eye" ? [v[0] + "%", v[1] + "%"] : [String(v)];
+  const shown = t.unit === "pct" ? [v + "%"] : t.unit === "permille" ? [v / 10 + "%"] : t.unit === "ticks" ? [seconds(v)] : t.unit === "mins" ? [Math.round(v / 360) / 10 + " min"] : t.unit === "nth" ? [NTH[v] ?? v + "th"] : t.unit === "eye" ? [v[0] + "%", v[1] + "%"] : t.unit === "bog" ? [v[0] / 10 + "%", v[1] + "%"] : [String(v)];
   return unique2.effect.replace(/\{(\d)\}/g, (_, i) => shown[Number(i)] ?? "");
 }
 var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
 var uniquesFrom = (source10, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source10 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
 var trophyFromV1 = (biome) => Object.values(UNIQUE_ITEMS).find((u) => u.trophy && u.biome === biome)?.from ?? null;
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator", "gilded_vault_keeper", "nexus_overseer"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator", "gilded_vault_keeper", "nexus_overseer", "corrosive_abomination"]);
 function nightmareUniqueV1(cls, pick6, source10 = "nightmare_sporecrown") {
   const own3 = cls ? uniquesFrom(source10, cls) : [], mine = own3.find((id) => UNIQUE_ITEMS[id].cls === cls), any = own3.find((id) => UNIQUE_ITEMS[id].cls === null);
   if (!mine) return null;
@@ -29230,6 +29293,7 @@ var BY_NOUN = Object.freeze({
   Treads: "boots",
   Exosuit: "plate",
   "Warden Plate": "plate",
+  Vest: "leather",
   "Inquisitor Robes": "robe",
   "Full Plate Armor": "plate",
   Trenchcoat: "leather",
