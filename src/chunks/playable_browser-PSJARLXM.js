@@ -326,6 +326,7 @@ import {
   TIMED_NULLIFIED_D12_4I_VERSION,
   TIMED_PLAYER_POISON_D12_4F_VERSION,
   TOME_ELEMENTS,
+  TOME_FOLLOWING_UNIQUES,
   TOWN_PROPS,
   TOXIC_DECAY_AFFIX_ID,
   TOXIC_DECAY_D12_4F,
@@ -1161,7 +1162,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-GSJCA5GX.js";
+} from "./chunk-BORVBM63.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -176052,7 +176053,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     if (unique) {
       const box6 = element("div", "", "gx-unique"), effect = uniqueEffectText(unique, d.rarityTier);
       box6.append(element("p", effect, "gx-uniqueeffect"));
-      if (/With a tome/.test(effect)) {
+      if (TOME_FOLLOWING_UNIQUES.has(unique.id)) {
         const held = inv.itemsById[inv.equipped.subweapon], els = held ? tomeEls(itemDefinition(held)) : null;
         box6.append(els ? elementBanner(els, "With your tome", null) : element("p", "Hold a tome to give it that tome\u2019s element.", "gx-elementline"));
       }

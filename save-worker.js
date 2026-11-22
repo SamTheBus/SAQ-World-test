@@ -15292,7 +15292,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "overlord_iron_vault",
     "volcanic",
-    "Blink primes the wand: your next Cast within 3 s becomes a Core Blast, a lance of molten fire through every enemy in a line for {0} of your Attack. It leaves a burning strip on the ground for 2 s. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
+    "Blink primes the wand: your next Cast within 3 s becomes a Core Blast, a lance of molten fire through every enemy in a line for {0} of your Attack. It leaves a burning strip on the ground for 2 s.",
     "A coal from its chest, still burning."
   ),
   unique(
@@ -15442,7 +15442,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "marcus",
     "grassland",
-    "Every 4th Cast also fires a fan of five glass shards. Each one hits the first enemy it touches for {0} of your Attack and bounces off walls up to twice. With a tome, the shards take its element: Fire burns, Frost chills, Lightning shocks.",
+    "Every 4th Cast also fires a fan of five glass shards. Each one hits the first enemy it touches for {0} of your Attack and bounces off walls up to twice.",
     "Every angle is a way in."
   ),
   unique(
@@ -15744,7 +15744,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "nightmare_frog",
     null,
-    "Every 4th Cast lobs a frog-spawn egg instead. A moment later it hatches into an Eyehopper that hops at the nearest enemy and pops for {0} of your Attack, giving it heavy legs (30% slower) for 2 s. With a tome, it takes the tome's element: Fire burns, Frost chills, Lightning shocks (Dual and Tri tomes take turns).",
+    "Every 4th Cast lobs a frog-spawn egg instead. A moment later it hatches into an Eyehopper that hops at the nearest enemy and pops for {0} of your Attack, giving it heavy legs (30% slower) for 2 s.",
     "They all love you. They all burst."
   ),
   unique(
@@ -16099,6 +16099,7 @@ function uniqueLineKeyV3(id2, affix) {
 var NTH = Object.freeze({ 2: "second", 3: "third", 4: "fourth", 5: "fifth" });
 var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator", "gilded_vault_keeper", "nexus_overseer", "corrosive_abomination"]);
 var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.25, named: 0.1, world: 2e-3 });
+var TOME_FOLLOWING_UNIQUES = Object.freeze(/* @__PURE__ */ new Set(["crownflame-scepter", "undying-sun-staff", "silkspinner", "coreheart", "wardlight-scepter", "splinterglass-wand", "frogspawn-wand"]));
 
 // src/shared/content/smart_offhand_v1.js
 var TREE_OFFHANDS = Object.freeze({
