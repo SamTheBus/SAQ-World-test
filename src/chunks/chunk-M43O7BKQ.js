@@ -282,7 +282,7 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   void_overseer: Object.freeze({
     id: "void_overseer",
-    label: "VOID OVERSEER",
+    label: "HOLLOW MOON",
     site: "repeatable-slot:ruin:frostland:deep:01",
     family: "ruin",
     biome: "frostland",
@@ -4343,6 +4343,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "When you\u2019re hit, 20% chance to throw a bogling out of you (once every 2 s). It lands a few tiles away and slithers back; gulp it to heal {0} of your max Life. One in four is a slagling: its molten trail burns enemies standing on it for {1} of your Attack every second for 3 s. Up to 3 at once; each melts after 5 s.",
     "Something in there is still beating."
   ),
+  // Hollow Moon (void_overseer; Sammy 2026-11-22, all four passes approved): its Singularity in your War Banner, its Cold
+  // Lance down your Lunge, its orbiting shards around your Ice Barrier, and its frozen sheet under you when you're hit.
+  unique(
+    "moonwell",
+    "Moonwell",
+    "weapon",
+    null,
+    "Warhammer",
+    "knight",
+    "void_overseer",
+    "frostland",
+    "War Banner becomes a little moon. For 2 s it pulls nearby enemies in toward the banner (bosses hold their ground), then bursts, hitting every enemy close by for {0} of your Attack. The banner\u2019s own buff stays.",
+    "Everything falls toward it."
+  ),
+  unique(
+    "rimethrust",
+    "Rimethrust",
+    "weapon",
+    null,
+    "Rapier",
+    "rogue",
+    "void_overseer",
+    "frostland",
+    "Lunge drives a Cold Lance down its whole reach. Ice spikes burst up along the line behind you, hitting every enemy on it for {0} of your Attack, the one you stab too.",
+    "Cold all the way through."
+  ),
+  unique(
+    "hollowshard-scepter",
+    "Hollowshard Scepter",
+    "weapon",
+    null,
+    "Scepter",
+    "mage",
+    "void_overseer",
+    "frostland",
+    "Ice Barrier sends the scepter\u2019s four shards circling your shell. While the Barrier holds they take turns firing small Cold Lances at the nearest enemy, each hitting everything in its lane for {0} of your Attack. If the Barrier breaks, the shards fly home.",
+    "Four pieces of a broken moon."
+  ),
+  unique(
+    "moonrime-circlet",
+    "Moonrime Circlet",
+    "helmet",
+    null,
+    "Backwards Cap",
+    null,
+    "void_overseer",
+    "frostland",
+    "When an enemy hits you, the ground under you freezes over for 4 s. Enemies on the frozen sheet are chilled and slowed {0}. Once every 8 s.",
+    "The moon\u2019s cold, worn close."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -4644,6 +4694,10 @@ var UNIQUE_TIERS = freezeWire({
   "sludgefang": { lines: ["skillDmg:shadowstep", "poisonDmg", "dex", "critChance", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
   "frostspore-staff": { lines: ["skillDmg:glacial_burst", "frostDmg", "int", "critChance", "eliteDmg"], stars: [50, 65, 80, 100], unit: "pct" },
   "bogheart-vest": { lines: ["maxHpPct", "defPct", "lifeHit", "cdr", "atkPct"], stars: [[20, 30], [25, 40], [30, 50], [40, 60]], unit: "bog" },
+  "moonwell": { lines: ["areaDmg", "mainDmg", "str", "critChance", "eliteDmg"], stars: [300, 360, 420, 500], unit: "pct" },
+  "rimethrust": { lines: ["frostDmg", "mainDmg", "dex", "critChance", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
+  "hollowshard-scepter": { lines: ["skillDmg:ice_barrier", "frostDmg", "int", "critChance", "eliteDmg"], stars: [80, 100, 120, 150], unit: "pct" },
+  "moonrime-circlet": { lines: ["defPct", "maxHpPct", "lifeHit", "eliteDr", "areaDr"], stars: [40, 45, 50, 60], unit: "pct" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["skillDmg:toxic_fan", "critChance", "critDamage", "dex", "eliteDmg"], stars: [100, 130, 160, 200], unit: "pct" },
@@ -4731,6 +4785,12 @@ var UNIQUE_LINES_V3 = freezeWire({
   "sludgefang": { always: "skillDmg:shadowstep", pool: ["poisonDmg", "ailmentDur", "dex", "critChance", "moveCdr", "eliteDmg"], leg: ["killCdr"] },
   "frostspore-staff": { always: "skillDmg:glacial_burst", pool: ["frostDmg", "areaDmg", "int", "critChance", "controlDur", "eliteDmg"], leg: ["maxPip"] },
   "bogheart-vest": { always: "maxHpPct", pool: ["defPct", "lifeHit", "eliteDr", "areaDr", "defCdr", "mainAttr", "fireDmg"], leg: [] },
+  // Hollow Moon set (Sammy 2026-11-22). Under the unique damage rule the well and the lance are the weapon's own (Main
+  // hand, Area; Frost), the shards are Ice Barrier damage (Frost); the circlet deals none.
+  "moonwell": { always: "areaDmg", pool: ["mainDmg", "str", "critChance", "critDamage", "controlDur", "eliteDmg"], leg: ["maxPip"] },
+  "rimethrust": { always: "frostDmg", pool: ["mainDmg", "dex", "critChance", "critDamage", "moveCdr", "eliteDmg"], leg: ["killCdr"] },
+  "hollowshard-scepter": { always: "skillDmg:ice_barrier", pool: ["frostDmg", "int", "critChance", "activeSpd", "defCdr", "eliteDmg"], leg: ["maxPip"] },
+  "moonrime-circlet": { always: "defPct", pool: ["maxHpPct", "lifeHit", "eliteDr", "areaDr", "defCdr", "mainAttr"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "skillDmg:toxic_fan", pool: ["rangedDmg", "critChance", "critDamage", "exposeDmg", "bonusAreaRadius", "eliteDmg"], leg: ["killCdr"] },
@@ -4800,7 +4860,7 @@ function uniqueEffectText(unique2, tier) {
 var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
 var uniquesFrom = (source10, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source10 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
 var trophyFromV1 = (biome) => Object.values(UNIQUE_ITEMS).find((u) => u.trophy && u.biome === biome)?.from ?? null;
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator", "gilded_vault_keeper", "nexus_overseer", "corrosive_abomination"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath", "cinderhart", "marcus", "chronos_arbitrator", "gilded_vault_keeper", "nexus_overseer", "corrosive_abomination", "void_overseer"]);
 function nightmareUniqueV1(cls, pick6, source10 = "nightmare_sporecrown") {
   const own3 = cls ? uniquesFrom(source10, cls) : [], mine = own3.find((id) => UNIQUE_ITEMS[id].cls === cls), any = own3.find((id) => UNIQUE_ITEMS[id].cls === null);
   if (!mine) return null;
@@ -18231,10 +18291,15 @@ var ARCHIVED_FIGHT_PROFILES = Object.freeze({
   }),
   void_overseer: Object.freeze({
     originalContentSha: "01fae024dffd8d5dc9e186f0e9fccf96b98bd6b030fe9a356962bc06e6ee087a",
-    attack: Object.freeze({ eye_lance: 75, singularity: 360 }),
+    attack: Object.freeze({ eye_lance: 75, singularity: 360, shard_volley: 190 }),
     movement: Object.freeze({ speed: 1.6, cycleTicks: 30, movingTicks: 15 }),
     singularity: Object.freeze({ radius: 90, pullNumerator: 4500, pullSoftening: 400, pullMax: 4.8, stopRange: 10 }),
-    contact: Object.freeze({ radius: 30.72, cadenceTicks: 40, damageMultiplier: 0.5 })
+    contact: Object.freeze({ radius: 30.72, cadenceTicks: 40, damageMultiplier: 0.5 }),
+    // Hollow Moon phase two (Nov 22): the crust breaks at half health (the boss holds while it breaks), the ring
+    // becomes four orbiting shards that fire lances in turn, and a phase-two Singularity leaves a frozen sheet.
+    breakHoldTicks: 48,
+    shards: Object.freeze({ count: 4, everyTicks: 50, windupTicks: 36, length: 200, halfWidth: 16, damagePercent: 110, orbitSpeed: 0.018, orbitX: 55, orbitY: 22, keepTicks: 130 }),
+    frostSheet: Object.freeze({ radius: 80, lifetimeTicks: 240, movementMultiplier: 0.6 })
   }),
   chronos_arbitrator: Object.freeze({
     originalContentSha: "fc26a4070fa2fb59a31c5a5680166f83c7ea54c48fcf79940dd9a4d83fed80af",
@@ -18810,7 +18875,23 @@ function validateRecoveredBossV1(state, id, b) {
   }
   if (b.archive !== void 0) {
     const archive = b.archive;
-    closedRecord(archive, ["version", "charge", "sporesById", "poisonByEntityId", "contactByEntityId", "nextWarrenTick", "sludgeSequence", "collapsedRings"], ["nexusShotsById", "shedEvents", "sheddingVersion", "shedProcessedStep", "ashfangShoves", "ashfangRoarTick", "globsById", "homeById", "gulps", "sporeBursts"]);
+    closedRecord(archive, ["version", "charge", "sporesById", "poisonByEntityId", "contactByEntityId", "nextWarrenTick", "sludgeSequence", "collapsedRings"], ["nexusShotsById", "shedEvents", "sheddingVersion", "shedProcessedStep", "ashfangShoves", "ashfangRoarTick", "globsById", "homeById", "gulps", "sporeBursts", "moonBrokeTick", "moonLances"]);
+    for (const key5 of ["moonBrokeTick", "moonLances"]) requireContract(archive[key5] === void 0 || b.bossDefinitionId === "void_overseer", "Invalid Hollow Moon record owner");
+    if (archive.moonBrokeTick !== void 0) {
+      safeInteger(archive.moonBrokeTick, b.activatedTick, state.tick);
+      requireContract(b.phase === 2, "Hollow Moon broke before phase two");
+    }
+    if (archive.moonLances !== void 0) {
+      const sh = archivedCombatProfile("void_overseer").shards;
+      requireContract(Array.isArray(archive.moonLances) && archive.moonLances.length >= 1 && archive.moonLances.length <= sh.count * 2, "Invalid Hollow Moon lance budget");
+      for (const l of archive.moonLances) {
+        closedRecord(l, ["i", "sequence", "startedTick", "firesTick", "origin", "target", "hitEntityIds"]);
+        safeInteger(l.i, 0, sh.count - 1);
+        safeInteger(l.sequence, 1, b.abilitySequence);
+        safeInteger(l.startedTick, b.activatedTick, state.tick);
+        requireContract(l.firesTick === l.startedTick + sh.windupTicks && point4(l.target) && (l.origin === null ? state.tick < l.firesTick : point4(l.origin) && state.tick - l.firesTick < sh.keepTicks) && Array.isArray(l.hitEntityIds) && l.hitEntityIds.length <= 4 && l.hitEntityIds.every((id2) => state.entitiesById[id2]?.team === "party"), "Invalid Hollow Moon shard lance");
+      }
+    }
     for (const key5 of ["globsById", "homeById", "gulps", "sporeBursts"]) requireContract(archive[key5] === void 0 || b.bossDefinitionId === "corrosive_abomination", "Invalid Corrosive record owner");
     if (archive.globsById !== void 0) {
       requireContract(archive.globsById && typeof archive.globsById === "object" && Object.keys(archive.globsById).length <= 3, "Invalid Corrosive bile budget");
@@ -18928,14 +19009,14 @@ function validateRecoveredBossV1(state, id, b) {
   requireContract(Array.isArray(b.pools) && b.pools.length <= (b.bossDefinitionId === "cinderhart" ? 64 : b.bossDefinitionId === "chronos_arbitrator" ? 32 : b.archive && b.bossDefinitionId === "corrosive_abomination" ? 96 : 20) && point4(b.lastTrailPosition), "Recovered boss hazard budget invalid");
   for (const p of b.pools) {
     closedRecord(p, ["id", "kind", "position", "radius", "createdTick", "expiresTick", "nextDamageTick"]);
-    requireContract(typeof p.id === "string" && p.id.startsWith(b.bossId + ":pool:") && ["acid", "slag", "bile", "fire", "void", "time", "collapse", "molten", "gold", "prism", "ghostfire", "sunfire"].includes(p.kind) && point4(p.position) && Number.isFinite(p.radius) && p.radius >= 8 && p.radius <= 300, "Recovered boss pool invalid");
+    requireContract(typeof p.id === "string" && p.id.startsWith(b.bossId + ":pool:") && ["acid", "slag", "bile", "fire", "void", "time", "collapse", "molten", "gold", "prism", "ghostfire", "sunfire", "frost"].includes(p.kind) && point4(p.position) && Number.isFinite(p.radius) && p.radius >= 8 && p.radius <= 300, "Recovered boss pool invalid");
     safeInteger(p.createdTick, b.activatedTick, state.tick);
     safeInteger(p.expiresTick, state.tick + 1, p.createdTick + 600);
     safeInteger(p.nextDamageTick, p.createdTick, p.expiresTick);
   }
   for (const [key5, s] of Object.entries(b.statusesByEntityId)) {
     closedRecord(s, ["kind", "startedTick", "expiresTick", "movementMultiplier"]);
-    requireContract(state.entitiesById[key5]?.team === "party" && ["time_slow", "control_glitch", "lasso"].includes(s.kind) && s.movementMultiplier > 0 && s.movementMultiplier <= 1, "Recovered boss status invalid");
+    requireContract(state.entitiesById[key5]?.team === "party" && ["time_slow", "frost_slow", "control_glitch", "lasso"].includes(s.kind) && s.movementMultiplier > 0 && s.movementMultiplier <= 1, "Recovered boss status invalid");
     safeInteger(s.startedTick, b.activatedTick, state.tick);
     safeInteger(s.expiresTick, state.tick + 1, s.startedTick + 600);
   }
@@ -18992,7 +19073,7 @@ function projectRecoveredBossV1(b, state) {
     echo: copyWire(b.echo ?? null),
     vault: copyWire(b.vault ?? null),
     reflections: copyWire(b.reflections ?? null),
-    archive: b.archive ? { charge: copyWire(b.archive.charge), sporesById: copyWire(b.archive.sporesById), poisonByEntityId: copyWire(b.archive.poisonByEntityId), collapsedRings: copyWire(b.archive.collapsedRings), nexusShotsById: copyWire(b.archive.nexusShotsById ?? {}), shedEvents: copyWire(b.archive.shedEvents ?? []), ...b.bossDefinitionId === "corrosive_abomination" ? { globsById: copyWire(b.archive.globsById ?? {}), homeById: copyWire(b.archive.homeById ?? {}), gulps: copyWire(b.archive.gulps ?? []), sporeBursts: copyWire(b.archive.sporeBursts ?? []) } : {}, ...b.archive.sheddingVersion === 4 ? { sheddingVersion: 4, shedProcessedStep: b.archive.shedProcessedStep, pendingSheds: b.chunkStep - b.archive.shedProcessedStep } : {} } : null,
+    archive: b.archive ? { charge: copyWire(b.archive.charge), sporesById: copyWire(b.archive.sporesById), poisonByEntityId: copyWire(b.archive.poisonByEntityId), collapsedRings: copyWire(b.archive.collapsedRings), nexusShotsById: copyWire(b.archive.nexusShotsById ?? {}), shedEvents: copyWire(b.archive.shedEvents ?? []), ...b.bossDefinitionId === "corrosive_abomination" ? { globsById: copyWire(b.archive.globsById ?? {}), homeById: copyWire(b.archive.homeById ?? {}), gulps: copyWire(b.archive.gulps ?? []), sporeBursts: copyWire(b.archive.sporeBursts ?? []) } : {}, ...b.bossDefinitionId === "void_overseer" ? { moonBrokeTick: b.archive.moonBrokeTick ?? null, moonLances: copyWire(b.archive.moonLances ?? []) } : {}, ...b.archive.sheddingVersion === 4 ? { sheddingVersion: 4, shedProcessedStep: b.archive.shedProcessedStep, pendingSheds: b.chunkStep - b.archive.shedProcessedStep } : {} } : null,
     minions: b.summonEntityIds.map((id) => {
       const m = state.bossCombat.summonsByEntityId[id];
       return { entityId: id, kind: m.kind, stage: m.stage, position: copyWire(state.entitiesById[id].position) };

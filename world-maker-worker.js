@@ -509,7 +509,7 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   void_overseer: Object.freeze({
     id: "void_overseer",
-    label: "VOID OVERSEER",
+    label: "HOLLOW MOON",
     site: "repeatable-slot:ruin:frostland:deep:01",
     family: "ruin",
     biome: "frostland",
