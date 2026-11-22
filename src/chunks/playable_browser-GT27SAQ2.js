@@ -111465,6 +111465,22 @@ function spreadPiecesV1(paint4) {
     sink = oldSink;
   }
 }
+function ringAroundV1(ctx, gy, stroke6) {
+  const H8 = Math.PI;
+  if (pass === null) {
+    ctx.save();
+    stroke6(0, 2 * H8);
+    ctx.restore();
+  } else if (pass === "ground") {
+    ctx.save();
+    stroke6(H8, 2 * H8);
+    ctx.restore();
+  } else if (pass === "spread") standV1(ctx, gy + 0.5, () => {
+    ctx.save();
+    stroke6(0, H8);
+    ctx.restore();
+  });
+}
 
 // src/client/barrow_crown_flame_v2.js
 var TAU166 = Math.PI * 2;
@@ -218408,13 +218424,13 @@ function lifeMote2(c, x, y, r, a = 1) {
 }
 function titheRing(c, x, y, tick, k, s) {
   if (k <= 0) return;
-  c.save();
-  c.strokeStyle = `rgba(240,70,100,${0.75 * k})`;
-  c.lineWidth = 1.3;
-  c.beginPath();
-  c.ellipse(x, y, (10 + Math.sin(tick * 0.3)) * s, 3.8 * s, 0, 0, TAU232);
-  c.stroke();
-  c.restore();
+  ringAroundV1(c, y, (a0, a1) => {
+    c.strokeStyle = `rgba(240,70,100,${0.75 * k})`;
+    c.lineWidth = 1.3;
+    c.beginPath();
+    c.ellipse(x, y, (10 + Math.sin(tick * 0.3)) * s, 3.8 * s, 0, a0, a1);
+    c.stroke();
+  });
 }
 function titheTether(c, from, to, tick, t1, snapped) {
   const k = clamp88(tick / 8) * (tick < t1 ? 1 : snapped ? 0 : 1 - (tick - t1) / 8);
@@ -218457,12 +218473,15 @@ function titheHeal(c, hero, tick, t1, layer3) {
     const a = tick - (born + MOTE_T);
     if (a < 0 || a >= 18) continue;
     const f = a / 18;
-    if (layer3 === "ground") {
-      c.strokeStyle = `rgba(255,120,140,${0.7 * (1 - f)})`;
-      c.lineWidth = 1.2;
-      c.beginPath();
-      c.ellipse(hero.x, hero.y, 6 + f * 7, (6 + f * 7) * 0.45, 0, 0, TAU232);
-      c.stroke();
+    if (layer3 === "ring") {
+      const r = 6 + f * 7, fy = hero.feet ?? hero.y;
+      ringAroundV1(c, fy, (a0, a1) => {
+        c.strokeStyle = `rgba(255,120,140,${0.7 * (1 - f)})`;
+        c.lineWidth = 1.2;
+        c.beginPath();
+        c.ellipse(hero.x, fy, r, r * 0.45, 0, a0, a1);
+        c.stroke();
+      });
       continue;
     }
     const j = (born / MOTE_GAP | 0) % 3, x = hero.x + (j - 1) * 5, y = hero.y - 14 - f * 12;
@@ -218512,10 +218531,8 @@ function drawTitheTether(c, k, foe, hero) {
   if (age < 0 || age > TITHE_TICKS + TITHE_FADE) return;
   const t1 = k.end || TITHE_TICKS, s = Math.max(1, Math.min(3, (foe.r ?? 10) / 10));
   const chest3 = { x: foe.x, y: foe.y - 16 * s }, hand7 = { x: hero.x + 5 * (hero.face ?? 1), y: hero.y - 10 };
-  if (groundPassV1()) {
-    titheRing(c, foe.x, foe.y, age, clamp88(age / 8) * (k.end ? Math.max(0, 1 - (age - k.end) / 8) : 1), s);
-    titheHeal(c, hero, age, t1, "ground");
-  }
+  titheRing(c, foe.x, foe.y, age, clamp88(age / 8) * (k.end ? Math.max(0, 1 - (age - k.end) / 8) : 1), s);
+  titheHeal(c, hero, age, t1, "ring");
   standV1(c, foe.y + 1, () => titheStamp(c, chest3, age));
   standV1(c, Math.max(foe.y, hero.y) + 1, () => {
     titheTether(c, chest3, hand7, age, t1, Boolean(k.snap));
@@ -218534,7 +218551,7 @@ function vaultUniquesArtV1(c, { m, id: id2, f, a, foot: foot2, face: face5, visi
   const t = f.tithe;
   if (t && a.alive !== false) {
     const e = m.entitiesById?.[t.target], live = e && e.alive !== false, foe = live ? { x: e.position.x, y: foot2(e), r: e.hullRadius ?? 10 } : { x: t.x, y: t.y, r: 10 };
-    if (see(foe.x, foe.y) || see(a.position.x, a.position.y)) place4("tithe/" + id2, foe.x, () => drawTitheTether(c, t, foe, { x: a.position.x, y: foot2(a), face: face5 }));
+    if (see(foe.x, foe.y) || see(a.position.x, a.position.y)) place4("tithe/" + id2, foe.x, () => drawTitheTether(c, t, foe, { x: a.position.x, y: foot2(a), feet: a.position.y + 8, face: face5 }));
   }
 }
 function vaultUniqueLights(f, at9) {
@@ -218862,6 +218879,7 @@ function shiftingPrismUniqueLights(f, at9, a) {
 var TAU234 = Math.PI * 2;
 var clamp90 = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 var ease54 = (t) => 1 - (1 - clamp90(t)) ** 3;
+var HERO_FEET3 = 8;
 var BOG = 0.42;
 var ICE5 = { b: "#bfe4f2", d: "#82b8d2", l: "#eefaff" };
 function scaledAt2(c, p, k, draw) {
@@ -219214,16 +219232,16 @@ function drawBogGulp(c, g2, hero, tick) {
     }
     return;
   }
-  if (groundPassV1()) {
-    c.save();
-    c.globalAlpha = 1 - a / BH_SHOW;
-    c.strokeStyle = g2.slag ? "#ffc06a" : "#bff08a";
-    c.lineWidth = 1.6;
-    const r = 8 + ease54(a / BH_SHOW) * 14;
-    c.beginPath();
-    c.ellipse(hero.x, hero.y + 1, r, r * 0.45, 0, 0, TAU234);
-    c.stroke();
-    c.restore();
+  {
+    const r = 8 + ease54(a / BH_SHOW) * 14, fy = hero.y + HERO_FEET3;
+    ringAroundV1(c, fy, (a0, a1) => {
+      c.globalAlpha = 1 - a / BH_SHOW;
+      c.strokeStyle = g2.slag ? "#ffc06a" : "#bff08a";
+      c.lineWidth = 1.6;
+      c.beginPath();
+      c.ellipse(hero.x, fy, r, r * 0.45, 0, a0, a1);
+      c.stroke();
+    });
   }
   if (a < 10) {
     const q2 = a / 10;
@@ -219538,7 +219556,7 @@ var BOSS_UQ_LIGHT = Object.freeze({
   "uq:oathcatch": { r: 40, color: "#b1fcf0", alpha: 0.35, life: 400 },
   "uq:antler": { r: 44, color: "#ff8a3d", alpha: 0.5, life: 500 }
 });
-var HERO_FEET3 = 8;
+var HERO_FEET4 = 8;
 var sunEye = (m, id2) => Boolean(m.entitiesById[id2]?.uniqueCharge?.sunEye);
 var offKind = (m, id2) => m.entitiesById[id2]?.heroLook?.gear?.off?.kind;
 var INK71 = "#190f20";
@@ -219978,7 +219996,7 @@ function createCombatVfx() {
   const wardFoes = (m, h) => Object.values(m.entitiesById).filter((t) => t.team === "hostile" && t.alive && Math.hypot(t.position.x - h.x, t.position.y - h.y) <= WARD_RADIUS + (t.hullRadius ?? 10)).slice(0, 6).map((t) => ({ x: t.position.x, y: foot2(t), top: (t.hullRadius ?? 10) * 2 }));
   function antlerLeap(m, id2, f, old2, a, time3) {
     if (!old2 || !((f.antler ?? 0) > old2.antler)) return;
-    const face5 = facings.get(id2) ?? 1, feet = a.position.y + HERO_FEET3;
+    const face5 = facings.get(id2) ?? 1, feet = a.position.y + HERO_FEET4;
     let t = null, best = 70;
     for (const e of Object.values(m.entitiesById)) {
       if (e.team !== "hostile" || !e.alive) continue;
@@ -219992,12 +220010,12 @@ function createCombatVfx() {
   }
   function wardenBursts(m, id2, f, old2, a, time3) {
     if (!old2) return;
-    const face5 = facings.get(id2) ?? 1, me = { position: { x: a.position.x, y: a.position.y + HERO_FEET3 } }, q2 = a.uniqueCharge;
-    if (f.lode && f.lode.ticks > old2.lode) add2("uq:lode", { position: { x: f.lode.x, y: f.lode.y + HERO_FEET3 } }, time3, 1, 0, { face: face5, from: f.lode.from.map((p) => ({ x: p.x, y: p.y + 4 })) });
+    const face5 = facings.get(id2) ?? 1, me = { position: { x: a.position.x, y: a.position.y + HERO_FEET4 } }, q2 = a.uniqueCharge;
+    if (f.lode && f.lode.ticks > old2.lode) add2("uq:lode", { position: { x: f.lode.x, y: f.lode.y + HERO_FEET4 } }, time3, 1, 0, { face: face5, from: f.lode.from.map((p) => ({ x: p.x, y: p.y + 4 })) });
     if (f.oath && !old2.oath) add2("uq:oathpop", me, time3, 1, 0, { face: face5 });
     if (old2.oath && !f.oath) add2("uq:oathcatch", me, time3, 1, 0, { face: face5 });
     if (q2 && q2.oath >= 1 && old2.oathK < 1 && !f.oath) add2("uq:oathready", me, time3, 1, 0, { face: face5 });
-    if (f.wardHit && f.wardHit.ticks > old2.wardHit) add2("uq:ward", { position: { x: f.wardHit.x, y: f.wardHit.y + HERO_FEET3 } }, time3, f.wardHit.dx, f.wardHit.dy, f.wardHit.el ? { el: f.wardHit.el, foes: wardFoes(m, f.wardHit) } : null);
+    if (f.wardHit && f.wardHit.ticks > old2.wardHit) add2("uq:ward", { position: { x: f.wardHit.x, y: f.wardHit.y + HERO_FEET4 } }, time3, f.wardHit.dx, f.wardHit.dy, f.wardHit.el ? { el: f.wardHit.el, foes: wardFoes(m, f.wardHit) } : null);
     const up2 = f.wardUp?.n ?? 0;
     for (let n = old2.wardUp; n < up2; n++) add2("uq:wardback", me, time3, 1, 0, { face: face5, slot: n, el: "frost" });
     if (f.plate > old2.plate) add2("uq:plate", me, time3);
@@ -220058,8 +220076,8 @@ function createCombatVfx() {
     if (ct?.alive) place4("crown/" + id2, ct.position.x, () => drawCrownMark(ctx, { x: ct.position.x, y: foot2(ct), s: (CROWN_EVERY - (f.crownCd || CROWN_EVERY)) / 60, hx: a.position.x - face5, hy }, time3));
   }
   function wardenArt(ctx, f, a, time3, place4) {
-    const id2 = a.entityId, gy = a.position.y + HERO_FEET3;
-    if (f.oath && a.alive) place4("oath/" + id2, f.oath.x, () => drawOathShield(ctx, { ...f.oath, y: f.oath.y + HERO_FEET3, fy: f.oath.fy + HERO_FEET3, ty: f.oath.ty + HERO_FEET3 }, { x: a.position.x, y: gy }, time3));
+    const id2 = a.entityId, gy = a.position.y + HERO_FEET4;
+    if (f.oath && a.alive) place4("oath/" + id2, f.oath.x, () => drawOathShield(ctx, { ...f.oath, y: f.oath.y + HERO_FEET4, fy: f.oath.fy + HERO_FEET4, ty: f.oath.ty + HERO_FEET4 }, { x: a.position.x, y: gy }, time3));
     if (a.alive && a.heroLook?.gear?.main?.kind === "wardlight-scepter") place4("ward/" + id2, a.position.x, () => drawWardOrbit(ctx, a.position.x, gy, a.uniqueCharge?.ward ?? 0, time3, ["frost"]));
     if (a.alive && f.plate > 0) place4("plate/" + id2, a.position.x, () => drawPlateRing(ctx, a.position.x, gy, f.plate, time3));
   }
