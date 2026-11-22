@@ -180409,6 +180409,17 @@ var store = { get(k) {
   } catch {
   }
 } };
+function trimRasterCacheV1(store2, keep8) {
+  while (store2.size > keep8) {
+    const k = store2.keys().next().value, v = store2.get(k);
+    store2.delete(k);
+    if (v?.surface) {
+      v.surface.width = 0;
+      v.surface.height = 0;
+    }
+    v?.raster?.bitmap?.close?.();
+  }
+}
 function farMarkV1(m) {
   return m.kind === "settlement" || m.kind === "ferry" || m.kind === "site" && Boolean(m.travel);
 }
@@ -180752,7 +180763,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
         surface3.width = Math.round(cssWidth * ratio);
         surface3.height = Math.round(cssHeight * ratio);
         store_.set(key5, { key: key5, raster, surface: surface3, cssWidth, cssHeight, paintKey: null });
-        while (store_.size > keep8) store_.delete(store_.keys().next().value);
+        trimRasterCacheV1(store_, keep8);
         dirty = true;
       }).catch((e) => {
         metadataError = e.message;
@@ -180986,6 +180997,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     closeButton.focus({ preventScroll: true });
   }
   function hide() {
+    trimRasterCacheV1(cache10, 1);
     dungeon.hide();
     open3 = false;
     atlas.hidden = true;
@@ -181287,7 +181299,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     c.fillRect(0, 0, width2, height);
     if (!center3) center3 = { ...p };
     const shown2 = chartView(center3, span3, width2, height), rw = Math.min(512, Math.round(width2)), rh = Math.min(240, Math.round(height)), k = knowledge();
-    let result = requestRaster(cache10, shown2, Math.max(32, rw), Math.max(32, rh), width2, height, ratio, 6);
+    let result = requestRaster(cache10, shown2, Math.max(32, rw), Math.max(32, rh), width2, height, ratio, 3);
     if (!result) result = [...cache10.values()].reverse().find((v) => v.raster.view.width / shown2.width < 3 && v.raster.view.width / shown2.width > 0.4) ?? null;
     if (result) {
       const visibleKey = Object.keys(k?.visited ?? {}).filter((id2) => !id2.startsWith("event:")).length;
