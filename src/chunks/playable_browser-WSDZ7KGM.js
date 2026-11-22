@@ -175796,7 +175796,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     if (line45) box6.append(element("p", line45, "gx-elementline"));
     return box6;
   }
-  const tomeBanner = (els) => elementBanner(els, els.length > 1 ? "Elements" : "Element", els.length > 1 ? "Your Cast takes them in turn, and so does the extra hit a Mage weapon unique adds." : `Your Cast deals ${ELEMENT_NAME[els[0]]}, and so does the extra hit a Mage weapon unique adds.`);
+  const tomeBanner = (els) => elementBanner(els, els.length > 1 ? "Elements" : "Element", els.length > 1 ? "Your Cast takes them in turn." : `Your Cast deals ${ELEMENT_NAME[els[0]]}.`);
   const CLOSE_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
   function bestRingSlot(inv) {
     if (!inv.equipped.ring1) return "ring1";
