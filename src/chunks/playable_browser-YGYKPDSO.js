@@ -175783,6 +175783,19 @@ function createInventoryPresentation({ document: document2, environment, readMod
   const STAT_ROW_ICONS = { "Critical damage": "critDamage", "Active haste": "activeSpeed", "Block chance": "block", "Parry chance": "parry", "Area multiplier": "bonusAreaRadius", "Movement speed": "moveSpeed" };
   const SHOWN_ABOVE = /* @__PURE__ */ new Set(["Attack", "Defense", "Maximum health", "Critical chance"]);
   const TOME_LINE = { fire: "Infernal Fireball \xB7 single-target Burn", lightning: "Chain Lightning \xB7 one additional target", frost: "Glacial Frost \xB7 Chill builds to Freeze" };
+  const ELEMENT_NAME = { fire: "Fire", frost: "Frost", lightning: "Lightning" }, ELEMENT_ICON = { fire: "fireDmg", frost: "frostDmg", lightning: "lightningDmg" };
+  const tomeEls = (d) => d?.subType === "tome" && TOME_ELEMENTS.includes(d.spellType) ? tomeElements(d.spellType) : null;
+  function elementBanner(els, label7, line45) {
+    const box6 = element("div", "", "gx-element");
+    box6.dataset.el = els.length > 1 ? "mixed" : els[0];
+    const top = element("div", "", "gx-elementtop");
+    top.innerHTML = els.map((e) => statIcon(ELEMENT_ICON[e], 15)).join("");
+    top.append(element("span", label7, "gx-elementlabel"), element("b", els.map((e) => ELEMENT_NAME[e]).join(" \xB7 "), "gx-elementname"));
+    box6.append(top);
+    if (line45) box6.append(element("p", line45, "gx-elementline"));
+    return box6;
+  }
+  const tomeBanner = (els) => elementBanner(els, els.length > 1 ? "Elements" : "Element", els.length > 1 ? "Your Cast takes them in turn, and so does the extra hit a Mage weapon unique adds." : `Your Cast deals ${ELEMENT_NAME[els[0]]}, and so does the extra hit a Mage weapon unique adds.`);
   const CLOSE_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
   function bestRingSlot(inv) {
     if (!inv.equipped.ring1) return "ring1";
@@ -176037,9 +176050,18 @@ function createInventoryPresentation({ document: document2, environment, readMod
       if (note2.childNodes.length) scroll.append(note2);
     }
     if (unique) {
-      const box6 = element("div", "", "gx-unique");
-      box6.append(element("p", uniqueEffectText(unique, d.rarityTier), "gx-uniqueeffect"), element("p", "\u201C" + unique.flavor + "\u201D", "gx-flavor"));
+      const box6 = element("div", "", "gx-unique"), effect = uniqueEffectText(unique, d.rarityTier);
+      box6.append(element("p", effect, "gx-uniqueeffect"));
+      if (/With a tome/.test(effect)) {
+        const held = inv.itemsById[inv.equipped.subweapon], els = held ? tomeEls(itemDefinition(held)) : null;
+        box6.append(els ? elementBanner(els, "With your tome", null) : element("p", "Hold a tome to give it that tome\u2019s element.", "gx-elementline"));
+      }
+      box6.append(element("p", "\u201C" + unique.flavor + "\u201D", "gx-flavor"));
       scroll.append(box6);
+    }
+    {
+      const els = tomeEls(d);
+      if (els) scroll.append(tomeBanner(els));
     }
     if (d.subType === "tome" && TOME_LINE[d.spellType]) scroll.append(element("p", TOME_LINE[d.spellType], "gx-itemnote"));
     else if (d.description && !d.effects) scroll.append(element("p", d.description, "gx-itemnote"));

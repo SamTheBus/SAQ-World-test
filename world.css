@@ -1540,6 +1540,13 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 #world-inventory .gx-uniquetag{display:inline-block;margin-left:8px;padding:2px 6px;border-radius:4px;background:#e8c37a;color:#1a1408;font:800 10px/1.2 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;vertical-align:middle}
 #world-inventory .gx-unique{margin:8px 0 6px;padding:10px 12px;border-radius:10px;background:rgba(232,195,122,.08);border:1px solid rgba(232,195,122,.3)}
 #world-inventory .gx-uniqueeffect{margin:0;color:#f1e6c8;font:500 13px/1.45 system-ui,sans-serif}
+#world-inventory .gx-element{--el:#ff7a45;margin:8px 0 6px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--el) 10%,transparent);border:1px solid color-mix(in srgb,var(--el) 45%,transparent)}
+#world-inventory .gx-unique .gx-element{margin:8px 0 0;padding:6px 10px}
+#world-inventory .gx-element[data-el=frost]{--el:#8fd3ff}#world-inventory .gx-element[data-el=lightning]{--el:#c9a6ff}#world-inventory .gx-element[data-el=mixed]{--el:#e8c37a}
+#world-inventory .gx-elementtop{display:flex;align-items:center;gap:6px}
+#world-inventory .gx-elementlabel{color:#aeb5b6;font:700 10.5px/1.2 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+#world-inventory .gx-elementname{color:var(--el);font:800 14px/1.2 system-ui,sans-serif}
+#world-inventory .gx-elementline{margin:4px 0 0;color:#dfe3e3;font:500 12.5px/1.4 system-ui,sans-serif}
 #world-inventory .gx-flavor{margin:6px 0 0;color:#ff6b5b;font:italic 500 12.5px/1.4 system-ui,sans-serif}
 /* New-world screen (src/client/new_world_screen_v1.js): a new campaign picks the classic map or a
    new seeded world, over the loading screen; the hero creator joins it there while the world builds. */
