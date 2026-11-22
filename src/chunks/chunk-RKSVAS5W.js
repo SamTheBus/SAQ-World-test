@@ -18151,12 +18151,18 @@ var ARCHIVED_FIGHT_PROFILE_VERSION = "boss-archive-parity-v1";
 var ARCHIVED_FIGHT_PROFILES = Object.freeze({
   corrosive_abomination: Object.freeze({
     originalContentSha: "5fc523adb50b9149a4cbb36a79eeb6717d7704ff92f8935e69c17f339e992f1d",
-    attack: Object.freeze({ corrosive_slam: 65, spore_storm: 85, acid_spill: 45 }),
+    attack: Object.freeze({ corrosive_slam: 65, spore_storm: 85, acid_spill: 45, bile_spit: 45 }),
     hop: Object.freeze({ speed: 1.6, cycleTicks: 30, movingTicks: 15, stopRange: 14 }),
-    acid: Object.freeze({ radius: 12, lifeTicks: 480, cadenceTicks: 45, maxHpPercent: 1.5, minimumHp: 1 }),
+    // Trail: separate puddles every 26 px; each one's size (12-16) and life (74-100% of 480) are seeded.
+    acid: Object.freeze({ radius: 12, lifeTicks: 480, cadenceTicks: 45, maxHpPercent: 1.5, minimumHp: 1, spacing: 26 }),
     slag: Object.freeze({ radius: 9, lifeTicks: 240, cadenceTicks: 30, maxHpPercent: 1 }),
-    contact: Object.freeze({ radius: 30.72, cadenceTicks: 40, damageMultiplier: 0.5 }),
-    spore: Object.freeze({ count: 3, radius: 12, speed: 1, lifeTicks: 360, initialRange: 45, poisonTicks: 240, poisonCadenceTicks: 60 }),
+    contact: Object.freeze({ radius: 48, cadenceTicks: 40, damageMultiplier: 0.5 }),
+    slam: Object.freeze({ radius: 96 }),
+    // Bile Spit: a glob lands 28 ticks after the wind-up (1x damage, r54) and leaves a 54 puddle for 8 s (acid rules).
+    bile: Object.freeze({ radius: 54, flightTicks: 28, lifeTicks: 480 }),
+    // A slime alive 8 s crawls home; the boss gulps it for 2% of max HP. Slag never does.
+    home: Object.freeze({ afterTicks: 480, speed: 1.3, reach: 40, healPercent: 2 }),
+    spore: Object.freeze({ count: 3, radius: 12, speed: 1, lifeTicks: 360, initialRange: 96, poisonTicks: 240, poisonCadenceTicks: 60 }),
     shedding: Object.freeze({ stepPercent: 8, maxLive: 6, maxSlag: 2, slagEveryPhaseTwoChunks: 3, flightTicks: 18, coalescenceTicks: 12 })
   }),
   void_overseer: Object.freeze({
@@ -18740,7 +18746,42 @@ function validateRecoveredBossV1(state, id, b) {
   }
   if (b.archive !== void 0) {
     const archive = b.archive;
-    closedRecord(archive, ["version", "charge", "sporesById", "poisonByEntityId", "contactByEntityId", "nextWarrenTick", "sludgeSequence", "collapsedRings"], ["nexusShotsById", "shedEvents", "sheddingVersion", "shedProcessedStep", "ashfangShoves", "ashfangRoarTick"]);
+    closedRecord(archive, ["version", "charge", "sporesById", "poisonByEntityId", "contactByEntityId", "nextWarrenTick", "sludgeSequence", "collapsedRings"], ["nexusShotsById", "shedEvents", "sheddingVersion", "shedProcessedStep", "ashfangShoves", "ashfangRoarTick", "globsById", "homeById", "gulps", "sporeBursts"]);
+    for (const key5 of ["globsById", "homeById", "gulps", "sporeBursts"]) requireContract(archive[key5] === void 0 || b.bossDefinitionId === "corrosive_abomination", "Invalid Corrosive record owner");
+    if (archive.globsById !== void 0) {
+      requireContract(archive.globsById && typeof archive.globsById === "object" && Object.keys(archive.globsById).length <= 3, "Invalid Corrosive bile budget");
+      for (const [id2, g] of Object.entries(archive.globsById)) {
+        closedRecord(g, ["id", "originPosition", "targetPosition", "startedTick", "landsTick", "sequence"]);
+        requireContract(g.id === id2 && id2.startsWith(b.bossId + ":bile:") && point4(g.originPosition) && point4(g.targetPosition), "Invalid Corrosive bile glob");
+        safeInteger(g.startedTick, b.activatedTick, state.tick);
+        safeInteger(g.landsTick, g.startedTick, g.startedTick + 60);
+        safeInteger(g.sequence, 1, b.abilitySequence);
+      }
+    }
+    if (archive.homeById !== void 0) {
+      requireContract(archive.homeById && typeof archive.homeById === "object" && Object.keys(archive.homeById).length <= 6, "Invalid Corrosive home budget");
+      for (const [id2, h] of Object.entries(archive.homeById)) {
+        closedRecord(h, ["startedTick", "from"]);
+        requireContract(b.summonEntityIds.includes(id2) && point4(h.from), "Invalid Corrosive home record");
+        safeInteger(h.startedTick, b.activatedTick, state.tick);
+      }
+    }
+    if (archive.gulps !== void 0) {
+      requireContract(Array.isArray(archive.gulps) && archive.gulps.length <= 4, "Invalid Corrosive gulp budget");
+      for (const g of archive.gulps) {
+        closedRecord(g, ["entityId", "tick", "from", "to"]);
+        requireContract(typeof g.entityId === "string" && point4(g.from) && point4(g.to), "Invalid Corrosive gulp");
+        safeInteger(g.tick, b.activatedTick, state.tick);
+      }
+    }
+    if (archive.sporeBursts !== void 0) {
+      requireContract(Array.isArray(archive.sporeBursts) && archive.sporeBursts.length <= 9, "Invalid Corrosive spore burst budget");
+      for (const x of archive.sporeBursts) {
+        closedRecord(x, ["id", "position", "stage", "resolvedTick"]);
+        requireContract(typeof x.id === "string" && point4(x.position) && ["detonated", "withered"].includes(x.stage), "Invalid Corrosive spore burst");
+        safeInteger(x.resolvedTick, b.activatedTick, state.tick);
+      }
+    }
     if (archive.ashfangRoarTick !== void 0) {
       requireContract(b.bossDefinitionId === "ashfang", "Invalid Ashfang roar owner");
       safeInteger(archive.ashfangRoarTick, b.activatedTick, state.tick);
@@ -18823,7 +18864,7 @@ function validateRecoveredBossV1(state, id, b) {
   requireContract(Array.isArray(b.pools) && b.pools.length <= (b.bossDefinitionId === "cinderhart" ? 64 : b.bossDefinitionId === "chronos_arbitrator" ? 32 : b.archive && b.bossDefinitionId === "corrosive_abomination" ? 96 : 20) && point4(b.lastTrailPosition), "Recovered boss hazard budget invalid");
   for (const p of b.pools) {
     closedRecord(p, ["id", "kind", "position", "radius", "createdTick", "expiresTick", "nextDamageTick"]);
-    requireContract(typeof p.id === "string" && p.id.startsWith(b.bossId + ":pool:") && ["acid", "slag", "fire", "void", "time", "collapse", "molten", "gold", "prism", "ghostfire", "sunfire"].includes(p.kind) && point4(p.position) && Number.isFinite(p.radius) && p.radius >= 8 && p.radius <= 300, "Recovered boss pool invalid");
+    requireContract(typeof p.id === "string" && p.id.startsWith(b.bossId + ":pool:") && ["acid", "slag", "bile", "fire", "void", "time", "collapse", "molten", "gold", "prism", "ghostfire", "sunfire"].includes(p.kind) && point4(p.position) && Number.isFinite(p.radius) && p.radius >= 8 && p.radius <= 300, "Recovered boss pool invalid");
     safeInteger(p.createdTick, b.activatedTick, state.tick);
     safeInteger(p.expiresTick, state.tick + 1, p.createdTick + 600);
     safeInteger(p.nextDamageTick, p.createdTick, p.expiresTick);
@@ -18836,7 +18877,7 @@ function validateRecoveredBossV1(state, id, b) {
   }
   if (b.lastAction !== null) {
     closedRecord(b.lastAction, ["ability", "resolvedTick", "targetPosition", "hitEntityIds"]);
-    requireContract((Object.hasOwn(spec.attacks, b.lastAction.ability) || b.lastAction.ability === "strike") && point4(b.lastAction.targetPosition) && Array.isArray(b.lastAction.hitEntityIds) && b.lastAction.hitEntityIds.every((key5) => state.entitiesById[key5]?.team === "party"), "Recovered boss history invalid");
+    requireContract((Object.hasOwn(spec.attacks, b.lastAction.ability) || b.lastAction.ability === "strike" || Boolean(b.archive) && Object.hasOwn(archivedCombatProfile(b.bossDefinitionId).attack, b.lastAction.ability)) && point4(b.lastAction.targetPosition) && Array.isArray(b.lastAction.hitEntityIds) && b.lastAction.hitEntityIds.every((key5) => state.entitiesById[key5]?.team === "party"), "Recovered boss history invalid");
     safeInteger(b.lastAction.resolvedTick, b.activatedTick, state.tick);
   }
   return b;
@@ -18887,7 +18928,7 @@ function projectRecoveredBossV1(b, state) {
     echo: copyWire(b.echo ?? null),
     vault: copyWire(b.vault ?? null),
     reflections: copyWire(b.reflections ?? null),
-    archive: b.archive ? { charge: copyWire(b.archive.charge), sporesById: copyWire(b.archive.sporesById), poisonByEntityId: copyWire(b.archive.poisonByEntityId), collapsedRings: copyWire(b.archive.collapsedRings), nexusShotsById: copyWire(b.archive.nexusShotsById ?? {}), shedEvents: copyWire(b.archive.shedEvents ?? []), ...b.archive.sheddingVersion === 4 ? { sheddingVersion: 4, shedProcessedStep: b.archive.shedProcessedStep, pendingSheds: b.chunkStep - b.archive.shedProcessedStep } : {} } : null,
+    archive: b.archive ? { charge: copyWire(b.archive.charge), sporesById: copyWire(b.archive.sporesById), poisonByEntityId: copyWire(b.archive.poisonByEntityId), collapsedRings: copyWire(b.archive.collapsedRings), nexusShotsById: copyWire(b.archive.nexusShotsById ?? {}), shedEvents: copyWire(b.archive.shedEvents ?? []), ...b.bossDefinitionId === "corrosive_abomination" ? { globsById: copyWire(b.archive.globsById ?? {}), homeById: copyWire(b.archive.homeById ?? {}), gulps: copyWire(b.archive.gulps ?? []), sporeBursts: copyWire(b.archive.sporeBursts ?? []) } : {}, ...b.archive.sheddingVersion === 4 ? { sheddingVersion: 4, shedProcessedStep: b.archive.shedProcessedStep, pendingSheds: b.chunkStep - b.archive.shedProcessedStep } : {} } : null,
     minions: b.summonEntityIds.map((id) => {
       const m = state.bossCombat.summonsByEntityId[id];
       return { entityId: id, kind: m.kind, stage: m.stage, position: copyWire(state.entitiesById[id].position) };
