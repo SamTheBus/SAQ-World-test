@@ -269,6 +269,7 @@ import {
   SETTLEMENT_LIFE_HASH,
   SETTLEMENT_LIFE_POLICY,
   SETTLEMENT_LIFE_VERSION,
+  SET_ASIDE_SITES_MAX_V1,
   SHIELD_SWORD_PRIMARY,
   SHRINE_MEMBERS,
   SHRINE_POLICY,
@@ -689,6 +690,7 @@ import {
   impScrapBandV1,
   inArenaBoxV1,
   inGroup,
+  inPlaceV1,
   initialD8Progression,
   initialDenV1,
   initialDiscovery,
@@ -953,6 +955,7 @@ import {
   serviceGoldAdjustment,
   serviceNpcByIdV1,
   serviceNpcsFor,
+  setAsideIdsV1,
   setLadder,
   setTier,
   settleGuard,
@@ -1147,6 +1150,7 @@ import {
   wholeAmount,
   wildernessFairLevelGap,
   withSeededWorldV1,
+  withSetAsideSitesV1,
   woodlandForestRole,
   workshopMaterialPrices,
   workshopQuote,
@@ -1167,7 +1171,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-23G3UWUU.js";
+} from "./chunk-X4KJKV4S.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -108982,7 +108986,7 @@ function validateResolvedSiteDefinitionD13A(definition2) {
 function validateAuthoritativeSiteDefinitionsD13A(state2) {
   const definitions3 = resolveAuthoritativeSiteDefinitionsD13A(state2), ids4 = /* @__PURE__ */ new Set();
   for (const definition2 of definitions3) {
-    validateResolvedSiteDefinitionD13A(definition2);
+    inPlaceV1(definition2.siteId, () => validateResolvedSiteDefinitionD13A(definition2));
     requireContract(!ids4.has(definition2.siteId), "Duplicate universal site definition");
     ids4.add(definition2.siteId);
   }
@@ -108991,7 +108995,7 @@ function validateAuthoritativeSiteDefinitionsD13A(state2) {
     const site = manifest.sites.find((row2) => row2.locationId === interior2.siteId);
     if (site?.locationDefinitionId === STONEWATCH_LOCATION_DEFINITION_ID && site.properName === "Stonewatch") requireContract(ids4.has(site.locationId), "Stonewatch Crypt definition missing");
   }
-  for (const [siteId, reservation] of Object.entries(state2.d9World?.siteReservationsById ?? {})) if (blueprintForPackage(reservation.packageId) && functionalSiteDefinitionD10(reservation.packageId, state2.d9World.functionalSitesById?.[siteId]?.packageVersion ?? null)) requireContract(ids4.has(siteId), "Functional site definition missing");
+  for (const [siteId, reservation] of Object.entries(state2.d9World?.siteReservationsById ?? {})) if (blueprintForPackage(reservation.packageId) && functionalSiteDefinitionD10(reservation.packageId, state2.d9World.functionalSitesById?.[siteId]?.packageVersion ?? null)) inPlaceV1(siteId, () => requireContract(ids4.has(siteId), "Functional site definition missing"));
   return true;
 }
 
@@ -109066,6 +109070,9 @@ function validateActivityCommandForState(c, s) {
 }
 var same7 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function validateActivityState(s) {
+  return withSetAsideSitesV1(setAsideIdsV1(s), () => validateActivityStateNow(s));
+}
+function validateActivityStateNow(s) {
   validateWorldEventsState(s);
   validateWire(s);
   closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "playerRevivesById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId", "waitingRoom", "bestiary", "trips", "arenaFallenV1"]);
@@ -109156,7 +109163,7 @@ function validateActivityState(s) {
   }
   const groupByEntity = /* @__PURE__ */ new Map();
   for (const g2 of Object.values(s.groupsById)) {
-    if (d3) validateEncounterProgression(s, g2);
+    if (d3) inPlaceV1(g2.siteId ?? g2.groupId, () => validateEncounterProgression(s, g2));
     for (const id2 of g2.entityIds) groupByEntity.set(id2, g2);
   }
   validateEliteCombatD12_4(s);
@@ -109204,14 +109211,17 @@ function validateActivityState(s) {
       safeInteger(nav.replanAfterTick, 0, s.tick + CAVE_INTERIOR_NAVIGATION_D12_3A.unreachableRetryTicks);
     }
     requireContract(id2 === a.entityId && space && (!d9 || !collidesWithTiles(space.collision, a.position.x, a.position.y, a.hullRadius)), "Invalid canonical actor geometry");
-    let p = s.content.definitionsById[a.contentDefinitionId];
-    requireContract(p?.kind === "actorProfile", "Missing actor profile");
-    if (d3 && a.team === "party") {
-      const resolved = resolvePlayerStats(playerByEntity.get(id2), { legacyMigration: s.subweaponCombat?.version !== "subweapon-combat-integer-v2" });
-      p = { ...p, maxHp: d6 ? resolved.maxHp : combatIntegerWire(resolved.maxHp), attackDamage: d6 ? resolved.attack : combatIntegerWire(resolved.attack), moveSpeed: resolved.moveSpeed, ...hasWorldCombat(s) ? { attackReach: 32 } : {} };
-    } else if (d3 && groupByEntity.has(id2)) p = encounterActorProfile(s, groupByEntity.get(id2), a);
-    if (d6) p = { ...p, maxHp: (s.subweaponCombat?.version === "subweapon-combat-integer-v2" ? combatInteger : asCombatAmount)(p.maxHp), attackDamage: (s.subweaponCombat?.version === "subweapon-combat-integer-v2" ? combatInteger : asCombatAmount)(p.attackDamage) };
-    for (const key4 of ["team", "maxHp", "hullRadius", "combatRadius", "moveSpeed", "attackDamage", "attackReach", "attackReachMode", "attackDelayTicks"]) requireContract(same7(a[key4], p[key4]), "Actor profile drift");
+    const home = a.team === "party" ? null : groupByEntity.get(id2);
+    inPlaceV1(home ? home.siteId ?? home.groupId : null, () => {
+      let p = s.content.definitionsById[a.contentDefinitionId];
+      requireContract(p?.kind === "actorProfile", "Missing actor profile");
+      if (d3 && a.team === "party") {
+        const resolved = resolvePlayerStats(playerByEntity.get(id2), { legacyMigration: s.subweaponCombat?.version !== "subweapon-combat-integer-v2" });
+        p = { ...p, maxHp: d6 ? resolved.maxHp : combatIntegerWire(resolved.maxHp), attackDamage: d6 ? resolved.attack : combatIntegerWire(resolved.attack), moveSpeed: resolved.moveSpeed, ...hasWorldCombat(s) ? { attackReach: 32 } : {} };
+      } else if (d3 && groupByEntity.has(id2)) p = encounterActorProfile(s, groupByEntity.get(id2), a);
+      if (d6) p = { ...p, maxHp: (s.subweaponCombat?.version === "subweapon-combat-integer-v2" ? combatInteger : asCombatAmount)(p.maxHp), attackDamage: (s.subweaponCombat?.version === "subweapon-combat-integer-v2" ? combatInteger : asCombatAmount)(p.attackDamage) };
+      for (const key4 of ["team", "maxHp", "hullRadius", "combatRadius", "moveSpeed", "attackDamage", "attackReach", "attackReachMode", "attackDelayTicks"]) requireContract(same7(a[key4], p[key4]), "Actor profile drift");
+    });
     if (a.team === "party") requireContract(owned2.has(id2), "Unowned party actor");
     else if (a.residency.spaceInstanceId === s.overworldInstanceId) requireContract(!manifest.safeRegions.some((r) => a.position.x + a.hullRadius > r.x && a.position.x - a.hullRadius < r.x + r.width && a.position.y + a.hullRadius > r.y && a.position.y - a.hullRadius < r.y + r.height), "Hostile overlaps safe settlement");
   }
@@ -109245,7 +109255,7 @@ function validateActivityState(s) {
       requireContract(a?.team === "hostile" && a.residency.spaceInstanceId === g2.spaceInstanceId && !grouped.has(id3), "Group actor ownership mismatch");
       grouped.add(id3);
     }
-    requireContract(g2.cleared === (g2.entityIds.every((id3) => !s.entitiesById[id3].alive) && eventReadyToClear(s, g2.groupId)), "Clear/liveness mismatch");
+    inPlaceV1(g2.siteId ?? g2.groupId, () => requireContract(g2.cleared === (g2.entityIds.every((id3) => !s.entitiesById[id3].alive) && eventReadyToClear(s, g2.groupId)), "Clear/liveness mismatch"));
   }
   requireContract(Object.values(s.entitiesById).filter((a) => a.team === "hostile").every((a) => grouped.has(a.entityId)), "Ungrouped hostile");
   requireContract(same7(Object.keys(s.residencyHistoryByEntityId).sort(), [...owned2].sort()), "Residency history owners");
@@ -248533,6 +248543,21 @@ async function createLocalEndlessSessionD9(options) {
   let saving = null, failStreak = 0, saveAgain = false, lastError = null, lastSavedTick = opened2.state.tick, lastLife = null, lastCritical = null, lastLifeSaveTick = -Infinity, savePhase = "idle", savePhaseAt = now3(), gateSince = null, gateTimedOut = false, durabilityFailed = false, fatalInvariant = null, failedCuts = 0, retriedCuts = 0, lastSuccessfulCommitAt = now3(), lastSaveAttemptAt = -Infinity, lastStreamServiceAt = -Infinity;
   const isGeometryFailure = (failure) => failure?.code === "WORLD_ACTOR_GEOMETRY_INVALID" || /Invalid canonical actor geometry/.test(failure?.reason ?? failure?.message ?? "");
   const liveGeometry = () => authority.withAuthority((a) => a.withAuthorityState((s) => firstInvalidActorGeometryD9(s, { mutation: "worker result live-state probe", phase: savePhase })));
+  const setAsideNotes = [];
+  let placesRebuilt = 0;
+  function setAsidePlace(result) {
+    const id2 = result?.siteId;
+    if (typeof id2 !== "string" || !id2) return false;
+    return authority.withAuthority((a) => a.withAuthorityState((s) => {
+      const now4 = s.campaign.setAsideSitesV1 ?? {};
+      if (now4[id2] || Object.keys(now4).length >= SET_ASIDE_SITES_MAX_V1) return false;
+      const reason = String(result.reason ?? result.status ?? "").slice(0, 200);
+      s.campaign.setAsideSitesV1 = { ...now4, [id2]: { tick: s.tick, reason } };
+      setAsideNotes.push({ siteId: id2, reason, tick: s.tick, at: (/* @__PURE__ */ new Date()).toISOString() });
+      if (setAsideNotes.length > 12) setAsideNotes.shift();
+      return true;
+    }));
+  }
   function discardStaleGeometry(failure, source3) {
     if (!isGeometryFailure(failure) || liveGeometry()) return false;
     retriedCuts++;
@@ -248611,9 +248636,10 @@ async function createLocalEndlessSessionD9(options) {
     }
     lastSaveAttemptAt = now3();
     saving = (async () => {
-      let result;
+      let result, retryPlace = false;
       do {
         saveAgain = false;
+        retryPlace = false;
         if (authority.getStatus().phase === "unknown") {
           phase3("reconciling");
           const reconciled = await authority.reconcile();
@@ -248663,13 +248689,18 @@ async function createLocalEndlessSessionD9(options) {
           durabilityFailed = true;
           result = { status: "aborted", reason: lastError, code: "WORLD_TRANSFER_STALE" };
           phase3("failed");
+        } else if (result.status === "aborted" && !isGeometryFailure(result) && authority.getStatus().phase === "ready" && setAsidePlace(result)) {
+          retriedCuts++;
+          saveAgain = true;
+          retryPlace = true;
+          phase3("preparing");
         } else {
           durabilityFailed = true;
           failedCuts++;
           if (isGeometryFailure(result)) latchFatal(result, "world.commit");
           phase3("failed");
         }
-      } while (saveAgain && result.status === "committed" && authority.getStatus().phase === "ready");
+      } while (saveAgain && (result.status === "committed" || retryPlace) && authority.getStatus().phase === "ready");
       return result;
     })().catch((e) => {
       if (discardStaleGeometry(e, "save preparation")) {
@@ -248988,6 +249019,13 @@ async function createLocalEndlessSessionD9(options) {
           try {
             commitSiteResetD13C(s, plan, { transitioningPlayerIds: live });
             ok = true;
+            const aside = s.campaign.setAsideSitesV1;
+            if (aside?.[siteId]) {
+              const { [siteId]: gone, ...rest2 } = aside;
+              if (Object.keys(rest2).length) s.campaign.setAsideSitesV1 = rest2;
+              else delete s.campaign.setAsideSitesV1;
+              placesRebuilt++;
+            }
           } catch (error) {
             if (!/Stale site reset plan|Site reset changed before commit/.test(error.message)) throw error;
           }
@@ -249310,7 +249348,7 @@ async function createLocalEndlessSessionD9(options) {
       }
       return true;
     },
-    resources: () => authority.withAuthority((a) => ({ ...a.resources(), ...clientPort.resources(), groundPreparation: groundPreparationStatus(), d9Streaming: stream2.inspect(), d9Pages: pages2.resources(), siteReset: { count: siteResets, error: siteResetError }, d9Save: { pending: Boolean(saving), phase: savePhase, error: lastError, durabilityFailed, fatalInvariant, lastSuccessfulCommitTick: lastSavedTick, lastSuccessfulCommitAgeMs: Math.max(0, now3() - lastSuccessfulCommitAt), failedCuts, retriedCuts }, d9Worker: worker.inspect?.() ?? null })),
+    resources: () => authority.withAuthority((a) => ({ ...a.resources(), ...clientPort.resources(), groundPreparation: groundPreparationStatus(), d9Streaming: stream2.inspect(), d9Pages: pages2.resources(), siteReset: { count: siteResets, error: siteResetError }, d9Save: { pending: Boolean(saving), phase: savePhase, error: lastError, durabilityFailed, fatalInvariant, lastSuccessfulCommitTick: lastSavedTick, lastSuccessfulCommitAgeMs: Math.max(0, now3() - lastSuccessfulCommitAt), failedCuts, retriedCuts, setAside: { places: a.withAuthorityState((s) => Object.keys(s.campaign.setAsideSitesV1 ?? {})), notes: setAsideNotes.slice(), rebuilt: placesRebuilt } }, d9Worker: worker.inspect?.() ?? null })),
     destroy() {
       stream2.close();
     }

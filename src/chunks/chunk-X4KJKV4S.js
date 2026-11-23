@@ -8,6 +8,47 @@ var __export = (target, all) => {
 function requireContract(condition, message) {
   if (!condition) throw new TypeError(message);
 }
+var SET_ASIDE_SITES_MAX_V1 = 8;
+var setAsideV1 = null;
+function setAsideIdsV1(state) {
+  return Object.keys(state?.campaign?.setAsideSitesV1 ?? {});
+}
+function withSetAsideSitesV1(ids, fn) {
+  const prev = setAsideV1;
+  setAsideV1 = ids?.length ? new Set(ids) : null;
+  try {
+    return fn();
+  } finally {
+    setAsideV1 = prev;
+  }
+}
+function placeSetAsideV1(id) {
+  return Boolean(id && setAsideV1?.has(id));
+}
+function inPlaceV1(id, fn) {
+  if (id && setAsideV1?.has(id)) return void 0;
+  try {
+    return fn();
+  } catch (error) {
+    if (id && error && typeof error === "object" && error.siteId === void 0) {
+      try {
+        error.siteId = id;
+      } catch {
+      }
+    }
+    throw error;
+  }
+}
+function validateSetAsideSitesV1(value) {
+  if (value === void 0) return;
+  const ids = Object.keys(value);
+  requireContract(value && typeof value === "object" && !Array.isArray(value) && ids.length <= SET_ASIDE_SITES_MAX_V1, "Set-aside place budget");
+  for (const id of ids) {
+    const r = value[id];
+    requireContract(/^[\w:.\-]{1,200}$/.test(id), "Invalid set-aside place id");
+    requireContract(r && typeof r === "object" && Object.keys(r).sort().join() === "reason,tick" && Number.isSafeInteger(r.tick) && r.tick >= 0 && typeof r.reason === "string" && r.reason.length <= 200, "Invalid set-aside place");
+  }
+}
 var RESOURCE_INVENTORY_WIRE_V1 = Object.freeze({ version: "horde-resource-inventory-wire-v1", maximumEntries: 512, ordinaryArrayMaximum: 256 });
 var GROUP_INDEX_WIRE_V1 = Object.freeze({ version: "horde-group-index-wire-v1", maximumKeys: 512, parentRecordMaximum: 256 });
 var CONTENT_CATALOG_WIRE_V1 = Object.freeze({ version: "content-catalog-wire-v1", maximumEntries: 512 });
@@ -10044,27 +10085,31 @@ function adoptOrdinaryRosters(s, { groupIds = null, safe = true, freshEpisodes =
 }
 function validateOrdinaryRosterState(s) {
   const root2 = s.d9World?.ordinaryRoster, newIds = new Set(DUNGEON_MOBS_V1_PROFILES.map((p) => p.contentDefinitionId));
-  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root2 && recordFor(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New ordinary actor lacks roster provenance");
+  for (const g of Object.values(s.groupsById)) inPlaceV1(g.siteId ?? g.groupId, () => {
+    for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root2 && recordFor(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New ordinary actor lacks roster provenance");
+  });
   if (!root2) return;
   closedRecord(root2, ["version", "activatedTick"]);
   requireContract(hasWorldCombat(s) && root2.version === ORDINARY_ROSTER_V1, "Unrecognized ordinary roster binding");
   safeInteger(root2.activatedTick, 0, s.tick);
-  for (const [id, episode] of Object.entries(s.d9World.episodes)) {
-    const row2 = episode.ordinaryRoster;
-    if (!row2) continue;
-    const g = s.groupsById[id];
-    requireContract(g, "Roster episode has no live group");
-    closedRecord(row2, ["version", "groupId", "adoptedEpisode", "adoptedTick", "poolKey", "substitutionsById"]);
-    requireContract(row2.version === ORDINARY_ROSTER_V1 && row2.groupId === id, "Roster identity drift");
-    safeInteger(row2.adoptedEpisode, 0, s.encounterEconomy.groups[id].episode);
-    safeInteger(row2.adoptedTick, root2.activatedTick, s.tick);
-    const context = contextFor(s, g);
-    requireContract(context && context.pool.key === row2.poolKey && same2(selection(s, g, context), row2.substitutionsById), "Roster deterministic selection drift");
-    for (const [entityId, sub] of Object.entries(row2.substitutionsById)) {
-      closedRecord(sub, ["fromProfileId", "toProfileId"]);
-      requireContract(s.entitiesById[entityId]?.contentDefinitionId === sub.toProfileId && g.entityIds.includes(entityId), "Roster actor profile drift");
+  for (const [id, episode] of Object.entries(s.d9World.episodes)) inPlaceV1(s.groupsById[id]?.siteId ?? id, () => {
+    for (const _once of [0]) {
+      const row2 = episode.ordinaryRoster;
+      if (!row2) continue;
+      const g = s.groupsById[id];
+      requireContract(g, "Roster episode has no live group");
+      closedRecord(row2, ["version", "groupId", "adoptedEpisode", "adoptedTick", "poolKey", "substitutionsById"]);
+      requireContract(row2.version === ORDINARY_ROSTER_V1 && row2.groupId === id, "Roster identity drift");
+      safeInteger(row2.adoptedEpisode, 0, s.encounterEconomy.groups[id].episode);
+      safeInteger(row2.adoptedTick, root2.activatedTick, s.tick);
+      const context = contextFor(s, g);
+      requireContract(context && context.pool.key === row2.poolKey && same2(selection(s, g, context), row2.substitutionsById), "Roster deterministic selection drift");
+      for (const [entityId, sub] of Object.entries(row2.substitutionsById)) {
+        closedRecord(sub, ["fromProfileId", "toProfileId"]);
+        requireContract(s.entitiesById[entityId]?.contentDefinitionId === sub.toProfileId && g.entityIds.includes(entityId), "Roster actor profile drift");
+      }
     }
-  }
+  });
 }
 
 // src/shared/content/aegis_mimics_v2.js
@@ -10291,28 +10336,32 @@ function adoptOrdinaryRostersV2(s, { groupIds = null, safe = true, freshEpisodes
 }
 function validateOrdinaryRosterV2State(s) {
   const root2 = s.d9World?.ordinaryRosterV2, newIds = new Set([...DUNGEON_MOBS_V2_PROFILES, ...BIOME_CREATURES_V1_PROFILES, ...TROPICAL_CREATURES_V1_PROFILES, ...OPEN_LAND_CREATURES_V1_PROFILES].map((p) => p.contentDefinitionId));
-  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !aegisMimicFor(s, id) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root2 && recordFor2(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New V2 ordinary actor lacks roster provenance");
+  for (const g of Object.values(s.groupsById)) inPlaceV1(g.siteId ?? g.groupId, () => {
+    for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !aegisMimicFor(s, id) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root2 && recordFor2(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New V2 ordinary actor lacks roster provenance");
+  });
   if (!root2) return;
   closedRecord(root2, ["version", "activatedTick"]);
   requireContract(completeCatalog(s), "V2 ordinary roster requires the complete appended catalog");
   requireContract(hasWorldCombat(s) && root2.version === ORDINARY_ROSTER_V2, "Unrecognized V2 ordinary roster binding");
   safeInteger(root2.activatedTick, 0, s.tick);
-  for (const [id, episode] of Object.entries(s.d9World.episodes)) {
-    const row2 = episode.ordinaryRosterV2;
-    if (!row2) continue;
-    const g = s.groupsById[id];
-    requireContract(g, "V2 roster episode has no live group");
-    closedRecord(row2, ["version", "groupId", "adoptedEpisode", "adoptedTick", "poolKey", "substitutionsById"]);
-    requireContract(row2.version === ORDINARY_ROSTER_V2 && row2.groupId === id, "V2 roster identity drift");
-    safeInteger(row2.adoptedEpisode, 0, s.encounterEconomy.groups[id].episode);
-    safeInteger(row2.adoptedTick, root2.activatedTick, s.tick);
-    const context = contextFor2(s, g);
-    requireContract(context && context.key === row2.poolKey && same3(selection2(s, g, context), row2.substitutionsById), "V2 roster deterministic selection drift");
-    for (const [entityId, sub] of Object.entries(row2.substitutionsById)) {
-      closedRecord(sub, ["fromProfileId", "toProfileId"]);
-      requireContract(s.entitiesById[entityId]?.contentDefinitionId === sub.toProfileId && g.entityIds.includes(entityId), "V2 roster actor profile drift");
+  for (const [id, episode] of Object.entries(s.d9World.episodes)) inPlaceV1(s.groupsById[id]?.siteId ?? id, () => {
+    for (const _once of [0]) {
+      const row2 = episode.ordinaryRosterV2;
+      if (!row2) continue;
+      const g = s.groupsById[id];
+      requireContract(g, "V2 roster episode has no live group");
+      closedRecord(row2, ["version", "groupId", "adoptedEpisode", "adoptedTick", "poolKey", "substitutionsById"]);
+      requireContract(row2.version === ORDINARY_ROSTER_V2 && row2.groupId === id, "V2 roster identity drift");
+      safeInteger(row2.adoptedEpisode, 0, s.encounterEconomy.groups[id].episode);
+      safeInteger(row2.adoptedTick, root2.activatedTick, s.tick);
+      const context = contextFor2(s, g);
+      requireContract(context && context.key === row2.poolKey && same3(selection2(s, g, context), row2.substitutionsById), "V2 roster deterministic selection drift");
+      for (const [entityId, sub] of Object.entries(row2.substitutionsById)) {
+        closedRecord(sub, ["fromProfileId", "toProfileId"]);
+        requireContract(s.entitiesById[entityId]?.contentDefinitionId === sub.toProfileId && g.entityIds.includes(entityId), "V2 roster actor profile drift");
+      }
     }
-  }
+  });
 }
 
 // src/shared/contracts/actor_geometry_d9.js
@@ -16724,7 +16773,7 @@ function validateEliteCombatD12_4(state) {
   if (root2 === void 0) return;
   closedRecord(root2, ["version", "elitesByEntityId"], ["hasteByEntityId", "timedStatusesByEntityId", "guardByEntityId", "attackAuraByEntityId", "nullificationResistanceByEntityId", "pendingHazardsBySourceEliteId", "hazardsById", "webbedByEntityId", "slagBurnByEntityId"]);
   requireContract(root2.version === ELITE_COMBAT_D12_4_VERSION, "Unsupported elite combat state");
-  for (const [entityId, e] of Object.entries(root2.elitesByEntityId)) {
+  for (const [entityId, e] of Object.entries(root2.elitesByEntityId)) inPlaceV1(e?.siteId ?? e?.groupId, () => {
     closedRecord(e, ["version", "eliteId", "entityId", "groupId", "siteId", "floorId", "roomId", "tier", "affixIds", "identitySource", "activatedTick", "nextPulseTick", "pulseSequence", "lastPulse"], ["composition", "namedEliteId", "namedTrick", "move"]);
     if (e.namedEliteId !== void 0) requireContract(Object.hasOwn(NAMED_ENDS_V1, e.namedEliteId) && NAMED_ENDS_V1[e.namedEliteId].affixId === e.affixIds[0], "Unknown named elite");
     if (e.namedTrick !== void 0) validateNamedTrickV1(state, e);
@@ -16746,7 +16795,7 @@ function validateEliteCombatD12_4(state) {
       requireContract(e.pulseSequence === 0 ? e.nextPulseTick === e.activatedTick : e.lastPulse?.sequence === e.pulseSequence && e.nextPulseTick === e.lastPulse.tick + definition.pulse.cadenceTicks, "Toxic Decay cooldown schedule drift");
     } else requireContract(e.nextPulseTick === e.activatedTick + (e.pulseSequence + 1) * definition.pulse.cadenceTicks, "Elite pulse schedule drift");
     validatePulseRecord(state, e, definition, group);
-  }
+  });
   for (const [entityId, h] of Object.entries(root2.hasteByEntityId ?? {})) {
     closedRecord(h, ["version", "entityId", "stacks", "sourceEliteIds", "lastRefreshTick", "lingerExpiresTick", "nextDecayTick", "lastStackTick", "lastDecayTick"]);
     requireContract(h.version === ELITE_HASTE_D12_4D_VERSION && h.entityId === entityId, "Invalid haste identity");
@@ -22444,17 +22493,23 @@ function validateSiteFinaleReservationsD13D_A(state) {
   requireContract(records2 && same13(Object.keys(records2).sort(), sites6.map((site) => site.siteId)), "Procedural Cave finale reservation inventory drift");
   const bound = [];
   for (const site of sites6) {
-    const record = validateWoodlandCaveFinaleReservationD13D_A(records2[site.siteId], site);
-    if (record.version === SITE_FINALE_RESERVATION_D13D_B) {
-      bound.push(site.siteId);
-      validateDeployment(state, site, record);
-    } else if (record.version === SITE_FINALE_RESERVATION_D13D_E) {
-      bound.push(site.siteId);
-      validateStandardDeploymentD13D_D(state, site, record);
-    } else if (record.version === SITE_FINALE_RESERVATION_D13D_G) {
-      bound.push(site.siteId);
-      validateLargeDeploymentD13D_F(state, site, record);
+    if (placeSetAsideV1(site.siteId)) {
+      if (state.campaign.siteFinaleDeploymentsById?.[site.siteId]) bound.push(site.siteId);
+      continue;
     }
+    inPlaceV1(site.siteId, () => {
+      const record = validateWoodlandCaveFinaleReservationD13D_A(records2[site.siteId], site);
+      if (record.version === SITE_FINALE_RESERVATION_D13D_B) {
+        bound.push(site.siteId);
+        validateDeployment(state, site, record);
+      } else if (record.version === SITE_FINALE_RESERVATION_D13D_E) {
+        bound.push(site.siteId);
+        validateStandardDeploymentD13D_D(state, site, record);
+      } else if (record.version === SITE_FINALE_RESERVATION_D13D_G) {
+        bound.push(site.siteId);
+        validateLargeDeploymentD13D_F(state, site, record);
+      }
+    });
   }
   requireContract(same13(Object.keys(state.campaign.siteFinaleDeploymentsById ?? {}).sort(), bound.sort()), "Cave finale deployment inventory drift");
   return true;
@@ -22545,43 +22600,45 @@ function validateBossCombatD12_5A(state) {
   if (root2 === void 0) return;
   closedRecord(root2, ["version", "bossesByEntityId", "summonsByEntityId", "hazardsById", "statusesByEntityId"]);
   requireContract(root2.version === BOSS_COMBAT_D12_5A_VERSION, "Unsupported boss combat state");
-  for (const [entityId, boss] of Object.entries(root2.bossesByEntityId)) {
-    if (recoveredBossRecord(boss)) {
-      validateRecoveredBossV1(state, entityId, boss);
-      continue;
+  for (const [entityId, boss] of Object.entries(root2.bossesByEntityId)) inPlaceV1(boss?.siteId ?? state.groupsById[boss?.groupId]?.siteId ?? boss?.groupId, () => {
+    for (const _once of [0]) {
+      if (recoveredBossRecord(boss)) {
+        validateRecoveredBossV1(state, entityId, boss);
+        continue;
+      }
+      if (boss.bossDefinitionId === BRIMSTONE_ID) {
+        validateBrimstoneColossus(state, entityId, boss);
+        continue;
+      }
+      if (boss.bossDefinitionId === AEGIS_GOLIATH_ID) {
+        validateAegisGoliath(state, entityId, boss);
+        continue;
+      }
+      closedRecord(boss, ["version", "bossId", "bossDefinitionId", "entityId", "groupId", "siteId", "floorId", "roomId", "homePosition", "phase", "phase2Triggered", "actionState", "activeAbility", "targetEntityId", "targetPosition", "telegraphStartedTick", "resolvesTick", "nextActionTick", "abilitySequence", "selectionSeed", "shieldActive", "shieldStartedTick", "shieldBrokenTick", "summonEntityIds", "lastAction", "activatedTick"]);
+      const actor = state.entitiesById[entityId], group = state.groupsById[boss.groupId];
+      requireContract(boss.version === BOSS_RECORD_D12_5A_VERSION && /^boss:[a-f0-9]{32}$/.test(boss.bossId) && boss.bossDefinitionId === ARACHNID_TREANT_BOSS_ID && boss.entityId === entityId && actor?.team === "hostile" && state.content.definitionsById[actor.contentDefinitionId]?.isBoss === true && group?.entityIds.includes(entityId) && group.siteId === boss.siteId && validPoint(boss.homePosition), "Invalid Arachnid Treant identity");
+      requireContract((boss.phase === 1 || boss.phase === 2) && boss.phase2Triggered === (boss.phase === 2) && ["idle", "telegraphing", "bark_shield", "defeated"].includes(boss.actionState), "Invalid Arachnid Treant phase");
+      requireContract(boss.activeAbility === null || ["slam", "root_snare"].includes(boss.activeAbility), "Invalid Arachnid Treant ability");
+      safeInteger(boss.activatedTick, 0, state.tick);
+      safeInteger(boss.nextActionTick, 0, state.tick + ARACHNID_TREANT_D12_5A.abilityRecoveryTicks + ARACHNID_TREANT_D12_5A.telegraphTicks);
+      safeInteger(boss.abilitySequence, 0);
+      safeInteger(boss.selectionSeed, 0, 4294967295);
+      requireContract(boss.summonEntityIds.length === 3 && new Set(boss.summonEntityIds).size === 3 && boss.summonEntityIds.every((id) => root2.summonsByEntityId[id]?.bossId === boss.bossId), "Invalid Arachnid Treant summons");
+      if (boss.actionState === "telegraphing") {
+        requireContract(boss.activeAbility && boss.targetEntityId && validPoint(boss.targetPosition), "Missing boss telegraph target");
+        safeInteger(boss.telegraphStartedTick, 0, state.tick);
+        safeInteger(boss.resolvesTick, boss.telegraphStartedTick + ARACHNID_TREANT_D12_5A.telegraphTicks, boss.telegraphStartedTick + ARACHNID_TREANT_D12_5A.telegraphTicks);
+      } else requireContract(boss.activeAbility === null && boss.targetPosition === null && boss.telegraphStartedTick === null && boss.resolvesTick === null, "Stale boss telegraph");
+      if (boss.lastAction !== null) {
+        closedRecord(boss.lastAction, ["ability", "resolvedTick", "targetPosition", "hitEntityIds"]);
+        requireContract(["strike", "slam", "root_snare"].includes(boss.lastAction.ability) && validPoint(boss.lastAction.targetPosition) && Array.isArray(boss.lastAction.hitEntityIds) && new Set(boss.lastAction.hitEntityIds).size === boss.lastAction.hitEntityIds.length && boss.lastAction.hitEntityIds.every((id) => state.entitiesById[id]?.team === "party"), "Invalid boss action provenance");
+        safeInteger(boss.lastAction.resolvedTick, boss.activatedTick, state.tick);
+      }
+      if (boss.shieldActive) requireContract(boss.phase === 2 && boss.actionState === "bark_shield" && boss.summonEntityIds.some((id) => state.entitiesById[id]?.alive), "Invalid Bark Shield");
+      if (boss.shieldStartedTick !== null) safeInteger(boss.shieldStartedTick, boss.activatedTick, state.tick);
+      if (boss.shieldBrokenTick !== null) safeInteger(boss.shieldBrokenTick, boss.shieldStartedTick ?? 0, state.tick);
     }
-    if (boss.bossDefinitionId === BRIMSTONE_ID) {
-      validateBrimstoneColossus(state, entityId, boss);
-      continue;
-    }
-    if (boss.bossDefinitionId === AEGIS_GOLIATH_ID) {
-      validateAegisGoliath(state, entityId, boss);
-      continue;
-    }
-    closedRecord(boss, ["version", "bossId", "bossDefinitionId", "entityId", "groupId", "siteId", "floorId", "roomId", "homePosition", "phase", "phase2Triggered", "actionState", "activeAbility", "targetEntityId", "targetPosition", "telegraphStartedTick", "resolvesTick", "nextActionTick", "abilitySequence", "selectionSeed", "shieldActive", "shieldStartedTick", "shieldBrokenTick", "summonEntityIds", "lastAction", "activatedTick"]);
-    const actor = state.entitiesById[entityId], group = state.groupsById[boss.groupId];
-    requireContract(boss.version === BOSS_RECORD_D12_5A_VERSION && /^boss:[a-f0-9]{32}$/.test(boss.bossId) && boss.bossDefinitionId === ARACHNID_TREANT_BOSS_ID && boss.entityId === entityId && actor?.team === "hostile" && state.content.definitionsById[actor.contentDefinitionId]?.isBoss === true && group?.entityIds.includes(entityId) && group.siteId === boss.siteId && validPoint(boss.homePosition), "Invalid Arachnid Treant identity");
-    requireContract((boss.phase === 1 || boss.phase === 2) && boss.phase2Triggered === (boss.phase === 2) && ["idle", "telegraphing", "bark_shield", "defeated"].includes(boss.actionState), "Invalid Arachnid Treant phase");
-    requireContract(boss.activeAbility === null || ["slam", "root_snare"].includes(boss.activeAbility), "Invalid Arachnid Treant ability");
-    safeInteger(boss.activatedTick, 0, state.tick);
-    safeInteger(boss.nextActionTick, 0, state.tick + ARACHNID_TREANT_D12_5A.abilityRecoveryTicks + ARACHNID_TREANT_D12_5A.telegraphTicks);
-    safeInteger(boss.abilitySequence, 0);
-    safeInteger(boss.selectionSeed, 0, 4294967295);
-    requireContract(boss.summonEntityIds.length === 3 && new Set(boss.summonEntityIds).size === 3 && boss.summonEntityIds.every((id) => root2.summonsByEntityId[id]?.bossId === boss.bossId), "Invalid Arachnid Treant summons");
-    if (boss.actionState === "telegraphing") {
-      requireContract(boss.activeAbility && boss.targetEntityId && validPoint(boss.targetPosition), "Missing boss telegraph target");
-      safeInteger(boss.telegraphStartedTick, 0, state.tick);
-      safeInteger(boss.resolvesTick, boss.telegraphStartedTick + ARACHNID_TREANT_D12_5A.telegraphTicks, boss.telegraphStartedTick + ARACHNID_TREANT_D12_5A.telegraphTicks);
-    } else requireContract(boss.activeAbility === null && boss.targetPosition === null && boss.telegraphStartedTick === null && boss.resolvesTick === null, "Stale boss telegraph");
-    if (boss.lastAction !== null) {
-      closedRecord(boss.lastAction, ["ability", "resolvedTick", "targetPosition", "hitEntityIds"]);
-      requireContract(["strike", "slam", "root_snare"].includes(boss.lastAction.ability) && validPoint(boss.lastAction.targetPosition) && Array.isArray(boss.lastAction.hitEntityIds) && new Set(boss.lastAction.hitEntityIds).size === boss.lastAction.hitEntityIds.length && boss.lastAction.hitEntityIds.every((id) => state.entitiesById[id]?.team === "party"), "Invalid boss action provenance");
-      safeInteger(boss.lastAction.resolvedTick, boss.activatedTick, state.tick);
-    }
-    if (boss.shieldActive) requireContract(boss.phase === 2 && boss.actionState === "bark_shield" && boss.summonEntityIds.some((id) => state.entitiesById[id]?.alive), "Invalid Bark Shield");
-    if (boss.shieldStartedTick !== null) safeInteger(boss.shieldStartedTick, boss.activatedTick, state.tick);
-    if (boss.shieldBrokenTick !== null) safeInteger(boss.shieldBrokenTick, boss.shieldStartedTick ?? 0, state.tick);
-  }
+  });
   for (const [entityId, summon] of Object.entries(root2.summonsByEntityId)) {
     if (summon.version === RECOVERED_SUMMON_VERSION) {
       const owner = Object.values(root2.bossesByEntityId).find((b) => b.bossId === summon.bossId);
@@ -25080,7 +25137,7 @@ function validateSiteRunEpisodesD13B(state) {
   closedRecord(records2, [], Object.keys(records2));
   const expected = implementedSiteIds(state);
   requireContract(expected.length <= 4096 && same18(Object.keys(records2).sort(), expected), "Site episode inventory mismatch");
-  for (const siteId2 of expected) {
+  for (const siteId2 of expected) inPlaceV1(siteId2, () => {
     const record = records2[siteId2];
     closedRecord(record, ["version", "siteId", "episode", "episodeSeed", "status", "effectiveLevel", "startedTick", "clearedTick", "vacantSinceTick", "activeSigilModifierRef", "historyArchive", "completionHistory", "lastReset"]);
     requireContract(record.version === SITE_RUN_EPISODE_D13B && record.siteId === siteId2 && Number.isSafeInteger(record.episode) && record.episode >= 1 && (record.episode === 1 || siteSupportsResetD13C(state, siteId2) && record.lastReset?.toEpisode === record.episode), "Invalid site episode identity");
@@ -25111,7 +25168,7 @@ function validateSiteRunEpisodesD13B(state) {
     const permanent = state.campaign.sitesById?.[siteId2]?.conqueredTick ?? state.d9World?.functionalSitesById?.[siteId2]?.conqueredTick ?? null;
     requireContract(permanent !== null === (record.episode > 1 || record.status === "cleared"), "Permanent site-clear history drift");
     if (siteOccupantsD13C(state, siteId2).length && record.status !== "unstarted") requireContract(record.startedTick !== null && record.vacantSinceTick === null, "Occupied site episode marked vacant");
-  }
+  });
   return true;
 }
 var siteClearIsSavedV1 = (record, lastSavedTick) => Boolean(record && record.status === "cleared" && record.clearedTick !== null && record.clearedTick !== void 0 && Number(lastSavedTick) >= Number(record.clearedTick));
@@ -25389,14 +25446,17 @@ function admitFunctionalSiteD9(state, plan) {
   return state.d9World.functionalSitesById[plan.functionalSite.siteId];
 }
 function validateFunctionalSiteStateD9(state) {
-  for (const s of Object.values(state.d9World?.functionalSitesById ?? {})) {
+  for (const s of Object.values(state.d9World?.functionalSitesById ?? {})) inPlaceV1(s.siteId, () => {
     const multi = s.floors?.[0]?.version === MULTIROOM_VERSION;
     if (multi) {
       requireContract(usesMultiroom(state.d9World.plannedWorld), "Uncommitted multiroom authority");
       for (const f3 of s.floors) requireContract((f3.encounter.combatVersion ?? null) === (hasWorldCombat(state) ? WORLD_COMBAT_VERSION : null), "Uncommitted combat roster");
     }
-  }
-  for (const f3 of functionalSitesD10(state)) {
+  });
+  for (const site of functionalSitesD10(state)) inPlaceV1(site.siteId, () => validateOneFunctionalSiteD9(state, site));
+}
+function validateOneFunctionalSiteD9(state, site) {
+  for (const f3 of [site]) {
     validateFunctionalSiteD9(f3);
     if (isGeneratedInteriorFamily(f3)) {
       if (isCryptFamily(f3)) validateCryptRuntime(state, f3);
@@ -27086,7 +27146,8 @@ function validateCharacterState(value) {
 }
 function validateCampaignState(value) {
   validateWire(value);
-  closedRecord(value, ["campaignId", "saveRevision", "seed", "contentFingerprint", "charactersById", "checkpointId"], ["geography", "encounterProof", "overworld", "sitesById", "forgeStations", "siteRunEpisodesById", "siteFinaleReservationsById", "siteFinaleDeploymentsById", "areaBossesByBiome", "partyClearsById"]);
+  closedRecord(value, ["campaignId", "saveRevision", "seed", "contentFingerprint", "charactersById", "checkpointId"], ["geography", "encounterProof", "overworld", "sitesById", "forgeStations", "siteRunEpisodesById", "siteFinaleReservationsById", "siteFinaleDeploymentsById", "areaBossesByBiome", "partyClearsById", "setAsideSitesV1"]);
+  validateSetAsideSitesV1(value.setAsideSitesV1);
   if (value.sitesById !== void 0) {
     closedRecord(value.sitesById, [], Object.keys(value.sitesById));
     requireContract(Object.keys(value.sitesById).length === 1, "Site state budget");
@@ -32541,6 +32602,10 @@ export {
   __export,
   WORLD_COMBAT_CONTRACT_VERSION,
   requireContract,
+  SET_ASIDE_SITES_MAX_V1,
+  setAsideIdsV1,
+  withSetAsideSitesV1,
+  inPlaceV1,
   validateWire,
   closedRecord,
   safeInteger,
