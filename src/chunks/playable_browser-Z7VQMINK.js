@@ -145354,6 +145354,141 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
   });
 }
 
+// src/storage/old_saves_v1.js
+var TEST_PREFIX = "saq-test-site:";
+var SLOT = /^(saq-hero-(\d+):|saq-party-(\d+):)?(saq-world-.+)$/;
+var OLD_SAVES_RECORD_V1 = "saq-old-saves-v1";
+function readSaveNameV1(name, { channel: channel2, keep: keep8 }) {
+  if (typeof name !== "string" || !name.startsWith(channel2)) return null;
+  const rest2 = name.slice(channel2.length);
+  if (!channel2 && rest2.startsWith(TEST_PREFIX)) return null;
+  const m = SLOT.exec(rest2);
+  if (!m) return null;
+  const slot = m[2] ? "Hero " + m[2] : m[3] ? "Party " + m[3] : "Hero 1";
+  return { name, slot, base: m[4], current: keep8.has(m[4]) };
+}
+async function listSavesV1({ indexedDB, channel: channel2, keep: keep8 }) {
+  if (typeof indexedDB?.databases !== "function") return null;
+  const out7 = [];
+  for (const d of await indexedDB.databases()) {
+    const r = readSaveNameV1(d?.name, { channel: channel2, keep: keep8 });
+    if (r) out7.push(r);
+  }
+  return out7;
+}
+var bytesOf = (v) => {
+  if (v == null) return 0;
+  if (typeof v === "string") return v.length;
+  if (ArrayBuffer.isView(v) || v instanceof ArrayBuffer) return v.byteLength;
+  if (typeof v !== "object") return 8;
+  let n = 0;
+  for (const k in v) n += k.length + bytesOf(v[k]);
+  return n;
+};
+function measureSaveV1(indexedDB, name) {
+  return new Promise((resolve) => {
+    let req;
+    try {
+      req = indexedDB.open(name);
+    } catch {
+      resolve(null);
+      return;
+    }
+    req.onupgradeneeded = () => req.transaction?.abort();
+    req.onerror = () => resolve(null);
+    req.onblocked = () => resolve(null);
+    req.onsuccess = () => {
+      const db = req.result, stores = [...db.objectStoreNames];
+      if (!stores.length) {
+        db.close();
+        resolve(0);
+        return;
+      }
+      let total = 0;
+      const tx = db.transaction(stores, "readonly");
+      for (const s of stores) {
+        const c = tx.objectStore(s).openCursor();
+        c.onsuccess = () => {
+          const cur = c.result;
+          if (!cur) return;
+          total += bytesOf(cur.key) + bytesOf(cur.value);
+          cur.continue();
+        };
+      }
+      tx.oncomplete = () => {
+        db.close();
+        resolve(total);
+      };
+      tx.onabort = tx.onerror = () => {
+        db.close();
+        resolve(null);
+      };
+    };
+  });
+}
+var deleteOne = (indexedDB, name) => new Promise((resolve) => {
+  let req;
+  try {
+    req = indexedDB.deleteDatabase(name);
+  } catch {
+    resolve(false);
+    return;
+  }
+  req.onsuccess = () => resolve(true);
+  req.onerror = () => resolve(false);
+  req.onblocked = () => {
+  };
+});
+var usedMb = async (env) => {
+  try {
+    const e = await env.navigator?.storage?.estimate?.();
+    return Number.isFinite(e?.usage) ? Math.round(e.usage / 1048576) : null;
+  } catch {
+    return null;
+  }
+};
+async function deleteOldSavesV1({ environment, indexedDB = environment.indexedDB, channel: channel2, keep: keep8, storage }) {
+  const list = await listSavesV1({ indexedDB, channel: channel2, keep: keep8 });
+  if (!list) return null;
+  const old2 = list.filter((r) => !r.current);
+  if (!old2.length) return { deleted: [], failed: [] };
+  const beforeMb = await usedMb(environment), deleted = [], failed = [];
+  for (const r of old2) (await deleteOne(indexedDB, r.name) ? deleted : failed).push(r.name);
+  const result = { at: Date.now(), deleted, failed, beforeMb, afterMb: await usedMb(environment) };
+  try {
+    const prior = JSON.parse(storage?.getItem(channel2 + OLD_SAVES_RECORD_V1) ?? "null");
+    storage?.setItem(
+      channel2 + OLD_SAVES_RECORD_V1,
+      JSON.stringify({
+        ...result,
+        total: (prior?.total ?? 0) + deleted.length,
+        firstBeforeMb: prior?.firstBeforeMb ?? beforeMb
+      })
+    );
+  } catch {
+  }
+  return result;
+}
+var LABEL = { "saq-world-built-worlds-v1": "New-world maps" };
+async function savedDataV1({ environment, indexedDB = environment.indexedDB, channel: channel2, keep: keep8, storage }) {
+  const list = await listSavesV1({ indexedDB, channel: channel2, keep: keep8 }) ?? [];
+  const saves = [];
+  for (const r of list) {
+    const bytes = await measureSaveV1(indexedDB, r.name);
+    saves.push({
+      label: r.slot + " \xB7 " + (LABEL[r.base] ?? (r.current ? "Save" : "Old save")),
+      mb: bytes == null ? null : bytes / 1048576,
+      current: r.current
+    });
+  }
+  let cleanup = null;
+  try {
+    cleanup = JSON.parse(storage?.getItem(channel2 + OLD_SAVES_RECORD_V1) ?? "null");
+  } catch {
+  }
+  return { siteMb: await usedMb(environment), saves, cleanup };
+}
+
 // src/shared/content/world_seed_v1.js
 var WORLD_SEED_MAX_LENGTH = 32;
 var NUMBER = /^-?\d{1,16}$/;
@@ -253665,6 +253800,7 @@ var CSS9 = `
 .st-line{display:flex;align-items:center;gap:12px;min-height:32px;font-weight:600;font-size:14px}
 .st-line>.st-name{flex:1;min-width:0}.st-line>.st-name.fixed{flex:0 0 108px}
 .st-line small{display:block;font-weight:500;font-size:11px;color:#9aa6a9;margin-top:1px}
+.st-data{display:flex;flex-direction:column;gap:3px;padding:0 0 4px}.st-data-row{display:flex;justify-content:space-between;gap:12px;font-size:12px;font-weight:500;color:#c9c0ab}.st-data-row b{color:#e9dfc8;font-weight:700}.st-data-row.note{color:#9aa6a9}
 .st input[type=range]{flex:1;min-width:0;height:24px;margin:0;background:none;-webkit-appearance:none;appearance:none;--v:50%;cursor:pointer}
 .st input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:4px;background:linear-gradient(90deg,#c9a24a,#f0c862) 0/var(--v) 100% no-repeat,#0b1015;box-shadow:inset 0 0 0 1px #2e3d48}
 .st input[type=range]::-moz-range-track{height:8px;border-radius:4px;background:linear-gradient(90deg,#c9a24a,#f0c862) 0/var(--v) 100% no-repeat,#0b1015;box-shadow:inset 0 0 0 1px #2e3d48}
@@ -253978,6 +254114,35 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   const lastActs = el3("div", "st-acts");
   lastActs.append(btn("Download", "ghost", () => byId("world-last-session-download")?.click()));
   const lastLine = line45(lastName, lastActs);
+  const dataNote = el3("small", null, "Saves on this device"), dataName = name("Saved data");
+  dataName.append(dataNote);
+  const dataList = el3("div", "st-data");
+  dataList.hidden = true;
+  const sizeText = (mb) => mb == null ? "?" : mb >= 1024 ? (mb / 1024).toFixed(1) + " GB" : mb >= 10 ? Math.round(mb) + " MB" : mb.toFixed(1) + " MB";
+  const dataRow = (left2, right, cls) => {
+    const r = el3("div", "st-data-row" + (cls ? " " + cls : ""));
+    r.append(el3("span", null, left2));
+    if (right) r.append(el3("b", null, right));
+    return r;
+  };
+  const dataBtn = btn("See", "ghost", async () => {
+    const api = env.__SAQ_SAVED_DATA_V1__;
+    if (!api) return;
+    dataBtn.disabled = true;
+    dataNote.textContent = "Reading\u2026";
+    try {
+      const d = await api.read();
+      dataList.replaceChildren(...d.saves.map((r) => dataRow(r.label, sizeText(r.mb))));
+      if (!d.saves.length) dataList.append(dataRow("No saves found"));
+      if (d.cleanup?.total) dataList.append(dataRow("Old saves deleted: " + d.cleanup.total, null, "note"));
+      dataList.hidden = false;
+      dataNote.textContent = (d.siteMb == null ? "" : sizeText(d.siteMb) + " on this site \xB7 ") + d.saves.length + (d.saves.length === 1 ? " save" : " saves");
+    } catch {
+      dataNote.textContent = "Could not read the saves";
+    }
+    dataBtn.disabled = false;
+  });
+  const dataLine = line45(dataName, dataBtn);
   const potionActs = el3("div", "st-acts");
   potionActs.append(
     btn("Move", "", () => doc.dispatchEvent(new Event(POTION_MOVE_EVENT))),
@@ -253991,7 +254156,9 @@ function createSettingsPageV1({ document: doc, environment: env }) {
     line45(saveName, saveBtn),
     line45(campName, campActs),
     perfLine,
-    lastLine
+    lastLine,
+    dataLine,
+    dataList
   );
   root6.append(
     section(
@@ -254046,6 +254213,8 @@ function createSettingsPageV1({ document: doc, environment: env }) {
       perfToggle.textContent = rec ? "Stop" : "Start";
       perfNote.textContent = rec ? "Recording now" : "Paused";
     }
+    dataLine.hidden = !env.__SAQ_SAVED_DATA_V1__;
+    if (dataLine.hidden) dataList.hidden = true;
     updateLine.hidden = !byId("world-update-now");
     worldLine.hidden = !byId("world-refresh");
     saveBtn.hidden = !byId("world-save-campaign");
@@ -343700,7 +343869,7 @@ var WORLD_MAKER_VERSION = "world-maker-v1.23";
 
 // src/client/dev_tools_v1.js
 var DEV_LEVEL_MAX = MAX_PLAYER_LEVEL;
-var SLOT = {
+var SLOT2 = {
   weapon: "weapon",
   subweapon: "subweapon",
   cape: "cape",
@@ -343753,7 +343922,7 @@ function devGiveUniqueV1(passport, id2, { stars: stars2 = 4, equip = true, level
     })
   );
   if (equip) {
-    let slot = SLOT[u.family];
+    let slot = SLOT2[u.family];
     if (slot === "ring1" && next.equipped.ring1 != null && next.equipped.ring2 == null) slot = "ring2";
     if (slot) next.equipped[slot] = key4;
   }
@@ -343765,7 +343934,7 @@ function devGiveGearSetV1(passport, { tier: tier2 = 4, level = null } = {}) {
   if (!Number.isInteger(tier2) || tier2 < 0 || tier2 > 5) throw Error("Tier must be 0 to 5");
   const next = copy3(passport), at10 = level ?? Math.max(1, Number(next.progression.level) || 1), used = new Set(next.items.map((i) => i.key));
   let n = 0;
-  for (const [family, slot] of [...Object.entries(SLOT), ["ring", "ring2"]]) {
+  for (const [family, slot] of [...Object.entries(SLOT2), ["ring", "ring2"]]) {
     while (used.has("gear:" + n)) n++;
     const key4 = "gear:" + n;
     used.add(key4);
@@ -349266,6 +349435,18 @@ async function startWorldClient(environment) {
           }
         }, 6e3);
     }
+  }
+  if (databaseName === RESHAPE_DATABASE && environment.indexedDB) {
+    const savedData = {
+      environment,
+      indexedDB: environment.indexedDB,
+      channel: channel2,
+      keep: /* @__PURE__ */ new Set([RESHAPE_DATABASE, BUILT_WORLD_DATABASE]),
+      storage: deviceStorage
+    };
+    environment.setTimeout(() => deleteOldSavesV1(savedData).catch(() => {
+    }), 2e4);
+    environment.__SAQ_SAVED_DATA_V1__ = Object.freeze({ read: () => savedDataV1(savedData) });
   }
   const fatalDownload = environment.document.getElementById("world-gate-download");
   if (fatalDownload) fatalDownload.onclick = () => diagnosticDownload.download("fatal");
