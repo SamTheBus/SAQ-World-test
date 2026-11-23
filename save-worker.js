@@ -47289,7 +47289,7 @@ function validateWorldPagingD9(paging) {
   }
   for (const [id2, g] of Object.entries(paging.originsByGroup)) {
     closedRecord(g, ["groupId", "episode", "rank", "chunkX", "chunkY", "anchorOrdinal", "entityIds"], ["combatHash"]);
-    const site = functionalSiteDefinitionForGroupD10(id2), generated = /^site:site:[a-f0-9]{32}:cave-floor-[0-4]$/.test(id2), floor4 = /-floor-4(?::episode-[1-9][0-9]*)?$/.test(id2), fortFloor = fortGroupFloorIndexV1(id2), ruin = cryptGroupInfoV2(id2) ?? ruinGroupInfoV2(id2), count2 = ruin ? ruin.count : fortFloor !== null ? 3 : site?.template.encounter.members.length ?? (generated ? null : 2);
+    const site = functionalSiteDefinitionForGroupD10(id2), generated = /^site:site:[a-f0-9]{32}:cave-floor-[0-4](?::episode-[1-9][0-9]*)?$/.test(id2), floor4 = /-floor-4(?::episode-[1-9][0-9]*)?$/.test(id2), fortFloor = fortGroupFloorIndexV1(id2), ruin = cryptGroupInfoV2(id2) ?? ruinGroupInfoV2(id2), count2 = ruin ? ruin.count : fortFloor !== null ? 3 : site?.template.encounter.members.length ?? (generated ? null : 2);
     requireContract(
       g.groupId === id2 && ["C", "B", "A", "S"].includes(g.rank) && (g.combatHash === WORLD_COMBAT_HASH ? g.entityIds.length >= 1 && g.entityIds.length <= 48 : count2 === null ? g.entityIds.length >= 1 && g.entityIds.length <= 5 : g.entityIds.length === count2),
       "Cold origin identity"
@@ -63766,7 +63766,7 @@ function validateOwnedGearPageD9(row2) {
     "Owned gear disposition fields"
   );
   if (row2.sourceGeography) {
-    const g = row2.sourceGeography, site = functionalSiteDefinitionForGroupD10(row2.origin.groupId), generated = /^site:site:[a-f0-9]{32}:cave-floor-[0-4]$/.test(row2.origin.groupId), floor4 = /-floor-4(?::episode-[1-9][0-9]*)?$/.test(row2.origin.groupId), fortFloor = fortGroupFloorIndexV1(row2.origin.groupId), ruin = cryptGroupInfoV2(row2.origin.groupId) ?? ruinGroupInfoV2(row2.origin.groupId), count2 = ruin ? ruin.count : fortFloor !== null ? 3 : site?.template.encounter.members.length ?? (generated ? null : 2);
+    const g = row2.sourceGeography, site = functionalSiteDefinitionForGroupD10(row2.origin.groupId), generated = /^site:site:[a-f0-9]{32}:cave-floor-[0-4](?::episode-[1-9][0-9]*)?$/.test(row2.origin.groupId), floor4 = /-floor-4(?::episode-[1-9][0-9]*)?$/.test(row2.origin.groupId), fortFloor = fortGroupFloorIndexV1(row2.origin.groupId), ruin = cryptGroupInfoV2(row2.origin.groupId) ?? ruinGroupInfoV2(row2.origin.groupId), count2 = ruin ? ruin.count : fortFloor !== null ? 3 : site?.template.encounter.members.length ?? (generated ? null : 2);
     closedRecord(g, ["chunkX", "chunkY", "anchorOrdinal", "rank", "entityIds"], ["combatHash"]);
     validateWorldPosition({ chunkX: g.chunkX, chunkY: g.chunkY, localX: 0, localY: 0 });
     if (!acceptedEventGearGeographyV2(row2.origin.groupId, g))

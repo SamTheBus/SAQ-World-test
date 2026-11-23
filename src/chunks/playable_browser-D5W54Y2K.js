@@ -1171,7 +1171,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-2LEQ73VZ.js";
+} from "./chunk-X7C6GMGJ.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -339530,7 +339530,7 @@ function validateOwnedGearPageD9(row2) {
     "Owned gear disposition fields"
   );
   if (row2.sourceGeography) {
-    const g2 = row2.sourceGeography, site = functionalSiteDefinitionForGroupD10(row2.origin.groupId), generated = /^site:site:[a-f0-9]{32}:cave-floor-[0-4]$/.test(row2.origin.groupId), floor4 = /-floor-4(?::episode-[1-9][0-9]*)?$/.test(row2.origin.groupId), fortFloor = fortGroupFloorIndexV1(row2.origin.groupId), ruin = cryptGroupInfoV2(row2.origin.groupId) ?? ruinGroupInfoV2(row2.origin.groupId), count2 = ruin ? ruin.count : fortFloor !== null ? 3 : site?.template.encounter.members.length ?? (generated ? null : 2);
+    const g2 = row2.sourceGeography, site = functionalSiteDefinitionForGroupD10(row2.origin.groupId), generated = /^site:site:[a-f0-9]{32}:cave-floor-[0-4](?::episode-[1-9][0-9]*)?$/.test(row2.origin.groupId), floor4 = /-floor-4(?::episode-[1-9][0-9]*)?$/.test(row2.origin.groupId), fortFloor = fortGroupFloorIndexV1(row2.origin.groupId), ruin = cryptGroupInfoV2(row2.origin.groupId) ?? ruinGroupInfoV2(row2.origin.groupId), count2 = ruin ? ruin.count : fortFloor !== null ? 3 : site?.template.encounter.members.length ?? (generated ? null : 2);
     closedRecord(g2, ["chunkX", "chunkY", "anchorOrdinal", "rank", "entityIds"], ["combatHash"]);
     validateWorldPosition({ chunkX: g2.chunkX, chunkY: g2.chunkY, localX: 0, localY: 0 });
     if (!acceptedEventGearGeographyV2(row2.origin.groupId, g2))
