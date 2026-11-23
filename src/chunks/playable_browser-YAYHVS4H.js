@@ -106110,10 +106110,15 @@ function createCrispGrassV1(doc, stamp8, clock9 = () => 0) {
   }
   const kept2 = patches.filter((p) => p.sprite);
   const mix47 = (a, b, t) => a.map((v, k) => Math.round(v + (b[k] - v) * t)), hex6 = (col2) => [1, 3, 5].map((i) => parseInt(col2.slice(i, i + 2), 16)), same12 = (a, i, c) => a[i] === c[0] && a[i + 1] === c[1] && a[i + 2] === c[2];
-  const tints = createIdleSpritesV1();
+  const tints = /* @__PURE__ */ new Map();
   function tinted(p, col2, base3) {
-    const key4 = col2 + base3 + "|" + p.id;
-    let t = tints.get(key4);
+    const key4 = col2 + base3;
+    let m = tints.get(key4);
+    if (!m) {
+      m = /* @__PURE__ */ new Map();
+      tints.set(key4, m);
+    }
+    let t = m.get(p.id);
     if (!t) {
       const L = hex6(col2), B9 = hex6(base3), TIP2 = [196, 226, 112], map = [
         [LIGHT, L],
@@ -106137,7 +106142,7 @@ function createCrispGrassV1(doc, stamp8, clock9 = () => 0) {
           }
       }
       g2.putImageData(im, 0, 0);
-      tints.set(key4, t);
+      m.set(p.id, t);
       stats3.tintPixels += t.width * t.height;
     }
     return t;
