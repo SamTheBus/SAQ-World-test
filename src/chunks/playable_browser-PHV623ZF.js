@@ -323118,6 +323118,7 @@ function createEnvironmentCache(canvas, {
   function releaseRaster(raster) {
     if (!raster) return;
     poolUsedAt = performance.now();
+    if (rasterPool.includes(raster)) return;
     rasterPool.push(raster);
     while (rasterPool.length > RECENT) freeRaster(rasterPool.shift());
   }
@@ -323275,6 +323276,10 @@ function createEnvironmentCache(canvas, {
     const { space, x, y, id: id2, sig, scale } = task, at10 = performance.now();
     emit("buildStart", { id: id2, mode });
     let raster = rasterPool.pop();
+    if (raster) {
+      const used = inUse();
+      while (raster && used.has(raster)) raster = rasterPool.pop();
+    }
     if (!raster && pages2.size >= capacity) {
       const ids4 = [...pages2.keys()].filter((k) => k !== id2 && !visibleIds.has(k)), victim = farthest(ids4.filter((k) => !preloadIds.has(k) && !recentIds.has(k) && !nearIds.has(k))) ?? (mode === "sync" ? ids4.find((k) => !preloadIds.has(k)) ?? ids4[0] : void 0);
       if (victim !== void 0) {
@@ -323839,6 +323844,13 @@ function createEnvironmentCache(canvas, {
     schedule();
     return true;
   }
+  const inUse = () => {
+    const used = /* @__PURE__ */ new Set();
+    for (const e of pages2.values()) used.add(e.raster);
+    for (const e of fallbacks.values()) used.add(e.raster);
+    if (activeJob?.raster) used.add(activeJob.raster);
+    return used;
+  };
   onIdleSweepV1((t) => {
     for (const [id2, at10] of [...leftAt]) {
       if (visibleIds.has(id2) || !pages2.has(id2)) {
@@ -323846,14 +323858,20 @@ function createEnvironmentCache(canvas, {
         continue;
       }
       if (t - at10 < IDLE_SPRITE_MS || nearIds.has(id2) || preloadIds.has(id2)) continue;
-      freeRaster(pages2.get(id2).raster);
+      const raster = pages2.get(id2).raster;
       pages2.delete(id2);
       recentSeen.delete(id2);
       recentIds.delete(id2);
       leftAt.delete(id2);
+      if (!inUse().has(raster) && !rasterPool.includes(raster)) freeRaster(raster);
       idleFreed++;
     }
-    if (t - poolUsedAt >= IDLE_SPRITE_MS) while (rasterPool.length > 2) freeRaster(rasterPool.shift());
+    if (t - poolUsedAt >= IDLE_SPRITE_MS && rasterPool.length > 2) {
+      const used = inUse(), spare = [...new Set(rasterPool)].filter((r) => !used.has(r));
+      rasterPool.length = 0;
+      rasterPool.push(...spare.slice(-2));
+      for (const r of spare.slice(0, -2)) freeRaster(r);
+    }
   });
   return Object.freeze({
     draw,
@@ -339242,10 +339260,15 @@ var WORKER_PART_PATHS_V1 = Object.freeze({
   groups: ["d9World", "runtime", "groups"],
   resources: ["d9World", "runtime", "resources"],
   sites: ["d9World", "siteReservationsById"],
-  defs: ["content", "definitionsById"]
+  defs: ["content", "definitionsById"],
+  actors: ["entitiesById"],
+  packs: ["groupsById"],
+  spaces: ["spacesByInstanceId"]
 });
 var PART = "$workerPart";
 var WORKER_PART_LISTS_V1 = /* @__PURE__ */ new Set(["chunks", "groups", "resources"]);
+var WORKER_PART_MAPS_V1 = /* @__PURE__ */ new Set(["actors", "packs", "spaces"]);
+var ROOTS_EVERY = 64;
 var f64 = new Float64Array(1);
 var u32 = new Uint32Array(f64.buffer);
 function hashWireV1(value2) {
@@ -339303,9 +339326,17 @@ function withPath(o, path19, value2) {
   node[path19.at(-1)] = value2;
   return top;
 }
+function rootSizes(out7) {
+  const size = (v) => Math.round(JSON.stringify(v ?? null).length / 1024 * 10) / 10, list = [];
+  for (const [k, v] of Object.entries(out7))
+    if (k === "d9World" && v && typeof v === "object")
+      for (const [k2, v2] of Object.entries(v)) list.push(["d9World." + k2, size(v2)]);
+    else list.push([k, size(v)]);
+  return Object.fromEntries(list.sort((a, b) => b[1] - a[1]).slice(0, 12));
+}
 function createWorkerPartsV1() {
   const held = /* @__PURE__ */ new Map();
-  let staged = [], sentFull = 0, sentRef = 0, itemFull = 0, itemRef = 0, misses = 0;
+  let staged = [], sentFull = 0, sentRef = 0, itemFull = 0, itemRef = 0, misses = 0, copies = 0, roots3 = null;
   return Object.freeze({
     // Returns the object to stringify: each present part as a stand-in when the Worker holds it, else carried whole
     // with its fingerprint. The whole parts of the latest copy wait in staged until the bridge sends it.
@@ -339315,6 +339346,21 @@ function createWorkerPartsV1() {
       for (const [name, path19] of Object.entries(WORKER_PART_PATHS_V1)) {
         const value2 = getPath(top, path19);
         if (value2 === void 0 || value2 === null || typeof value2 !== "object") continue;
+        if (WORKER_PART_MAPS_V1.has(name) && !Array.isArray(value2)) {
+          const have = held.get(name) instanceof Set ? held.get(name) : /* @__PURE__ */ new Set(), hashes = [], entries = Object.entries(value2).map(([id2, item2]) => {
+            const h = hashWireV1(item2);
+            hashes.push(h);
+            if (have.has(h)) {
+              itemRef++;
+              return [id2, h];
+            }
+            itemFull++;
+            return [id2, h, item2];
+          });
+          out7 = withPath(out7, path19, { [PART]: name, entries });
+          staged.push([name, hashes]);
+          continue;
+        }
         if (WORKER_PART_LISTS_V1.has(name) && Array.isArray(value2)) {
           const have = held.get(name) instanceof Set ? held.get(name) : /* @__PURE__ */ new Set(), hashes = [], items3 = value2.map((item2) => {
             const h = hashWireV1(item2);
@@ -339340,6 +339386,7 @@ function createWorkerPartsV1() {
           sentFull++;
         }
       }
+      if (++copies % ROOTS_EVERY === 1) roots3 = rootSizes(out7);
       return out7;
     },
     // The bridge takes the latest copy's whole parts as it sends that copy, and confirms them on the answer.
@@ -339357,7 +339404,7 @@ function createWorkerPartsV1() {
       staged = [];
       if (miss) misses++;
     },
-    inspect: () => ({ held: held.size, sentFull, sentRef, itemFull, itemRef, misses })
+    inspect: () => ({ held: held.size, sentFull, sentRef, itemFull, itemRef, misses, roots: roots3 })
   });
 }
 
