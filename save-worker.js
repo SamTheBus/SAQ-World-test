@@ -15954,6 +15954,44 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "volcanic",
     "Hitting a burning enemy heals you for {0} of the damage.",
     "Still warm."
+  ),
+  // Woodland lesser bosses (Sammy 2026-11-22, set page DdkkMDJp..., passes approved): one any-class unique each, at a
+  // named elite's 10%. Rustmaw's roll after a long walk, Sporecrown's ring of toadstools, Gravewing's stone skin.
+  unique(
+    "rustshell",
+    "Rustshell",
+    "overall",
+    null,
+    "Carapace",
+    null,
+    "rustmaw",
+    "woodland",
+    "Walk for 2 s without stopping and you curl up into the shell and roll, 30% faster than walking. Each enemy you bump takes {0} of your Attack, once a roll; small ones are knocked aside and dizzy. Bumping an elite or boss, attacking or stopping pops you back out.",
+    "It never stops rolling. Neither should you."
+  ),
+  unique(
+    "fairy-ring",
+    "Fairy Ring",
+    "ring",
+    null,
+    "Band Ring",
+    null,
+    "sporecrown",
+    "woodland",
+    "Drinking a potion pops a ring of toadstools around you for 4 s. Enemies inside are slowed 40% and take {0} of your Attack as Poison every half second.",
+    "Step inside. Stay a while."
+  ),
+  unique(
+    "stonewing-cloak",
+    "Stonewing Cloak",
+    "cape",
+    null,
+    "Cloak",
+    null,
+    "gravewing",
+    "woodland",
+    "When a hit would drop you below 30% Health, you turn to stone instead: the hit does nothing and you take no damage for 2 s, then the stone bursts, hitting enemies near you for {0} of your Attack. Once every 60 s.",
+    "It sleeps on the crypt roof. It wakes for you."
   )
 ].map((u) => [u.id, u])));
 var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
@@ -16036,7 +16074,11 @@ var UNIQUE_TIERS = freezeWire({
   "mirewail-veil": { lines: ["moveSpeed", "critChance", "lifeKill", "defPct", "cdr"], stars: [480, 420, 360, 300], unit: "ticks" },
   "goldcarapace-band": { lines: ["defPct", "maxHpPct", "str", "lifeHit", "eliteDmg"], stars: [40, 50, 60, 75], unit: "pct" },
   "briarfang-thornmantle": { lines: ["maxHpPct", "defPct", "str", "atkPct", "lifeKill"], stars: [30, 40, 50, 65], unit: "pct" },
-  "emberjaw-fang": { lines: ["fireDmg", "atkPct", "critChance", "lifeHit", "maxHpPct"], stars: [20, 30, 40, 50], unit: "permille" }
+  "emberjaw-fang": { lines: ["fireDmg", "atkPct", "critChance", "lifeHit", "maxHpPct"], stars: [20, 30, 40, 50], unit: "permille" },
+  // Woodland lesser bosses (v3 lines below; these five are the v2 fallback).
+  "rustshell": { lines: ["maxHpPct", "defPct", "moveSpeed", "lifeKill", "atkPct"], stars: [120, 150, 180, 220], unit: "pct" },
+  "fairy-ring": { lines: ["atkPct", "lifeHit", "maxHpPct", "critChance", "cdr"], stars: [15, 20, 25, 32], unit: "pct" },
+  "stonewing-cloak": { lines: ["maxHpPct", "defPct", "lifeKill", "moveSpeed", "cdr"], stars: [200, 250, 300, 380], unit: "pct" }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
 var UNIQUE_LINES_V3 = freezeWire({
@@ -16128,7 +16170,10 @@ var UNIQUE_LINES_V3 = freezeWire({
   "mirewail-veil": { always: "moveSpeed", pool: ["critChance", "lifeKill", "defPct", "moveCdr", "fullDmg", "eliteDr"], leg: ["killCdr"] },
   "goldcarapace-band": { always: "eliteDr", pool: ["defPct", "maxHpPct", "str", "lifeHit", "eliteDmg", "fullDmg", "stunDr"], leg: [] },
   "briarfang-thornmantle": { always: "closeDmg", pool: ["maxHpPct", "defPct", "counterDmg", "eliteDr", "lifeKill", "areaDr", "hitCdr"], leg: [] },
-  "emberjaw-fang": { always: "ailingDmg", pool: ["fireDmg", "atkPct", "critChance", "lifeHit", "ailmentDur", "maxHpPct", "areaDmg"], leg: [] }
+  "emberjaw-fang": { always: "ailingDmg", pool: ["fireDmg", "atkPct", "critChance", "lifeHit", "ailmentDur", "maxHpPct", "areaDmg"], leg: [] },
+  "rustshell": { always: "moveSpeed", pool: ["maxHpPct", "defPct", "lifeKill", "eliteDr", "areaDr", "closeDmg", "mainAttr"], leg: [] },
+  "fairy-ring": { always: "potionHeal", pool: ["atkPct", "critChance", "lifeHit", "maxHpPct", "ailingDmg", "areaDmg", "cdr"], leg: [] },
+  "stonewing-cloak": { always: "eliteDr", pool: ["maxHpPct", "defPct", "lifeKill", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] }
 });
 var UNIQUE_SIGNATURE_LINE = 0;
 var rerollableUniqueV3 = (g) => g?.progression?.affixes === "affixes-v3" && Boolean(UNIQUE_LINES_V3[g?.definition?.unique]);
@@ -26058,6 +26103,7 @@ var BY_NOUN = Object.freeze({
   Treads: "boots",
   Exosuit: "plate",
   "Warden Plate": "plate",
+  Carapace: "plate",
   Vest: "leather",
   "Inquisitor Robes": "robe",
   "Full Plate Armor": "plate",
@@ -28130,6 +28176,11 @@ var HS_BACK = 18;
 var HS_SHOTS = 4;
 var MR_LIFE = 240;
 var MR_EVERY = 480;
+var RS_CURL = 120;
+var RS_POP = 26;
+var FR_LIFE = 240;
+var SW_LIFE = 150;
+var SW_EVERY = 3600;
 var SEAL_MAX = 7200;
 var SEAL_SHOW = 40;
 var FC_TICKS = 112;
@@ -28168,7 +28219,7 @@ var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
-var LIVE = ["mwWell", "rtLance", "hsOrb", "hsShots", "hsBack", "mrCd", "mrSheet", "mcCd", "mcSlam", "sfGlob", "sfPool", "fsPods", "bhCd", "bhN", "bhSheds", "bhTrail", "bhGulps", "seal", "sealBurst", "fcCage", "slShards", "msCd", "msHit", "lidBite", "stCoin", "blCoins", "titheCd", "tithe", "hfGlass", "shEcho", "clock", "tbCd", "turn", "pane", "ssCd", "mirrors", "splN", "splinters", "gvCd", "glass", "glassPop", "scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardUp", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["rsWalk", "rsRoll", "rsPop", "frRing", "swCd", "swStone", "mwWell", "rtLance", "hsOrb", "hsShots", "hsBack", "mrCd", "mrSheet", "mcCd", "mcSlam", "sfGlob", "sfPool", "fsPods", "bhCd", "bhN", "bhSheds", "bhTrail", "bhGulps", "seal", "sealBurst", "fcCage", "slShards", "msCd", "msHit", "lidBite", "stCoin", "blCoins", "titheCd", "tithe", "hfGlass", "shEcho", "clock", "tbCd", "turn", "pane", "ssCd", "mirrors", "splN", "splinters", "gvCd", "glass", "glassPop", "scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardUp", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 var ZIP_TICKS = 120;
 var PERF_READY_TICKS = 180;
 function prune(combat) {
@@ -28894,6 +28945,29 @@ function validateClassSkillState(s, combat, actor) {
       closedRecord(k.mrSheet, ["x", "y", "age"]);
       requireContract(pos2(k.mrSheet), "Invalid frozen sheet");
       safeInteger(k.mrSheet.age, 0, MR_LIFE - 1);
+    }
+    if (k.rsWalk !== void 0) safeInteger(k.rsWalk, 1, RS_CURL);
+    if (k.rsRoll !== void 0) {
+      closedRecord(k.rsRoll, ["age", "hit"]);
+      safeInteger(k.rsRoll.age, 0, 1e9);
+      requireContract(Array.isArray(k.rsRoll.hit) && k.rsRoll.hit.length <= 64 && k.rsRoll.hit.every((id3) => typeof id3 === "string"), "Invalid shell roll");
+    }
+    if (k.rsPop !== void 0) {
+      closedRecord(k.rsPop, ["x", "y", "age"]);
+      requireContract(pos2(k.rsPop), "Invalid shell pop");
+      safeInteger(k.rsPop.age, 0, RS_POP - 1);
+    }
+    if (k.frRing !== void 0) {
+      closedRecord(k.frRing, ["x", "y", "age", "at"]);
+      requireContract(pos2(k.frRing), "Invalid fairy ring");
+      safeInteger(k.frRing.age, 0, FR_LIFE - 1);
+      safeInteger(k.frRing.at, 0, 1e12);
+    }
+    if (k.swCd !== void 0) safeInteger(k.swCd, 1, SW_EVERY);
+    if (k.swStone !== void 0) {
+      closedRecord(k.swStone, ["x", "y", "age"]);
+      requireContract(pos2(k.swStone), "Invalid stone skin");
+      safeInteger(k.swStone.age, 0, SW_LIFE - 1);
     }
     if (k.bhGulps !== void 0) {
       requireContract(Array.isArray(k.bhGulps) && k.bhGulps.length >= 1 && k.bhGulps.length <= BH_MAX * 2, "Invalid gulps");

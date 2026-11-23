@@ -4638,6 +4638,44 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "volcanic",
     "Hitting a burning enemy heals you for {0} of the damage.",
     "Still warm."
+  ),
+  // Woodland lesser bosses (Sammy 2026-11-22, set page DdkkMDJp..., passes approved): one any-class unique each, at a
+  // named elite's 10%. Rustmaw's roll after a long walk, Sporecrown's ring of toadstools, Gravewing's stone skin.
+  unique(
+    "rustshell",
+    "Rustshell",
+    "overall",
+    null,
+    "Carapace",
+    null,
+    "rustmaw",
+    "woodland",
+    "Walk for 2 s without stopping and you curl up into the shell and roll, 30% faster than walking. Each enemy you bump takes {0} of your Attack, once a roll; small ones are knocked aside and dizzy. Bumping an elite or boss, attacking or stopping pops you back out.",
+    "It never stops rolling. Neither should you."
+  ),
+  unique(
+    "fairy-ring",
+    "Fairy Ring",
+    "ring",
+    null,
+    "Band Ring",
+    null,
+    "sporecrown",
+    "woodland",
+    "Drinking a potion pops a ring of toadstools around you for 4 s. Enemies inside are slowed 40% and take {0} of your Attack as Poison every half second.",
+    "Step inside. Stay a while."
+  ),
+  unique(
+    "stonewing-cloak",
+    "Stonewing Cloak",
+    "cape",
+    null,
+    "Cloak",
+    null,
+    "gravewing",
+    "woodland",
+    "When a hit would drop you below 30% Health, you turn to stone instead: the hit does nothing and you take no damage for 2 s, then the stone bursts, hitting enemies near you for {0} of your Attack. Once every 60 s.",
+    "It sleeps on the crypt roof. It wakes for you."
   )
 ].map((u) => [u.id, u])));
 var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
@@ -4720,7 +4758,11 @@ var UNIQUE_TIERS = freezeWire({
   "mirewail-veil": { lines: ["moveSpeed", "critChance", "lifeKill", "defPct", "cdr"], stars: [480, 420, 360, 300], unit: "ticks" },
   "goldcarapace-band": { lines: ["defPct", "maxHpPct", "str", "lifeHit", "eliteDmg"], stars: [40, 50, 60, 75], unit: "pct" },
   "briarfang-thornmantle": { lines: ["maxHpPct", "defPct", "str", "atkPct", "lifeKill"], stars: [30, 40, 50, 65], unit: "pct" },
-  "emberjaw-fang": { lines: ["fireDmg", "atkPct", "critChance", "lifeHit", "maxHpPct"], stars: [20, 30, 40, 50], unit: "permille" }
+  "emberjaw-fang": { lines: ["fireDmg", "atkPct", "critChance", "lifeHit", "maxHpPct"], stars: [20, 30, 40, 50], unit: "permille" },
+  // Woodland lesser bosses (v3 lines below; these five are the v2 fallback).
+  "rustshell": { lines: ["maxHpPct", "defPct", "moveSpeed", "lifeKill", "atkPct"], stars: [120, 150, 180, 220], unit: "pct" },
+  "fairy-ring": { lines: ["atkPct", "lifeHit", "maxHpPct", "critChance", "cdr"], stars: [15, 20, 25, 32], unit: "pct" },
+  "stonewing-cloak": { lines: ["maxHpPct", "defPct", "lifeKill", "moveSpeed", "cdr"], stars: [200, 250, 300, 380], unit: "pct" }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
 var UNIQUE_LINES_V3 = freezeWire({
@@ -4812,7 +4854,10 @@ var UNIQUE_LINES_V3 = freezeWire({
   "mirewail-veil": { always: "moveSpeed", pool: ["critChance", "lifeKill", "defPct", "moveCdr", "fullDmg", "eliteDr"], leg: ["killCdr"] },
   "goldcarapace-band": { always: "eliteDr", pool: ["defPct", "maxHpPct", "str", "lifeHit", "eliteDmg", "fullDmg", "stunDr"], leg: [] },
   "briarfang-thornmantle": { always: "closeDmg", pool: ["maxHpPct", "defPct", "counterDmg", "eliteDr", "lifeKill", "areaDr", "hitCdr"], leg: [] },
-  "emberjaw-fang": { always: "ailingDmg", pool: ["fireDmg", "atkPct", "critChance", "lifeHit", "ailmentDur", "maxHpPct", "areaDmg"], leg: [] }
+  "emberjaw-fang": { always: "ailingDmg", pool: ["fireDmg", "atkPct", "critChance", "lifeHit", "ailmentDur", "maxHpPct", "areaDmg"], leg: [] },
+  "rustshell": { always: "moveSpeed", pool: ["maxHpPct", "defPct", "lifeKill", "eliteDr", "areaDr", "closeDmg", "mainAttr"], leg: [] },
+  "fairy-ring": { always: "potionHeal", pool: ["atkPct", "critChance", "lifeHit", "maxHpPct", "ailingDmg", "areaDmg", "cdr"], leg: [] },
+  "stonewing-cloak": { always: "eliteDr", pool: ["maxHpPct", "defPct", "lifeKill", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] }
 });
 var UNIQUE_SIGNATURE_LINE = 0;
 var rerollableUniqueV3 = (g) => g?.progression?.affixes === "affixes-v3" && Boolean(UNIQUE_LINES_V3[g?.definition?.unique]);
@@ -29375,6 +29420,7 @@ var BY_NOUN = Object.freeze({
   Treads: "boots",
   Exosuit: "plate",
   "Warden Plate": "plate",
+  Carapace: "plate",
   Vest: "leather",
   "Inquisitor Robes": "robe",
   "Full Plate Armor": "plate",
@@ -33380,6 +33426,7 @@ export {
   gearAffixTotalsV2,
   heroRank,
   POTION_BELT_POLICY,
+  potionBelt,
   potionCapacity,
   potionHealPercent,
   potionCount,
