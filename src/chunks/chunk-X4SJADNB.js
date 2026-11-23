@@ -9912,8 +9912,12 @@ function eligible(s, g, { safe = true, freshEpisodeFrom = null } = {}) {
     return a.ai?.melee?.phase && a.ai.melee.phase !== "idle";
   });
 }
+var finaleIdsV1 = (s, g) => {
+  const f3 = s.d9World?.functionalSitesById?.[g.siteId]?.floors?.find((x) => x.groupId === g.groupId);
+  return new Set(f3 ? g.entityIds.filter((id, n) => String(f3.encounter?.members?.[n]?.memberKey).startsWith("finale:")) : []);
+};
 function selection(s, g, context) {
-  const seed = s.campaign.seed.seedHex + "/" + g.groupId + "/" + ORDINARY_ROSTER_V1, exempt = (id) => context.protected.has(id) || s.eliteCombat?.elitesByEntityId[id] && !(s.eliteCombat.elitesByEntityId[id].version === COMPOSITION_ELITE_V1 && s.eliteCombat.elitesByEntityId[id].composition.inherited === false) || s.bossCombat?.bossesByEntityId[id] || s.bossCombat?.summonsByEntityId[id];
+  const finale = finaleIdsV1(s, g), seed = s.campaign.seed.seedHex + "/" + g.groupId + "/" + ORDINARY_ROSTER_V1, exempt = (id) => finale.has(id) || context.protected.has(id) || s.eliteCombat?.elitesByEntityId[id] && !(s.eliteCombat.elitesByEntityId[id].version === COMPOSITION_ELITE_V1 && s.eliteCombat.elitesByEntityId[id].composition.inherited === false) || s.bossCombat?.bossesByEntityId[id] || s.bossCombat?.summonsByEntityId[id];
   const candidates = context.members.filter((m) => !exempt(m.entityId) && ordinaryEnemyForProfile(m.profileId)).map((m) => ({ ...m, n: hashReward(seed + "/" + m.entityId) })).sort((a, b) => a.n - b.n || a.entityId.localeCompare(b.entityId));
   if (!candidates.length) return {};
   const desiredRanged = context.floor ? Math.min(4, Math.max(3, Math.round(g.entityIds.length / 7))) : g.entityIds.length >= 10 ? 2 : 1, maxRanged = context.pool.ranged.length ? Math.min(desiredRanged, Math.max(0, Math.floor((g.entityIds.length - 1) / 2))) : 0, ranged3 = [], seenRooms = /* @__PURE__ */ new Set();
@@ -10172,8 +10176,12 @@ function eligible2(s, g, { safe = true, freshEpisodeFrom = null } = {}) {
     return a.ai?.melee?.phase && a.ai.melee.phase !== "idle";
   });
 }
+var finaleIdsV2 = (s, g) => {
+  const f3 = s.d9World?.functionalSitesById?.[g.siteId]?.floors?.find((x) => x.groupId === g.groupId);
+  return new Set(f3 ? g.entityIds.filter((id, n) => String(f3.encounter?.members?.[n]?.memberKey).startsWith("finale:")) : []);
+};
 function selection2(s, g, context) {
-  const seed = s.campaign.seed.seedHex + "/" + g.groupId + "/" + ORDINARY_ROSTER_V2, v1 = s.d9World.episodes[g.groupId].ordinaryRoster?.substitutionsById ?? {}, exempt = (id) => v1[id] || s.eliteCombat?.elitesByEntityId[id] && !(s.eliteCombat.elitesByEntityId[id].version === COMPOSITION_ELITE_V1 && s.eliteCombat.elitesByEntityId[id].composition.inherited === false) || s.bossCombat?.bossesByEntityId[id] || s.bossCombat?.summonsByEntityId[id];
+  const finale = finaleIdsV2(s, g), seed = s.campaign.seed.seedHex + "/" + g.groupId + "/" + ORDINARY_ROSTER_V2, v1 = s.d9World.episodes[g.groupId].ordinaryRoster?.substitutionsById ?? {}, exempt = (id) => finale.has(id) || v1[id] || s.eliteCombat?.elitesByEntityId[id] && !(s.eliteCombat.elitesByEntityId[id].version === COMPOSITION_ELITE_V1 && s.eliteCombat.elitesByEntityId[id].composition.inherited === false) || s.bossCombat?.bossesByEntityId[id] || s.bossCombat?.summonsByEntityId[id];
   const candidates = context.members.filter((m) => !exempt(m.entityId) && ordinaryEnemyForProfile(m.profileId)).map((m) => ({ ...m, n: hashReward(seed + "/" + m.entityId) })).sort((a, b) => a.n - b.n || a.entityId.localeCompare(b.entityId));
   const count2 = context.native ? candidates.length : context.ecology ? Math.min(candidates.length, context.rareAnomaly ? 1 : Math.max(1, Math.ceil(g.entityIds.length * 0.58))) : Math.min(candidates.length, Math.max(2, Math.min(6, Math.floor(g.entityIds.length / 4)))), offset = hashReward(seed + "/families"), result = {};
   for (const [n, m] of candidates.slice(0, count2).entries()) {
