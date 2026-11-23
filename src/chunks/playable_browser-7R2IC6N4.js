@@ -78839,8 +78839,8 @@ var PLATE = {
 };
 var overlaps = (a, b, p = 0) => a.x0 < b.x1 + p && a.x1 > b.x0 - p && a.y0 < b.y1 + p && a.y1 > b.y0 - p;
 function createForestStandsArtV2(env, prior) {
-  const doc = env.document, pieces = createStandPieces(doc), lanes2 = createStandLanes(doc), terraces = createTerracePainter(), volcanoes = createVolcanoPainter(), kits = /* @__PURE__ */ new Map(), models = /* @__PURE__ */ new WeakMap(), plates = /* @__PURE__ */ new Map(), bands = /* @__PURE__ */ new WeakMap(), casters = /* @__PURE__ */ new WeakMap(), fronts = /* @__PURE__ */ new WeakMap();
-  let plateBytes = 0;
+  const doc = env.document, pieces = createStandPieces(doc), lanes2 = createStandLanes(doc), terraces = createTerracePainter(), volcanoes = createVolcanoPainter(), kits = /* @__PURE__ */ new Map(), plates = /* @__PURE__ */ new Map(), bands = /* @__PURE__ */ new WeakMap(), casters = /* @__PURE__ */ new WeakMap(), fronts = /* @__PURE__ */ new WeakMap();
+  let plateBytes = 0, models = /* @__PURE__ */ new WeakMap(), kitsAt = prior.kitGeneration?.() ?? 0;
   const stats3 = { platesBuilt: 0, trees: 0, faded: 0, replays: 0, lanePages: 0, terracePages: 0 };
   function kit2(code2, kind, h = 0) {
     const key4 = code2 + "/" + kind + "/" + h % 6;
@@ -78893,9 +78893,17 @@ function createForestStandsArtV2(env, prior) {
     const kx = sl.img.width / (sl.x1 - sl.x0), ky = sl.img.height / (sl.y1 - sl.y0);
     c.drawImage(sl.img, (x0 - sl.x0) * kx, (y0 - sl.y0) * ky, (x1 - x0) * kx, (y1 - y0) * ky, x0, y0, x1 - x0, y1 - y0);
   }
+  function syncKits() {
+    const g2 = prior.kitGeneration?.() ?? 0;
+    if (g2 === kitsAt) return;
+    kitsAt = g2;
+    kits.clear();
+    models = /* @__PURE__ */ new WeakMap();
+  }
   function modelFor(space) {
     const v = space?.visual;
     if (!v) return null;
+    syncKits();
     if (models.has(v)) return models.get(v);
     let m = null;
     if (v.stands && !space.site && !space.settlementInterior && v.worldAddress) {
