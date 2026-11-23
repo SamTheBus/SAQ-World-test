@@ -229691,6 +229691,23 @@ var PREMIUM_SITE_KINDS = Object.freeze(["woodland-cave", "woodland-ruin", "proce
 function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
   const pages2 = /* @__PURE__ */ new Map();
   let identity2 = null, builds = 0, caveSurface = null, ruinSurface = null, premiumSurface = null;
+  const zero7 = (c) => {
+    if (c) {
+      c.width = 0;
+      c.height = 0;
+    }
+  }, dropPages = () => {
+    for (const c of pages2.values()) zero7(c);
+    pages2.clear();
+  }, dropAll = () => {
+    dropPages();
+    zero7(caveSurface);
+    zero7(ruinSurface);
+    zero7(premiumSurface);
+    caveSurface = null;
+    ruinSurface = null;
+    premiumSurface = null;
+  };
   function drawTile(ctx, v, x, y, t, mode = "standard", space = null) {
     const ox = v.originTile.x, oy = v.originTile.y, at10 = (cx, cy2) => v.terrain[cy2 - oy]?.[cx - ox], type = at10(x, y), px7 = x * t, py = y * t;
     const ruin = mode === "ruin", fort = mode === "fort", cave = mode === "cave";
@@ -230011,10 +230028,7 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
     const site = space.site ?? space.functionalSite, v = space.visual, t = space.collision.tileSize, size = 8, extent2 = size * t, mode = ["woodland-ruin", "procedural-ruin", "procedural-crypt"].includes(site.siteKind) ? "ruin" : ["woodland-fort", "procedural-fort"].includes(site.siteKind) ? "fort" : site.siteKind === "woodland-cave" ? "cave" : "standard";
     const surfaceIdentity = (["procedural-fort", "procedural-ruin", "procedural-crypt", "woodland-cave"].includes(site.siteKind) ? site.contentHash + "/" + space.spaceInstanceId : site.contentHash) + "/" + (authoredArt?.fort?.identity?.() ?? "");
     if (identity2 !== surfaceIdentity) {
-      pages2.clear();
-      caveSurface = null;
-      ruinSurface = null;
-      premiumSurface = null;
+      dropAll();
       identity2 = surfaceIdentity;
     }
     ctx.fillStyle = mode === "fort" ? "#090806" : "#05030a";
@@ -230073,7 +230087,11 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
         builds++;
       }
       pages2.set(key4, page);
-      while (pages2.size > 24) pages2.delete(pages2.keys().next().value);
+      while (pages2.size > 24) {
+        const k = pages2.keys().next().value;
+        zero7(pages2.get(k));
+        pages2.delete(k);
+      }
       ctx.drawImage(page, px7 * extent2, py * extent2);
       painted6 += size * size;
     }
@@ -230139,10 +230157,7 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
     } }));
     return items3;
   }, clear() {
-    pages2.clear();
-    caveSurface = null;
-    ruinSurface = null;
-    premiumSurface = null;
+    dropAll();
     identity2 = null;
   }, resources: () => ({ siteRasterPages: pages2.size + (caveSurface ? 1 : 0) + (ruinSurface ? 1 : 0) + (premiumSurface ? 1 : 0), siteRasterBytes: pages2.size * 256 * 256 * 4 + (caveSurface ? caveSurface.width * caveSurface.height * 4 : 0) + (ruinSurface ? ruinSurface.width * ruinSurface.height * 4 : 0) + (premiumSurface ? premiumSurface.width * premiumSurface.height * 4 : 0), siteRasterBuilds: builds }) });
 }
