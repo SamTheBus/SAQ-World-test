@@ -15992,6 +15992,44 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "woodland",
     "When a hit would drop you below 30% Health, you turn to stone instead: the hit does nothing and you take no damage for 2 s, then the stone bursts, hitting enemies near you for {0} of your Attack. Once every 60 s.",
     "It sleeps on the crypt roof. It wakes for you."
+  ),
+  // Grassland lesser bosses (Sammy 2026-11-22, set page EurQ6jEE..., passes approved): one any-class unique each, at a
+  // named elite's 10%. Rootgorger's roots on a kill, Thresher's two scythes on the combo finisher, Waxcrown's bees.
+  unique(
+    "rootgrip-treads",
+    "Rootgrip Treads",
+    "boots",
+    null,
+    "Treads",
+    null,
+    "rootgorger",
+    "grassland",
+    "When you kill an enemy, roots burst out where it fell and grab the two nearest enemies within 3 tiles: they are held for 1.5 s and take {0} of your Attack. Elites and bosses are slowed instead. Once every 2 s.",
+    "Every step it takes, the ground takes back."
+  ),
+  unique(
+    "reapers-grips",
+    "Reaper\u2019s Grips",
+    "gloves",
+    null,
+    "Gloves",
+    null,
+    "thresher",
+    "grassland",
+    "The third hit of your combo also reaps: two scythe sweeps in front of you, left then right, each hitting every enemy in its wide arc for {0} of your Attack and knocking them back a little. Once every 3 s.",
+    "Two scythes. One harvest."
+  ),
+  unique(
+    "waxcrown-circlet",
+    "Waxcrown Circlet",
+    "helmet",
+    null,
+    "Backwards Cap",
+    null,
+    "waxcrown",
+    "grassland",
+    "Every 1.5 s while an enemy is within 5 tiles, a bee flies out of your crown and stings the nearest one for {0} of your Attack. The honey slows it 30% for 2 s.",
+    "The hive goes where the queen goes."
   )
 ].map((u) => [u.id, u])));
 var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
@@ -16078,7 +16116,11 @@ var UNIQUE_TIERS = freezeWire({
   // Woodland lesser bosses (v3 lines below; these five are the v2 fallback).
   "rustshell": { lines: ["maxHpPct", "defPct", "moveSpeed", "lifeKill", "atkPct"], stars: [120, 150, 180, 220], unit: "pct" },
   "fairy-ring": { lines: ["atkPct", "lifeHit", "maxHpPct", "critChance", "cdr"], stars: [15, 20, 25, 32], unit: "pct" },
-  "stonewing-cloak": { lines: ["maxHpPct", "defPct", "lifeKill", "moveSpeed", "cdr"], stars: [200, 250, 300, 380], unit: "pct" }
+  "stonewing-cloak": { lines: ["maxHpPct", "defPct", "lifeKill", "moveSpeed", "cdr"], stars: [200, 250, 300, 380], unit: "pct" },
+  // Grassland lesser bosses (v3 lines below; these five are the v2 fallback).
+  "rootgrip-treads": { lines: ["moveSpeed", "maxHpPct", "defPct", "lifeKill", "atkPct"], stars: [80, 100, 120, 150], unit: "pct" },
+  "reapers-grips": { lines: ["atkPct", "critChance", "lifeHit", "maxHpPct", "eliteDmg"], stars: [80, 100, 120, 150], unit: "pct" },
+  "waxcrown-circlet": { lines: ["critChance", "atkPct", "lifeHit", "maxHpPct", "defPct"], stars: [40, 50, 60, 75], unit: "pct" }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
 var UNIQUE_LINES_V3 = freezeWire({
@@ -16173,7 +16215,10 @@ var UNIQUE_LINES_V3 = freezeWire({
   "emberjaw-fang": { always: "ailingDmg", pool: ["fireDmg", "atkPct", "critChance", "lifeHit", "ailmentDur", "maxHpPct", "areaDmg"], leg: [] },
   "rustshell": { always: "moveSpeed", pool: ["maxHpPct", "defPct", "lifeKill", "eliteDr", "areaDr", "closeDmg", "mainAttr"], leg: [] },
   "fairy-ring": { always: "potionHeal", pool: ["atkPct", "critChance", "lifeHit", "maxHpPct", "ailingDmg", "areaDmg", "cdr"], leg: [] },
-  "stonewing-cloak": { always: "eliteDr", pool: ["maxHpPct", "defPct", "lifeKill", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] }
+  "stonewing-cloak": { always: "eliteDr", pool: ["maxHpPct", "defPct", "lifeKill", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
+  "rootgrip-treads": { always: "moveSpeed", pool: ["maxHpPct", "defPct", "lifeKill", "areaDmg", "closeDmg", "critChance", "mainAttr"], leg: [] },
+  "reapers-grips": { always: "closeDmg", pool: ["atkPct", "critChance", "lifeHit", "areaDmg", "maxHpPct", "eliteDmg", "mainAttr"], leg: [] },
+  "waxcrown-circlet": { always: "critChance", pool: ["atkPct", "lifeHit", "maxHpPct", "defPct", "ailingDmg", "cdr", "mainAttr"], leg: [] }
 });
 var UNIQUE_SIGNATURE_LINE = 0;
 var rerollableUniqueV3 = (g) => g?.progression?.affixes === "affixes-v3" && Boolean(UNIQUE_LINES_V3[g?.definition?.unique]);
@@ -28184,6 +28229,13 @@ var HS_BACK = 18;
 var HS_SHOTS = 4;
 var MR_LIFE = 240;
 var MR_EVERY = 480;
+var RG_N = 2;
+var RG_EVERY = 120;
+var RG_SHOW = 134;
+var RP_SHOW = 100;
+var RP_EVERY = 180;
+var WX_EVERY = 90;
+var WX_SHOW = 42;
 var RS_CURL = 120;
 var RS_POP = 26;
 var FR_LIFE = 240;
@@ -28227,7 +28279,7 @@ var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
-var LIVE = ["rsWalk", "rsRoll", "rsPop", "frRing", "swCd", "swStone", "mwWell", "rtLance", "hsOrb", "hsShots", "hsBack", "mrCd", "mrSheet", "mcCd", "mcSlam", "sfGlob", "sfPool", "fsPods", "bhCd", "bhN", "bhSheds", "bhTrail", "bhGulps", "seal", "sealBurst", "fcCage", "slShards", "msCd", "msHit", "lidBite", "stCoin", "blCoins", "titheCd", "tithe", "hfGlass", "shEcho", "clock", "tbCd", "turn", "pane", "ssCd", "mirrors", "splN", "splinters", "gvCd", "glass", "glassPop", "scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardUp", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["rgCd", "rgRoot", "rpCd", "rpReap", "wxCd", "wxBee", "rsWalk", "rsRoll", "rsPop", "frRing", "swCd", "swStone", "mwWell", "rtLance", "hsOrb", "hsShots", "hsBack", "mrCd", "mrSheet", "mcCd", "mcSlam", "sfGlob", "sfPool", "fsPods", "bhCd", "bhN", "bhSheds", "bhTrail", "bhGulps", "seal", "sealBurst", "fcCage", "slShards", "msCd", "msHit", "lidBite", "stCoin", "blCoins", "titheCd", "tithe", "hfGlass", "shEcho", "clock", "tbCd", "turn", "pane", "ssCd", "mirrors", "splN", "splinters", "gvCd", "glass", "glassPop", "scorch", "hareCd", "hares", "harePops", "cinders", "kindleCd", "kindle", "antler", "zip", "perfReady", "cleave", "cleaveCd", "grave", "skull", "skullCd", "skullHit", "shroudCd", "sunk", "risen", "croakN", "croak", "lashCd", "lash", "spawnN", "hoppers", "hopPops", "boil", "boilPop", "lode", "oath", "oathCd", "wardOut", "wardUp", "wardHit", "plate", "plateCd", "sporeCd", "spores", "gazecaps", "capPops", "eyeCd", "eye", "crownCd", "crownMark", "treadCd", "tread", "quake", "bark", "barkShot", "silk", "web", "wrapCd", "cocoon", "furrow", "vent", "vents", "core", "strip", "sharp", "woven", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "sunBeam", "casts", "staffSuns", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 var ZIP_TICKS = 120;
 var PERF_READY_TICKS = 180;
 function prune(combat) {
@@ -28972,6 +29024,25 @@ function validateClassSkillState(s, combat, actor) {
       safeInteger(k.frRing.at, 0, 1e12);
     }
     if (k.swCd !== void 0) safeInteger(k.swCd, 1, SW_EVERY);
+    if (k.rgCd !== void 0) safeInteger(k.rgCd, 1, RG_EVERY);
+    if (k.rgRoot !== void 0) {
+      closedRecord(k.rgRoot, ["x", "y", "age", "to"]);
+      requireContract(pos2(k.rgRoot), "Invalid root burst");
+      safeInteger(k.rgRoot.age, 0, RG_SHOW - 1);
+      requireContract(Array.isArray(k.rgRoot.to) && k.rgRoot.to.length <= RG_N && k.rgRoot.to.every((t) => t && typeof t.id === "string" && pos2(t) && Object.keys(t).length === 3), "Invalid root targets");
+    }
+    if (k.rpCd !== void 0) safeInteger(k.rpCd, 1, RP_EVERY);
+    if (k.rpReap !== void 0) {
+      closedRecord(k.rpReap, ["x", "y", "ax", "ay", "age"]);
+      requireContract(pos2(k.rpReap) && Number.isFinite(k.rpReap.ax) && Number.isFinite(k.rpReap.ay), "Invalid reap");
+      safeInteger(k.rpReap.age, 0, RP_SHOW - 1);
+    }
+    if (k.wxCd !== void 0) safeInteger(k.wxCd, 1, WX_EVERY);
+    if (k.wxBee !== void 0) {
+      closedRecord(k.wxBee, ["x", "y", "id", "tx", "ty", "age"]);
+      requireContract(pos2(k.wxBee) && typeof k.wxBee.id === "string" && Number.isFinite(k.wxBee.tx) && Number.isFinite(k.wxBee.ty), "Invalid bee");
+      safeInteger(k.wxBee.age, 0, WX_SHOW - 1);
+    }
     if (k.swStone !== void 0) {
       closedRecord(k.swStone, ["x", "y", "age"]);
       requireContract(pos2(k.swStone), "Invalid stone skin");

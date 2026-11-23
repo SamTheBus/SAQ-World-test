@@ -4676,6 +4676,44 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "woodland",
     "When a hit would drop you below 30% Health, you turn to stone instead: the hit does nothing and you take no damage for 2 s, then the stone bursts, hitting enemies near you for {0} of your Attack. Once every 60 s.",
     "It sleeps on the crypt roof. It wakes for you."
+  ),
+  // Grassland lesser bosses (Sammy 2026-11-22, set page EurQ6jEE..., passes approved): one any-class unique each, at a
+  // named elite's 10%. Rootgorger's roots on a kill, Thresher's two scythes on the combo finisher, Waxcrown's bees.
+  unique(
+    "rootgrip-treads",
+    "Rootgrip Treads",
+    "boots",
+    null,
+    "Treads",
+    null,
+    "rootgorger",
+    "grassland",
+    "When you kill an enemy, roots burst out where it fell and grab the two nearest enemies within 3 tiles: they are held for 1.5 s and take {0} of your Attack. Elites and bosses are slowed instead. Once every 2 s.",
+    "Every step it takes, the ground takes back."
+  ),
+  unique(
+    "reapers-grips",
+    "Reaper\u2019s Grips",
+    "gloves",
+    null,
+    "Gloves",
+    null,
+    "thresher",
+    "grassland",
+    "The third hit of your combo also reaps: two scythe sweeps in front of you, left then right, each hitting every enemy in its wide arc for {0} of your Attack and knocking them back a little. Once every 3 s.",
+    "Two scythes. One harvest."
+  ),
+  unique(
+    "waxcrown-circlet",
+    "Waxcrown Circlet",
+    "helmet",
+    null,
+    "Backwards Cap",
+    null,
+    "waxcrown",
+    "grassland",
+    "Every 1.5 s while an enemy is within 5 tiles, a bee flies out of your crown and stings the nearest one for {0} of your Attack. The honey slows it 30% for 2 s.",
+    "The hive goes where the queen goes."
   )
 ].map((u) => [u.id, u])));
 var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
@@ -4762,7 +4800,11 @@ var UNIQUE_TIERS = freezeWire({
   // Woodland lesser bosses (v3 lines below; these five are the v2 fallback).
   "rustshell": { lines: ["maxHpPct", "defPct", "moveSpeed", "lifeKill", "atkPct"], stars: [120, 150, 180, 220], unit: "pct" },
   "fairy-ring": { lines: ["atkPct", "lifeHit", "maxHpPct", "critChance", "cdr"], stars: [15, 20, 25, 32], unit: "pct" },
-  "stonewing-cloak": { lines: ["maxHpPct", "defPct", "lifeKill", "moveSpeed", "cdr"], stars: [200, 250, 300, 380], unit: "pct" }
+  "stonewing-cloak": { lines: ["maxHpPct", "defPct", "lifeKill", "moveSpeed", "cdr"], stars: [200, 250, 300, 380], unit: "pct" },
+  // Grassland lesser bosses (v3 lines below; these five are the v2 fallback).
+  "rootgrip-treads": { lines: ["moveSpeed", "maxHpPct", "defPct", "lifeKill", "atkPct"], stars: [80, 100, 120, 150], unit: "pct" },
+  "reapers-grips": { lines: ["atkPct", "critChance", "lifeHit", "maxHpPct", "eliteDmg"], stars: [80, 100, 120, 150], unit: "pct" },
+  "waxcrown-circlet": { lines: ["critChance", "atkPct", "lifeHit", "maxHpPct", "defPct"], stars: [40, 50, 60, 75], unit: "pct" }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
 var UNIQUE_LINES_V3 = freezeWire({
@@ -4857,7 +4899,10 @@ var UNIQUE_LINES_V3 = freezeWire({
   "emberjaw-fang": { always: "ailingDmg", pool: ["fireDmg", "atkPct", "critChance", "lifeHit", "ailmentDur", "maxHpPct", "areaDmg"], leg: [] },
   "rustshell": { always: "moveSpeed", pool: ["maxHpPct", "defPct", "lifeKill", "eliteDr", "areaDr", "closeDmg", "mainAttr"], leg: [] },
   "fairy-ring": { always: "potionHeal", pool: ["atkPct", "critChance", "lifeHit", "maxHpPct", "ailingDmg", "areaDmg", "cdr"], leg: [] },
-  "stonewing-cloak": { always: "eliteDr", pool: ["maxHpPct", "defPct", "lifeKill", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] }
+  "stonewing-cloak": { always: "eliteDr", pool: ["maxHpPct", "defPct", "lifeKill", "areaDr", "lowDmg", "hitCdr", "mainAttr"], leg: [] },
+  "rootgrip-treads": { always: "moveSpeed", pool: ["maxHpPct", "defPct", "lifeKill", "areaDmg", "closeDmg", "critChance", "mainAttr"], leg: [] },
+  "reapers-grips": { always: "closeDmg", pool: ["atkPct", "critChance", "lifeHit", "areaDmg", "maxHpPct", "eliteDmg", "mainAttr"], leg: [] },
+  "waxcrown-circlet": { always: "critChance", pool: ["atkPct", "lifeHit", "maxHpPct", "defPct", "ailingDmg", "cdr", "mainAttr"], leg: [] }
 });
 var UNIQUE_SIGNATURE_LINE = 0;
 var rerollableUniqueV3 = (g) => g?.progression?.affixes === "affixes-v3" && Boolean(UNIQUE_LINES_V3[g?.definition?.unique]);
