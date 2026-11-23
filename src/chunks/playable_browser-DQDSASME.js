@@ -1217,13 +1217,13 @@ function createAuthorityClock({ now: now3, step: step3, ready, observe = null, m
   let deadline3 = openedAt + period, lastCallbackAt = openedAt, maxDebt = 0, maxSteps = 0, maxCallbackGapMs = 0, resetDebtTicks = 0, overflowDiscardedDebtTicks = 0, resetCount = 0, lastResetReason = null;
   const dueAt = (at10) => at10 + epsilon < deadline3 ? 0 : Math.floor((at10 - deadline3 + epsilon) / period) + 1;
   function reset(reason = "manual") {
-    const at10 = now3(), dropped2 = dueAt(at10);
-    resetDebtTicks += dropped2;
+    const at10 = now3(), dropped = dueAt(at10);
+    resetDebtTicks += dropped;
     resetCount++;
     lastResetReason = reason;
     deadline3 = at10 + period;
     lastCallbackAt = at10;
-    return dropped2;
+    return dropped;
   }
   function run2() {
     const start = now3(), callbackGapMs = Math.max(0, start - lastCallbackAt), due = dueAt(start), debt = Math.max(0, due - 1);
@@ -1257,11 +1257,11 @@ function createAuthorityClock({ now: now3, step: step3, ready, observe = null, m
 }
 
 // src/client/authority_delivery_v1.js
-function createAuthorityDeliveryV1({ clock: clock8, now: now3, activity = true, active: active2 = () => true, failed = () => false, onBegin = () => {
+function createAuthorityDeliveryV1({ clock: clock9, now: now3, activity = true, active: active2 = () => true, failed = () => false, onBegin = () => {
 }, onError = () => {
 }, observe = null }) {
   const epsilon = AUTHORITY_CLOCK_PERIOD_MS * 1e-7;
-  const timer = { callbacks: 0, services: 0, dueZeroRuns: 0, lastAt: null, lastGapMs: null, maxGapMs: 0 }, paint4 = { opportunities: 0, services: 0, dueZeroSkips: 0, timerDeliveredSkips: 0, lastAt: null, lastGapMs: null, maxGapMs: 0 };
+  const timer2 = { callbacks: 0, services: 0, dueZeroRuns: 0, lastAt: null, lastGapMs: null, maxGapMs: 0 }, paint4 = { opportunities: 0, services: 0, dueZeroSkips: 0, timerDeliveredSkips: 0, lastAt: null, lastGapMs: null, maxGapMs: 0 };
   let resets = 0, lastReset = null, faults = 0, currentDriver = null, legacySkips = 0, inactiveSkips = 0, timerCallbacksAtPreviousPaint = 0;
   function offer(driver) {
     if (!activity) {
@@ -1272,15 +1272,15 @@ function createAuthorityDeliveryV1({ clock: clock8, now: now3, activity = true, 
       inactiveSkips++;
       return null;
     }
-    const at10 = now3(), row2 = driver === "timer" ? timer : paint4, gap2 = row2.lastAt === null ? null : Math.max(0, at10 - row2.lastAt);
+    const at10 = now3(), row2 = driver === "timer" ? timer2 : paint4, gap2 = row2.lastAt === null ? null : Math.max(0, at10 - row2.lastAt);
     row2.lastAt = at10;
     row2.lastGapMs = gap2;
     if (gap2 !== null) row2.maxGapMs = Math.max(row2.maxGapMs, gap2);
-    if (driver === "timer") timer.callbacks++;
+    if (driver === "timer") timer2.callbacks++;
     else paint4.opportunities++;
-    const due = at10 + epsilon >= clock8.inspect().deadline;
+    const due = at10 + epsilon >= clock9.inspect().deadline;
     if (driver === "paint") {
-      timerCallbacksAtPreviousPaint = timer.callbacks;
+      timerCallbacksAtPreviousPaint = timer2.callbacks;
       if (!due) {
         paint4.dueZeroSkips++;
         observe?.({ driver, at: at10, gapMs: gap2, due: false, serviced: false, skipReason: "not-due" });
@@ -1288,11 +1288,11 @@ function createAuthorityDeliveryV1({ clock: clock8, now: now3, activity = true, 
       }
     }
     row2.services++;
-    if (driver === "timer" && !due) timer.dueZeroRuns++;
+    if (driver === "timer" && !due) timer2.dueZeroRuns++;
     currentDriver = driver;
     try {
       onBegin(driver);
-      const wait2 = clock8.run();
+      const wait2 = clock9.run();
       observe?.({ driver, at: at10, gapMs: gap2, due, serviced: true });
       return wait2;
     } catch (error) {
@@ -1308,13 +1308,13 @@ function createAuthorityDeliveryV1({ clock: clock8, now: now3, activity = true, 
     paint: () => offer("paint"),
     currentDriver: () => currentDriver,
     reset(reason) {
-      timer.lastAt = paint4.lastAt = null;
-      timer.lastGapMs = paint4.lastGapMs = null;
-      timerCallbacksAtPreviousPaint = timer.callbacks;
+      timer2.lastAt = paint4.lastAt = null;
+      timer2.lastGapMs = paint4.lastGapMs = null;
+      timerCallbacksAtPreviousPaint = timer2.callbacks;
       resets++;
       lastReset = reason;
     },
-    inspect: () => ({ version: "authority-delivery-due-paint-v1.1", activity, timer: { ...timer }, paint: { ...paint4 }, resets, lastReset, faults, legacySkips, inactiveSkips })
+    inspect: () => ({ version: "authority-delivery-due-paint-v1.1", activity, timer: { ...timer2 }, paint: { ...paint4 }, resets, lastReset, faults, legacySkips, inactiveSkips })
   });
 }
 
@@ -4012,6 +4012,106 @@ function siteBiomeAtV1(space, x, y) {
 }
 var siteContextAtV1 = (ctx, space, x, y) => siteTintedContextV1(ctx, siteBiomeAtV1(space, x, y));
 
+// src/client/idle_sprites_v1.js
+var IDLE_SPRITE_MS = 3e4;
+var IDLE_SWEEP_MS = 5e3;
+var clock = () => globalThis.performance?.now?.() ?? Date.now();
+var sweeps = /* @__PURE__ */ new Set();
+var timer = null;
+function onIdleSweepV1(fn) {
+  sweeps.add(fn);
+  if (!timer && typeof setInterval === "function") {
+    timer = setInterval(() => {
+      const t = clock();
+      for (const f of sweeps) {
+        try {
+          f(t);
+        } catch {
+        }
+      }
+    }, IDLE_SWEEP_MS);
+    timer.unref?.();
+  }
+  return () => sweeps.delete(fn);
+}
+function freeSpriteV1(s) {
+  const c = s && (typeof s.getContext === "function" || typeof s.close === "function" ? s : s.canvas ?? s.cv);
+  if (!c) return;
+  if (typeof c.close === "function" && typeof c.getContext !== "function") {
+    try {
+      c.close();
+    } catch {
+    }
+    return;
+  }
+  if ("width" in c) {
+    c.width = 0;
+    c.height = 0;
+  }
+}
+function createIdleSpritesV1({ limit = Infinity, idleMs = IDLE_SPRITE_MS, free = freeSpriteV1, now: now3 = clock, sweep: sweep2 = true } = {}) {
+  const map = /* @__PURE__ */ new Map(), used = /* @__PURE__ */ new Map();
+  let dropped = 0;
+  const drop4 = (k) => {
+    const s = map.get(k);
+    map.delete(k);
+    used.delete(k);
+    dropped++;
+    try {
+      free(s);
+    } catch {
+    }
+  };
+  const api = {
+    get(k) {
+      const s = map.get(k);
+      if (map.has(k)) {
+        map.delete(k);
+        map.set(k, s);
+        used.set(k, now3());
+      }
+      return s;
+    },
+    touch(k) {
+      if (map.has(k)) used.set(k, now3());
+    },
+    has: (k) => map.has(k),
+    set(k, s) {
+      const old2 = map.get(k);
+      if (old2 !== void 0 && old2 !== s) try {
+        free(old2);
+      } catch {
+      }
+      map.delete(k);
+      map.set(k, s);
+      used.set(k, now3());
+      while (map.size > limit) drop4(map.keys().next().value);
+      return api;
+    },
+    delete(k) {
+      if (!map.has(k)) return false;
+      drop4(k);
+      return true;
+    },
+    sweep(t = now3()) {
+      for (const [k, u] of [...used]) if (t - u > idleMs) drop4(k);
+    },
+    clear() {
+      for (const k of [...map.keys()]) drop4(k);
+    },
+    get size() {
+      return map.size;
+    },
+    keys: () => map.keys(),
+    values: () => map.values(),
+    entries: () => map.entries(),
+    [Symbol.iterator]: () => map.entries(),
+    stats: () => ({ size: map.size, dropped })
+  };
+  if (sweep2) onIdleSweepV1(() => api.sweep());
+  return api;
+}
+
 // src/client/fort_art_v4.js
 var FORT_ART_V4 = "fort-art-v4";
 var DETAIL = /^(north|south|west|east)-\d+$|^tower-\d+$|^keep$|^courtyard-wing-\d+$/;
@@ -4055,15 +4155,11 @@ function plannedFortsV4(space) {
   return found;
 }
 var LIMIT = 40;
-var sprites = /* @__PURE__ */ new Map();
+var sprites = createIdleSpritesV1({ limit: LIMIT });
 var painted = 0;
 function sprite(key4, box6, paint4) {
   let s = sprites.get(key4);
-  if (s) {
-    sprites.delete(key4);
-    sprites.set(key4, s);
-    return s;
-  }
+  if (s) return s;
   const [l, t, r, b] = box6, scale = (r - l) * (b - t) > 9e5 ? 1 : 1.5, w = Math.ceil((r - l) * scale), h = Math.ceil((b - t) * scale), canvas = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(w, h) : globalThis.document?.createElement("canvas");
   if (!canvas || !canvas.getContext) return { paint: paint4, box: box6, canvas: null };
   canvas.width = w;
@@ -4076,7 +4172,6 @@ function sprite(key4, box6, paint4) {
   painted++;
   s = { canvas, box: box6 };
   sprites.set(key4, s);
-  while (sprites.size > LIMIT) sprites.delete(sprites.keys().next().value);
   return s;
 }
 function stamp(ctx, s, x, y) {
@@ -4171,7 +4266,7 @@ function createFortArtV4(prior) {
     door: (c, space, e) => Boolean(e.proceduralFort && plannedFortsV4(space).has(/^site:([0-9a-f]+)$/.exec(e.siteAction?.siteId ?? "")?.[1])),
     identity: () => FORT_ART_V4
   });
-  const resources = () => ({ ...prior.resources?.(), fortArt: { version: FORT_ART_V4, sprites: sprites.size, painted } });
+  const resources = () => ({ ...prior.resources?.(), fortArt: { version: FORT_ART_V4, sprites: sprites.size, painted, dropped: sprites.stats().dropped } });
   return Object.freeze({ ...prior, fort, resources });
 }
 function fortKeepTorchesV4(d, t) {
@@ -5701,7 +5796,7 @@ var jump = true;
 var centre = null;
 var deadline = 0;
 var stats = { spriteBuilds: 0, spriteSteps: 0, buildMs: 0, worstFrameMs: 0, fallbackDraws: 0 };
-var clock = () => (globalThis.performance ?? Date).now();
+var clock2 = () => (globalThis.performance ?? Date).now();
 var quantize = (s) => Math.max(0.5, Math.min(2, Math.round(s * 20) / 20));
 function makeSprite(key4, item2, scale) {
   const doc = globalThis.document;
@@ -5718,14 +5813,14 @@ function makeSprite(key4, item2, scale) {
 }
 function run(s, until) {
   while (!s.done) {
-    const at10 = clock();
+    const at10 = clock2();
     if (s.steps.next().done) {
       s.done = true;
       s.steps = null;
       stats.spriteBuilds++;
     }
     stats.spriteSteps++;
-    const now3 = clock();
+    const now3 = clock2();
     stats.buildMs += now3 - at10;
     if (until !== null && now3 >= until) break;
   }
@@ -5771,7 +5866,7 @@ function planFor(kind, t, biome) {
 }
 var near = (o, b, v, m) => o.x + b.x < v.x + v.width + m && o.x + b.x + b.w > v.x - m && o.y + b.y < v.y + v.height + m && o.y + b.y + b.h > v.y - m;
 function prepareSettlementArtV1(kind, t, o, biome, v) {
-  const start = clock();
+  const start = clock2();
   if (v !== seen) {
     seen = v;
     frame++;
@@ -5789,12 +5884,12 @@ function prepareSettlementArtV1(kind, t, o, biome, v) {
       if (s.done) continue;
     }
     const now3 = !margin && jump;
-    if (!now3 && clock() >= deadline) continue;
+    if (!now3 && clock2() >= deadline) continue;
     s ??= makeSprite(key4, item2, mainScale);
     if (s) run(s, now3 ? null : deadline);
   }
   evict();
-  stats.worstFrameMs = Math.max(stats.worstFrameMs, clock() - start);
+  stats.worstFrameMs = Math.max(stats.worstFrameMs, clock2() - start);
 }
 function drawSprite(c, item2, ox, oy) {
   const scale = quantize(c.getTransform?.().a ?? 1), id2 = item2.id;
@@ -68388,7 +68483,7 @@ var canvasOf2 = (w, h) => {
   c.height = h;
   return c;
 };
-var clock2 = () => (globalThis.performance ?? Date).now();
+var clock3 = () => (globalThis.performance ?? Date).now();
 var quantize2 = (s) => Math.max(0.5, Math.min(2, Math.round(s * 20) / 20));
 var slotOf = (t) => t.id.replace("settlement-slot:", "");
 var sHash9 = (s) => {
@@ -68546,8 +68641,14 @@ function townGlowV1(t) {
   for (const p of townPiecesV1(t)) if (p.glow) for (const [i, g2] of p.glow.entries()) out7.push({ id: p.id + "/" + i, foot: p.y, ...g2 });
   return out7;
 }
-var sprites3 = /* @__PURE__ */ new Map();
-var LIMIT2 = 24e6;
+var sprites3 = createIdleSpritesV1({ free: (s) => {
+  if (s) {
+    pixels2 -= s.px;
+    s.cv.width = 0;
+    s.cv.height = 0;
+  }
+} });
+var LIMIT2 = 12e6;
 var BUDGET_MS2 = 4;
 var AHEAD2 = 420;
 var pixels2 = 0;
@@ -68632,11 +68733,11 @@ function measure(p) {
   p.fade = true;
 }
 function build(key4, p, s, now3) {
-  const at10 = clock2();
+  const at10 = clock3();
   if (p.box === void 0) {
     measure(p);
     if (!now3 && p.box) {
-      stats2.buildMs += clock2() - at10;
+      stats2.buildMs += clock3() - at10;
       return;
     }
   }
@@ -68655,21 +68756,20 @@ function build(key4, p, s, now3) {
   sprites3.set(key4, { cv, used: frame2, px: cv.width * cv.height });
   pixels2 += cv.width * cv.height;
   stats2.built++;
-  stats2.buildMs += clock2() - at10;
+  stats2.buildMs += clock3() - at10;
 }
 function evict2() {
   if (pixels2 <= LIMIT2) return;
   for (const [k, s] of [...sprites3.entries()].filter(([, s2]) => s2 && s2.used < frame2).sort((a, b) => a[1].used - b[1].used)) {
     if (pixels2 <= LIMIT2) break;
     sprites3.delete(k);
-    pixels2 -= s.px;
   }
 }
 var near2 = (o, R18, v, m) => o.x + R18.x0 < v.x + v.width + m && o.x + R18.x1 > v.x - m && o.y + R18.y0 < v.y + v.height + m && o.y + R18.y1 > v.y - m;
 var boxR = (p) => p.box ? { x0: p.box.x, y0: p.box.y, x1: p.box.x + p.box.w, y1: p.box.y + p.box.h } : p.region;
 var keyOf = (t, p, s) => t.id + "|" + p.id + "@" + s;
 function prepareTownBuildingsV1(c, list, v) {
-  const start = clock2();
+  const start = clock3();
   mainScale2 = quantize2(c.getTransform?.().a ?? 1);
   frame2++;
   const ctr = { x: v.x + v.width / 2, y: v.y + v.height / 2 };
@@ -68685,11 +68785,11 @@ function prepareTownBuildingsV1(c, list, v) {
     }
     if (s === null) continue;
     const now3 = margin === 0 && jump2;
-    if (!now3 && clock2() >= deadline2) continue;
+    if (!now3 && clock3() >= deadline2) continue;
     build(key4, p, mainScale2, now3);
   }
   evict2();
-  stats2.worstFrameMs = Math.max(stats2.worstFrameMs, clock2() - start);
+  stats2.worstFrameMs = Math.max(stats2.worstFrameMs, clock3() - start);
 }
 function drawPiece(c, t, o, p, fade) {
   const b = p.box;
@@ -68727,7 +68827,7 @@ function townBuildingDepthItemsV1(t, o, v, actor, key4, env) {
     out7.push(depthItem({ id: key4 + p.id, anchorX: o.x + (R18.x0 + R18.x1) / 2, anchorY: o.y + p.y, draw: (c) => drawPiece(c, t, o, p, fade) }));
     if (p.fx) {
       const fx = p.fx;
-      out7.push(depthItem({ id: key4 + p.id + "/fx", anchorX: o.x + (R18.x0 + R18.x1) / 2, anchorY: o.y + p.y + 0.5, draw: (c) => drawTownFxV1(c, fx, o.x, o.y, clock2() / 1e3) }));
+      out7.push(depthItem({ id: key4 + p.id + "/fx", anchorX: o.x + (R18.x0 + R18.x1) / 2, anchorY: o.y + p.y + 0.5, draw: (c) => drawTownFxV1(c, fx, o.x, o.y, clock3() / 1e3) }));
     }
   }
   if (env?.drawNatureProp) for (const [k, g2] of townGreenOaksV1(t).entries()) {
@@ -70592,27 +70692,11 @@ function ruinModulePlanV4(space) {
   return found;
 }
 var LIMIT3 = 64;
-var sprites4 = /* @__PURE__ */ new Map();
+var sprites4 = createIdleSpritesV1({ limit: LIMIT3 });
 var painted2 = 0;
-var dropped = 0;
-function trimRuinSpritesV4(keep8 = LIMIT3) {
-  while (sprites4.size > keep8) {
-    const k = sprites4.keys().next().value, s = sprites4.get(k);
-    sprites4.delete(k);
-    dropped++;
-    if (s?.canvas) {
-      s.canvas.width = 0;
-      s.canvas.height = 0;
-    }
-  }
-}
 function sprite2(key4, box6, paint4) {
   let s = sprites4.get(key4);
-  if (s) {
-    sprites4.delete(key4);
-    sprites4.set(key4, s);
-    return s;
-  }
+  if (s) return s;
   const [l, t, r, b] = box6, w = Math.ceil(r - l), h = Math.ceil(b - t), canvas = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(w, h) : globalThis.document?.createElement("canvas");
   if (!canvas?.getContext) return { paint: paint4, box: box6, canvas: null };
   canvas.width = w;
@@ -70624,7 +70708,6 @@ function sprite2(key4, box6, paint4) {
   painted2++;
   s = { canvas, box: box6 };
   sprites4.set(key4, s);
-  trimRuinSpritesV4();
   return s;
 }
 function stamp2(ctx, s, x, y) {
@@ -70668,7 +70751,7 @@ function createRuinArtV4(prior) {
     identity: () => RUIN_ART_V4
   });
   const setMode = prior.setMode ? ((value2) => prior.setMode(value2 === "storybook" ? "candidate" : value2)) : void 0;
-  const resources = () => ({ ...prior.resources?.(), ruinArt: { version: RUIN_ART_V4, sprites: sprites4.size, painted: painted2, dropped } });
+  const resources = () => ({ ...prior.resources?.(), ruinArt: { version: RUIN_ART_V4, sprites: sprites4.size, painted: painted2, dropped: sprites4.stats().dropped } });
   return Object.freeze({ ...prior, ruin, ...setMode ? { setMode } : {}, resources });
 }
 
@@ -71529,8 +71612,8 @@ var put = (im, i, c, a = 255) => {
   im.data[i + 2] = c[2];
   im.data[i + 3] = a;
 };
-function createCrispGrassV1(doc, stamp8, clock8 = () => 0) {
-  const started = clock8(), d = stamp8.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, N, N).data, light2 = new Uint8Array(N * N);
+function createCrispGrassV1(doc, stamp8, clock9 = () => 0) {
+  const started = clock9(), d = stamp8.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, N, N).data, light2 = new Uint8Array(N * N);
   for (let y = 0; y < N; y++) {
     const sy = y < N / 2 ? y : y - N;
     for (let x = 0; x < N; x++) {
@@ -71641,7 +71724,7 @@ function createCrispGrassV1(doc, stamp8, clock8 = () => 0) {
   });
   const seen5 = new Uint32Array(patches.length);
   let token3 = 0;
-  const stats3 = { patches: kept2.length, spritePixels, setupMs: clock8() - started, tiles: 0, patchDraws: 0, tintPixels: 0 };
+  const stats3 = { patches: kept2.length, spritePixels, setupMs: clock9() - started, tiles: 0, patchDraws: 0, tintPixels: 0 };
   function keeps(L, p, cx, cy2, seed2) {
     if (p.size < ONLY_FIRST || p.wraps) return L.layer === 1;
     const wx = cx * L.period - L.offX + p.ax * L.k, wy = cy2 * L.period - L.offY + p.ay * L.k, busy = Math.max(0, Math.min(1, (woodlandFieldV1(wx / 900, wy / 900, seed2 + 1) - 0.25) / 0.5)), r = terrainHash(p.id * 7 + cx * 131, cy2 * 977 + L.layer, seed2 + 3) / 4294967296;
@@ -78376,11 +78459,11 @@ function createVolcanoPainter() {
       const j = Math.min(f.pts.length - 1, Math.floor(i / 6));
       return Boolean(f.pts[j][2] && f.pts[Math.min(f.pts.length - 1, j + 1)][2]);
     });
-    const len = [0], clock8 = [0];
+    const len = [0], clock9 = [0];
     for (let i = 1; i < q2.length; i++) {
       const d = Math.hypot(q2[i][0] - q2[i - 1][0], q2[i][1] - q2[i - 1][1]);
       len.push(len[i - 1] + d);
-      clock8.push(clock8[i - 1] + d / (fall[i] ? 4 : 1));
+      clock9.push(clock9[i - 1] + d / (fall[i] ? 4 : 1));
     }
     const stages = /* @__PURE__ */ new Map();
     for (const [x, y, st] of f.tiles) {
@@ -78415,7 +78498,7 @@ function createVolcanoPainter() {
     }
     const falls = runs.map((r) => ({ x: r.x * T107, top: r.y0 * T107, foot: (r.y1 + 1) * T107, streaks: Array.from({ length: 5 }, () => [(R18() - 0.5) * 30, R18() * 0.3, 0.6 + R18() * 0.4]) }));
     const pool4 = g2.pool ? { x: (g2.pool.x + 0.5) * T107, y: (g2.pool.y + 0.5) * T107, rx: g2.pool.rx * T107, ry: g2.pool.ry * T107 } : null;
-    return { q: q2, line: line45, fall, len, clock: clock8, stages, fan, fanLip, cross: cross7, plates, streaks, pool: pool4, falls, seed: g2.d.sh };
+    return { q: q2, line: line45, fall, len, clock: clock9, stages, fan, fanLip, cross: cross7, plates, streaks, pool: pool4, falls, seed: g2.d.sh };
   }
   function along4(F7, t) {
     const C4 = F7.clock, T1 = C4.at(-1);
@@ -110042,8 +110125,8 @@ function advanceMasteryTransient(player) {
   const t = player.d8?.transient;
   if (!t) return false;
   let changed = false;
-  for (const [timer, fields] of [["fortitudeTicks", ["fortitudeStacks"]], ["colossusTicks", ["colossusAttack"]], ["shadowStepTicks", []], ["syphonTicks", ["syphonStacks"]], ["weavingTicks", ["weavingStacks"]]]) {
-    if (t[timer] > 0 && --t[timer] === 0) {
+  for (const [timer2, fields] of [["fortitudeTicks", ["fortitudeStacks"]], ["colossusTicks", ["colossusAttack"]], ["shadowStepTicks", []], ["syphonTicks", ["syphonStacks"]], ["weavingTicks", ["weavingStacks"]]]) {
+    if (t[timer2] > 0 && --t[timer2] === 0) {
       changed = true;
       for (const f of fields) t[f] = f === "colossusAttack" ? "0" : 0;
     }
@@ -124058,8 +124141,8 @@ function createWorldEventHudV4(document2, onActivate = () => {
   root6.hidden = true;
   root6.setAttribute("data-gameplay-hud", "");
   root6.setAttribute("aria-label", "Local event");
-  const tag2 = document2.createElement("small"), head19 = document2.createElement("div"), title16 = document2.createElement("strong"), timer = document2.createElement("time"), row2 = document2.createElement("div"), pips = document2.createElement("span"), bar3 = document2.createElement("span"), fill8 = document2.createElement("i"), barText = document2.createElement("b"), line45 = document2.createElement("p"), action2 = document2.createElement("button");
-  head19.append(title16, timer);
+  const tag2 = document2.createElement("small"), head19 = document2.createElement("div"), title16 = document2.createElement("strong"), timer2 = document2.createElement("time"), row2 = document2.createElement("div"), pips = document2.createElement("span"), bar3 = document2.createElement("span"), fill8 = document2.createElement("i"), barText = document2.createElement("b"), line45 = document2.createElement("p"), action2 = document2.createElement("button");
+  head19.append(title16, timer2);
   bar3.append(fill8, barText);
   row2.append(pips, bar3);
   action2.type = "button";
@@ -124139,7 +124222,7 @@ function createWorldEventHudV4(document2, onActivate = () => {
     root6.dataset.kind = trackerRow.kind ?? "";
     tag2.textContent = trackerRow.tag ?? "";
     title16.textContent = trackerRow.title ?? "";
-    timer.textContent = trackerRow.timer ?? "";
+    timer2.textContent = trackerRow.timer ?? "";
     line45.textContent = trackerRow.line ?? "";
     const n = trackerRow.pips ?? 0;
     if (pips.childElementCount !== n) pips.replaceChildren(...Array.from({ length: n }, () => document2.createElement("em")));
@@ -127819,7 +127902,7 @@ function snackCanvasV1(doc, snack, size = 32) {
   cv.className = "trip-snack-icon " + (snack === "frog-leg" ? "is-leg" : "is-cap");
   return drawSnackIconV1(cv, snack);
 }
-var clock3 = (ticks) => {
+var clock4 = (ticks) => {
   const s = Math.max(0, Math.ceil(ticks / 60));
   return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
 };
@@ -127827,7 +127910,7 @@ function tripBadgeV1(model) {
   const t = model.trips?.trip, tick = model.tick ?? model.trips?.tick;
   if (!t || t.outcome === "bad" || !(tick >= t.startTick && tick < t.endTick)) return null;
   const s = TRIP_SNACKS_V1[t.snack], left = t.endTick - tick;
-  return { snack: t.snack, name: s.label, fx: s.pill, clock: clock3(left), fraction: left / TRIP_TICKS, blink: left <= 600 && Math.floor(left / 15) % 2 === 0, color: SNACK_ART[t.snack].border, drawIcon: (cv) => drawSnackIconV1(cv, t.snack) };
+  return { snack: t.snack, name: s.label, fx: s.pill, clock: clock4(left), fraction: left / TRIP_TICKS, blink: left <= 600 && Math.floor(left / 15) % 2 === 0, color: SNACK_ART[t.snack].border, drawIcon: (cv) => drawSnackIconV1(cv, t.snack) };
 }
 function snackRowsV1(model) {
   const bag2 = model.trips?.bag ?? {}, t = model.trips?.trip, tick = model.tick ?? model.trips?.tick, tripping = Boolean(t && tick < t.endTick), hell = Boolean(model.space?.tripHell);
@@ -157828,7 +157911,7 @@ function ageOf3(k, t, tick) {
   const span3 = SPAN3[t.kind](t)[k.phase] ?? 1, age = clamp13(span3 - (k.phaseEndsTick - tick), 0, span3);
   return { age, q: age / span3 };
 }
-function clock4(k, t, tick) {
+function clock5(k, t, tick) {
   const sp = SPAN3[t.kind](t);
   let A2 = 0;
   for (const ph of ORDER4[t.kind]) {
@@ -158059,7 +158142,7 @@ function ramPose(actor, k, tick, s) {
 }
 function ramGround(c, actor, k, tick) {
   if (!k.direction || !k.target) return;
-  const G6 = RAM_LOOK, A2 = clock4(k, RAM, tick), d = k.direction, o = k.origin, end = ramEnd(k), R18 = RAM.radius;
+  const G6 = RAM_LOOK, A2 = clock5(k, RAM, tick), d = k.direction, o = k.origin, end = ramEnd(k), R18 = RAM.radius;
   const from = { x: o.x + d.x * 30, y: o.y + d.y * 30 }, L = { x: from.x, y: from.y, a: Math.atan2(d.y, d.x), len: Math.max(10, Math.hypot(end.x - from.x, end.y - from.y)), w: RAM.laneHalfWidth * 2 };
   if (k.phase === "windup" && A2 >= 6) gameLane(c, L, (A2 - 6) / (RAM.windupTicks - 6), (A2 - 6) * SEC4, G6, 5);
   if (A2 >= RAM.windupTicks && A2 < RAM.windupTicks + 27) gameLaneBurst(c, L, (A2 - RAM.windupTicks) * SEC4, G6, 0.45);
@@ -158103,7 +158186,7 @@ function ramGround(c, actor, k, tick) {
 }
 function ramItems(model, actor, k, tick, out7) {
   if (!k.direction || !k.target) return;
-  const A2 = clock4(k, RAM, tick), id2 = "lesser-vfx/" + actor.entityId, end = ramEnd(k), d = k.direction;
+  const A2 = clock5(k, RAM, tick), id2 = "lesser-vfx/" + actor.entityId, end = ramEnd(k), d = k.direction;
   const gone = k.phase === "dazed" ? clamp13((ageOf3(k, RAM, tick).age - (RAM.dazedTicks - SINK2)) / SINK2) : 0, foot2 = actor.position.y + (actor.hullRadius ?? 20) * 0.45 + 0.5;
   if (k.phase === "windup") {
     for (const p0 of [21, 42]) if (A2 >= p0 && A2 < p0 + 21) {
@@ -158332,7 +158415,7 @@ function slingPose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face5 = k.direction.x < 0 ? -1 : 1;
-    const A2 = clock4(k, SLING, tick);
+    const A2 = clock5(k, SLING, tick);
     s.missing = ORDER_STONES.filter((n, i) => A2 < homeAt(i));
     if (A2 < STAGGER_AT) {
       s.raise = ease7(clamp13(A2 / 30)) * (0.32 + (A2 > T0 && A2 < CALL_AT ? 0.12 * Math.sin(tick * 0.1) : 0));
@@ -158370,7 +158453,7 @@ function stoneAt(actor, k, i, A2, tick) {
   return { x: mix9(tg.x, slot.x, u), y: gy - 4 - lift, gy, rot: ease7(u) * TAU138 * (i % 2 ? 1 : -1), air: true, shadowK: 1 - u };
 }
 function slingGround(c, actor, k, tick) {
-  const G6 = SLING_LOOK, A2 = clock4(k, SLING, tick), o = actor.position;
+  const G6 = SLING_LOOK, A2 = clock5(k, SLING, tick), o = actor.position;
   ORDER_STONES.forEach((n, i) => {
     const p = k.points?.[i], sp = T0 + SLING.spawns[i], land = landAt(i), back = RETURN_AT + SLING.backs[i], R18 = SLING.radius;
     const st = stoneAt(actor, k, i, A2, tick);
@@ -158385,7 +158468,7 @@ function slingGround(c, actor, k, tick) {
   });
 }
 function slingItems(model, actor, k, tick, out7) {
-  const A2 = clock4(k, SLING, tick), id2 = "lesser-vfx/" + actor.entityId, foot2 = actor.position.y + (actor.hullRadius ?? 20) * 0.45 + 0.5;
+  const A2 = clock5(k, SLING, tick), id2 = "lesser-vfx/" + actor.entityId, foot2 = actor.position.y + (actor.hullRadius ?? 20) * 0.45 + 0.5;
   ORDER_STONES.forEach((n, i) => {
     const st = stoneAt(actor, k, i, A2, tick);
     if (!st) return;
@@ -160732,7 +160815,7 @@ function ageOf4(k, t, tick) {
   const span3 = SPAN4[t.kind](t)[k.phase] ?? 1, age = clamp13(span3 - (k.phaseEndsTick - tick), 0, span3);
   return { age, q: age / span3 };
 }
-function clock5(k, t, tick) {
+function clock6(k, t, tick) {
   const sp = SPAN4[t.kind](t);
   let A2 = 0;
   const order2 = t.kind === "heave" ? k.phase === "toss" || k.phase === "gather" ? ["toss", "gather"] : ["scoop", "lift", "winded", "drift"] : ORDER5[t.kind];
@@ -161193,7 +161276,7 @@ function cagePose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face5 = k.direction.x < 0 ? -1 : 1;
-    const T121 = clock5(k, CAGE, tick) * SEC5;
+    const T121 = clock6(k, CAGE, tick) * SEC5;
     s.cast = T121 < 1 ? ease7(seg2(T121, 0, 0.45)) : 1 - ease7(seg2(T121, 1.05, 1.4));
     s.thrust = T121 < 2.1 ? ease7(seg2(T121, 1.55, 1.82)) : 1 - ease7(seg2(T121, 2.1, 2.4));
     s.spent = ease7(seg2(T121, 2.15, 2.6)) * (1 - ease7(seg2(T121, REGROW, CAGE_END)));
@@ -161208,7 +161291,7 @@ function cagePose(actor, k, tick, s) {
 var rim = (k, a) => ({ x: k.target.x + Math.cos(a) * CR, y: k.target.y + Math.sin(a) * CR });
 function cageGround(c, actor, k, tick) {
   if (!k.target) return;
-  const G6 = ICE_LOOK, T121 = clock5(k, CAGE, tick) * SEC5, { x: CX2, y: CY2 } = k.target;
+  const G6 = ICE_LOOK, T121 = clock6(k, CAGE, tick) * SEC5, { x: CX2, y: CY2 } = k.target;
   if (T121 >= WARN0 && T121 < CLOSE) {
     gameWarn(c, CX2, CY2, CR, seg2(T121, WARN0, CLOSE), T121 - WARN0, G6);
     for (const p of PILLARS2) {
@@ -161271,7 +161354,7 @@ function cageGround(c, actor, k, tick) {
 var caged = (model, k) => party2(model).filter((h) => Math.hypot(h.position.x - k.target.x, h.position.y - k.target.y) <= CR + (h.hullRadius ?? 10) * 0.5);
 function cageItems(model, actor, k, tick, out7) {
   if (!k.target) return;
-  const T121 = clock5(k, CAGE, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face5 = k.direction?.x < 0 ? -1 : 1, o = actor.position;
+  const T121 = clock6(k, CAGE, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face5 = k.direction?.x < 0 ? -1 : 1, o = actor.position;
   for (const [i, q2] of THROWS.entries()) {
     const r = rim(k, q2.a), land = q2.t + FLY3;
     if (T121 >= q2.t && T121 < land) {
@@ -161360,7 +161443,7 @@ function heavePose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face5 = k.direction.x < 0 ? -1 : 1;
-    const T121 = clock5(k, RIME, tick) * SEC5;
+    const T121 = clock6(k, RIME, tick) * SEC5;
     if (throwing(k)) {
       for (const th of TOSS) {
         const t0 = th.w, t1 = th.h, t2 = th.h + HURL;
@@ -161390,7 +161473,7 @@ function heavePose(actor, k, tick, s) {
   return { face: face5, x, y, rot: 0, sq: 1 };
 }
 function heaveGround(c, actor, k, tick) {
-  const G6 = SNOW_LOOK, T121 = clock5(k, RIME, tick) * SEC5, face5 = k.direction?.x < 0 ? -1 : 1;
+  const G6 = SNOW_LOOK, T121 = clock6(k, RIME, tick) * SEC5, face5 = k.direction?.x < 0 ? -1 : 1;
   if (throwing(k)) {
     TOSS.forEach((th, i) => {
       const p = k.points?.[i];
@@ -161429,7 +161512,7 @@ function heaveGround(c, actor, k, tick) {
   }
 }
 function heaveItems(model, actor, k, tick, out7) {
-  const T121 = clock5(k, RIME, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face5 = k.direction?.x < 0 ? -1 : 1, o = actor.position, foot2 = footOf(actor), hand7 = local7(actor, face5, TROLL_HANDS.scoop);
+  const T121 = clock6(k, RIME, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face5 = k.direction?.x < 0 ? -1 : 1, o = actor.position, foot2 = footOf(actor), hand7 = local7(actor, face5, TROLL_HANDS.scoop);
   const scoopSnow = (t0, t1, n, key4) => {
     if (T121 >= t0 && T121 < t1) out7.push({ id: id2 + "/" + key4, anchorX: hand7.x, anchorY: foot2 + 0.5, draw: (c) => {
       for (let i = 0; i < n; i++) {
@@ -161541,7 +161624,7 @@ function vigilPose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face5 = k.direction.x < 0 ? -1 : 1;
-    const T121 = clock5(k, WHITE2, tick) * SEC5;
+    const T121 = clock6(k, WHITE2, tick) * SEC5;
     s.raise = T121 < CALM ? ease7(seg2(T121, 0, 0.55)) : 1 - ease7(seg2(T121, CALM, CALM + 0.3));
     s.gutter = ease7(seg2(T121, CALM, CALM + 0.35)) * (1 - ease7(seg2(T121, GUT_END - 0.35, GUT_END)));
   }
@@ -161556,7 +161639,7 @@ function meterOf(actor, k, h, tick) {
     m = { seq: k.sequence, tick, n: 0, frozenUntil: -1, frozenAt: -1 };
     meters.set(key4, m);
   }
-  const T121 = clock5(k, WHITE2, tick) * SEC5, inStorm = k.phase === "storm", dt = Math.min(10, Math.max(0, tick - m.tick));
+  const T121 = clock6(k, WHITE2, tick) * SEC5, inStorm = k.phase === "storm", dt = Math.min(10, Math.max(0, tick - m.tick));
   m.tick = tick;
   if (inStorm && dt > 0 && tick >= m.frozenUntil) {
     const inReach = Math.hypot(h.position.x - k.origin.x, h.position.y - k.origin.y) <= WR;
@@ -161577,7 +161660,7 @@ function sweepMeters(model) {
   }
 }
 function vigilGround(c, actor, k, tick, model) {
-  const G6 = STORM_LOOK, T121 = clock5(k, WHITE2, tick) * SEC5, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [];
+  const G6 = STORM_LOOK, T121 = clock6(k, WHITE2, tick) * SEC5, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [];
   const storm = T121 >= STORM3 && T121 < CALM + 0.3, sa = T121 < CALM ? seg2(T121, STORM3, STORM3 + 0.2) : 1 - seg2(T121, CALM, CALM + 0.3);
   if (T121 >= 0.2 && T121 < STORM3 + 0.25) {
     c.save();
@@ -161623,7 +161706,7 @@ function vigilGround(c, actor, k, tick, model) {
   }
 }
 function vigilItems(model, actor, k, tick, out7) {
-  const T121 = clock5(k, WHITE2, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face5 = k.direction?.x < 0 ? -1 : 1, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [], t = tick * SEC5;
+  const T121 = clock6(k, WHITE2, tick) * SEC5, id2 = "lesser-vfx/" + actor.entityId, face5 = k.direction?.x < 0 ? -1 : 1, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [], t = tick * SEC5;
   const pk = seg2(T121, POOLS_AT, POOLS_AT + 0.15) * (1 - seg2(T121, GUT_END - 0.3, GUT_END)), storm = T121 >= STORM3 && T121 < CALM + 0.3, sa = T121 < CALM ? seg2(T121, STORM3, STORM3 + 0.2) : 1 - seg2(T121, CALM, CALM + 0.3);
   const L = LANTERN({ raise: T121 < CALM ? ease7(seg2(T121, 0, 0.55)) : 0 }), LX = actor.position.x + face5 * L[0], LY = actor.position.y + L[1];
   pts2.forEach((p, i) => {
@@ -163662,7 +163745,7 @@ var SPAN5 = {
   wildfire: (t) => ({ rear: t.rearTicks, warnA: t.warnTicks, burnA: t.burnTicks, warnB: t.warnTicks, burnB: t.burnTicks, spent: t.spentTicks, rise: t.riseTicks })
 };
 var VOLCANIC_KINDS = /* @__PURE__ */ new Set(["eruption", "fissure", "wildfire"]);
-function clock6(k, t, tick) {
+function clock7(k, t, tick) {
   const sp = SPAN5[t.kind](t);
   let A2 = 0;
   for (const ph of ORDER6[t.kind]) {
@@ -164067,7 +164150,7 @@ function ventPose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face5 = k.direction.x < 0 ? -1 : 1;
-    const T121 = clock6(k, VENT, tick);
+    const T121 = clock7(k, VENT, tick);
     s.brace = T121 < 1.8 ? ease7(seg5(T121, 0, 0.6)) : 1 - ease7(seg5(T121, 1.8, 2.1));
     let erupt = 0;
     for (const L of LAUNCH) if (T121 >= L - 0.06 && T121 < L + 0.3) erupt = Math.max(erupt, 1 - Math.abs(T121 - L - 0.05) / 0.25);
@@ -164079,7 +164162,7 @@ function ventPose(actor, k, tick, s) {
 }
 function ventGround(c, actor, k, tick) {
   if (!k.target) return;
-  const G6 = LAVA_LOOK, T121 = clock6(k, VENT, tick), spots2 = bombSpots(k);
+  const G6 = LAVA_LOOK, T121 = clock7(k, VENT, tick), spots2 = bombSpots(k);
   spots2.forEach((b, i) => {
     const t0 = LAUNCH[i], land = t0 + FLY4;
     if (T121 >= t0 && T121 < land) {
@@ -164098,7 +164181,7 @@ function ventGround(c, actor, k, tick) {
   });
 }
 function ventItems(model, actor, k, tick, out7) {
-  const T121 = clock6(k, VENT, tick), id2 = "lesser-vfx/" + actor.entityId, face5 = k.direction?.x < 0 ? -1 : 1, cr = craterAt2(actor, face5), foot2 = footOf2(actor);
+  const T121 = clock7(k, VENT, tick), id2 = "lesser-vfx/" + actor.entityId, face5 = k.direction?.x < 0 ? -1 : 1, cr = craterAt2(actor, face5), foot2 = footOf2(actor);
   LAUNCH.forEach((t0, i) => {
     if (T121 >= t0 - 0.04 && T121 < t0 + 0.3) out7.push({ id: id2 + "/spit" + i, anchorX: actor.position.x, anchorY: foot2 + 2, draw: (c) => spit(c, cr.x, cr.y, seg5(T121, t0 - 0.04, t0 + 0.3)) });
   });
@@ -164242,7 +164325,7 @@ function anvilPose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready" && k.target) {
     face5 = k.target.x < actor.position.x ? -1 : 1;
-    const T121 = clock6(k, ANV, tick);
+    const T121 = clock7(k, ANV, tick);
     s.raise = T121 < T_SLAM ? ease7(seg5(T121, 0, 0.75)) * (1 - ease7(seg5(T121, T_SLAM - 0.18, T_SLAM))) : 0;
     s.slam = T121 < T_FREE ? ease7(seg5(T121, T_SLAM - 0.18, T_SLAM)) : 1 - ease7(seg5(T121, T_FREE, T_FREE + 0.4));
     s.stuck = T121 < T_FREE ? ease7(seg5(T121, T_SLAM + 0.15, T_SLAM + 0.5)) : 1 - ease7(seg5(T121, T_FREE, T_FREE + 0.25));
@@ -164252,7 +164335,7 @@ function anvilPose(actor, k, tick, s) {
 }
 function anvilGround(c, actor, k, tick) {
   if (!k.target || !k.direction) return;
-  const G6 = LAVA_LOOK, T121 = clock6(k, ANV, tick), IX = k.target.x, IY = k.target.y, P29 = AP;
+  const G6 = LAVA_LOOK, T121 = clock7(k, ANV, tick), IX = k.target.x, IY = k.target.y, P29 = AP;
   const crK = T121 < T_FREE ? ease7(seg5(T121, T_SLAM, T_SLAM + 0.12)) : 1 - seg5(T121, T_FREE + 0.2, A_END);
   if (crK > 0) craterBack(c, IX, IY, 9, crK);
   if (T121 >= T_SLAM && T121 < T_SLAM + 0.5) gameBurst(c, IX, IY, 16, T121 - T_SLAM, G6, 0.5);
@@ -164308,7 +164391,7 @@ function anvilGround(c, actor, k, tick) {
 }
 function anvilItems(model, actor, k, tick, out7) {
   if (!k.target || !k.direction) return;
-  const T121 = clock6(k, ANV, tick), id2 = "lesser-vfx/" + actor.entityId, IX = k.target.x, IY = k.target.y, P29 = AP, o = actor.position, face5 = IX < o.x ? -1 : 1;
+  const T121 = clock7(k, ANV, tick), id2 = "lesser-vfx/" + actor.entityId, IX = k.target.x, IY = k.target.y, P29 = AP, o = actor.position, face5 = IX < o.x ? -1 : 1;
   const hand7 = [o.x + face5 * HAND[0], o.y + HAND[1]], head19 = [o.x + face5 * HEAD3[0], o.y + HEAD3[1]], pump = pumpAt(T121), foot2 = footOf2(actor);
   if (pump > 0.05) out7.push({ id: id2 + "/haft", anchorX: o.x, anchorY: foot2 + 1.4, draw: (c) => {
     c.save();
@@ -164505,7 +164588,7 @@ function pyrePose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face5 = k.direction.x < 0 ? -1 : 1;
-    const T121 = clock6(k, PYR, tick);
+    const T121 = clock7(k, PYR, tick);
     s.rear = T121 < SP0 ? ease7(seg5(T121, 0, 0.5)) : 1 - ease7(seg5(T121, SP0, SP0 + 0.3));
     s.spent = T121 < RS0 ? ease7(seg5(T121, SP0 + 0.05, SP0 + 0.45)) : 1 - ease7(seg5(T121, RS0, P_END));
   }
@@ -164513,7 +164596,7 @@ function pyrePose(actor, k, tick, s) {
 }
 function pyreGround(c, actor, k, tick) {
   if (!k.origin) return;
-  const G6 = LAVA_LOOK, T121 = clock6(k, PYR, tick), o = k.origin, m = gapsOf(actor, k);
+  const G6 = LAVA_LOOK, T121 = clock7(k, PYR, tick), o = k.origin, m = gapsOf(actor, k);
   for (const w of WAVES2) {
     const gaps = m[w.key];
     if (!gaps) continue;
@@ -164601,7 +164684,7 @@ function flameRows(o, gaps, seed2) {
 }
 function pyreItems(model, actor, k, tick, out7) {
   if (!k.origin) return;
-  const T121 = clock6(k, PYR, tick), id2 = "lesser-vfx/" + actor.entityId, o = k.origin, m = gapsOf(actor, k);
+  const T121 = clock7(k, PYR, tick), id2 = "lesser-vfx/" + actor.entityId, o = k.origin, m = gapsOf(actor, k);
   for (const w of WAVES2) {
     const gaps = m[w.key];
     if (!gaps) continue;
@@ -170365,9 +170448,9 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
 // src/client/level_up_celebration_v4.js
 var LEVEL_UP_CELEBRATION_V4 = Object.freeze({ durationMs: 3200, sparks: 22 });
 function createLevelUpCelebrationV4(doc) {
-  let root6 = null, timer = null;
+  let root6 = null, timer2 = null;
   function clear2() {
-    clearTimeout(timer);
+    clearTimeout(timer2);
     root6?.remove();
     root6 = null;
   }
@@ -170404,7 +170487,7 @@ function createLevelUpCelebrationV4(doc) {
     stage2.append(rays, burst8, emblem8, sub);
     root6.append(flash2, stage2);
     doc.body.append(root6);
-    timer = setTimeout(clear2, LEVEL_UP_CELEBRATION_V4.durationMs);
+    timer2 = setTimeout(clear2, LEVEL_UP_CELEBRATION_V4.durationMs);
   }
   return Object.freeze({ play, destroy: clear2 });
 }
@@ -170502,10 +170585,10 @@ function drawJournalPageV1(c, dir) {
 }
 function createCampJournalNoticeV1(doc) {
   const seen5 = /* @__PURE__ */ new Map();
-  let card = null, timer = 0;
+  let card = null, timer2 = 0;
   function close() {
     if (!card) return;
-    clearTimeout(timer);
+    clearTimeout(timer2);
     card.remove();
     card = null;
   }
@@ -170534,7 +170617,7 @@ function createCampJournalNoticeV1(doc) {
     doc.fonts?.ready?.then(paint4).catch(() => {
     });
     setTimeout(paint4, 400);
-    timer = setTimeout(close, 6500);
+    timer2 = setTimeout(close, 6500);
   }
   function refresh(model, visible3 = true) {
     if (!visible3) {
@@ -176218,7 +176301,7 @@ function createFriendsClientV1({ server, storage, key: key4 = FRIENDS_KEY, fetch
     } catch {
     }
   };
-  let me = read3(), last = null, error = "", timer = null, running2 = false, syncing = null, presenceOf = () => null;
+  let me = read3(), last = null, error = "", timer2 = null, running2 = false, syncing = null, presenceOf = () => null;
   const listeners = /* @__PURE__ */ new Set(), noteListeners = /* @__PURE__ */ new Set(), paces = /* @__PURE__ */ new Map();
   const signedIn = () => Boolean(me.id && me.secret);
   const tell = () => {
@@ -176293,11 +176376,11 @@ function createFriendsClientV1({ server, storage, key: key4 = FRIENDS_KEY, fetch
     return ms;
   };
   function schedule(ms = pace()) {
-    if (timer !== null) clearTimeout2(timer);
-    timer = null;
+    if (timer2 !== null) clearTimeout2(timer2);
+    timer2 = null;
     if (!running2 || !signedIn()) return;
-    timer = setTimeout2(async () => {
-      timer = null;
+    timer2 = setTimeout2(async () => {
+      timer2 = null;
       if (!document2?.hidden) await sync();
       schedule();
     }, ms);
@@ -176356,8 +176439,8 @@ function createFriendsClientV1({ server, storage, key: key4 = FRIENDS_KEY, fetch
     },
     stop() {
       running2 = false;
-      if (timer !== null) clearTimeout2(timer);
-      timer = null;
+      if (timer2 !== null) clearTimeout2(timer2);
+      timer2 = null;
     },
     sync,
     async register(name) {
@@ -178681,11 +178764,11 @@ function createSettlementServicesMenu2(options) {
     refresh(readModel());
   }
   let drinkHeld = 0;
-  const clock8 = () => globalThis.performance?.now?.() ?? Date.now();
+  const clock9 = () => globalThis.performance?.now?.() ?? Date.now();
   async function drink() {
     const m = readModel();
     if (m.potions?.count && m.potions.cooldownTicks > 0 && m.potions.cooldownTicks <= 27 && !busy) {
-      drinkHeld = clock8() + 450;
+      drinkHeld = clock9() + 450;
       return;
     }
     if (!m.potions?.count || m.potions.cooldownTicks > 0 || busy) return;
@@ -179457,7 +179540,7 @@ function createSettlementServicesMenu2(options) {
       return;
     }
     if (drinkHeld) {
-      if (clock8() > drinkHeld) drinkHeld = 0;
+      if (clock9() > drinkHeld) drinkHeld = 0;
       else if (!m.potions.cooldownTicks) drink();
     }
     const belt2 = m.potions, cooling = belt2.cooldownTicks > 0, seconds = cooling ? String(Math.ceil(belt2.cooldownTicks / 60)) : "";
@@ -179711,13 +179794,13 @@ function createPotionDragV1({ document: doc, environment: env }) {
   env.addEventListener("resize", apply3);
   doc.addEventListener(POTION_MOVE_EVENT, start);
   doc.addEventListener(POTION_RESET_EVENT, resetSpot);
-  const timer = env.setInterval(() => {
+  const timer2 = env.setInterval(() => {
     if (spot2 && !moving2) apply3();
   }, 1e3);
   apply3();
   return Object.freeze({ start, finish: finish4, reset: resetSpot, spot: () => spot2, moving: () => moving2, destroy() {
     finish4();
-    env.clearInterval(timer);
+    env.clearInterval(timer2);
     env.removeEventListener("pointerdown", down, true);
     env.removeEventListener("pointermove", move, true);
     env.removeEventListener("pointerup", up2, true);
@@ -180105,7 +180188,7 @@ function createSettingsPageV1({ document: doc, environment: env }) {
 var TARGETS = ["#primary-attack", "#world-bag", "#carried-rations", "#rpg-interaction-v2", ".subweapon-hud", "#world-pickup"];
 function createHandMirrorV1({ document: doc, environment: env }) {
   const html = doc.documentElement;
-  let on = false, timer = null;
+  let on = false, timer2 = null;
   const moved = /* @__PURE__ */ new Set();
   const unpin = (e) => {
     if (e.dataset.potionPlaced === "true") {
@@ -180146,11 +180229,11 @@ function createHandMirrorV1({ document: doc, environment: env }) {
     on = want;
     if (on) {
       place4();
-      timer = env.setInterval(place4, 500);
+      timer2 = env.setInterval(place4, 500);
       env.addEventListener("resize", place4);
     } else {
-      env.clearInterval(timer);
-      timer = null;
+      env.clearInterval(timer2);
+      timer2 = null;
       env.removeEventListener("resize", place4);
       for (const e of moved) unpin(e);
       moved.clear();
@@ -180159,7 +180242,7 @@ function createHandMirrorV1({ document: doc, environment: env }) {
   sync();
   return Object.freeze({ sync, destroy() {
     on = false;
-    env.clearInterval(timer);
+    env.clearInterval(timer2);
     env.removeEventListener("resize", place4);
     for (const e of moved) unpin(e);
     moved.clear();
@@ -181614,7 +181697,7 @@ function createDungeonMapV1({ document: doc, environment: env, store: store2, re
   doc.head?.append(style);
   doc.body.append(sheet3);
   let found = {}, open3 = false, viewFloor = 0, model = null, tabsKey = null, dirty = true, lastDraw = -1;
-  const pictures = /* @__PURE__ */ new Map();
+  const pictures = createIdleSpritesV1({ limit: 12 });
   try {
     found = JSON.parse(store2.get(STORE_KEY) ?? "{}") ?? {};
   } catch {
@@ -181641,7 +181724,6 @@ function createDungeonMapV1({ document: doc, environment: env, store: store2, re
     paintMask(c.getContext("2d"), m, PX, PALETTE[pal3]);
     p = { key: key4, canvas: c, mask: m, set };
     pictures.set(d.siteKey + "/" + i + "/" + pal3, p);
-    if (pictures.size > 12) pictures.delete(pictures.keys().next().value);
     return p;
   }
   function track4() {
@@ -185273,7 +185355,7 @@ var clamp44 = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 var mix26 = (a, b, t) => a + (b - a) * t;
 var interior = (space) => Boolean(space.site || space.functionalSite || space.settlementInterior || space.tripHell);
 function lightingFrameV1(model, review = null) {
-  const override = review?.getOverrideMinute?.(), clock8 = Number.isFinite(override) ? worldTimeAtMinute(override) : model.worldTime ?? worldTimeAtTick(model.tick ?? 0), enabled = review?.enabled?.() !== false, minute = clock8.minuteOfDay;
+  const override = review?.getOverrideMinute?.(), clock9 = Number.isFinite(override) ? worldTimeAtMinute(override) : model.worldTime ?? worldTimeAtTick(model.tick ?? 0), enabled = review?.enabled?.() !== false, minute = clock9.minuteOfDay;
   const room = interior(model.space), tavern = Boolean(model.space.settlementInterior);
   let ambient, shadowAlpha = 0, vector2 = { x: 0, y: 0 };
   const underground = ["woodland-cave", "procedural-crypt"].includes((model.space.site ?? model.space.functionalSite)?.siteKind);
@@ -185294,7 +185376,7 @@ function lightingFrameV1(model, review = null) {
     const visibility = sun3 ? Math.min(1, clamp44((minute - 300) / 120), clamp44((1260 - minute) / 120)) : Math.min(1, progress5 * 8, (1 - progress5) * 8);
     shadowAlpha = (sun3 ? 0.105 + 0.035 * elevation : 0.055) * clamp44(visibility);
   }
-  return Object.freeze({ version: DAY_NIGHT_LIGHTING_VERSION, enabled, clock: clock8, minuteOfDay: minute, period: clock8.period, preview: Number.isFinite(override), profile: room ? "interior" : "outdoor", ambient: ambient.map(Math.round), vector: vector2, shadowAlpha: enabled ? shadowAlpha : 0, tavern });
+  return Object.freeze({ version: DAY_NIGHT_LIGHTING_VERSION, enabled, clock: clock9, minuteOfDay: minute, period: clock9.period, preview: Number.isFinite(override), profile: room ? "interior" : "outdoor", ambient: ambient.map(Math.round), vector: vector2, shadowAlpha: enabled ? shadowAlpha : 0, tavern });
 }
 var LIGHT_MAP_SCALE = 0.5;
 var lightMaps = /* @__PURE__ */ new WeakMap();
@@ -209914,7 +209996,7 @@ function plannedVillageDepthItems(m, v) {
 // src/client/generated_town_presentation_v1.js
 var PROP_BOX = Object.freeze({ x: -70, y: -120, w: 140, h: 140 });
 var PROP_KEEP = 96;
-var propSprites = /* @__PURE__ */ new Map();
+var propSprites = createIdleSpritesV1({ limit: PROP_KEEP });
 var propBuilt = 0;
 var propDrawn = 0;
 var propScale = (s) => Math.max(0.5, Math.min(3, Math.round(s * 20) / 20));
@@ -209929,8 +210011,7 @@ function streetPropSpriteV1(c, t, o, kind, lx, ly, i) {
   }
   const s = propScale(m.a), key4 = t.id + "|" + i + "|" + kind + "@" + s;
   let sprite8 = propSprites.get(key4);
-  if (sprite8) propSprites.delete(key4);
-  else {
+  if (!sprite8) {
     const cv = doc.createElement("canvas");
     cv.width = Math.ceil(PROP_BOX.w * s);
     cv.height = Math.ceil(PROP_BOX.h * s);
@@ -209942,7 +210023,6 @@ function streetPropSpriteV1(c, t, o, kind, lx, ly, i) {
     }
     sprite8 = cv;
     propBuilt++;
-    if (propSprites.size >= PROP_KEEP) propSprites.delete(propSprites.keys().next().value);
   }
   propSprites.set(key4, sprite8);
   propDrawn++;
@@ -210171,10 +210251,16 @@ function layersOf(t) {
 }
 var PAGE2 = 384;
 var PAD4 = 2;
-var PIXELS2 = 16e6;
+var PIXELS2 = 8e6;
 var AHEAD3 = 320;
-var pages = /* @__PURE__ */ new Map();
 var pageStats = { made: 0, maxMs: 0, pixels: 0 };
+var pages = createIdleSpritesV1({ free: (p) => {
+  if (p) {
+    pageStats.pixels -= p.width * p.height;
+    p.width = 0;
+    p.height = 0;
+  }
+} });
 var keepAtLeast = 0;
 var lastCentre = null;
 function trim3() {
@@ -210183,10 +210269,7 @@ function trim3() {
   while (pages.size && (pageStats.pixels > PIXELS2 && n > keepAtLeast || pages.size > 4096)) {
     const [k, p] = pages.entries().next().value;
     pages.delete(k);
-    if (p) {
-      pageStats.pixels -= p.width * p.height;
-      n--;
-    }
+    if (p) n--;
   }
 }
 var canvasOf3 = (w, h) => {
@@ -210199,12 +210282,7 @@ var canvasOf3 = (w, h) => {
 };
 function pageFor(t, which, layer3, px7, py, s, budget) {
   const key4 = t.id + "|" + which + "|" + px7 + "," + py + "|" + s;
-  let p = pages.get(key4);
-  if (p !== void 0) {
-    pages.delete(key4);
-    pages.set(key4, p);
-    return p;
-  }
+  if (pages.has(key4)) return pages.get(key4);
   const b = { x0: px7, y0: py, x1: px7 + PAGE2, y1: py + PAGE2 };
   if (!layer3.boxes.some((r) => hits(r, b))) {
     pages.set(key4, null);
@@ -227300,15 +227378,11 @@ var ANCHOR = Object.freeze({ cave: -24, crypt: -84, ruin: -84 });
 var ENTRANCE = { cave: paintCaveEntranceV3, crypt: paintCryptEntranceV3, ruin: paintRuinEntranceV3 };
 var SCALE27 = 1.5;
 var LIMIT7 = 12;
-var sprites7 = /* @__PURE__ */ new Map();
+var sprites7 = createIdleSpritesV1({ limit: LIMIT7 });
 var painted5 = 0;
 function sprite7(key4, box6, paint4) {
   let s = sprites7.get(key4);
-  if (s) {
-    sprites7.delete(key4);
-    sprites7.set(key4, s);
-    return s;
-  }
+  if (s) return s;
   const [l, t, r, b] = box6, w = Math.ceil((r - l) * SCALE27), h = Math.ceil((b - t) * SCALE27), canvas = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(w, h) : globalThis.document?.createElement("canvas");
   if (!canvas) return null;
   canvas.width = w;
@@ -227321,7 +227395,6 @@ function sprite7(key4, box6, paint4) {
   painted5++;
   s = { canvas, box: box6 };
   sprites7.set(key4, s);
-  while (sprites7.size > LIMIT7) sprites7.delete(sprites7.keys().next().value);
   return s;
 }
 function stamp7(ctx, s, x, y, facing2 = 0) {
@@ -227387,7 +227460,11 @@ function drawSiteEntranceV3(ctx, e, art2 = null) {
 var queued = /* @__PURE__ */ new Set();
 function prewarmSiteEntranceV3(e, art2 = null) {
   const key4 = entranceKey(e, art2);
-  if (sprites7.has(key4) || queued.has(key4)) return;
+  if (sprites7.has(key4)) {
+    sprites7.touch(key4);
+    return;
+  }
+  if (queued.has(key4)) return;
   queued.add(key4);
   const run2 = () => {
     queued.delete(key4);
@@ -240154,7 +240231,7 @@ function drawGooIcon(cv) {
   return cv;
 }
 var TIMES_UP_TICKS = 84;
-var clock7 = (ticks) => {
+var clock8 = (ticks) => {
   const s = Math.max(0, Math.ceil(ticks / S17));
   return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
 };
@@ -240165,18 +240242,18 @@ function tripBadBadgeV1(model) {
   if (r?.landTick != null) {
     if (model.context?.spaceInstanceId !== h.spaceInstanceId) return null;
     const heavy2 = r.landTick + TRIP_HEAVY_LEGS_TICKS - tick;
-    if (heavy2 > 0) return { snack: "heavy-legs", name: "Heavy legs", fx: "", clock: clock7(heavy2), fraction: heavy2 / TRIP_HEAVY_LEGS_TICKS, blink: false, color: "#b070e0", drawIcon: drawGooIcon };
+    if (heavy2 > 0) return { snack: "heavy-legs", name: "Heavy legs", fx: "", clock: clock8(heavy2), fraction: heavy2 / TRIP_HEAVY_LEGS_TICKS, blink: false, color: "#b070e0", drawIcon: drawGooIcon };
     const goo2 = h.nightmare?.legs?.[me] ?? 0;
-    if (goo2 > tick) return { snack: "heavy-legs", name: "Heavy legs", fx: "", clock: clock7(goo2 - tick), fraction: (goo2 - tick) / 180, blink: false, color: "#b070e0", drawIcon: drawGooIcon };
+    if (goo2 > tick) return { snack: "heavy-legs", name: "Heavy legs", fx: "", clock: clock8(goo2 - tick), fraction: (goo2 - tick) / 180, blink: false, color: "#b070e0", drawIcon: drawGooIcon };
     if (h.nightmare) return h.nightmare.dead === null ? tick - h.endTick < TIMES_UP_TICKS ? { snack: "bad-trip", name: "Time's up", fx: "", clock: "", fraction: 0, blink: false, color: "#ff5ab0", drawIcon: drawSwirlIcon } : null : { snack: "bad-trip", name: "The way out is open", fx: "", clock: "", fraction: 1, blink: false, color: "#ff5ab0", drawIcon: drawSwirlIcon };
     const left2 = h.endTick - tick;
-    return { snack: "bad-trip", name: "Bad trip", fx: "", clock: clock7(left2), fraction: left2 / (h.endTick - r.landTick), blink: left2 <= 600 && Math.floor(left2 / 15) % 2 === 0, color: "#ff5ab0", drawIcon: drawSwirlIcon };
+    return { snack: "bad-trip", name: "Bad trip", fx: "", clock: clock8(left2), fraction: left2 / (h.endTick - r.landTick), blink: left2 <= 600 && Math.floor(left2 / 15) % 2 === 0, color: "#ff5ab0", drawIcon: drawSwirlIcon };
   }
   if (r) return null;
   const p = h.portal, window2 = p.closeTick !== null && tick < p.closeTick && p.closeTick - (h.heroes[h.eaterEntityId]?.landTick ?? p.closeTick) > 60;
   if (!window2) return null;
   const left = p.closeTick - tick, who = className(model.entitiesById[h.eaterEntityId]?.heroLook?.cls);
-  return { snack: "portal", name: `${who} fell into a bad trip!`, fx: "Jump in", clock: clock7(left), fraction: left / TRIP_FRIEND_WINDOW_TICKS, blink: left <= 300 && Math.floor(left / 15) % 2 === 0, color: "#ff5ab0", drawIcon: drawSwirlIcon };
+  return { snack: "portal", name: `${who} fell into a bad trip!`, fx: "Jump in", clock: clock8(left), fraction: left / TRIP_FRIEND_WINDOW_TICKS, blink: left <= 300 && Math.floor(left / 15) % 2 === 0, color: "#ff5ab0", drawIcon: drawSwirlIcon };
 }
 
 // src/client/trip_hell_v1/imps.js
@@ -244292,7 +244369,7 @@ function startBlackboxV1({ environment: env, storage, channel: channel2 = "", re
   env.addEventListener?.("unhandledrejection", onError);
   write4();
   let bigAt = now3();
-  const timer = env.setInterval?.(() => {
+  const timer2 = env.setInterval?.(() => {
     if (hidden()) return;
     if (now3() - bigAt >= everyMs - 250) {
       bigAt = now3();
@@ -244305,7 +244382,7 @@ function startBlackboxV1({ environment: env, storage, channel: channel2 = "", re
     flush,
     record: () => record2,
     stop() {
-      if (timer !== null) env.clearInterval?.(timer);
+      if (timer2 !== null) env.clearInterval?.(timer2);
       if (raf !== null) env.cancelAnimationFrame?.(raf);
       env.removeEventListener?.("pagehide", onHide);
       doc?.removeEventListener?.("visibilitychange", onVisibility);
@@ -247123,7 +247200,7 @@ function releaseOfHtmlV1(html) {
 function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstCheckMs = 2e4, fetchImpl = null, againMs = 18e5 } = {}) {
   const doc = environment.document, current = doc.documentElement.dataset.worldRelease, fetcher = fetchImpl ?? environment.fetch?.bind(environment);
   if (!current || !fetcher) return null;
-  let banner8 = null, checking = false, timer = null, stopped = false, found = null, dismissedAt = null;
+  let banner8 = null, checking = false, timer2 = null, stopped = false, found = null, dismissedAt = null;
   const now3 = () => environment.Date?.now?.() ?? Date.now();
   async function check() {
     if (stopped || checking || found || doc.hidden) return found;
@@ -247231,11 +247308,11 @@ function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstC
   doc.addEventListener("visibilitychange", onVisible);
   environment.addEventListener("pageshow", onVisible);
   const first = environment.setTimeout(check, firstCheckMs);
-  timer = environment.setInterval(check, intervalMs);
+  timer2 = environment.setInterval(check, intervalMs);
   return Object.freeze({ check, stop() {
     stopped = true;
     environment.clearTimeout(first);
-    environment.clearInterval(timer);
+    environment.clearInterval(timer2);
     doc.removeEventListener("visibilitychange", onVisible);
     environment.removeEventListener("pageshow", onVisible);
     banner8?.remove();
@@ -247380,11 +247457,11 @@ function openWorldRefreshV1({ document: doc, environment: env, begin: begin2, bl
   card.append(title16, body6, acts);
   root6.append(card);
   doc.body.append(root6);
-  let job = null, closed2 = false, timer = null;
+  let job = null, closed2 = false, timer2 = null;
   const close = () => {
     if (closed2) return;
     closed2 = true;
-    if (timer !== null) env.clearInterval(timer);
+    if (timer2 !== null) env.clearInterval(timer2);
     try {
       job?.build?.cancel?.();
     } catch {
@@ -247421,11 +247498,11 @@ function openWorldRefreshV1({ document: doc, environment: env, begin: begin2, bl
   };
   show([el3("p", null, "Building the updated world. Nothing changes until you confirm."), bar3, stage2], [button3("Cancel", "wr-no", close)]);
   progress5();
-  timer = env.setInterval(progress5, 250);
+  timer2 = env.setInterval(progress5, 250);
   job.build.result.then(async (record2) => {
     if (closed2) return;
-    env.clearInterval(timer);
-    timer = null;
+    env.clearInterval(timer2);
+    timer2 = null;
     const plan = await job.summarize(record2);
     if (closed2) return;
     if (plan.same) {
@@ -247447,9 +247524,9 @@ function openWorldRefreshV1({ document: doc, environment: env, begin: begin2, bl
     show([el3("p", null, "The updated world is ready."), list], [no, go]);
   }).catch((e) => {
     if (!closed2) {
-      if (timer !== null) {
-        env.clearInterval(timer);
-        timer = null;
+      if (timer2 !== null) {
+        env.clearInterval(timer2);
+        timer2 = null;
       }
       fail(e?.message);
     }
@@ -247856,7 +247933,7 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
 }, onJoin = () => {
 }, validatePassport = validateHeroPassport }) {
   const guests = /* @__PURE__ */ new Map(), held = /* @__PURE__ */ new Map();
-  let session = null, started = false, timer = null, closed2 = false, shared = null;
+  let session = null, started = false, timer2 = null, closed2 = false, shared = null;
   const friendOf = (m) => typeof m.friend === "string" && /^.{1,16}#\d{4}$/u.test(m.friend) ? m.friend : null;
   const roster = () => [...guests.values()].filter((g2) => g2.hello).map((g2) => ({ name: g2.hello.name, heroId: g2.hello.heroId, playerId: g2.playerId ?? null, via: g2.via, friend: friendOf(g2.hello) }));
   const tellLobby = () => {
@@ -248152,7 +248229,7 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
         g2.link.send({ t: "start", playerId: pid, ...shared ? { party: shared } : {} });
       }
       tellLobby();
-      timer = setInterval2(() => pump(), MODEL_INTERVAL_MS / 2);
+      timer2 = setInterval2(() => pump(), MODEL_INTERVAL_MS / 2);
     },
     tick: (worldAt) => pump(worldAt),
     guests: () => guests.size,
@@ -248162,7 +248239,7 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
     close(reason = "The host closed the game") {
       if (closed2) return;
       closed2 = true;
-      if (timer !== null) clearInterval2(timer);
+      if (timer2 !== null) clearInterval2(timer2);
       for (const g2 of [...guests.values()]) {
         if (session && g2.playerId && g2.hello) sendPassport(g2, true);
         drop4(g2, reason);
@@ -248756,16 +248833,16 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
     leave() {
       if (ended || leaving) return Promise.resolve();
       return new Promise((resolve) => {
-        let timer = null;
+        let timer2 = null;
         leaving = () => {
           leaving = () => {
           };
           ended = true;
-          clearTimeout(timer);
+          clearTimeout(timer2);
           link.close("left");
           resolve();
         };
-        timer = setTimeout2(() => leaving(), 2e3);
+        timer2 = setTimeout2(() => leaving(), 2e3);
         link.send({ t: "bye" });
       });
     },
@@ -250636,8 +250713,8 @@ function channelLink(pc2, channel2) {
   };
   if (typeof pc2.getStats === "function") {
     setTimeout(readPath, 1500);
-    const timer = setInterval(() => {
-      if (link.closed) clearInterval(timer);
+    const timer2 = setInterval(() => {
+      if (link.closed) clearInterval(timer2);
       else readPath();
     }, 15e3);
   }
@@ -250941,9 +251018,9 @@ async function scanQr(environment, host) {
   const document2 = environment.document, video = el(document2, "video", "coop-camera"), canvas = el(document2, "canvas"), stop2 = button(document2, "coop-secondary", "Stop camera", () => finish4(null));
   video.setAttribute("playsinline", "");
   video.muted = true;
-  let stream2 = null, timer = null, done3 = null;
+  let stream2 = null, timer2 = null, done3 = null;
   const finish4 = (v) => {
-    if (timer) environment.clearInterval(timer);
+    if (timer2) environment.clearInterval(timer2);
     stream2?.getTracks().forEach((t) => t.stop());
     video.remove();
     stop2.remove();
@@ -250963,7 +251040,7 @@ async function scanQr(environment, host) {
   await video.play().catch(() => {
   });
   const g2 = canvas.getContext("2d", { willReadFrequently: true });
-  timer = environment.setInterval(() => {
+  timer2 = environment.setInterval(() => {
     const w = video.videoWidth, h = video.videoHeight;
     if (!w || !h) return;
     const s = Math.min(1, 640 / Math.max(w, h));
@@ -253087,7 +253164,7 @@ async function startWorldClient(environment) {
   function stopAfterLoopError(phase3, error) {
     const context = inspect(() => {
       const m = clientPort.getReadModel();
-      return { tick: m.tick, spaceInstanceId: m.context.spaceInstanceId, persistence: m.persistence, preparation: client.resources().spacePreparation, authorityClock: clock8.inspect(), runtime: session.resources?.() };
+      return { tick: m.tick, spaceInstanceId: m.context.spaceInstanceId, persistence: m.persistence, preparation: client.resources().spacePreparation, authorityClock: clock9.inspect(), runtime: session.resources?.() };
     });
     if (!loopHealth.fail(phase3, error, context)) return;
     session.haltForClientFault?.(error, phase3);
@@ -253132,7 +253209,7 @@ async function startWorldClient(environment) {
       lastPresentedFrame = time3;
       inputReadSincePaint = false;
       performanceProbe?.frame(time3);
-      const authorityDeadline = clock8.inspect().deadline;
+      const authorityDeadline = clock9.inspect().deadline;
       if (performanceProbe) performanceProbe.measure("clientFrameTotal", () => client.render(time3, authorityDeadline));
       else client.render(time3, authorityDeadline);
       loopHealth.paintEnd();
@@ -253152,7 +253229,7 @@ async function startWorldClient(environment) {
     client.resetActorPresentation("suspend");
     client.releaseInput();
     active2 = false;
-    clock8.reset("suspend");
+    clock9.reset("suspend");
     lastPresentedFrame = null;
     if (frame6 !== null) environment.cancelAnimationFrame(frame6);
     frame6 = null;
@@ -253162,7 +253239,7 @@ async function startWorldClient(environment) {
     loopHealth.record("resume");
     if (environment.document.hidden || loopHealth.failed()) return;
     if (!active2) {
-      clock8.reset("resume");
+      clock9.reset("resume");
       authorityDelivery?.reset("resume");
       session.resume?.();
     }
@@ -253226,12 +253303,12 @@ async function startWorldClient(environment) {
         coopPumpQueued = true;
         queueMicrotask(() => {
           coopPumpQueued = false;
-          coopHost?.tick(clock8.inspect().deadline - AUTHORITY_CLOCK_PERIOD_MS);
+          coopHost?.tick(clock9.inspect().deadline - AUTHORITY_CLOCK_PERIOD_MS);
         });
       }
     }
   }
-  const clock8 = createAuthorityClock({
+  const clock9 = createAuthorityClock({
     now: () => environment.performance.now(),
     step: tick,
     maxStepsPerCallback: () => coopHost ? AUTHORITY_CLOCK_GAME_STEPS_PER_CALLBACK : AUTHORITY_CLOCK_MAX_STEPS_PER_CALLBACK,
@@ -253257,29 +253334,29 @@ async function startWorldClient(environment) {
       performanceProbe.setGauge("authorityLastResetReason", value2.lastResetReason);
     } : null
   });
-  authorityDelivery = createAuthorityDeliveryV1({ clock: clock8, now: () => environment.performance.now(), activity, active: () => active2, failed: () => loopHealth.failed(), onBegin: () => loopHealth.authorityBegin(), onError: (error) => stopAfterLoopError("authority", error), observe: performanceProbe ? (sample) => {
+  authorityDelivery = createAuthorityDeliveryV1({ clock: clock9, now: () => environment.performance.now(), activity, active: () => active2, failed: () => loopHealth.failed(), onBegin: () => loopHealth.authorityBegin(), onError: (error) => stopAfterLoopError("authority", error), observe: performanceProbe ? (sample) => {
     const name = sample.driver === "timer" ? "authorityTimer" : "authorityPaint";
     performanceProbe.record(name + (sample.serviced ? "Service" : sample.skipReason === "timer-delivered" ? "TimerDeliveredSkip" : "DueZeroSkip"), 0);
     if (sample.driver === "timer" && sample.gapMs !== null) performanceProbe.sample("authorityTimerCallbackGapMs", sample.gapMs);
   } : null });
-  let timer = null;
+  let timer2 = null;
   function pacedTick() {
-    timer = null;
+    timer2 = null;
     if (!active2 || loopHealth.failed()) return;
     const wait2 = authorityDelivery.timer();
-    if (wait2 !== null && active2 && !loopHealth.failed()) timer = environment.setTimeout(pacedTick, wait2);
+    if (wait2 !== null && active2 && !loopHealth.failed()) timer2 = environment.setTimeout(pacedTick, wait2);
   }
   function startClockTimer() {
-    if (timer !== null) return;
-    timer = activity ? environment.setTimeout(pacedTick, Math.ceil(period)) : environment.setInterval(() => {
+    if (timer2 !== null) return;
+    timer2 = activity ? environment.setTimeout(pacedTick, Math.ceil(period)) : environment.setInterval(() => {
       if (active2) tick();
     }, period);
   }
   function stopClockTimer() {
-    if (timer === null) return;
-    if (activity) environment.clearTimeout(timer);
-    else environment.clearInterval(timer);
-    timer = null;
+    if (timer2 === null) return;
+    if (activity) environment.clearTimeout(timer2);
+    else environment.clearInterval(timer2);
+    timer2 = null;
   }
   environment.addEventListener("blur", () => {
     if (coopHost?.guests()) client.releaseInput();
