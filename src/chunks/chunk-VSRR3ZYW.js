@@ -22861,7 +22861,8 @@ function keyEnemyExtractionTickV1(state, groupId) {
   if (!group) return null;
   const economy = state.encounterEconomy?.groups?.[groupId];
   if (group.cleared && economy?.clearedTick !== null && economy?.clearedTick !== void 0) return economy.clearedTick;
-  const key5 = group.entityIds.filter((id) => state.bossCombat?.bossesByEntityId?.[id] || state.eliteCombat?.elitesByEntityId?.[id]);
+  const site = group.siteId ? state.d9World?.functionalSitesById?.[group.siteId] : null, last = Array.isArray(site?.floors) ? site.floors.at(-1) : null, bosses = last?.groupId === groupId ? siteBossIdsV1(state, site) : [];
+  const key5 = bosses.length ? bosses : group.entityIds.filter((id) => state.bossCombat?.bossesByEntityId?.[id] || state.eliteCombat?.elitesByEntityId?.[id]);
   if (!key5.length) return null;
   let tick = -1;
   for (const id of key5) {
