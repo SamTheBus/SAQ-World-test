@@ -74999,6 +74999,7 @@ function swampTreeSpritesV1(doc) {
 // src/client/biome_nature_art_v1.js
 var BIOME_NATURE_VERSION = "biome-nature-art-v1";
 var BIOME_NATURE_KITS = Object.freeze({ a: "grassland", m: "wetland", r: "upland", d: "desert", s: "frostland", t: "tropical", l: "volcanic", w: "woodland" });
+var NATURE_KIT_BORROWS_V1 = Object.freeze({ d: Object.freeze(["t", "w"]), r: Object.freeze(["w"]), l: Object.freeze(["w"]) });
 var ROLES = /* @__PURE__ */ new Set(["trees", "understory", "rocks", "accents"]);
 var PICK = {
   a: { tree: ["oak", 3, "birch", 2, "apple", 2], base: ["bush", 7, "sunflowers", 1, "rocks", 1], rock: ["stone", 2, "rocks", 2, "bush", 1], ground: [["tuft", 0.62, 4], ["flowers", 0.72, 3], ["rocks", 0.45, 1]] },
@@ -75225,16 +75226,21 @@ async function createBiomeNatureArtV1(env, review, prior) {
   }
   const natureTile = (s, x, y) => Boolean(owned2(s, x, y));
   const hasTree = (s, x, y, size, n) => natureTile(s, x + size * 0.5, y + size * 0.78) || (prior.hasTree ? prior.hasTree(s, x, y, size, n) : true);
+  const withBorrowed = (codes) => {
+    const out7 = new Set(codes);
+    for (const c of codes) for (const b of NATURE_KIT_BORROWS_V1[c] ?? []) out7.add(b);
+    return out7;
+  };
   const kitKey = (codes) => (prior.kitKey?.(codes) ?? "") + "n" + lazy.key(codes), kitGeneration = () => (prior.kitGeneration?.() ?? 0) + lazy.generation();
   const wantKitsFor = (space) => {
     prior.wantKitsFor?.(space);
     const codes = landCodesOfSpaceV1(space);
-    if (codes) lazy.want(codes);
+    if (codes) lazy.want(withBorrowed(codes));
   };
   const whenKitsLoaded = async (space) => {
     await prior.whenKitsLoaded?.(space);
     const codes = landCodesOfSpaceV1(space);
-    if (codes) await lazy.whenLoaded(codes);
+    if (codes) await lazy.whenLoaded(withBorrowed(codes));
   };
   return Object.freeze({ ...prior, tree: tree2, base: base3, rock: rock4, biomeDetail, drawGroundDetail, natureTile, hasTree, drawNatureProp, kitKey, kitGeneration, wantKitsFor, whenKitsLoaded, resources: () => ({ ...prior.resources(), biomeNature: { version: BIOME_NATURE_VERSION, kits: Object.values(BIOME_NATURE_KITS), lazy: lazy.stats(), draws: { ...draws }, decodedBytes, downloadBytes } }) });
 }
