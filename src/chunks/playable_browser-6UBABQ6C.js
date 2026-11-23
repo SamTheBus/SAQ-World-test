@@ -338879,6 +338879,8 @@ function trendPicksV1(snapshot) {
   put3("actors", a?.canonicalActors);
   put3("resets", snapshot?.gauges?.authorityResetCount);
   put3("long", snapshot?.longFrameCount);
+  put3("wkMb", a?.d9Worker?.postedMb);
+  put3("wkN", a?.d9Worker?.postedCopies);
   return out7;
 }
 var parse2 = (text3) => {
@@ -339210,6 +339212,7 @@ async function requestCartographyV1(request, send) {
 function createWorldWorkerBridgeD9(worker, { record: record2 = () => {
 }, diagnostics = false, now: now3 = () => performance.now(), expectedDatabaseName = null } = {}) {
   const queue = [], requestDiagnostics = {}, requestCounts = {};
+  let postedChars = 0, postedCopies = 0;
   let active2 = null, ready = false, closed2 = false, sequence = 0;
   let markStarted;
   const started = new Promise((resolve) => markStarted = resolve);
@@ -339264,6 +339267,10 @@ function createWorldWorkerBridgeD9(worker, { record: record2 = () => {
     if (queue.length + (active2 ? 1 : 0) >= 8)
       return Promise.reject(new Error("D9 world Worker queue admission exceeded"));
     requestCounts[kind] = (requestCounts[kind] ?? 0) + 1;
+    if (typeof request?.stateText === "string") {
+      postedChars += request.stateText.length;
+      postedCopies++;
+    }
     if ((typeof diagnostics === "function" ? diagnostics() : diagnostics) && (requestCounts[kind] === 1 || requestCounts[kind] % 64 === 0 || !requestDiagnostics[kind])) {
       const at10 = now3(), encoder = new TextEncoder(), fields = {};
       for (const [key4, value2] of Object.entries(request))
@@ -339305,7 +339312,9 @@ function createWorldWorkerBridgeD9(worker, { record: record2 = () => {
       ready,
       closed: closed2,
       requestDiagnostics: { ...requestDiagnostics },
-      requestCounts: { ...requestCounts }
+      requestCounts: { ...requestCounts },
+      postedMb: postedChars / 1048576,
+      postedCopies
     }),
     destroy() {
       worker.terminate();
@@ -339559,7 +339568,8 @@ function applyWorldTransferPatchD9(state2, patch) {
     "World transfer campaign/frame changed during preparation"
   );
   for (const [pid, revision] of Object.entries(patch.revisions))
-    requireContract(state2.playersById[pid]?.inventory.revision === revision, "Inventory changed during world preparation");
+    if (patch.changes.some((c) => c.path[0] === "playersById" && c.path[1] === pid && c.path[2] === "inventory"))
+      requireContract(state2.playersById[pid]?.inventory.revision === revision, "Inventory changed during world preparation");
   for (const id2 of patch.releasedGroupIds)
     requireContract(!proceduralGroupPinnedD9(state2, id2), "Combat now pins a prepared eviction");
   for (const id2 of patch.coldGroups)
