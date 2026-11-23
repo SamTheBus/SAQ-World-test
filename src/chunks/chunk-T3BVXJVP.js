@@ -53888,6 +53888,9 @@ function defeatReward2(state, p, enemy2, ordinal, rewardVersion = PLAYER_INVENTO
   return { gold, definitionId };
 }
 function canPickUp(state, p, sourceEntityId, radius) {
+  return canReachDrop(state, p, sourceEntityId, radius) && Object.keys(p.inventory.itemsById).length < inventoryIntakeCapacity(p.d8);
+}
+function canReachDrop(state, p, sourceEntityId, radius) {
   const a = state.entitiesById[p.entityId], r = p.inventory?.renewal ? groundGear(p).find((r2) => r2.sourceEntityId === sourceEntityId) : p.inventory?.rewardsByEntityId[sourceEntityId];
   if (!a.alive || !r || !r.definitionId || r.claimed || a.residency.spaceInstanceId !== r.spaceInstanceId) return false;
   const dx = r.position.x - a.position.x, dy = r.position.y - a.position.y, d = Math.hypot(dx, dy);
@@ -53895,7 +53898,7 @@ function canPickUp(state, p, sourceEntityId, radius) {
   const c = state.spacesByInstanceId[r.spaceInstanceId].collision, steps = Math.max(1, Math.ceil(d / (c.tileSize / 4)));
   for (let i = 0; i <= steps; i++)
     if (collidesWithTiles(c, a.position.x + dx * i / steps, a.position.y + dy * i / steps, 0)) return false;
-  return !r.definitionId || Object.keys(p.inventory.itemsById).length < inventoryIntakeCapacity(p.d8);
+  return true;
 }
 var KIT_CLASS = Object.fromEntries(
   Object.entries(CLASS_KITS).flatMap(([cls, kit]) => Object.values(kit).map((id) => [id, cls]))
@@ -57873,6 +57876,7 @@ export {
   equippedWeaponVisual,
   defeatReward2 as defeatReward,
   canPickUp,
+  canReachDrop,
   itemGearClasses,
   classGearAllowed,
   classGearRefusal,

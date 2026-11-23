@@ -487,6 +487,7 @@ import {
   canClaimSubweapon,
   canDropGear,
   canPickUp,
+  canReachDrop,
   canSalvage,
   canTargetActor,
   cancelDefeatedPrimaries,
@@ -1171,7 +1172,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-X7C6GMGJ.js";
+} from "./chunk-T3BVXJVP.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -175121,7 +175122,8 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
             ...r.generated ? { generated: r.generated } : {},
             ...r.workshop ? { workshop: r.workshop } : {},
             ...r.trip ? { tripTick: r.droppedTick } : {},
-            canPickUp: canPickUp(state2, player, r.sourceEntityId, playersById[localPlayerId].stats.pickupRadius)
+            canPickUp: canPickUp(state2, player, r.sourceEntityId, playersById[localPlayerId].stats.pickupRadius),
+            bagFull: !canPickUp(state2, player, r.sourceEntityId, playersById[localPlayerId].stats.pickupRadius) && canReachDrop(state2, player, r.sourceEntityId, playersById[localPlayerId].stats.pickupRadius)
           })).sort(
             (a, b) => Math.hypot(a.position.x - local8.position.x, a.position.y - local8.position.y) - Math.hypot(b.position.x - local8.position.x, b.position.y - local8.position.y) || a.sourceEntityId.localeCompare(b.sourceEntityId)
           );
@@ -251717,6 +251719,7 @@ function createInventoryPresentation({
 
 // src/client/interaction_hud_v2.js
 var PICKUP_CONTEXT_V2 = "rpg-context:pickup";
+var BAG_FULL_CONTEXT_V2 = "rpg-context:bag-full";
 var ICON_PATHS2 = Object.freeze({
   door: "M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M4 21h16M14 12h.01",
   shop: "M4 9h16l-1.5 11h-13zM8 9V7a4 4 0 0 1 8 0v2",
@@ -251737,6 +251740,7 @@ var KIND_ICONS = Object.freeze({
   "Dungeon passage": "cave",
   "Settlement service": "shop",
   "Ground loot": "loot",
+  "Bag full": "loot",
   "Nearby object": "hand",
   "Notice board": "scroll",
   Quest: "scroll",
@@ -251790,7 +251794,9 @@ function pickupChoice(model) {
   ))
     return null;
   const label7 = contextActionLabelForModel(model, action2);
-  return action2 && label7 ? { exitId: PICKUP_CONTEXT_V2, label: label7, kind: action2.kind === "loot.pickup" ? "Ground loot" : "Nearby object" } : null;
+  if (action2 && label7)
+    return { exitId: PICKUP_CONTEXT_V2, label: label7, kind: action2.kind === "loot.pickup" ? "Ground loot" : "Nearby object" };
+  return model.loot?.some((entry2) => entry2.bagFull) ? { exitId: BAG_FULL_CONTEXT_V2, label: "Open Bag to make room", kind: "Bag full" } : null;
 }
 function createInteractionHudV2({ document: doc, readModel, activate, isBlocked = () => false }) {
   const button3 = doc.createElement("button");
@@ -337915,6 +337921,7 @@ function mountPlayableClient({
   const activateContext = (exitId, alt = false) => {
     if (gameplayInputBlocked()) return;
     if (exitId === PICKUP_CONTEXT_V2) doc.getElementById("world-pickup").click();
+    else if (exitId === BAG_FULL_CONTEXT_V2) doc.getElementById("world-bag").click();
     else if (exitId.startsWith(REVIVE_CONTEXT_V2)) {
       try {
         adapter.issue(
