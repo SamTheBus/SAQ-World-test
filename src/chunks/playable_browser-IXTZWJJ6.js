@@ -155458,14 +155458,14 @@ function captureOwnedWorldStreamStateV1(state2, kind) {
     ...state2.hostileCombat ? { hostileCombat: structuredClone(state2.hostileCombat) } : {}
   };
 }
-function captureOwnedWorldStreamTextV1(state2, kind) {
+function captureOwnedWorldStreamTextV1(state2, kind, parts = null) {
   requireContract(KINDS5.has(kind) && state2.d9World, "World stream capture kind");
   const spacesByInstanceId = {};
   for (const [id2, space] of Object.entries(state2.spacesByInstanceId)) {
     const collision = space.collision, strip = kind !== "ground" && id2 === state2.overworldInstanceId && collision?.origin;
     spacesByInstanceId[id2] = strip ? { ...space, collision: { ...collision, origin: { width: 0, height: 0, tiles: [] } } } : space;
   }
-  return JSON.stringify({
+  const top = {
     streamCapture: {
       version: WORLD_STREAM_CAPTURE_D9,
       kind,
@@ -155484,7 +155484,8 @@ function captureOwnedWorldStreamTextV1(state2, kind) {
     subweaponCombat: state2.subweaponCombat,
     ...state2.eliteCombat ? { eliteCombat: state2.eliteCombat } : {},
     ...state2.hostileCombat ? { hostileCombat: state2.hostileCombat } : {}
-  });
+  };
+  return JSON.stringify(parts ? parts.project(top) : top);
 }
 
 // src/simulation/hostile_projectiles_v1.js
@@ -171862,7 +171863,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     version: () => version,
     events: () => events,
     captureStreamState: (kind) => captureOwnedWorldStreamStateV1(state2, kind),
-    captureStreamTextV1: (kind) => captureOwnedWorldStreamTextV1(state2, kind),
+    captureStreamTextV1: (kind, parts = null) => captureOwnedWorldStreamTextV1(state2, kind, parts),
     captureForDurability: ({ saveRevision, checkpointId }) => {
       safeInteger(saveRevision, 0);
       validateId("checkpointId", checkpointId);
@@ -171879,13 +171880,13 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     },
     // The save copy as one JSON text: one pass instead of copy + freeze + the Worker's structured clone,
     // so a co-op host's save freezes its frame for about a third as long (Sammy 2026-11-13: lag).
-    captureDurableTextV1: ({ saveRevision, checkpointId }) => {
+    captureDurableTextV1: ({ saveRevision, checkpointId }, parts = null) => {
       safeInteger(saveRevision, 0);
       validateId("checkpointId", checkpointId);
       const campaign = state2.campaign, kept2 = { saveRevision: campaign.saveRevision, checkpointId: campaign.checkpointId };
       Object.assign(campaign, { saveRevision, checkpointId });
       try {
-        return { tick: state2.tick, text: JSON.stringify(state2) };
+        return { tick: state2.tick, text: JSON.stringify(parts ? parts.project(state2) : state2) };
       } finally {
         Object.assign(campaign, kept2);
       }
@@ -172021,13 +172022,13 @@ function createActivityAuthority({ initialState, measure: measure2, schedulerOpt
     seatCut = null;
     return freezeWire({ status: "undone" });
   }
-  function captureDurableTextV1(cursor) {
+  function captureDurableTextV1(cursor, parts = null) {
     const cut = seatCut;
     seatCut = null;
     if (!cut || simulation.withAuthorityState(
       (s) => s.tick !== cut.tick || s.lastAppliedAuthorityOrder !== cut.lastAppliedAuthorityOrder
     ))
-      return simulation.captureDurableTextV1(cursor);
+      return simulation.captureDurableTextV1(cursor, parts);
     return {
       tick: cut.tick,
       text: JSON.stringify({
@@ -339208,16 +339209,125 @@ async function requestCartographyV1(request, send) {
   return { ...first, view: request.view, height: request.height, rows };
 }
 
+// src/shared/contracts/worker_parts_v1.js
+var WORKER_PART_PATHS_V1 = Object.freeze({
+  chunks: ["d9World", "runtime", "chunks"],
+  groups: ["d9World", "runtime", "groups"],
+  resources: ["d9World", "runtime", "resources"],
+  sites: ["d9World", "siteReservationsById"],
+  defs: ["content", "definitionsById"]
+});
+var PART = "$workerPart";
+var f64 = new Float64Array(1);
+var u32 = new Uint32Array(f64.buffer);
+function hashWireV1(value2) {
+  let a = 2166136261, b = 2538058380;
+  const mix47 = (n) => {
+    a = Math.imul(a ^ n, 16777619);
+    b = Math.imul(b ^ n, 1540483477);
+    b ^= b >>> 15;
+  };
+  const str = (s) => {
+    mix47(s.length + 20973);
+    for (let i = 0; i < s.length; i++) mix47(s.charCodeAt(i));
+  };
+  const walk = (v) => {
+    if (v === null) return mix47(1);
+    switch (typeof v) {
+      case "string":
+        return str(v);
+      case "number":
+        f64[0] = v;
+        mix47(2);
+        mix47(u32[0]);
+        return mix47(u32[1]);
+      case "boolean":
+        return mix47(v ? 3 : 4);
+      case "object":
+        if (Array.isArray(v)) {
+          mix47(5);
+          mix47(v.length);
+          for (let i = 0; i < v.length; i++) walk(v[i] === void 0 ? null : v[i]);
+          return;
+        }
+        mix47(6);
+        for (const k in v) {
+          if (!Object.hasOwn(v, k) || v[k] === void 0 || typeof v[k] === "function") continue;
+          str(k);
+          walk(v[k]);
+        }
+        return mix47(7);
+      default:
+        return mix47(8);
+    }
+  };
+  walk(value2);
+  return (a >>> 0).toString(16).padStart(8, "0") + (b >>> 0).toString(16).padStart(8, "0");
+}
+var getPath = (o, path19) => path19.reduce((x, k) => x && typeof x === "object" ? x[k] : void 0, o);
+function withPath(o, path19, value2) {
+  const top = { ...o };
+  let node = top;
+  for (let i = 0; i < path19.length - 1; i++) {
+    node[path19[i]] = { ...node[path19[i]] };
+    node = node[path19[i]];
+  }
+  node[path19.at(-1)] = value2;
+  return top;
+}
+function createWorkerPartsV1() {
+  const held = /* @__PURE__ */ new Map();
+  let staged = [], sentFull = 0, sentRef = 0, misses = 0;
+  return Object.freeze({
+    // Returns the object to stringify: each present part as a stand-in when the Worker holds it, else carried whole
+    // with its fingerprint. The whole parts of the latest copy wait in staged until the bridge sends it.
+    project(top) {
+      let out7 = top;
+      staged = [];
+      for (const [name, path19] of Object.entries(WORKER_PART_PATHS_V1)) {
+        const value2 = getPath(top, path19);
+        if (value2 === void 0 || value2 === null || typeof value2 !== "object") continue;
+        const hash94 = hashWireV1(value2);
+        if (held.get(name) === hash94) {
+          out7 = withPath(out7, path19, { [PART]: name, hash: hash94 });
+          sentRef++;
+        } else {
+          out7 = withPath(out7, path19, { [PART]: name, hash: hash94, value: value2 });
+          staged.push([name, hash94]);
+          sentFull++;
+        }
+      }
+      return out7;
+    },
+    // The bridge takes the latest copy's whole parts as it sends that copy, and confirms them on the answer.
+    take() {
+      const t = staged;
+      staged = [];
+      return t;
+    },
+    confirm(sent) {
+      for (const [name, hash94] of sent) held.set(name, hash94);
+    },
+    forget(miss = false) {
+      held.clear();
+      staged = [];
+      if (miss) misses++;
+    },
+    inspect: () => ({ held: held.size, sentFull, sentRef, misses })
+  });
+}
+
 // src/client/world_worker_bridge_d9.js
 function createWorldWorkerBridgeD9(worker, { record: record2 = () => {
 }, diagnostics = false, now: now3 = () => performance.now(), expectedDatabaseName = null } = {}) {
-  const queue = [], requestDiagnostics = {}, requestCounts = {};
+  const queue = [], requestDiagnostics = {}, requestCounts = {}, parts = createWorkerPartsV1();
   let postedChars = 0, postedCopies = 0;
   let active2 = null, ready = false, closed2 = false, sequence = 0;
   let markStarted;
   const started = new Promise((resolve) => markStarted = resolve);
   function fail(error) {
     closed2 = true;
+    parts.forget();
     markStarted();
     active2?.reject(error);
     active2 = null;
@@ -339253,16 +339363,21 @@ function createWorldWorkerBridgeD9(worker, { record: record2 = () => {
       if (t.name === "worldWorkerTotal") record2("worker." + job.packet.kind.replace("world.", ""), t.ms);
     }
     if (data.error) {
+      parts.forget(data.code === "worker-part-miss");
       const error = new Error(data.error);
       if (data.code) error.code = data.code;
       if (data.actorGeometry) error.actorGeometry = data.actorGeometry;
       if (data.stack) error.stack = data.stack;
       job.reject(error);
-    } else job.resolve(data.result);
+    } else {
+      parts.confirm(job.parts);
+      job.resolve(data.result);
+    }
     pump();
   };
   worker.onerror = worker.onmessageerror = () => fail(new Error("D9 world Worker interrupted; the last confirmed root remains recoverable."));
   function send(kind, request) {
+    const sentParts = typeof request?.stateText === "string" ? parts.take() : [];
     if (closed2) return Promise.reject(new Error("D9 world Worker is closed"));
     if (queue.length + (active2 ? 1 : 0) >= 8)
       return Promise.reject(new Error("D9 world Worker queue admission exceeded"));
@@ -339280,11 +339395,12 @@ function createWorldWorkerBridgeD9(worker, { record: record2 = () => {
       record2("worker.requestInspect", now3() - at10);
     }
     return new Promise((resolve, reject) => {
-      queue.push({ packet: { id: ++sequence, kind, request }, resolve, reject });
+      queue.push({ packet: { id: ++sequence, kind, request }, parts: sentParts, resolve, reject });
       pump();
     });
   }
   return Object.freeze({
+    parts,
     started: () => started,
     bindPlanned: (request) => send("world.bindPlanned", request),
     collect: () => send("world.collect", {}),
@@ -339314,7 +339430,8 @@ function createWorldWorkerBridgeD9(worker, { record: record2 = () => {
       requestDiagnostics: { ...requestDiagnostics },
       requestCounts: { ...requestCounts },
       postedMb: postedChars / 1048576,
-      postedCopies
+      postedCopies,
+      parts: parts.inspect()
     }),
     destroy() {
       worker.terminate();
@@ -340154,7 +340271,7 @@ function createPagedWorldAuthorityD9({
       saveRevision: s.campaign.saveRevision,
       checkpointId: s.campaign.checkpointId
     }));
-    const cut = measure2("saveCapture", () => authority.captureDurableTextV1(cursor)), pages2 = capturePages();
+    const cut = measure2("saveCapture", () => authority.captureDurableTextV1(cursor, task.parts ?? null)), pages2 = capturePages();
     pending = { tick: cut.tick, saveRevision: cursor.saveRevision, checkpointId: request.checkpointId, pages: pages2 };
     busy = true;
     try {
@@ -340210,7 +340327,7 @@ function createPagedWorldAuthorityD9({
     },
     readState: () => authority.readState(),
     captureStreamState: (kind) => measure2("streamCapture", () => authority.captureStreamState(kind)),
-    captureStreamTextV1: (kind) => measure2("streamCapture", () => authority.captureStreamTextV1(kind)),
+    captureStreamTextV1: (kind, parts = null) => measure2("streamCapture", () => authority.captureStreamTextV1(kind, parts)),
     readGateway: () => authority.readGateway(),
     withAuthority: (fn) => fn(authority),
     withReadyAuthority: (fn) => {
@@ -340427,7 +340544,7 @@ function createWorldResidencyD9({
     return true;
   };
   const capture = (kind) => authority.captureStreamState ? authority.captureStreamState(kind) : measure2("streamCapture", () => borrow((s) => captureWorldStreamStateD9(s, kind)));
-  const captured = (kind) => authority.captureStreamTextV1 ? { stateText: authority.captureStreamTextV1(kind) } : { state: capture(kind) };
+  const captured = (kind) => authority.captureStreamTextV1 ? { stateText: authority.captureStreamTextV1(kind, rawWorker.parts ?? null) } : { state: capture(kind) };
   function view3() {
     return borrow((s) => {
       const w = s.d9World, origin = {
@@ -342221,7 +342338,7 @@ async function createLocalEndlessSessionD9(options) {
       }).join("|")
     )
   );
-  let saving = null, failStreak = 0, saveAgain = false, lastError = null, lastSavedTick = opened2.state.tick, lastLife = null, lastCritical = null, lastLifeSaveTick = -Infinity, savePhase = "idle", savePhaseAt = now3(), gateSince = null, gateTimedOut = false, durabilityFailed = false, fatalInvariant = null, failedCuts = 0, retriedCuts = 0, lastSuccessfulCommitAt = now3(), lastSaveAttemptAt = -Infinity, lastStreamServiceAt = -Infinity;
+  let saving = null, failStreak = 0, saveAgain = false, lastError = null, lastSavedTick = opened2.state.tick, savedAnchor = null, lastLife = null, lastCritical = null, lastLifeSaveTick = -Infinity, savePhase = "idle", savePhaseAt = now3(), gateSince = null, gateTimedOut = false, durabilityFailed = false, fatalInvariant = null, failedCuts = 0, retriedCuts = 0, lastSuccessfulCommitAt = now3(), lastSaveAttemptAt = -Infinity, lastStreamServiceAt = -Infinity;
   const isGeometryFailure = (failure) => failure?.code === "WORLD_ACTOR_GEOMETRY_INVALID" || /Invalid canonical actor geometry/.test(failure?.reason ?? failure?.message ?? "");
   const liveGeometry = () => authority.withAuthority(
     (a) => a.withAuthorityState(
@@ -342424,6 +342541,7 @@ async function createLocalEndlessSessionD9(options) {
         if (result.status === "committed") {
           durabilityFailed = false;
           lastSavedTick = result.tick;
+          savedAnchor = streamAnchor();
           lastSuccessfulCommitAt = now3();
           stream2.acknowledgeSave?.();
           phase3("committed");
@@ -343359,7 +343477,7 @@ async function createLocalEndlessSessionD9(options) {
         );
       if (!saving && tick % 6 === 0) {
         const life = lifecycle(), critical = criticalLifecycle(), needsSave = stream2.needsSave(), lifeDue = life !== lastLife && (critical !== lastCritical || tick - lastLifeSaveTick >= LIFECYCLE_SAVE_TICKS);
-        if ((lifeDue || needsSave || tick - lastSavedTick >= 600) && (!lastError || now3() - lastSaveAttemptAt >= Math.min(
+        if ((lifeDue || needsSave || tick - lastSavedTick >= (savedAnchor !== null && streamAnchor() === savedAnchor ? 3600 : 600)) && (!lastError || now3() - lastSaveAttemptAt >= Math.min(
           3e4,
           RETRY_MS * 2 ** Math.min(5, Math.max(0, failStreak - 1))
         ))) {

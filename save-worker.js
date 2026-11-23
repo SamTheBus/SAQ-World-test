@@ -63836,9 +63836,62 @@ async function prepareGroundWindowD9({ state: before, stagedPages = [] }, { sha2
   };
 }
 
+// src/shared/contracts/worker_parts_v1.js
+var WORKER_PART_PATHS_V1 = Object.freeze({
+  chunks: ["d9World", "runtime", "chunks"],
+  groups: ["d9World", "runtime", "groups"],
+  resources: ["d9World", "runtime", "resources"],
+  sites: ["d9World", "siteReservationsById"],
+  defs: ["content", "definitionsById"]
+});
+var PART = "$workerPart";
+var f64 = new Float64Array(1);
+var u322 = new Uint32Array(f64.buffer);
+var getPath = (o, path) => path.reduce((x, k) => x && typeof x === "object" ? x[k] : void 0, o);
+var deepFreeze = (v) => {
+  if (v && typeof v === "object" && !Object.isFrozen(v)) {
+    Object.freeze(v);
+    for (const k in v) deepFreeze(v[k]);
+  }
+  return v;
+};
+function createWorkerPartCacheV1() {
+  const kept = /* @__PURE__ */ new Map();
+  const keep = (name, hash21, value) => {
+    const m = kept.get(name) ?? /* @__PURE__ */ new Map();
+    m.delete(hash21);
+    m.set(hash21, value);
+    while (m.size > 3) m.delete(m.keys().next().value);
+    kept.set(name, m);
+  };
+  return Object.freeze({
+    resolve(state) {
+      for (const [name, path] of Object.entries(WORKER_PART_PATHS_V1)) {
+        const parent = getPath(state, path.slice(0, -1)), key9 = path.at(-1), v = parent && typeof parent === "object" ? parent[key9] : void 0;
+        if (!v || typeof v !== "object" || v[PART] !== name) continue;
+        if (Object.hasOwn(v, "value")) {
+          keep(name, v.hash, deepFreeze(v.value));
+          parent[key9] = v.value;
+        } else {
+          const k = kept.get(name)?.get(v.hash);
+          if (!k) {
+            const e = new Error("Worker part cache miss: " + name);
+            e.code = "worker-part-miss";
+            throw e;
+          }
+          parent[key9] = k;
+        }
+      }
+      return state;
+    },
+    inspect: () => Object.fromEntries([...kept].map(([n, m]) => [n, [...m.keys()]]))
+  });
+}
+
 // src/storage/world_worker_task_d9.js
 function createWorldWorkerTaskD9({ store, sha256, plannedAssets = null }) {
   const charts = /* @__PURE__ */ new Map();
+  const partCache = createWorkerPartCacheV1();
   const saves = createWorldSaveTaskD9({
     store,
     sha256,
@@ -63856,7 +63909,7 @@ function createWorldWorkerTaskD9({ store, sha256, plannedAssets = null }) {
       "world.prepareGround"
     ].includes(kind2) && typeof request?.stateText === "string" && !Object.hasOwn(request, "state")) {
       const { stateText, ...rest } = request;
-      request = { ...rest, state: JSON.parse(stateText) };
+      request = { ...rest, state: partCache.resolve(JSON.parse(stateText)) };
     }
     validateWire(request);
     if (kind2 === "world.bindPlanned") {
