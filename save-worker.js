@@ -63845,6 +63845,7 @@ var WORKER_PART_PATHS_V1 = Object.freeze({
   defs: ["content", "definitionsById"]
 });
 var PART = "$workerPart";
+var ITEM_KEEP = 2e3;
 var f64 = new Float64Array(1);
 var u322 = new Uint32Array(f64.buffer);
 var getPath = (o, path) => path.reduce((x, k) => x && typeof x === "object" ? x[k] : void 0, o);
@@ -63856,7 +63857,7 @@ var deepFreeze = (v) => {
   return v;
 };
 function createWorkerPartCacheV1() {
-  const kept = /* @__PURE__ */ new Map();
+  const kept = /* @__PURE__ */ new Map(), pieces = /* @__PURE__ */ new Map();
   const keep = (name, hash21, value) => {
     const m = kept.get(name) ?? /* @__PURE__ */ new Map();
     m.delete(hash21);
@@ -63869,6 +63870,25 @@ function createWorkerPartCacheV1() {
       for (const [name, path] of Object.entries(WORKER_PART_PATHS_V1)) {
         const parent = getPath(state, path.slice(0, -1)), key9 = path.at(-1), v = parent && typeof parent === "object" ? parent[key9] : void 0;
         if (!v || typeof v !== "object" || v[PART] !== name) continue;
+        if (Array.isArray(v.items)) {
+          const m = pieces.get(name) ?? /* @__PURE__ */ new Map();
+          pieces.set(name, m);
+          parent[key9] = v.items.map((it) => {
+            const h = typeof it === "string" ? it : it.h;
+            let value = m.get(h);
+            if (typeof it !== "string") value = deepFreeze(it.v);
+            else if (value === void 0) {
+              const e = new Error("Worker part cache miss: " + name);
+              e.code = "worker-part-miss";
+              throw e;
+            }
+            m.delete(h);
+            m.set(h, value);
+            return value;
+          });
+          while (m.size > ITEM_KEEP) m.delete(m.keys().next().value);
+          continue;
+        }
         if (Object.hasOwn(v, "value")) {
           keep(name, v.hash, deepFreeze(v.value));
           parent[key9] = v.value;
@@ -63884,7 +63904,10 @@ function createWorkerPartCacheV1() {
       }
       return state;
     },
-    inspect: () => Object.fromEntries([...kept].map(([n, m]) => [n, [...m.keys()]]))
+    inspect: () => ({
+      ...Object.fromEntries([...kept].map(([n, m]) => [n, [...m.keys()]])),
+      ...Object.fromEntries([...pieces].map(([n, m]) => [n, m.size]))
+    })
   });
 }
 

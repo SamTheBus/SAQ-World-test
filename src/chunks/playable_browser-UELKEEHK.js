@@ -106110,15 +106110,10 @@ function createCrispGrassV1(doc, stamp8, clock9 = () => 0) {
   }
   const kept2 = patches.filter((p) => p.sprite);
   const mix47 = (a, b, t) => a.map((v, k) => Math.round(v + (b[k] - v) * t)), hex6 = (col2) => [1, 3, 5].map((i) => parseInt(col2.slice(i, i + 2), 16)), same12 = (a, i, c) => a[i] === c[0] && a[i + 1] === c[1] && a[i + 2] === c[2];
-  const tints = /* @__PURE__ */ new Map();
+  const tints = createIdleSpritesV1();
   function tinted(p, col2, base3) {
-    const key4 = col2 + base3;
-    let m = tints.get(key4);
-    if (!m) {
-      m = /* @__PURE__ */ new Map();
-      tints.set(key4, m);
-    }
-    let t = m.get(p.id);
+    const key4 = col2 + base3 + "|" + p.id;
+    let t = tints.get(key4);
     if (!t) {
       const L = hex6(col2), B9 = hex6(base3), TIP2 = [196, 226, 112], map = [
         [LIGHT, L],
@@ -106142,7 +106137,7 @@ function createCrispGrassV1(doc, stamp8, clock9 = () => 0) {
           }
       }
       g2.putImageData(im, 0, 0);
-      m.set(p.id, t);
+      tints.set(key4, t);
       stats3.tintPixels += t.width * t.height;
     }
     return t;
@@ -290261,8 +290256,15 @@ function createAtlasMapV2({
     renderSheet();
     closeButton.focus({ preventScroll: true });
   }
+  let closedTimer = null;
   function hide() {
     trimRasterCacheV1(cache12, 1);
+    large.width = 0;
+    large.height = 0;
+    clearTimeout(closedTimer);
+    closedTimer = setTimeout(() => {
+      if (!open3) trimRasterCacheV1(cache12, 0);
+    }, 3e4);
     dungeon.hide();
     open3 = false;
     atlas.hidden = true;
@@ -323029,6 +323031,8 @@ function createEnvironmentCache(canvas, {
 } = {}) {
   const SIZE12 = 256, BASE_LIMIT = 32, MAX_LIMIT = 128, DESCRIPTORS = 64, PREFETCH = 8, ROUTE_PREFETCH = 16, RECENT = 24, LAYOUTS = 4;
   const pages2 = /* @__PURE__ */ new Map(), fallbacks = /* @__PURE__ */ new Map(), descriptors = /* @__PURE__ */ new Map(), layouts3 = /* @__PURE__ */ new Map(), stamps = /* @__PURE__ */ new Map(), flowerStamps = [], rasterPool = [];
+  const leftAt = /* @__PURE__ */ new Map();
+  let poolUsedAt = 0, idleFreed = 0;
   const win13 = canvas.ownerDocument.defaultView ?? globalThis;
   const aheadReady = /* @__PURE__ */ new Map(), pathStats = {
     environmentPathScreenColdFrames: 0,
@@ -323113,6 +323117,7 @@ function createEnvironmentCache(canvas, {
   }
   function releaseRaster(raster) {
     if (!raster) return;
+    poolUsedAt = performance.now();
     rasterPool.push(raster);
     while (rasterPool.length > RECENT) freeRaster(rasterPool.shift());
   }
@@ -323561,7 +323566,11 @@ function createEnvironmentCache(canvas, {
     for (let y = y0; y < view3.y + view3.height && y < ymax; y += SIZE12)
       for (let x = x0; x < view3.x + view3.width && x < xmax; x += SIZE12) required.push({ x, y, id: x + "/" + y });
     const nextVisible = new Set(required.map((t) => t.id)), returnedIds = new Set([...nextVisible].filter((id2) => recentSeen.has(id2)));
-    for (const id2 of visibleIds) if (!nextVisible.has(id2) && pages2.has(id2)) recentSeen.set(id2, frameSequence);
+    for (const id2 of visibleIds)
+      if (!nextVisible.has(id2) && pages2.has(id2)) {
+        recentSeen.set(id2, frameSequence);
+        leftAt.set(id2, performance.now());
+      }
     for (const id2 of nextVisible) recentSeen.delete(id2);
     visibleIds = nextVisible;
     for (const id2 of [...recentSeen.keys()]) if (!pages2.has(id2)) recentSeen.delete(id2);
@@ -323830,6 +323839,22 @@ function createEnvironmentCache(canvas, {
     schedule();
     return true;
   }
+  onIdleSweepV1((t) => {
+    for (const [id2, at10] of [...leftAt]) {
+      if (visibleIds.has(id2) || !pages2.has(id2)) {
+        leftAt.delete(id2);
+        continue;
+      }
+      if (t - at10 < IDLE_SPRITE_MS || nearIds.has(id2) || preloadIds.has(id2)) continue;
+      freeRaster(pages2.get(id2).raster);
+      pages2.delete(id2);
+      recentSeen.delete(id2);
+      recentIds.delete(id2);
+      leftAt.delete(id2);
+      idleFreed++;
+    }
+    if (t - poolUsedAt >= IDLE_SPRITE_MS) while (rasterPool.length > 2) freeRaster(rasterPool.shift());
+  });
   return Object.freeze({
     draw,
     drawWater,
@@ -323840,6 +323865,8 @@ function createEnvironmentCache(canvas, {
     clear: clear2,
     park,
     resources: () => ({
+      environmentIdleFreed: idleFreed,
+      environmentPoolSpares: rasterPool.length,
       ...pathStats,
       environmentCacheParks: parkCount,
       waterMotion: waterMotion.resources(),
@@ -339218,6 +339245,7 @@ var WORKER_PART_PATHS_V1 = Object.freeze({
   defs: ["content", "definitionsById"]
 });
 var PART = "$workerPart";
+var WORKER_PART_LISTS_V1 = /* @__PURE__ */ new Set(["chunks", "groups", "resources"]);
 var f64 = new Float64Array(1);
 var u32 = new Uint32Array(f64.buffer);
 function hashWireV1(value2) {
@@ -339277,7 +339305,7 @@ function withPath(o, path19, value2) {
 }
 function createWorkerPartsV1() {
   const held = /* @__PURE__ */ new Map();
-  let staged = [], sentFull = 0, sentRef = 0, misses = 0;
+  let staged = [], sentFull = 0, sentRef = 0, itemFull = 0, itemRef = 0, misses = 0;
   return Object.freeze({
     // Returns the object to stringify: each present part as a stand-in when the Worker holds it, else carried whole
     // with its fingerprint. The whole parts of the latest copy wait in staged until the bridge sends it.
@@ -339287,6 +339315,21 @@ function createWorkerPartsV1() {
       for (const [name, path19] of Object.entries(WORKER_PART_PATHS_V1)) {
         const value2 = getPath(top, path19);
         if (value2 === void 0 || value2 === null || typeof value2 !== "object") continue;
+        if (WORKER_PART_LISTS_V1.has(name) && Array.isArray(value2)) {
+          const have = held.get(name) instanceof Set ? held.get(name) : /* @__PURE__ */ new Set(), hashes = [], items3 = value2.map((item2) => {
+            const h = hashWireV1(item2);
+            hashes.push(h);
+            if (have.has(h)) {
+              itemRef++;
+              return h;
+            }
+            itemFull++;
+            return { h, v: item2 };
+          });
+          out7 = withPath(out7, path19, { [PART]: name, items: items3 });
+          staged.push([name, hashes]);
+          continue;
+        }
         const hash94 = hashWireV1(value2);
         if (held.get(name) === hash94) {
           out7 = withPath(out7, path19, { [PART]: name, hash: hash94 });
@@ -339305,15 +339348,16 @@ function createWorkerPartsV1() {
       staged = [];
       return t;
     },
+    // A list's held pieces are the ones in the latest answered copy (the Worker keeps more, so these are always there).
     confirm(sent) {
-      for (const [name, hash94] of sent) held.set(name, hash94);
+      for (const [name, hash94] of sent) held.set(name, Array.isArray(hash94) ? new Set(hash94) : hash94);
     },
     forget(miss = false) {
       held.clear();
       staged = [];
       if (miss) misses++;
     },
-    inspect: () => ({ held: held.size, sentFull, sentRef, misses })
+    inspect: () => ({ held: held.size, sentFull, sentRef, itemFull, itemRef, misses })
   });
 }
 
