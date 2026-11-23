@@ -5988,21 +5988,6 @@ var MULTIROOM_SEEDED_POLICY = freezeWire({
   maximumAttempts: { small: 192, standard: 48, large: 48, deep: 48 }
 });
 
-// src/shared/content/seeded_world_v1.js
-function presentSeededWorldV1(a) {
-  return {
-    ...a,
-    assetId: "alpha",
-    wildernessExtension: a.wildernessExtension && {
-      ...a.wildernessExtension,
-      version: WILDERNESS_VERSION,
-      hash: WILDERNESS_HASH
-    },
-    firstJourney: a.firstJourney && { ...a.firstJourney, version: ACCESS_VERSION, hash: ACCESS_HASH },
-    worldReshape: a.worldReshape && { ...a.worldReshape, version: RESHAPE_VERSION, hash: RESHAPE_HASH }
-  };
-}
-
 // src/shared/content/alpha_site_population_v1.js
 var ALPHA_POPULATION_VERSION = "planned-alpha-site-population-v1";
 var ALPHA_POPULATION_HASH = "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e";
@@ -12491,6 +12476,21 @@ var CLASSIC_EVENT_PLAN = freezeWire({
     ({ n, event }) => CLASSIC_CACHES[n] ? { eventSlotId: slotId(n), event, cacheSlotId: slotId(CLASSIC_CACHES[n]) } : { eventSlotId: slotId(n), event }
   )
 });
+
+// src/shared/content/seeded_world_v1.js
+function presentSeededWorldV1(a) {
+  return {
+    ...a,
+    assetId: "alpha",
+    wildernessExtension: a.wildernessExtension && {
+      ...a.wildernessExtension,
+      version: WILDERNESS_VERSION,
+      hash: WILDERNESS_HASH
+    },
+    firstJourney: a.firstJourney && { ...a.firstJourney, version: ACCESS_VERSION, hash: ACCESS_HASH },
+    worldReshape: a.worldReshape && { ...a.worldReshape, version: RESHAPE_VERSION, hash: RESHAPE_HASH }
+  };
+}
 
 // src/shared/generation/world_maker_v1/version.js
 var WORLD_MAKER_VERSION = "world-maker-v1.23";

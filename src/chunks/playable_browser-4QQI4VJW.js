@@ -8,11 +8,7 @@ import {
   AEGIS_GOLIATH_ID,
   AEGIS_MIMICS,
   AFFIXES_V3,
-  ALPHA_POPULATION_BASE_HASH,
   ALPHA_POPULATION_HASH,
-  ALPHA_POPULATION_PLAN_HASH,
-  ALPHA_POPULATION_ROUTE_HASH,
-  ALPHA_POPULATION_SELECTIONS,
   ALPHA_POPULATION_VERSION,
   AMBUSH_POLICY,
   AMBUSH_VERSION,
@@ -134,7 +130,6 @@ import {
   FERRY_NETWORK,
   FERRY_VERSION,
   FIRST_CAVE_ID,
-  FIRST_CAVE_SELECTION,
   FOREST_STANDS_VERSION,
   FORGE_INTERACTION_RADIUS,
   FORGE_MATERIALS,
@@ -168,7 +163,6 @@ import {
   IMP_RULES,
   IRON_CITADEL_AFFIX_ID,
   IRON_CITADEL_D12_4G,
-  LEGACY_D4_ACTIVITY_FORMAT,
   LEGACY_ORDINARY_ENEMIES,
   LEGACY_ORDINARY_PROFILES,
   LESSER_BOSSES_V1,
@@ -246,7 +240,6 @@ import {
   REFLECTION_V1,
   RESHAPE_DATABASE,
   RESHAPE_HASH,
-  RESHAPE_HYDROLOGY_HASH,
   RESHAPE_VERSION,
   RESONANCE_SETS,
   ROADSIDE_CREW,
@@ -431,7 +424,6 @@ import {
   applyPrimaryIntent,
   applySalvage,
   applyServiceAction,
-  applyWorldReshape,
   approachIntent,
   arachnidTreantCaveHereV1,
   archivedCombatProfile,
@@ -730,7 +722,6 @@ import {
   isLairSiteV1,
   isRareV1,
   isRuinFamily,
-  isSeededBindingV1,
   isSporeV4,
   isSporeV5,
   isStarterVillageSafe,
@@ -759,7 +750,6 @@ import {
   maxCombat,
   memberLevelFitsV1,
   memberLevelV1,
-  migrateD4Inventory,
   migrateD9Participant,
   migrateForgeInventory,
   migrateLegacyFunctionalSitesD10,
@@ -819,7 +809,6 @@ import {
   pendingPrimaryHits,
   personalFinaleClaimD13D_G1,
   planLocalFramesD9,
-  plannedAssetDirectory,
   plannedCaveIds,
   plannedEventFamiliesV1,
   plannedEventKindV1,
@@ -850,7 +839,6 @@ import {
   prepareEpisodeReward,
   prepareProgressionChange,
   presentCombat,
-  presentSeededWorldV1,
   primaryMovementIntent,
   primaryPhaseAt,
   primaryPinnedCommands,
@@ -946,7 +934,6 @@ import {
   safeInteger,
   saleQuote,
   salvageQuote,
-  seededCommitmentsV1,
   seededMultiroomV1,
   segmentDistance,
   selectForwardActors,
@@ -1091,7 +1078,6 @@ import {
   validateFunctionalSiteStateD9,
   validateHex,
   validateHuntV1,
-  validateHydrologyPlanV1,
   validateId,
   validateInteger,
   validateInventoryProgress,
@@ -1109,7 +1095,6 @@ import {
   validatePlannedFortReservation,
   validatePlannedRuinReservation,
   validatePlayerInventory,
-  validatePlayerInventory2,
   validatePlayerProgression,
   validatePlayerState,
   validatePrimaryAim,
@@ -1150,7 +1135,6 @@ import {
   wheelEntriesFor,
   wholeAmount,
   wildernessFairLevelGap,
-  withSeededWorldV1,
   withSetAsideSitesV1,
   woodlandForestRole,
   workshopMaterialPrices,
@@ -1172,7 +1156,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-T3BVXJVP.js";
+} from "./chunk-6ZPGCYCR.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -106664,14 +106648,11 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
     files[f.path] = bytes;
     downloads += bytes.byteLength;
   }
-  const accepted = JSON.parse(new TextDecoder().decode(files["journey.json"])), seeded2 = isSeededBindingV1(review.binding);
-  if (!seeded2 && (review.asset.assetId !== accepted.assetId || review.binding.assetHash !== accepted.assetHash || review.binding.wildernessHash !== accepted.wildernessHash))
-    throw Error("Woodland journey requires matching accepted Alpha inputs");
-  const journey = seeded2 ? {
+  const accepted = JSON.parse(new TextDecoder().decode(files["journey.json"])), journey = {
     ...accepted,
     clearings: [],
     scope: { ...accepted.scope, right: accepted.scope.left, bottom: accepted.scope.top }
-  } : accepted;
+  };
   const protection = createWoodlandEventProtectionV1([
     ...journey.clearings,
     ...review.asset.wildernessExtension?.eventCapacities ?? []
@@ -111121,7 +111102,7 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
   const root6 = new URL("../../assets/painted-paths-v1/", import.meta.url), r = await env.fetch(new URL("kit-manifest.json", root6));
   if (!r.ok) throw Error("Missing painted path kit");
   const kit2 = await r.json();
-  if (JSON.stringify(kit2.targets) !== JSON.stringify(PAINTED_REVIEW_TARGETS) || kit2.version !== PAINTED_ROUTE_VERSION || !isSeededBindingV1(review.binding) && (review.asset.assetId !== kit2.assetId || review.binding.assetHash !== kit2.assetHash))
+  if (JSON.stringify(kit2.targets) !== JSON.stringify(PAINTED_REVIEW_TARGETS) || kit2.version !== PAINTED_ROUTE_VERSION)
     throw Error("Painted path pilot input commitment mismatch");
   const begin2 = env.performance.now(), profiles2 = [], downloads = kit2.files.reduce((n, f) => n + f.bytes, 0);
   let material;
@@ -141279,103 +141260,6 @@ function questTextV1(q2, names2) {
   return { title: sentences(title17), note: sentences(note2), step: sentences(step3) };
 }
 
-// src/shared/generation/alderwood_access_v1.js
-function applyFirstJourney(asset, binding, delta3) {
-  requireContract(
-    hasFirstJourney(binding) && asset.assetId === "alpha" && delta3.version === ACCESS_VERSION && delta3.parentHydrologyHash === binding.hydrologyHash && delta3.parentWildernessHash === binding.wildernessHash && delta3.seed === asset.seed,
-    "First-journey source mismatch"
-  );
-  const { biome, added: added2, old: old2, ...expected } = FIRST_CAVE_SELECTION;
-  requireContract(
-    canonicalStringify(delta3.site) === canonicalStringify(expected) && asset.sites.length === 124 && !asset.sites.some((s) => s.id === delta3.site.id),
-    "First-journey roster drift"
-  );
-  requireContract(
-    delta3.geographyChanged === false && delta3.progressionChanged === false && delta3.waterChanged === false && delta3.existingReservationsChanged === false && delta3.failures.length === 0,
-    "Unresolved first-journey change"
-  );
-  requireContract(
-    delta3.trail.widthTiles === 3 && delta3.trail.path.length > 1 && delta3.trail.path.length <= 1024 && delta3.trailTiles.length <= 4096,
-    "First-journey trail budget"
-  );
-  const seen5 = /* @__PURE__ */ new Set();
-  for (const p of delta3.trailTiles) {
-    requireContract(
-      Number.isSafeInteger(p.x) && Number.isSafeInteger(p.y) && p.x >= 0 && p.y >= 0 && p.x < asset.domain.width * 64 && p.y < asset.domain.height * 52 && p.kind === "footpath" && !seen5.has(p.x + "," + p.y),
-      "Invalid first-journey tile"
-    );
-    seen5.add(p.x + "," + p.y);
-  }
-  for (let i = 0; i < delta3.trail.path.length; i++) {
-    const p = delta3.trail.path[i], q2 = delta3.trail.path[Math.max(0, i - 1)];
-    requireContract(
-      seen5.has(p.x + "," + p.y) && Math.abs(p.x - q2.x) + Math.abs(p.y - q2.y) === (i ? 1 : 0),
-      "Disconnected first-journey path"
-    );
-  }
-  return {
-    ...asset,
-    sites: [...asset.sites, delta3.site],
-    routes: { ...asset.routes, destinations: [...asset.routes.destinations, delta3.routeDestination] },
-    wildernessExtension: {
-      ...asset.wildernessExtension,
-      trailTiles: [...asset.wildernessExtension.trailTiles, ...delta3.trailTiles]
-    },
-    firstJourney: {
-      version: ACCESS_VERSION,
-      hash: ACCESS_HASH,
-      siteId: delta3.site.id,
-      trail: delta3.trail,
-      parentRuntime: delta3.parentRuntime
-    }
-  };
-}
-
-// src/shared/generation/alpha_population_overlay_v1.js
-function applyAlphaPopulationOverlay(base3, binding, delta3) {
-  requireContract(
-    hasAlphaPopulation(binding) && base3.assetId === "alpha" && binding.assetHash === ALPHA_POPULATION_BASE_HASH && delta3.version === ALPHA_POPULATION_VERSION && delta3.planHash === ALPHA_POPULATION_PLAN_HASH && delta3.routeHash === ALPHA_POPULATION_ROUTE_HASH && delta3.sourceCommitments.baseAssetHash === binding.assetHash && delta3.sourceCommitments.basePlanHash === binding.planHash && delta3.sourceCommitments.baseRouteHash === binding.routeHash && delta3.sourceCommitments.basePhysicalHash === binding.physicalHash,
-    "Population overlay source drift"
-  );
-  requireContract(
-    base3.sites.length === 48 && delta3.addedReservations.length === 3 && delta3.effectiveReservationCount === 51,
-    "Population roster count drift"
-  );
-  const a = JSON.parse(JSON.stringify(base3));
-  a.sites.push(...delta3.addedReservations);
-  a.routes.destinations.push(...delta3.routeDestinations);
-  a.routes.edges.push(...delta3.routeEdges);
-  const pages2 = new Map(a.routes.routePages.map((p) => [p.key, p.rows.map((r) => r.split(""))]));
-  for (const p of delta3.routePages) {
-    if (!pages2.has(p.key))
-      pages2.set(
-        p.key,
-        Array.from({ length: 26 }, () => Array(32).fill("0"))
-      );
-    for (let y = 0; y < 26; y++)
-      for (let x = 0; x < 32; x++)
-        pages2.get(p.key)[y][x] = String(Math.max(Number(pages2.get(p.key)[y][x]), Number(p.rows[y][x])));
-  }
-  a.routes.routePages = [...pages2].sort((a2, b) => a2[0].localeCompare(b[0])).map(([key4, rows]) => ({ key: key4, rows: rows.map((r) => r.join("")) }));
-  a.populationOverlay = {
-    version: ALPHA_POPULATION_VERSION,
-    hash: ALPHA_POPULATION_HASH,
-    planHash: delta3.planHash,
-    routeHash: delta3.routeHash,
-    parentAssetHash: binding.assetHash,
-    parentPlanHash: binding.planHash,
-    parentRouteHash: binding.routeHash
-  };
-  for (const r of ALPHA_POPULATION_SELECTIONS) {
-    const s = a.sites.find((s2) => s2.id === r.id);
-    requireContract(
-      s && JSON.stringify(s.footprint) === JSON.stringify(r.footprint) && JSON.stringify(s.approach) === JSON.stringify(r.approach) && s.familyId === r.familyId && s.tier === r.tier && s.landmassId === r.landmassId && s.band === r.band,
-      "Population assignment drift"
-    );
-  }
-  return a;
-}
-
 // src/shared/generation/hidden_hollow_obstacle_v1.js
 var HOLLOW_OBSTACLE_VERSION = "hidden-hollow-trunk-v2-recessed-mouth";
 var HOLLOW_TRUNK_CELLS = Object.freeze(
@@ -141426,6 +141310,40 @@ function hollowObstaclePage(page, home, tile2) {
     east: { cells: rows.map((r) => r[31]).join(""), terrain: visual.terrain.map((r) => r[31]).join("") }
   };
   return { ...page, collision, visual, edges };
+}
+
+// src/shared/content/seeded_world_v1.js
+var isSeededBindingV1 = (b) => b?.worldMaker !== void 0;
+var seededCommitmentsV1 = (asset) => ({
+  planHash: asset.upstream.planHash,
+  routeHash: asset.routeHash,
+  planningHash: asset.upstream.planningPolicyHash,
+  physicalHash: asset.upstream.physicalPlanHash,
+  worldMaker: asset.upstream.maker
+});
+function withSeededWorldV1(base3, assetHash, c) {
+  return {
+    ...base3,
+    assetHash,
+    planHash: c.planHash,
+    routeHash: c.routeHash,
+    planningHash: c.planningHash,
+    physicalHash: c.physicalHash,
+    worldMaker: c.worldMaker
+  };
+}
+function presentSeededWorldV1(a) {
+  return {
+    ...a,
+    assetId: "alpha",
+    wildernessExtension: a.wildernessExtension && {
+      ...a.wildernessExtension,
+      version: WILDERNESS_VERSION,
+      hash: WILDERNESS_HASH
+    },
+    firstJourney: a.firstJourney && { ...a.firstJourney, version: ACCESS_VERSION, hash: ACCESS_HASH },
+    worldReshape: a.worldReshape && { ...a.worldReshape, version: RESHAPE_VERSION, hash: RESHAPE_HASH }
+  };
 }
 
 // src/shared/generation/world_combat_packs_v2.js
@@ -144797,92 +144715,8 @@ function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
       prepared.set(
         key4,
         (async () => {
-          if (isSeededBindingV1(binding)) return prepareSeeded(binding);
-          const text3 = await readText(plannedAssetDirectory(binding) + "/" + binding.assetId + ".json");
-          requirePlan(
-            bytesToHex(await sha256(new TextEncoder().encode(text3))) === binding.assetHash,
-            "Planned asset commitment mismatch"
-          );
-          let asset = JSON.parse(text3);
-          validateRuntimePlan(asset);
-          useWorldRolesV1(asset.contentRoles, asset.ferry, asset.settlements);
-          useGeneratedTownsV1(null);
-          useEventLinksV1(asset);
-          useStirSlotsV1(asset);
-          useQuestWorldV1(asset);
-          requirePlan(
-            asset.upstream.planHash === binding.planHash && asset.upstream.physicalPlanHash === binding.physicalHash && asset.upstream.planningPolicyHash === binding.planningHash && asset.routeHash === binding.routeHash,
-            "Planned asset upstream mismatch"
-          );
-          if (hasAlphaPopulation(binding)) {
-            const deltaText = await readText("assets/alpha-site-population-v1.json");
-            requirePlan(
-              bytesToHex(await sha256(new TextEncoder().encode(deltaText))) === ALPHA_POPULATION_HASH,
-              "Population file commitment mismatch"
-            );
-            asset = applyAlphaPopulationOverlay(asset, binding, JSON.parse(deltaText));
-            validateRuntimePlan(asset);
-          }
-          if (hasWilderness(binding)) {
-            const wildernessText = await readText("assets/wilderness-v2/alpha.json");
-            requirePlan(
-              bytesToHex(await sha256(new TextEncoder().encode(wildernessText))) === WILDERNESS_HASH,
-              "Wilderness asset hash drift"
-            );
-            const wilderness = JSON.parse(wildernessText);
-            requirePlan(
-              wilderness.version === WILDERNESS_VERSION && wilderness.sites.length === 73 && wilderness.eventCapacities.length === 176 && wilderness.trails.length >= 70,
-              "Incomplete wilderness extension"
-            );
-            const a = JSON.parse(JSON.stringify(asset));
-            a.sites.push(...wilderness.sites.map((r) => r.site));
-            a.routes.destinations.push(...wilderness.sites.map((r) => r.routeDestination));
-            a.wildernessExtension = {
-              version: WILDERNESS_VERSION,
-              hash: WILDERNESS_HASH,
-              sourceAssetHash: binding.assetHash,
-              trailTiles: wilderness.trailTiles,
-              eventCapacities: wilderness.eventCapacities,
-              sites: wilderness.sites
-            };
-            asset = a;
-            validateRuntimePlan(asset);
-          }
-          if (hasHydrologyV1(binding)) {
-            const reshaped = hasWorldReshape(binding), text4 = await readText(
-              reshaped ? "assets/world-reshape-v2/hydrology.json" : "assets/hydrology-v1/alpha.json"
-            );
-            requirePlan(
-              bytesToHex(await sha256(new TextEncoder().encode(text4))) === (reshaped ? RESHAPE_HYDROLOGY_HASH : HYDROLOGY_HASH),
-              "Hydrology asset commitment mismatch"
-            );
-            const plan = validateHydrologyPlanV1(JSON.parse(text4));
-            requirePlan(
-              plan.parent.baseAssetHash === binding.assetHash && plan.parent.populationHash === binding.sitePopulationHash && plan.parent.wildernessHash === binding.wildernessHash && plan.parent.ferryHash === binding.ferryHash && plan.widthTiles === asset.domain.width * 64 && plan.heightTiles === asset.domain.height * 52,
-              "Hydrology input composition mismatch"
-            );
-            asset = { ...asset, hydrologyPlan: plan, routes: { ...asset.routes, bridges: plan.bridgePlan.bridges } };
-          }
-          if (hasFirstJourney(binding)) {
-            const text4 = await readText("assets/alderwood-access-v1/alpha.json");
-            requirePlan(
-              bytesToHex(await sha256(new TextEncoder().encode(text4))) === ACCESS_HASH,
-              "First-journey asset commitment mismatch"
-            );
-            asset = applyFirstJourney(asset, binding, JSON.parse(text4));
-            validateRuntimePlan(asset);
-          }
-          if (hasWorldReshape(binding)) {
-            const text4 = await readText("assets/world-reshape-v2/alpha.json");
-            requirePlan(
-              bytesToHex(await sha256(new TextEncoder().encode(text4))) === RESHAPE_HASH,
-              "World reshape asset commitment mismatch"
-            );
-            asset = applyWorldReshape(asset, binding, JSON.parse(text4));
-            validateRuntimePlan(asset);
-          }
-          freezePlan(asset);
-          return asset;
+          requirePlan(isSeededBindingV1(binding), "The classic map has been retired");
+          return prepareSeeded(binding);
         })()
       );
     return prepared.get(key4);
@@ -144974,8 +144808,7 @@ async function plannedReviewInputsV1(environment, assetId, sha256) {
   } : forestBinding;
   return {
     get,
-    binding: environment.document.body.dataset.forestStands === "v2" && assetId === "alpha" ? { ...binding, forestStandsVersion: FOREST_STANDS_VERSION } : binding,
-    store: createPlannedWorldAssetStore({ readText: get, sha256 })
+    binding: environment.document.body.dataset.forestStands === "v2" && assetId === "alpha" ? { ...binding, forestStandsVersion: FOREST_STANDS_VERSION } : binding
   };
 }
 async function plannedReviewTargetsV1(environment, assetId, { get, binding }, { asset, generator, caveReservation, caveReservations, fortReservations, ruinReservations, cryptReservations }) {
@@ -145138,11 +144971,6 @@ async function plannedReviewTargetsV1(environment, assetId, { get, binding }, { 
       break;
     }
   }
-  if (environment.document.body.dataset.artPilot === "true" && assetId === "alpha" && !isSeededBindingV1(binding)) {
-    const journey = JSON.parse(await get("assets/hybrid-art-pilot-v1/journey.json"));
-    if (journey.geometryBinding.assetHash !== binding.assetHash) throw Error("Art journey geometry mismatch");
-    targets.unshift(...journey.stops, journey.supplement);
-  }
   if (binding.townPrototype)
     targets.unshift(
       { id: "art:woodland-wide", label: "V2 coverage - woodland beyond old corridor", tile: { x: 3872, y: 338 } },
@@ -145226,11 +145054,12 @@ async function plannedReviewTargetsV1(environment, assetId, { get, binding }, { 
 }
 var SITE_PLACEMENT_CACHE_KEY = "saq-world-site-placements-v1";
 async function openPlannedReviewV1(environment, assetId, sha256, { inputs: given = null, world: world2 = null } = {}) {
-  const base3 = given ?? await plannedReviewInputsV1(environment, assetId, sha256), inputs = world2 ? {
+  if (!world2) throw Error("The classic map has been retired: open a seeded world");
+  const base3 = given ?? await plannedReviewInputsV1(environment, assetId, sha256), inputs = {
     ...base3,
     binding: withSeededWorldV1(base3.binding, world2.hash, world2.commitments),
     store: createPlannedWorldAssetStore({ readText: base3.get, sha256, readWorld: world2.read })
-  } : base3, { binding, store: store2 } = inputs, asset = await store2.prepare(binding), targets = [];
+  }, { binding, store: store2 } = inputs, asset = await store2.prepare(binding), targets = [];
   let full = null, fullPromise = null, targetsPromise = null;
   const sites = () => fullPromise ??= store2.load(binding).then((r) => full = r);
   const release = environment.document.documentElement?.dataset?.worldRelease ?? "", cacheable = /-compact-[0-9a-f]{12}$/.test(release), identity2 = plannedWorldAssetCacheKey(binding) + "|" + release;
@@ -146467,7 +146296,6 @@ function createHeroCreatorV1({
 
 // src/client/new_world_screen_v1.js
 var ICONS2 = {
-  classic: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 12l11-4 12 4 11-4v28l-11 4-12-4-11 4z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M18 8v28M30 12v28" stroke="currentColor" stroke-width="3"/></svg>',
   seeded: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 41V24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M24 26C24 18 18 13 9 13c0 8 6 13 15 13zM24 23c0-8 6-13 15-13 0 8-6 13-15 13z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M14 41h20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
   dice: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg>'
 };
@@ -146498,24 +146326,28 @@ function dom(document2) {
   };
   return { el: el3, button: button3, icon: icon2, dialog };
 }
-async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV1 }) {
+async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV1, moving: moving2 = null }) {
   const randomUint32 = () => environment.crypto.getRandomValues(new Uint32Array(1))[0];
   const choice = await chooseWorld(environment.document, {
     pick: "seeded",
     text: rollWorldSeedV1(randomUint32),
-    roll: () => rollWorldSeedV1(randomUint32)
+    roll: () => rollWorldSeedV1(randomUint32),
+    moving: moving2
   });
-  if (choice.kind === "classic") return { kind: "classic", hero: null };
-  return buildWithHero(environment, choice.seed, save, startBuild);
+  return buildWithHero(environment, choice.seed, save, startBuild, moving2);
 }
-function chooseWorld(document2, { pick: pick4, text: text3, roll: roll10 }) {
+function chooseWorld(document2, { pick: pick4, text: text3, roll: roll10, moving: moving2 }) {
   const { el: el3, button: button3, icon: icon2, dialog } = dom(document2);
   return new Promise((resolve) => {
     const root6 = dialog("new-world-title"), panel = el3("div", "nw-panel"), head19 = el3("header", "nw-head"), title17 = el3("h2", "", "Choose your world");
     title17.id = "new-world-title";
     head19.append(
       title17,
-      el3("p", "nw-intro", "Each hero lives in one world. Play the classic map, or grow a new one from a seed.")
+      el3(
+        "p",
+        "nw-intro",
+        moving2 ? `The classic map has been retired. ${moving2.look.name} moves to a new world and keeps their level, gear and gold.` : "Each hero lives in one world, grown from a seed."
+      )
     );
     const body6 = el3("div", "nw-body"), cards = el3("div", "nw-cards"), legend = el3("p", "nw-legend", "World");
     const card = (kind, name, about, tag2) => {
@@ -146530,12 +146362,6 @@ function chooseWorld(document2, { pick: pick4, text: text3, roll: roll10 }) {
       cards.append(b);
       return b;
     };
-    const classicCard = card(
-      "classic",
-      "Classic world",
-      "The map every hero has played so far: Alderwood, the Woodland and the seven lands beyond.",
-      "Same map for everyone \xB7 starts right away"
-    );
     const seededCard = card(
       "seeded",
       "New world",
@@ -146568,13 +146394,12 @@ function chooseWorld(document2, { pick: pick4, text: text3, roll: roll10 }) {
         "Seeds are numbers; a word you type becomes one. The same seed always makes the same world, so friends can share one. Building takes about a minute, and you make your hero meanwhile."
       )
     );
-    const ready = el3("p", "nw-note nw-ready", "Nothing to build: the classic world is ready now.");
-    body6.append(legend, cards, seedBox, ready);
+    body6.append(legend, cards, seedBox);
     const foot2 = el3("footer", "nw-foot"), next = button3("nw-next", "", () => {
       const seed2 = worldSeedV1(input.value);
-      if (pick4 === "seeded" && !seed2) return;
+      if (!seed2) return;
       root6.remove();
-      resolve(pick4 === "classic" ? { kind: "classic" } : { kind: "seeded", seed: seed2, text: input.value });
+      resolve({ kind: "seeded", seed: seed2, text: input.value });
     });
     foot2.append(next);
     panel.append(head19, body6, foot2);
@@ -146588,10 +146413,8 @@ function chooseWorld(document2, { pick: pick4, text: text3, roll: roll10 }) {
     });
     function paint4() {
       const seeded2 = pick4 === "seeded", seed2 = worldSeedV1(input.value);
-      classicCard.setAttribute("aria-pressed", String(!seeded2));
       seededCard.setAttribute("aria-pressed", String(seeded2));
       seedBox.hidden = !seeded2;
-      ready.hidden = seeded2;
       word.hidden = !(seeded2 && seed2?.word);
       word.replaceChildren();
       if (!word.hidden) {
@@ -146600,16 +146423,16 @@ function chooseWorld(document2, { pick: pick4, text: text3, roll: roll10 }) {
       }
       const blocked3 = seeded2 && !seed2;
       next.disabled = blocked3;
-      next.textContent = blocked3 ? "Type or roll a seed" : "Next: make your hero";
+      next.textContent = blocked3 ? "Type or roll a seed" : moving2 ? "Build this world" : "Next: make your hero";
     }
     paint4();
     document2.body.append(root6);
-    (pick4 === "seeded" ? seededCard : classicCard).focus({ preventScroll: true });
+    seededCard.focus({ preventScroll: true });
   });
 }
-async function buildWithHero(environment, seed2, save, startBuild) {
+async function buildWithHero(environment, seed2, save, startBuild, moving2 = null) {
   const document2 = environment.document;
-  let build2 = null, hero = null, heroDone = null, live = true;
+  let build2 = null, hero = moving2, heroDone = null, live = true;
   const strip = buildStrip(document2, seed2), creator = createHeroCreatorV1({
     document: document2,
     environment,
@@ -146644,7 +146467,7 @@ async function buildWithHero(environment, seed2, save, startBuild) {
   tick();
   const built = () => build2.read().stage === WORLD_BUILD_STAGES.length;
   try {
-    for (let showCreator = true; ; ) {
+    for (let showCreator = !moving2; ; ) {
       if (showCreator) {
         const confirmed = new Promise((r) => {
           heroDone = r;
@@ -146652,10 +146475,10 @@ async function buildWithHero(environment, seed2, save, startBuild) {
         creator.openBeforeGame(hero);
         await confirmed;
       }
-      if (built()) return { kind: "seeded", world: await build2.result, hero };
-      const outcome = await waiting.show(hero, build2);
-      if (outcome === "ready") return { kind: "seeded", world: await build2.result, hero };
-      if (outcome === "classic") return { kind: "classic", hero };
+      const done3 = async () => ({ kind: "seeded", world: await build2.result, hero, moved: Boolean(moving2) });
+      if (built()) return done3();
+      const outcome = await waiting.show(hero, build2, { canGoBack: !moving2 });
+      if (outcome === "ready") return done3();
       if (outcome === "retry") {
         build2 = begin2();
         showCreator = false;
@@ -146727,16 +146550,17 @@ function waitingPanel(document2, environment, seed2) {
     s?.(value2);
   };
   const back = button3("nw-quiet", "Back to hero", () => answer("back")), start = button3("nw-next", "Starts when the world is ready", () => {
-  }), retry = button3("nw-next", "Try again", () => answer("retry")), classic = button3("nw-quiet", "Play the classic world", () => answer("classic"));
+  }), retry = button3("nw-next", "Try again", () => answer("retry"));
   start.disabled = true;
-  foot2.append(status, back, classic, retry, start);
+  foot2.append(status, back, retry, start);
   panel.append(head19, body6, foot2);
   root6.append(panel);
   document2.body.append(root6);
   let name = "";
   return {
-    show(hero, build2) {
+    show(hero, build2, { canGoBack = true } = {}) {
       name = hero.look.name;
+      back.hidden = !canGoBack;
       heroName.textContent = name;
       heroClass.textContent = (hero.cls ? HERO_CLASSES[hero.cls].name : "No class yet") + " \xB7 Level 1";
       root6.hidden = false;
@@ -146752,7 +146576,7 @@ function waitingPanel(document2, environment, seed2) {
         c.scale(0.8 * s, 0.8 * s);
         drawBlockyHero(c, startingHeroSpecV1(hero), { t: 0, still: true });
       });
-      back.focus({ preventScroll: true });
+      (canGoBack ? back : start).focus({ preventScroll: true });
       const asked = new Promise((r) => {
         settle2 = r;
       });
@@ -146779,12 +146603,12 @@ function waitingPanel(document2, environment, seed2) {
     intro.textContent = state2.failed ? `${name} is ready, but this seed\u2019s world couldn\u2019t be made.` : `${name} is ready. The adventure starts as soon as the world is built.`;
     if (state2.failed) {
       title17.textContent = "This world couldn\u2019t be built";
-      note2.textContent = "The world maker stopped: " + state2.failed + ". Try again, or play the classic world with " + name + ".";
+      note2.textContent = "The world maker stopped: " + state2.failed + ". Try again.";
     } else {
       title17.textContent = "Your world is almost ready";
       note2.textContent = "Your world is saved with " + name + ", so it only builds once.";
     }
-    retry.hidden = classic.hidden = !state2.failed;
+    retry.hidden = !state2.failed;
     start.hidden = Boolean(state2.failed);
     barRow.hidden = Boolean(state2.failed);
     if (state2.stage === WORLD_BUILD_STAGES.length) answer("ready");
@@ -150230,64 +150054,6 @@ function overlayWoodlandCaveParcelD10(chunk6, parcel2) {
   });
 }
 
-// src/shared/generation/woodland_cave_family_placement_d12.js
-var WOODLAND_CAVE_FAMILY_PARCEL_D12 = "woodland-cave-family-parcel-d12-v1";
-function overlayWoodlandCaveFamilyParcelsD12(chunk6, parcels = []) {
-  let next = chunk6;
-  for (const parcel2 of parcels) {
-    if (!parcel2?.pages?.some((p) => p.chunkX === next.chunkX && p.chunkY === next.chunkY)) continue;
-    requireContract(
-      parcel2.version === WOODLAND_CAVE_FAMILY_PARCEL_D12 && parcel2.familyId === WOODLAND_CAVE_FAMILY_ID,
-      "Invalid D12 cave parcel overlay"
-    );
-    const historical = overlayWoodlandCaveParcelD10(next, { ...copyWire(parcel2), version: WOODLAND_CAVE_VERSION });
-    next = freezeWire({
-      ...copyWire(historical),
-      cave: {
-        siteId: parcel2.siteId,
-        version: parcel2.version,
-        familyId: parcel2.familyId,
-        pages: copyWire(parcel2.pages)
-      }
-    });
-  }
-  return next;
-}
-
-// src/shared/generation/woodland_cave_family_placement_d12_1.js
-var WOODLAND_CAVE_FAMILY_PARCEL_D12_1 = "woodland-cave-family-parcel-d12-1-v1";
-var variantFor = (siteId, kind) => {
-  let n = 2166136261;
-  for (const c of siteId + kind) n = Math.imul(n ^ c.charCodeAt(0), 16777619);
-  return (n >>> 0) % 3;
-};
-function overlayWoodlandCaveFamilyParcelsD12_1(chunk6, parcels = []) {
-  let next = chunk6;
-  for (const parcel2 of parcels) {
-    if (!parcel2?.pages?.some((page) => page.chunkX === next.chunkX && page.chunkY === next.chunkY)) continue;
-    requireContract(
-      parcel2.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_1 && parcel2.familyId === WOODLAND_CAVE_FAMILY_ID,
-      "Invalid D12.1 Cave parcel overlay"
-    );
-    const historical = overlayWoodlandCaveParcelD10(next, { ...copyWire(parcel2), version: WOODLAND_CAVE_VERSION }), decorations = historical.visual.decorations.map(
-      (d) => d.id?.startsWith(`cave-decoration:${parcel2.siteId}:`) ? { ...copyWire(d), variant: variantFor(parcel2.siteId, d.kind) } : copyWire(d)
-    );
-    next = freezeWire({
-      ...copyWire(historical),
-      visual: { ...copyWire(historical.visual), decorations },
-      cave: {
-        siteId: parcel2.siteId,
-        version: parcel2.version,
-        familyId: parcel2.familyId,
-        tier: parcel2.tier,
-        layoutSeed: parcel2.layoutSeed,
-        pages: copyWire(parcel2.pages)
-      }
-    });
-  }
-  return next;
-}
-
 // src/shared/generation/woodland_cave_region_placement_d12_2.js
 var WOODLAND_CAVE_FAMILY_PARCEL_D12_2 = "woodland-cave-family-parcel-d12-2-v1";
 var W2 = BigInt(WOODLAND_CAVE_EXTERIOR.width);
@@ -150302,7 +150068,7 @@ var hash42 = (text3) => {
   n = Math.imul(n, 2246822507);
   return (n ^ n >>> 13) >>> 0;
 };
-var variantFor2 = (siteId, kind) => hash42(siteId + "/" + kind) % 3;
+var variantFor = (siteId, kind) => hash42(siteId + "/" + kind) % 3;
 function overlayWoodlandCaveFamilyParcelsD12_2(chunk6, parcels = []) {
   let next = chunk6;
   for (const parcel2 of parcels) {
@@ -150312,7 +150078,7 @@ function overlayWoodlandCaveFamilyParcelsD12_2(chunk6, parcels = []) {
       "Invalid D12.2 Cave parcel overlay"
     );
     const historical = overlayWoodlandCaveParcelD10(next, { ...copyWire(parcel2), version: WOODLAND_CAVE_VERSION }), decorations = historical.visual.decorations.map(
-      (d) => d.id?.startsWith(`cave-decoration:${parcel2.siteId}:`) ? { ...copyWire(d), variant: variantFor2(parcel2.siteId, d.kind) } : copyWire(d)
+      (d) => d.id?.startsWith(`cave-decoration:${parcel2.siteId}:`) ? { ...copyWire(d), variant: variantFor(parcel2.siteId, d.kind) } : copyWire(d)
     );
     next = freezeWire({
       ...copyWire(historical),
@@ -150506,9 +150272,9 @@ function validateD9Root(root6) {
       validatePlannedCaveReservation(root6, r);
       continue;
     }
-    const family = r.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID, modernFamily = family && r.parcel?.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_1, naturalFamily = family && r.parcel?.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2;
+    const family = r.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID, naturalFamily = family && r.parcel?.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2;
     requireContract(
-      (r.version === "site-reservation-d10-v1" || family && ["site-reservation-d12-v1", "site-reservation-d12-1-v1", "site-reservation-d12-2-v1"].includes(r.version)) && id2 === r.siteId && r.socket.siteId === id2 && [
+      (r.version === "site-reservation-d10-v1" || family && r.version === "site-reservation-d12-2-v1") && id2 === r.siteId && r.socket.siteId === id2 && [
         "woodland-overgrown-ruin",
         "woodland-fort",
         WOODLAND_CAVE_PACKAGE_ID,
@@ -150523,11 +150289,7 @@ function validateD9Root(root6) {
       requireContract(r.parcel.version === WOODLAND_CAVE_VERSION && r.parcel.pages.length === 1, "Cave reservation parcel");
     if (family)
       requireContract(
-        [
-          WOODLAND_CAVE_FAMILY_PARCEL_D12,
-          WOODLAND_CAVE_FAMILY_PARCEL_D12_1,
-          WOODLAND_CAVE_FAMILY_PARCEL_D12_2
-        ].includes(r.parcel.version) && r.parcel.familyId === WOODLAND_CAVE_FAMILY_ID && r.parcel.spawnOrdinal >= 0 && r.parcel.spawnOrdinal < (naturalFamily ? 2 : modernFamily ? 16 : 4) && r.parcel.pages.length === 1 && (!(modernFamily || naturalFamily) || /^[a-f0-9]{64}$/.test(r.parcel.layoutSeed) && ["small", "standard", "large", "deep"].includes(r.parcel.tier)),
+        r.parcel.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2 && r.parcel.familyId === WOODLAND_CAVE_FAMILY_ID && r.parcel.spawnOrdinal >= 0 && r.parcel.spawnOrdinal < 2 && r.parcel.pages.length === 1 && /^[a-f0-9]{64}$/.test(r.parcel.layoutSeed) && ["small", "standard", "large", "deep"].includes(r.parcel.tier),
         "Cave family parcel"
       );
   }
@@ -150778,15 +150540,15 @@ function canShadowDash(actor, combat, stats3, suppressed = false) {
 }
 function beginShadowDash(actor, combat, stats3, aim2, suppressed = false, cooldownPercent = 100) {
   if (!canShadowDash(actor, combat, stats3, suppressed)) return false;
-  const intent = actor.movementIntent, direction3 = Math.hypot(intent.x, intent.y) > 0.01 ? intent : aim2, length = Math.hypot(direction3.x, direction3.y);
+  const intent = actor.movementIntent, direction2 = Math.hypot(intent.x, intent.y) > 0.01 ? intent : aim2, length = Math.hypot(direction2.x, direction2.y);
   if (!length) return false;
   const move = CLASS_MOVES[stats3.subType];
   Object.assign(combat.dash, {
     frames: move.frames,
     cooldown: Math.round(move.cooldown * cooldownPercent / 100),
     remaining: move.distance,
-    x: direction3.x / length,
-    y: direction3.y / length
+    x: direction2.x / length,
+    y: direction2.y / length
   });
   return true;
 }
@@ -153214,7 +152976,7 @@ function validateActivityStateNow(s) {
   validateTownInteriors(s);
   const d9 = Boolean(s.d9World);
   if (d9) validateD9Root(s.d9World);
-  const d6 = s.format === D6_ACTIVITY_FORMAT, legacyD4 = s.format === LEGACY_D4_ACTIVITY_FORMAT, d4 = d6 || s.format === D4_ACTIVITY_FORMAT || legacyD4, d3 = d4 || s.format === D3_ACTIVITY_FORMAT;
+  const d6 = s.format === D6_ACTIVITY_FORMAT, d4 = d6 || s.format === D4_ACTIVITY_FORMAT, d3 = d4 || s.format === D3_ACTIVITY_FORMAT;
   requireContract(
     (d3 || s.format === ACTIVITY_FORMAT) && s.protocolVersion === 1 && s.ticksPerSecond === 60,
     "Unsupported activity state"
@@ -153358,7 +153120,7 @@ function validateActivityStateNow(s) {
       }
       validatePlayerState(identity2);
       validatePlayerProgression(progression);
-      if (d4) (legacyD4 ? validatePlayerInventory2 : validatePlayerInventory)(p, s, validateActivityCommand);
+      if (d4) validatePlayerInventory(p, s, validateActivityCommand);
       else requireContract(inventory === void 0, "Inventory needs D4 format");
     } else validatePlayerState(p);
     const a = s.entitiesById[p.entityId];
@@ -153806,16 +153568,6 @@ function upgradeLegacyActivityState(input) {
     const next = copyWire(input);
     for (const p of Object.values(next.playersById))
       p.inventory = migrateForgeInventory({ ...p, inventory: migratePresentationInventory(p) });
-    return createActivityState(normalizeOrdinaryAcquireRange(next));
-  }
-  if (input.format === LEGACY_D4_ACTIVITY_FORMAT) {
-    const next = copyWire(input);
-    next.format = D4_ACTIVITY_FORMAT;
-    for (const p of Object.values(next.playersById))
-      p.inventory = migrateForgeInventory({
-        ...p,
-        inventory: migratePresentationInventory({ ...p, inventory: migrateD4Inventory(p) })
-      });
     return createActivityState(normalizeOrdinaryAcquireRange(next));
   }
   if (input.format === D3_ACTIVITY_FORMAT) {
@@ -166958,7 +166710,7 @@ function createArchivedBossFightRuntime(state2, { pool: pool4, damage: damage2, 
       else if (d < 60) moveAegisAffectedActor(c, decoy, { x: -u.x * cfgN.speed * 0.8, y: -u.y * cfgN.speed * 0.8 });
       const age = state2.tick - s.activatedTick - 60 - s.ordinal * 17;
       if (age < 0 || age % 90 !== 0 || d > cfgN.range || !sweptPathClear(c, decoy.position, t.position, 3)) continue;
-      const direction3 = range(decoy.position, t.position) || 1, seq = Math.floor(age / 90) + 1;
+      const direction2 = range(decoy.position, t.position) || 1, seq = Math.floor(age / 90) + 1;
       const key4 = b.bossId + ":bolt:" + decoy.entityId + ":" + seq;
       shots[key4] = {
         id: key4,
@@ -166966,8 +166718,8 @@ function createArchivedBossFightRuntime(state2, { pool: pool4, damage: damage2, 
         position: point4(decoy.position),
         previousPosition: point4(decoy.position),
         velocity: {
-          x: (t.position.x - decoy.position.x) / direction3 * cfgN.projectileSpeed,
-          y: (t.position.y - decoy.position.y) / direction3 * cfgN.projectileSpeed
+          x: (t.position.x - decoy.position.x) / direction2 * cfgN.projectileSpeed,
+          y: (t.position.y - decoy.position.y) / direction2 * cfgN.projectileSpeed
         },
         createdTick: state2.tick,
         expiresTick: state2.tick + cfgN.projectileLifeTicks,
@@ -172564,13 +172316,7 @@ function validateActivityProgress(a, b) {
   validateActivityEnvelope(a);
   validateActivityEnvelope(b);
   const x = upgradeActivityState(a.cut.snapshot.state), y = upgradeActivityState(b.cut.snapshot.state);
-  const formats = [
-    "saq-world-activity-1",
-    D3_ACTIVITY_FORMAT,
-    LEGACY_D4_ACTIVITY_FORMAT,
-    D4_ACTIVITY_FORMAT,
-    D6_ACTIVITY_FORMAT
-  ];
+  const formats = ["saq-world-activity-1", D3_ACTIVITY_FORMAT, D4_ACTIVITY_FORMAT, D6_ACTIVITY_FORMAT];
   requireContract(
     formats.indexOf(b.cut.snapshot.state.format) >= formats.indexOf(a.cut.snapshot.state.format),
     "Progression format regressed"
@@ -172642,9 +172388,7 @@ function validateActivityProgress(a, b) {
       g2.lastRequiredTick === null || h.lastRequiredTick !== null && h.lastRequiredTick >= g2.lastRequiredTick,
       "Group relevance history regressed"
     );
-    if ([D3_ACTIVITY_FORMAT, LEGACY_D4_ACTIVITY_FORMAT, D4_ACTIVITY_FORMAT, D6_ACTIVITY_FORMAT].includes(
-      b.cut.snapshot.state.format
-    ) && g2.threatSnapshot) {
+    if ([D3_ACTIVITY_FORMAT, D4_ACTIVITY_FORMAT, D6_ACTIVITY_FORMAT].includes(b.cut.snapshot.state.format) && g2.threatSnapshot) {
       requireContract(
         h.threatSnapshot && h.threatSnapshot.activatedTick >= g2.threatSnapshot.activatedTick,
         "Threat history regressed"
@@ -174431,58 +174175,6 @@ function deterministicCreatureVisualSeed(entityId2) {
   return h >>> 0;
 }
 
-// src/shared/content/wilderness_event_discovery_v3_8.js
-var WOODLAND_RUMOR_RADIUS_TILES = 54;
-var WOODLAND_SIGHT_RADIUS_TILES = 20;
-var hints = Object.freeze({
-  "density-v2-event-capacity-030": "Faint campfire smoke drifts between the trees",
-  "density-v2-event-capacity-070": "Broken saplings and fresh tracks mark the undergrowth",
-  "density-v2-event-capacity-132": "Weathered stones hide something among the roots"
-});
-var direction2 = (dx, dy) => {
-  const east = Math.abs(dx) > Math.abs(dy) * 0.42 ? dx > 0 ? "east" : "west" : "";
-  const north = Math.abs(dy) > Math.abs(dx) * 0.42 ? dy > 0 ? "south" : "north" : "";
-  return north + east || "nearby";
-};
-function woodlandEventDistanceV3_8(from, to) {
-  if (!from || !to) return Infinity;
-  const cx = BigInt(to.chunkX) - BigInt(from.chunkX), cy2 = BigInt(to.chunkY) - BigInt(from.chunkY);
-  if (cx > 3n || cx < -3n || cy2 > 3n || cy2 < -3n) return Infinity;
-  return Math.hypot(Number(cx) * 1024 + to.localX - from.localX, Number(cy2) * 832 + to.localY - from.localY);
-}
-function woodlandEventCluesV3_8(position3, statuses = []) {
-  if (!position3) return Object.freeze([]);
-  const stateById = new Map(statuses.map((s) => [s.slotId, s.state]));
-  const candidates = [];
-  for (const event of WOODLAND_EVENT_PILOT_V3_7) {
-    const point15 = woodlandPilotWorldPosition(event);
-    const distance11 = woodlandEventDistanceV3_8(position3, point15), tiles9 = distance11 / 32;
-    if (tiles9 > WOODLAND_RUMOR_RADIUS_TILES) continue;
-    const state2 = stateById.get(event.slotId) ?? "undiscovered";
-    if (state2 === "completed" && tiles9 > WOODLAND_SIGHT_RADIUS_TILES) continue;
-    const dx = Number(BigInt(point15.chunkX) - BigInt(position3.chunkX)) * 1024 + point15.localX - position3.localX;
-    const dy = Number(BigInt(point15.chunkY) - BigInt(position3.chunkY)) * 832 + point15.localY - position3.localY;
-    const bearing = direction2(dx, dy);
-    const sighted = tiles9 <= WOODLAND_SIGHT_RADIUS_TILES;
-    candidates.push(
-      Object.freeze({
-        slotId: event.slotId,
-        kind: event.kind,
-        state: state2,
-        stage: sighted ? "sighted" : "rumor",
-        title: sighted ? event.label : "Something in the wilderness",
-        text: state2 === "completed" ? event.label + " \xB7 cleared" : sighted ? event.label : hints[event.slotId],
-        direction: bearing,
-        distanceTiles: Math.round(tiles9),
-        // The minimap receives exact coordinates only after the player is close.
-        ...sighted ? { position: point15 } : {}
-      })
-    );
-  }
-  candidates.sort((a, b) => a.distanceTiles - b.distanceTiles || a.slotId.localeCompare(b.slotId));
-  return Object.freeze(candidates);
-}
-
 // src/shared/contracts/site_truth_d12_4c.js
 var SITE_TRUTH_D12_4C = "site-truth-d12-4c.1-v1";
 var tileAnchor = (anchor2) => {
@@ -175486,9 +175178,9 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           }
           const siteTruth = state2.d9World ? siteTruthView : null;
           const exits = (m.siteInteriors ?? []).filter((d2) => inOverworld || d2 === interior2).map((d2) => {
-            const semantic = m.sites.find((s) => s.locationId === d2.siteId), direction3 = inOverworld ? "enter" : "exit", anchor2 = inOverworld ? semantic.position : d2.entrance, payload = { siteId: d2.siteId, direction: direction3 };
+            const semantic = m.sites.find((s) => s.locationId === d2.siteId), direction2 = inOverworld ? "enter" : "exit", anchor2 = inOverworld ? semantic.position : d2.entrance, payload = { siteId: d2.siteId, direction: direction2 };
             return {
-              exitId: `site-${direction3}:${d2.siteId}`,
+              exitId: `site-${direction2}:${d2.siteId}`,
               siteAction: payload,
               x: anchor2.x,
               y: anchor2.y,
@@ -175525,16 +175217,16 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                     label: functional.siteKind === "procedural-fort" ? "Leave Fort" : functional.siteKind === "procedural-ruin" ? "Leave Ruin" : functional.siteKind === "procedural-crypt" ? "Leave Crypt" : `Leave Cave`
                   });
                 }
-                for (const direction3 of ["up", "down"]) {
-                  const transition2 = functionalFloor.transitions[direction3];
+                for (const direction2 of ["up", "down"]) {
+                  const transition2 = functionalFloor.transitions[direction2];
                   if (!transition2) continue;
-                  const payload = { siteId: functional.siteId, direction: direction3, transitionId: transition2.transitionId }, anchor2 = transition2.anchor;
+                  const payload = { siteId: functional.siteId, direction: direction2, transitionId: transition2.transitionId }, anchor2 = transition2.anchor;
                   exits.push({
-                    exitId: `site-${direction3}:${transition2.transitionId}`,
+                    exitId: `site-${direction2}:${transition2.transitionId}`,
                     siteAction: payload,
                     siteKind: functional.siteKind,
                     .../* boss skip v1: out from the last floor's stairs */
-                    direction3 === "up" && functionalFloor.index === functional.floors.length - 1 && siteBossDoorV1(functional) && functionalSiteTransitionTargetD9(state2, local8, { siteId: functional.siteId, direction: "exit" }) ? {
+                    direction2 === "up" && functionalFloor.index === functional.floors.length - 1 && siteBossDoorV1(functional) && functionalSiteTransitionTargetD9(state2, local8, { siteId: functional.siteId, direction: "exit" }) ? {
                       altAction: {
                         siteAction: { siteId: functional.siteId, direction: "exit" },
                         label: functional.siteKind === "procedural-fort" ? "Leave Fort" : functional.siteKind === "procedural-ruin" ? "Leave Ruin" : functional.siteKind === "procedural-crypt" ? "Leave Crypt" : "Leave Cave",
@@ -175542,13 +175234,13 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                       }
                     } : {},
                     ...functionalFloor.graph?.navigation?.arrivalFacing !== void 0 ? {
-                      stairFacing: functionalFloor.graph.navigation[direction3 === "up" ? "arrivalFacing" : "onwardFacing"]
+                      stairFacing: functionalFloor.graph.navigation[direction2 === "up" ? "arrivalFacing" : "onwardFacing"]
                     } : {},
                     x: anchor2.x,
                     y: anchor2.y,
                     radius: SITE_INTERACTION_RADIUS,
                     available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)),
-                    label: transition2.label ?? (direction3 === "down" ? "Descend" : "Ascend")
+                    label: transition2.label ?? (direction2 === "down" ? "Descend" : "Ascend")
                   });
                 }
                 const extraction = projectSmallCaveFinaleExtractionD13D_C(state2, functional, functionalFloor) ?? projectStandardCaveBossExtractionD13D_E(state2, functional, functionalFloor) ?? projectLargeCaveFinaleExtractionD13D_G(state2, functional, functionalFloor) ?? projectArachnidTreantExtractionD12_5C(state2, functional, functionalFloor);
@@ -175647,13 +175339,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
               available: n.available,
               label: "Talk to " + n.name + " \xB7 " + n.roleLabel
             });
-          const fixedEvents = state2.d9World?.plannedWorld && !isSeededBindingV1(state2.d9World.plannedWorld) && inOverworld, woodlandPilotEvents = fixedEvents ? WOODLAND_EVENT_PILOT_V3_7.map((event) => {
-            const anchor2 = state2.d9World.runtime.chunks.flatMap((chunk6) => chunk6.anchors).find((a) => a.ordinal === event.ordinal && isWoodlandPilotEventAnchor(a)), groupId = anchor2 ? "ordinary:" + anchor2.id.split(":").at(-1) : null, group = groupId ? state2.groupsById[groupId] : null;
-            return {
-              slotId: event.slotId,
-              state: group?.cleared ? "completed" : eventRecord(state2, groupId) ? "active" : "undiscovered"
-            };
-          }) : [];
+          const woodlandPilotEvents = [];
           const boon = boonOfV1(state2, player.playerId), blessing = blessingOfV1(state2, player.playerId);
           cachedModel = Object.freeze({
             bestiary: state2.bestiary ? freezeProjection(projectBestiaryV1(state2, localPlayerId, ctx.spaceInstanceId, local8.position)) : null,
@@ -175787,12 +175473,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
               nextClientSequence: engine.nextClientSequence(localPlayerId)
             }),
             woodlandPilotEvents: freezeProjection(woodlandPilotEvents),
-            woodlandPilotClues: freezeProjection(
-              fixedEvents ? woodlandEventCluesV3_8(
-                localFramePositionD9(local8.position, state2.d9World.runtime.frames),
-                woodlandPilotEvents
-              ) : []
-            ),
+            woodlandPilotClues: freezeProjection([]),
             primary: freezeProjection({ actorsById: primaryActors, events }),
             encounter: null,
             // The boss room's cloud wall on this hero's floor: its doors, and whether it is up.
@@ -189391,13 +189072,13 @@ function banditMeleePoseV1(actor, tick) {
   const L = LEAN[actor.enemyFamily], phase3 = actor.meleePhase, g2 = actor.meleeGeometry;
   if (!L || !actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, distance11 = Math.hypot(dx, dy);
-  const direction3 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
+  const direction2 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
   const centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = clamp14(distance11 - targetRadius, sourceRadius, weaponReach);
   const p = clamp14((tick - phase3.phaseStartedTick) / Math.max(1, phase3.phaseEndsTick - phase3.phaseStartedTick), 0, 1), windup2 = phase3.phase === "windup", impact3 = phase3.phase === "impact", w = windup2 ? ease8(p) : 0, r = phase3.phase === "recovery" ? (1 - p) ** 2 : 0;
-  const travel = windup2 ? -L.back * w : impact3 ? L.lunge : L.lunge * r, side = direction3.x < 0 ? -1 : 1;
+  const travel = windup2 ? -L.back * w : impact3 ? L.lunge : L.lunge * r, side = direction2.x < 0 ? -1 : 1;
   const body6 = {
-    x: direction3.x * travel,
-    y: direction3.y * travel,
+    x: direction2.x * travel,
+    y: direction2.y * travel,
     rotation: (windup2 ? -L.tilt * 0.6 * w : impact3 ? L.tilt : L.tilt * r) * side,
     scaleX: 1 + (windup2 ? L.squash * 0.6 * w : 0),
     scaleY: 1 - (windup2 ? L.squash * w : impact3 ? -L.squash * 0.5 : 0)
@@ -189406,7 +189087,7 @@ function banditMeleePoseV1(actor, tick) {
     family: actor.enemyFamily,
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -189419,7 +189100,7 @@ function banditMeleePoseV1(actor, tick) {
 function banditArcherRangedPoseV1(actor, tick) {
   const r = actor.ranged;
   if (!actor.alive || !r || r.phase === "idle") return null;
-  const aim2 = r.aim ?? (r.targetPosition ? { x: r.targetPosition.x - actor.position.x, y: r.targetPosition.y - actor.position.y } : { x: actor.presentationFacingX ?? 1, y: 0 }), length = Math.hypot(aim2.x, aim2.y), direction3 = length > 1e-3 ? { x: aim2.x / length, y: aim2.y / length } : { x: 1, y: 0 };
+  const aim2 = r.aim ?? (r.targetPosition ? { x: r.targetPosition.x - actor.position.x, y: r.targetPosition.y - actor.position.y } : { x: actor.presentationFacingX ?? 1, y: 0 }), length = Math.hypot(aim2.x, aim2.y), direction2 = length > 1e-3 ? { x: aim2.x / length, y: aim2.y / length } : { x: 1, y: 0 };
   const p = clamp14((tick - r.phaseStartedTick) / Math.max(1, r.phaseEndsTick - r.phaseStartedTick), 0, 1), weight2 = r.phase === "windup" ? ease8(p) : 1 - ease8(p), kick = r.phase === "recovery" ? Math.sin(Math.PI * clamp14((tick - r.phaseStartedTick) / 4, 0, 1)) : 0;
   return {
     family: "bandit_archer",
@@ -189428,14 +189109,14 @@ function banditArcherRangedPoseV1(actor, tick) {
     preserveFacingFlip: true,
     phase: r.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     artWeight: weight2,
     charge: r.phase === "windup" ? weight2 : 0,
     release: r.phase === "recovery" ? Math.max(0, 1 - (tick - r.phaseStartedTick) / 3) : 0,
     recovery: r.phase === "recovery" ? 1 - p : 0,
     body: {
-      x: -direction3.x * (1.5 * weight2 + 1.5 * kick),
-      y: -direction3.y * (1.5 * weight2 + 1.5 * kick),
+      x: -direction2.x * (1.5 * weight2 + 1.5 * kick),
+      y: -direction2.y * (1.5 * weight2 + 1.5 * kick),
       rotation: 0,
       scaleX: 1,
       scaleY: 1
@@ -191199,13 +190880,13 @@ function burrowerMeleePoseV1(actor, tick) {
   const phase3 = actor.meleePhase, g2 = actor.meleeGeometry;
   if (actor.enemyFamily !== "burrower" || !actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, distance11 = Math.hypot(dx, dy);
-  const direction3 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
+  const direction2 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
   const centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = clamp15(distance11 - targetRadius, sourceRadius, weaponReach);
   const p = clamp15((tick - phase3.phaseStartedTick) / Math.max(1, phase3.phaseEndsTick - phase3.phaseStartedTick), 0, 1), windup2 = phase3.phase === "windup", impact3 = phase3.phase === "impact", w = windup2 ? ease9(p) : 0, r = phase3.phase === "recovery" ? (1 - p) ** 2 : 0;
-  const travel = windup2 ? -2 * w : impact3 ? 7 : 7 * r, side = direction3.x < 0 ? -1 : 1;
+  const travel = windup2 ? -2 * w : impact3 ? 7 : 7 * r, side = direction2.x < 0 ? -1 : 1;
   const body6 = {
-    x: direction3.x * travel,
-    y: direction3.y * travel,
+    x: direction2.x * travel,
+    y: direction2.y * travel,
     rotation: (windup2 ? -0.06 * w : impact3 ? 0.12 : 0.12 * r) * side,
     scaleX: 1 + (windup2 ? 0.05 * w : 0),
     scaleY: 1 - (windup2 ? 0.08 * w : impact3 ? -0.04 : 0)
@@ -191214,7 +190895,7 @@ function burrowerMeleePoseV1(actor, tick) {
     family: "burrower",
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -204718,7 +204399,7 @@ var smooth7 = (x) => {
   return p * p * (3 - 2 * p);
 };
 var mix12 = (a, b, t) => a + (b - a) * t;
-function uprightAttackFrame(tuning, phase3, p, direction3, contactReach) {
+function uprightAttackFrame(tuning, phase3, p, direction2, contactReach) {
   const front2 = tuning.front, reach2 = Math.max(0, contactReach - front2);
   const idle2 = {
     travel: 0,
@@ -204761,13 +204442,13 @@ function uprightAttackFrame(tuning, phase3, p, direction3, contactReach) {
   const first = phase3 === "windup" && p < 0.4, from = phase3 === "recovery" ? hit2 : first ? idle2 : brace, to = phase3 === "recovery" ? idle2 : first ? brace : hit2;
   const t = phase3 === "windup" ? smooth7(first ? p / 0.4 : (p - 0.4) / 0.6) : phase3 === "recovery" ? smooth7(p) : 1;
   const f = Object.fromEntries(Object.keys(idle2).map((k) => [k, mix12(from[k], to[k], t)]));
-  const anchor2 = { x: direction3.x * f.travel, y: direction3.y * f.travel + f.lift };
+  const anchor2 = { x: direction2.x * f.travel, y: direction2.y * f.travel + f.lift };
   const artWeight = phase3 === "windup" ? smooth7(p / 0.4) : phase3 === "recovery" ? 1 - smooth7(p) : 1;
   const strikeBlend = phase3 === "windup" ? smooth7((p - 0.4) / 0.6) : phase3 === "recovery" ? 1 - smooth7(p) : 1;
   return {
     artWeight,
     strikeBlend,
-    body: { ...anchor2, rotation: f.rotation * direction3.x, scaleX: f.scaleX, scaleY: f.scaleY },
+    body: { ...anchor2, rotation: f.rotation * direction2.x, scaleX: f.scaleX, scaleY: f.scaleY },
     anchor: anchor2,
     limb: { extension: f.extension, sweep: f.sweep, open: f.open, orbit: f.orbit, spin: f.spin },
     frontExtent: front2
@@ -204787,21 +204468,21 @@ function cursedBladeMeleePoseV4(actor, tick) {
   const phase3 = actor.meleePhase, g2 = actor.meleeGeometry;
   if (actor.enemyFamily !== "cursed_blade" || !actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, d = Math.hypot(dx, dy);
-  const direction3 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
+  const direction2 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
   const centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = Math.max(sourceRadius, Math.min(weaponReach, d - targetRadius));
   const p = clamp19((tick - phase3.phaseStartedTick) / Math.max(1, phase3.phaseEndsTick - phase3.phaseStartedTick)), size = actor.elite?.scale ?? 1;
   const frame6 = uprightAttackFrame(
     { front: TIP * SCALE4 * size, recoil: 5, lift: -2, lean: 0, hitLean: 0, squeezeX: 1, squeezeY: 1, hitX: 1, hitY: 1 },
     phase3.phase,
     p,
-    direction3,
+    direction2,
     contactReach
   );
   return {
     family: "cursed_blade",
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -205047,27 +204728,27 @@ var clamp20 = (x) => Math.max(0, Math.min(1, x));
 var mix14 = (a, b, t) => a + (b - a) * t;
 var color3 = (flash2, hex6) => flash2 ? "#fff" : hex6;
 var rotate = (x, y, a) => ({ x: Math.cos(a) * x - Math.sin(a) * y, y: Math.sin(a) * x + Math.cos(a) * y });
-function localDirection(direction3, rotation, facing2) {
+function localDirection(direction2, rotation, facing2) {
   const co = Math.cos(rotation), si = Math.sin(rotation);
-  return { x: (co * direction3.x + si * direction3.y) * facing2, y: -si * direction3.x + co * direction3.y };
+  return { x: (co * direction2.x + si * direction2.y) * facing2, y: -si * direction2.x + co * direction2.y };
 }
 function swordRay(u) {
   const dot18 = STRIKE_GRIP.x * u.x + STRIKE_GRIP.y * u.y, perp2 = STRIKE_GRIP.x ** 2 + STRIKE_GRIP.y ** 2 - dot18 * dot18;
   return dot18 + Math.sqrt(Math.max(0, BLADE_REACH ** 2 - perp2));
 }
-function armorSwordFrontV4(direction3, rotation, facing2 = 1, size = 1) {
-  return swordRay(localDirection(direction3, rotation, facing2)) * SCALE5 * size;
+function armorSwordFrontV4(direction2, rotation, facing2 = 1, size = 1) {
+  return swordRay(localDirection(direction2, rotation, facing2)) * SCALE5 * size;
 }
 function animatedArmorMeleePoseV4(actor, tick) {
   const phase3 = actor.meleePhase, g2 = actor.meleeGeometry;
   if (actor.enemyFamily !== "animated_armor" || !actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, d = Math.hypot(dx, dy);
-  const direction3 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
+  const direction2 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
   const centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = Math.max(sourceRadius, Math.min(weaponReach, d - targetRadius));
   const p = clamp20((tick - phase3.phaseStartedTick) / Math.max(1, phase3.phaseEndsTick - phase3.phaseStartedTick)), facing2 = actor.presentationFacingX === -1 ? -1 : 1, size = actor.elite?.scale ?? 1;
   const frame6 = uprightAttackFrame(
     {
-      front: armorSwordFrontV4(direction3, 0.08 * direction3.x, facing2, size),
+      front: armorSwordFrontV4(direction2, 0.08 * direction2.x, facing2, size),
       recoil: 2,
       lift: 1,
       lean: -0.1,
@@ -205079,14 +204760,14 @@ function animatedArmorMeleePoseV4(actor, tick) {
     },
     phase3.phase,
     p,
-    direction3,
+    direction2,
     contactReach
   );
   return {
     family: "animated_armor",
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -205484,16 +205165,16 @@ var IDLE_GRIP = Object.freeze({ x: -11 - Math.sin(IDLE_ANGLE) * 8, y: 7 + Math.c
 var clamp21 = (x) => Math.max(0, Math.min(1, x));
 var mix15 = (a, b, t) => a + (b - a) * t;
 var color4 = (flash2, hex6) => flash2 ? "#fff" : hex6;
-function localDirection2(direction3, rotation, facing2) {
+function localDirection2(direction2, rotation, facing2) {
   const co = Math.cos(rotation), si = Math.sin(rotation);
-  return { x: (co * direction3.x + si * direction3.y) * facing2, y: -si * direction3.x + co * direction3.y };
+  return { x: (co * direction2.x + si * direction2.y) * facing2, y: -si * direction2.x + co * direction2.y };
 }
 function swordRay2(u) {
   const dot18 = STRIKE_GRIP2.x * u.x + STRIKE_GRIP2.y * u.y, perp2 = STRIKE_GRIP2.x ** 2 + STRIKE_GRIP2.y ** 2 - dot18 * dot18;
   return dot18 + Math.sqrt(Math.max(0, BLADE_REACH2 ** 2 - perp2));
 }
-function gargoyleSwordFrontV4(direction3, rotation, facing2 = 1, size = 1) {
-  return swordRay2(localDirection2(direction3, rotation, facing2)) * SCALE6 * size;
+function gargoyleSwordFrontV4(direction2, rotation, facing2 = 1, size = 1) {
+  return swordRay2(localDirection2(direction2, rotation, facing2)) * SCALE6 * size;
 }
 function gargoyleSwordGeometryV4(action2 = null) {
   const weight2 = action2?.artWeight ?? 0, strike = action2?.strikeBlend ?? 0, facing2 = action2?.idleFacingX ?? 1;
@@ -205524,11 +205205,11 @@ function gargoyleMeleePoseV4(actor, tick) {
   const phase3 = actor.meleePhase, g2 = actor.meleeGeometry;
   if (actor.enemyFamily !== "gargoyle" || !actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, d = Math.hypot(dx, dy);
-  const direction3 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
+  const direction2 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
   const centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = Math.max(sourceRadius, Math.min(weaponReach, d - targetRadius));
   const p = clamp21((tick - phase3.phaseStartedTick) / Math.max(1, phase3.phaseEndsTick - phase3.phaseStartedTick)), facing2 = actor.presentationFacingX === -1 ? -1 : 1, size = actor.elite?.scale ?? 1;
   const tuning = {
-    front: gargoyleSwordFrontV4(direction3, 0.1 * direction3.x, facing2, size),
+    front: gargoyleSwordFrontV4(direction2, 0.1 * direction2.x, facing2, size),
     recoil: 3,
     lift: 2,
     lean: -0.12,
@@ -205538,12 +205219,12 @@ function gargoyleMeleePoseV4(actor, tick) {
     hitX: 1,
     hitY: 1
   };
-  const frame6 = uprightAttackFrame(tuning, phase3.phase, p, direction3, contactReach);
+  const frame6 = uprightAttackFrame(tuning, phase3.phase, p, direction2, contactReach);
   return {
     family: "gargoyle",
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -205866,8 +205547,8 @@ function watcherLookDirection(actor, target, pose3 = null) {
   const cos = Math.cos(angle3), sin = Math.sin(angle3), facing2 = actor.presentationFacingX === -1 ? -1 : 1;
   return { x: (dx * cos + dy * sin) * facing2, y: dy * cos - dx * sin };
 }
-function watcherEyePose(tick, seed2, direction3 = null, phase3 = "idle", flash2 = false) {
-  const dx = point5(direction3) ? direction3.x : 0, dy = point5(direction3) ? direction3.y : 0, length = Math.max(64, Math.hypot(dx, dy));
+function watcherEyePose(tick, seed2, direction2 = null, phase3 = "idle", flash2 = false) {
+  const dx = point5(direction2) ? direction2.x : 0, dy = point5(direction2) ? direction2.y : 0, length = Math.max(64, Math.hypot(dx, dy));
   const visualSeed = seed2 >>> 0, period = 260 + visualSeed % 101, offset2 = (visualSeed * 37 + 19) % period;
   const elapsed = Number.isFinite(tick) ? tick : 0, cycle = ((elapsed + offset2) % period + period) % period, blinkAge = cycle - (period - 10);
   const openness = phase3 === "idle" && !flash2 && blinkAge >= 0 ? 1 - Math.sin(Math.PI * blinkAge / 10) ** 2 : 1;
@@ -206313,8 +205994,8 @@ function voidSpectreMotionV4(m, time3, seed2 = 0) {
     if (a) {
       const d = a.direction, n2 = { x: -d.y, y: d.x }, spread = side * mix18(5, -5, rake);
       const center3 = { x: d.x * a.contactReach + n2.x * spread, y: d.y * a.contactReach - 8 + n2.y * spread };
-      const goal = toLocal(a, center3), origin = toLocal(a, { x: 0, y: 0 }), direction3 = toLocal(a, d);
-      const targetAngle = Math.atan2(direction3.y - origin.y, direction3.x - origin.x);
+      const goal = toLocal(a, center3), origin = toLocal(a, { x: 0, y: 0 }), direction2 = toLocal(a, d);
+      const targetAngle = Math.atan2(direction2.y - origin.y, direction2.x - origin.x);
       angle3 = idleAngle + turn3(targetAngle - idleAngle) * weight2;
       const forward = { x: Math.cos(angle3), y: Math.sin(angle3) };
       const targetWrist = { x: goal.x - forward.x * 6, y: goal.y - forward.y * 6 };
@@ -206932,7 +206613,7 @@ var HULL = Object.freeze(
     [-18, 2]
   ].map((p) => Object.freeze(p))
 );
-function mimicShieldBashRadiusV4(direction3, rotation, facing2 = 1, size = 1) {
+function mimicShieldBashRadiusV4(direction2, rotation, facing2 = 1, size = 1) {
   const co = Math.cos(rotation), si = Math.sin(rotation), scale = SCALE12 * size;
   const vertices = HULL.map(([x, y]) => ({
     x: (co * x * facing2 - si * y) * scale,
@@ -206941,9 +206622,9 @@ function mimicShieldBashRadiusV4(direction3, rotation, facing2 = 1, size = 1) {
   const cross7 = (a, b) => a.x * b.y - a.y * b.x;
   let distance11 = Infinity;
   for (let i = 0; i < vertices.length; i++) {
-    const a = vertices[i], b = vertices[(i + 1) % vertices.length], edge = { x: b.x - a.x, y: b.y - a.y }, den = cross7(direction3, edge);
+    const a = vertices[i], b = vertices[(i + 1) % vertices.length], edge = { x: b.x - a.x, y: b.y - a.y }, den = cross7(direction2, edge);
     if (Math.abs(den) < 1e-9) continue;
-    const t = cross7(a, edge) / den, u = cross7(a, direction3) / den;
+    const t = cross7(a, edge) / den, u = cross7(a, direction2) / den;
     if (t >= 0 && u >= -1e-9 && u <= 1 + 1e-9) distance11 = Math.min(distance11, t);
   }
   return Number.isFinite(distance11) ? distance11 : 13.5 * size;
@@ -207424,26 +207105,26 @@ function dungeonMobMeleePoseV2A(actor, tick) {
   const family = actor.enemyFamily, phase3 = actor.meleePhase, g2 = actor.meleeGeometry;
   if (!families.has(family) || !actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, distance11 = Math.hypot(dx, dy);
-  const direction3 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 };
+  const direction2 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 };
   const sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius, centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach;
   const weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = clamp24(distance11 - targetRadius, sourceRadius, weaponReach);
   const p = clamp24((tick - phase3.phaseStartedTick) / Math.max(1, phase3.phaseEndsTick - phase3.phaseStartedTick), 0, 1);
   const tuning = family === "mimic_shield" ? {
     ...uprightTuning[family],
     front: mimicShieldBashRadiusV4(
-      direction3,
-      uprightTuning[family].hitLean * direction3.x,
+      direction2,
+      uprightTuning[family].hitLean * direction2.x,
       actor.presentationFacingX === -1 ? -1 : 1,
       actor.elite?.scale ?? 1
     )
   } : uprightTuning[family];
-  const frame6 = uprightAttackFrame(tuning, phase3.phase, p, direction3, contactReach);
+  const frame6 = uprightAttackFrame(tuning, phase3.phase, p, direction2, contactReach);
   const coinTiming = DUNGEON_MOBS_V2_MELEE_MOTION.coin_elemental, coinPhaseOffset = phase3.phase === "impact" ? coinTiming.windupTicks : phase3.phase === "recovery" ? coinTiming.windupTicks + coinTiming.impactTicks : 0;
   const pose3 = {
     family,
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -209247,7 +208928,7 @@ function voidOrbRangedPoseV4(actor, tick) {
   const r = actor.ranged;
   if (!actor.alive || !r || !["windup", "recovery"].includes(r.phase)) return null;
   const d = r.aim ?? (r.targetPosition ? { x: r.targetPosition.x - actor.position.x, y: r.targetPosition.y - actor.position.y } : { x: actor.presentationFacingX ?? 1, y: 0 });
-  const length = Math.hypot(d.x, d.y), direction3 = length > 1e-3 ? { x: d.x / length, y: d.y / length } : { x: 1, y: 0 };
+  const length = Math.hypot(d.x, d.y), direction2 = length > 1e-3 ? { x: d.x / length, y: d.y / length } : { x: 1, y: 0 };
   const progress5 = clamp26((tick - r.phaseStartedTick) / Math.max(1, r.phaseEndsTick - r.phaseStartedTick));
   const hold = r.phase === "windup" ? smooth12(progress5) : 1 - smooth12(progress5);
   const kick = r.phase === "recovery" ? Math.sin(Math.PI * clamp26(progress5 * 3)) : 0;
@@ -209265,11 +208946,11 @@ function voidOrbRangedPoseV4(actor, tick) {
     recovery: r.phase === "recovery" ? 1 - progress5 : 0,
     hold,
     kick,
-    direction: direction3,
+    direction: direction2,
     body: {
-      x: direction3.x * travel,
-      y: direction3.y * travel - 0.7 * hold,
-      rotation: -direction3.x * 0.07 * hold,
+      x: direction2.x * travel,
+      y: direction2.y * travel - 0.7 * hold,
+      rotation: -direction2.x * 0.07 * hold,
       scaleX: 1 - 0.11 * hold + 0.07 * kick,
       scaleY: 1 + 0.08 * hold - 0.04 * kick
     },
@@ -209487,7 +209168,7 @@ function thornWyrmRangedPoseV4(actor, tick) {
   const r = actor.ranged;
   if (!actor.alive || !r || r.phase === "idle") return null;
   const aim2 = r.aim ?? (r.targetPosition ? { x: r.targetPosition.x - actor.position.x, y: r.targetPosition.y - actor.position.y } : { x: actor.presentationFacingX ?? 1, y: 0 });
-  const length = Math.hypot(aim2.x, aim2.y), direction3 = length > 1e-3 ? { x: aim2.x / length, y: aim2.y / length } : { x: 1, y: 0 };
+  const length = Math.hypot(aim2.x, aim2.y), direction2 = length > 1e-3 ? { x: aim2.x / length, y: aim2.y / length } : { x: 1, y: 0 };
   const p = clamp27((tick - r.phaseStartedTick) / Math.max(1, r.phaseEndsTick - r.phaseStartedTick));
   const weight2 = r.phase === "windup" ? smooth13(p) : 1 - smooth13(p), size = actor.elite?.scale ?? 1;
   const muzzle = (actor.hullRadius ?? 10) + 6 + 1;
@@ -209500,7 +209181,7 @@ function thornWyrmRangedPoseV4(actor, tick) {
     preserveFacingFlip: true,
     phase: r.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     artWeight: weight2,
     charge: r.phase === "windup" ? weight2 : 0,
     release: r.phase === "recovery" ? Math.max(0, 1 - (tick - r.phaseStartedTick) / 3) : 0,
@@ -209508,8 +209189,8 @@ function thornWyrmRangedPoseV4(actor, tick) {
     drawFacingX: actor.presentationFacingX === -1 ? 1 : -1,
     bodyPivot: { x: 0, y: -10 * SCALE16 * size },
     body: {
-      x: direction3.x * travel,
-      y: direction3.y * travel + (10 * SCALE16 * size - 8) * weight2,
+      x: direction2.x * travel,
+      y: direction2.y * travel + (10 * SCALE16 * size - 8) * weight2,
       rotation: 0,
       scaleX: 1,
       scaleY: 1
@@ -209731,7 +209412,7 @@ function frostWyrmlingRangedPoseV4(actor, tick) {
   const r = actor.ranged;
   if (!actor.alive || !r || r.phase === "idle") return null;
   const aim2 = r.aim ?? (r.targetPosition ? { x: r.targetPosition.x - actor.position.x, y: r.targetPosition.y - actor.position.y } : { x: actor.presentationFacingX ?? 1, y: 0 });
-  const length = Math.hypot(aim2.x, aim2.y), direction3 = length > 1e-3 ? { x: aim2.x / length, y: aim2.y / length } : { x: 1, y: 0 };
+  const length = Math.hypot(aim2.x, aim2.y), direction2 = length > 1e-3 ? { x: aim2.x / length, y: aim2.y / length } : { x: 1, y: 0 };
   const p = clamp28((tick - r.phaseStartedTick) / Math.max(1, r.phaseEndsTick - r.phaseStartedTick));
   const weight2 = r.phase === "windup" ? smooth14(p) : 1 - smooth14(p), size = actor.elite?.scale ?? 1;
   const muzzle = (actor.hullRadius ?? 10) + 6 + 1;
@@ -209744,7 +209425,7 @@ function frostWyrmlingRangedPoseV4(actor, tick) {
     preserveFacingFlip: true,
     phase: r.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     artWeight: weight2,
     charge: r.phase === "windup" ? weight2 : 0,
     release: r.phase === "recovery" ? Math.max(0, 1 - (tick - r.phaseStartedTick) / 3) : 0,
@@ -209752,8 +209433,8 @@ function frostWyrmlingRangedPoseV4(actor, tick) {
     drawFacingX: actor.presentationFacingX === -1 ? 1 : -1,
     bodyPivot: { x: 0, y: -12 * SCALE17 * size },
     body: {
-      x: direction3.x * travel,
-      y: direction3.y * travel + (12 * SCALE17 * size - 8) * weight2,
+      x: direction2.x * travel,
+      y: direction2.y * travel + (12 * SCALE17 * size - 8) * weight2,
       rotation: 0,
       scaleX: 1,
       scaleY: 1
@@ -209973,7 +209654,7 @@ function corrodedGolemMeleePoseV4(actor, tick) {
   const phase3 = actor.meleePhase, g2 = actor.meleeGeometry;
   if (actor.enemyFamily !== "corroded_golem" || !actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, d = Math.hypot(dx, dy);
-  const direction3 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
+  const direction2 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
   const centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = Math.max(sourceRadius, Math.min(weaponReach, d - targetRadius));
   const p = clamp29((tick - phase3.phaseStartedTick) / Math.max(1, phase3.phaseEndsTick - phase3.phaseStartedTick)), size = actor.elite?.scale ?? 1;
   const frame6 = uprightAttackFrame(
@@ -209990,14 +209671,14 @@ function corrodedGolemMeleePoseV4(actor, tick) {
     },
     phase3.phase,
     p,
-    direction3,
+    direction2,
     contactReach
   );
   return {
     family: "corroded_golem",
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -211055,35 +210736,35 @@ var FRONT5 = (NECK2 + NOSE) * SCALE23;
 var clamp30 = (x) => Math.max(0, Math.min(1, x));
 var mix22 = (a, b, t) => a + (b - a) * t;
 var color23 = (flash2, hex6) => flash2 ? "#fff" : hex6;
-function localDirection3(direction3, rotation, facing2) {
+function localDirection3(direction2, rotation, facing2) {
   const co = Math.cos(rotation), si = Math.sin(rotation);
-  return { x: (co * direction3.x + si * direction3.y) * facing2, y: -si * direction3.x + co * direction3.y };
+  return { x: (co * direction2.x + si * direction2.y) * facing2, y: -si * direction2.x + co * direction2.y };
 }
 function hellBatMeleePoseV4(actor, tick) {
   const phase3 = actor.meleePhase, g2 = actor.meleeGeometry;
   if (actor.enemyFamily !== "hell_bat" || !actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, d = Math.hypot(dx, dy);
-  const direction3 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
+  const direction2 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
   const centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = Math.max(sourceRadius, Math.min(weaponReach, d - targetRadius));
   const p = clamp30((tick - phase3.phaseStartedTick) / Math.max(1, phase3.phaseEndsTick - phase3.phaseStartedTick)), size = actor.elite?.scale ?? 1;
   const frame6 = uprightAttackFrame(
     { front: FRONT5 * size, recoil: 3, lift: -3, lean: -0.1, hitLean: 0.12, squeezeX: 1, squeezeY: 1, hitX: 1, hitY: 1 },
     phase3.phase,
     p,
-    direction3,
+    direction2,
     contactReach
   );
   if (phase3.phase === "windup") {
     const travel = Math.max(0, contactReach - FRONT5 * size) * p * p * (3 - 2 * p) - 3 * Math.sin(Math.PI * p);
-    frame6.body.x = direction3.x * travel;
-    frame6.body.y = direction3.y * travel - 3 * Math.sin(Math.PI * p);
+    frame6.body.x = direction2.x * travel;
+    frame6.body.y = direction2.y * travel - 3 * Math.sin(Math.PI * p);
     frame6.anchor = { x: frame6.body.x, y: frame6.body.y };
   }
   return {
     family: "hell_bat",
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -211280,29 +210961,29 @@ var FRONT6 = (NECK3 + NOSE2) * SCALE24;
 var clamp31 = (x) => Math.max(0, Math.min(1, x));
 var mix23 = (a, b, t) => a + (b - a) * t;
 var color24 = (flash2, hex6) => flash2 ? "#fff" : hex6;
-function localDirection4(direction3, rotation, facing2) {
+function localDirection4(direction2, rotation, facing2) {
   const co = Math.cos(rotation), si = Math.sin(rotation);
-  return { x: (co * direction3.x + si * direction3.y) * facing2, y: -si * direction3.x + co * direction3.y };
+  return { x: (co * direction2.x + si * direction2.y) * facing2, y: -si * direction2.x + co * direction2.y };
 }
 function lavaSerpentMeleePoseV4(actor, tick) {
   const phase3 = actor.meleePhase, g2 = actor.meleeGeometry;
   if (actor.enemyFamily !== "lava_serpent" || !actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, d = Math.hypot(dx, dy);
-  const direction3 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
+  const direction2 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
   const centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = Math.max(sourceRadius, Math.min(weaponReach, d - targetRadius));
   const p = clamp31((tick - phase3.phaseStartedTick) / Math.max(1, phase3.phaseEndsTick - phase3.phaseStartedTick)), size = actor.elite?.scale ?? 1;
   const frame6 = uprightAttackFrame(
     { front: FRONT6 * size, recoil: 4, lift: -1, lean: -0.1, hitLean: 0.08, squeezeX: 1, squeezeY: 1, hitX: 1, hitY: 1 },
     phase3.phase,
     p,
-    direction3,
+    direction2,
     contactReach
   );
   return {
     family: "lava_serpent",
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -211318,7 +210999,7 @@ function lavaSerpentMeleePoseV4(actor, tick) {
 function lavaSerpentRangedPoseV4(actor, tick) {
   const r = actor.ranged;
   if (!actor.alive || !r || r.phase === "idle") return null;
-  const aim2 = r.aim ?? { x: actor.presentationFacingX ?? 1, y: 0 }, d = Math.hypot(aim2.x, aim2.y), direction3 = d > 1e-3 ? { x: aim2.x / d, y: aim2.y / d } : { x: 1, y: 0 };
+  const aim2 = r.aim ?? { x: actor.presentationFacingX ?? 1, y: 0 }, d = Math.hypot(aim2.x, aim2.y), direction2 = d > 1e-3 ? { x: aim2.x / d, y: aim2.y / d } : { x: 1, y: 0 };
   const p = clamp31((tick - r.phaseStartedTick) / Math.max(1, r.phaseEndsTick - r.phaseStartedTick)), smooth33 = (x) => x * x * (3 - 2 * x), weight2 = r.phase === "windup" ? smooth33(p) : 1 - smooth33(p), size = actor.elite?.scale ?? 1;
   return {
     family: "lava_serpent",
@@ -211327,7 +211008,7 @@ function lavaSerpentRangedPoseV4(actor, tick) {
     preserveFacingFlip: true,
     phase: r.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     artWeight: weight2,
     strikeBlend: 1,
     charge: r.phase === "windup" ? weight2 : 0,
@@ -211335,7 +211016,7 @@ function lavaSerpentRangedPoseV4(actor, tick) {
     recovery: r.phase === "recovery" ? 1 - p : 0,
     drawFacingX: actor.presentationFacingX === -1 ? 1 : -1,
     bodyPivot: { x: 0, y: -10 * SCALE24 * size },
-    body: { x: -direction3.x * 2 * weight2, y: -direction3.y * 2 * weight2, rotation: 0, scaleX: 1, scaleY: 1 },
+    body: { x: -direction2.x * 2 * weight2, y: -direction2.y * 2 * weight2, rotation: 0, scaleX: 1, scaleY: 1 },
     limb: { extension: 0, sweep: 0, open: weight2 }
   };
 }
@@ -211600,7 +211281,7 @@ var TAU173 = Math.PI * 2;
 function clockworkDroneRangedPose(actor, tick) {
   const r = actor.ranged;
   if (!actor.alive || !r || r.phase === "idle") return null;
-  const aim2 = r.aim ?? { x: actor.presentationFacingX ?? 1, y: 0 }, d = Math.hypot(aim2.x, aim2.y), direction3 = d > 1e-3 ? { x: aim2.x / d, y: aim2.y / d } : { x: 1, y: 0 };
+  const aim2 = r.aim ?? { x: actor.presentationFacingX ?? 1, y: 0 }, d = Math.hypot(aim2.x, aim2.y), direction2 = d > 1e-3 ? { x: aim2.x / d, y: aim2.y / d } : { x: 1, y: 0 };
   const p = clamp32((tick - r.phaseStartedTick) / Math.max(1, r.phaseEndsTick - r.phaseStartedTick));
   const charge3 = r.phase === "windup" ? smooth19(p) : 0, hold = r.phase === "windup" ? charge3 : 1 - smooth19(p);
   const release = r.phase === "recovery" ? clamp32(1 - (tick - r.phaseStartedTick) / 3) : 0;
@@ -211616,11 +211297,11 @@ function clockworkDroneRangedPose(actor, tick) {
     charge: charge3,
     release,
     recovery: r.phase === "recovery" ? 1 - p : 0,
-    direction: direction3,
+    direction: direction2,
     body: {
-      x: -direction3.x * (hold + kick * 1.5),
-      y: -direction3.y * (hold + kick * 1.5),
-      rotation: direction3.x * (-0.035 * hold + 0.025 * kick),
+      x: -direction2.x * (hold + kick * 1.5),
+      y: -direction2.y * (hold + kick * 1.5),
+      rotation: direction2.x * (-0.035 * hold + 0.025 * kick),
       scaleX: 1 - 0.025 * hold,
       scaleY: 1 + 0.025 * hold
     },
@@ -211696,7 +211377,7 @@ function hostileRangedPose(actor, tick) {
   if (actor.enemyFamily === "bandit_archer") return banditArcherRangedPoseV1(actor, tick);
   const r = actor.ranged;
   if (!actor.alive || !r || r.phase === "idle" || !rangedFamilies.has(actor.enemyFamily)) return null;
-  const d = r.aim ?? (r.targetPosition ? { x: r.targetPosition.x - actor.position.x, y: r.targetPosition.y - actor.position.y } : { x: actor.presentationFacingX ?? 1, y: 0 }), length = Math.hypot(d.x, d.y), direction3 = length > 1e-3 ? { x: d.x / length, y: d.y / length } : { x: 1, y: 0 };
+  const d = r.aim ?? (r.targetPosition ? { x: r.targetPosition.x - actor.position.x, y: r.targetPosition.y - actor.position.y } : { x: actor.presentationFacingX ?? 1, y: 0 }), length = Math.hypot(d.x, d.y), direction2 = length > 1e-3 ? { x: d.x / length, y: d.y / length } : { x: 1, y: 0 };
   const p = clamp33((tick - r.phaseStartedTick) / Math.max(1, r.phaseEndsTick - r.phaseStartedTick), 0, 1), charge3 = r.phase === "windup" ? smooth20(p) : 0;
   const release = r.phase === "recovery" ? Math.max(0, 1 - (tick - r.phaseStartedTick) / 3) : 0, recovery = r.phase === "recovery" ? 1 - p : 0, family = actor.enemyFamily;
   const body6 = { x: 0, y: 0, rotation: 0, scaleX: 1, scaleY: 1 };
@@ -211704,33 +211385,33 @@ function hostileRangedPose(actor, tick) {
   const hold = r.phase === "windup" ? charge3 : 1 - smooth20(p), kick = r.phase === "recovery" ? Math.sin(Math.PI * clamp33((tick - r.phaseStartedTick) / 4, 0, 1)) : 0;
   switch (family) {
     case "thorn_wyrm":
-      body6.rotation = direction3.x * (0.08 * hold - 0.04 * kick);
+      body6.rotation = direction2.x * (0.08 * hold - 0.04 * kick);
       body6.scaleX = 1 - 0.16 * hold + 0.05 * kick;
       body6.scaleY = 1 + 0.12 * hold;
       travel = -3 * hold - 2 * kick;
       break;
     case "wyrmling":
-      body6.rotation = direction3.x * (-0.09 * hold + 0.06 * kick);
+      body6.rotation = direction2.x * (-0.09 * hold + 0.06 * kick);
       body6.y = -3 * hold;
       body6.scaleY = 1 + 0.08 * hold - 0.06 * kick;
       travel = -2 * hold - 3 * kick;
       break;
     case "magma_elemental":
-      body6.rotation = direction3.x * (-0.06 * hold + 0.08 * kick);
+      body6.rotation = direction2.x * (-0.06 * hold + 0.08 * kick);
       body6.scaleX = 1 + 0.08 * hold;
       body6.scaleY = 1 - 0.08 * hold + 0.06 * kick;
       travel = -hold - 4 * kick;
       break;
     case "toxic_fly":
-      body6.rotation = direction3.x * (-0.12 * hold + 0.08 * kick);
+      body6.rotation = direction2.x * (-0.12 * hold + 0.08 * kick);
       body6.scaleX = 1 + 0.12 * hold;
       body6.scaleY = 1 - 0.13 * hold + 0.1 * kick;
       body6.y = -2 * hold;
       travel = -2 * hold + 1.5 * kick;
       break;
   }
-  body6.x += direction3.x * travel;
-  body6.y += direction3.y * travel;
+  body6.x += direction2.x * travel;
+  body6.y += direction2.y * travel;
   return {
     family,
     ranged: true,
@@ -211742,7 +211423,7 @@ function hostileRangedPose(actor, tick) {
     charge: charge3,
     release,
     recovery,
-    direction: direction3,
+    direction: direction2,
     body: body6,
     limb: { extension: 0, sweep: 0, open: charge3 }
   };
@@ -211875,16 +211556,16 @@ function dungeonMobMeleePoseV2B(actor, tick) {
   const phase3 = actor.meleePhase, g2 = actor.meleeGeometry, family = actor.enemyFamily;
   if (!families2.has(family) || !actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, distance11 = Math.hypot(dx, dy);
-  const direction3 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
+  const direction2 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
   const centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = clamp34(distance11 - targetRadius, sourceRadius, weaponReach);
   const p = clamp34((tick - phase3.phaseStartedTick) / Math.max(1, phase3.phaseEndsTick - phase3.phaseStartedTick), 0, 1);
-  const frame6 = uprightAttackFrame(uprightTuning2[family], phase3.phase, p, direction3, contactReach);
+  const frame6 = uprightAttackFrame(uprightTuning2[family], phase3.phase, p, direction2, contactReach);
   const timing = DUNGEON_MOBS_V2_MELEE_MOTION.wireframe_orb, orbPhaseOffset = phase3.phase === "impact" ? timing.windupTicks : phase3.phase === "recovery" ? timing.windupTicks + timing.impactTicks : 0;
   return {
     family,
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -211937,11 +211618,11 @@ function drawDungeonMobContactV2B(c, contact, age) {
   if (age < 0 || age >= DUNGEON_MOB_CONTACT_MS_V2B) return true;
   const source3 = contact.sourcePosition, target = contact.targetPosition;
   if (!source3 || !target) return true;
-  const dx = target.x - source3.x, dy = target.y - source3.y, d = Math.hypot(dx, dy), direction3 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 };
+  const dx = target.x - source3.x, dy = target.y - source3.y, d = Math.hypot(dx, dy), direction2 = d > 1e-3 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 };
   const reach2 = contact.mode === "clearHullGap" ? contact.reach + contact.sourceRadius : Math.max(0, contact.reach - contact.targetRadius), near5 = Math.min(reach2, Math.max(0, d - contact.targetRadius)), p = age / DUNGEON_MOB_CONTACT_MS_V2B, s = 1 - p;
   c.save();
-  c.translate(source3.x + direction3.x * near5, source3.y + direction3.y * near5 + bodyHeights[contact.family]);
-  c.rotate(Math.atan2(direction3.y, direction3.x));
+  c.translate(source3.x + direction2.x * near5, source3.y + direction2.y * near5 + bodyHeights[contact.family]);
+  c.rotate(Math.atan2(direction2.y, direction2.x));
   c.globalAlpha *= s ** 1.25;
   c.lineCap = "round";
   c.lineJoin = "round";
@@ -213782,13 +213463,13 @@ function biomeCreatureMeleePoseV1(actor, tick) {
   const L = LEAN2[actor.enemyFamily], phase3 = actor.meleePhase, g2 = actor.meleeGeometry;
   if (!L || !actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1, dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, distance11 = Math.hypot(dx, dy);
-  const direction3 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
+  const direction2 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 }, sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
   const centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach, weaponReach = Math.max(sourceRadius, centerLimit - targetRadius), contactReach = clamp35(distance11 - targetRadius, sourceRadius, weaponReach);
   const p = clamp35((tick - phase3.phaseStartedTick) / Math.max(1, phase3.phaseEndsTick - phase3.phaseStartedTick), 0, 1), windup2 = phase3.phase === "windup", impact3 = phase3.phase === "impact", w = windup2 ? ease10(p) : 0, r = phase3.phase === "recovery" ? (1 - p) ** 2 : 0;
-  const travel = windup2 ? -L.back * w : impact3 ? L.lunge : L.lunge * r, side = direction3.x < 0 ? -1 : 1;
+  const travel = windup2 ? -L.back * w : impact3 ? L.lunge : L.lunge * r, side = direction2.x < 0 ? -1 : 1;
   const body6 = {
-    x: direction3.x * travel,
-    y: direction3.y * travel,
+    x: direction2.x * travel,
+    y: direction2.y * travel,
     rotation: (windup2 ? -L.tilt * 0.6 * w : impact3 ? L.tilt : L.tilt * r) * side,
     scaleX: 1 + (windup2 ? L.squash * 0.6 * w : 0),
     scaleY: 1 - (windup2 ? L.squash * w : impact3 ? -L.squash * 0.5 : 0)
@@ -213797,7 +213478,7 @@ function biomeCreatureMeleePoseV1(actor, tick) {
     family: actor.enemyFamily,
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -213874,7 +213555,7 @@ var uprightDungeonMelee = {
   }
 };
 var mix25 = (a, b, t) => a + (b - a) * t;
-function uprightMeleeBody(tuning, phase3, p, direction3, contactReach) {
+function uprightMeleeBody(tuning, phase3, p, direction2, contactReach) {
   const reach2 = Math.max(0, contactReach - tuning.front), idle2 = [0, 0, 0, 1, 1];
   const brace = [-tuning.recoil, tuning.lift, tuning.lean, tuning.squeezeX, tuning.squeezeY];
   const hit2 = [reach2, 0, tuning.hitLean, tuning.hitX, tuning.hitY];
@@ -213882,7 +213563,7 @@ function uprightMeleeBody(tuning, phase3, p, direction3, contactReach) {
   const to = phase3 === "recovery" ? idle2 : phase3 === "windup" && p < 0.4 ? brace : hit2;
   const blend4 = phase3 === "windup" ? smooth21(p < 0.4 ? p / 0.4 : (p - 0.4) / 0.6) : phase3 === "recovery" ? smooth21(p) : 1;
   const [travel, lift, rotation, scaleX, scaleY] = from.map((v, i) => mix25(v, to[i], blend4));
-  return { x: direction3.x * travel, y: direction3.y * travel + lift, rotation: rotation * direction3.x, scaleX, scaleY };
+  return { x: direction2.x * travel, y: direction2.y * travel + lift, rotation: rotation * direction2.x, scaleX, scaleY };
 }
 function hostileMeleePose(actor, tick) {
   const imported = corrodedGolemMeleePoseV4(actor, tick) ?? dungeonMobMeleePoseV2A(actor, tick) ?? dungeonMobMeleePoseV2B(actor, tick) ?? gargoyleMeleePoseV4(actor, tick) ?? animatedArmorMeleePoseV4(actor, tick) ?? cursedBladeMeleePoseV4(actor, tick) ?? lavaSerpentMeleePoseV4(actor, tick) ?? hellBatMeleePoseV4(actor, tick) ?? biomeCreatureMeleePoseV1(actor, tick) ?? banditMeleePoseV1(actor, tick) ?? burrowerMeleePoseV1(actor, tick);
@@ -213891,7 +213572,7 @@ function hostileMeleePose(actor, tick) {
   if (!actor.alive || !g2 || !phase3 || phase3.phase === "idle") return null;
   const dx = g2.targetPosition ? g2.targetPosition.x - actor.position.x : actor.presentationFacingX ?? 1;
   const dy = g2.targetPosition ? g2.targetPosition.y - actor.position.y : 0, distance11 = Math.hypot(dx, dy);
-  const direction3 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 };
+  const direction2 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 };
   const sourceRadius = g2.sourceRadius, targetRadius = g2.targetRadius;
   const centerLimit = g2.mode === "clearHullGap" ? g2.reach + sourceRadius + targetRadius : g2.reach;
   const weaponReach = Math.max(sourceRadius, centerLimit - targetRadius);
@@ -213908,7 +213589,7 @@ function hostileMeleePose(actor, tick) {
       family,
       phase: phase3.phase,
       progress: p,
-      direction: direction3,
+      direction: direction2,
       sourceRadius,
       targetRadius,
       centerLimit,
@@ -213916,7 +213597,7 @@ function hostileMeleePose(actor, tick) {
       contactReach,
       upright: true,
       bodyPivot: { x: 0, y: -10 },
-      body: uprightMeleeBody(uprightDungeonMelee[family], phase3.phase, p, direction3, contactReach),
+      body: uprightMeleeBody(uprightDungeonMelee[family], phase3.phase, p, direction2, contactReach),
       limb: limb6
     };
   }
@@ -213926,7 +213607,7 @@ function hostileMeleePose(actor, tick) {
       const reach2 = Math.min(7, Math.max(0, contactReach - 28));
       travel = windup2 ? -2 * w : impact3 ? reach2 : reach2 * r;
       lift = windup2 ? 2 * w : impact3 ? 2 * (1 - p) : r;
-      body6.rotation = (windup2 ? -0.12 * w : impact3 ? 0.09 : 0.09 * r) * (direction3.x < 0 ? -1 : 1);
+      body6.rotation = (windup2 ? -0.12 * w : impact3 ? 0.09 : 0.09 * r) * (direction2.x < 0 ? -1 : 1);
       body6.scaleY = 1 + (windup2 ? 0.04 * w : impact3 ? -0.035 : -0.035 * r);
       limb6.extension = windup2 ? 8 - 15 * w : impact3 ? contactReach - travel : (contactReach - reach2) * r + 8 * (1 - r);
       limb6.sweep = windup2 ? -0.18 * w : impact3 ? 0.07 * p : 0.07 * r;
@@ -213934,13 +213615,13 @@ function hostileMeleePose(actor, tick) {
       break;
     }
   }
-  body6.x = direction3.x * travel;
-  body6.y = direction3.y * travel + lift;
+  body6.x = direction2.x * travel;
+  body6.y = direction2.y * travel + lift;
   return {
     family,
     phase: phase3.phase,
     progress: p,
-    direction: direction3,
+    direction: direction2,
     sourceRadius,
     targetRadius,
     centerLimit,
@@ -214010,14 +213691,14 @@ function hostileContactPose(contact, age) {
   if (age < 0 || age >= HOSTILE_STRIKE_FEEDBACK_MS) return null;
   const source3 = contact.sourcePosition, target = contact.targetPosition;
   if (!source3 || !target) return null;
-  const dx = target.x - source3.x, dy = target.y - source3.y, distance11 = Math.hypot(dx, dy), direction3 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 };
+  const dx = target.x - source3.x, dy = target.y - source3.y, distance11 = Math.hypot(dx, dy), direction2 = distance11 > 1e-3 ? { x: dx / distance11, y: dy / distance11 } : { x: 1, y: 0 };
   const max = contact.mode === "clearHullGap" ? contact.reach + contact.sourceRadius : Math.max(0, contact.reach - contact.targetRadius);
   const near5 = Math.min(max, Math.max(0, distance11 - contact.targetRadius));
-  const contactPosition = { x: source3.x + direction3.x * near5, y: source3.y + direction3.y * near5 };
+  const contactPosition = { x: source3.x + direction2.x * near5, y: source3.y + direction2.y * near5 };
   return {
     family: contact.family ?? null,
     progress: age / HOSTILE_STRIKE_FEEDBACK_MS,
-    direction: direction3,
+    direction: direction2,
     contactPosition,
     radius: 11
   };
@@ -214026,13 +213707,13 @@ function drawHostileContact(c, contact, age) {
   if (drawDungeonMobContactV2A(c, contact, age) || drawDungeonMobContactV2B(c, contact, age)) return;
   const pose3 = hostileContactPose(contact, age);
   if (!pose3) return;
-  const { family, progress: t, direction: direction3, contactPosition: p } = pose3, s = 1 - t;
+  const { family, progress: t, direction: direction2, contactPosition: p } = pose3, s = 1 - t;
   c.save();
   c.translate(
     p.x,
     p.y - (family === "gargoyle" ? 12 * 0.82 : family === "animated_armor" ? 16 * 0.76 : family === "cursed_blade" ? 12.5 * 0.78 + 1 : family === "lava_serpent" ? 10 * 0.78 : 8)
   );
-  c.rotate(Math.atan2(direction3.y, direction3.x));
+  c.rotate(Math.atan2(direction2.y, direction2.x));
   c.globalAlpha *= (1 - t) ** 1.25;
   c.lineCap = "round";
   switch (family) {
@@ -263639,10 +263320,10 @@ function corrosiveAttackPose(actor, tick) {
   const aim2 = pending ? localTarget(actor, pending) : recent ? localTarget(actor, recent) : point8(Math.cos(b.facingAngle ?? 1.57) * 40, Math.sin(b.facingAngle ?? 1.57) * 40);
   const committed = pending ?? recent, origin = committed?.originPosition ?? actor.position;
   const committedDirection = committed?.targetPosition ? point8(committed.targetPosition.x - origin.x, committed.targetPosition.y - origin.y) : aim2;
-  const direction3 = unit11(committedDirection.x, committedDirection.y), side = committedDirection.x < 0 ? -1 : 1;
+  const direction2 = unit11(committedDirection.x, committedDirection.y), side = committedDirection.x < 0 ? -1 : 1;
   const idle2 = Math.sin((tick + (actor.visualSeed ?? 0) * 0.7) * 0.045);
   const moving2 = actor.movedLastTick === true, hop = 0, goo2 = corrosiveGoopMotionV5(actor, tick);
-  const motion = unit11(actor.movementIntent?.x ?? direction3.x, actor.movementIntent?.y ?? direction3.y);
+  const motion = unit11(actor.movementIntent?.x ?? direction2.x, actor.movementIntent?.y ?? direction2.y);
   const pose3 = {
     goo: goo2,
     ability: pending?.ability ?? recent?.ability ?? null,
@@ -263650,7 +263331,7 @@ function corrosiveAttackPose(actor, tick) {
     age,
     side,
     aim: aim2,
-    direction: direction3,
+    direction: direction2,
     bodyX: moving2 ? -motion.x * (1.1 + Math.abs(hop) * 1.4) : 0,
     bodyY: idle2 * 1.5 + Math.abs(hop) * 1.8,
     top: idle2 * 1.2 - Math.abs(hop) * 2,
@@ -263700,8 +263381,8 @@ function corrosiveAttackPose(actor, tick) {
   } else if (recent?.ability === "strike" && age < 26) {
     const amount2 = 1 - ease25(age / 26);
     pose3.armAmount = amount2;
-    pose3.bodyX = direction3.x * 3 * amount2;
-    pose3.bodyY = direction3.y * 2 * amount2;
+    pose3.bodyX = direction2.x * 3 * amount2;
+    pose3.bodyY = direction2.y * 2 * amount2;
     pose3.tip = localTarget(actor, recent, 17);
     pose3.top = -2 * amount2;
   } else if (pending?.ability === "spore_storm") {
@@ -266144,14 +265825,14 @@ function voidAttackPose(actor, tick) {
   const pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity;
   const recent = age >= 0 && age < 40 ? last : null, p = pending ? castProgress(pending, tick) : 0;
   const record2 = pending ?? recent, aim2 = record2 ? localTarget2(actor, record2) : point9(Math.cos(b.facingAngle ?? Math.PI / 2) * 60, Math.sin(b.facingAngle ?? Math.PI / 2) * 60);
-  const origin = record2?.originPosition ?? actor.position, target = record2?.targetPosition ?? point9(actor.position.x + aim2.x, actor.position.y + aim2.y), direction3 = unit13(target.x - origin.x, target.y - origin.y);
+  const origin = record2?.originPosition ?? actor.position, target = record2?.targetPosition ?? point9(actor.position.x + aim2.x, actor.position.y + aim2.y), direction2 = unit13(target.x - origin.x, target.y - origin.y);
   const hover = Math.sin((tick + (actor.visualSeed ?? 0) * 0.13) / 8.4) * 4.2;
   const pose3 = {
     ability: record2?.ability ?? null,
     p,
     age,
     aim: aim2,
-    direction: direction3,
+    direction: direction2,
     bodyX: 0,
     bodyY: -43 + hover,
     rotation: Math.sin(tick * 0.025) * 0.018,
@@ -266163,26 +265844,26 @@ function voidAttackPose(actor, tick) {
   };
   if (pending?.ability === "slam") {
     const coil = ease29(p / 0.72), drive = ease29((p - 0.78) / 0.22);
-    pose3.bodyX = -direction3.x * 4 * coil + direction3.x * 7 * drive;
+    pose3.bodyX = -direction2.x * 4 * coil + direction2.x * 7 * drive;
     pose3.bodyY += -12 * coil + 17 * drive;
-    pose3.rotation += direction3.x * (-0.16 * coil + 0.1 * drive);
+    pose3.rotation += direction2.x * (-0.16 * coil + 0.1 * drive);
     pose3.scaleX = 1 - 0.08 * coil + 0.1 * drive;
     pose3.scaleY = 1 + 0.1 * coil - 0.1 * drive;
     pose3.charge = coil;
     pose3.drive = drive;
   } else if (recent?.ability === "slam") {
     const amount2 = 1 - ease29(age / 35);
-    pose3.bodyX = direction3.x * 3 * amount2;
+    pose3.bodyX = direction2.x * 3 * amount2;
     pose3.bodyY += 5 * amount2;
-    pose3.rotation -= direction3.x * 0.06 * amount2;
+    pose3.rotation -= direction2.x * 0.06 * amount2;
     pose3.scaleX = 1 + 0.02 * amount2;
     pose3.charge = amount2;
     pose3.drive = amount2;
     pose3.release = 1 - ease29(age / 16);
   } else if (recent?.ability === "strike" && age < 26) {
     const amount2 = 1 - ease29(age / 26), angle3 = Math.atan2(aim2.y - 17 - pose3.bodyY, aim2.x), nearest2 = Math.round(angle3 / (Math.PI / 2)) * (Math.PI / 2);
-    pose3.bodyX = direction3.x * 7 * amount2;
-    pose3.bodyY += direction3.y * 6 * amount2;
+    pose3.bodyX = direction2.x * 7 * amount2;
+    pose3.bodyY += direction2.y * 6 * amount2;
     pose3.rotation += (angle3 - nearest2) * amount2;
     pose3.scaleX = 1 + 0.045 * amount2;
     pose3.charge = 0.45 * amount2;
@@ -266196,8 +265877,8 @@ function voidAttackPose(actor, tick) {
     pose3.scaleY = 1 + 0.04 * charge3;
   } else if (recent?.ability === "eye_lance") {
     const kick = 1 - ease29(age / 16);
-    pose3.bodyX = -direction3.x * 5 * kick;
-    pose3.bodyY -= direction3.y * 3 * kick;
+    pose3.bodyX = -direction2.x * 5 * kick;
+    pose3.bodyY -= direction2.y * 3 * kick;
     pose3.charge = kick;
     pose3.release = kick;
     pose3.pulse = 0;
@@ -283478,13 +283159,13 @@ function armGeometry(side, pose3) {
   }
   const dx = hand32.x - root6.x, dy = hand32.y - root6.y, length = Math.hypot(dx, dy) || 1, bend2 = Math.max(6, Math.min(17, 26 - length * 0.3));
   const elbow22 = point24(root6.x + dx * 0.62 + side * 3, root6.y - 8 - bend2 * 0.35 + Math.max(0, -dy) * 0.4);
-  const direction3 = pose3.strike > 0 && side === pose3.strikeSide ? unit15(hand32.x - elbow22.x, hand32.y - elbow22.y) : unit15(side * 0.12, 1);
+  const direction2 = pose3.strike > 0 && side === pose3.strikeSide ? unit15(hand32.x - elbow22.x, hand32.y - elbow22.y) : unit15(side * 0.12, 1);
   return {
     root: root6,
     elbow: elbow22,
     hand: point24(hand32.x, hand32.y - 15),
     tick: pose3.tick,
-    angle: Math.atan2(direction3.y, direction3.x) - Math.PI / 2
+    angle: Math.atan2(direction2.y, direction2.x) - Math.PI / 2
   };
 }
 var CHANGE = 64;
@@ -295945,8 +295626,8 @@ var TAU230 = Math.PI * 2;
 var clamp89 = (v, a, b) => Math.max(a, Math.min(b, v));
 var styles = /* @__PURE__ */ new Set(["thorn", "frost", "fireball", "maelstrom", "void", "clockwork", "arrow"]);
 function ordinaryHostileProjectilePose(projectile, presentationTick) {
-  const direction3 = projectile.direction ?? { x: 1, y: 0 }, length = Math.hypot(direction3.x, direction3.y);
-  const unit17 = length > 1e-3 ? { x: direction3.x / length, y: direction3.y / length } : { x: 1, y: 0 };
+  const direction2 = projectile.direction ?? { x: 1, y: 0 }, length = Math.hypot(direction2.x, direction2.y);
+  const unit17 = length > 1e-3 ? { x: direction2.x / length, y: direction2.y / length } : { x: 1, y: 0 };
   const age = Number.isFinite(projectile.firedTick) ? Math.max(0, presentationTick - projectile.firedTick) : 3;
   const radius = clamp89(Number.isFinite(projectile.radius) ? projectile.radius : 6, 2, 8);
   return {
@@ -300390,9 +300071,9 @@ function drawMasteryBadges(ctx, m) {
     ctx.restore();
   }
 }
-function drawEarthBreaker(ctx, p, direction3, age) {
+function drawEarthBreaker(ctx, p, direction2, age) {
   if (age < 0 || age >= 250) return;
-  const t = age / 250, heading = Math.atan2(direction3.y, direction3.x);
+  const t = age / 250, heading = Math.atan2(direction2.y, direction2.x);
   ctx.save();
   ctx.translate(p.x, p.y);
   ctx.rotate(heading);
@@ -316850,9 +316531,9 @@ function caveSlope(ctx, x, y, up2, v = 0) {
   ctx.strokeStyle = OUT5;
   ctx.lineWidth = 3;
   ctx.stroke();
-  const direction3 = up2 ? -1 : 1;
+  const direction2 = up2 ? -1 : 1;
   for (let i = 0; i < 4; i++) {
-    const yy = y + direction3 * (i * 8 - 12), wide = 36 - i * 4;
+    const yy = y + direction2 * (i * 8 - 12), wide = 36 - i * 4;
     ctx.fillStyle = i % 2 ? "#58675f" : "#69766c";
     poly33(
       ctx,
@@ -319581,7 +319262,7 @@ function createCombatFeedback() {
       const primary = primaries.get(e.source.entityId), heavy2 = target.team === "hostile" && primary?.commandId === e.causation.commandId && primary?.step === 3;
       const contact = e.payload.meleeContact, projectileContact = e.payload.projectileContact, position3 = { ...projectileContact?.position ?? contact?.targetPosition ?? target.position }, sourcePosition = contact ? { ...contact.sourcePosition } : source3 ? { ...source3.position } : null;
       const dx = sourcePosition ? position3.x - sourcePosition.x : 0, dy = sourcePosition ? position3.y - sourcePosition.y : 0, length = Math.hypot(dx, dy);
-      const direction3 = length > 1e-3 ? { x: dx / length, y: dy / length } : { x: 0, y: 0 };
+      const direction2 = length > 1e-3 ? { x: dx / length, y: dy / length } : { x: 0, y: 0 };
       const player = target.team === "party";
       const shownEarly = e.kind === "combat.damageApplied" && e.payload.mechanic === "main" && e.source.entityId === ownId && time3 - (guessed.get(e.subject.entityId) ?? -Infinity) < 700;
       if (shownEarly) guessed.delete(e.subject.entityId);
@@ -319589,7 +319270,7 @@ function createCombatFeedback() {
         const skill = !player && e.kind === "combat.damageApplied" && !e.payload.defenseKind && !BASIC_MECHANICS.has(e.payload.mechanic) && e.payload.trigger !== "periodic" && !COMBAT_TEXT_TICKS.has(e.payload.mechanic) && !e.payload.sourceItem;
         boundedSet(reactions, e.subject.entityId, {
           born: time3,
-          direction: direction3,
+          direction: direction2,
           position: position3,
           heavy: heavy2,
           player,
@@ -319600,7 +319281,7 @@ function createCombatFeedback() {
         if (!calm && !player && e.source.entityId === ownId && e.kind === "combat.damageApplied" && e.payload.trigger !== "periodic" && !COMBAT_TEXT_TICKS.has(e.payload.mechanic)) {
           const amount2 = hitShakeAmountV1({ skill, crit: e.payload.critical === true });
           if (amount2 && !(hitShakeOffsetV1(shaking, time3) && shaking.amount > amount2))
-            shaking = { born: time3, amount: amount2, direction: length > 1e-3 ? direction3 : { x: 1, y: 0 } };
+            shaking = { born: time3, amount: amount2, direction: length > 1e-3 ? direction2 : { x: 1, y: 0 } };
         }
       }
       const same12 = numbers.filter((n) => n.targetId === e.subject.entityId);
@@ -319621,7 +319302,7 @@ function createCombatFeedback() {
         position: position3,
         player,
         heavy: heavy2,
-        direction: direction3,
+        direction: direction2,
         chainFrom: e.payload.chainFrom ?? null,
         skillMark: e.payload.skillMark ?? null,
         barrierAbsorption: e.payload.barrierAbsorption ?? null,
@@ -340744,18 +340425,8 @@ function createWorldResidencyD9({
         fortParcel
       ),
       caveParcel
-    ), legacy = overlayWoodlandCaveFamilyParcelsD12(
-      historical,
-      v.familyParcels.filter(
-        (parcel2) => ![WOODLAND_CAVE_FAMILY_PARCEL_D12_1, WOODLAND_CAVE_FAMILY_PARCEL_D12_2, PLANNED_CAVE_PARCEL].includes(
-          parcel2.version
-        )
-      )
-    ), modern = overlayWoodlandCaveFamilyParcelsD12_1(
-      legacy,
-      v.familyParcels.filter((parcel2) => parcel2.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_1)
     ), chunk6 = overlayWoodlandCaveFamilyParcelsD12_2(
-      modern,
+      historical,
       v.familyParcels.filter((parcel2) => parcel2.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2)
     );
     generated++;
@@ -342029,15 +341700,15 @@ function projectFunctionalSiteClueD9(model, clueSearch) {
   }, score = (clue2) => {
     const x = BigInt(clue2.target.chunkX) * 32n + BigInt(Math.floor(clue2.target.localX / 32)), y = BigInt(clue2.target.chunkY) * 26n + BigInt(Math.floor(clue2.target.localY / 32));
     return (x > tile2.x ? x - tile2.x : tile2.x - x) + (y > tile2.y ? y - tile2.y : tile2.y - y);
-  }, clue = [...valid].sort((a, b) => Number(score(a) - score(b)) || a.side.localeCompare(b.side))[0], direction3 = clueBearing(position3, clue.target), egress = model.space.overworld.egresses.find((value2) => value2.side === clue.side), projected2 = clue.trailheadTarget ? projectToLocalFrameD9(clue.trailheadTarget, model.navigation.frames) : null, trailLabel = clue.trailLabel ?? (clue.label ? "Fort road" : "Woodland trail");
+  }, clue = [...valid].sort((a, b) => Number(score(a) - score(b)) || a.side.localeCompare(b.side))[0], direction2 = clueBearing(position3, clue.target), egress = model.space.overworld.egresses.find((value2) => value2.side === clue.side), projected2 = clue.trailheadTarget ? projectToLocalFrameD9(clue.trailheadTarget, model.navigation.frames) : null, trailLabel = clue.trailLabel ?? (clue.label ? "Fort road" : "Woodland trail");
   return Object.freeze({
     version: clueSearch.version,
     siteId: clue.siteId,
-    direction: direction3,
+    direction: direction2,
     distanceTiles: clue.distanceTiles,
     side: clue.side,
-    label: `${clue.label ?? "Unidentified Woodland Site"} \xB7 ${direction3}`,
-    trailhead: projected2 ? Object.freeze({ x: projected2.x, y: projected2.y, side: clue.side, direction: direction3, trailLabel }) : egress ? Object.freeze({ x: egress.x, y: egress.y, side: egress.side, direction: direction3, trailLabel }) : null
+    label: `${clue.label ?? "Unidentified Woodland Site"} \xB7 ${direction2}`,
+    trailhead: projected2 ? Object.freeze({ x: projected2.x, y: projected2.y, side: clue.side, direction: direction2, trailLabel }) : egress ? Object.freeze({ x: egress.x, y: egress.y, side: egress.side, direction: direction2, trailLabel }) : null
   });
 }
 function createFunctionalSiteCluePortD10({ clientPort, plannedBootstrap, fortClue, ruinSiteId }) {
@@ -342280,7 +341951,7 @@ async function createLocalEndlessSessionD9(options) {
       };
     for (const cave2 of caves)
       draft.d9World.siteReservationsById[cave2.siteId] = {
-        version: cave2.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2 ? "site-reservation-d12-2-v1" : "site-reservation-d12-1-v1",
+        version: "site-reservation-d12-2-v1",
         siteId: cave2.siteId,
         packageId: WOODLAND_CAVE_FAMILY_PACKAGE_ID,
         socket: copyWire(cave2.socket),
@@ -349109,28 +348780,6 @@ async function startWorldClient(environment) {
       });
       return null;
     }
-  if (!coopGuest && !FORGE_REVIEW_BUILD && activity && proofCase === "A" && !launch.resume && location.searchParams.get("activityNew") !== "1" && launcherCapability(environment, heroPrefix).getItem(WORLD_PROCEDURAL_LAUNCHER_KEY)) {
-    showStartupRecovery(
-      environment,
-      {
-        title: "Earlier prototype campaign retained",
-        detail: "This authority checkpoint uses a new save format. Your earlier campaign is still stored. Choose Start New Campaign to create a separate X-C campaign."
-      },
-      {
-        retry: () => environment.location.reload(),
-        forget,
-        reset,
-        startNew: async () => {
-          await forget();
-          const url = policy.cleanUrl();
-          url.searchParams.set("activityNew", "1");
-          environment.history.replaceState(null, "", url.href);
-          environment.location.reload();
-        }
-      }
-    );
-    return null;
-  }
   let plannedReview = null, builtWorlds = null, builtWorld = null, startingHero = null, refreshRecord = null, refreshOld = null;
   const refreshKey = channel2 + heroPrefix + WORLD_REFRESH_V1_KEY;
   if (coopGuest) {
@@ -349204,7 +348853,7 @@ async function startWorldClient(environment) {
           } catch (error) {
             console.warn("Shared world copy not kept", error);
           }
-      } else plannedReview = await plannedOpening.open(null);
+      } else throw Error("This game is on the classic map, which has been retired.");
     } catch (error) {
       coopJoin?.link.close("left");
       coopScreens.showCoopEndedV1({ environment, title: "Join a game", reason: error.message, onHome: home });
@@ -349237,9 +348886,14 @@ async function startWorldClient(environment) {
             writeRefreshV1(deviceStorage, refreshKey, { ...refreshRecord, phase: "started" });
           }
         }
+        let movingHero = null;
+        if (launch.resume && !await builtWorlds.forStart({ resume: launch.resume })) {
+          movingHero = heroEntry?.hero && readHeroPassport(deviceStorage, channel2, heroId) ? { look: { ...heroEntry.hero.look, name: heroEntry.name || "Hero" }, cls: heroEntry.hero.cls } : null;
+          launch = { source: "classic-retired", resume: null };
+        }
         if (!launch.resume && !requested && !FORGE_REVIEW_BUILD && proofCase === "A" && plannedOpening.assetId === "alpha") {
-          const made2 = await newWorldFlowV1({ environment, save: (text3) => builtWorlds.put(text3) });
-          startingHero = made2.hero;
+          const made2 = await newWorldFlowV1({ environment, save: (text3) => builtWorlds.put(text3), moving: movingHero });
+          startingHero = made2.moved ? null : made2.hero;
           requested = made2.world?.hash ?? null;
         }
         builtWorld = await builtWorlds.forStart({ resume: launch.resume, requested });
@@ -349267,8 +348921,8 @@ async function startWorldClient(environment) {
         });
         return null;
       }
-    plannedReview ??= await plannedOpening.open(null);
-    roster.setWorld(builtWorld ? { seed: builtWorld.seed } : null);
+    if (!plannedReview) throw Error("No world to play: the classic map has been retired. Start a new world.");
+    roster.setWorld({ seed: builtWorld.seed });
     if (woodlandReview && plannedReview?.asset.assetId === "alpha")
       plannedReview.targets.push(...WOODLAND_REVIEW_TARGETS_V1, ...PAINTED_REVIEW_TARGETS);
     if (plannedReview?.binding.woodlandForestVersion)
@@ -349286,7 +348940,7 @@ async function startWorldClient(environment) {
       build: coopBuild,
       hostName,
       hostFriend: friends.me()?.code ?? null,
-      world: builtWorld ? { kind: "seeded", hash: builtWorld.hash } : { kind: "classic" },
+      world: { kind: "seeded", hash: builtWorld.hash },
       nextToken,
       onChange: (players) => lobby?.players.show(players),
       onFacts: (f) => {
@@ -350113,7 +349767,7 @@ async function startWorldClient(environment) {
             build: coopBuild,
             hostName: heroEntry?.name || "Host",
             hostFriend: friends.me()?.code ?? null,
-            world: builtWorld ? { kind: "seeded", hash: builtWorld.hash } : { kind: "classic" },
+            world: { kind: "seeded", hash: builtWorld.hash },
             nextToken,
             onChange: (p) => {
               try {
