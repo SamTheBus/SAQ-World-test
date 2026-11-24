@@ -157406,9 +157406,10 @@ var angleSeed = (value2) => {
 };
 var WORLD_PACK_LEASH_PIXELS = 1280;
 var WORLD_PACK_PATIENCE_TICKS = 240;
+var WORLD_PACK_SETTLE_PIXELS = 6144;
 function createEncounterContainmentD11_2(state2, { participantPolicy = () => null, targetPolicy = () => null, canReach = meleeLineClear } = {}) {
   const groupsByActor = /* @__PURE__ */ new Map(), participantsByGroup = /* @__PURE__ */ new Map(), globalSlotsByPlayer = /* @__PURE__ */ new Map();
-  let transitions = 0, returns = 0, reengagements = 0, alerts = 0, globalStarterCandidates = 0, globalStartLocal = null;
+  let transitions = 0, returns = 0, reengagements = 0, alerts = 0, settled = 0, globalStarterCandidates = 0, globalStartLocal = null;
   const lastChaseByGroup = /* @__PURE__ */ new Map(), chased = (group) => lastChaseByGroup.set(group.groupId, state2.tick);
   function refreshGroups() {
     groupsByActor.clear();
@@ -157459,6 +157460,37 @@ function createEncounterContainmentD11_2(state2, { participantPolicy = () => nul
       return;
     for (const a of fallen2) a.position = { x: homes3[a.entityId].x, y: homes3[a.entityId].y };
   };
+  const settleFar = (group) => {
+    const c = group.containment, def = state2.d9World?.runtime?.groups?.find((g2) => g2.groupId === group.groupId);
+    if (!def) return;
+    const heroes3 = Object.values(state2.playersById).map((p) => state2.entitiesById[p.entityId]).filter((a) => a?.residency.spaceInstanceId === group.spaceInstanceId);
+    const spots2 = new Map(def.members.map((m) => [m.entityId, m.position])), members = group.entityIds.map((id2) => state2.entitiesById[id2]).filter(Boolean);
+    if (heroes3.some(
+      (h) => distance5(h.position, c.homeAnchor) <= WORLD_PACK_SETTLE_PIXELS || members.some((a) => distance5(h.position, a.position) <= WORLD_PACK_SETTLE_PIXELS)
+    ))
+      return;
+    let moved = false;
+    for (const a of members) {
+      const spot2 = spots2.get(a.entityId);
+      if (!a.alive || !spot2) continue;
+      if (distance5(a.position, spot2) > 1e-7) {
+        a.position = { x: spot2.x, y: spot2.y };
+        moved = true;
+      }
+      if (JSON.stringify(a.hp) !== JSON.stringify(a.maxHp)) a.hp = structuredClone(a.maxHp);
+      a.movementIntent = { x: 0, y: 0 };
+      a.movedLastTick = false;
+      const melee3 = a.ai?.melee;
+      if (melee3 && melee3.phase !== "idle") {
+        melee3.phase = "idle";
+        melee3.phaseStartedTick = state2.tick;
+        melee3.phaseEndsTick = state2.tick;
+        melee3.targetEntityId = null;
+      }
+    }
+    if (c.mode !== "guard") setMode(group, "guard");
+    if (moved) settled++;
+  };
   let tickGroups = [];
   function beginTick(activeIds = null) {
     const active2 = activeIds ? new Set(activeIds) : null;
@@ -157471,8 +157503,10 @@ function createEncounterContainmentD11_2(state2, { participantPolicy = () => nul
         c.modeStartedTick = state2.tick;
         c.outsideTicks = 0;
       }
-      if (c && group.siteId === null && group.spaceInstanceId === state2.overworldInstanceId && state2.tick % 60 === 0)
+      if (c && group.siteId === null && group.spaceInstanceId === state2.overworldInstanceId && state2.tick % 60 === 0) {
         parkFallen(group);
+        if (!group.cleared) settleFar(group);
+      }
       if (!c || group.cleared || active2 && !group.entityIds.some((id2) => active2.has(id2))) continue;
       tickGroups.push(group);
       const modeAtStart = c.mode, acquire = modeAtStart === "engaged" ? [] : participants(group, c.acquireRadius, "acquire"), pursuit = modeAtStart === "engaged" ? participants(group, c.pursuitRadius, "pursuit") : [];
@@ -157589,6 +157623,7 @@ function createEncounterContainmentD11_2(state2, { participantPolicy = () => nul
       returns,
       reengagements,
       alerts,
+      settled,
       globalStarterPlayers: globalSlotsByPlayer.size,
       globalStarterPursuers: [...globalSlotsByPlayer.values()].reduce((n, set) => n + set.size, 0),
       globalStarterCandidates
@@ -340596,6 +340631,16 @@ function strandedFrameAnchorD9(s, planned) {
   frames[1].chunkY = String(clamp115(heroY, maxY - FRAME_HOLD_CHUNKS, minY + FRAME_HOLD_CHUNKS));
   return frames;
 }
+var FAR_CHUNKS = 6;
+function bulkReleaseD9({ evictable, candidates, stranded, gap: gap2, free, saveWaiting }) {
+  const held = evictable.filter(([k]) => stranded.has(k)), far2 = saveWaiting ? [] : evictable.filter(([k, c]) => !stranded.has(k) && gap2(c) >= FAR_CHUNKS);
+  if (!held.length && !far2.length) return null;
+  const release = (held.length ? held.slice(0, D9_RUNTIME_POLICY.handoffChunks) : far2.slice(0, D9_RUNTIME_POLICY.evictChunks)).map(([, c]) => c.id);
+  return {
+    release,
+    admit: candidates.slice(0, Math.max(0, Math.min(free + release.length, D9_RUNTIME_POLICY.handoffChunks - release.length, 2))).map(([k]) => k)
+  };
+}
 function actorFootprintPinsD9(s) {
   const w = s.d9World, homes3 = new Map(w.runtime.groups.map((g2) => [g2.groupId, proceduralGroupDetachmentHomeD9(s, g2.groupId)])), pinned = new Set(
     w.runtime.groups.filter((g2) => !homes3.get(g2.groupId)).flatMap((g2) => {
@@ -340648,22 +340693,24 @@ function createWorldResidencyD9({
   measure: measure2 = (_name, fn) => fn(),
   now: now3 = () => Date.now()
 }) {
-  const SOFT_RESIDENT_CHUNKS = 64;
+  const SOFT_RESIDENT_CHUNKS = 49;
+  let stranded = /* @__PURE__ */ new Set();
   const RELEASE_COOLDOWN_TICKS = 900, releaseCooldown = /* @__PURE__ */ new Map();
   const COMPANION_TICKS = 1800, companions = /* @__PURE__ */ new Map();
   const coolRelease = (v, release) => {
     for (const [key4, c] of v.resident)
       if (release.includes(c.id)) releaseCooldown.set(key4, v.tick + RELEASE_COOLDOWN_TICKS);
   };
-  const farthestFirst = (rows, v) => {
-    const gap2 = (row2) => Math.min(
-      ...v.players.map(
-        (p) => Math.max(
-          Math.abs(Number(BigInt(row2.chunkX) - BigInt(p.position.chunkX))),
-          Math.abs(Number(BigInt(row2.chunkY) - BigInt(p.position.chunkY)))
-        )
+  const gapOf = (row2, v) => v.players.length ? Math.min(
+    ...v.players.map(
+      (p) => Math.max(
+        Math.abs(Number(BigInt(row2.chunkX) - BigInt(p.position.chunkX))),
+        Math.abs(Number(BigInt(row2.chunkY) - BigInt(p.position.chunkY)))
       )
-    );
+    )
+  ) : 0;
+  const farthestFirst = (rows, v) => {
+    const gap2 = (row2) => gapOf(row2, v);
     return v.players.length ? rows.map((r) => [r, gap2(r[1])]).sort((a, b) => b[1] - a[1]).map(([r]) => r) : rows;
   };
   const LIVE_HANDOFF_CHUNKS = 2, LIVE_EVICT_CHUNKS = 2, parcelKeys = fortParcel?.pages.map((p) => chunkAddressKey(p.chunkX, p.chunkY)) ?? [];
@@ -340993,8 +341040,12 @@ function createWorldResidencyD9({
             try {
               rebaseWorldRuntimeD9(s, planned);
               changed = true;
+              stranded = /* @__PURE__ */ new Set();
             } catch (e) {
               if (e.message !== "Live geometry outside new admitted frame") throw e;
+              stranded = new Set(
+                liveGeometryAddressesD9(s).filter((a2) => !projectToLocalFrameD9(a2, planned)).map((a2) => chunkAddressKey(a2.chunkX, a2.chunkY))
+              );
               const slid = strandedFrameAnchorD9(s, planned), old2 = slid && w.runtime.frames.find((f) => f.id !== 0 && f.playerIds.join() === slid[1].playerIds.join());
               const gap2 = (a2, b) => Math.max(
                 Math.abs(Number(BigInt(a2.chunkX) - BigInt(b.chunkX))),
@@ -341134,7 +341185,7 @@ function createWorldResidencyD9({
       ), parcelWanted = parcelKeys.some((k) => v.wanted.has(k)), parcelResident = parcelKeys.filter((k) => v.resident.has(k)), parcelMissing = parcelKeys.filter((k) => !v.resident.has(k));
       for (const [key4, until] of releaseCooldown)
         if (until <= v.tick || !v.resident.has(key4)) releaseCooldown.delete(key4);
-      let release = [], admit = [];
+      let release = [], admit = [], bulk = null;
       if (parcelWanted && parcelMissing.length) {
         if (parcelMissing.every((k) => prepared.has(k))) {
           const need = Math.max(0, parcelMissing.length - free), other = evictable.filter(([k]) => !parcelKeys.includes(k));
@@ -341142,6 +341193,16 @@ function createWorldResidencyD9({
           if (release.length === need) admit = parcelMissing.map((k) => prepared.get(k));
           else release = [];
         }
+      } else if (bulk = bulkReleaseD9({
+        evictable: evictable.filter(([k]) => !parcelKeys.includes(k)),
+        candidates: candidates.filter(([k]) => !parcelKeys.includes(k)),
+        stranded,
+        gap: (c) => gapOf(c, v),
+        free,
+        saveWaiting: pageBuffer.resources().dirtyPages > D9_RUNTIME_POLICY.flushPages
+      })) {
+        release = bulk.release;
+        admit = bulk.admit.map((k) => prepared.get(k));
       } else {
         const ordinaryCandidates = candidates.filter(([k]) => !parcelKeys.includes(k)), need = Math.max(
           0,
