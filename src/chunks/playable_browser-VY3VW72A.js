@@ -289543,8 +289543,8 @@ function siteBossV1(site) {
       else if (fam === "cave" && tier2 !== "small" && arachnidTreantCaveHereV1(r)) out7 = world("arachnid_treant");
       else {
         const e = siteEndSpecV1(last), lesser = e?.named && LESSER_BOSSES_V1[e.named], elite = e?.named && NAMED_ELITES_V1[e.named];
-        if (lesser) out7 = { family: lesser.family, name: title(lesser.label) };
-        else if (elite) out7 = { creature: elite.family, name: title(elite.label) };
+        if (lesser) out7 = { family: lesser.family, name: title(lesser.label), rank: "lesser" };
+        else if (elite) out7 = { creature: elite.family, name: title(elite.label), rank: "named" };
       }
     }
   } catch {
@@ -289865,7 +289865,8 @@ function createAtlasMapV2({
         band: s.band,
         site: s,
         done: seen6 && states[s.id]?.state === "completed",
-        boss: seen6 && states[s.id]?.state === "completed" ? siteBossV1(s) : null,
+        // Sammy 2026-11-24: a found dungeon's lesser boss or named enemy shows at once; other bosses once cleared.
+        boss: seen6 && (states[s.id]?.state === "completed" || siteBossV1(s)?.rank) ? siteBossV1(s) : null,
         travel: seen6,
         rumored: !seen6
       });
@@ -290533,7 +290534,7 @@ function createAtlasMapV2({
         el3(
           "p",
           "m2-note",
-          "Every town, city and capital shows as ? until you reach it; dungeons appear once you find them. Every town and dungeon you find is a fast travel point. A green tick marks a cleared dungeon."
+          "Every town, city and capital shows as ? until you reach it; dungeons appear once you find them. Every town and dungeon you find is a fast travel point. A face shows the lesser boss or named enemy inside a dungeon. A green tick marks a cleared dungeon."
         )
       );
       const notes = knowledge()?.journal ?? [];
@@ -290637,7 +290638,14 @@ function createAtlasMapV2({
     if (m.unknown) sheet3.append(el3("p", "m2-note", "Reach it to learn its name and unlock fast travel."));
     if (m.kind === "site" && m.boss) {
       const pic = bossPortraitV1(m.boss, 52, { document: doc, ratio: Math.min(2, env.devicePixelRatio || 1) }), row2 = el3("div", "m2-boss"), words = el3("div");
-      words.append(el3("small", void 0, "Boss"), el3("strong", void 0, m.boss.name));
+      words.append(
+        el3(
+          "small",
+          void 0,
+          m.boss.rank === "lesser" ? "Lesser boss" : m.boss.rank === "named" ? "Named enemy" : "Boss"
+        ),
+        el3("strong", void 0, m.boss.name)
+      );
       if (pic) {
         const c = el3("canvas");
         c.width = pic.width;
@@ -290807,7 +290815,7 @@ function createAtlasMapV2({
       const face5 = m.boss && !far2 ? bossPortraitV1(m.boss, 30, { document: doc, ratio }) : null;
       if (face5) {
         c.drawImage(face5, q2.x - 15, q2.y - 15, 30, 30);
-        doneTick(c, q2.x, q2.y, 13);
+        if (m.done) doneTick(c, q2.x, q2.y, 13);
       } else medal(c, q2.x, q2.y, r, m.icon, m.unknown ? { col: "#d9ccaa", rim: "#8f7a52" } : { done: m.done });
       hits2.push({ m, x: q2.x, y: q2.y, r: Math.max(16, r + 6) });
     }
