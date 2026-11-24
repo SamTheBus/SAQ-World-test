@@ -29324,6 +29324,56 @@ var UNIQUE_ITEMS = freezeWire(
         "When an enemy hits you, the ground under you freezes over for 4 s. Enemies on the frozen sheet are chilled and slowed {0}. Once every 8 s.",
         "Let it go."
       ),
+      // Ashfang (Sammy 2026-11-24, the set page and all four passes approved): its Arena Collapse under your Earth-Breaker, its
+      // Hooked Tail behind your Riposte, its Scarlet Fire out of your Cast, and its ember seams lit by your kills.
+      unique(
+        "ruinfall",
+        "Ruinfall",
+        "weapon",
+        null,
+        "Warhammer",
+        "knight",
+        "ashfang",
+        "desert",
+        "Earth-Breaker caves the floor in. The ground around the slam cracks and drops into a glowing pit for 3 s. Enemies standing on it take {0} of your Attack as Fire every half second and are 40% slower. Bosses aren\u2019t slowed, but they still burn.",
+        "The floor is lava. No, really."
+      ),
+      unique(
+        "hookedtail",
+        "Hookedtail",
+        "weapon",
+        null,
+        "Saber",
+        "rogue",
+        "ashfang",
+        "desert",
+        "When Riposte catches a hit, a hooked tail bursts from the ground behind you. A ring shows on the attacker\u2019s spot, and a moment later the tail stabs down, hitting every enemy in the ring for {0} of your Attack and hooking them, 40% slower for 2 s.",
+        "Hooked on a feeling. The feeling is pain."
+      ),
+      unique(
+        "scarletmaw-scepter",
+        "Scarletmaw Scepter",
+        "weapon",
+        null,
+        "Scepter",
+        "mage",
+        "ashfang",
+        "desert",
+        "Every 6 s, your next Cast comes out as Scarlet Fire: a cone of flame in front of you that hits every enemy in it for {0} of your Attack and sets them burning. The ground in the cone stays scorched for 2 s and burns anything that walks on it.",
+        "Dracarys."
+      ),
+      unique(
+        "ashscale-hauberk",
+        "Ashscale Hauberk",
+        "overall",
+        null,
+        "Hauberk",
+        null,
+        "ashfang",
+        "desert",
+        "Each kill lights one ember seam on your armor. At 5, your scales flare: a ring of flame bursts around you, hitting every enemy near you for {0} of your Attack and setting them burning. Then the seams go dark and start again.",
+        "Five in a row? Killing spree."
+      ),
       // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
       // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
       unique(
@@ -29877,6 +29927,27 @@ var UNIQUE_TIERS = freezeWire({
     stars: [40, 45, 50, 60],
     unit: "pct"
   },
+  // Ashfang (v3 lines below; these five are the v2 fallback).
+  ruinfall: {
+    lines: ["skillDmg:earth_breaker", "fireDmg", "str", "critChance", "eliteDmg"],
+    stars: [30, 40, 50, 65],
+    unit: "pct"
+  },
+  hookedtail: {
+    lines: ["skillDmg:riposte", "counterDmg", "dex", "critChance", "eliteDmg"],
+    stars: [120, 150, 190, 240],
+    unit: "pct"
+  },
+  "scarletmaw-scepter": {
+    lines: ["offDmg", "fireDmg", "int", "critChance", "eliteDmg"],
+    stars: [90, 120, 150, 190],
+    unit: "pct"
+  },
+  "ashscale-hauberk": {
+    lines: ["maxHpPct", "defPct", "lifeKill", "fireDmg", "eliteDmg"],
+    stars: [100, 130, 170, 220],
+    unit: "pct"
+  },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": {
     lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"],
@@ -30266,6 +30337,28 @@ var UNIQUE_LINES_V3 = freezeWire({
     pool: ["maxHpPct", "lifeHit", "eliteDr", "areaDr", "defCdr", "mainAttr"],
     leg: []
   },
+  // Ashfang set (Sammy 2026-11-24). Under the unique damage rule the pit is Earth-Breaker damage (Fire), the tail Riposte
+  // damage (Counter), the breath Cast damage (Off-hand, Ranged, Fire); the Ashscale ring is armor's: no slot, no skill, Fire.
+  ruinfall: {
+    always: "skillDmg:earth_breaker",
+    pool: ["fireDmg", "areaDmg", "str", "critChance", "ailingDmg", "eliteDmg"],
+    leg: ["maxPip"]
+  },
+  hookedtail: {
+    always: "skillDmg:riposte",
+    pool: ["counterDmg", "areaDmg", "dex", "critChance", "critDamage", "eliteDmg"],
+    leg: ["killCdr"]
+  },
+  "scarletmaw-scepter": {
+    always: "fireDmg",
+    pool: ["offDmg", "rangedDmg", "int", "critChance", "ailingDmg", "eliteDmg"],
+    leg: ["maxPip"]
+  },
+  "ashscale-hauberk": {
+    always: "maxHpPct",
+    pool: ["defPct", "lifeKill", "fireDmg", "areaDr", "eliteDr", "mainAttr"],
+    leg: []
+  },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": {
     always: "controlDur",
@@ -30446,7 +30539,8 @@ var UNIQUE_BOSSES = Object.freeze([
   "gilded_vault_keeper",
   "nexus_overseer",
   "corrosive_abomination",
-  "void_overseer"
+  "void_overseer",
+  "ashfang"
 ]);
 var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.25, named: 0.1, world: 2e-3 });
 var TOME_FOLLOWING_UNIQUES = Object.freeze(
@@ -49946,6 +50040,12 @@ var HS_BACK = 18;
 var HS_SHOTS = 4;
 var MR_LIFE = 240;
 var MR_EVERY = 480;
+var RF_END = 212;
+var HT_END = 96;
+var SM_EVERY = 360;
+var SC_END = 122;
+var AS_KILLS = 5;
+var AS_END = 130;
 var RG_N = 2;
 var RG_EVERY = 120;
 var RG_SHOW = 134;
@@ -50044,6 +50144,12 @@ var LIVE = [
   "hsBack",
   "mrCd",
   "mrSheet",
+  "rfPit",
+  "htStrike",
+  "smCd",
+  "smBreath",
+  "asN",
+  "asBurst",
   "mcCd",
   "mcSlam",
   "sfGlob",
@@ -51235,6 +51341,33 @@ function validateClassSkillState(s, combat, actor) {
       closedRecord(k.mrSheet, ["x", "y", "age"]);
       requireContract(pos2(k.mrSheet), "Invalid frozen sheet");
       safeInteger(k.mrSheet.age, 0, MR_LIFE - 1);
+    }
+    if (k.rfPit !== void 0) {
+      closedRecord(k.rfPit, ["x", "y", "age"]);
+      requireContract(pos2(k.rfPit), "Invalid ruinfall pit");
+      safeInteger(k.rfPit.age, 0, RF_END - 1);
+    }
+    if (k.htStrike !== void 0) {
+      const h = k.htStrike;
+      closedRecord(h, ["x", "y", "target", "age"]);
+      requireContract(pos2(h) && typeof h.target === "string" && h.target.length <= 240, "Invalid hooked tail");
+      safeInteger(h.age, 0, HT_END - 1);
+    }
+    if (k.smCd !== void 0) safeInteger(k.smCd, 1, SM_EVERY);
+    if (k.smBreath !== void 0) {
+      const b = k.smBreath;
+      closedRecord(b, ["x", "y", "dx", "dy", "age"]);
+      requireContract(
+        pos2(b) && Number.isFinite(b.dx) && Number.isFinite(b.dy) && Math.abs(Math.hypot(b.dx, b.dy) - 1) < 0.01,
+        "Invalid scarlet fire"
+      );
+      safeInteger(b.age, 0, SC_END - 1);
+    }
+    if (k.asN !== void 0) safeInteger(k.asN, 1, AS_KILLS - 1);
+    if (k.asBurst !== void 0) {
+      closedRecord(k.asBurst, ["x", "y", "age"]);
+      requireContract(pos2(k.asBurst), "Invalid ashscale flare");
+      safeInteger(k.asBurst.age, 0, AS_END - 1);
     }
     if (k.rsWalk !== void 0) safeInteger(k.rsWalk, 1, RS_CURL);
     if (k.rsRoll !== void 0) {
