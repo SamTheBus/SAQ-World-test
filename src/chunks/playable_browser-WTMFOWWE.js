@@ -1156,7 +1156,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-6ZPGCYCR.js";
+} from "./chunk-5EU6FY34.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -157446,6 +157446,18 @@ function createEncounterContainmentD11_2(state2, { participantPolicy = () => nul
     }
     if (mode === "engaged" && state2.tick > 0) reengagements++;
   };
+  const parkFallen = (group) => {
+    const homes3 = group.containment.memberHomesById ?? {}, fallen2 = group.entityIds.map((id2) => state2.entitiesById[id2]).filter((a) => a && !a.alive && homes3[a.entityId] && distance5(a.position, homes3[a.entityId]) > 1e-7);
+    if (!fallen2.length) return;
+    const heroes3 = Object.values(state2.playersById).map((p) => state2.entitiesById[p.entityId]).filter((a) => a?.residency.spaceInstanceId === group.spaceInstanceId);
+    if (heroes3.some(
+      (h) => fallen2.some(
+        (a) => distance5(h.position, a.position) <= WORLD_PACK_LEASH_PIXELS || distance5(h.position, homes3[a.entityId]) <= WORLD_PACK_LEASH_PIXELS
+      )
+    ))
+      return;
+    for (const a of fallen2) a.position = { x: homes3[a.entityId].x, y: homes3[a.entityId].y };
+  };
   let tickGroups = [];
   function beginTick(activeIds = null) {
     const active2 = activeIds ? new Set(activeIds) : null;
@@ -157453,6 +157465,13 @@ function createEncounterContainmentD11_2(state2, { participantPolicy = () => nul
     participantsByGroup.clear();
     for (const group of Object.values(state2.groupsById).sort((a, b) => a.groupId.localeCompare(b.groupId))) {
       const c = group.containment;
+      if (c && group.cleared && c.mode !== "guard") {
+        c.mode = "guard";
+        c.modeStartedTick = state2.tick;
+        c.outsideTicks = 0;
+      }
+      if (c && group.siteId === null && group.spaceInstanceId === state2.overworldInstanceId && state2.tick % 60 === 0)
+        parkFallen(group);
       if (!c || group.cleared || active2 && !group.entityIds.some((id2) => active2.has(id2))) continue;
       tickGroups.push(group);
       const modeAtStart = c.mode, acquire = modeAtStart === "engaged" ? [] : participants(group, c.acquireRadius, "acquire"), pursuit = modeAtStart === "engaged" ? participants(group, c.pursuitRadius, "pursuit") : [];
@@ -339268,11 +339287,26 @@ var WORKER_PART_PATHS_V1 = Object.freeze({
   defs: ["content", "definitionsById"],
   actors: ["entitiesById"],
   packs: ["groupsById"],
-  spaces: ["spacesByInstanceId"]
+  spaces: ["spacesByInstanceId"],
+  players: ["playersById"],
+  places: ["d9World", "functionalSitesById"],
+  episodes: ["d9World", "episodes"]
 });
 var PART = "$workerPart";
 var WORKER_PART_LISTS_V1 = /* @__PURE__ */ new Set(["chunks", "groups", "resources"]);
 var WORKER_PART_MAPS_V1 = /* @__PURE__ */ new Set(["actors", "packs", "spaces"]);
+var WORKER_PART_TREES_V1 = /* @__PURE__ */ new Map([
+  ["players", 3],
+  ["places", 1],
+  ["episodes", 1]
+]);
+var isRecord = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+function treeLeaves(value2, depth, path19 = [], out7 = []) {
+  const keys2 = isRecord(value2) ? Object.keys(value2).filter((k) => value2[k] !== void 0 && typeof value2[k] !== "function") : null;
+  if (!keys2 || depth === 0 || !keys2.length) out7.push([path19, value2]);
+  else for (const k of keys2) treeLeaves(value2[k], depth - 1, [...path19, k], out7);
+  return out7;
+}
 var ROOTS_EVERY = 64;
 var f64 = new Float64Array(1);
 var u32 = new Uint32Array(f64.buffer);
@@ -339351,6 +339385,21 @@ function createWorkerPartsV1() {
       for (const [name, path19] of Object.entries(WORKER_PART_PATHS_V1)) {
         const value2 = getPath(top, path19);
         if (value2 === void 0 || value2 === null || typeof value2 !== "object") continue;
+        if (WORKER_PART_TREES_V1.has(name) && isRecord(value2)) {
+          const have = held.get(name) instanceof Set ? held.get(name) : /* @__PURE__ */ new Set(), hashes = [], leaves = treeLeaves(value2, WORKER_PART_TREES_V1.get(name)).map(([path20, item2]) => {
+            const h = hashWireV1(item2);
+            hashes.push(h);
+            if (have.has(h)) {
+              itemRef++;
+              return [path20, h];
+            }
+            itemFull++;
+            return [path20, h, item2];
+          });
+          out7 = withPath(out7, path19, { [PART]: name, leaves });
+          staged.push([name, hashes]);
+          continue;
+        }
         if (WORKER_PART_MAPS_V1.has(name) && !Array.isArray(value2)) {
           const have = held.get(name) instanceof Set ? held.get(name) : /* @__PURE__ */ new Set(), hashes = [], entries = Object.entries(value2).map(([id2, item2]) => {
             const h = hashWireV1(item2);

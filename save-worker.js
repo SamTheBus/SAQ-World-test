@@ -44739,7 +44739,14 @@ var choose = (record2, predicate) => Object.fromEntries(
 function proceduralGroupPinnedD9(state, groupId) {
   const group = state.groupsById[groupId], runtime = state.d9World.runtime, def = runtime.groups.find((g) => g.groupId === groupId);
   if (!group || !def) return true;
-  if (group.containment && group.containment.mode !== "guard" || group.entityIds.some((id2) => state.entitiesById[id2]?.ai?.melee && state.entitiesById[id2].ai.melee.phase !== "idle"))
+  if (
+    // A fight mark on a pack with nobody left alive holds nothing (2026-11-23: wiped packs stayed 'engaged').
+    group.containment && group.containment.mode !== "guard" && group.entityIds.some((id2) => state.entitiesById[id2]?.alive) || // Only the living swing: a monster that died mid-swing keeps its last swing step for good.
+    group.entityIds.some((id2) => {
+      const a = state.entitiesById[id2];
+      return a?.alive && a.ai?.melee && a.ai.melee.phase !== "idle";
+    })
+  )
     return true;
   const ids = new Set(group.entityIds), combat = state.subweaponCombat, eliteRoot = state.eliteCombat;
   if (eliteRoot) {
@@ -63845,7 +63852,10 @@ var WORKER_PART_PATHS_V1 = Object.freeze({
   defs: ["content", "definitionsById"],
   actors: ["entitiesById"],
   packs: ["groupsById"],
-  spaces: ["spacesByInstanceId"]
+  spaces: ["spacesByInstanceId"],
+  players: ["playersById"],
+  places: ["d9World", "functionalSitesById"],
+  episodes: ["d9World", "episodes"]
 });
 var PART = "$workerPart";
 var ITEM_KEEP = 2e3;
@@ -63874,6 +63884,40 @@ function createWorkerPartCacheV1() {
       for (const [name, path] of Object.entries(WORKER_PART_PATHS_V1)) {
         const parent = getPath(state, path.slice(0, -1)), key9 = path.at(-1), v = parent && typeof parent === "object" ? parent[key9] : void 0;
         if (!v || typeof v !== "object" || v[PART] !== name) continue;
+        if (Array.isArray(v.leaves)) {
+          const m = pieces.get(name) ?? /* @__PURE__ */ new Map();
+          pieces.set(name, m);
+          let rec;
+          for (const [p, h, item2] of v.leaves) {
+            let value;
+            if (item2 !== void 0) {
+              value = item2;
+              m.delete(h);
+              m.set(h, structuredClone(item2));
+            } else {
+              const kept2 = m.get(h);
+              if (kept2 === void 0) {
+                const e = new Error("Worker part cache miss: " + name);
+                e.code = "worker-part-miss";
+                throw e;
+              }
+              m.delete(h);
+              m.set(h, kept2);
+              value = structuredClone(kept2);
+            }
+            if (!p.length) {
+              rec = value;
+              continue;
+            }
+            rec ??= {};
+            let node = rec;
+            for (let i = 0; i < p.length - 1; i++) node = node[p[i]] ??= {};
+            node[p.at(-1)] = value;
+          }
+          while (m.size > ENTRY_KEEP) m.delete(m.keys().next().value);
+          parent[key9] = rec ?? {};
+          continue;
+        }
         if (Array.isArray(v.entries)) {
           const m = pieces.get(name) ?? /* @__PURE__ */ new Map(), rec = {};
           pieces.set(name, m);

@@ -50805,7 +50805,14 @@ var same24 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function proceduralGroupPinnedD9(state, groupId) {
   const group = state.groupsById[groupId], runtime = state.d9World.runtime, def = runtime.groups.find((g) => g.groupId === groupId);
   if (!group || !def) return true;
-  if (group.containment && group.containment.mode !== "guard" || group.entityIds.some((id) => state.entitiesById[id]?.ai?.melee && state.entitiesById[id].ai.melee.phase !== "idle"))
+  if (
+    // A fight mark on a pack with nobody left alive holds nothing (2026-11-23: wiped packs stayed 'engaged').
+    group.containment && group.containment.mode !== "guard" && group.entityIds.some((id) => state.entitiesById[id]?.alive) || // Only the living swing: a monster that died mid-swing keeps its last swing step for good.
+    group.entityIds.some((id) => {
+      const a = state.entitiesById[id];
+      return a?.alive && a.ai?.melee && a.ai.melee.phase !== "idle";
+    })
+  )
     return true;
   const ids = new Set(group.entityIds), combat = state.subweaponCombat, eliteRoot = state.eliteCombat;
   if (eliteRoot) {
