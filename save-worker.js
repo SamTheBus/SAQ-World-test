@@ -63862,6 +63862,7 @@ var WORKER_PART_PATHS_V1 = Object.freeze({
 var PART = "$workerPart";
 var ITEM_KEEP = 2e3;
 var ENTRY_KEEP = 8e3;
+var COPY_KEEP = 16;
 var f64 = new Float64Array(1);
 var u322 = new Uint32Array(f64.buffer);
 var getPath = (o, path) => path.reduce((x, k) => x && typeof x === "object" ? x[k] : void 0, o);
@@ -63881,13 +63882,25 @@ function createWorkerPartCacheV1() {
     while (m.size > 3) m.delete(m.keys().next().value);
     kept.set(name, m);
   };
+  const copyOf = /* @__PURE__ */ new Map();
+  const begin = (name) => {
+    const n = (copyOf.get(name) ?? 0) + 1;
+    copyOf.set(name, n);
+    return n;
+  };
+  const trim = (m, n, limit) => {
+    for (const [h, e] of m) {
+      if (m.size <= limit && e[1] > n - COPY_KEEP) break;
+      m.delete(h);
+    }
+  };
   return Object.freeze({
     resolve(state) {
       for (const [name, path] of Object.entries(WORKER_PART_PATHS_V1)) {
         const parent = getPath(state, path.slice(0, -1)), key9 = path.at(-1), v = parent && typeof parent === "object" ? parent[key9] : void 0;
         if (!v || typeof v !== "object" || v[PART] !== name) continue;
         if (Array.isArray(v.leaves)) {
-          const m = pieces.get(name) ?? /* @__PURE__ */ new Map();
+          const m = pieces.get(name) ?? /* @__PURE__ */ new Map(), n = begin(name);
           pieces.set(name, m);
           let rec;
           for (const [p, h, item2] of v.leaves) {
@@ -63895,7 +63908,7 @@ function createWorkerPartCacheV1() {
             if (item2 !== void 0) {
               value = item2;
               m.delete(h);
-              m.set(h, structuredClone(item2));
+              m.set(h, [structuredClone(item2), n]);
             } else {
               const kept2 = m.get(h);
               if (kept2 === void 0) {
@@ -63904,8 +63917,8 @@ function createWorkerPartCacheV1() {
                 throw e;
               }
               m.delete(h);
-              m.set(h, kept2);
-              value = structuredClone(kept2);
+              m.set(h, [kept2[0], n]);
+              value = structuredClone(kept2[0]);
             }
             if (!p.length) {
               rec = value;
@@ -63916,15 +63929,15 @@ function createWorkerPartCacheV1() {
             for (let i = 0; i < p.length - 1; i++) node = node[p[i]] ??= {};
             node[p.at(-1)] = value;
           }
-          while (m.size > ENTRY_KEEP) m.delete(m.keys().next().value);
+          trim(m, n, ENTRY_KEEP);
           parent[key9] = rec ?? {};
           continue;
         }
         if (Array.isArray(v.entries)) {
-          const m = pieces.get(name) ?? /* @__PURE__ */ new Map(), rec = {};
+          const m = pieces.get(name) ?? /* @__PURE__ */ new Map(), n = begin(name), rec = {};
           pieces.set(name, m);
           for (const [id2, h, item2] of v.entries) {
-            let value = m.get(h);
+            let value = m.get(h)?.[0];
             if (item2 !== void 0) value = deepFreeze(item2);
             else if (value === void 0) {
               const e = new Error("Worker part cache miss: " + name);
@@ -63932,19 +63945,19 @@ function createWorkerPartCacheV1() {
               throw e;
             }
             m.delete(h);
-            m.set(h, value);
+            m.set(h, [value, n]);
             rec[id2] = value;
           }
-          while (m.size > ENTRY_KEEP) m.delete(m.keys().next().value);
+          trim(m, n, ENTRY_KEEP);
           parent[key9] = rec;
           continue;
         }
         if (Array.isArray(v.items)) {
-          const m = pieces.get(name) ?? /* @__PURE__ */ new Map();
+          const m = pieces.get(name) ?? /* @__PURE__ */ new Map(), n = begin(name);
           pieces.set(name, m);
           parent[key9] = v.items.map((it) => {
             const h = typeof it === "string" ? it : it.h;
-            let value = m.get(h);
+            let value = m.get(h)?.[0];
             if (typeof it !== "string") value = deepFreeze(it.v);
             else if (value === void 0) {
               const e = new Error("Worker part cache miss: " + name);
@@ -63952,10 +63965,10 @@ function createWorkerPartCacheV1() {
               throw e;
             }
             m.delete(h);
-            m.set(h, value);
+            m.set(h, [value, n]);
             return value;
           });
-          while (m.size > ITEM_KEEP) m.delete(m.keys().next().value);
+          trim(m, n, ITEM_KEEP);
           continue;
         }
         if (Object.hasOwn(v, "value")) {
