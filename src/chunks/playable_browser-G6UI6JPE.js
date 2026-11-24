@@ -339388,6 +339388,7 @@ function treeLeaves(value2, depth, path19 = [], out7 = []) {
   else for (const k of keys2) treeLeaves(value2[k], depth - 1, [...path19, k], out7);
   return out7;
 }
+var SPLIT_KEYS = 24;
 var ROOTS_EVERY = 64;
 var f64 = new Float64Array(1);
 var u32 = new Uint32Array(f64.buffer);
@@ -339468,6 +339469,29 @@ function createWorkerPartsV1() {
         if (value2 === void 0 || value2 === null || typeof value2 !== "object") continue;
         if (WORKER_PART_TREES_V1.has(name) && isRecord(value2)) {
           const have = held.get(name) instanceof Set ? held.get(name) : /* @__PURE__ */ new Set(), hashes = [], leaves = treeLeaves(value2, WORKER_PART_TREES_V1.get(name)).map(([path20, item2]) => {
+            const list = isRecord(item2) ? Object.entries(item2).filter(([, v]) => v !== void 0 && typeof v !== "function") : null;
+            if (list && list.length >= SPLIT_KEYS) {
+              const each = list.map(([, v]) => hashWireV1(v)), h2 = hashWireV1(["$split", list.map(([id2], i) => [id2, each[i]])]);
+              hashes.push(h2);
+              for (const e of each) hashes.push("e:" + e);
+              if (have.has(h2)) {
+                itemRef++;
+                return [path20, h2];
+              }
+              return [
+                path20,
+                h2,
+                null,
+                list.map(([id2, v], i) => {
+                  if (have.has("e:" + each[i])) {
+                    itemRef++;
+                    return [id2, each[i]];
+                  }
+                  itemFull++;
+                  return [id2, each[i], v];
+                })
+              ];
+            }
             const h = hashWireV1(item2);
             hashes.push(h);
             if (have.has(h)) {

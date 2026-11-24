@@ -63903,9 +63903,27 @@ function createWorkerPartCacheV1() {
           const m = pieces.get(name) ?? /* @__PURE__ */ new Map(), n = begin(name);
           pieces.set(name, m);
           let rec;
-          for (const [p, h, item2] of v.leaves) {
+          const miss = () => {
+            const e = new Error("Worker part cache miss: " + name);
+            e.code = "worker-part-miss";
+            return e;
+          };
+          for (const [p, h, item2, list2] of v.leaves) {
             let value;
-            if (item2 !== void 0) {
+            const known = m.get(h);
+            if (Array.isArray(list2) || item2 === void 0 && known?.[2]) {
+              const ids = Array.isArray(list2) ? list2.map(([id2, eh]) => [id2, "e:" + eh]) : known[2];
+              value = {};
+              ids.forEach(([id2, k], i) => {
+                const arrived = Array.isArray(list2) && list2[i].length > 2, kept2 = arrived ? [structuredClone(list2[i][2])] : m.get(k);
+                if (kept2 === void 0) throw miss();
+                m.delete(k);
+                m.set(k, [kept2[0], n]);
+                value[id2] = arrived ? list2[i][2] : structuredClone(kept2[0]);
+              });
+              m.delete(h);
+              m.set(h, [null, n, ids]);
+            } else if (item2 !== void 0) {
               value = item2;
               m.delete(h);
               m.set(h, [structuredClone(item2), n]);
