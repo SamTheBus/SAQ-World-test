@@ -1157,7 +1157,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-E6XAGMM2.js";
+} from "./chunk-DUFQWFOQ.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -171372,7 +171372,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
           functional.discoveredByPlayerIds.sort();
         }
         relocate(actor.entityId, target.spaceInstanceId, target.position, authorityOrder);
-        if (!target.civilian && ["exit", "extract"].includes(command.payload.direction))
+        if (!target.civilian && ["exit", "extract", "escape"].includes(command.payload.direction))
           (state2.siteExitProtectionByEntityId ??= {})[actor.entityId] = safeInteger(
             state2.tick + SITE_EXIT_PROTECTION_TICKS,
             1
@@ -175745,6 +175745,16 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
               }),
               visual: state2.trips?.hell?.spaceInstanceId === ctx.spaceInstanceId ? null : page,
               exits: freezeProjection(exits),
+              // Escape (Menu tile): inside a dungeon, the way straight back out to its entrance.
+              escape: inFunctional && state2.d9World.functionalSitesById[functional.siteId] ? freezeProjection({
+                siteId: functional.siteId,
+                available: Boolean(
+                  functionalSiteTransitionTargetD9(state2, local8, {
+                    siteId: functional.siteId,
+                    direction: "escape"
+                  })
+                )
+              }) : null,
               functionalSite: inFunctional && functional.siteKind === "woodland-fort" ? freezeProjection({
                 siteId: functional.siteId,
                 label: functional.label,
@@ -241632,6 +241642,9 @@ var MENU_HUB_ICONS = Object.freeze({
     '<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="6.6"/><path d="M12 2.6v2.8M12 18.6v2.8M2.6 12h2.8M18.6 12h2.8M5.4 5.4l2 2M16.6 16.6l2 2M5.4 18.6l2-2M16.6 7.4l2-2"/>'
   ),
   player: icon('<circle cx="12" cy="8" r="3.6"/><path d="M4.8 20.2c.9-4 3.7-6 7.2-6s6.3 2 7.2 6"/>'),
+  escape: icon(
+    '<path d="M14 4H6.5A1.5 1.5 0 0 0 5 5.5v13A1.5 1.5 0 0 0 6.5 20H14"/><path d="M10 12h10M16.5 8.5 20 12l-3.5 3.5"/>'
+  ),
   home: icon(
     '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>'
   )
@@ -250155,9 +250168,32 @@ function createInventoryPresentation({
       { id: "bestiary", name: "Bestiary", icon: plainIcon(MENU_ICONS.bestiary), pick: () => go("bestiary") },
       { id: "friends", name: "Friends", icon: plainIcon(MENU_ICONS.friends), pick: () => go("friends") },
       { id: "heroes", name: "Heroes", icon: plainIcon(MENU_ICONS.heroes), pick: () => go("heroes") },
-      { id: "settings", name: "Settings", icon: MENU_HUB_ICONS.settings, pick: () => go("settings") }
+      { id: "settings", name: "Settings", icon: MENU_HUB_ICONS.settings, pick: () => go("settings") },
+      // Escape (Sammy 2026-11-24): inside a dungeon, back out to its entrance from anywhere. Tap twice.
+      { id: "escape", name: "Escape", icon: MENU_HUB_ICONS.escape, pick: () => escapeSite() }
     ]
   });
+  let escapeArmed = 0;
+  function escapeSite() {
+    const m = readModel(), way = m.space?.escape;
+    if (!way?.available || m.persistence?.phase !== "encounter") return;
+    if (Date.now() - escapeArmed > 3e3) {
+      escapeArmed = Date.now();
+      paintHub(m);
+      return;
+    }
+    escapeArmed = 0;
+    try {
+      const sent = adapter.issue("site.transition", { siteId: way.siteId, direction: "escape" }, m);
+      sent?.catch?.((e) => {
+        error = e.message;
+      });
+      close();
+    } catch (e) {
+      error = e.message;
+      paintHub(m);
+    }
+  }
   document2.querySelector(".bag-body").append(hub.root);
   function friendsSub() {
     const f = heroSlots?.friends?.client;
@@ -250195,7 +250231,8 @@ function createInventoryPresentation({
       bestiary: { sub: "Monster cards" },
       friends: friendsSub(),
       heroes: { sub: heroes3 === 1 ? "1 hero" : heroes3 + " heroes", hidden: !heroesView },
-      settings: { sub: "Sound \xB7 controls", hidden: !settingsPage }
+      settings: { sub: "Sound \xB7 controls", hidden: !settingsPage },
+      escape: !m.space?.escape ? { hidden: true } : !m.space.escape.available ? { sub: "Not right now" } : Date.now() - escapeArmed <= 3e3 ? { sub: "Tap again to leave", badge: "!" } : { sub: "Back to the entrance" }
     });
   }
   const nav = panel.querySelector(".bag-section-tabs"), heading = panel.querySelector(".bag-heading");

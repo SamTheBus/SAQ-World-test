@@ -48730,7 +48730,7 @@ function validateCommand(command) {
       "Invalid site transition identity"
     );
     requireContract(
-      ["enter", "boss", "exit", "up", "down", "extract"].includes(command.payload.direction),
+      ["enter", "boss", "exit", "up", "down", "extract", "escape"].includes(command.payload.direction),
       "Invalid site transition direction"
     );
     if (["up", "down"].includes(command.payload.direction))

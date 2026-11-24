@@ -16831,7 +16831,7 @@ function validateCommand(command) {
       "Invalid site transition identity"
     );
     requireContract(
-      ["enter", "boss", "exit", "up", "down", "extract"].includes(command.payload.direction),
+      ["enter", "boss", "exit", "up", "down", "extract", "escape"].includes(command.payload.direction),
       "Invalid site transition direction"
     );
     if (["up", "down"].includes(command.payload.direction))
@@ -44910,6 +44910,14 @@ function siteBossDoorV1(site) {
 function functionalSiteTransitionTargetD9(state, actor, payload) {
   const f3 = state.d9World?.functionalSitesById?.[payload.siteId];
   if (!f3 || !actor.alive || state.primary.actorsById[actor.entityId]?.current) return null;
+  if (payload.direction === "escape") {
+    const inside2 = isGeneratedInteriorFamily(f3) ? Boolean(functionalSiteFloorForSpaceD12(f3, actor.residency.spaceInstanceId)) : actor.residency.spaceInstanceId === f3.spaceInstanceId;
+    const out = projectToLocalFrameD9(
+      !isGeneratedInteriorFamily(f3) && f3.siteKind === "woodland-fort" ? fortDoorWorldD10(f3) : f3.socket.entrance,
+      state.d9World.runtime.frames
+    );
+    return inside2 && out ? partyTarget(state, actor, state.overworldInstanceId, out) : null;
+  }
   if (isGeneratedInteriorFamily(f3)) {
     if (isCryptFamily(f3)) validateCryptRuntime(state, f3);
     let source11, anchor2, destination2, targetSpace;
