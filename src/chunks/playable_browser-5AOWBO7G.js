@@ -323220,7 +323220,7 @@ function createEnvironmentCache(canvas, {
     }
   }
   let lastView = null, travelX = 0, travelY = 0, exitsKey = null, kitsSeen = null;
-  let layoutJob = null, activeJob = null, planKey = null, planVisual = null, key4 = null, scaleKey = null, queue = [], routeQueue = [], routeBurst = 0, pending = null, generation = 0, visualGeneration = 0, rasterGeneration = 0, currentVisual = null, currentSpace = null, frameSequence = 0, visibleIds = /* @__PURE__ */ new Set(), nearIds = /* @__PURE__ */ new Set(), pathScreenIds = /* @__PURE__ */ new Set(), preloadIds = /* @__PURE__ */ new Set(), recentIds = /* @__PURE__ */ new Set(), recentSeen = /* @__PURE__ */ new Map(), protectedIds = /* @__PURE__ */ new Set(), lastFlowers = [], lastWater = [], requiredTasks = [], builds = 0, created = 0, worstBuildMs = 0, descriptorReuses = 0, retentionHits = 0, peakNeeded = 0, peakPrefetched = 0, capacity = BASE_LIMIT, evictions = 0, misses = 0, fallbackBuilds = 0, fallbackHits = 0, peakFallbackPages = 0, visibleRasterPages = 0, fallbackPages = 0, activeColliderVisuals = 0, missingColliderVisuals = 0, underCoveredColliderVisuals = 0, lastColliderRepair = null, lastColliderAudit = null, lastRasterLifecycle = null, staleRasterDiscards = 0, atomicRasterReplacements = 0, rasterCompletenessRepairs = 0, clearCount = 0, parkCount = 0, lastClearReason = "none", lastMissReason = "none", clearReasons = /* @__PURE__ */ Object.create(null);
+  let layoutJob = null, activeJob = null, planKey = null, planVisual = null, key4 = null, scaleKey = null, queue = [], routeQueue = [], routeBurst = 0, pending = null, generation = 0, visualGeneration = 0, rasterGeneration = 0, currentVisual = null, currentSpace = null, frameSequence = 0, visibleIds = /* @__PURE__ */ new Set(), nearIds = /* @__PURE__ */ new Set(), pathScreenIds = /* @__PURE__ */ new Set(), preloadIds = /* @__PURE__ */ new Set(), recentIds = /* @__PURE__ */ new Set(), recentSeen = /* @__PURE__ */ new Map(), protectedIds = /* @__PURE__ */ new Set(), lastFlowers = [], lastWater = [], requiredTasks = [], builds = 0, created = 0, worstBuildMs = 0, descriptorReuses = 0, retentionHits = 0, peakNeeded = 0, peakPrefetched = 0, capacity = BASE_LIMIT, evictions = 0, misses = 0, fallbackBuilds = 0, fallbackHits = 0, peakFallbackPages = 0, visibleRasterPages = 0, fallbackPages = 0, activeColliderVisuals = 0, missingColliderVisuals = 0, underCoveredColliderVisuals = 0, lastColliderRepair = null, lastColliderAudit = null, lastRasterLifecycle = null, staleRasterDiscards = 0, atomicRasterReplacements = 0, rasterCompletenessRepairs = 0, clearCount = 0, parkCount = 0, staleRecipeDrops = 0, recipeFaults = 0, lastRecipeFault = null, lastClearReason = "none", lastMissReason = "none", clearReasons = /* @__PURE__ */ Object.create(null);
   const emit = (kind, values = {}) => {
     if (diagnostics) diagnostics({ kind, at: performance.now(), ...values });
   };
@@ -323527,11 +323527,19 @@ function createEnvironmentCache(canvas, {
       if (!complete) return false;
     }
     const descriptor = job.descriptor, rasterStart = performance.now();
-    while (job.index < descriptor.commands.length) {
-      const [method, args] = descriptor.commands[job.index++];
-      if (method === "=") rc[args[0]] = args[1];
-      else rc[method](...args);
-      if (!complete && job.index % 32 === 0 && performance.now() - rasterStart >= sliceMs()) break;
+    try {
+      while (job.index < descriptor.commands.length) {
+        const [method, args] = descriptor.commands[job.index++];
+        if (method === "=") rc[args[0]] = args[1];
+        else rc[method](...args);
+        if (!complete && job.index % 32 === 0 && performance.now() - rasterStart >= sliceMs()) break;
+      }
+    } catch (error) {
+      if (descriptors.get(job.task.id) === descriptor) descriptors.delete(job.task.id);
+      recipeFaults++;
+      lastRecipeFault = String(error?.message ?? error).slice(0, 120);
+      releaseRaster(job.raster);
+      return true;
     }
     const ms = performance.now() - rasterStart;
     job.cpu += ms;
@@ -323719,7 +323727,11 @@ function createEnvironmentCache(canvas, {
     }
     {
       const g2 = kitGeneration?.() ?? 0;
-      if (kitsSeen !== null && g2 !== kitsSeen) for (const entry2 of pages2.values()) entry2.visual = null;
+      if (kitsSeen !== null && g2 !== kitsSeen) {
+        for (const entry2 of pages2.values()) entry2.visual = null;
+        descriptors.clear();
+        staleRecipeDrops++;
+      }
       kitsSeen = g2;
     }
     if (lastView) {
@@ -324052,6 +324064,9 @@ function createEnvironmentCache(canvas, {
       environmentPoolSpares: rasterPool.length,
       ...pathStats,
       environmentCacheParks: parkCount,
+      environmentRecipeDrops: staleRecipeDrops,
+      environmentRecipeFaults: recipeFaults,
+      environmentLastRecipeFault: lastRecipeFault,
       waterMotion: waterMotion.resources(),
       environmentPathPreparationVersion: "moving-path-priority-v3",
       environmentPathLookaheadPixels: SIZE12 * 2,
@@ -339005,11 +339020,15 @@ function watchCanvasesV1(doc, scope = globalThis) {
   if (!doc?.createElement || typeof WeakRef !== "function") return () => null;
   if (doc.__saqCanvasCensusV1) return doc.__saqCanvasCensusV1;
   const refs = [], original = doc.createElement;
-  let made2 = 0, offscreen = 0;
+  let made2 = 0, offscreen = 0, madeBytes = 0;
+  const makers = /* @__PURE__ */ new Map();
   const track4 = (el3, kind) => {
     made2++;
     if (kind) offscreen++;
-    refs.push({ ref: new WeakRef(el3), by: creatorOf(), kind });
+    const by = creatorOf(), m = makers.get(by) ?? { by, n: 0, bytes: 0 };
+    m.n++;
+    makers.set(by, m);
+    refs.push({ ref: new WeakRef(el3), by, kind, peak: 0 });
   };
   doc.createElement = function(tag2, ...rest2) {
     const el3 = original.call(this, tag2, ...rest2);
@@ -339048,6 +339067,12 @@ function watchCanvasesV1(doc, scope = globalThis) {
       if (e.kind) off++;
       const b = (c.width | 0) * (c.height | 0) * 4;
       bytes += b;
+      if (b > e.peak) {
+        madeBytes += b - e.peak;
+        const m = makers.get(e.by);
+        if (m) m.bytes += b - e.peak;
+        e.peak = b;
+      }
       if (b >= 4194304) {
         big++;
         if (bigs && bigs.length < 24) bigs.push({ by: e.by, w: c.width, h: c.height, off: e.kind });
@@ -339060,10 +339085,19 @@ function watchCanvasesV1(doc, scope = globalThis) {
       }
     }
     refs.length = keep8;
-    const out7 = { made: made2, alive, mb: Math.round(bytes / 104857.6) / 10, big, off, offMade: offscreen };
+    const out7 = {
+      made: made2,
+      madeMb: Math.round(madeBytes / 104857.6) / 10,
+      alive,
+      mb: Math.round(bytes / 104857.6) / 10,
+      big,
+      off,
+      offMade: offscreen
+    };
     if (detail) {
       out7.top = [...by.values()].sort((a, b) => b.bytes - a.bytes).slice(0, 8).map((t) => ({ by: t.by, n: t.n, mb: Math.round(t.bytes / 104857.6) / 10 }));
       out7.bigs = bigs;
+      out7.makers = [...makers.values()].sort((a, b) => b.bytes - a.bytes || b.n - a.n).slice(0, 10).map((t) => ({ by: t.by, n: t.n, mb: Math.round(t.bytes / 104857.6) / 10 }));
     }
     return out7;
   };
@@ -339225,6 +339259,7 @@ function startBlackboxV1({
       r.cv = c.alive;
       r.cvMb = c.mb;
       r.cvMade = c.made;
+      r.cvMadeMb = c.madeMb;
       r.cvBig = c.big;
       r.cvOff = c.off;
     }
@@ -339283,6 +339318,7 @@ function startBlackboxV1({
           at: Math.round((now3() - record2.startedAt) / 1e3),
           top: d.top,
           bigs: d.bigs,
+          makers: d.makers,
           offMade: d.offMade
         };
     } catch {
