@@ -63888,9 +63888,18 @@ function createWorkerPartCacheV1() {
     copyOf.set(name, n);
     return n;
   };
+  let keptChars = 0;
+  const put3 = (m, h, value, n, ids, arrived) => {
+    const old = m.get(h), size = arrived !== void 0 ? JSON.stringify(arrived).length : old?.[3] ?? 0;
+    if (old) keptChars -= old[3];
+    m.delete(h);
+    m.set(h, [value, n, ids, size]);
+    keptChars += size;
+  };
   const trim = (m, n, limit) => {
     for (const [h, e] of m) {
       if (m.size <= limit && e[1] > n - COPY_KEEP) break;
+      keptChars -= e[3];
       m.delete(h);
     }
   };
@@ -63917,16 +63926,13 @@ function createWorkerPartCacheV1() {
               ids.forEach(([id2, k], i) => {
                 const arrived = Array.isArray(list2) && list2[i].length > 2, kept2 = arrived ? [structuredClone(list2[i][2])] : m.get(k);
                 if (kept2 === void 0) throw miss();
-                m.delete(k);
-                m.set(k, [kept2[0], n]);
+                put3(m, k, kept2[0], n, void 0, arrived ? list2[i][2] : void 0);
                 value[id2] = arrived ? list2[i][2] : structuredClone(kept2[0]);
               });
-              m.delete(h);
-              m.set(h, [null, n, ids]);
+              put3(m, h, null, n, ids, Array.isArray(list2) ? ids : void 0);
             } else if (item2 !== void 0) {
               value = item2;
-              m.delete(h);
-              m.set(h, [structuredClone(item2), n]);
+              put3(m, h, structuredClone(item2), n, void 0, item2);
             } else {
               const kept2 = m.get(h);
               if (kept2 === void 0) {
@@ -63934,8 +63940,7 @@ function createWorkerPartCacheV1() {
                 e.code = "worker-part-miss";
                 throw e;
               }
-              m.delete(h);
-              m.set(h, [kept2[0], n]);
+              put3(m, h, kept2[0], n);
               value = structuredClone(kept2[0]);
             }
             if (!p.length) {
@@ -63962,8 +63967,7 @@ function createWorkerPartCacheV1() {
               e.code = "worker-part-miss";
               throw e;
             }
-            m.delete(h);
-            m.set(h, [value, n]);
+            put3(m, h, value, n, void 0, item2);
             rec[id2] = value;
           }
           trim(m, n, ENTRY_KEEP);
@@ -63982,8 +63986,7 @@ function createWorkerPartCacheV1() {
               e.code = "worker-part-miss";
               throw e;
             }
-            m.delete(h);
-            m.set(h, [value, n]);
+            put3(m, h, value, n, void 0, typeof it === "string" ? void 0 : it.v);
             return value;
           });
           trim(m, n, ITEM_KEEP);
@@ -64007,7 +64010,13 @@ function createWorkerPartCacheV1() {
     inspect: () => ({
       ...Object.fromEntries([...kept].map(([n, m]) => [n, [...m.keys()]])),
       ...Object.fromEntries([...pieces].map(([n, m]) => [n, m.size]))
-    })
+    }),
+    // Pieces kept and their size (KB of text as they arrived), for the black box.
+    kept: () => {
+      let n = 0;
+      for (const m of pieces.values()) n += m.size;
+      return { n, kb: Math.round(keptChars / 1024) };
+    }
   });
 }
 
@@ -64023,7 +64032,9 @@ function createWorldWorkerTaskD9({ store, sha256, plannedAssets = null }) {
       return plannedAssets.generate(request);
     }
   });
-  return async function run(kind2, request) {
+  run.kept = () => partCache.kept();
+  return run;
+  async function run(kind2, request) {
     if ([
       "world.commit",
       "world.prepareResidency",
@@ -64148,7 +64159,7 @@ function createWorldWorkerTaskD9({ store, sha256, plannedAssets = null }) {
       return store.worldPages.publish(request);
     }
     throw new TypeError("Unknown D9 world Worker task");
-  };
+  }
 }
 
 // src/entrypoints/activity_save_worker.js
@@ -64286,7 +64297,7 @@ function startActivitySaveWorker(environment) {
           world ? "worldWorkerTotal" : "saveDurabilityTotal",
           () => world ? worldTask(data.kind, data.request) : task[data.kind](data.request)
         );
-        environment.postMessage({ id: data.id, result, timings });
+        environment.postMessage({ id: data.id, result, timings, ...world ? { kept: worldTask.kept() } : {} });
       } catch (error) {
         environment.postMessage({
           id: data.id,

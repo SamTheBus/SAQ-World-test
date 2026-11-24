@@ -339032,6 +339032,8 @@ function trendPicksV1(snapshot) {
   put3("long", snapshot?.longFrameCount);
   put3("wkMb", a?.d9Worker?.postedMb);
   put3("wkN", a?.d9Worker?.postedCopies);
+  put3("wkKeep", a?.d9Worker?.keptMb);
+  put3("wkKeepN", a?.d9Worker?.keptPieces);
   return out7;
 }
 var parse2 = (text3) => {
@@ -339055,7 +339057,8 @@ function readLastSessionV1(storage, channel2 = "") {
 function lastSessionLineV1(last, format = (t) => new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })) {
   if (!last) return "No earlier session on this device.";
   const mins = Math.max(0, Math.floor((last.at - last.startedAt) / 6e4)), span3 = mins < 1 ? "under a minute" : mins + " min";
-  return (last.ended === "unexpected" ? "Ended without warning at " : "Closed at ") + format(last.at) + " after " + span3 + " of play";
+  return (last.ended === "unexpected" ? "Ended without warning at " : "Closed at ") + format(last.at) + " after " + span3 + " of play" + // Hidden, never shown again, and the game started over: the phone most likely dropped it in the background.
+  (last.ended === "closed" && last.exit === "hidden" && typeof last.next?.awayS === "number" ? " (in the background; started again " + (last.next.awayS < 90 ? last.next.awayS + " s" : Math.round(last.next.awayS / 60) + " min") + " later)" : "");
 }
 function startBlackboxV1({
   environment: env,
@@ -339085,6 +339088,13 @@ function startBlackboxV1({
   if (prior) {
     last = { ...prior, ended: prior.clean ? "closed" : "unexpected" };
     try {
+      last.next = {
+        awayS: Math.max(0, Math.round((now3() - prior.at) / 1e3)),
+        nav: env.performance?.getEntriesByType?.("navigation")?.[0]?.type ?? null
+      };
+    } catch {
+    }
+    try {
       storage?.setItem(lastKey, JSON.stringify(last));
     } catch {
       try {
@@ -339103,6 +339113,10 @@ function startBlackboxV1({
     writes: 0,
     errors: [],
     notes: [],
+    // Times the page went to the background and seconds spent there; hiddenAt while it is there now.
+    hides: 0,
+    hiddenS: 0,
+    hiddenAt: null,
     trend: [],
     storage: null,
     canvases: null,
@@ -339235,9 +339249,13 @@ function startBlackboxV1({
     if (hidden()) {
       record2.clean = true;
       record2.exit = "hidden";
+      record2.hides++;
+      record2.hiddenAt = now3();
     } else {
       record2.clean = false;
       record2.exit = null;
+      if (record2.hiddenAt !== null) record2.hiddenS += Math.max(0, Math.round((now3() - record2.hiddenAt) / 1e3));
+      record2.hiddenAt = null;
     }
     write4();
   };
@@ -339571,7 +339589,7 @@ function createWorkerPartsV1() {
 function createWorldWorkerBridgeD9(worker, { record: record2 = () => {
 }, diagnostics = false, now: now3 = () => performance.now(), expectedDatabaseName = null } = {}) {
   const queue = [], requestDiagnostics = {}, requestCounts = {}, parts = createWorkerPartsV1();
-  let postedChars = 0, postedCopies = 0;
+  let postedChars = 0, postedCopies = 0, workerKept = null;
   let active2 = null, ready = false, closed2 = false, sequence = 0;
   let markStarted;
   const started = new Promise((resolve) => markStarted = resolve);
@@ -339606,6 +339624,7 @@ function createWorldWorkerBridgeD9(worker, { record: record2 = () => {
       return;
     }
     if (!active2 || data.id !== active2.packet.id) return;
+    if (data.kept && typeof data.kept.kb === "number") workerKept = data.kept;
     const job = active2;
     active2 = null;
     for (const t of data.timings ?? []) {
@@ -339681,6 +339700,8 @@ function createWorldWorkerBridgeD9(worker, { record: record2 = () => {
       requestCounts: { ...requestCounts },
       postedMb: postedChars / 1048576,
       postedCopies,
+      keptMb: workerKept ? workerKept.kb / 1024 : null,
+      keptPieces: workerKept ? workerKept.n : null,
       parts: parts.inspect()
     }),
     destroy() {
