@@ -3377,11 +3377,10 @@ var enemyByProfile = new Map(
 function ordinaryEnemyForProfile(id2) {
   return enemyByProfile.get(id2) ?? null;
 }
+var ordinaryTexts = null;
 function validateOrdinaryDefinition(d) {
-  requireContract(
-    ORDINARY_ENEMIES.some((e) => canonicalStringify(e) === canonicalStringify(d)),
-    "Ordinary definition drift"
-  );
+  ordinaryTexts ??= new Set(ORDINARY_ENEMIES.map((e) => canonicalStringify(e)));
+  requireContract(ordinaryTexts.has(canonicalStringify(d)), "Ordinary definition drift");
 }
 
 // src/shared/content/wilderness_ecology_v3.js
@@ -11075,7 +11074,8 @@ function terraceGeometry(d) {
     return Math.round(tilt * u + bend * u * u);
   };
   const { x0, y0, x1, y1 } = terraceBox(d);
-  const memo = /* @__PURE__ */ new Map();
+  let memo = null;
+  const MW = x1 - x0 + 1, MH = y1 - y0 + 1;
   function raw(k, x, y) {
     y -= off(x);
     const L3 = levels2[k];
@@ -11089,15 +11089,18 @@ function terraceGeometry(d) {
   function inS(k, x, y) {
     if (k <= 0) return true;
     if (k > n || x < x0 || x > x1 || y < y0 || y > y1) return false;
-    const key9 = (k * 4096 + (x - x0)) * 4096 + (y - y0);
-    let r = memo.get(key9);
-    if (r !== void 0) return r;
+    const at2 = Number.isInteger(x) && Number.isInteger(y) ? ((k - 1) * MH + (y - y0)) * MW + (x - x0) : -1;
+    if (at2 >= 0) {
+      memo ??= new Int8Array(n * MW * MH);
+      const m = memo[at2];
+      if (m) return m === 1;
+    }
+    let r;
     const L3 = levels2[k];
     r = x >= L3.f0 && x <= L3.f1 ? y <= L3.E && y >= L3.top && (y >= L3.E - 3 || raw(k, x, y)) : raw(k, x, y);
     if (r && k > 1)
       r = inS(k - 1, x, y - 3) && inS(k - 1, x - 3, y) && inS(k - 1, x + 3, y) && inS(k - 1, x, y + CLIFF + 3);
-    if (memo.size > 1 << 16) memo.clear();
-    memo.set(key9, r);
+    if (at2 >= 0) memo[at2] = r ? 1 : 2;
     return r;
   }
   const level = (x, y) => {
@@ -11480,7 +11483,8 @@ function volcanoGeometry(d) {
   const pool = volcano ? { x: cx, y: summit.top + 3 + 4, rx: n >= 4 ? 6 : 5, ry: 4 } : null;
   const cairn = pool ? { x: cx, y: pool.y + pool.ry + 1 } : bare ? null : { x: cx, y: summit.top + 3 };
   const pad = volcano ? 8 : d.gap ? 9 : 2, x0 = cx - A1 - pad, x1 = cx + A1 + pad, y0 = cy - B1 - 2, y1 = levels2[1].E + CLIFF2 + (volcano ? 10 : 5);
-  const memo = /* @__PURE__ */ new Map();
+  let memo = null;
+  const MW = x1 - x0 + 1, MH = y1 - y0 + 1;
   if (d.gap) {
     const top = cy + d.gap[0], bot = cy + d.gap[1], N2 = 8;
     let R3 = Infinity;
@@ -11510,17 +11514,20 @@ function volcanoGeometry(d) {
   function inS(k, x, y) {
     if (k <= 0) return true;
     if (k > n || x < x0 || x > x1 || y < y0 || y > y1 || blocked2(x, y)) return false;
-    const key9 = (k * 4096 + (x - x0)) * 4096 + (y - y0);
-    let r = memo.get(key9);
-    if (r !== void 0) return r;
+    const at2 = Number.isInteger(x) && Number.isInteger(y) ? ((k - 1) * MH + (y - y0)) * MW + (x - x0) : -1;
+    if (at2 >= 0) {
+      memo ??= new Int8Array(n * MW * MH);
+      const m = memo[at2];
+      if (m) return m === 1;
+    }
+    let r;
     const L3 = levels2[k];
     r = x >= L3.f0 && x <= L3.f1 ? y <= L3.E && y >= L3.top && (y >= L3.E - 3 || raw(k, x, y)) : raw(k, x, y);
     if (r && k > 1) {
       const G2 = round2 ? 4 : 3;
       r = inS(k - 1, x, y - G2) && inS(k - 1, x - G2, y) && inS(k - 1, x + G2, y) && inS(k - 1, x - G2 + 1, y - G2 + 1) && inS(k - 1, x + G2 - 1, y - G2 + 1) && inS(k - 1, x, y + CLIFF2 + 3);
     }
-    if (memo.size > 1 << 16) memo.clear();
-    memo.set(key9, r);
+    if (at2 >= 0) memo[at2] = r ? 1 : 2;
     return r;
   }
   const level = (x, y) => {
@@ -11907,6 +11914,7 @@ function createVolcanoes({
     let v = openMemo.get(k);
     if (v === void 0) {
       v = siteOpen(x, y, own3);
+      if (openMemo.size >= 1 << 14) openMemo.clear();
       openMemo.set(k, v);
     }
     return v;
@@ -12386,7 +12394,7 @@ function createForestStandsV2({
     let b = bases.get(key9);
     if (!b) {
       b = terrain2.base(x, y);
-      bounded(bases, 1 << 17).set(key9, b);
+      bounded(bases, 1 << 15).set(key9, b);
     }
     return b;
   };
@@ -12499,7 +12507,7 @@ function createForestStandsV2({
       high: high(x, y),
       guard: guardAt(x, y)
     } : { walkable: false, biome: b.biome };
-    bounded(envs, 1 << 16).set(key9, e);
+    bounded(envs, 1 << 14).set(key9, e);
     return e;
   }
   const stands = /* @__PURE__ */ new Map();
@@ -12509,7 +12517,7 @@ function createForestStandsV2({
     if (s !== void 0) return s;
     const e = envAt(x, y);
     s = e.walkable ? S2.stand(x, y, e.biome, e.wet, e.high, e.guard) : 0;
-    bounded(stands, 1 << 16).set(key9, s);
+    bounded(stands, 1 << 14).set(key9, s);
     return s;
   };
   const candidates = /* @__PURE__ */ new Map();

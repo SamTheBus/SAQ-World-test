@@ -1157,7 +1157,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-DRU5CHLP.js";
+} from "./chunk-ZHLD3DFW.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -174859,8 +174859,10 @@ function rustNibblerFacingD11_2({
   return facing2;
 }
 var staticLayout = null;
+var staticFrames = null;
 var staticSpots = /* @__PURE__ */ new Map();
 function staticProjectionV1(address3, frames) {
+  if (frames === staticFrames) return staticSpotV1(address3, frames);
   let layout = "";
   for (const f of frames)
     layout += f.id + ":" + f.chunkX + "," + f.chunkY + ":" + f.offsetX + "," + f.offsetY + (f.originBounds ? ":" + f.originBounds.width + "x" + f.originBounds.height : "") + "|";
@@ -174868,6 +174870,10 @@ function staticProjectionV1(address3, frames) {
     staticLayout = layout;
     staticSpots = /* @__PURE__ */ new Map();
   }
+  staticFrames = Object.isFrozen(frames) ? frames : null;
+  return staticSpotV1(address3, frames);
+}
+function staticSpotV1(address3, frames) {
   const key4 = address3.chunkX + "," + address3.chunkY + "," + address3.localX + "," + address3.localY;
   let spot2 = staticSpots.get(key4);
   if (spot2 === void 0) {
@@ -323393,10 +323399,10 @@ function createEnvironmentCache(canvas, {
     let lands = "";
     for (let row2 = y / t - 7; row2 < (y + SIZE12) / t + 7; row2++) {
       const s = (v.biomes?.[row2 - oy] ?? "").slice(Math.max(0, x / t - 7 - ox), Math.max(0, (x + SIZE12) / t + 7 - ox));
-      lands += s;
+      for (let i = 0; i < s.length; i++) if (!lands.includes(s[i])) lands += s[i];
       text3 += s + "|";
     }
-    if (kitKey) text3 += "k" + kitKey(new Set(lands)) + "|";
+    if (kitKey) text3 += "k" + kitKey(lands) + "|";
     if (v.stands)
       for (let row2 = y / t - 3; row2 < (y + SIZE12) / t + 3; row2++)
         text3 += (v.stands[row2 - oy] ?? "").slice(Math.max(0, x / t - 3 - ox), Math.max(0, (x + SIZE12) / t + 3 - ox)) + "|";
