@@ -318437,7 +318437,8 @@ var PREMIUM_SITE_KINDS = Object.freeze([
 ]);
 function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
   const pages2 = /* @__PURE__ */ new Map();
-  let identity2 = null, builds = 0, caveSurface = null, ruinSurface = null, premiumSurface = null;
+  let identity2 = null, builds = 0, caveSurface = null, ruinSurface = null, premiumSurface = null, spareSurface = null, spareAt = 0, reuses = 0;
+  const SPARE_MS = 6e4, clock9 = () => globalThis.performance?.now?.() ?? Date.now();
   const zero7 = (c) => {
     if (c) {
       c.width = 0;
@@ -318450,7 +318451,11 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
     dropPages();
     zero7(caveSurface);
     zero7(ruinSurface);
-    zero7(premiumSurface);
+    if (premiumSurface && premiumSurface !== spareSurface) {
+      zero7(spareSurface);
+      spareSurface = premiumSurface;
+      spareAt = clock9();
+    }
     caveSurface = null;
     ruinSurface = null;
     premiumSurface = null;
@@ -318780,6 +318785,12 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
     }
     ctx.restore();
   }
+  onIdleSweepV1((now3) => {
+    if (spareSurface && now3 - spareAt >= SPARE_MS) {
+      zero7(spareSurface);
+      spareSurface = null;
+    }
+  });
   return Object.freeze({
     draw(ctx, space, view3) {
       const site = space.site ?? space.functionalSite, v = space.visual, t = space.collision.tileSize, size = 8, extent2 = size * t, mode = ["woodland-ruin", "procedural-ruin", "procedural-crypt"].includes(site.siteKind) ? "ruin" : ["woodland-fort", "procedural-fort"].includes(site.siteKind) ? "fort" : site.siteKind === "woodland-cave" ? "cave" : "standard";
@@ -318792,9 +318803,18 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
       ctx.fillRect(view3.x, view3.y, view3.width, view3.height);
       if (PREMIUM_SITE_KINDS.includes(site.siteKind)) {
         if (!premiumSurface) {
-          premiumSurface = canvas.ownerDocument.createElement("canvas");
-          premiumSurface.width = space.collision.width * t;
-          premiumSurface.height = space.collision.height * t;
+          const w = space.collision.width * t, h = space.collision.height * t, spareCtx = spareSurface && spareSurface.width === w && spareSurface.height === h ? spareSurface.getContext("2d") : null;
+          if (spareCtx && typeof spareCtx.reset === "function") {
+            spareCtx.reset();
+            premiumSurface = spareSurface;
+            reuses++;
+          } else {
+            zero7(spareSurface);
+            premiumSurface = canvas.ownerDocument.createElement("canvas");
+            premiumSurface.width = w;
+            premiumSurface.height = h;
+          }
+          spareSurface = null;
           drawSitePremiumSurfaceV1(premiumSurface.getContext("2d"), space);
           builds++;
         }
@@ -319006,10 +319026,19 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
       dropAll();
       identity2 = null;
     },
+    // Everything, the kept floor picture too (the page is going away, or memory is wanted back now).
+    release() {
+      dropAll();
+      identity2 = null;
+      zero7(spareSurface);
+      spareSurface = null;
+    },
     resources: () => ({
       siteRasterPages: pages2.size + (caveSurface ? 1 : 0) + (ruinSurface ? 1 : 0) + (premiumSurface ? 1 : 0),
       siteRasterBytes: pages2.size * 256 * 256 * 4 + (caveSurface ? caveSurface.width * caveSurface.height * 4 : 0) + (ruinSurface ? ruinSurface.width * ruinSurface.height * 4 : 0) + (premiumSurface ? premiumSurface.width * premiumSurface.height * 4 : 0),
-      siteRasterBuilds: builds
+      siteRasterBuilds: builds,
+      siteSurfaceReuses: reuses,
+      siteSpareBytes: spareSurface ? spareSurface.width * spareSurface.height * 4 : 0
     })
   });
 }
@@ -319401,6 +319430,7 @@ var numberFont = (px7) => `800 ${px7}px "Baloo 2", system-ui, sans-serif`;
 function numberStampV1(ctx, n, px7, scale, fill8) {
   const key4 = n.text + "|" + px7 + "|" + fill8;
   if (n.stampKey === key4) return n.stamp;
+  freeNumberStampV1(n);
   let s = null;
   try {
     const doc = ctx.canvas?.ownerDocument;
@@ -319433,6 +319463,15 @@ function numberStampV1(ctx, n, px7, scale, fill8) {
   n.stamp = s;
   return s;
 }
+function freeNumberStampV1(n) {
+  const cv = n.stamp?.cv;
+  n.stamp = null;
+  n.stampKey = void 0;
+  if (cv) {
+    cv.width = 0;
+    cv.height = 0;
+  }
+}
 var fontRequested = false;
 function loadNumberFont() {
   if (fontRequested || typeof FontFace !== "function" || typeof document === "undefined" || !document.fonts) return;
@@ -319464,8 +319503,8 @@ var boundedSet = (map, key4, value2) => {
 };
 function createCombatFeedback() {
   loadNumberFont();
-  let domain = null, context = null, cursor = 0, numbers = [], impacts2 = [], peak = 0, lastModel2 = null, lastLayout = [], lastReserved = [];
-  const reactions = /* @__PURE__ */ new Map(), primaries = /* @__PURE__ */ new Map(), ticks = /* @__PURE__ */ new Map();
+  let domain = null, context = null, cursor = 0, numbers = [], impacts2 = [], peak = 0, stampsFreed = 0, lastModel2 = null, lastLayout = [], lastReserved = [];
+  const reactions = /* @__PURE__ */ new Map(), primaries = /* @__PURE__ */ new Map(), ticks = /* @__PURE__ */ new Map(), stamped = /* @__PURE__ */ new Set();
   const guessed = /* @__PURE__ */ new Map();
   let guessedKey = -Infinity, shaking = null;
   const calm = (() => {
@@ -319504,6 +319543,12 @@ function createCombatFeedback() {
     numbers = numbers.filter(
       (n) => n.shown === void 0 ? time3 - n.born <= HIT_FEEDBACK.placementMs : time3 - n.shown < combatTextStyle(n).life
     );
+    for (const n of stamped)
+      if (!numbers.includes(n)) {
+        freeNumberStampV1(n);
+        stamped.delete(n);
+        stampsFreed++;
+      }
     impacts2 = impacts2.filter((n) => time3 - n.born < 520);
     for (const [id2, r] of reactions) if (time3 - r.born >= hitLifeV1(r)) reactions.delete(id2);
     for (const h of model.predictedHits ?? []) {
@@ -319878,6 +319923,7 @@ function createCombatFeedback() {
       const pop2 = n.critical ? 1 + 0.9 * (1 - backOut(Math.min(1, age / 150))) : 1 + 0.35 * (1 - easeOut7(Math.min(1, age / 90))), bump2 = n.bump != null ? 1 + 0.25 * (1 - Math.min(1, Math.max(0, time3 - n.bump) / 120)) : 1, zoom = pop2 * bump2, font2 = style.size * zoom;
       ctx.globalAlpha = t < 0.72 ? 1 : 1 - (t - 0.72) / 0.28;
       const fill8 = n.rainbow ? null : n.labelKind === "absorption" ? "#d49afa" : n.defended ? "#67e8f9" : n.player ? "#ff6a66" : n.critical ? "#ffe6a0" : MECHANIC_COLORS[n.mechanic] ?? (n.heavy ? "#ffe16b" : "#fff7db"), stamp8 = fill8 ? numberStampV1(ctx, n, style.size * scale, scale, fill8) : null;
+      if (stamp8) stamped.add(n);
       ctx.save();
       ctx.translate(x, y);
       ctx.scale(zoom, zoom);
@@ -319927,7 +319973,13 @@ function createCombatFeedback() {
     ground,
     lights,
     draw,
-    resources: () => ({ floatingNumbers: numbers.length, hitReactions: reactions.size, peakFloatingNumbers: peak }),
+    resources: () => ({
+      numberStamps: stamped.size,
+      numberStampsFreed: stampsFreed,
+      floatingNumbers: numbers.length,
+      hitReactions: reactions.size,
+      peakFloatingNumbers: peak
+    }),
     // Explicit inspection is for evidence; normal rendering never serializes it.
     inspect: () => ({
       cursor,
@@ -336289,7 +336341,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     minorBossBar.reset();
     bossEffects.clear();
     prompt.clear();
-    if (reason === "space-change" || reason === "prepared-space-change")
+    if (reason === "space-change" || reason === "prepared-space-change" || reason === "residency-change")
       environmentCache.park(reason);
     else environmentCache.clear(reason);
     siteEnvironment.clear();
