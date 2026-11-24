@@ -45209,26 +45209,19 @@ function captureWorldPositionsD9(state) {
   if (frameInputs) positionCaptures.set(state, { frameInputs, actors: next });
   else positionCaptures.delete(state);
 }
-function rebaseWorldRuntimeD9(state, newFrames) {
-  const world = state.d9World, runtime = world.runtime, old = runtime.frames;
-  const project = (p) => {
-    const q = projectToLocalFrameD9(localFramePositionD9(p, old), newFrames);
-    requireContract(q, "Live geometry outside new admitted frame");
-    return { x: q.x, y: q.y };
-  };
-  const changes = [];
+function liveGeometryEntriesD9(state) {
+  const world = state.d9World, runtime = world.runtime, out2 = [];
   for (const a of Object.values(state.entitiesById))
-    if (a.residency.spaceInstanceId === state.overworldInstanceId) changes.push([a, "position", project(a.position)]);
+    if (a.residency.spaceInstanceId === state.overworldInstanceId) out2.push([a, "position", a.position]);
   for (const p of Object.values(state.playersById))
     for (const rows3 of [p.inventory.rewardsByEntityId, p.inventory.renewal.groundBySourceId])
       for (const value of Object.values(rows3))
-        if (value.spaceInstanceId === state.overworldInstanceId)
-          changes.push([value, "position", project(value.position)]);
+        if (value.spaceInstanceId === state.overworldInstanceId) out2.push([value, "position", value.position]);
   for (const p of Object.values(state.playersById))
     for (const rows3 of [p.inventory.d7.salvaged, p.inventory.d7.autoSalvaged])
       for (const value of Object.values(rows3))
         if (value.reward?.spaceInstanceId === state.overworldInstanceId)
-          changes.push([value.reward, "position", project(value.reward.position)]);
+          out2.push([value.reward, "position", value.reward.position]);
   const effects = [
     ...Object.values(state.subweaponCombat.projectiles),
     ...Object.values(state.hostileCombat?.projectiles ?? {}),
@@ -45238,20 +45231,29 @@ function rebaseWorldRuntimeD9(state, newFrames) {
     ])
   ];
   for (const value of effects)
-    if (value.spaceInstanceId === state.overworldInstanceId) changes.push([value, "position", project(value.position)]);
+    if (value.spaceInstanceId === state.overworldInstanceId) out2.push([value, "position", value.position]);
   for (const group of Object.values(state.groupsById))
     if (group.spaceInstanceId === state.overworldInstanceId && group.containment) {
-      changes.push([group.containment, "homeAnchor", project(group.containment.homeAnchor)]);
+      out2.push([group.containment, "homeAnchor", group.containment.homeAnchor]);
       for (const id2 of Object.keys(group.containment.memberHomesById))
-        changes.push([group.containment.memberHomesById, id2, project(group.containment.memberHomesById[id2])]);
+        out2.push([group.containment.memberHomesById, id2, group.containment.memberHomesById[id2]]);
     }
   for (const group of runtime.groups) {
-    changes.push([group, "anchor", project(group.anchor)]);
-    for (const member of group.members) changes.push([member, "position", project(member.position)]);
+    out2.push([group, "anchor", group.anchor]);
+    for (const member of group.members) out2.push([member, "position", member.position]);
   }
   for (const resource of runtime.resources)
-    if (resource.spaceInstanceId === state.overworldInstanceId)
-      changes.push([resource, "position", project(resource.position)]);
+    if (resource.spaceInstanceId === state.overworldInstanceId) out2.push([resource, "position", resource.position]);
+  return out2;
+}
+function rebaseWorldRuntimeD9(state, newFrames) {
+  const old = state.d9World.runtime.frames;
+  const project = (p) => {
+    const q = projectToLocalFrameD9(localFramePositionD9(p, old), newFrames);
+    requireContract(q, "Live geometry outside new admitted frame");
+    return { x: q.x, y: q.y };
+  };
+  const world = state.d9World, runtime = world.runtime, changes = liveGeometryEntriesD9(state).map(([object, key9, p]) => [object, key9, project(p)]);
   const proposedActors = { ...state.entitiesById };
   for (const [object, key9, value] of changes)
     if (key9 === "position" && object.entityId && state.entitiesById[object.entityId] === object)

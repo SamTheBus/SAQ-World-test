@@ -740,6 +740,7 @@ import {
   lesserCooldownV1,
   lineToPoint,
   listedEquipmentSlots,
+  liveGeometryAddressesD9,
   livingFusedMimics,
   localFramePositionD9,
   lowerShield,
@@ -1156,7 +1157,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-5EU6FY34.js";
+} from "./chunk-E6XAGMM2.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -172867,7 +172868,15 @@ function projectWorldTerrainD9(state2, compiled, { x, y, width: width2 = 88, hei
     );
     if (visual.stands) hasStands = true;
   }
-  const point15 = localFramePositionD9({ x: x * D9_PROFILE.tileSize, y: y * D9_PROFILE.tileSize }, state2.d9World.runtime.frames);
+  const half2 = { x: Math.floor(width2 / 2) * D9_PROFILE.tileSize, y: Math.floor(height / 2) * D9_PROFILE.tileSize }, middle = localFramePositionD9(
+    { x: x * D9_PROFILE.tileSize + half2.x, y: y * D9_PROFILE.tileSize + half2.y },
+    state2.d9World.runtime.frames
+  ), point15 = normalizeWorldPosition({
+    chunkX: middle.chunkX,
+    chunkY: middle.chunkY,
+    localX: middle.localX - half2.x,
+    localY: middle.localY - half2.y
+  });
   return {
     originTile: { x, y },
     terrain: grid.map((r) => r.join("")),
@@ -340567,6 +340576,26 @@ function overlayWoodlandRuinExteriorD11_3_2(chunk6, bootstrap) {
 
 // src/host/world_residency_d9.js
 var FRAME_KEEP_CHUNKS = 40n;
+var FRAME_HOLD_CHUNKS = 62n;
+function strandedFrameAnchorD9(s, planned) {
+  if (planned.length !== 2 || planned[0].id !== 0 || planned[1].playerIds.includes("destination-preparation"))
+    return null;
+  const heroX = BigInt(planned[1].chunkX), heroY = BigInt(planned[1].chunkY);
+  let minX = heroX, maxX = heroX, minY = heroY, maxY = heroY;
+  for (const a of liveGeometryAddressesD9(s)) {
+    if (projectToLocalFrameD9(a, [planned[0]])) continue;
+    const x = BigInt(a.chunkX), y = BigInt(a.chunkY);
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+  }
+  if (maxX - minX > 2n * FRAME_HOLD_CHUNKS || maxY - minY > 2n * FRAME_HOLD_CHUNKS) return null;
+  const clamp115 = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v, frames = copyWire(planned);
+  frames[1].chunkX = String(clamp115(heroX, maxX - FRAME_HOLD_CHUNKS, minX + FRAME_HOLD_CHUNKS));
+  frames[1].chunkY = String(clamp115(heroY, maxY - FRAME_HOLD_CHUNKS, minY + FRAME_HOLD_CHUNKS));
+  return frames;
+}
 function actorFootprintPinsD9(s) {
   const w = s.d9World, homes3 = new Map(w.runtime.groups.map((g2) => [g2.groupId, proceduralGroupDetachmentHomeD9(s, g2.groupId)])), pinned = new Set(
     w.runtime.groups.filter((g2) => !homes3.get(g2.groupId)).flatMap((g2) => {
@@ -340966,6 +340995,20 @@ function createWorldResidencyD9({
               changed = true;
             } catch (e) {
               if (e.message !== "Live geometry outside new admitted frame") throw e;
+              const slid = strandedFrameAnchorD9(s, planned), old2 = slid && w.runtime.frames.find((f) => f.id !== 0 && f.playerIds.join() === slid[1].playerIds.join());
+              const gap2 = (a2, b) => Math.max(
+                Math.abs(Number(BigInt(a2.chunkX) - BigInt(b.chunkX))),
+                Math.abs(Number(BigInt(a2.chunkY) - BigInt(b.chunkY)))
+              );
+              const heroGap = old2 ? gap2(planned[1], old2) : Infinity;
+              if (slid && (!old2 || gap2(slid[1], old2) > 0 && (heroGap > 52 || gap2(slid[1], old2) >= 8)))
+                try {
+                  rebaseWorldRuntimeD9(s, slid);
+                  changed = true;
+                } catch (e2) {
+                  if (e2.message !== "Live geometry outside new admitted frame" && e2.code !== "WORLD_ACTOR_GEOMETRY_INVALID")
+                    throw e2;
+                }
             }
           }
         });
