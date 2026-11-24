@@ -6246,7 +6246,7 @@ var UNIQUE_ITEMS = freezeWire(
         "barrow_king",
         "grassland",
         "Skyfall Leap lands in a Grave Cleave: the ground splits all around you and earth slabs heave up, hitting every enemy near you for {0} of your Attack.",
-        "Kneel. The barrow is patient."
+        "Kneel before Zod."
       ),
       unique(
         "wightfang",
@@ -6307,7 +6307,7 @@ var UNIQUE_ITEMS = freezeWire(
         "sun_pharaoh",
         "desert",
         "Dash and Lunge leave a trail of scorpion venom behind you for {0}. Enemies who cross it are poisoned.",
-        "Every step, a sunrise."
+        "Walk like an Egyptian."
       ),
       unique(
         "undying-sun-staff",
@@ -6319,7 +6319,7 @@ var UNIQUE_ITEMS = freezeWire(
         "sun_pharaoh",
         "desert",
         "Meteor becomes Sunfall: three suns strike around the spot instead, hitting each enemy under them for {0} of Meteor's damage and setting them burning.",
-        "Noon, three times over."
+        "It\u2019s high noon."
       ),
       unique(
         "eye-of-the-sun",
@@ -6344,7 +6344,7 @@ var UNIQUE_ITEMS = freezeWire(
         "arachnid_treant",
         "tropical",
         "Each hit you block with Guard grows a bark plate on your shield, up to 3. When you lower Guard, the plates burst off at the enemies near you, each for {0} of your Attack.",
-        "It grew around every arrow, and kept them."
+        "I am Groot."
       ),
       unique(
         "rootfang",
@@ -6380,7 +6380,7 @@ var UNIQUE_ITEMS = freezeWire(
         "arachnid_treant",
         "tropical",
         "Every 6 s, your next hit wraps the enemy in silk and holds it in place. A moment later the cocoon bursts into spiderlings that bite every enemy near it for {0} of your Attack.",
-        "Something in there is always hatching."
+        "Hatch me if you can."
       ),
       // Brimstone Colossus: its own attacks, molten (Sammy 2026-11-12; the Treads wait for their art pass).
       unique(
@@ -6429,7 +6429,7 @@ var UNIQUE_ITEMS = freezeWire(
         "overlord_iron_vault",
         "volcanic",
         "When a movement skill lands (Dash, Blink, Lunge, Shadowstep, Shield Charge or Skyfall Leap), the ground quakes: a ring of lava cracks bursts around you for {0} of your Attack, sets enemies burning and knocks them back. Once every 4 s.",
-        "Every step a small eruption."
+        "This is fine."
       ),
       // Shield Warden (Upland): its lodestone, its thrown spirit shield, its circling shields and its plate (Sammy 2026-11-13,
       // the set page and all four passes approved).
@@ -6443,7 +6443,7 @@ var UNIQUE_ITEMS = freezeWire(
         "aegis_goliath",
         "upland",
         "Shield Bash pulls first: a lodestone ring drags every enemy near you in to your shield (not bosses) and slams them for {0} of your Attack. Then the bash lands on all of them.",
-        "Whatever it faces comes closer."
+        "Resistance is futile."
       ),
       unique(
         "oathcutter",
@@ -6479,7 +6479,7 @@ var UNIQUE_ITEMS = freezeWire(
         "aegis_goliath",
         "upland",
         "When a hit drops you below 40% Health, a ring of spirit shields slams down around you: it knocks the enemies near you back, and you take {0} less damage for 4 s. Once every 30 s.",
-        "It held the fort gate for a hundred years."
+        "You shall not pass."
       ),
       // Cinderhart (Woodland): his Fire Charge furrow, his ember bunnies, his scorched starburst and his antlers (Sammy
       // 2026-11-15/16, the set page and all four passes approved; the Emberhare poisons, as the Khopesh and Ventcutter do).
@@ -6493,7 +6493,7 @@ var UNIQUE_ITEMS = freezeWire(
         "cinderhart",
         "woodland",
         "Shield Charge tears a burning furrow behind you. A moment later the whole furrow flares up, hitting every enemy in it for {0} of your Attack. Then it keeps burning for 3 s, setting enemies who stand in it burning. Shield Charge's own hits become Fire.",
-        "The forest still remembers the road it burned."
+        "Only you can ~~prevent~~ forest fires."
       ),
       unique(
         "emberhare",
@@ -6505,7 +6505,7 @@ var UNIQUE_ITEMS = freezeWire(
         "cinderhart",
         "woodland",
         "Smoke Veil wakes three ember bunnies out of the smoke. Each hops at the nearest enemies four times. Every landing hits the enemies under it for {0} of your Attack and leaves a patch of smoldering cinders that sets enemies burning (Fire) for 3 s. Then it bursts into embers.",
-        "Every warren has a fire at the bottom."
+        "Follow the burning rabbit."
       ),
       unique(
         "kindleheart-tome",
@@ -6555,7 +6555,7 @@ var UNIQUE_ITEMS = freezeWire(
         "marcus",
         "grassland",
         "Dash leaves mirror copies along your path, up to three. A moment after you pass, each one shatters, hitting the enemies near it for {0} of your Attack. Once every 3 s.",
-        "It was never where you struck."
+        "Nothing personnel, kid."
       ),
       unique(
         "splinterglass-wand",
@@ -6593,7 +6593,7 @@ var UNIQUE_ITEMS = freezeWire(
         "chronos_arbitrator",
         "upland",
         "Earth-Breaker also drops a glass hourglass onto the toughest enemy it hit. A ring of sand shows where it will land, and a moment later it smashes down, hitting every enemy in the ring for {0} of your Attack.",
-        "Every grain lands somewhere."
+        "Like sands through the hourglass."
       ),
       unique(
         "second-hand",
@@ -6605,7 +6605,7 @@ var UNIQUE_ITEMS = freezeWire(
         "chronos_arbitrator",
         "upland",
         "Whirling Blades leaves a sand echo of you where you spun. A moment later the echo spins too, cutting everything in the same ring three times for {0} of your Attack each.",
-        "Strike once. It ticks twice."
+        "Time is a flat circle."
       ),
       unique(
         "stillhour-tome",
@@ -6629,7 +6629,7 @@ var UNIQUE_ITEMS = freezeWire(
         "chronos_arbitrator",
         "upland",
         "Using a skill flips the band\u2019s little hourglass. A moment later the sand runs back and that skill\u2019s cooldown resets, so you can use it again. Once every {0}.",
-        "Again. And again."
+        "Dormammu, I\u2019ve come to bargain."
       ),
       // Gilded Vault Keeper (Sammy 2026-11-20, the set page and all four passes approved): its lid chomp on your Counter
       // Stance, its spinning coins off Thousand Cuts, its bomb coins out of the Flame Wall, and its Taxation drain on your hits.
@@ -6643,7 +6643,7 @@ var UNIQUE_ITEMS = freezeWire(
         "gilded_vault_keeper",
         "upland",
         "When Counter Stance catches a hit, a gilded chest lid snaps shut in front of you instead of the strike back, biting every enemy in front of you for {0} of your Attack and stunning them.",
-        "Everything inside is spoken for."
+        "Open sesame. Wrong answer."
       ),
       unique(
         "spendthrift",
@@ -6655,7 +6655,7 @@ var UNIQUE_ITEMS = freezeWire(
         "gilded_vault_keeper",
         "upland",
         "The last cut of Thousand Cuts flicks a spinning crown coin off the enemy. It rolls for 3 s, bouncing from enemy to enemy and off walls, and hits each enemy it touches for {0} of your Attack (once a second each).",
-        "Easy come, easy go."
+        "Mo\u2019 money, mo\u2019 problems."
       ),
       unique(
         "burning-ledger",
@@ -6667,7 +6667,7 @@ var UNIQUE_ITEMS = freezeWire(
         "gilded_vault_keeper",
         "upland",
         "Flame Wall spits three bomb coins out of its far side. Each burns a 1 s fuse, then bursts, hitting everything close by for {0} of your Attack and setting it burning.",
-        "Every debt is paid in fire."
+        "Pay to win."
       ),
       unique(
         "tithe-grips",
@@ -6679,7 +6679,7 @@ var UNIQUE_ITEMS = freezeWire(
         "gilded_vault_keeper",
         "upland",
         "Every 8 s your next hit taxes the enemy: a ruby tether drains it for {0} of your Attack every second for 4 s and heals you for the damage it does. It snaps if you get too far away.",
-        "A cut of everything."
+        "Death and taxes. Mostly taxes."
       ),
       // Shifting Prism (nexus_overseer; Sammy 2026-11-20, the set page and all four passes approved): its sealed crystal shell
       // on your Aegis Pulse, its Crystal Cage around your Noxious Bloom, its morphing crystal splitting your Thunderfall, and its
@@ -6718,7 +6718,7 @@ var UNIQUE_ITEMS = freezeWire(
         "nexus_overseer",
         "tropical",
         "A little crystal floats over the open book. Thunderfall\u2019s bolt drops into it and splits into beams, and a moment later a shard jumps from every enemy it struck to the nearest other one for {0} of your Attack.",
-        "One light, many paths."
+        "Taste the rainbow."
       ),
       unique(
         "mirrorstep",
@@ -6730,7 +6730,7 @@ var UNIQUE_ITEMS = freezeWire(
         "nexus_overseer",
         "tropical",
         "When an enemy hits you, a mirror lattice flips under your feet and throws the strike back as a crystal shard, hitting that enemy for {0} of your Attack. Once every 4 s.",
-        "What you send comes back."
+        "No u."
       ),
       // Corrosive Abomination (Sammy 2026-11-21/22, the set page and all four passes approved): its acid slam on your third
       // combo hit, its Bile Spit on your Shadowstep, its spore pods (frosted) on your Glacial Burst, and its boglings shed when
@@ -6795,7 +6795,7 @@ var UNIQUE_ITEMS = freezeWire(
         "void_overseer",
         "frostland",
         "War Banner becomes a little moon. For 2 s it pulls nearby enemies in toward the banner (bosses hold their ground), then bursts, hitting every enemy close by for {0} of your Attack. The banner\u2019s own buff stays.",
-        "Everything falls toward it."
+        "That\u2019s no moon."
       ),
       unique(
         "rimethrust",
@@ -6831,7 +6831,7 @@ var UNIQUE_ITEMS = freezeWire(
         "void_overseer",
         "frostland",
         "When an enemy hits you, the ground under you freezes over for 4 s. Enemies on the frozen sheet are chilled and slowed {0}. Once every 8 s.",
-        "The moon\u2019s cold, worn close."
+        "Let it go."
       ),
       // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
       // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
@@ -6881,7 +6881,7 @@ var UNIQUE_ITEMS = freezeWire(
         "nightmare_sporecrown",
         null,
         "Using a skill makes your crown mark the nearest enemy for 4 s, once every 8 s. A marked enemy takes {0} more damage from everyone.",
-        "It sees what you see. Then it sees more."
+        "Big Brother is watching."
       ),
       // Nightmare Frog, the boss at the end of a bad Frog Leg trip (trip passes 5d-3-1..5d-3-4, Sammy 2026-11-12/13).
       // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
@@ -6895,7 +6895,7 @@ var UNIQUE_ITEMS = freezeWire(
         "nightmare_frog",
         null,
         "Rallying Cry lets out a croak: a purple ring runs out from you, hitting every enemy it reaches for {0} of your Attack and shoving them back.",
-        "Every swing, a little louder."
+        "Ribbit and tear."
       ),
       unique(
         "lashtongue-saber",
@@ -6907,7 +6907,7 @@ var UNIQUE_ITEMS = freezeWire(
         "nightmare_frog",
         null,
         "Riposte also lashes an eye-tipped tongue at the farthest enemy within 5 tiles. It is yanked over to you and takes {0} of your Attack.",
-        "Come here. Closer."
+        "Get over here!"
       ),
       unique(
         "frogspawn-wand",
@@ -7005,7 +7005,7 @@ var UNIQUE_ITEMS = freezeWire(
         "gorehide",
         "grassland",
         "Your Dash, Blink or Shield Charge gores every enemy you pass through for {0} of your Attack.",
-        "The boar never learned to stop."
+        "Leeroy Jenkins!"
       ),
       trophy(
         "sunsting-grips",
@@ -7091,7 +7091,7 @@ var UNIQUE_ITEMS = freezeWire(
         "rustmaw",
         "woodland",
         "Walk for 2 s without stopping and you curl up into the shell and roll, 30% faster than walking. Each enemy you bump takes {0} of your Attack, once a roll; small ones are knocked aside and dizzy. Bumping an elite or boss, attacking or stopping pops you back out.",
-        "It never stops rolling. Neither should you."
+        "Rustbots, roll out."
       ),
       unique(
         "fairy-ring",
@@ -7103,7 +7103,7 @@ var UNIQUE_ITEMS = freezeWire(
         "sporecrown",
         "woodland",
         "Drinking a potion pops a ring of toadstools around you for 4 s. Enemies inside are slowed 40% and take {0} of your Attack as Poison every half second.",
-        "Step inside. Stay a while."
+        "Stay a while and listen."
       ),
       unique(
         "stonewing-cloak",
@@ -7141,7 +7141,7 @@ var UNIQUE_ITEMS = freezeWire(
         "thresher",
         "grassland",
         "The third hit of your combo also reaps: two scythe sweeps in front of you, left then right, each hitting every enemy in its wide arc for {0} of your Attack and knocking them back a little. Once every 3 s.",
-        "Two scythes. One harvest."
+        "Don\u2019t fear the reaper."
       ),
       unique(
         "waxcrown-circlet",
@@ -7153,7 +7153,7 @@ var UNIQUE_ITEMS = freezeWire(
         "waxcrown",
         "grassland",
         "Every 1.5 s while an enemy is within 5 tiles, a bee flies out of your crown and stings the nearest one for {0} of your Attack. The honey slows it 30% for 2 s.",
-        "The hive goes where the queen goes."
+        "Not the bees!"
       )
     ].map((u) => [u.id, u])
   )

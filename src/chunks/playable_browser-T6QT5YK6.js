@@ -1157,7 +1157,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-DUFQWFOQ.js";
+} from "./chunk-DRU5CHLP.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -251151,7 +251151,9 @@ function createInventoryPresentation({
           els ? elementBanner(els, "With your tome", null) : element("p", "Hold a tome to give it that tome\u2019s element.", "gx-elementline")
         );
       }
-      box6.append(element("p", "\u201C" + unique.flavor + "\u201D", "gx-flavor"));
+      const flavor = element("p", "", "gx-flavor");
+      ("\u201C" + unique.flavor + "\u201D").split("~~").forEach((part3, i) => flavor.append(i % 2 ? element("s", part3) : part3));
+      box6.append(flavor);
       scroll.append(box6);
     }
     {
