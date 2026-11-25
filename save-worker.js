@@ -7811,7 +7811,7 @@ async function buildDefinedFunctionalSiteD10(state, site, binding, definition, {
     completion: true
   };
   functionalSite.instanceHash = bytesToHex(
-    await hashBytes(utf8(canonicalStringify({ functionalSite, group, economy, episode, actors, resource })), sha256)
+    await hashUtf8(canonicalStringify({ functionalSite, group, economy, episode, actors, resource }), sha256)
   );
   return freezeWire({
     functionalSite,
@@ -7945,7 +7945,7 @@ async function buildDefinedWorldCompoundD10(state, parcel2, binding, definition,
     initial: { group, economy, episode, actors, resource, definition: definitionRow },
     conqueredTick: null
   };
-  functionalSite.instanceHash = bytesToHex(await hashBytes(utf8(canonicalStringify(functionalSite)), sha256));
+  functionalSite.instanceHash = bytesToHex(await hashUtf8(canonicalStringify(functionalSite), sha256));
   return freezeWire({
     functionalSite,
     space: { spaceId: logicalSpaceId, spaceInstanceId, spaceRevision: 1, collision: copyWire(interior.collision) }
@@ -9611,18 +9611,24 @@ function validateHydrologyPlanV1(plan) {
 }
 function createHydrologyGeometryV1(plan, parent) {
   validateHydrologyPlanV1(plan);
-  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), cache6 = /* @__PURE__ */ new Map();
+  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), encodedByNumber = /* @__PURE__ */ new Map(), cache6 = /* @__PURE__ */ new Map();
+  for (const p of plan.pages) {
+    const [cx, cy] = p.key.split(",").map(Number);
+    if (cx >= 0 && cy >= 0 && cx < 65536 && cy < 65536 && cx + "," + cy === p.key)
+      encodedByNumber.set(cx * 65536 + cy, p.runs);
+  }
+  const allNumbered = encodedByNumber.size === encoded.size;
   let decodes = 0, lastCx = NaN, lastCy = NaN, lastPage = null;
   function page(cx, cy) {
     if (cx === lastCx && cy === lastCy) return lastPage;
-    const key9 = cx + "," + cy, runs = encoded.get(key9);
+    const key9 = cx >= 0 && cy >= 0 && cx < 65536 && cy < 65536 ? cx * 65536 + cy : cx + "," + cy, runs = typeof key9 === "number" ? encodedByNumber.get(key9) ?? (allNumbered ? void 0 : encoded.get(cx + "," + cy)) : encoded.get(key9);
     let data = null;
     if (runs) {
       data = cache6.get(key9);
       if (!data) {
         data = new Uint8Array(832);
         for (const [start, length, kind3] of runs) data.fill(kind3, start, start + length);
-        if (cache6.size >= 256) cache6.delete(cache6.keys().next().value);
+        if (cache6.size >= 1024) cache6.delete(cache6.keys().next().value);
         cache6.set(key9, data);
         decodes++;
       }
@@ -17903,12 +17909,13 @@ function createPlannedTerrain(p) {
     const dx = b.x - a.x, dy = b.y - a.y, u = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / (dx * dx + dy * dy || 1)));
     return PM.hypot(x - a.x - u * dx, y - a.y - u * dy);
   };
+  let biomeNames = null, biomeFull = null;
   function base(x, y, sparseCoast = false) {
     const mx = Math.floor(x / 64), my = Math.floor(y / 52), c = macro(mx, my);
     if (!c) return { walkable: false, kind: "ocean", biome: "o", landmassId: null, band: 0 };
     const coast = waterGeometry ? sparseCoast ? waterGeometry.sampleCoast(x, y) : waterGeometry.coast(x, y) : shoreline?.tile(x, y);
     if (coast?.water) return { walkable: false, kind: "ocean", biome: "o", landmassId: null, band: 0 };
-    const biome = p.biomeIds[(softBiome ? softBiome(x, y, mx, my, c) : c[2]) - 1].replace("biome:", ""), code = BIOME_CODES[biome], inland = waterGeometry?.inland(x, y);
+    const biomeAt = (softBiome ? softBiome(x, y, mx, my, c) : c[2]) - 1, biome = (biomeNames ??= p.biomeIds.map((id2) => id2.replace("biome:", "")))[biomeAt], code = BIOME_CODES[biome], inland = waterGeometry?.inland(x, y);
     if (inland?.water)
       return { walkable: false, kind: inland.kind, biome: code, landmassId: landmass[c[1]].id, band: c[3] };
     if (!waterGeometry && c[4])
@@ -17923,7 +17930,7 @@ function createPlannedTerrain(p) {
       kind: (shoreline ? coast?.shore : oldCoastal) ? "shore" : "land",
       shoreClassId: coast?.classId ?? null,
       biome: code,
-      biomeId: "biome:" + biome,
+      biomeId: (biomeFull ??= biomeNames.map((name) => "biome:" + name))[biomeAt],
       landmassId: landmass[c[1]].id,
       band: c[3],
       slope: c[8],
@@ -19599,6 +19606,27 @@ var CRYPT_POPULATION_TIERS = freezeWire({
 var cryptPopulationRecipe = (seed, tier2, index) => tier2 === "small" ? cryptFloorRecipe(seed, tier2, index) : cryptFloorRecipeV2(seed, tier2, index);
 var cryptPopulationLinks = (tier2) => tier2 === "small" ? cryptFloorLinks(tier2) : cryptFloorLinksV2(tier2);
 
+// src/shared/generation/exterior_once_v1.js
+var byTerrain = /* @__PURE__ */ new WeakMap();
+var realized = /* @__PURE__ */ new WeakMap();
+function exteriorOnceV1(terrain2, asset, kind2, id2, build) {
+  if (!terrain2 || typeof terrain2 !== "object") return build();
+  let slots2 = byTerrain.get(terrain2);
+  if (!slots2) byTerrain.set(terrain2, slots2 = /* @__PURE__ */ new Map());
+  const key9 = kind2 + "|" + id2, had = slots2.get(key9);
+  if (had && had.asset === asset) return had.exterior;
+  const exterior = build();
+  slots2.set(key9, { asset, exterior });
+  return exterior;
+}
+function keepRealizedExteriorV1(realization, terrain2, asset, id2, exterior) {
+  if (realization && typeof realization === "object") realized.set(realization, { terrain: terrain2, asset, id: id2, exterior });
+}
+function realizedExteriorV1(realization, terrain2, asset, id2) {
+  const had = realization && typeof realization === "object" ? realized.get(realization) : null;
+  return had && had.terrain === terrain2 && had.asset === asset && had.id === id2 ? had.exterior : null;
+}
+
 // src/shared/generation/site_names_v1.js
 var LAND = {
   woodland: ["Mossy", "Bramble", "Fernshade", "Oakroot", "Thornwood", "Gloomwood", "Briar", "Ivy"],
@@ -19786,7 +19814,10 @@ function createNaturalProtection(asset, { ruinFootprints = [] } = {}) {
 }
 
 // src/shared/generation/planned_crypt_v1.js
-function createPlannedCryptExterior(asset, id2, terrain2 = createPlannedTerrain(asset)) {
+function createPlannedCryptExterior(asset, id2, terrain2) {
+  return terrain2 ? exteriorOnceV1(terrain2, asset, "crypt-v1", id2, () => createPlannedCryptExteriorBuilt(asset, id2, terrain2)) : createPlannedCryptExteriorBuilt(asset, id2);
+}
+function createPlannedCryptExteriorBuilt(asset, id2, terrain2 = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id2), d = asset.routes.destinations.find((s) => s.id === id2);
   requireContract(
     r?.familyId === "site-family:crypt" && r.tier === "small" && r.footprint.length === 1 && r.approach.length === 1 && d?.point,
@@ -19946,7 +19977,10 @@ async function derivePlannedCryptReservation(asset, binding, sha256, { reservati
 }
 
 // src/shared/generation/planned_crypt_v2.js
-function createPlannedCryptExteriorV2(asset, id2, terrain2 = createPlannedTerrain(asset)) {
+function createPlannedCryptExteriorV2(asset, id2, terrain2) {
+  return terrain2 ? exteriorOnceV1(terrain2, asset, "crypt-v2", id2, () => createPlannedCryptExteriorV2Built(asset, id2, terrain2)) : createPlannedCryptExteriorV2Built(asset, id2);
+}
+function createPlannedCryptExteriorV2Built(asset, id2, terrain2 = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id2), d = asset.routes.destinations.find((s) => s.id === id2);
   requireContract(
     r?.familyId === "site-family:crypt" && ["standard", "large", "deep"].includes(r.tier) && r.footprint.length === 1 && r.approach.length === 1 && d?.point,
@@ -20381,7 +20415,13 @@ function createRuinGrovePlan(ruin, seed, nativeTile) {
 }
 
 // src/shared/generation/planned_ruin_v1.js
-function createPlannedRuinExterior(asset, reservationId, terrain2 = createPlannedTerrain(asset), realization = null) {
+function createPlannedRuinExterior(asset, reservationId, terrain2, realization = null) {
+  if (!terrain2) return createPlannedRuinExteriorBuilt(asset, reservationId, void 0, realization);
+  if (realization)
+    return realizedExteriorV1(realization, terrain2, asset, reservationId) ?? createPlannedRuinExteriorBuilt(asset, reservationId, terrain2, realization);
+  return exteriorOnceV1(terrain2, asset, "ruin-v1", reservationId, () => createPlannedRuinExteriorBuilt(asset, reservationId, terrain2, null));
+}
+function createPlannedRuinExteriorBuilt(asset, reservationId, terrain2 = createPlannedTerrain(asset), realization = null) {
   const r = asset.sites.find((s) => s.id === reservationId), d = asset.routes.destinations.find((s) => s.id === reservationId), policy = realization?.policy ?? RUIN_TIER_POLICY[r?.tier];
   requireContract(r?.familyId === "site-family:ruin" && policy && d?.point, "Ruin requires an existing reservation");
   const xs = r.footprint.map((c) => c.x), ys = r.footprint.map((c) => c.y), minX = Math.min(...xs), minY = Math.min(...ys), maxX = Math.max(...xs), maxY = Math.max(...ys), [width, height] = realization?.tiles ?? (policy.exteriorTiles[0] <= (maxX - minX + 1) * 32 && policy.exteriorTiles[1] <= (maxY - minY + 1) * 26 ? policy.exteriorTiles : [policy.exteriorTiles[1], policy.exteriorTiles[0]]), left = realization?.left ?? minX * 32 + Math.floor(((maxX - minX + 1) * 32 - width) / 2), top = realization?.top ?? minY * 26;
@@ -20690,7 +20730,10 @@ async function derivePlannedRuinReservation(asset, binding, sha256, { reservatio
 }
 
 // src/shared/generation/planned_ruin_v2.js
-function createPlannedRuinExteriorV2(asset, id2, terrain2 = createPlannedTerrain(asset)) {
+function createPlannedRuinExteriorV2(asset, id2, terrain2) {
+  return terrain2 ? exteriorOnceV1(terrain2, asset, "ruin-v2", id2, () => createPlannedRuinExteriorV2Built(asset, id2, terrain2)) : createPlannedRuinExteriorV2Built(asset, id2);
+}
+function createPlannedRuinExteriorV2Built(asset, id2, terrain2 = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id2), policy = RUIN_TIER_POLICY_V2[r?.tier];
   requireContract(r?.familyId === "site-family:ruin" && policy, "Ruin V2 requires a Ruin reservation");
   if (["small", "standard"].includes(r.tier)) return createPlannedRuinExterior(asset, id2, terrain2);
@@ -20782,6 +20825,9 @@ async function derivePlannedRuinReservationV2(asset, binding, sha256, { reservat
 
 // src/shared/generation/alpha_population_runtime_v1.js
 function createPopulationRuinExterior(asset, id2, terrain2) {
+  return exteriorOnceV1(terrain2, asset, "population-ruin", id2, () => createPopulationRuinExteriorBuilt(asset, id2, terrain2));
+}
+function createPopulationRuinExteriorBuilt(asset, id2, terrain2) {
   const g = createPlannedRuinExteriorV2(asset, id2, terrain2);
   if (terrain2.base(g.entrance.x, g.entrance.y).biome === BIOME_CODES[plannedSiteBiome(asset, id2)]) return g;
   const r = g.reservation, minX = Math.min(...r.footprint.map((c) => c.x)) * 32, minY = Math.min(...r.footprint.map((c) => c.y)) * 26, maxX = (Math.max(...r.footprint.map((c) => c.x)) + 1) * 32, maxY = (Math.max(...r.footprint.map((c) => c.y)) + 1) * 26, locations = [];
@@ -20793,8 +20839,10 @@ function createPopulationRuinExterior(asset, id2, terrain2) {
   for (const q of locations.slice(0, 64))
     try {
       const n = createPlannedRuinExterior(asset, id2, terrain2, q);
-      if (terrain2.base(n.entrance.x, n.entrance.y).biome === BIOME_CODES[plannedSiteBiome(asset, id2)])
+      if (terrain2.base(n.entrance.x, n.entrance.y).biome === BIOME_CODES[plannedSiteBiome(asset, id2)]) {
+        keepRealizedExteriorV1(q, terrain2, asset, id2, n);
         return Object.freeze({ ...n, populationRealization: q });
+      }
     } catch {
     }
   throw new TypeError("No compatible Ruin anchor within its existing footprint/approach");
@@ -20805,6 +20853,9 @@ async function derivePopulationRuinReservation(asset, binding, sha256, options) 
   return completePopulationReservation(r, asset, binding, sha256);
 }
 function createPopulationCryptExterior(asset, id2, terrain2) {
+  return exteriorOnceV1(terrain2, asset, "population-crypt", id2, () => createPopulationCryptExteriorBuilt(asset, id2, terrain2));
+}
+function createPopulationCryptExteriorBuilt(asset, id2, terrain2) {
   const r = asset.sites.find((r2) => r2.id === id2), g = (r.tier === "small" ? createPlannedCryptExterior : createPlannedCryptExteriorV2)(asset, id2, terrain2);
   return newPopulationSelection(id2) ? Object.freeze({ ...g, realizationVersion: CRYPT_POPULATION_VERSION }) : g;
 }
@@ -20839,7 +20890,13 @@ async function completePopulationReservation(r, asset, binding, sha256) {
 }
 
 // src/shared/generation/planned_fort_v1.js
-function createPlannedFortExterior(asset, reservationId, terrain2 = createPlannedTerrain(asset), realization = null) {
+function createPlannedFortExterior(asset, reservationId, terrain2, realization = null) {
+  if (!terrain2) return createPlannedFortExteriorBuilt(asset, reservationId, void 0, realization);
+  if (realization)
+    return realizedExteriorV1(realization, terrain2, asset, reservationId) ?? createPlannedFortExteriorBuilt(asset, reservationId, terrain2, realization);
+  return exteriorOnceV1(terrain2, asset, "fort-v1", reservationId, () => createPlannedFortExteriorBuilt(asset, reservationId, terrain2, null));
+}
+function createPlannedFortExteriorBuilt(asset, reservationId, terrain2 = createPlannedTerrain(asset), realization = null) {
   const r = asset.sites.find((s) => s.id === reservationId), d = asset.routes.destinations.find((s) => s.id === reservationId), policy = FORT_TIER_POLICY[r?.tier];
   requireContract(r?.familyId === "site-family:fort" && policy && d?.point, "Fort requires an existing reservation");
   const xs = r.footprint.map((c) => c.x), ys = r.footprint.map((c) => c.y), minX = Math.min(...xs), minY = Math.min(...ys), maxX = Math.max(...xs), maxY = Math.max(...ys), [width, height] = realization?.tiles ?? policy.exteriorTiles, left = realization?.left ?? minX * 32 + Math.floor(((maxX - minX + 1) * 32 - width) / 2), top = realization?.top ?? minY * 26;
@@ -21060,7 +21117,10 @@ async function derivePlannedFortReservation(asset, binding, sha256, { reservatio
 }
 
 // src/shared/generation/planned_fort_v2.js
-function createPlannedFortExteriorV2(asset, id2, terrain2 = createPlannedTerrain(asset)) {
+function createPlannedFortExteriorV2(asset, id2, terrain2) {
+  return terrain2 ? exteriorOnceV1(terrain2, asset, "fort-v2", id2, () => createPlannedFortExteriorV2Built(asset, id2, terrain2)) : createPlannedFortExteriorV2Built(asset, id2);
+}
+function createPlannedFortExteriorV2Built(asset, id2, terrain2 = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id2), p = FORT_TIER_POLICY[r?.tier];
   requireContract(r?.familyId === "site-family:fort" && p, "Fort V2 requires an existing Fort reservation");
   if (["small", "standard"].includes(r.tier)) {
@@ -22229,7 +22289,7 @@ async function generateWoodlandCaveInstanceD12_2({ campaignSeed, site, reservati
     if (floors[i].transitions.up) floors[i].transitions.up.floorId = floors[i - 1].floorId;
     if (floors[i].transitions.down) floors[i].transitions.down.floorId = floors[i + 1].floorId;
   }
-  const floorIds = floors.map((f3) => f3.floorId), layoutHash = bytesToHex(await hashBytes(utf8(canonicalStringify(floors)), sha256));
+  const floorIds = floors.map((f3) => f3.floorId), layoutHash = bytesToHex(await hashUtf8(canonicalStringify(floors), sha256));
   return freezeWire({
     version: GENERATED_SITE_D12_2,
     familyId: WOODLAND_CAVE_FAMILY_ID,
@@ -22312,6 +22372,15 @@ function validateGeneratedWoodlandCaveD12_2(g) {
 
 // src/shared/generation/planned_cave_v1.js
 function createPlannedCaveExterior(asset, reservationId = PLANNED_CAVE_ID, sharedTerrain = null) {
+  return sharedTerrain ? exteriorOnceV1(
+    sharedTerrain,
+    asset,
+    "cave-v1",
+    reservationId,
+    () => createPlannedCaveExteriorBuilt(asset, reservationId, sharedTerrain)
+  ) : createPlannedCaveExteriorBuilt(asset, reservationId, null);
+}
+function createPlannedCaveExteriorBuilt(asset, reservationId = PLANNED_CAVE_ID, sharedTerrain = null) {
   const r = asset.sites.find((s) => s.id === reservationId), destination = asset.routes.destinations.find((d) => d.id === reservationId);
   requireContract(
     r?.familyId === "site-family:cave" && PLANNED_CAVE_TIERS.includes(r.tier) && r.footprint.length === 1 && r.approach.length === 1 && destination?.point,
@@ -38998,8 +39067,8 @@ async function buildRuinFamilyV1(state, socket, binding, { sha256, runEpisode = 
       };
     }
   const layoutHash = bytesToHex(
-    await hashBytes(
-      utf8(canonicalStringify({ version, siteSeed: socket.siteSeed, tier: tier2, recipes: recipes2, links: links2, floorIds })),
+    await hashUtf8(
+      canonicalStringify({ version, siteSeed: socket.siteSeed, tier: tier2, recipes: recipes2, links: links2, floorIds }),
       sha256
     )
   ), first = floors[0], interior = {
@@ -39041,19 +39110,17 @@ async function buildRuinFamilyV1(state, socket, binding, { sha256, runEpisode = 
     instanceHash: ""
   };
   functionalSite.instanceHash = bytesToHex(
-    await hashBytes(
-      utf8(
-        canonicalStringify({
-          functionalSite: copyWire(functionalSite),
-          groups: copyWire(groups),
-          economies: copyWire(economies),
-          episodes: copyWire(episodes),
-          actors: copyWire(actors),
-          resources: copyWire(resources),
-          elites: copyWire(elites),
-          ...bosses.length ? { bosses: copyWire(bosses) } : {}
-        })
-      ),
+    await hashUtf8(
+      canonicalStringify({
+        functionalSite: copyWire(functionalSite),
+        groups: copyWire(groups),
+        economies: copyWire(economies),
+        episodes: copyWire(episodes),
+        actors: copyWire(actors),
+        resources: copyWire(resources),
+        elites: copyWire(elites),
+        ...bosses.length ? { bosses: copyWire(bosses) } : {}
+      }),
       sha256
     )
   );
@@ -40759,7 +40826,7 @@ async function buildWoodlandRuinD9(state, site, binding, { sha256 }) {
     completion: true
   };
   const commitment2 = bytesToHex(
-    await hashBytes(utf8(canonicalStringify({ functionalSite, group, economy, episode, actors, resource })), sha256)
+    await hashUtf8(canonicalStringify({ functionalSite, group, economy, episode, actors, resource }), sha256)
   );
   functionalSite.instanceHash = commitment2;
   return freezeWire({
@@ -41546,8 +41613,8 @@ async function buildFortFamilyV1(state, socket, binding, { sha256, runEpisode = 
       };
     }
   const layoutHash = bytesToHex(
-    await hashBytes(
-      utf8(canonicalStringify({ version, siteSeed: socket.siteSeed, tier: tier2, recipes: recipes2, links: links2, floorIds })),
+    await hashUtf8(
+      canonicalStringify({ version, siteSeed: socket.siteSeed, tier: tier2, recipes: recipes2, links: links2, floorIds }),
       sha256
     )
   ), first = floors[0], interior = {
@@ -41589,19 +41656,17 @@ async function buildFortFamilyV1(state, socket, binding, { sha256, runEpisode = 
     instanceHash: ""
   };
   functionalSite.instanceHash = bytesToHex(
-    await hashBytes(
-      utf8(
-        canonicalStringify({
-          functionalSite: copyWire(functionalSite),
-          groups: copyWire(groups),
-          economies: copyWire(economies),
-          episodes: copyWire(episodes),
-          actors: copyWire(actors),
-          resources: copyWire(resources),
-          elites: copyWire(elites),
-          ...bosses.length ? { bosses: copyWire(bosses) } : {}
-        })
-      ),
+    await hashUtf8(
+      canonicalStringify({
+        functionalSite: copyWire(functionalSite),
+        groups: copyWire(groups),
+        economies: copyWire(economies),
+        episodes: copyWire(episodes),
+        actors: copyWire(actors),
+        resources: copyWire(resources),
+        elites: copyWire(elites),
+        ...bosses.length ? { bosses: copyWire(bosses) } : {}
+      }),
       sha256
     )
   );
@@ -41647,7 +41712,7 @@ async function generateMultiroomCave({ campaignSeed, site, reservation, combat =
       version: MULTIROOM_VERSION,
       floorId: id2,
       index: i,
-      floorSeed: bytesToHex(await hashBytes(utf8(MULTIROOM_VERSION + "/" + d.layoutSeed + "/" + i), sha256)),
+      floorSeed: bytesToHex(await hashUtf8(MULTIROOM_VERSION + "/" + d.layoutSeed + "/" + i, sha256)),
       graph: copyWire(r.graph),
       collision: copyWire(r.collision),
       visual: copyWire(r.visual),
@@ -41684,7 +41749,7 @@ async function generateMultiroomCave({ campaignSeed, site, reservation, combat =
     label: d.label,
     floorCount: count2,
     floorIds: floors.map((f3) => f3.floorId),
-    layoutHash: bytesToHex(await hashBytes(utf8(canonicalStringify(floors)), sha256)),
+    layoutHash: bytesToHex(await hashUtf8(canonicalStringify(floors), sha256)),
     spawnProvenance: {
       kind: "existing-planned-reservation",
       ordinal: spawnOrdinal,
@@ -43521,7 +43586,7 @@ async function buildWoodlandCaveFamilyD12_2(state, site, binding, { sha256, runE
   const instancePayload = { functionalSite, groups, economies, episodes, actors, resources };
   if (elites.length) instancePayload.elites = elites;
   if (bosses.length) instancePayload.bosses = bosses;
-  functionalSite.instanceHash = bytesToHex(await hashBytes(utf8(canonicalStringify(instancePayload)), sha256));
+  functionalSite.instanceHash = bytesToHex(await hashUtf8(canonicalStringify(instancePayload), sha256));
   return freezeWire({ functionalSite, spaces, groups, economies, episodes, actors, resources, elites, bosses });
 }
 var WOODLAND_CAVE_FAMILY_DEFINITION_D12_2 = Object.freeze({
@@ -49060,7 +49125,7 @@ function createCampaignStoreTransactions({
       "saveSerialize",
       () => canonicalStringify(frozen)
     );
-    const proposalHash = bytesToHex(await hashBytes(utf8(proposalCanonical), options.sha256));
+    const proposalHash = bytesToHex(await hashUtf8(proposalCanonical, options.sha256));
     return Object.freeze({ proposal: frozen, proposalCanonical, proposalHash });
   }
   function validateCommittedResult2(prepared, result) {
@@ -54621,12 +54686,12 @@ function overworldManifestBody(definition) {
   return freezeWire(body);
 }
 async function verifyOverworldManifestHash(definition, { sha256 } = {}) {
-  const digest11 = bytesToHex(await hashBytes(utf8(canonicalStringify(overworldManifestBody(definition))), sha256));
+  const digest11 = bytesToHex(await hashUtf8(canonicalStringify(overworldManifestBody(definition)), sha256));
   requireContract(digest11 === definition.manifestHash, "Overworld manifest hash mismatch");
   for (const interior of definition.siteInteriors ?? []) {
     const { contentHash, ...body } = interior;
     requireContract(
-      contentHash === bytesToHex(await hashBytes(utf8(canonicalStringify(body)), sha256)),
+      contentHash === bytesToHex(await hashUtf8(canonicalStringify(body), sha256)),
       "Site interior hash mismatch"
     );
   }
@@ -55515,7 +55580,7 @@ async function verifyContentFingerprint(catalog2, { sha256 } = {}) {
     contentSchemaVersion: catalog2.contentSchemaVersion,
     definitionsById: catalog2.definitionsById
   });
-  const fingerprint = bytesToHex(await hashBytes(utf8(canonicalStringify(body)), sha256));
+  const fingerprint = bytesToHex(await hashUtf8(canonicalStringify(body), sha256));
   requireContract(fingerprint === expectedFingerprint, "Content fingerprint mismatch");
   return true;
 }
@@ -57372,12 +57437,10 @@ async function currentProceduralContentCatalogHash(sha256, populationEnabled = f
     locationDefinitions: LOCATION_SITE_PROOF_CATALOG,
     artifactDefinitions: ARTIFACT_PROOF_CATALOG
   };
-  const geographyHash = bytesToHex(await hashBytes(utf8(canonicalStringify(body)), sha256));
+  const geographyHash = bytesToHex(await hashUtf8(canonicalStringify(body), sha256));
   return populationEnabled ? bytesToHex(
-    await hashBytes(
-      utf8(
-        canonicalStringify({ geographyHash, catalogVersion: ORDINARY_CATALOG_VERSION, enemies: ORDINARY_ENEMIES })
-      ),
+    await hashUtf8(
+      canonicalStringify({ geographyHash, catalogVersion: ORDINARY_CATALOG_VERSION, enemies: ORDINARY_ENEMIES }),
       sha256
     )
   ) : geographyHash;
@@ -58660,7 +58723,12 @@ var transition = (a, b) => {
   requireContract(b.saveRevision === a.saveRevision + 1 && a.checkpointId !== b.checkpointId, "Invalid successor");
   return validateActivityProgress(a, b);
 };
-var digest9 = async (cut, sha256, measure = (_name, fn) => fn()) => bytesToHex(await hashBytes(utf8(measure("saveSerialize", () => canonicalStringify(cut))), sha256));
+var digest9 = async (cut, sha256, measure = (_name, fn) => fn()) => bytesToHex(
+  await hashUtf8(
+    measure("saveSerialize", () => canonicalStringify(cut)),
+    sha256
+  )
+);
 var parseActivityEnvelope = (text) => freezeWire(validateActivityEnvelope(JSON.parse(text)));
 var serializeActivityEnvelope = (e) => canonicalStringify(validateActivityEnvelope(e));
 async function createActivityEnvelope(cut, kind2, { sha256, measure }) {
@@ -62248,7 +62316,7 @@ async function openWorldSnapshotD9(publication, { sha256, readPage, generatePlan
 async function prepareD9OriginMigration(state, { sha256 }) {
   validateActivityState(state);
   requireContract(!state.d9World, "World already migrated");
-  const m = manifestForState(state), collision2 = compileBoundOverworld(state).collision, hash21 = bytesToHex(await hashBytes(utf8(canonicalStringify(m)), sha256)), overlay = originEgress(m, collision2, economicResources(state, m));
+  const m = manifestForState(state), collision2 = compileBoundOverworld(state).collision, hash21 = bytesToHex(await hashUtf8(canonicalStringify(m), sha256)), overlay = originEgress(m, collision2, economicResources(state, m));
   const positions = {};
   for (const a of Object.values(state.entitiesById))
     if (a.residency.spaceInstanceId === state.overworldInstanceId)

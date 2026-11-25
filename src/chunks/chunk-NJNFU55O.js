@@ -16285,7 +16285,7 @@ async function createOldwardSeamlessManifest(sha256) {
       }
     ]
   };
-  const manifestHash = bytesToHex(await hashBytes(utf8(canonicalStringify(body)), sha256));
+  const manifestHash = bytesToHex(await hashUtf8(canonicalStringify(body), sha256));
   return freezeWire({
     contentDefinitionId: SEAMLESS_MANIFEST_DEFINITION_ID,
     kind: "overworldManifest",
@@ -23808,18 +23808,24 @@ function validateHydrologyPlanV1(plan) {
 }
 function createHydrologyGeometryV1(plan, parent) {
   validateHydrologyPlanV1(plan);
-  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), cache6 = /* @__PURE__ */ new Map();
+  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), encodedByNumber = /* @__PURE__ */ new Map(), cache6 = /* @__PURE__ */ new Map();
+  for (const p of plan.pages) {
+    const [cx, cy] = p.key.split(",").map(Number);
+    if (cx >= 0 && cy >= 0 && cx < 65536 && cy < 65536 && cx + "," + cy === p.key)
+      encodedByNumber.set(cx * 65536 + cy, p.runs);
+  }
+  const allNumbered = encodedByNumber.size === encoded.size;
   let decodes = 0, lastCx = NaN, lastCy = NaN, lastPage = null;
   function page(cx, cy) {
     if (cx === lastCx && cy === lastCy) return lastPage;
-    const key5 = cx + "," + cy, runs = encoded.get(key5);
+    const key5 = cx >= 0 && cy >= 0 && cx < 65536 && cy < 65536 ? cx * 65536 + cy : cx + "," + cy, runs = typeof key5 === "number" ? encodedByNumber.get(key5) ?? (allNumbered ? void 0 : encoded.get(cx + "," + cy)) : encoded.get(key5);
     let data = null;
     if (runs) {
       data = cache6.get(key5);
       if (!data) {
         data = new Uint8Array(832);
         for (const [start, length, kind3] of runs) data.fill(kind3, start, start + length);
-        if (cache6.size >= 256) cache6.delete(cache6.keys().next().value);
+        if (cache6.size >= 1024) cache6.delete(cache6.keys().next().value);
         cache6.set(key5, data);
         decodes++;
       }
@@ -27714,12 +27720,13 @@ function createPlannedTerrain(p) {
     const dx = b.x - a.x, dy = b.y - a.y, u = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / (dx * dx + dy * dy || 1)));
     return PM.hypot(x - a.x - u * dx, y - a.y - u * dy);
   };
+  let biomeNames = null, biomeFull = null;
   function base(x, y, sparseCoast = false) {
     const mx = Math.floor(x / 64), my = Math.floor(y / 52), c = macro(mx, my);
     if (!c) return { walkable: false, kind: "ocean", biome: "o", landmassId: null, band: 0 };
     const coast = waterGeometry ? sparseCoast ? waterGeometry.sampleCoast(x, y) : waterGeometry.coast(x, y) : shoreline?.tile(x, y);
     if (coast?.water) return { walkable: false, kind: "ocean", biome: "o", landmassId: null, band: 0 };
-    const biome = p.biomeIds[(softBiome ? softBiome(x, y, mx, my, c) : c[2]) - 1].replace("biome:", ""), code = BIOME_CODES[biome], inland = waterGeometry?.inland(x, y);
+    const biomeAt = (softBiome ? softBiome(x, y, mx, my, c) : c[2]) - 1, biome = (biomeNames ??= p.biomeIds.map((id) => id.replace("biome:", "")))[biomeAt], code = BIOME_CODES[biome], inland = waterGeometry?.inland(x, y);
     if (inland?.water)
       return { walkable: false, kind: inland.kind, biome: code, landmassId: landmass[c[1]].id, band: c[3] };
     if (!waterGeometry && c[4])
@@ -27734,7 +27741,7 @@ function createPlannedTerrain(p) {
       kind: (shoreline ? coast?.shore : oldCoastal) ? "shore" : "land",
       shoreClassId: coast?.classId ?? null,
       biome: code,
-      biomeId: "biome:" + biome,
+      biomeId: (biomeFull ??= biomeNames.map((name) => "biome:" + name))[biomeAt],
       landmassId: landmass[c[1]].id,
       band: c[3],
       slope: c[8],
@@ -30478,7 +30485,7 @@ async function buildDefinedFunctionalSiteD10(state, site, binding, definition, {
     completion: true
   };
   functionalSite.instanceHash = bytesToHex(
-    await hashBytes(utf8(canonicalStringify({ functionalSite, group, economy, episode, actors: actors2, resource })), sha256)
+    await hashUtf8(canonicalStringify({ functionalSite, group, economy, episode, actors: actors2, resource }), sha256)
   );
   return freezeWire({
     functionalSite,
@@ -30612,7 +30619,7 @@ async function buildDefinedWorldCompoundD10(state, parcel, binding, definition, 
     initial: { group, economy, episode, actors: actors2, resource, definition: definitionRow },
     conqueredTick: null
   };
-  functionalSite.instanceHash = bytesToHex(await hashBytes(utf8(canonicalStringify(functionalSite)), sha256));
+  functionalSite.instanceHash = bytesToHex(await hashUtf8(canonicalStringify(functionalSite), sha256));
   return freezeWire({
     functionalSite,
     space: { spaceId: logicalSpaceId, spaceInstanceId, spaceRevision: 1, collision: copyWire(interior.collision) }
@@ -33957,8 +33964,8 @@ async function buildRuinFamilyV1(state, socket, binding, { sha256, runEpisode = 
       };
     }
   const layoutHash = bytesToHex(
-    await hashBytes(
-      utf8(canonicalStringify({ version, siteSeed: socket.siteSeed, tier, recipes: recipes2, links: links2, floorIds })),
+    await hashUtf8(
+      canonicalStringify({ version, siteSeed: socket.siteSeed, tier, recipes: recipes2, links: links2, floorIds }),
       sha256
     )
   ), first = floors[0], interior = {
@@ -34000,19 +34007,17 @@ async function buildRuinFamilyV1(state, socket, binding, { sha256, runEpisode = 
     instanceHash: ""
   };
   functionalSite.instanceHash = bytesToHex(
-    await hashBytes(
-      utf8(
-        canonicalStringify({
-          functionalSite: copyWire(functionalSite),
-          groups: copyWire(groups),
-          economies: copyWire(economies),
-          episodes: copyWire(episodes),
-          actors: copyWire(actors2),
-          resources: copyWire(resources),
-          elites: copyWire(elites),
-          ...bosses.length ? { bosses: copyWire(bosses) } : {}
-        })
-      ),
+    await hashUtf8(
+      canonicalStringify({
+        functionalSite: copyWire(functionalSite),
+        groups: copyWire(groups),
+        economies: copyWire(economies),
+        episodes: copyWire(episodes),
+        actors: copyWire(actors2),
+        resources: copyWire(resources),
+        elites: copyWire(elites),
+        ...bosses.length ? { bosses: copyWire(bosses) } : {}
+      }),
       sha256
     )
   );
@@ -35772,7 +35777,7 @@ async function buildWoodlandRuinD9(state, site, binding, { sha256 }) {
     completion: true
   };
   const commitment2 = bytesToHex(
-    await hashBytes(utf8(canonicalStringify({ functionalSite, group, economy, episode, actors: actors2, resource })), sha256)
+    await hashUtf8(canonicalStringify({ functionalSite, group, economy, episode, actors: actors2, resource }), sha256)
   );
   functionalSite.instanceHash = commitment2;
   return freezeWire({
@@ -37162,8 +37167,8 @@ async function buildFortFamilyV1(state, socket, binding, { sha256, runEpisode = 
       };
     }
   const layoutHash = bytesToHex(
-    await hashBytes(
-      utf8(canonicalStringify({ version, siteSeed: socket.siteSeed, tier, recipes: recipes2, links: links2, floorIds })),
+    await hashUtf8(
+      canonicalStringify({ version, siteSeed: socket.siteSeed, tier, recipes: recipes2, links: links2, floorIds }),
       sha256
     )
   ), first = floors[0], interior = {
@@ -37205,19 +37210,17 @@ async function buildFortFamilyV1(state, socket, binding, { sha256, runEpisode = 
     instanceHash: ""
   };
   functionalSite.instanceHash = bytesToHex(
-    await hashBytes(
-      utf8(
-        canonicalStringify({
-          functionalSite: copyWire(functionalSite),
-          groups: copyWire(groups),
-          economies: copyWire(economies),
-          episodes: copyWire(episodes),
-          actors: copyWire(actors2),
-          resources: copyWire(resources),
-          elites: copyWire(elites),
-          ...bosses.length ? { bosses: copyWire(bosses) } : {}
-        })
-      ),
+    await hashUtf8(
+      canonicalStringify({
+        functionalSite: copyWire(functionalSite),
+        groups: copyWire(groups),
+        economies: copyWire(economies),
+        episodes: copyWire(episodes),
+        actors: copyWire(actors2),
+        resources: copyWire(resources),
+        elites: copyWire(elites),
+        ...bosses.length ? { bosses: copyWire(bosses) } : {}
+      }),
       sha256
     )
   );
@@ -37911,7 +37914,7 @@ async function generateWoodlandCaveInstanceD12_2({ campaignSeed, site, reservati
     if (floors[i].transitions.up) floors[i].transitions.up.floorId = floors[i - 1].floorId;
     if (floors[i].transitions.down) floors[i].transitions.down.floorId = floors[i + 1].floorId;
   }
-  const floorIds = floors.map((f3) => f3.floorId), layoutHash = bytesToHex(await hashBytes(utf8(canonicalStringify(floors)), sha256));
+  const floorIds = floors.map((f3) => f3.floorId), layoutHash = bytesToHex(await hashUtf8(canonicalStringify(floors), sha256));
   return freezeWire({
     version: GENERATED_SITE_D12_2,
     familyId: WOODLAND_CAVE_FAMILY_ID,
@@ -38019,7 +38022,7 @@ async function generateMultiroomCave({ campaignSeed, site, reservation, combat =
       version: MULTIROOM_VERSION,
       floorId: id,
       index: i,
-      floorSeed: bytesToHex(await hashBytes(utf8(MULTIROOM_VERSION + "/" + d.layoutSeed + "/" + i), sha256)),
+      floorSeed: bytesToHex(await hashUtf8(MULTIROOM_VERSION + "/" + d.layoutSeed + "/" + i, sha256)),
       graph: copyWire(r.graph),
       collision: copyWire(r.collision),
       visual: copyWire(r.visual),
@@ -38056,7 +38059,7 @@ async function generateMultiroomCave({ campaignSeed, site, reservation, combat =
     label: d.label,
     floorCount: count2,
     floorIds: floors.map((f3) => f3.floorId),
-    layoutHash: bytesToHex(await hashBytes(utf8(canonicalStringify(floors)), sha256)),
+    layoutHash: bytesToHex(await hashUtf8(canonicalStringify(floors), sha256)),
     spawnProvenance: {
       kind: "existing-planned-reservation",
       ordinal: spawnOrdinal,
@@ -39985,7 +39988,7 @@ async function buildWoodlandCaveFamilyD12_2(state, site, binding, { sha256, runE
   const instancePayload = { functionalSite, groups, economies, episodes, actors: actors2, resources };
   if (elites.length) instancePayload.elites = elites;
   if (bosses.length) instancePayload.bosses = bosses;
-  functionalSite.instanceHash = bytesToHex(await hashBytes(utf8(canonicalStringify(instancePayload)), sha256));
+  functionalSite.instanceHash = bytesToHex(await hashUtf8(canonicalStringify(instancePayload), sha256));
   return freezeWire({ functionalSite, spaces, groups, economies, episodes, actors: actors2, resources, elites, bosses });
 }
 var WOODLAND_CAVE_FAMILY_DEFINITION_D12_2 = Object.freeze({
@@ -45741,12 +45744,12 @@ function overworldManifestBody(definition) {
   return freezeWire(body);
 }
 async function verifyOverworldManifestHash(definition, { sha256 } = {}) {
-  const digest10 = bytesToHex(await hashBytes(utf8(canonicalStringify(overworldManifestBody(definition))), sha256));
+  const digest10 = bytesToHex(await hashUtf8(canonicalStringify(overworldManifestBody(definition)), sha256));
   requireContract(digest10 === definition.manifestHash, "Overworld manifest hash mismatch");
   for (const interior of definition.siteInteriors ?? []) {
     const { contentHash, ...body } = interior;
     requireContract(
-      contentHash === bytesToHex(await hashBytes(utf8(canonicalStringify(body)), sha256)),
+      contentHash === bytesToHex(await hashUtf8(canonicalStringify(body), sha256)),
       "Site interior hash mismatch"
     );
   }
@@ -46728,7 +46731,7 @@ async function createContentCatalog(definitions, { sha256 } = {}) {
   );
   const body = freezeWire({ contentSchemaVersion: CONTENT_SCHEMA_VERSION, definitionsById });
   validateContentCatalog({ ...body, fingerprint: "0".repeat(64) });
-  const fingerprint = bytesToHex(await hashBytes(utf8(canonicalStringify(body)), sha256));
+  const fingerprint = bytesToHex(await hashUtf8(canonicalStringify(body), sha256));
   return freezeWire({ ...body, fingerprint });
 }
 async function verifyContentFingerprint(catalog2, { sha256 } = {}) {
@@ -46738,7 +46741,7 @@ async function verifyContentFingerprint(catalog2, { sha256 } = {}) {
     contentSchemaVersion: catalog2.contentSchemaVersion,
     definitionsById: catalog2.definitionsById
   });
-  const fingerprint = bytesToHex(await hashBytes(utf8(canonicalStringify(body)), sha256));
+  const fingerprint = bytesToHex(await hashUtf8(canonicalStringify(body), sha256));
   requireContract(fingerprint === expectedFingerprint, "Content fingerprint mismatch");
   return true;
 }
@@ -47555,7 +47558,7 @@ async function authoredGeographyDefinition(sha256) {
     kind: "authoredGeography",
     regionId: REGION_ID,
     layoutVersion: LAYOUT_VERSION,
-    layoutFingerprint: bytesToHex(await hashBytes(utf8(canonicalStringify(OLDWARD_LAYOUT)), sha256))
+    layoutFingerprint: bytesToHex(await hashUtf8(canonicalStringify(OLDWARD_LAYOUT), sha256))
   };
 }
 function initialDiscovery(definition) {
@@ -48503,12 +48506,10 @@ async function currentProceduralContentCatalogHash(sha256, populationEnabled = f
     locationDefinitions: LOCATION_SITE_PROOF_CATALOG,
     artifactDefinitions: ARTIFACT_PROOF_CATALOG
   };
-  const geographyHash = bytesToHex(await hashBytes(utf8(canonicalStringify(body)), sha256));
+  const geographyHash = bytesToHex(await hashUtf8(canonicalStringify(body), sha256));
   return populationEnabled ? bytesToHex(
-    await hashBytes(
-      utf8(
-        canonicalStringify({ geographyHash, catalogVersion: ORDINARY_CATALOG_VERSION, enemies: ORDINARY_ENEMIES })
-      ),
+    await hashUtf8(
+      canonicalStringify({ geographyHash, catalogVersion: ORDINARY_CATALOG_VERSION, enemies: ORDINARY_ENEMIES }),
       sha256
     )
   ) : geographyHash;
@@ -49210,7 +49211,7 @@ function createCampaignStoreTransactions({
       "saveSerialize",
       () => canonicalStringify(frozen)
     );
-    const proposalHash = bytesToHex(await hashBytes(utf8(proposalCanonical), options.sha256));
+    const proposalHash = bytesToHex(await hashUtf8(proposalCanonical, options.sha256));
     return Object.freeze({ proposal: frozen, proposalCanonical, proposalHash });
   }
   function validateCommittedResult2(prepared, result) {
@@ -54931,6 +54932,7 @@ export {
   validateId,
   createId,
   utf8,
+  hashUtf8,
   bytesToHex,
   validateHex,
   frameUtf8,

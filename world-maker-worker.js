@@ -494,18 +494,24 @@ function validateHydrologyPlanV1(plan) {
 }
 function createHydrologyGeometryV1(plan, parent) {
   validateHydrologyPlanV1(plan);
-  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), cache = /* @__PURE__ */ new Map();
+  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), encodedByNumber = /* @__PURE__ */ new Map(), cache = /* @__PURE__ */ new Map();
+  for (const p of plan.pages) {
+    const [cx2, cy2] = p.key.split(",").map(Number);
+    if (cx2 >= 0 && cy2 >= 0 && cx2 < 65536 && cy2 < 65536 && cx2 + "," + cy2 === p.key)
+      encodedByNumber.set(cx2 * 65536 + cy2, p.runs);
+  }
+  const allNumbered = encodedByNumber.size === encoded.size;
   let decodes = 0, lastCx = NaN, lastCy = NaN, lastPage = null;
   function page(cx2, cy2) {
     if (cx2 === lastCx && cy2 === lastCy) return lastPage;
-    const key2 = cx2 + "," + cy2, runs = encoded.get(key2);
+    const key2 = cx2 >= 0 && cy2 >= 0 && cx2 < 65536 && cy2 < 65536 ? cx2 * 65536 + cy2 : cx2 + "," + cy2, runs = typeof key2 === "number" ? encodedByNumber.get(key2) ?? (allNumbered ? void 0 : encoded.get(cx2 + "," + cy2)) : encoded.get(key2);
     let data = null;
     if (runs) {
       data = cache.get(key2);
       if (!data) {
         data = new Uint8Array(832);
         for (const [start, length, kind2] of runs) data.fill(kind2, start, start + length);
-        if (cache.size >= 256) cache.delete(cache.keys().next().value);
+        if (cache.size >= 1024) cache.delete(cache.keys().next().value);
         cache.set(key2, data);
         decodes++;
       }
@@ -8403,12 +8409,13 @@ function createPlannedTerrain(p) {
     const dx = b.x - a.x, dy = b.y - a.y, u = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / (dx * dx + dy * dy || 1)));
     return PM.hypot(x - a.x - u * dx, y - a.y - u * dy);
   };
+  let biomeNames = null, biomeFull = null;
   function base(x, y, sparseCoast = false) {
     const mx = Math.floor(x / 64), my = Math.floor(y / 52), c = macro(mx, my);
     if (!c) return { walkable: false, kind: "ocean", biome: "o", landmassId: null, band: 0 };
     const coast = waterGeometry ? sparseCoast ? waterGeometry.sampleCoast(x, y) : waterGeometry.coast(x, y) : shoreline?.tile(x, y);
     if (coast?.water) return { walkable: false, kind: "ocean", biome: "o", landmassId: null, band: 0 };
-    const biome = p.biomeIds[(softBiome ? softBiome(x, y, mx, my, c) : c[2]) - 1].replace("biome:", ""), code = BIOME_CODES[biome], inland = waterGeometry?.inland(x, y);
+    const biomeAt = (softBiome ? softBiome(x, y, mx, my, c) : c[2]) - 1, biome = (biomeNames ??= p.biomeIds.map((id) => id.replace("biome:", "")))[biomeAt], code = BIOME_CODES[biome], inland = waterGeometry?.inland(x, y);
     if (inland?.water)
       return { walkable: false, kind: inland.kind, biome: code, landmassId: landmass[c[1]].id, band: c[3] };
     if (!waterGeometry && c[4])
@@ -8423,7 +8430,7 @@ function createPlannedTerrain(p) {
       kind: (shoreline ? coast?.shore : oldCoastal) ? "shore" : "land",
       shoreClassId: coast?.classId ?? null,
       biome: code,
-      biomeId: "biome:" + biome,
+      biomeId: (biomeFull ??= biomeNames.map((name) => "biome:" + name))[biomeAt],
       landmassId: landmass[c[1]].id,
       band: c[3],
       slope: c[8],
