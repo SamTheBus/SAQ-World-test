@@ -333474,6 +333474,348 @@ function siroccoName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var MIRE2 = ROT_PAL.B;
+var MIRE_BOG = "#1d2312";
+var MIRE_SCUM = "#4f6024";
+var MIRE_GAS = "#b6e07a";
+var GAS_LIME = "#c6ef8a";
+var mireEase = (x) => x * x * (3 - 2 * x);
+var mireClamp = (x) => Math.max(0, Math.min(1, x));
+function mireBeat(t, low, impact3) {
+  const T121 = low ? 2.25 : 4.5, s = t % T121 * (4.5 / T121);
+  let lean = 0, open3 = 0.4 + Math.sin(t * 1.6) * 0.06, swell = 0, kick = 0;
+  if (s >= 0.6 && s < 1.3) {
+    const q2 = mireEase((s - 0.6) / 0.7);
+    lean = -q2;
+    swell = q2;
+    open3 = 0.4 + q2 * 0.6;
+  } else if (s >= 1.3 && s < 1.8) {
+    const a = s - 1.3;
+    for (const f of [0, 0.13, 0.26]) if (a >= f && a < f + 0.17) kick = Math.max(kick, 1 - (a - f) / 0.17);
+    lean = -1 + mireClamp(a / 0.1) * 1.4 + kick * 0.3;
+    swell = Math.max(0, 1 - a / 0.4);
+    open3 = 0.95 - kick * 0.3;
+  } else if (s >= 1.8 && s < 2.3) lean = 0.4 * (1 - mireEase((s - 1.8) / 0.5));
+  if (impact3 > 0) {
+    lean = 0;
+    kick = 0;
+  }
+  return { s, lean, open: open3, swell, kick };
+}
+function mireLily(e, R18, open3) {
+  const P29 = MIRE2, sq = 0.8;
+  const petal = (a, back) => {
+    const L = R18 * (1.55 + open3 * 0.35), ux = Math.cos(a), uy = Math.sin(a) * sq;
+    const P0 = [ux * R18 * 0.35 - uy * R18 * 0.42, uy * R18 * 0.35 + ux * R18 * 0.42 * sq], P111 = [ux * R18 * 0.35 + uy * R18 * 0.42, uy * R18 * 0.35 - ux * R18 * 0.42 * sq], tip = [ux * L, uy * L];
+    const shape4 = () => {
+      e.beginPath();
+      e.moveTo(...P0);
+      e.bezierCurveTo(
+        P0[0] + ux * L * 0.7,
+        P0[1] + uy * L * 0.7,
+        tip[0] - uy * R18 * 0.5,
+        tip[1] + ux * R18 * 0.5 * sq,
+        tip[0],
+        tip[1]
+      );
+      e.bezierCurveTo(
+        tip[0] + uy * R18 * 0.5,
+        tip[1] - ux * R18 * 0.5 * sq,
+        P111[0] + ux * L * 0.7,
+        P111[1] + uy * L * 0.7,
+        ...P111
+      );
+      e.closePath();
+    };
+    shape4();
+    e.fillStyle = back ? P29.petalD : P29.petal;
+    e.fill();
+    e.save();
+    shape4();
+    e.clip();
+    e.fillStyle = back ? "#4a1f66" : P29.petalD;
+    e.beginPath();
+    e.ellipse(tip[0] * 0.7 + uy * R18 * 0.25, tip[1] * 0.7 - ux * R18 * 0.25 * sq, R18 * 0.5, R18 * 0.3, a, 0, TAU256);
+    e.fill();
+    if (!back) {
+      e.fillStyle = P29.petalL;
+      e.beginPath();
+      e.ellipse(tip[0] * 0.55 - uy * R18 * 0.2, tip[1] * 0.55 + ux * R18 * 0.2 * sq, R18 * 0.35, R18 * 0.12, a, 0, TAU256);
+      e.fill();
+    }
+    e.fillStyle = P29.wart;
+    for (let i = 0; i < 3; i++) {
+      const u = 0.5 + i * 0.17;
+      e.beginPath();
+      e.arc(tip[0] * u + (i - 1) * uy * 1.2, tip[1] * u - (i - 1) * ux * 1.2 * sq, R18 * (0.12 - i * 0.02), 0, TAU256);
+      e.fill();
+    }
+    e.restore();
+    shape4();
+    e.strokeStyle = EDGE5;
+    e.lineWidth = 1;
+    e.stroke();
+  };
+  for (const a of [0, 1, 2, 3, 4].map((i) => -Math.PI / 2 + i * TAU256 / 5 + 0.3)) petal(a, Math.sin(a) < 0);
+  ell6(e, 0, 0, R18 * 0.82, R18 * 0.82 * sq, P29.maw, true, 1.1);
+  for (let i = 0; i < 10; i++) {
+    const a = i / 10 * TAU256;
+    e.save();
+    e.translate(Math.cos(a) * R18 * 0.78, Math.sin(a) * R18 * 0.78 * sq);
+    e.rotate(a + Math.PI / 2);
+    poly10(
+      e,
+      [
+        [-0.9, 0],
+        [0.9, 0],
+        [0, R18 * 0.32 * open3 + 1]
+      ],
+      P29.cilia,
+      true,
+      0.5
+    );
+    e.restore();
+  }
+  e.save();
+  e.shadowColor = P29.spot;
+  e.shadowBlur = 4;
+  e.fillStyle = P29.spot;
+  e.beginPath();
+  e.ellipse(0, 0, R18 * 0.2, R18 * 0.2 * sq, 0, 0, TAU256);
+  e.fill();
+  e.restore();
+}
+function mireBud(e, x, y, t) {
+  const P29 = MIRE2, sw = Math.sin(t * 1.3) * 0.08;
+  e.save();
+  e.lineCap = "round";
+  e.beginPath();
+  e.moveTo(x - 3, y);
+  e.quadraticCurveTo(x + 4, y - 1, x + 5.5, y + 4);
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 3.4;
+  e.stroke();
+  e.strokeStyle = P29.stalk;
+  e.lineWidth = 1.8;
+  e.stroke();
+  e.translate(x + 5.5, y + 4);
+  e.rotate(0.25 + sw);
+  const shape4 = () => {
+    e.beginPath();
+    e.moveTo(0, -0.5);
+    e.bezierCurveTo(-4.2, 1.5, -3.4, 7.5, 0, 9);
+    e.bezierCurveTo(3.4, 7.5, 4.2, 1.5, 0, -0.5);
+    e.closePath();
+  };
+  shape4();
+  e.fillStyle = P29.petal;
+  e.fill();
+  e.save();
+  shape4();
+  e.clip();
+  e.fillStyle = P29.petalD;
+  e.beginPath();
+  e.ellipse(1.8, 5, 2.4, 5, 0, 0, TAU256);
+  e.fill();
+  e.strokeStyle = P29.stripe;
+  e.lineWidth = 0.6;
+  e.beginPath();
+  e.moveTo(0, 0);
+  e.quadraticCurveTo(-0.8, 4.5, 0, 8.8);
+  e.stroke();
+  e.fillStyle = P29.wart;
+  dot17(e, -1.6, 3.2, 0.55, P29.wart);
+  dot17(e, -1.2, 5.6, 0.45, P29.wart);
+  e.restore();
+  shape4();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 0.9;
+  e.stroke();
+  poly10(
+    e,
+    [
+      [-2.2, -0.6],
+      [0, 1.8],
+      [2.2, -0.6],
+      [0, -1.4]
+    ],
+    P29.leafD,
+    true,
+    0.7
+  );
+  e.restore();
+}
+var MIRE_MOTTLE = [
+  [0.04, 0.4, 2.6],
+  [0.13, 0.62, 2],
+  [0.21, 0.32, 3],
+  [0.3, 0.6, 2.2],
+  [0.39, 0.38, 2.8],
+  [0.48, 0.64, 2],
+  [0.57, 0.34, 2.6],
+  [0.66, 0.6, 2.4],
+  [0.75, 0.36, 2.2],
+  [0.84, 0.62, 2.8],
+  [0.93, 0.38, 2]
+];
+var MIRE_SPOTS = [0.09, 0.26, 0.44, 0.61, 0.79, 0.95];
+var MIRE_BANKS = [0.11, 0.22, 0.33];
+var MIRELILY_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: ["#f0e2fa", "#cfa4e6", "#9a5cc2"],
+  under(e, o, t, i, a, l) {
+    mireBud(e, o + i + 1, t + a / 2, l);
+  },
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, [MIRE2.petalL, MIRE2.petal, MIRE2.petalD]);
+    e.fill();
+    e.save();
+    e.clip();
+    const rnd27 = seeded2(41);
+    e.strokeStyle = MIRE2.stripe;
+    e.lineWidth = 0.6;
+    for (let x = o + 5 + rnd27() * 6; x < o + i; x += 9 + rnd27() * 8) {
+      e.beginPath();
+      e.moveTo(x, t - 2.5);
+      e.quadraticCurveTo(x + 1.5, t - 1.5, x + 2.4, t - 0.2);
+      e.moveTo(x + 4, t + a + 2.5);
+      e.quadraticCurveTo(x + 5.5, t + a + 1.5, x + 6.4, t + a + 0.2);
+      e.stroke();
+    }
+    for (let x = o + 12 + rnd27() * 10; x < o + i - 4; x += 26 + rnd27() * 30) dot17(e, x, t - 1.3, 0.7, MIRE2.wart);
+    e.restore();
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    pill(e, o, t, i, a);
+    e.fillStyle = MIRE_BOG;
+    e.fill();
+    e.save();
+    e.clip();
+    e.fillStyle = MIRE_SCUM;
+    e.fillRect(o, t, i, a * 0.28);
+    const r24 = seeded2(9);
+    for (let x = o + 4; x < o + i; x += 6 + r24() * 10) dot17(e, x, t + a * 0.32, 0.8 + r24() * 0.7, MIRE_SCUM);
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    const P29 = MIRE2;
+    e.fillStyle = vgrad(e, t, a, [P29.stalkL, P29.stalk, P29.stalkD]);
+    e.fillRect(o, t, i, a);
+    e.fillStyle = "rgba(93,42,126,.55)";
+    for (const [f, v, r] of MIRE_MOTTLE) {
+      const x = o + f * n;
+      if (x - r > o + i) continue;
+      e.beginPath();
+      e.ellipse(x, t + v * a, r * 1.3, r * 0.55, 0.2, 0, TAU256);
+      e.fill();
+    }
+    e.fillStyle = P29.stalkL;
+    e.fillRect(o, t + 1, i, 0.7);
+    e.fillStyle = P29.stalkD;
+    e.fillRect(o, t + a * 0.7, i, 0.7);
+    for (const [k, f] of MIRE_SPOTS.entries()) {
+      const x = o + f * n;
+      if (x > o + i - 1.5) continue;
+      const g2 = 0.6 + 0.4 * Math.sin(l * 2.2 + k * 1.7);
+      e.globalAlpha = g2;
+      dot17(e, x, t + a * 0.5, 1, P29.spot);
+      e.globalAlpha = 1;
+      dot17(e, x + 3, t + a * 0.3, 0.55, P29.wart);
+    }
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 4; n++) {
+      const r = (l * 0.9 + n / 4) % 1;
+      e.globalAlpha = 1 - r;
+      dot17(e, o + i * (0.15 + n * 0.23), t + a - 1 + r * 4, 0.9, "#9a5cc2");
+    }
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a) {
+    e.fillStyle = MIRE2.stalkD;
+    e.beginPath();
+    e.arc(o - 0.5, t + i / 2, i / 2, -Math.PI / 2, Math.PI / 2);
+    e.fill();
+    e.fillStyle = "#d6f59a";
+    e.beginPath();
+    e.ellipse(o - 0.4, t + i / 2, 0.9, i / 2 - 1, 0, 0, TAU256);
+    e.fill();
+    dot17(e, o - 0.2, t + i - 0.6 + a, 0.8, MIRE2.spot);
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const low = n < 0.5, b = mireBeat(l, low, r), fx = o + i * n, hx2 = o - 8, hy = t + a / 2 - 2;
+    for (let k2 = 0; k2 < (low ? 5 : 3); k2++) {
+      const q2 = (l * 0.5 + k2 / (low ? 5 : 3)) % 1, x = o + 10 + (k2 * 0.29 + 0.13) % 1 * (fx - o - 14);
+      if (x > fx - 3) continue;
+      e.globalAlpha = 1 - q2;
+      ell6(e, x + Math.sin(q2 * 6 + k2) * 1.5, t - 1 - q2 * 9, 0.7 + q2 * 1.1, 0.7 + q2 * 1.1, MIRE_GAS, true, 0.5);
+    }
+    e.globalAlpha = 1;
+    if (r <= 0)
+      for (const [k2, f] of MIRE_BANKS.entries()) {
+        const at10 = 1.3 + k2 * 0.13, x = o + i * f;
+        if (b.s < at10 || x > fx - 4) continue;
+        const age = b.s - at10, fly = mireClamp(age / 0.22), grow2 = mireEase(mireClamp((age - 0.12) / 0.3)), lift = mireClamp((b.s - 3.9) / 0.6);
+        if (fly < 1) {
+          const px7 = hx2 + (x - hx2) * fly, py = hy - 4 + (t + a - 4 - (hy - 4)) * fly - Math.sin(fly * Math.PI) * 9;
+          ell6(e, px7, py, 2 + fly * 1.5, 1.6 + fly * 1.2, GAS_LIME, true, 0.7);
+        }
+        if (grow2 > 0 && lift < 1) {
+          e.save();
+          e.globalAlpha = Math.min(1, grow2 * 2);
+          gasBank(e, x, t + a + 1, 12, l, 0.62 * (0.45 + grow2 * 0.55), 3 + k2, lift);
+          e.restore();
+        }
+      }
+    e.save();
+    e.translate(hx2, hy);
+    e.rotate(-0.5 + b.lean * 0.3);
+    const k = 1 + b.swell * 0.12;
+    e.scale(k, k);
+    mireLily(e, 8.6, b.open);
+    e.restore();
+    if (b.kick > 0)
+      for (let j = 0; j < 4; j++) {
+        e.globalAlpha = b.kick;
+        dot17(e, hx2 + 6 + j * 2.8, hy - 7 - j * 1.8 - (1 - b.kick) * 4, 1.2 + j * 0.2, MIRE_GAS);
+      }
+    e.globalAlpha = 1;
+    if (r > 0) {
+      for (let j = 0; j < 7; j++) {
+        const d = 1 - r, sx = (j - 3) * 2.4 * (0.4 + d), vy = -4 + d * d * 14 + j % 2 * 2;
+        e.globalAlpha = r;
+        if (j % 3) dot17(e, fx + sx, t + a / 2 + vy, 1, j % 2 ? MIRE2.petal : MIRE_GAS);
+        else ell6(e, fx + sx, t + a / 2 + vy, 1.6, 0.8, MIRE2.petalL, true, 0.5, d * 4 + j);
+      }
+      e.globalAlpha = 1;
+    }
+  }
+};
+function drawMirelilyBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 16, y: y + NAME_GAP, w: w - 26, h: BAR_H }, i, MIRELILY_BAR, a);
+  mirelilyName(e, x + w / 2, y + 13, t.name);
+}
+function mirelilyName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#1e0a2a";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#f6ecff", "#d2a8ee", "#9a5cc2"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -333486,7 +333828,8 @@ var LESSER_BARS = Object.freeze({
   waxcrown: Object.freeze({ draw: drawWaxcrownBar, side: 20 }),
   pitjaw: Object.freeze({ draw: drawPitjawBar, side: 18 }),
   spinegrove: Object.freeze({ draw: drawSpinegroveBar, side: 16 }),
-  sirocco: Object.freeze({ draw: drawSiroccoBar, side: 16 })
+  sirocco: Object.freeze({ draw: drawSiroccoBar, side: 16 }),
+  mirelily: Object.freeze({ draw: drawMirelilyBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
