@@ -336576,6 +336576,438 @@ function ironhornName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var STM = TALON_PAL.A;
+var STM_SKY = ["#5a6b86", "#3a4760", "#242d40"];
+var STM_DEAD = "#17191d";
+var STM_DEADL = "#25282e";
+var stmEase = (x) => x * x * (3 - 2 * x);
+var stmClamp = (x) => Math.max(0, Math.min(1, x));
+function stmBeat(t, low) {
+  const T121 = low ? 3 : 6, u = (t % T121 + T121) % T121 / T121 * 6;
+  const b = { u, open: 0, beat: 0, gust: -1, tired: 0, rings: [] };
+  if (u >= 0.8 && u < 1.6) b.open = stmEase(stmClamp((u - 0.95) / 0.6));
+  else if (u >= 1.6 && u < 3.1) {
+    const age = (u - 1.6) * 60, ph = age / 30 % 1;
+    b.open = 1;
+    b.gust = (u - 1.6) / 1.5;
+    b.up = ph >= 0.32;
+    b.beat = ph < 0.32 ? stmEase(ph / 0.32) : 1 - stmEase((ph - 0.32) / 0.68);
+    if (age > 81) b.beat *= 1 - (age - 81) / 9;
+  } else if (u >= 3.1 && u < 4.3) {
+    const age = (u - 3.1) * 60;
+    b.open = 1 - stmEase(stmClamp(age / 27));
+    b.tired = stmClamp(age / 12) * (1 - stmClamp((age - 54) / 18));
+  }
+  for (const at10 of [6, 36, 66]) {
+    const q2 = ((u - 1.6) * 60 - at10) / 36;
+    if (q2 > 0 && q2 < 1) b.rings.push(q2);
+  }
+  return b;
+}
+var STM_LW = 1.7;
+var STM_SEC = [
+  [40, 27],
+  [33, 27.6],
+  [26, 27],
+  [19, 25.4],
+  [12, 22.4],
+  [5, 17.6]
+];
+function stmInnerWing(e) {
+  e.beginPath();
+  e.moveTo(-1, 0);
+  e.quadraticCurveTo(12, -7, 28, -5);
+  e.quadraticCurveTo(40, -3.4, 47, 1);
+  e.lineTo(46, 14);
+  e.lineTo(42, 24);
+  for (const [x, y] of STM_SEC) e.quadraticCurveTo(x + 2.6, y + 3.6, x, y);
+  e.lineTo(-2, 10);
+  e.closePath();
+}
+function stmSpreadWing(e, hand8, open3, t) {
+  const P29 = STM, tips = [];
+  e.save();
+  e.translate(44, 4);
+  e.rotate(hand8);
+  e.translate(-44, -4);
+  for (let i = 0; i < 6; i++) {
+    const a = (-0.2 + i * 0.17) * (0.55 + open3 * 0.45), len = 28 - Math.abs(i - 1.5) * 1.5, bx = 42 + i * 0.5, by = 1.5 + i * 4;
+    e.save();
+    e.translate(bx, by);
+    e.rotate(a);
+    const f = () => {
+      e.beginPath();
+      e.moveTo(-6, -4.4);
+      e.quadraticCurveTo(len * 0.5, -4.8, len, -1);
+      e.quadraticCurveTo(len * 0.65, 3, -6, 4.6);
+      e.closePath();
+    };
+    f();
+    e.fillStyle = P29.wing;
+    e.fill();
+    e.save();
+    f();
+    e.clip();
+    e.fillStyle = P29.bar;
+    for (const u of [7, 13.5, 20]) e.fillRect(u, -5, 1.6, 10);
+    e.fillStyle = P29.tip;
+    e.fillRect(len - 6, -5, 7, 10);
+    e.fillStyle = P29.storm;
+    e.fillRect(len - 6.6, -5, 1.1, 10);
+    e.restore();
+    e.strokeStyle = P29.wingD;
+    e.lineWidth = 0.7 * STM_LW;
+    e.beginPath();
+    e.moveTo(-2, 0);
+    e.quadraticCurveTo(len * 0.5, -0.4, len - 1.5, -0.2);
+    e.stroke();
+    f();
+    e.strokeStyle = EDGE5;
+    e.lineWidth = 1.1 * STM_LW;
+    e.stroke();
+    e.restore();
+    tips.push([bx + Math.cos(a) * len, by + Math.sin(a) * len]);
+  }
+  if (open3 > 0.6) {
+    e.save();
+    e.lineCap = "round";
+    e.lineJoin = "round";
+    const fr = t * 7 | 0;
+    for (let i = 0; i < 5; i++) {
+      if (Math.sin(t * 9 + i * 2.1) <= 0.2) continue;
+      const p0 = tips[i], p1 = tips[i + 1], r = seeded2(i * 7 + fr * 31 + 1), j = (u) => [p0[0] + (p1[0] - p0[0]) * u + 2 + r() * 4, p0[1] + (p1[1] - p0[1]) * u], m = j(0.5), pts2 = [p0, j(0.33), [m[0] - 3, m[1]], j(0.66), p1];
+      e.globalAlpha = (open3 - 0.6) / 0.4;
+      for (const [col2, w] of [
+        ["rgba(20,50,90,.55)", 2.6],
+        [P29.storm, 1.3],
+        ["#fff", 0.5]
+      ]) {
+        e.strokeStyle = col2;
+        e.lineWidth = w;
+        e.beginPath();
+        pts2.forEach((q2, n) => n ? e.lineTo(q2[0], q2[1]) : e.moveTo(q2[0], q2[1]));
+        e.stroke();
+      }
+    }
+    e.globalAlpha = 1;
+    e.restore();
+  }
+  e.restore();
+  stmInnerWing(e);
+  e.fillStyle = P29.wing;
+  e.fill();
+  e.save();
+  stmInnerWing(e);
+  e.clip();
+  e.fillStyle = P29.wingD;
+  e.beginPath();
+  e.moveTo(-2, 12);
+  for (const [x, y] of STM_SEC.slice().reverse()) e.lineTo(x, y - 4.5);
+  e.lineTo(46, 20);
+  e.lineTo(48, 32);
+  e.lineTo(-4, 24);
+  e.closePath();
+  e.fill();
+  e.strokeStyle = P29.bar;
+  e.lineWidth = 1.4 * STM_LW;
+  for (const k of [0, 1]) {
+    e.beginPath();
+    e.moveTo(3, 9 + k * 4.5);
+    e.quadraticCurveTo(22, 15 + k * 4.6, 44, 12 + k * 5);
+    e.stroke();
+  }
+  e.strokeStyle = P29.wingD;
+  e.lineWidth = 0.9 * STM_LW;
+  for (const [x, y] of STM_SEC) {
+    e.beginPath();
+    e.moveTo(x * 0.9 + 2, y * 0.42 + 3);
+    e.lineTo(x, y - 1);
+    e.stroke();
+  }
+  e.fillStyle = P29.body;
+  e.beginPath();
+  e.moveTo(-2, 1);
+  e.quadraticCurveTo(12, -6, 28, -4.4);
+  e.quadraticCurveTo(40, -3, 48, 1);
+  for (let x = 47; x >= 1; x -= 5.8) e.quadraticCurveTo(x - 1.2, 8.4 - (47 - x) * 0.04, x - 5.8, 6.6 - (47 - x) * 0.04);
+  e.closePath();
+  e.fill();
+  e.strokeStyle = P29.bodyD;
+  e.lineWidth = 0.9 * STM_LW;
+  for (let x = 41; x >= 5; x -= 5.8) {
+    e.beginPath();
+    e.arc(x - 2.4, 3, 2.8, 0.4, 2.7);
+    e.stroke();
+  }
+  e.fillStyle = P29.bodyL;
+  e.beginPath();
+  e.ellipse(20, -3.6, 11, 1.5, 0.02, 0, TAU258);
+  e.fill();
+  e.fillStyle = P29.chest;
+  e.beginPath();
+  e.ellipse(41, 9, 4.2, 3, 0.5, 0, TAU258);
+  e.fill();
+  e.restore();
+  stmInnerWing(e);
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 1.6 * STM_LW;
+  e.lineJoin = "round";
+  e.stroke();
+}
+function stmWing(e, x, y, h, b, t) {
+  const mix52 = (p, q2, u) => p + (q2 - p) * u, spread = b.tired > 0 ? mix52(1, 0.72, b.tired) : 0.86 + b.open * 0.14, beat2 = b.gust >= 0 ? b.beat : b.tired * 0.55, k = b.gust >= 0 ? 0 : stmEase(beat2) * 0.28, phi = mix52(1.45, -0.12, k) + Math.sin(t * 3) * 0.03 * spread, sw = mix52(-0.3, 0.62, k), hand8 = ((b.gust >= 0 && b.up ? 0.25 + 0.85 * Math.sin(Math.PI * k) : -0.05 + 0.3 * k) + b.tired * 0.45) * spread, ax = mix52(-0.95, sw, spread), ay = mix52(-0.28, -Math.sin(phi) * 0.85 + 0.5 * Math.cos(phi), spread), L = mix52(0.35, 1, spread) * 1.3;
+  e.save();
+  e.translate(x + 6.5, y + 3);
+  e.rotate((b.gust >= 0 ? stmEase(b.beat) : 0) * 0.75);
+  e.scale(0.43, 0.43);
+  e.transform(ax * L, ay * L, -0.95, 0.3, 0, 0);
+  stmSpreadWing(e, hand8, spread, t);
+  e.restore();
+}
+function stmBolt(e, x, y, h, seed2, k) {
+  const r = seeded2(seed2), pts2 = [[x, y]];
+  for (let j = 1; j <= 4; j++) pts2.push([x + (r() - 0.5) * 3.2, y + h * j / 4]);
+  e.save();
+  e.globalAlpha = k;
+  e.lineJoin = "round";
+  for (const [col2, w] of [
+    ["rgba(159,230,255,.45)", 2.2],
+    ["#ffffff", 0.8]
+  ]) {
+    e.strokeStyle = col2;
+    e.lineWidth = w;
+    e.beginPath();
+    pts2.forEach((q2, j) => j ? e.lineTo(q2[0], q2[1]) : e.moveTo(q2[0], q2[1]));
+    e.stroke();
+  }
+  e.restore();
+}
+function stmStreak(e, x, y, len, k) {
+  if (k <= 0) return;
+  e.save();
+  e.globalAlpha = k;
+  e.lineCap = "round";
+  const path21 = () => {
+    e.beginPath();
+    for (let i = 0; i <= 6; i++) {
+      const u = i / 6;
+      i ? e.lineTo(x + len * u, y + Math.sin(u * TAU258) * 1.1) : e.moveTo(x, y);
+    }
+  };
+  path21();
+  e.strokeStyle = "rgba(16,30,44,.45)";
+  e.lineWidth = 2.2;
+  e.stroke();
+  path21();
+  e.strokeStyle = "#f4fbff";
+  e.lineWidth = 1.1;
+  e.stroke();
+  e.restore();
+}
+function stmFeather(e, x, y, rot2, k) {
+  e.save();
+  e.translate(x, y);
+  e.rotate(rot2);
+  e.scale(k, k);
+  e.beginPath();
+  e.moveTo(-6, 0);
+  e.quadraticCurveTo(0, -2.6, 6, 0);
+  e.quadraticCurveTo(0, 2.6, -6, 0);
+  e.closePath();
+  e.fillStyle = STM.wing;
+  e.fill();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 0.8;
+  e.stroke();
+  e.fillStyle = STM.bar;
+  e.fillRect(-1, -1.6, 1.2, 3.2);
+  e.strokeStyle = STM.chest;
+  e.lineWidth = 0.6;
+  e.beginPath();
+  e.moveTo(-6, 0);
+  e.lineTo(6, 0);
+  e.stroke();
+  e.restore();
+}
+var STORMTALON_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: ["#eafaff", "#9fe6ff", "#2c4a6e"],
+  under(e, o, t, i, a, l, n) {
+    stmWing(e, o, t, a, stmBeat(l, n < 0.5), l);
+  },
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, [STM.bodyL, STM.body, STM.bodyD]);
+    e.fill();
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    e.strokeStyle = STM.bodyD;
+    e.lineWidth = 0.6;
+    e.beginPath();
+    for (let x = o + 4; x < o + i - 4; x += 4.2) {
+      e.moveTo(x + 1.6, t - 1.7);
+      e.arc(x, t - 1.7, 1.6, 0, Math.PI);
+      e.moveTo(x + 2.1 + 1.6, t + a + 0.6);
+      e.arc(x + 2.1, t + a + 0.6, 1.6, 0, Math.PI);
+    }
+    e.stroke();
+    pill(e, o, t, i, a);
+    e.fillStyle = STM_DEAD;
+    e.fill();
+    e.save();
+    e.clip();
+    const r = seeded2(31);
+    e.fillStyle = STM_DEADL;
+    for (let x = o + 2; x < o + i; x += 6 + r() * 6) {
+      e.beginPath();
+      e.ellipse(x, t + 0.6, 3.5 + r() * 2, 2.2, 0, 0, TAU258);
+      e.fill();
+    }
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    const b = stmBeat(l, i / n < 0.5);
+    e.fillStyle = vgrad(e, t, a, STM_SKY);
+    e.fillRect(o, t, i, a);
+    e.strokeStyle = "rgba(214,236,255,.22)";
+    e.lineWidth = 0.5;
+    e.beginPath();
+    const rain = l * 30 % 5;
+    for (let x = o - 4 + rain; x < o + i; x += 5) {
+      e.moveTo(x, t + a * 0.3);
+      e.lineTo(x - 2, t + a);
+    }
+    e.stroke();
+    const roll10 = l * 5 % 40, cr = seeded2(57);
+    for (let x0 = 0; x0 < i + 60; ) {
+      const w = 4 + cr() * 5, x = o - 40 + roll10 + x0, lift = cr() * 1.2;
+      x0 += w * 1.6 + cr() * 4;
+      if (x > o + i + w) continue;
+      e.fillStyle = "#2a3346";
+      e.beginPath();
+      e.ellipse(x, t + 1.4 - lift, w, 2.6, 0, 0, TAU258);
+      e.fill();
+      e.fillStyle = "#8e9bb2";
+      e.beginPath();
+      e.ellipse(x - 0.5, t + 0.4 - lift, w * 0.8, 1.5, 0, 0, TAU258);
+      e.fill();
+    }
+    const slot = Math.floor(l * 2.5), age = l * 2.5 - slot, rr7 = seeded2(slot * 7 + 11);
+    if (rr7() < 0.8 && age < 0.4) stmBolt(e, o + 10 + rr7() * Math.max(0, i - 20), t + 0.5, a - 1, slot, 1 - age / 0.4);
+    for (const q2 of b.rings) {
+      const x = o + 6 + q2 * (n - 6);
+      if (q2 < 0.25 && x < o + i) stmBolt(e, x - 4, t + 0.5, a - 1, 99 + Math.round(q2 * 4), 1 - q2 / 0.25);
+      if (x > o + i + 4) continue;
+      e.fillStyle = "rgba(238,248,255," + (0.3 * (1 - q2)).toFixed(3) + ")";
+      e.fillRect(x - 3, t, 6, a);
+    }
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    const r = seeded2((l * 8 | 0) + 3);
+    e.strokeStyle = "#ffffff";
+    e.lineWidth = 0.6;
+    e.beginPath();
+    for (let n = 0; n < 2; n++) {
+      const x = o + r() * i;
+      e.moveTo(x, t + 1);
+      e.lineTo(x + 1.2, t + a * 0.5);
+      e.lineTo(x - 0.4, t + a * 0.6);
+      e.lineTo(x + 0.8, t + a - 1);
+    }
+    e.stroke();
+  },
+  edge(e, o, t, i, a) {
+    for (const [dy, rr7] of [
+      [0.2, 2],
+      [0.55, 2.3],
+      [0.9, 1.9]
+    ])
+      dot17(e, o - 0.6, t + i * dy, rr7, "#4a5874");
+    for (const [dy, rr7] of [
+      [0.2, 1.2],
+      [0.55, 1.5],
+      [0.9, 1.1]
+    ])
+      dot17(e, o - 0.9, t + i * dy - 0.3, rr7 + a * 0.5, "#a8b6cc");
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const b = stmBeat(l, n < 0.5), fx = o + i * n;
+    for (const q2 of b.rings) {
+      const x = o + 6 + q2 * (i - 6), k = Math.sin(q2 * Math.PI);
+      e.save();
+      e.globalAlpha = k;
+      e.lineCap = "round";
+      e.strokeStyle = "rgba(16,30,44,.4)";
+      e.lineWidth = 3.2;
+      e.beginPath();
+      e.ellipse(x - 6, t + a / 2, 7.5, a / 2 + 7, 0, -0.95, 0.95);
+      e.stroke();
+      e.strokeStyle = "#eef8ff";
+      e.lineWidth = 1.8;
+      e.stroke();
+      e.strokeStyle = "rgba(191,230,255,.7)";
+      e.lineWidth = 0.8;
+      e.beginPath();
+      e.ellipse(x - 11, t + a / 2, 6, a / 2 + 5, 0, -0.85, 0.85);
+      e.stroke();
+      e.restore();
+    }
+    if (b.gust >= 0) {
+      const fade = 1 - stmClamp((b.gust - 0.9) / 0.1), T121 = b.gust * 1.5;
+      for (let k = 0; k < 7; k++) {
+        const q3 = (T121 * 1.2 + k / 7) % 1, above = k % 2 === 0, x2 = o + 10 + q3 * (i - 30), y2 = above ? t - 4 - k % 3 * 1.5 : t + a + 4 + k % 3;
+        if (above && x2 > o + i * 0.36 && x2 < o + i * 0.64) continue;
+        stmStreak(e, x2, y2, 10 + k % 3 * 3, Math.sin(q3 * Math.PI) * fade);
+        if (k % 3 === 1) {
+          e.globalAlpha = fade * Math.sin(q3 * Math.PI);
+          dot17(e, x2 + 12, y2 + 1.5, 1, k % 2 ? "#b47ccc" : "#d9a8e6");
+          e.globalAlpha = 1;
+        }
+      }
+      const q2 = T121 * 0.55 % 1, x = o + 16 + q2 * (i - 40), y = t + a + 6 + Math.sin(q2 * 9) * 2.5;
+      e.globalAlpha = fade * Math.min(1, q2 * 6, (1 - q2) * 6);
+      stmFeather(e, x, y, q2 * 9, 0.75);
+      e.globalAlpha = 1;
+    }
+    if (n < 0.5)
+      for (let k = 0; k < 3; k++) {
+        const q2 = (l * 0.5 + k / 3) % 1, x = o + 14 + (k * 0.37 + 0.2) % 1 * Math.max(0, fx - o - 18);
+        e.globalAlpha = 1 - q2;
+        dot17(e, x + Math.sin(q2 * 7 + k) * 2, t + a + 1 + q2 * 6, 0.8, STM.chest);
+      }
+    e.globalAlpha = 1;
+    if (r > 0)
+      for (let k = 0; k < 5; k++) {
+        const d = 1 - r, sx = (k - 2) * 3 * (0.4 + d), vy = -4 + d * d * 12 + k % 2 * 2;
+        e.globalAlpha = r;
+        stmFeather(e, fx + sx, t + a / 2 + vy, k * 1.3 + d * 3, 0.42);
+      }
+    e.globalAlpha = 1;
+  }
+};
+function drawStormtalonBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 18, y: y + NAME_GAP, w: w - 24, h: BAR_H }, i, STORMTALON_BAR, a);
+  stormtalonName(e, x + w / 2, y + 13, t.name);
+}
+function stormtalonName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#0e1622";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#f4fcff", "#bfe6ff", "#6fb0d8"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -336592,7 +337024,8 @@ var LESSER_BARS = Object.freeze({
   mirelily: Object.freeze({ draw: drawMirelilyBar, side: 16 }),
   croakmaw: Object.freeze({ draw: drawCroakmawBar, side: 16 }),
   gorgeleech: Object.freeze({ draw: drawGorgeleechBar, side: 16 }),
-  ironhorn: Object.freeze({ draw: drawIronhornBar, side: 16 })
+  ironhorn: Object.freeze({ draw: drawIronhornBar, side: 16 }),
+  stormtalon: Object.freeze({ draw: drawStormtalonBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
