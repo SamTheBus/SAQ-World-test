@@ -7233,6 +7233,45 @@ var UNIQUE_ITEMS = freezeWire(
         "grassland",
         "Every 1.5 s while an enemy is within 5 tiles, a bee flies out of your crown and stings the nearest one for {0} of your Attack. The honey slows it 30% for 2 s.",
         "Not the bees!"
+      ),
+      // Tropical lesser bosses (Sammy 2026-11-24, set page CEEEmf2s..., passes approved): one any-class unique each, at a
+      // named elite's 10%. Vinegorger's wyrm bursts up under whoever hits you, Rotbloom's snapjaw seeds on each skill,
+      // Gulpjaw's belly flop on a critical hit.
+      unique(
+        "wyrmcoil-hide",
+        "Wyrmcoil Hide",
+        "overall",
+        null,
+        "Hauberk",
+        null,
+        "vinegorger",
+        "tropical",
+        "When an enemy hits you, a thorn wyrm bursts up under that enemy in a ring of thorns: it and every enemy around it take {0} of your Attack and are knocked back a little. Works on ranged hits too. Once every 5 s.",
+        "Walk without rhythm."
+      ),
+      unique(
+        "snapseed-ring",
+        "Snapseed Ring",
+        "ring",
+        null,
+        "Band Ring",
+        null,
+        "rotbloom",
+        "tropical",
+        "Each time you use a skill, a seed flies at the nearest enemy and sprouts a little snapjaw where it lands. For 3 s it bites enemies within 1.5 tiles every half second for {0} of your Attack. Up to 2 sprouts at once.",
+        "Feed me, Seymour!"
+      ),
+      unique(
+        "gulpjaw-hood",
+        "Gulpjaw Hood",
+        "helmet",
+        null,
+        "Backwards Cap",
+        null,
+        "gulpjaw",
+        "tropical",
+        "A critical hit makes you hop up and belly-flop where you stand: enemies around you take {0} of your Attack, are pushed back, and a poison puddle slows them 30% for 3 s. Once every 6 s.",
+        "One small hop for a frog."
       )
     ].map((u) => [u.id, u])
   )
@@ -7611,6 +7650,22 @@ var UNIQUE_TIERS = freezeWire({
   "waxcrown-circlet": {
     lines: ["critChance", "atkPct", "lifeHit", "maxHpPct", "defPct"],
     stars: [40, 50, 60, 75],
+    unit: "pct"
+  },
+  // Tropical lesser bosses (v3 lines below; these five are the v2 fallback).
+  "wyrmcoil-hide": {
+    lines: ["maxHpPct", "defPct", "lifeHit", "atkPct", "eliteDr"],
+    stars: [120, 150, 180, 220],
+    unit: "pct"
+  },
+  "snapseed-ring": {
+    lines: ["atkPct", "cdr", "critChance", "lifeHit", "maxHpPct"],
+    stars: [20, 25, 30, 38],
+    unit: "pct"
+  },
+  "gulpjaw-hood": {
+    lines: ["critChance", "atkPct", "lifeHit", "maxHpPct", "defPct"],
+    stars: [150, 190, 230, 290],
     unit: "pct"
   }
 });
@@ -8027,6 +8082,21 @@ var UNIQUE_LINES_V3 = freezeWire({
   "waxcrown-circlet": {
     always: "critChance",
     pool: ["atkPct", "lifeHit", "maxHpPct", "defPct", "ailingDmg", "cdr", "mainAttr"],
+    leg: []
+  },
+  "wyrmcoil-hide": {
+    always: "defPct",
+    pool: ["maxHpPct", "lifeHit", "areaDmg", "eliteDr", "areaDr", "closeDmg", "mainAttr"],
+    leg: []
+  },
+  "snapseed-ring": {
+    always: "cdr",
+    pool: ["atkPct", "critChance", "lifeHit", "maxHpPct", "areaDmg", "ailingDmg", "mainAttr"],
+    leg: []
+  },
+  "gulpjaw-hood": {
+    always: "critChance",
+    pool: ["atkPct", "lifeHit", "maxHpPct", "defPct", "areaDmg", "ailingDmg", "mainAttr"],
     leg: []
   }
 });
