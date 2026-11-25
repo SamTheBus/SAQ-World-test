@@ -3129,7 +3129,29 @@ var ORDINARY_ENEMIES = Object.freeze([
   ...LESSER_BOSSES_V1_VOLCANIC_ENEMIES,
   ...OPEN_LAND_CREATURES_V1_VOLCANIC_ENEMIES
 ]);
+var profileMemo = /* @__PURE__ */ new Map();
+var profileCopy = (v) => {
+  if (v === null || typeof v !== "object") return v;
+  if (Array.isArray(v)) return Object.freeze(v.map(profileCopy));
+  const out = /* @__PURE__ */ Object.create(null);
+  for (const k in v) out[k] = profileCopy(v[k]);
+  return Object.freeze(out);
+};
 function resolveOrdinaryProfile(enemy2, tier, progressionPower = BASELINE_PROGRESSION_POWER) {
+  let byKey = profileMemo.get(enemy2);
+  const key5 = tier + "/" + progressionPower;
+  let kept = typeof tier === "string" && typeof progressionPower === "number" ? byKey?.get(key5) : void 0;
+  if (!kept) {
+    kept = buildOrdinaryProfile(enemy2, tier, progressionPower);
+    if (typeof tier === "string" && typeof progressionPower === "number") {
+      if (!byKey) profileMemo.set(enemy2, byKey = /* @__PURE__ */ new Map());
+      if (byKey.size >= 64) byKey.clear();
+      byKey.set(key5, kept);
+    }
+  }
+  return profileCopy(kept);
+}
+function buildOrdinaryProfile(enemy2, tier, progressionPower) {
   requireContract(ORDINARY_ENEMIES.includes(enemy2), "Unknown ordinary definition");
   const i = ORDINARY_ENEMIES.indexOf(enemy2), rank = THREAT_TIERS.indexOf(tier), power2 = resolveThreatPower(progressionPower, tier);
   return freezeWire({

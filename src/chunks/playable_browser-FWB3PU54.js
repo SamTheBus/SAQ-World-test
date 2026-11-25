@@ -1157,7 +1157,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-XC4BWNUY.js";
+} from "./chunk-NKUB52PP.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -175505,29 +175505,50 @@ function rustNibblerFacingD11_2({
   }
   return facing2;
 }
-var staticLayout = null;
-var staticFrames = null;
+var staticSeen = [];
 var staticSpots = /* @__PURE__ */ new Map();
-function staticProjectionV1(address3, frames) {
-  if (frames === staticFrames) return staticSpotV1(address3, frames);
-  let layout = "";
-  for (const f of frames)
-    layout += f.id + ":" + f.chunkX + "," + f.chunkY + ":" + f.offsetX + "," + f.offsetY + (f.originBounds ? ":" + f.originBounds.width + "x" + f.originBounds.height : "") + "|";
-  if (layout !== staticLayout) {
-    staticLayout = layout;
-    staticSpots = /* @__PURE__ */ new Map();
+var staticCount = 0;
+function staticLayoutSameV1(frames) {
+  let i = 0;
+  for (const f of frames) {
+    const b = f.originBounds;
+    if (staticSeen[i] !== f.id || staticSeen[i + 1] !== f.chunkX || staticSeen[i + 2] !== f.chunkY || staticSeen[i + 3] !== f.offsetX || staticSeen[i + 4] !== f.offsetY || staticSeen[i + 5] !== (b ? b.width : null) || staticSeen[i + 6] !== (b ? b.height : null))
+      return false;
+    i += 7;
   }
-  staticFrames = Object.isFrozen(frames) ? frames : null;
-  return staticSpotV1(address3, frames);
+  return i === staticSeen.length;
 }
-function staticSpotV1(address3, frames) {
-  const key4 = address3.chunkX + "," + address3.chunkY + "," + address3.localX + "," + address3.localY;
-  let spot2 = staticSpots.get(key4);
+function staticProjectionV1(address3, frames) {
+  if (!staticLayoutSameV1(frames)) {
+    staticSeen = [];
+    for (const f of frames)
+      staticSeen.push(
+        f.id,
+        f.chunkX,
+        f.chunkY,
+        f.offsetX,
+        f.offsetY,
+        f.originBounds ? f.originBounds.width : null,
+        f.originBounds ? f.originBounds.height : null
+      );
+    staticSpots = /* @__PURE__ */ new Map();
+    staticCount = 0;
+  }
+  let byX = staticSpots.get(address3.chunkX);
+  if (!byX) staticSpots.set(address3.chunkX, byX = /* @__PURE__ */ new Map());
+  let byY = byX.get(address3.chunkY);
+  if (!byY) byX.set(address3.chunkY, byY = /* @__PURE__ */ new Map());
+  const at10 = Number.isInteger(address3.localX) && Number.isInteger(address3.localY) ? address3.localX * 65536 + address3.localY : address3.localX + "," + address3.localY;
+  let spot2 = byY.get(at10);
   if (spot2 === void 0) {
     spot2 = projectToLocalFrameD9(address3, frames);
     if (spot2) Object.freeze(spot2);
-    if (staticSpots.size > 4e3) staticSpots.clear();
-    staticSpots.set(key4, spot2);
+    if (++staticCount > 4e3) {
+      staticSpots = /* @__PURE__ */ new Map();
+      staticCount = 1;
+      staticSpots.set(address3.chunkX, /* @__PURE__ */ new Map([[address3.chunkY, byY = /* @__PURE__ */ new Map()]]));
+    }
+    byY.set(at10, spot2);
   }
   return spot2;
 }
@@ -175569,6 +175590,10 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
             if (!slowView.has(name)) slowView.set(name, fn());
             return slowView.get(name);
           };
+          const siteDoorOpen = (payload) => slowCached(
+            "site-door:" + payload.siteId + "/" + payload.direction + "/" + (payload.transitionId ?? payload.extractionId ?? "") + "/" + (state2.primary.actorsById[local8.entityId]?.current ? 1 : 0),
+            () => Boolean(functionalSiteTransitionTargetD9(state2, local8, payload))
+          );
           const serviceNpcs = slowCached("serviceNpcs", () => projectedServiceNpcs(state2, player)), questRev = (questLogV1(state2, player.playerId)?.revision ?? 0) + "/" + (state2.d9World?.navigation?.knowledge?.revision ?? 0), questView = state2.d9World ? slowCached("quests:" + questRev, () => projectQuestsV1(state2, player, local8, serviceNpcs)) : null;
           const tavernBinding = campaignTavernBinding(state2), tavernFloor = tavernBinding ? floorForSpace(tavernBinding, ctx.spaceInstanceId) : null, townHere = tavernFloor ? null : townInteriorForSpace(state2, ctx.spaceInstanceId), townBinding = townHere ? townInteriorBinding(state2, townHere.siteId) : null, townName = townHere ? generatedTownV1(townHere.record.settlementId)?.name ?? "Town" : "";
           const functional = functionalSiteForSpaceD12(state2, ctx.spaceInstanceId), inFunctional = Boolean(functional), functionalFloor = functional ? functionalSiteFloorForSpaceD12(functional, ctx.spaceInstanceId) : null, inOverworld = ctx.spaceInstanceId === state2.overworldInstanceId, c = space.collision, interior2 = inFunctional ? isGeneratedInteriorFamily(functional) ? {
@@ -176074,7 +176099,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                     x: anchor2.x,
                     y: anchor2.y,
                     radius: SITE_INTERACTION_RADIUS,
-                    available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)),
+                    available: siteDoorOpen(payload),
                     label: functional.siteKind === "procedural-fort" ? "Leave Fort" : functional.siteKind === "procedural-ruin" ? "Leave Ruin" : functional.siteKind === "procedural-crypt" ? "Leave Crypt" : `Leave Cave`
                   });
                 }
@@ -176087,7 +176112,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                     siteAction: payload,
                     siteKind: functional.siteKind,
                     .../* boss skip v1: out from the last floor's stairs */
-                    direction2 === "up" && functionalFloor.index === functional.floors.length - 1 && siteBossDoorV1(functional) && functionalSiteTransitionTargetD9(state2, local8, { siteId: functional.siteId, direction: "exit" }) ? {
+                    direction2 === "up" && functionalFloor.index === functional.floors.length - 1 && siteBossDoorV1(functional) && siteDoorOpen({ siteId: functional.siteId, direction: "exit" }) ? {
                       altAction: {
                         siteAction: { siteId: functional.siteId, direction: "exit" },
                         label: functional.siteKind === "procedural-fort" ? "Leave Fort" : functional.siteKind === "procedural-ruin" ? "Leave Ruin" : functional.siteKind === "procedural-crypt" ? "Leave Crypt" : "Leave Cave",
@@ -176100,7 +176125,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                     x: anchor2.x,
                     y: anchor2.y,
                     radius: SITE_INTERACTION_RADIUS,
-                    available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)),
+                    available: siteDoorOpen(payload),
                     label: transition2.label ?? (direction2 === "down" ? "Descend" : "Ascend")
                   });
                 }
@@ -176119,7 +176144,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                     x: anchor2.x,
                     y: anchor2.y,
                     radius: SITE_INTERACTION_RADIUS,
-                    available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)),
+                    available: siteDoorOpen(payload),
                     label: functional.siteKind === "procedural-fort" ? "Return to Fort Entrance" : functional.siteKind === "procedural-ruin" ? "Return to Ruin Entrance" : functional.siteKind === "procedural-crypt" ? "Return to Crypt Entrance" : "Return to Cave Mouth"
                   });
                 }
@@ -176132,7 +176157,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                   x: anchor2.x,
                   y: anchor2.y,
                   radius: SITE_INTERACTION_RADIUS,
-                  available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)),
+                  available: siteDoorOpen(payload),
                   label: functional.siteKind === "woodland-fort" ? "Leave Keep" : `Leave ${functional.label}`
                 });
               }
@@ -176141,7 +176166,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                 const anchor2 = siteEnterPointV1(truth.packageId, front2);
                 const bound = state2.d9World.functionalSitesById[truth.siteId], keep8 = bound?.siteKind === "woodland-fort" || truth.packageId === "procedural-fort-family";
                 if (Math.hypot(anchor2.x - local8.position.x, anchor2.y - local8.position.y) > 900) continue;
-                const payload = { siteId: truth.siteId, direction: "enter" }, available = bound ? Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)) : local8.alive && !state2.primary.actorsById[local8.entityId].current && Math.hypot(anchor2.x - local8.position.x, anchor2.y - local8.position.y) <= SITE_INTERACTION_RADIUS;
+                const payload = { siteId: truth.siteId, direction: "enter" }, available = bound ? siteDoorOpen(payload) : local8.alive && !state2.primary.actorsById[local8.entityId].current && Math.hypot(anchor2.x - local8.position.x, anchor2.y - local8.position.y) <= SITE_INTERACTION_RADIUS;
                 exits.push({
                   exitId: `site-enter:${truth.siteId}`,
                   siteAction: payload,
@@ -176229,25 +176254,37 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
               revision: state2.d9World.navigation.revision,
               knowledge: projectMapKnowledge(state2),
               root: state2.d9World.discoveryIndex,
-              boundSitesById: Object.fromEntries(
-                functionalSitesD10(state2).map((site2) => [
-                  site2.siteId,
-                  {
-                    siteId: site2.siteId,
-                    label: mapSiteLabel(state2, site2.siteId, site2.label),
-                    state: site2.conqueredTick === null ? "active" : "completed"
-                  }
-                ])
+              // The map's site tables change rarely: made a few times a second with the other slow views,
+              // not for every screen view (a row per site, about 50 MB every 40 s standing still).
+              boundSitesById: slowCached(
+                "nav.bound",
+                () => freezeProjection(
+                  Object.fromEntries(
+                    functionalSitesD10(state2).map((site2) => [
+                      site2.siteId,
+                      {
+                        siteId: site2.siteId,
+                        label: mapSiteLabel(state2, site2.siteId, site2.label),
+                        state: site2.conqueredTick === null ? "active" : "completed"
+                      }
+                    ])
+                  )
+                )
               ),
-              navigableSitesById: Object.fromEntries(
-                siteTruth.sites.map((site2) => [
-                  site2.siteId,
-                  {
-                    siteId: site2.siteId,
-                    label: mapSiteLabel(state2, site2.siteId, site2.label),
-                    state: site2.completed || state2.campaign?.partyClearsById?.[site2.siteId] ? "completed" : site2.bound ? "active" : "unidentified"
-                  }
-                ])
+              navigableSitesById: slowCached(
+                "nav.navigable",
+                () => freezeProjection(
+                  Object.fromEntries(
+                    siteTruth.sites.map((site2) => [
+                      site2.siteId,
+                      {
+                        siteId: site2.siteId,
+                        label: mapSiteLabel(state2, site2.siteId, site2.label),
+                        state: site2.completed || state2.campaign?.partyClearsById?.[site2.siteId] ? "completed" : site2.bound ? "active" : "unidentified"
+                      }
+                    ])
+                  )
+                )
               ),
               pending: copyWire(state2.d9World.navigation.pending.filter((r) => r.playerId === localPlayerId)),
               pips: inOverworld ? visible3.filter(
@@ -252954,6 +252991,9 @@ function createSettlementServicesMenu2(options) {
  #settlement-services .tn-pick{max-height:318px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#3a4654 transparent}
  @media (max-width:759px){#settlement-services .tn-pick .tn-filters{flex-wrap:nowrap}#settlement-services .tn-tab{box-shadow:none}}
  @media (min-width:760px){#settlement-services[data-layout=work] .tn-body{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start;overflow:hidden;gap:14px}#settlement-services[data-layout=work] .tn-pick,#settlement-services[data-layout=work] .tn-side{max-height:100%;overflow:auto}#settlement-services[data-layout=work] .tn-body{grid-template-rows:minmax(0,1fr)}#settlement-services[data-layout=work] .tn-side{display:flex;flex-direction:column;gap:12px;min-width:0}#settlement-services[data-layout=work] .tn-pick{order:0}}
+ /* Phone landscape (Sammy 2026-11-24: "you can't see anything"): the name, tabs, gold and close share one row and the
+    buy bar is slimmer, so the items get the height. */
+ @media (max-height:500px) and (orientation:landscape){#settlement-services .tn-shell{display:grid;grid-template-columns:auto minmax(0,auto) minmax(0,1fr) auto auto;grid-template-rows:auto auto auto minmax(0,1fr) auto;align-items:center;column-gap:10px}#settlement-services .tn-head{display:contents}#settlement-services .tn-npc{grid-area:1/1;width:34px;height:34px;margin:8px 0 8px 16px}#settlement-services .tn-npc svg{width:19px;height:19px}#settlement-services .tn-who{grid-area:1/2}#settlement-services .tn-who h3{font-size:17px;white-space:nowrap}#settlement-services .tn-who small{margin-top:3px;font-size:9px;letter-spacing:.12em;white-space:nowrap}#settlement-services .tn-tier{height:16px;font-size:9px}#settlement-services .tn-tabs{grid-area:1/3;align-self:stretch;margin:0;border-bottom:0;justify-content:center}#settlement-services .tn-tabs{justify-content:safe center}#settlement-services .tn-tab{flex:0 0 auto;flex-direction:row;gap:6px;padding:0 12px;font-size:13px}#settlement-services .tn-tab svg{width:17px;height:17px;flex:none}#settlement-services .tn-tab[aria-pressed=true]::after{bottom:0}#settlement-services .tn-wallet{grid-area:1/4;padding:0;flex-wrap:nowrap;max-width:32vw;overflow-x:auto;scrollbar-width:none}#settlement-services .tn-chipv{height:28px}#settlement-services .tn-x{grid-area:1/5;width:36px;height:36px;margin-right:14px}#settlement-services .tn-notice{grid-row:3;grid-column:1/-1;margin:0 14px 6px}#settlement-services .tn-body{grid-row:4;grid-column:1/-1;align-self:stretch;height:100%;padding:8px 14px 8px;border-top:1px solid var(--tn-line)}#settlement-services .tn-pick{max-height:none;gap:8px;padding:10px}#settlement-services .tn-pick .tn-restock{padding:5px 10px}#settlement-services .tn-pick .tn-restock small{display:none}#settlement-services .tn-pick .tn-pickh{display:none}#settlement-services .tn-tabs:has(.tn-tab:nth-child(4)){grid-area:2/1/3/-1;height:38px;margin:0 14px;justify-content:safe center;border-top:1px solid var(--tn-line)}#settlement-services .tn-foot{grid-row:5;grid-column:1/-1;padding:6px 14px 8px}#settlement-services .tn-foot>.tn-btn{min-height:40px}}
  #settlement-services .tn-radio{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:9px 12px;border-radius:12px;border:1px solid var(--tn-line);background:#111820;margin-bottom:6px;font:600 13px/1.2 system-ui,sans-serif;color:#cfd5d6;text-align:left}
  #settlement-services .tn-radio .tn-dot{width:18px;height:18px;border-radius:50%;border:2px solid #4a5868;flex:none}
  #settlement-services .tn-radio[aria-pressed=true]{border-color:var(--tn-accent);background:linear-gradient(90deg,#d9b25f1c,#d9b25f08)}#settlement-services .tn-radio[aria-pressed=true] .tn-dot{border:5px solid var(--tn-gold)}
