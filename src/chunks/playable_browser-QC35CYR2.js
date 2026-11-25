@@ -328981,11 +328981,165 @@ function drawVinegorgerBar(e, o, t, i, a) {
 function vinegorgerName(e, o, t, i) {
   e.save(), e.textAlign = "center", e.textBaseline = "alphabetic", e.lineJoin = "round", e.font = "900 13px Georgia,serif", e.shadowColor = "#000000a0", e.shadowBlur = 4, e.shadowOffsetY = 1, e.lineWidth = 3.4, e.strokeStyle = "#0b1a10", e.strokeText(i, o, t), e.shadowColor = "transparent", e.fillStyle = vgrad(e, t - 10, 11, ["#d8ffd0", "#7ae59a", "#27a05e"]), e.fillText(i, o, t), e.restore();
 }
+var ROT3 = ROT_PAL.A;
+var MAW_RED = "#3b0f19";
+function mixHex9(e, o, t) {
+  let i = parseInt(e.slice(1), 16), a = parseInt(o.slice(1), 16), l = (n) => Math.round((i >> n & 255) + ((a >> n & 255) - (i >> n & 255)) * t);
+  return `rgb(${l(16)},${l(8)},${l(0)})`;
+}
+function trapHead2(e, o, t, i, a, l) {
+  e.save(), e.translate(o, t), e.scale(-i, i), e.rotate(Math.sin(l * 1.35 - 0.7) * 0.08), e.lineCap = "round", e.lineJoin = "round";
+  let r = (s) => {
+    let f = s ? -1 : 1;
+    e.save(), e.rotate(f * a);
+    let h = () => {
+      e.beginPath(), e.moveTo(0, 0), e.ellipse(24 * 0.52, 0, 24 * 0.52, 24 * 0.4, 0, Math.PI, s ? TAU255 : 0, !s), e.closePath();
+    };
+    h(), e.fillStyle = ROT3.inner, e.fill(), e.save(), h(), e.clip(), e.fillStyle = ROT3.innerD, e.beginPath(), e.ellipse(24 * 0.55, f * 24 * 0.12, 24 * 0.4, 24 * 0.16, 0, 0, TAU255), e.fill(), e.fillStyle = ROT3.lobe, e.beginPath(), e.ellipse(24 * 0.5, f * 24 * 0.46, 24 * 0.56, 24 * 0.34, 0, 0, TAU255), e.fill(), e.fillStyle = ROT3.lobeD, e.beginPath(), e.ellipse(24 * 0.66, f * 24 * 0.52, 24 * 0.42, 24 * 0.22, 0, 0, TAU255), e.fill(), e.fillStyle = ROT3.lobeL, e.beginPath(), e.ellipse(24 * 0.34, f * 24 * 0.32, 24 * 0.22, 24 * 0.07, f * 0.2, 0, TAU255), e.fill(), e.fillStyle = ROT3.spot;
+    for (let d = 0; d < 3; d++)
+      e.beginPath(), e.arc(24 * (0.36 + d * 0.16), f * 24 * 0.1, 24 * 0.035, 0, TAU255), e.fill();
+    e.strokeStyle = ROT3.innerD, e.lineWidth = 0.8;
+    for (let d = 0; d < 4; d++)
+      e.beginPath(), e.moveTo(24 * 0.08, 0), e.quadraticCurveTo(24 * (0.3 + d * 0.15), f * 24 * 0.04, 24 * (0.42 + d * 0.14), f * 24 * 0.16), e.stroke();
+    e.restore(), h(), e.strokeStyle = EDGE5, e.lineWidth = 2.4, e.stroke();
+    for (let d = 0; d < 8; d++) {
+      let u = 0.16 + d * 0.115, y = 24 * u, p = 24 * (0.2 + Math.sin(u * Math.PI) * 0.1);
+      poly10(
+        e,
+        [
+          [y - 24 * 0.045, 0],
+          [y + 24 * 0.045, 0],
+          [y + 24 * 0.06, -f * p]
+        ],
+        ROT3.cilia,
+        true,
+        1.1
+      );
+    }
+    e.restore();
+  };
+  if (a > 0.12 && (e.fillStyle = MAW_RED, e.beginPath(), e.moveTo(0, 0), e.lineTo(Math.cos(-a) * 24 * 0.95, Math.sin(-a) * 24 * 0.95), e.lineTo(Math.cos(a) * 24 * 0.95, Math.sin(a) * 24 * 0.95), e.closePath(), e.fill()), r(false), r(true), a > 0.3) {
+    let s = 14.879999999999999;
+    e.strokeStyle = "#ffe9a0", e.lineWidth = 1.2, e.beginPath(), e.moveTo(Math.cos(-a) * s, Math.sin(-a) * s), e.quadraticCurveTo(s * 1.02, Math.sin(l * 3) * 1.5, Math.cos(a) * s, Math.sin(a) * s), e.stroke();
+  }
+  ell6(e, 0, 0, 24 * 0.16, 24 * 0.2, ROT3.stalk, true, 1.6), e.restore();
+}
+function rotLeaf(e, o, t, i, a) {
+  let r = 5 + Math.sin(a * 1.7) * 1.2, s = 1;
+  e.save(), e.translate(o, t), e.scale(i, i), e.rotate(-0.15), e.lineCap = "round", e.lineJoin = "round";
+  let f = [s * 30, -6 - r], h = [s * 30 * 0.55, 4.5], d = [s * 30 * 0.45, -6 - 30 * 0.28], u = () => {
+    e.beginPath(), e.moveTo(0, -2), e.quadraticCurveTo(d[0], d[1], f[0], f[1]), e.quadraticCurveTo(h[0], h[1], 0, 2.5), e.closePath();
+  };
+  u(), e.fillStyle = ROT3.leaf, e.fill(), e.save(), u(), e.clip(), e.fillStyle = ROT3.leafL, e.beginPath(), e.moveTo(0, -2), e.quadraticCurveTo(d[0], d[1], f[0], f[1]), e.quadraticCurveTo(s * 30 * 0.5, -6 * 0.5, 0, 0), e.closePath(), e.fill(), e.fillStyle = ROT3.leafD, e.beginPath(), e.moveTo(f[0], f[1]), e.quadraticCurveTo(s * 30 * 0.8, -6 * 0.2 + 2, s * 30 * 0.62, 1.5), e.lineTo(s * 30 * 0.92, -6 * 0.4), e.closePath(), e.fill(), e.strokeStyle = ROT3.leafD, e.lineWidth = 1.2, e.beginPath(), e.moveTo(0, 0), e.quadraticCurveTo(s * 30 * 0.5, -6 * 0.55, f[0] * 0.94, f[1] * 0.94), e.stroke();
+  for (let y = 1; y < 4; y++) {
+    let p = y / 4, g2 = s * 30 * p, b = -6 * p * 0.6;
+    e.beginPath(), e.moveTo(g2, b), e.lineTo(g2 + s * 3, b - 3), e.stroke();
+  }
+  e.restore(), u(), e.strokeStyle = EDGE5, e.lineWidth = 2, e.stroke();
+  for (let y = 1; y < 5; y++) {
+    let p = y / 5.2, g2 = f[0] * p + s * (1 - Math.abs(p - 0.5) * 2) * 1.5, b = -2 + (f[1] + 2) * p - (1 - Math.abs(p - 0.5) * 2) * 30 * 0.18 - 1.2;
+    poly10(
+      e,
+      [
+        [g2 - s * 1.6, b + 0.8],
+        [g2 + s * 0.6, b - 1.6],
+        [g2 + s * 1.4, b + 0.9]
+      ],
+      ROT3.leaf,
+      true,
+      1
+    );
+  }
+  e.restore();
+}
+function seedPod(e, o, t, i, a) {
+  let l = a > 0.15, n = i * (1 + a * 0.5);
+  e.save(), e.translate(o, t), e.rotate(Math.PI), e.scale(n, n);
+  let r = () => {
+    e.beginPath(), e.moveTo(0, 2), e.bezierCurveTo(-6, 0, -5, -10, 0, -12), e.bezierCurveTo(5, -10, 6, 0, 0, 2), e.closePath();
+  };
+  r(), e.fillStyle = l ? mixHex9(ROT3.pod, ROT3.podHot, unit17(a * 1.4)) : ROT3.pod, e.fill(), e.save(), r(), e.clip(), e.fillStyle = ROT3.podD, e.beginPath(), e.ellipse(2.5, -3, 3.4, 7, 0, 0, TAU255), e.fill(), e.strokeStyle = ROT3.stripe, e.lineWidth = 1;
+  for (let s of [-2, 1.2]) e.beginPath(), e.moveTo(s, 1), e.quadraticCurveTo(s * 1.6, -6, s * 0.4, -11.5), e.stroke();
+  e.fillStyle = "rgba(255,255,255,.45)", e.beginPath(), e.ellipse(-2, -7, 1.2, 2.4, 0.2, 0, TAU255), e.fill(), e.restore(), r(), e.strokeStyle = EDGE5, e.lineWidth = 1.8, e.stroke(), l && (e.strokeStyle = EDGE5, e.lineWidth = 1, e.beginPath(), e.moveTo(-1, -11), e.lineTo(0.5, -8), e.lineTo(-0.5, -6), e.stroke()), e.restore();
+}
+function trapGape(e, o) {
+  let t = o ? 1.7 : 3.4, i = e % t / t, a = 0.22 + Math.sin(e * 1.6) * 0.06, l = (n) => n * n * (3 - 2 * n);
+  return i > 0.55 && i < 0.8 ? a + l((i - 0.55) / 0.25) * 0.6 : i >= 0.8 && i < 0.85 ? (a + 0.6) * (1 - (i - 0.8) / 0.05) : i >= 0.85 && i < 0.92 ? 0 : a;
+}
+function rotCutEnd(e, o, t, i) {
+  let a = i / 2 + 3, l = a * 0.5;
+  e.beginPath(), e.moveTo(o - 6, t - a + 1.4), e.lineTo(o, t - a), e.lineTo(o, t + a), e.lineTo(o - 6, t + a - 1.4), e.closePath(), e.fillStyle = ROT3.stalk, e.fill(), e.fillStyle = ROT3.stalkD, e.fillRect(o - 6, t + 1, 6, a - 1.2), e.fillStyle = ROT3.stalkL, e.fillRect(o - 6, t - a + 2, 6, 1.4), e.beginPath(), e.moveTo(o - 6, t - a + 1.4), e.lineTo(o, t - a), e.moveTo(o - 6, t + a - 1.4), e.lineTo(o, t + a), e.strokeStyle = EDGE5, e.lineWidth = 1, e.stroke(), e.beginPath(), e.ellipse(o, t, l, a, 0, 0, TAU255), e.fillStyle = ROT3.stalkD, e.fill(), e.lineWidth = 1.1, e.strokeStyle = EDGE5, e.stroke(), e.beginPath(), e.ellipse(o, t, l - 1, a - 1.2, 0, 0, TAU255), e.fillStyle = "#cfe8a8", e.fill(), e.beginPath(), e.ellipse(o, t, l * 0.55, a * 0.6, 0, 0, TAU255), e.strokeStyle = ROT3.stalkL, e.lineWidth = 0.7, e.stroke(), e.fillStyle = ROT3.stalk;
+  for (let n = 0; n < 6; n++) {
+    let r = n / 6 * TAU255;
+    e.beginPath(), e.arc(o + Math.cos(r) * l * 0.55, t + Math.sin(r) * a * 0.6, 0.5, 0, TAU255), e.fill();
+  }
+  e.beginPath(), e.ellipse(o, t, l * 0.18, a * 0.2, 0, 0, TAU255), e.fillStyle = "#e9f6d2", e.fill();
+}
+var ROTBLOOM_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: ["#fff8e2", "#fff0c0", "#e8cf88"],
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5), e.fillStyle = vgrad(e, t - 2.5, a + 5, [ROT3.bulbL, ROT3.bulb, ROT3.bulbD]), e.fill(), e.save(), pill(e, o - 2.5, t - 2.5, i + 5, a + 5), e.clip();
+    let l = seeded2(57);
+    for (let n = o + 6; n < o + i; n += 18 + l() * 26) {
+      let r = l() < 0.5;
+      e.beginPath(), e.ellipse(n, r ? t - 2 : t + a + 2, 2.2, 1.3, 0, 0, TAU255), e.fillStyle = ROT3.bulbL, e.fill(), e.lineWidth = 0.6, e.strokeStyle = ROT3.bulbD, e.stroke();
+    }
+    e.restore(), pill(e, o - 2.5, t - 2.5, i + 5, a + 5), e.lineWidth = 1, e.strokeStyle = EDGE5, e.stroke(), pill(e, o, t, i, a), e.fillStyle = MAW_RED, e.fill(), e.save(), e.clip(), e.strokeStyle = ROT3.innerD, e.lineWidth = 0.6, e.globalAlpha = 0.6;
+    for (let n = o + 4; n < o + i; n += 9)
+      e.beginPath(), e.moveTo(n, t + a), e.quadraticCurveTo(n + 3, t + a * 0.4, n + 6, t), e.stroke();
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    e.fillStyle = ROT3.stalk, e.fillRect(o, t, i, a), e.fillStyle = ROT3.stalkD, e.fillRect(o, t + a * 0.55, i, a * 0.45), e.fillStyle = ROT3.stalkL, e.fillRect(o, t + 1, i, 1.6), e.strokeStyle = EDGE5, e.lineWidth = 0.8;
+    for (let r = 1; r < 8; r++) {
+      let s = o + n * r / 8 + n / 32;
+      s > o + i - 2 || (e.beginPath(), e.moveTo(s - 0.6, t), e.quadraticCurveTo(s + 1.6, t + a / 2, s - 0.6, t + a), e.stroke());
+    }
+  },
+  edge(e, o, t, i) {
+    e.beginPath(), e.ellipse(o, t + i / 2, 2.6, i / 2, 0, -Math.PI / 2, Math.PI / 2), e.closePath(), e.fillStyle = ROT3.stalk, e.fill(), e.fillStyle = ROT3.stalkD, e.fillRect(o, t + i * 0.55, 2.2, i * 0.45), e.beginPath(), e.ellipse(o, t + i / 2, 2.6, i / 2, 0, -Math.PI / 2, Math.PI / 2), e.strokeStyle = EDGE5, e.lineWidth = 1, e.stroke();
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 3; n++) {
+      let r = (l * 0.75 + n / 3) % 1;
+      e.save(), e.globalAlpha = 1 - r * r, drawSeed(e, o + i * (0.2 + n * 0.3), t + a + 1 + r * 9, r * 3 + n, false, 0.42), e.restore();
+    }
+  },
+  over(e, o, t, i, a, l, n, r) {
+    for (let [u, y] of [
+      [0.22, 1],
+      [0.64, 0],
+      [0.82, 1]
+    ]) {
+      let p = o + i * u;
+      p > o + i * n - 3 || (e.save(), e.translate(p, y ? t : t + a), y || e.scale(1, -1), e.rotate(-0.55), rotLeaf(e, 0, 0, 0.5, l + u * 3), e.restore());
+    }
+    let s = n < 0.5 ? 2 : 4, f = l % s / s, h = f < 0.7 ? 0 : f < 0.95 ? (f - 0.7) / 0.25 : Math.max(0, 1 - (f - 0.95) / 0.05);
+    if (e.strokeStyle = EDGE5, e.lineWidth = 2.6, e.beginPath(), e.moveTo(o + i / 2, t + a), e.lineTo(o + i / 2, t + a + 2.4), e.stroke(), e.strokeStyle = ROT3.stalk, e.lineWidth = 1.3, e.stroke(), seedPod(e, o + i / 2, t + a + 2, 0.55, h), rotCutEnd(e, o + i + 4, t + a / 2, a), r > 0) {
+      let u = o + i * n, y = 1 - r;
+      for (let p = 0; p < 4; p++) {
+        let g2 = -1.1 + p * 0.65, b = 3 + y * 11;
+        e.save(), e.globalAlpha = r, drawSeed(e, u + Math.cos(g2) * b, t + a / 2 + Math.sin(g2) * b + y * y * 6, y * 6 + p, false, 0.4), e.restore();
+      }
+    }
+    let d = r > 0 ? 0 : trapGape(l, n < 0.5);
+    trapHead2(e, o - 4, t + a / 2, 0.7, 0.12 + d * 0.9, l);
+  }
+};
+function drawRotbloomBar(e, o, t, i, a) {
+  let { x: l, y: n, w: r } = o;
+  rotbloomName(e, l + r / 2, n + 13, t.name), drawBar(e, { x: l + 10, y: n + NAME_GAP, w: r - 10, h: BAR_H }, i, ROTBLOOM_BAR, a);
+}
+function rotbloomName(e, o, t, i) {
+  e.save(), e.textAlign = "center", e.textBaseline = "alphabetic", e.lineJoin = "round", e.font = "900 13px Georgia,serif", e.shadowColor = "#000000a0", e.shadowBlur = 4, e.shadowOffsetY = 1, e.lineWidth = 3.4, e.strokeStyle = "#160a0c", e.strokeText(i, o, t), e.shadowColor = "transparent", e.fillStyle = vgrad(e, t - 10, 11, ["#ffd6dc", "#ff7a8a", "#d9344c"]), e.fillText(i, o, t), e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
   gravewing: Object.freeze({ draw: drawGravewingBar, side: 27 }),
-  vinegorger: Object.freeze({ draw: drawVinegorgerBar, side: 18 })
+  vinegorger: Object.freeze({ draw: drawVinegorgerBar, side: 18 }),
+  rotbloom: Object.freeze({ draw: drawRotbloomBar, side: 20 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
