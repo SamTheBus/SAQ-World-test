@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex" />
+    <title>SAQ World memory test</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        padding: 20px 16px 40px;
+        background: #14171c;
+        color: #e8e6df;
+        font: 17px/1.45 system-ui, -apple-system, sans-serif;
+      }
+      main {
+        max-width: 520px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 6px;
+      }
+      p {
+        margin: 8px 0;
+        color: #b9b6ac;
+      }
+      .card {
+        background: #1e232b;
+        border: 1px solid #333a45;
+        border-radius: 12px;
+        padding: 14px;
+        margin: 14px 0;
+      }
+      .big {
+        font-size: 44px;
+        font-weight: 700;
+        color: #f2c14e;
+        font-variant-numeric: tabular-nums;
+      }
+      .result {
+        color: #fff;
+        font-size: 19px;
+        font-weight: 600;
+      }
+      button {
+        font: inherit;
+        font-weight: 700;
+        padding: 14px 18px;
+        border-radius: 10px;
+        border: 0;
+        background: #f2c14e;
+        color: #1a1508;
+        width: 100%;
+        margin-top: 8px;
+      }
+      button.quiet {
+        background: #2c333d;
+        color: #e8e6df;
+        font-weight: 500;
+      }
+      button:disabled {
+        opacity: 0.5;
+      }
+      ul {
+        padding-left: 20px;
+        margin: 6px 0;
+      }
+      small {
+        color: #8f8c83;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Memory test</h1>
+      <p>
+        This page fills memory step by step until the phone closes it, then shows how far it got. It does not touch
+        your game or your saves.
+      </p>
+      <div class="card" id="last" hidden></div>
+      <div class="card">
+        <div><small id="where"></small></div>
+        <div class="big" id="now">0 MB</div>
+        <p id="status">Ready.</p>
+        <button id="go">Start test</button>
+        <button id="clear" class="quiet">Clear results</button>
+      </div>
+      <div class="card">
+        <strong>Results in this browser</strong>
+        <ul id="history"></ul>
+        <small>Each browser keeps its own list. Run it once in each place you want to compare.</small>
+      </div>
+    </main>
+    <script>
+      (() => {
+        const KEY = 'saq-memory-test-v1';
+        const STEP_MB = 16,
+          STEP_MS = 120,
+          CAP_MB = 8000;
+        const ua = navigator.userAgent;
+        const where =
+          navigator.standalone === true || matchMedia('(display-mode: standalone)').matches
+            ? 'Home screen'
+            : /CriOS/.test(ua)
+              ? 'Chrome on iPhone'
+              : /FxiOS/.test(ua)
+                ? 'Firefox on iPhone'
+                : /EdgiOS/.test(ua)
+                  ? 'Edge on iPhone'
+                  : /iPhone|iPad/.test(ua)
+                    ? 'Safari'
+                    : /Chrome\//.test(ua)
+                      ? 'Chrome (computer)'
+                      : 'This browser';
+        const $ = id => document.getElementById(id);
+        const read = () => {
+          try {
+            return JSON.parse(localStorage.getItem(KEY)) ?? { runs: [] };
+          } catch {
+            return { runs: [] };
+          }
+        };
+        const write = v => {
+          try {
+            localStorage.setItem(KEY, JSON.stringify(v));
+          } catch {}
+        };
+        const time = t => new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        const line = r =>
+          r.end === 'closed'
+            ? 'Closed by the phone at about ' + r.mb + ' MB'
+            : r.end === 'refused'
+              ? 'Browser refused more memory at ' + r.mb + ' MB (page stayed open)'
+              : r.end === 'cap'
+                ? 'Reached ' + r.mb + ' MB with no limit hit'
+                : r.end === 'stopped'
+                  ? 'Stopped by you at ' + r.mb + ' MB'
+                  : 'Running';
+        $('where').textContent = 'Running in: ' + where;
+
+        // A run still marked "running" when the page opens means the page was closed mid-test.
+        const state = read();
+        const open = state.runs.find(r => r.end === 'running');
+        // The address keeps the last size too, in case the browser lost the stored note when it closed the page.
+        const fromHash = Number((location.hash.match(/mb=(\d+)/) ?? [])[1] ?? 0);
+        if (open) {
+          open.mb = Math.max(open.mb, fromHash);
+          open.end = 'closed';
+          write(state);
+          $('last').hidden = false;
+          $('last').innerHTML =
+            '<div class="result">The phone closed this page at about ' +
+            open.mb +
+            ' MB.</div><p>That is the most memory one page could hold here (' +
+            open.where +
+            ') before it was shut down.</p>';
+        }
+        history.replaceState(null, '', location.pathname);
+        const draw = () => {
+          const runs = read().runs;
+          $('history').innerHTML = runs.length
+            ? runs
+                .slice()
+                .reverse()
+                .map(r => '<li>' + time(r.t) + ' · ' + r.where + ' · ' + line(r) + '</li>')
+                .join('')
+            : '<li>None yet.</li>';
+        };
+        draw();
+
+        const held = [];
+        let timer = 0,
+          mb = 0,
+          seed = (Date.now() ^ 0x9e3779b9) >>> 0;
+        // Random fill, so the phone cannot squeeze the memory down the way it can with blank memory.
+        const fill = words => {
+          let s = seed;
+          for (let i = 0; i < words.length; i++) {
+            s ^= s << 13;
+            s ^= s >>> 17;
+            s ^= s << 5;
+            words[i] = s;
+          }
+          seed = s >>> 0 || 1;
+        };
+        const finish = (end, text) => {
+          clearInterval(timer);
+          timer = 0;
+          const s = read(),
+            r = s.runs.find(x => x.end === 'running');
+          if (r) {
+            r.mb = mb;
+            r.end = end;
+            write(s);
+          }
+          history.replaceState(null, '', location.pathname);
+          $('status').textContent = text;
+          $('go').textContent = 'Start test';
+          held.length = 0;
+          draw();
+        };
+        const step = () => {
+          try {
+            const block = new Uint32Array((STEP_MB * 1048576) / 4);
+            fill(block);
+            held.push(block);
+          } catch {
+            finish('refused', 'The browser refused to give more memory at ' + mb + ' MB. The page stayed open.');
+            return;
+          }
+          mb += STEP_MB;
+          $('now').textContent = mb + ' MB';
+          const s = read(),
+            r = s.runs.find(x => x.end === 'running');
+          if (r) {
+            r.mb = mb;
+            write(s);
+          }
+          history.replaceState(null, '', location.pathname + '#mb=' + mb);
+          if (mb >= CAP_MB) finish('cap', 'Reached ' + mb + ' MB without being closed.');
+        };
+        $('go').onclick = () => {
+          if (timer) return finish('stopped', 'Stopped at ' + mb + ' MB.');
+          const s = read();
+          s.runs.push({ t: Date.now(), where, mb: 0, end: 'running' });
+          s.runs = s.runs.slice(-12);
+          write(s);
+          mb = 0;
+          $('last').hidden = true;
+          $('status').textContent =
+            'Filling memory. Leave this page open. If it reloads or goes blank, open it again to see the result.';
+          $('go').textContent = 'Stop';
+          timer = setInterval(step, STEP_MS);
+          draw();
+        };
+        $('clear').onclick = () => {
+          if (timer) return;
+          write({ runs: [] });
+          $('last').hidden = true;
+          draw();
+        };
+      })();
+    </script>
+  </body>
+</html>
