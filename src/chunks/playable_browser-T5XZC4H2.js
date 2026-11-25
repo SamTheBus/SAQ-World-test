@@ -329518,13 +329518,569 @@ function drawGulpjawBar(e, o, t, i, a) {
 function gulpjawName(e, o, t, i) {
   e.save(), e.textAlign = "center", e.textBaseline = "alphabetic", e.lineJoin = "round", e.font = "900 13px Georgia,serif", e.shadowColor = "#000000a0", e.shadowBlur = 4, e.shadowOffsetY = 1, e.lineWidth = 3.4, e.strokeStyle = "#0a1426", e.strokeText(i, o, t), e.shadowColor = "transparent", e.fillStyle = vgrad(e, t - 10, 11, ["#e6f4ff", "#86c8ff", "#2f86e0"]), e.fillText(i, o, t), e.restore();
 }
+var BARKP = VINE_PAL.B;
+var ROOT_SOIL = "#24170c";
+var ROOT_LIT = "#a07648";
+var ROOT_LINE = "#2e1d10";
+var rootSegments = (w) => {
+  const n = Math.max(8, Math.round(w / 13));
+  return { n, sw: w / n };
+};
+function barkCollar(e) {
+  for (let i = 0; i < 6; i++) {
+    const a = -Math.PI * 0.4 - i * 0.38, L = 17 + i % 2 * 4, w = 0.2;
+    poly10(
+      e,
+      [
+        [Math.cos(a - w) * 6, Math.sin(a - w) * 6],
+        [Math.cos(a - w * 0.7) * L, Math.sin(a - w * 0.7) * L],
+        [Math.cos(a + 0.05) * (L + 2), Math.sin(a + 0.05) * (L + 2)],
+        [Math.cos(a + w * 0.8) * (L - 1), Math.sin(a + w * 0.8) * (L - 1)],
+        [Math.cos(a + w) * 6, Math.sin(a + w) * 6]
+      ],
+      i % 2 ? "#6a4a2c" : "#7a5432",
+      true,
+      1.8
+    );
+    e.fillStyle = BARKP.moss;
+    e.beginPath();
+    e.arc(Math.cos(a + w * 1.1) * 9, Math.sin(a + w * 1.1) * 9, 1.6, 0, TAU255);
+    e.fill();
+  }
+}
+function rootHead(e, x, y, k, t, gape) {
+  const P29 = BARKP;
+  e.save();
+  e.translate(x, y);
+  e.scale(-k, k);
+  e.rotate(0.14 + Math.sin(t * 1.25 + 0.6) * 0.06);
+  e.lineCap = "round";
+  e.lineJoin = "round";
+  e.save();
+  e.translate(-5, -2.5);
+  barkCollar(e);
+  e.restore();
+  e.save();
+  e.translate(-3, 3.5);
+  e.rotate(gape * 0.62);
+  poly10(
+    e,
+    [
+      [-2, -2],
+      [18, -1.2],
+      [18, 4.5]
+    ],
+    "#2a1608",
+    false
+  );
+  e.fillStyle = "#9a4a3a";
+  e.beginPath();
+  e.ellipse(9, 0.6, 6, 1.4, 0, 0, TAU255);
+  e.fill();
+  for (let u = 0; u < 4; u++) {
+    const q2 = 6 + u * 3.2;
+    poly10(
+      e,
+      [
+        [q2 - 1.2, 0],
+        [q2 + 1.2, 0],
+        [q2 + 0.2, -3.2 - (u === 3 ? 1.4 : 0)]
+      ],
+      "#fff4d6",
+      true,
+      1
+    );
+  }
+  poly10(
+    e,
+    [
+      [-4, -1],
+      [19, 0],
+      [20, 2.4],
+      [15, 6],
+      [2, 6.6],
+      [-5, 4]
+    ],
+    P29.headD,
+    true,
+    2.2
+  );
+  poly10(
+    e,
+    [
+      [-3, 0],
+      [18, 0.8],
+      [17, 2.4],
+      [-3, 2.2]
+    ],
+    P29.head,
+    false
+  );
+  e.restore();
+  const skull5 = [
+    [-10, -1],
+    [-9, -7],
+    [-3, -11],
+    [5, -10.5],
+    [10, -7.5],
+    [17, -4.5],
+    [21, -1.5],
+    [21, 1.5],
+    [17, 3.2],
+    [4, 4],
+    [-4, 5],
+    [-9, 3.5]
+  ];
+  poly10(e, skull5, P29.head, false);
+  e.save();
+  poly10(e, skull5, null, false);
+  e.clip();
+  e.fillStyle = P29.headD;
+  e.beginPath();
+  e.moveTo(-10, 2);
+  e.lineTo(21, 0);
+  e.lineTo(21, 6);
+  e.lineTo(-10, 6);
+  e.closePath();
+  e.fill();
+  e.beginPath();
+  e.ellipse(9, -1, 12, 4, 0.12, 0, TAU255);
+  e.fillStyle = P29.head;
+  e.fill();
+  e.fillStyle = P29.headL;
+  e.beginPath();
+  e.moveTo(-8, -6);
+  e.quadraticCurveTo(-3, -11, 5, -10);
+  e.quadraticCurveTo(11, -8, 16, -4.6);
+  e.lineTo(9, -5.6);
+  e.quadraticCurveTo(1, -8, -7, -4);
+  e.closePath();
+  e.fill();
+  e.strokeStyle = P29.headD;
+  e.lineWidth = 0.8;
+  e.beginPath();
+  e.moveTo(-6, -3);
+  e.lineTo(-1, -1);
+  e.lineTo(4, -2.5);
+  e.stroke();
+  e.fillStyle = P29.moss;
+  e.beginPath();
+  e.ellipse(-3, -9.5, 6, 2.4, -0.15, 0, TAU255);
+  e.fill();
+  e.fillStyle = P29.mossL;
+  e.beginPath();
+  e.ellipse(-5, -10.2, 2.6, 1, -0.15, 0, TAU255);
+  e.fill();
+  e.restore();
+  poly10(e, skull5, null, true, 2.2);
+  for (let u = 0; u < 5; u++) {
+    const q2 = 4 + u * 3.3, big = u === 4 || u === 1;
+    poly10(
+      e,
+      [
+        [q2 - 1.3, 3.6 - u * 0.1],
+        [q2 + 1.3, 3.5 - u * 0.1],
+        [q2 + 0.3, 7.4 + (big ? 2 : 0) - u * 0.1]
+      ],
+      "#fff4d6",
+      true,
+      1
+    );
+  }
+  e.save();
+  e.shadowColor = P29.glow;
+  e.shadowBlur = 5;
+  ell6(e, 6.5, -4.8, 2.8, 2.1, P29.eye, false);
+  e.restore();
+  ell6(e, 6.5, -4.8, 2.8, 2.1, null, true, 1.4);
+  e.fillStyle = EDGE5;
+  e.beginPath();
+  e.ellipse(7, -4.8, 0.7, 1.9, 0, 0, TAU255);
+  e.fill();
+  e.fillStyle = "#f4ffe0";
+  e.beginPath();
+  e.arc(5.6, -5.6, 0.6, 0, TAU255);
+  e.fill();
+  e.fillStyle = EDGE5;
+  e.beginPath();
+  e.ellipse(18.5, -2.2, 1.1, 0.6, 0.3, 0, TAU255);
+  e.fill();
+  poly10(
+    e,
+    [
+      [1.5, -6.4],
+      [10.5, -8.6],
+      [11.5, -6.8],
+      [3, -4.6]
+    ],
+    P29.headD,
+    true,
+    1.4
+  );
+  for (const [u, q2, r] of [
+    [-8, 2, 2.5],
+    [-9.5, -1.5, 2.85]
+  ]) {
+    e.save();
+    e.translate(u, q2);
+    e.rotate(r);
+    poly10(
+      e,
+      [
+        [0, -1.6],
+        [6, 0],
+        [0, 1.6]
+      ],
+      P29.thorn,
+      true,
+      1.4
+    );
+    e.restore();
+  }
+  for (let i = 0; i < 4; i++) {
+    const bx = -6 + i * 3.6, by = -10.3 + Math.abs(i - 1.5) * 0.6, len = 10 - Math.abs(i - 1) * 1.6;
+    poly10(
+      e,
+      [
+        [bx - 2, by + 1.5],
+        [bx - len * 0.45, by - len],
+        [bx + 1.6, by + 0.6]
+      ],
+      P29.thorn,
+      true,
+      1.3
+    );
+  }
+  if (gape > 0.3) {
+    e.fillStyle = "#c6ff6a";
+    e.strokeStyle = EDGE5;
+    e.lineWidth = 0.8;
+    e.beginPath();
+    e.ellipse(14, 6 + gape * 6, 0.9, 1.6 + gape, 0, 0, TAU255);
+    e.fill();
+    e.stroke();
+  }
+  e.restore();
+}
+function rootGape(t, low, snare) {
+  return 0.1 + Math.sin(t * 1.7) * 0.05 + snare.burst * 0.8;
+}
+function rootSnare(t, low, impact3) {
+  const T121 = low ? 1.8 : 3.6, q2 = t % T121 / T121, ease70 = (x) => x * x * (3 - 2 * x);
+  const s = { grow: 0, hold: 0, wither: 0, burst: 0 };
+  if (impact3 > 0) return s;
+  if (q2 > 0.5 && q2 < 0.62) {
+    s.grow = ease70((q2 - 0.5) / 0.12);
+    s.burst = s.grow;
+  } else if (q2 >= 0.62 && q2 < 0.86) {
+    s.grow = 1;
+    s.hold = Math.min(1, (q2 - 0.62) / 0.05);
+    s.burst = 1 - ease70(Math.min(1, (q2 - 0.62) / 0.1));
+  } else if (q2 >= 0.86 && q2 < 0.98) {
+    s.grow = 1;
+    s.hold = 1 - (q2 - 0.86) / 0.06;
+    s.wither = ease70((q2 - 0.86) / 0.12);
+  }
+  s.hold = Math.max(0, s.hold);
+  return s;
+}
+function rootBand(e, x, y, h, k, wither) {
+  if (k <= 0) return;
+  const top = y - 1.6, bot = y + h + 1.6, lean = 2.2;
+  e.save();
+  e.lineCap = "round";
+  e.globalAlpha *= Math.min(1, k * 2);
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 3.4;
+  e.beginPath();
+  e.moveTo(x - lean / 2, top);
+  e.quadraticCurveTo(x + 1.6, y + h / 2, x + lean / 2, bot);
+  e.stroke();
+  e.strokeStyle = wither > 0.5 ? BARKP.dark : "#6e4b2a";
+  e.lineWidth = 2;
+  e.stroke();
+  e.strokeStyle = ROOT_LIT;
+  e.lineWidth = 0.6;
+  e.beginPath();
+  e.moveTo(x - lean / 2 - 0.4, top + 0.6);
+  e.quadraticCurveTo(x + 1, y + h / 2, x + lean / 2 - 0.4, bot - 0.8);
+  e.stroke();
+  e.restore();
+}
+function rootThorn(e, x, y, h) {
+  const r = Math.max(1.4, h * 0.3), tx = x + h * 0.75, ty = y - h * 0.8, path20 = () => {
+    e.beginPath();
+    e.moveTo(x - r, y);
+    e.quadraticCurveTo(x + h * 0.1, y - h * 0.6, tx, ty);
+    e.quadraticCurveTo(x + h * 0.35, y - h * 0.35, x + r, y);
+    e.closePath();
+  };
+  path20();
+  e.fillStyle = BARKP.thorn;
+  e.fill();
+  e.save();
+  path20();
+  e.clip();
+  e.fillStyle = BARKP.thornL;
+  e.beginPath();
+  e.moveTo(x - r, y);
+  e.quadraticCurveTo(x + h * 0.1, y - h * 0.6, tx, ty);
+  e.lineTo(x, y);
+  e.closePath();
+  e.fill();
+  e.restore();
+  path20();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 0.9;
+  e.stroke();
+}
+var ROOTLETS = [0.08, 0.17, 0.29, 0.36, 0.47, 0.58, 0.66, 0.74, 0.83, 0.93];
+var ROOTGORGER_BAR = {
+  shape: (e, x, y, w, h) => pill(e, x, y, w, h),
+  chunk: ["#f6ead0", "#e6cfa2", "#c09a62"],
+  under(e, x, y, w, h, t) {
+    const rnd27 = seeded2(77);
+    e.save();
+    e.lineCap = "round";
+    for (const [i, f] of ROOTLETS.entries()) {
+      const rx = x + w * f, len = 4 + rnd27() * 5, sway = Math.sin(t * 1.3 + i * 1.7) * 1.2, y0 = y + h + 2;
+      e.strokeStyle = EDGE5;
+      e.lineWidth = 1.9;
+      e.beginPath();
+      e.moveTo(rx, y0);
+      e.quadraticCurveTo(rx + 1.5, y0 + len * 0.6, rx + sway, y0 + len);
+      e.stroke();
+      e.strokeStyle = "#6e4b2a";
+      e.lineWidth = 0.9;
+      e.stroke();
+      if (i % 3 === 1) {
+        e.strokeStyle = "#6e4b2a";
+        e.lineWidth = 0.7;
+        e.beginPath();
+        e.moveTo(rx + 0.8, y0 + len * 0.45);
+        e.lineTo(rx + 3 + sway * 0.5, y0 + len * 0.75);
+        e.stroke();
+      }
+    }
+    e.restore();
+    const flick = Math.sin(t * 3.1) * 0.25, tx = x + w + 1.5, ty = y + h / 2;
+    e.save();
+    e.translate(tx, ty);
+    e.rotate(flick);
+    const tail2 = () => {
+      e.beginPath();
+      e.moveTo(0, -2.6);
+      e.quadraticCurveTo(6, -3, 10, 0);
+      e.quadraticCurveTo(6, 2.4, 0, 2.6);
+      e.closePath();
+    };
+    tail2();
+    e.fillStyle = BARKP.thorn;
+    e.fill();
+    e.save();
+    tail2();
+    e.clip();
+    e.fillStyle = BARKP.thornL;
+    e.fillRect(0, -3, 10, 2.4);
+    e.restore();
+    tail2();
+    e.strokeStyle = EDGE5;
+    e.lineWidth = 1;
+    e.stroke();
+    e.restore();
+  },
+  track(e, x, y, w, h) {
+    pill(e, x - 2.5, y - 2.5, w + 5, h + 5);
+    e.fillStyle = vgrad(e, y - 2.5, h + 5, ["#86603a", "#563a22", ROOT_LINE]);
+    e.fill();
+    e.save();
+    pill(e, x - 2.5, y - 2.5, w + 5, h + 5);
+    e.clip();
+    e.strokeStyle = ROOT_LIT;
+    e.lineWidth = 0.7;
+    e.globalAlpha = 0.75;
+    for (const side of [0, 1]) {
+      e.beginPath();
+      for (let gx = x - 2; gx <= x + w + 2; gx += 2) {
+        const gy = (side ? y + h + 1.3 : y - 1.3) + Math.sin(gx * 0.21 + side * 2) * 0.6 + Math.sin(gx * 0.07) * 0.4;
+        gx === x - 2 ? e.moveTo(gx, gy) : e.lineTo(gx, gy);
+      }
+      e.stroke();
+    }
+    e.restore();
+    pill(e, x - 2.5, y - 2.5, w + 5, h + 5);
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    pill(e, x, y, w, h);
+    e.fillStyle = ROOT_SOIL;
+    e.fill();
+    e.save();
+    e.clip();
+    const p = seeded2(41);
+    for (let px7 = x + 2; px7 < x + w; px7 += 5 + p() * 7) dot17(e, px7, y + 1.5 + p() * (h - 3), 0.5 + p() * 0.7, "#4a3220");
+    e.restore();
+  },
+  fill(e, x, y, w, h, t, fullW) {
+    const { n, sw } = rootSegments(fullW);
+    e.save();
+    e.beginPath();
+    e.rect(x, y, w, h);
+    e.clip();
+    for (let i = n - 1; i >= 0; i--) {
+      const sx = x + i * sw;
+      if (sx > x + w) continue;
+      const seg9 = () => {
+        e.beginPath();
+        e.moveTo(sx - 1, y);
+        e.lineTo(sx + sw, y);
+        e.ellipse(sx + sw, y + h / 2, 3.2, h / 2, 0, -Math.PI / 2, Math.PI / 2);
+        e.lineTo(sx - 1, y + h);
+        e.closePath();
+      };
+      seg9();
+      e.fillStyle = BARKP.seg;
+      e.fill();
+      e.save();
+      seg9();
+      e.clip();
+      e.fillStyle = BARKP.light;
+      e.fillRect(sx, y + 0.5, sw * 0.8, h * 0.28);
+      e.fillStyle = BARKP.dark;
+      e.beginPath();
+      e.ellipse(sx + sw + 1, y + h * 0.55, sw * 0.42, h * 0.5, 0, 0, TAU255);
+      e.fill();
+      e.fillStyle = BARKP.belly;
+      e.fillRect(sx - 1, y + h * 0.72, sw + 4, h * 0.28);
+      e.strokeStyle = BARKP.dark;
+      e.lineWidth = 0.7;
+      for (const f of [0.22, 0.5, 0.78]) {
+        e.beginPath();
+        e.moveTo(sx + f * sw, y + h * 0.2);
+        e.quadraticCurveTo(sx + f * sw + 0.8, y + h * 0.42, sx + f * sw - 0.3, y + h * 0.68);
+        e.stroke();
+      }
+      e.fillStyle = BARKP.moss;
+      e.beginPath();
+      e.ellipse(sx + sw * 0.42, y + 0.4, sw * 0.34, 1.5, 0, 0, TAU255);
+      e.fill();
+      e.fillStyle = BARKP.mossL;
+      e.beginPath();
+      e.ellipse(sx + sw * 0.32, y + 0.1, sw * 0.14, 0.7, 0, 0, TAU255);
+      e.fill();
+      e.restore();
+      e.beginPath();
+      e.ellipse(sx + sw, y + h / 2, 3.2, h / 2, 0, -Math.PI / 2, Math.PI / 2);
+      e.strokeStyle = ROOT_LINE;
+      e.lineWidth = 0.8;
+      e.stroke();
+    }
+    e.restore();
+  },
+  edge(e, x, y, h) {
+    e.beginPath();
+    e.ellipse(x, y + h / 2, 3, h / 2, 0, -Math.PI / 2, Math.PI / 2);
+    e.closePath();
+    e.fillStyle = BARKP.seg;
+    e.fill();
+    e.fillStyle = BARKP.belly;
+    e.fillRect(x, y + h * 0.72, 2.4, h * 0.28);
+    e.beginPath();
+    e.ellipse(x, y + h / 2, 3, h / 2, 0, -Math.PI / 2, Math.PI / 2);
+    e.strokeStyle = EDGE5;
+    e.lineWidth = 1;
+    e.stroke();
+  },
+  // wood chips off the lost chunk
+  chunkMotion(e, x, y, w, h, t) {
+    for (let i = 0; i < 3; i++) {
+      const q2 = (t * 0.7 + i / 3) % 1, cx = x + w * (0.2 + i * 0.3) + Math.sin(q2 * 6 + i) * 2, cy2 = y + h + q2 * 10;
+      e.save();
+      e.globalAlpha = 1 - q2;
+      e.translate(cx, cy2);
+      e.rotate(q2 * 4 + i);
+      e.fillStyle = i % 2 ? "#c09a62" : "#e6cfa2";
+      e.fillRect(-1.6, -0.7, 3.2, 1.4);
+      e.restore();
+    }
+  },
+  over(e, x, y, w, h, t, frac, impact3) {
+    const { n, sw } = rootSegments(w), low = frac < 0.5;
+    for (let i = 0; i < n; i++) {
+      const tx = x + i * sw + sw * 0.45;
+      if (tx > x + w * frac - 2) break;
+      rootThorn(e, tx, y - 1.8, i % 2 ? 4.2 : 5.4);
+    }
+    const snare = rootSnare(t, low, impact3), filled = w * frac;
+    if (snare.grow > 0 && filled > 24) {
+      for (const [i, f] of [0.2, 0.52, 0.84].entries()) {
+        const rx = x + filled * f;
+        if (rx < x + 10) continue;
+        const curl = i % 2 ? -0.5 : 0.5;
+        drawRoot(e, rx - 3, y + h + 9, rx + 2.5 * curl, y - 2.5, snare.grow, {
+          w: 1.9,
+          curl,
+          wither: snare.wither,
+          leaf: true
+        });
+        rootBand(e, rx - 2, y, h, snare.hold, snare.wither);
+        rootBand(e, rx + 2.2, y, h, snare.hold * 0.9, snare.wither);
+      }
+    }
+    if (low)
+      for (let i = 0; i < 4; i++) {
+        const q2 = (t * 0.6 + i / 4) % 1, cx = x + w * frac + w * (1 - frac) * ((i * 0.37 + 0.15) % 1), cy2 = y + h + 2 + q2 * 10;
+        e.globalAlpha = 1 - q2;
+        dot17(e, cx, cy2, 1.1, "#5a3e26");
+        e.globalAlpha = 1;
+      }
+    if (impact3 > 0) {
+      const hx2 = x + w * frac, u = 1 - impact3;
+      for (let i = 0; i < 5; i++) {
+        const a = -1.1 + i * 0.5, d = 3 + u * 11;
+        e.save();
+        e.globalAlpha = impact3;
+        e.translate(hx2 + Math.cos(a) * d, y + h / 2 + Math.sin(a) * d + u * u * 5);
+        e.rotate(u * 5 + i);
+        e.fillStyle = i % 2 ? BARKP.mossL : "#e6cfa2";
+        e.fillRect(-1.7, -0.8, 3.4, 1.6);
+        e.restore();
+      }
+    }
+    const gape = impact3 > 0 ? Math.max(0, 0.9 - impact3 * 2) : rootGape(t, low, snare);
+    rootHead(e, x - 7, y + h / 2 + 1.5, 0.64, t, gape);
+  }
+};
+function drawRootgorgerBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  rootgorgerName(e, x + w / 2, y + 13, t.name);
+  drawBar(e, { x: x + 8, y: y + NAME_GAP, w: w - 8, h: BAR_H }, i, ROOTGORGER_BAR, a);
+}
+function rootgorgerName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#140c05";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#f2ffd8", "#c6ff6a", "#5f9a3c"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
   gravewing: Object.freeze({ draw: drawGravewingBar, side: 27 }),
   vinegorger: Object.freeze({ draw: drawVinegorgerBar, side: 18 }),
   rotbloom: Object.freeze({ draw: drawRotbloomBar, side: 20 }),
-  gulpjaw: Object.freeze({ draw: drawGulpjawBar, side: 22 })
+  gulpjaw: Object.freeze({ draw: drawGulpjawBar, side: 22 }),
+  rootgorger: Object.freeze({ draw: drawRootgorgerBar, side: 22 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
