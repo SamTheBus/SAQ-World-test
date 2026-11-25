@@ -332738,6 +332738,431 @@ function pitjawName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var SPG = SPINE_PAL.A;
+var SPG_DEAD = "#2a1d10";
+var SPG_WOOD = "#b89a6a";
+var SPG_WOODD = "#7a6040";
+var SPG_PULP = ["#f2f6d2", "#d8e4a0", "#a8bd62"];
+var spgEase = (x) => x * x * (3 - 2 * x);
+var spgClamp = (x) => Math.max(0, Math.min(1, x));
+function spgBeat(t, low, impact3) {
+  const T121 = low ? 2.1 : 4.2, q2 = t % T121 / T121, sec4 = T121;
+  let swell = 0, fire2 = 0, spent = 0;
+  if (q2 < 0.12) swell = 0;
+  else if (q2 < 0.36) swell = spgEase((q2 - 0.12) / 0.24);
+  else if (q2 < 0.44) {
+    fire2 = Math.sin((q2 - 0.36) / 0.08 * Math.PI);
+    swell = 1 - (q2 - 0.36) / 0.08 * 0.4;
+  } else if (q2 < 0.62) swell = 0.6 + spgEase((q2 - 0.44) / 0.18) * 0.4;
+  else if (q2 < 0.7) {
+    fire2 = Math.sin((q2 - 0.62) / 0.08 * Math.PI);
+    swell = 1 - spgEase((q2 - 0.62) / 0.08);
+  } else spent = q2 < 0.78 ? spgEase((q2 - 0.7) / 0.08) : 1 - spgEase(spgClamp((q2 - 0.86) / 0.14));
+  if (impact3 > 0) {
+    swell *= 0.3;
+    fire2 = 0;
+  }
+  return { swell, fire: fire2, spent, v1: (q2 - 0.36) * sec4, v2: (q2 - 0.62) * sec4 };
+}
+function spgLen(b) {
+  return 1.7 * (1 + b.swell * 0.9) * (1 - b.spent * 0.6) * (1 - b.fire * 0.4);
+}
+function spgSpines(e, x, y, dir, len, hot) {
+  e.fillStyle = SPG.areole;
+  e.beginPath();
+  e.arc(x, y, 0.6, 0, TAU256);
+  e.fill();
+  e.strokeStyle = hot > 0.3 ? "#fffbea" : SPG.spine;
+  e.lineWidth = 0.5;
+  e.lineCap = "round";
+  e.beginPath();
+  for (const a of [-0.65, 0, 0.65]) {
+    e.moveTo(x, y);
+    e.lineTo(x + Math.cos(dir + a) * len, y + Math.sin(dir + a) * len);
+  }
+  e.stroke();
+}
+function spgFlower(e, x, y, r, a) {
+  e.save();
+  e.translate(x, y);
+  e.rotate(a);
+  for (let i = 0; i < 5; i++) {
+    const q2 = i / 5 * TAU256;
+    ell6(e, Math.cos(q2) * r * 0.6, Math.sin(q2) * r * 0.45, r * 0.55, r * 0.36, SPG.petal, true, 0.6, q2);
+  }
+  ell6(e, 0, 0, r * 0.38, r * 0.3, SPG.pollen, true, 0.5);
+  e.restore();
+}
+function spgSkull(e, x, y, k) {
+  e.save();
+  e.translate(x, y);
+  e.scale(k, k);
+  e.rotate(-0.18);
+  for (const [pts2, c] of [
+    [
+      [
+        [-4, -3],
+        [-8, -6],
+        [-9, -10]
+      ],
+      SPG.boneD
+    ],
+    [
+      [
+        [3, -3],
+        [7, -6],
+        [8.5, -10]
+      ],
+      SPG.bone
+    ]
+  ]) {
+    stroke2(e, pts2, EDGE5, 2.8);
+    stroke2(e, pts2, c, 1.4);
+  }
+  poly10(
+    e,
+    [
+      [-5, -4],
+      [4, -4],
+      [3, 2],
+      [1, 6],
+      [-2, 6],
+      [-4, 2]
+    ],
+    SPG.bone,
+    true,
+    1.2
+  );
+  ell6(e, -2.4, -1, 1.3, 1.6, "#3a2e22", false);
+  ell6(e, 1.6, -1, 1.3, 1.6, "#3a2e22", false);
+  e.fillStyle = "#3a2e22";
+  e.fillRect(-1.1, 3.4, 0.7, 1.4);
+  e.fillRect(0.1, 3.4, 0.7, 1.4);
+  e.restore();
+}
+function spgNeedle(e, x, y, a, k, alpha) {
+  e.save();
+  e.globalAlpha = alpha;
+  e.translate(x, y);
+  e.rotate(a);
+  e.scale(k, k);
+  e.lineCap = "round";
+  e.strokeStyle = "rgba(255,246,220,.6)";
+  e.lineWidth = 1.2;
+  e.beginPath();
+  e.moveTo(-11, 0);
+  e.lineTo(-4, 0);
+  e.stroke();
+  e.fillStyle = SPG.spine;
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 0.7;
+  e.beginPath();
+  e.moveTo(-4.5, -0.9);
+  e.lineTo(3, -0.6);
+  e.lineTo(6, 0);
+  e.lineTo(3, 0.6);
+  e.lineTo(-4.5, 0.9);
+  e.closePath();
+  e.fill();
+  e.stroke();
+  e.fillStyle = "#6a4a2a";
+  e.beginPath();
+  e.moveTo(3.2, -0.5);
+  e.lineTo(6, 0);
+  e.lineTo(3.2, 0.5);
+  e.closePath();
+  e.fill();
+  e.restore();
+}
+function spgTrunk(e, cx, top, bot, b, t) {
+  const hw = 8 * (1 + b.swell * 0.12) * (1 + b.fire * 0.05), droop = b.spent * 0.06, len = spgLen(b);
+  e.save();
+  e.translate(cx, bot);
+  e.rotate(-droop + Math.sin(t * 1.3) * 0.015);
+  e.translate(-cx, -bot);
+  for (const [x1, far2] of [
+    [-11, true],
+    [10, true],
+    [-7, false],
+    [6.5, false]
+  ]) {
+    const x0 = cx + (x1 < 0 ? -2 : 2), xe = cx + x1, my2 = bot + 1.2;
+    e.lineCap = "round";
+    e.beginPath();
+    e.moveTo(x0, bot - 2);
+    e.quadraticCurveTo((x0 + xe) / 2, my2 - 2.5, xe, bot + 2.6);
+    e.strokeStyle = EDGE5;
+    e.lineWidth = far2 ? 3.2 : 3.8;
+    e.stroke();
+    e.strokeStyle = far2 ? SPG.rootD : SPG.root;
+    e.lineWidth = far2 ? 1.6 : 2.1;
+    e.stroke();
+  }
+  const body6 = () => {
+    e.beginPath();
+    e.moveTo(cx - hw * 0.88, bot);
+    e.lineTo(cx - hw, top + hw);
+    e.arc(cx, top + hw, hw, Math.PI, 0);
+    e.lineTo(cx + hw * 0.88, bot);
+    e.quadraticCurveTo(cx, bot + 1.6, cx - hw * 0.88, bot);
+    e.closePath();
+  };
+  body6();
+  e.fillStyle = SPG.b;
+  e.fill();
+  e.save();
+  body6();
+  e.clip();
+  e.fillStyle = SPG.bD;
+  e.fillRect(cx + hw * 0.35, top, hw, bot - top + 2);
+  e.fillStyle = SPG.bDD;
+  e.fillRect(cx + hw * 0.72, top, hw, bot - top + 2);
+  e.fillStyle = SPG.bL;
+  e.fillRect(cx - hw * 0.62, top + 3, hw * 0.28, bot - top - 5);
+  e.strokeStyle = SPG.rib;
+  e.lineWidth = 0.7;
+  for (const f of [-0.72, -0.36, 0, 0.36, 0.72]) {
+    const x = cx + f * hw;
+    e.beginPath();
+    e.moveTo(cx + f * hw * 0.9, bot + 1);
+    e.lineTo(x, top + hw + 1);
+    e.quadraticCurveTo(x, top + 1.5, cx + f * hw * 0.25, top + 0.8);
+    e.stroke();
+  }
+  e.restore();
+  body6();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 1.2;
+  e.stroke();
+  for (let y = bot - 3; y > top + hw - 1; y -= 5.5) {
+    spgSpines(e, cx - hw * 0.96, y, Math.PI + 0.25, len, b.swell);
+    spgSpines(e, cx + hw * 0.96, y + 2.4, -0.25, len, b.swell);
+  }
+  for (let a = 0.35; a < Math.PI - 0.3; a += 0.62)
+    spgSpines(e, cx - Math.cos(a) * hw * 0.92, top + hw - Math.sin(a) * hw * 0.92, -a, len, b.swell);
+  spgSkull(e, cx - hw * 0.5, bot - 5, 0.6);
+  const ey = top + 13, shut = Math.min(1, b.spent * 0.7 + (Math.sin(t * 0.9) > 0.985 ? 0.9 : 0));
+  for (const [ex, r] of [
+    [cx - hw * 0.1, 1.5],
+    [cx + hw * 0.5, 1.3]
+  ]) {
+    ell6(e, ex, ey, r * 1.1, r * 1.3, SPG.eyeD, true, 0.6);
+    ell6(e, ex, ey + r * 0.2, r * 0.7, r * 0.85 * (1 - shut), b.swell > 0.5 ? "#ffd27a" : SPG.eye, false);
+    e.fillStyle = "#fff3cf";
+    e.fillRect(ex - r * 0.35, ey - r * 0.2, r * 0.35, r * 0.35);
+    e.fillStyle = SPG.bDD;
+    e.beginPath();
+    e.ellipse(ex, ey - r * 0.9, r * 1.25, r * (0.25 + shut * 1.1), 0, Math.PI, 0, true);
+    e.fill();
+  }
+  const my = ey + 5, mo = b.fire * 1.6 + b.swell * 0.7;
+  poly10(
+    e,
+    [
+      [cx - hw * 0.2, my],
+      [cx + hw * 0.1, my - 0.5],
+      [cx + hw * 0.35, my - 0.1],
+      [cx + hw * 0.62, my - 0.6],
+      [cx + hw * 0.58, my + 1 + mo * 0.6],
+      [cx + hw * 0.3, my + 1.7 + mo],
+      [cx, my + 1.3 + mo * 0.7]
+    ],
+    "#2a1a0e",
+    true,
+    0.6
+  );
+  spgFlower(e, cx - 4.2, top + 1.6, 2.6, 0.4);
+  spgFlower(e, cx + 1.8, top - 0.6, 3, -0.2);
+  spgFlower(e, cx + 6.4, top + 2.6, 2.1, 0.9);
+  e.restore();
+}
+function spgTip(e, x, y, h, b, t) {
+  const len = spgLen(b), tx = x + 5.5, ty = y - 8 - b.swell * 0.8;
+  e.save();
+  e.lineCap = "round";
+  e.lineJoin = "round";
+  e.beginPath();
+  e.moveTo(x - 4, y + h / 2);
+  e.quadraticCurveTo(tx + 0.5, y + h / 2 + 1, tx, y + h / 2 - 2.5);
+  e.lineTo(tx, ty);
+  e.strokeStyle = EDGE5;
+  e.lineWidth = h + 2.4;
+  e.stroke();
+  e.strokeStyle = SPG.b;
+  e.lineWidth = h;
+  e.stroke();
+  e.strokeStyle = SPG.bD;
+  e.lineWidth = 1.6;
+  e.beginPath();
+  e.moveTo(tx + 1.7, y + h / 2 - 1);
+  e.lineTo(tx + 1.7, ty + 0.5);
+  e.stroke();
+  e.strokeStyle = SPG.bL;
+  e.lineWidth = 1;
+  e.beginPath();
+  e.moveTo(tx - 1.6, y + h / 2 - 2);
+  e.lineTo(tx - 1.6, ty + 1);
+  e.stroke();
+  e.restore();
+  for (let yy = y + 1; yy > ty; yy -= 4) {
+    spgSpines(e, tx + h / 2 + 0.2, yy, -0.25, len, b.swell);
+    spgSpines(e, tx - h / 2 - 0.2, yy - 1.5, Math.PI + 0.25, len * 0.8, b.swell);
+  }
+  spgFlower(e, tx + 0.4, ty - h / 2 + 0.6, 2.2, 0.3 + Math.sin(t * 1.1) * 0.08);
+}
+var SPG_RIBS = [0.26, 0.5, 0.74];
+var SPINEGROVE_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: SPG_PULP,
+  under(e, o, t, i, a, l, n, r) {
+    const b = spgBeat(l, n < 0.5, r);
+    spgTip(e, o + i, t, a, b, l);
+  },
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, [SPG.bD, SPG.bDD, "#1b3616"]);
+    e.fill();
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    pill(e, o, t, i, a);
+    e.fillStyle = SPG_DEAD;
+    e.fill();
+    e.save();
+    e.clip();
+    for (const f of [0.22, 0.5, 0.78]) {
+      e.fillStyle = SPG_WOODD;
+      e.fillRect(o, t + a * f - 0.3, i, 1.4);
+      e.fillStyle = SPG_WOOD;
+      e.fillRect(o, t + a * f - 0.6, i, 0.9);
+    }
+    const rnd27 = seeded2(31);
+    e.fillStyle = SPG_DEAD;
+    for (let x = o + 4; x < o + i; x += 9 + rnd27() * 9) e.fillRect(x, t, 1.2, a);
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    const b = spgBeat(l, i / n < 0.5, 0);
+    e.fillStyle = vgrad(e, t, a, [SPG.bL, SPG.b, SPG.bD, SPG.bDD]);
+    e.fillRect(o, t, i, a);
+    e.fillStyle = SPG.bL;
+    e.fillRect(o, t + 0.5, i, a * 0.2);
+    for (const f of SPG_RIBS) {
+      e.fillStyle = SPG.rib;
+      e.fillRect(o, t + a * f, i, 0.7);
+    }
+    const len = spgLen(b) * 0.5;
+    for (let x = o + 5; x < o + i - 1.5; x += 9) spgSpines(e, x, t + a * 0.5, -Math.PI / 2, len, b.swell);
+    if (b.swell > 0.05) {
+      e.fillStyle = `rgba(255,251,200,${b.swell * 0.18})`;
+      e.fillRect(o, t, i, a);
+    }
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 5; n++) {
+      const r = (l * 1.1 + n / 5) % 1, x = o + i * (0.1 + n * 0.19) + r * 2, y = t + a - 1 + r * r * 7;
+      e.globalAlpha = 1 - r;
+      stroke2(
+        e,
+        [
+          [x, y],
+          [x + 1.6, y - 1.1]
+        ],
+        SPG.spine,
+        0.7
+      );
+    }
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a) {
+    e.fillStyle = SPG_PULP[1];
+    e.beginPath();
+    e.moveTo(o - 1.6, t);
+    e.lineTo(o + 0.4, t + i * 0.2);
+    e.lineTo(o - 0.6, t + i * 0.42);
+    e.lineTo(o + 0.6, t + i * 0.62);
+    e.lineTo(o - 0.4, t + i * 0.82);
+    e.lineTo(o + 0.2, t + i);
+    e.lineTo(o - 1.6, t + i);
+    e.closePath();
+    e.fill();
+    e.fillStyle = SPG_WOOD;
+    for (const f of [0.22, 0.5, 0.78]) e.fillRect(o - 1, t + i * f - 0.5, 2.2 + a * 1.5, 0.9);
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const low = n < 0.5, b = spgBeat(l, low, r), len = spgLen(b), fx = o + i * n;
+    for (let x = o + 2; x < fx - 1.5; x += 4.5) {
+      const k = Math.round((x - o) / 4.5) % 2;
+      if (x < o + 4) continue;
+      spgSpines(e, x + k * 1.5, t + (k ? a + 0.6 : -0.6), k ? Math.PI / 2 + 0.3 : -Math.PI / 2 - 0.3, len, b.swell);
+    }
+    spgTrunk(e, o - 6, t - 17, t + a + 4, b, l);
+    const cx = o - 6, cy2 = t - 4;
+    for (const [vi, age] of [b.v1, b.v2].entries()) {
+      if (age < 0 || age > 0.5 || r > 0) continue;
+      const u = age / 0.5;
+      for (let k = 0; k < 8; k++) {
+        const a8 = k / 8 * TAU256 + (vi ? Math.PI / 8 : 0) - Math.PI / 2, d = 13 + spgEase(u) * 20;
+        spgNeedle(e, cx + Math.cos(a8) * d, cy2 + Math.sin(a8) * d * 0.85, a8, 0.7, 1 - u * u);
+      }
+      const rnd27 = seeded2(7 + vi);
+      for (let k = 0; k < 7; k++) {
+        const x0 = o + (0.08 + rnd27() * 0.9) * i;
+        if (x0 > fx - 2) continue;
+        const dl = rnd27() * 0.12, v = spgClamp((age - dl) / 0.4);
+        if (v <= 0 || v >= 1) continue;
+        spgNeedle(e, x0 + v * 6, t - 1 - spgEase(v) * 9 + v * v * 4, -1.2 + v * 0.9, 0.6, 1 - v * v);
+      }
+    }
+    if (low)
+      for (let k = 0; k < 3; k++) {
+        const q2 = (l * 0.45 + k / 3) % 1, px7 = cx + 2 + q2 * 14 + Math.sin(l * 3 + k) * 1.5, py = t - 17 + q2 * 24;
+        e.globalAlpha = 1 - q2;
+        ell6(e, px7, py, 1.1, 0.7, SPG.petalD, true, 0.4, l * 2 + k);
+      }
+    e.globalAlpha = 1;
+    if (r > 0) {
+      for (let k = 0; k < 8; k++) {
+        const d = 1 - r, hx2 = (k - 3.5) * 2.2 * (0.4 + d), vy = -4 + d * d * 14 + k % 2 * 2;
+        e.globalAlpha = r;
+        if (k % 3) dot17(e, fx + hx2, t + a / 2 + vy, 1, SPG_PULP[k % 2]);
+        else
+          stroke2(
+            e,
+            [
+              [fx + hx2, t + a / 2 + vy],
+              [fx + hx2 + 1.8, t + a / 2 + vy - 1.2]
+            ],
+            SPG.spine,
+            0.7
+          );
+      }
+      e.globalAlpha = 1;
+    }
+  }
+};
+function drawSpinegroveBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 14, y: y + NAME_GAP, w: w - 22, h: BAR_H }, i, SPINEGROVE_BAR, a);
+  spinegroveName(e, x + w / 2, y + 13, t.name);
+}
+function spinegroveName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#142a0e";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#fffdf0", "#f4e6b8", "#d9b24a"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -332748,7 +333173,8 @@ var LESSER_BARS = Object.freeze({
   rootgorger: Object.freeze({ draw: drawRootgorgerBar, side: 22 }),
   thresher: Object.freeze({ draw: drawThresherBar, side: 30 }),
   waxcrown: Object.freeze({ draw: drawWaxcrownBar, side: 20 }),
-  pitjaw: Object.freeze({ draw: drawPitjawBar, side: 18 })
+  pitjaw: Object.freeze({ draw: drawPitjawBar, side: 18 }),
+  spinegrove: Object.freeze({ draw: drawSpinegroveBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
