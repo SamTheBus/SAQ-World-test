@@ -274688,10 +274688,10 @@ function drawCinderBunny(c, actor2, tick, flash2 = false) {
     ellipse6(c, -11.4, -5.4, 2.6, 2.6, GOLD33);
     ellipse6(c, -12, -5.8, 1.3, 1.4, HOT2);
   }
-  const earLean = hopping ? 0.3 + 0.3 * stretch : 0.1 + Math.sin((tick + seed2) * 0.12) * 0.06;
+  const earLean2 = hopping ? 0.3 + 0.3 * stretch : 0.1 + Math.sin((tick + seed2) * 0.12) * 0.06;
   c.save();
   c.translate(5, -10);
-  c.rotate(-earLean);
+  c.rotate(-earLean2);
   ellipse6(c, -1, -6, 2.5, 8.6, flash2 ? HOT2 : DARK13, INK55, 0.8);
   if (!flash2) {
     ellipse6(c, -1.1, -6, 1.3, 6.4, FIRE4);
@@ -274700,7 +274700,7 @@ function drawCinderBunny(c, actor2, tick, flash2 = false) {
   c.restore();
   c.save();
   c.translate(8, -10);
-  c.rotate(-earLean + 0.24);
+  c.rotate(-earLean2 + 0.24);
   ellipse6(c, 0, -7, 2.8, 9.6, flash2 ? HOT2 : COAL2, INK55, 0.8);
   if (!flash2) {
     ellipse6(c, 0.1, -7.2, 1.4, 7.1, GOLD33);
@@ -330073,6 +330073,430 @@ function rootgorgerName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var MANTIS = THRESH_PAL.A;
+var STUBBLE2 = "#2a2210";
+var tmix = (a, b, t) => a + (b - a) * t;
+var tlerp = (a, b, t) => [tmix(a[0], b[0], t), tmix(a[1], b[1], t)];
+var tease = (x) => x * x * (3 - 2 * x);
+function threshSeg(e, a, b, r0, r1, fill8, light2) {
+  const th = Math.atan2(b[1] - a[1], b[0] - a[0]), nx = -Math.sin(th), ny = Math.cos(th), sh3 = () => {
+    e.beginPath();
+    e.moveTo(a[0] + nx * r0, a[1] + ny * r0);
+    e.lineTo(b[0] + nx * r1, b[1] + ny * r1);
+    e.arc(b[0], b[1], r1, th + Math.PI / 2, th - Math.PI / 2, true);
+    e.lineTo(a[0] - nx * r0, a[1] - ny * r0);
+    e.arc(a[0], a[1], r0, th - Math.PI / 2, th + Math.PI / 2, true);
+    e.closePath();
+  };
+  sh3();
+  e.fillStyle = fill8;
+  e.fill();
+  if (light2) {
+    const up2 = ny > 0 ? -1 : 1;
+    e.save();
+    sh3();
+    e.clip();
+    e.strokeStyle = light2;
+    e.lineWidth = Math.max(0.7, (r0 + r1) * 0.42);
+    e.beginPath();
+    e.moveTo(a[0] + nx * up2 * r0 * 0.45, a[1] + ny * up2 * r0 * 0.45);
+    e.lineTo(b[0] + nx * up2 * r1 * 0.45, b[1] + ny * up2 * r1 * 0.45);
+    e.stroke();
+    e.restore();
+  }
+  sh3();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 1.1;
+  e.stroke();
+}
+var THRESH_ARM = {
+  rest: { c: [12, -37], f: [20, -55], t: [14, -41] },
+  raise: { c: [17, -50], f: [29, -68], t: [41, -60] },
+  strike: { c: [17, -44], f: [36, -47], t: [45, -33] }
+};
+function threshArm(raise, strike) {
+  const p = {};
+  for (const k of ["c", "f", "t"])
+    p[k] = tlerp(tlerp(THRESH_ARM.rest[k], THRESH_ARM.raise[k], raise), THRESH_ARM.strike[k], strike);
+  return p;
+}
+function threshScythe(e, sh3, p, far2) {
+  const P29 = MANTIS, col2 = far2 ? P29.bD : P29.b, lit2 = far2 ? null : P29.bL, C4 = p.c, Fm = p.f, Tp = p.t;
+  threshSeg(e, sh3, C4, 2.3, 2, col2, lit2);
+  threshSeg(e, C4, Fm, 2.6, 2, col2, lit2);
+  {
+    const th2 = Math.atan2(Fm[1] - C4[1], Fm[0] - C4[0]), nx2 = -Math.sin(th2), ny2 = Math.cos(th2), side2 = nx2 > 0 ? 1 : -1;
+    for (let i = 1; i < 6; i++) {
+      const u = i / 6, x = tmix(C4[0], Fm[0], u) + nx2 * side2 * 2.2, y = tmix(C4[1], Fm[1], u) + ny2 * side2 * 2.2, L = i % 2 ? 2.6 : 1.6;
+      poly10(
+        e,
+        [
+          [x - Math.cos(th2) * 0.8, y - Math.sin(th2) * 0.8],
+          [x + nx2 * side2 * L, y + ny2 * side2 * L],
+          [x + Math.cos(th2) * 0.8, y + Math.sin(th2) * 0.8]
+        ],
+        far2 ? P29.spine : P29.bDD,
+        false
+      );
+    }
+  }
+  const th = Math.atan2(Tp[1] - Fm[1], Tp[0] - Fm[0]), nx = -Math.sin(th), ny = Math.cos(th), side = nx * (C4[0] - Fm[0]) + ny * (C4[1] - Fm[1]) > 0 ? 1 : -1, bow2 = [tmix(Fm[0], Tp[0], 0.5) - nx * side * 3.2, tmix(Fm[1], Tp[1], 0.5) - ny * side * 3.2], hook = [Tp[0] + Math.cos(th) * 2.4 + nx * side * 2.6, Tp[1] + Math.sin(th) * 2.4 + ny * side * 2.6];
+  e.beginPath();
+  e.moveTo(Fm[0] - nx * side * 1.9, Fm[1] - ny * side * 1.9);
+  e.quadraticCurveTo(
+    bow2[0] - nx * side * 1.6,
+    bow2[1] - ny * side * 1.6,
+    Tp[0] - nx * side * 0.4,
+    Tp[1] - ny * side * 0.4
+  );
+  e.lineTo(hook[0], hook[1]);
+  e.quadraticCurveTo(
+    Tp[0] + nx * side * 0.9,
+    Tp[1] + ny * side * 0.9,
+    tmix(Fm[0], Tp[0], 0.8) + nx * side * 0.6,
+    tmix(Fm[1], Tp[1], 0.8) + ny * side * 0.6
+  );
+  e.quadraticCurveTo(
+    bow2[0] + nx * side * 1.2,
+    bow2[1] + ny * side * 1.2,
+    Fm[0] + nx * side * 1.9,
+    Fm[1] + ny * side * 1.9
+  );
+  e.closePath();
+  e.fillStyle = far2 ? P29.bD : P29.blade;
+  e.fill();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 1.1;
+  e.stroke();
+  e.strokeStyle = far2 ? P29.wingD : P29.edge;
+  e.lineWidth = 0.7;
+  e.beginPath();
+  for (let i = 0; i <= 8; i++) {
+    const u = 0.1 + i / 8 * 0.8, x = tmix(Fm[0], Tp[0], u) + nx * side * (1 + Math.sin(u * Math.PI) * -1.5) + (i % 2 ? nx * side * 0.7 : 0), y = tmix(Fm[1], Tp[1], u) + ny * side * (1 + Math.sin(u * Math.PI) * -1.5) + (i % 2 ? ny * side * 0.7 : 0);
+    i ? e.lineTo(x, y) : e.moveTo(x, y);
+  }
+  e.stroke();
+  circ2(e, Fm[0], Fm[1], 1.9, col2, true, 1);
+}
+function threshBeat(t, low, impact3) {
+  const out7 = { raise: 0, far: 0, near: 0, sweep: -1, slashFar: 0, slashNear: 0 };
+  if (impact3 > 0) return out7;
+  const T121 = low ? 1.7 : 3.4, q2 = t % T121 / T121;
+  if (q2 > 0.4 && q2 < 0.55) out7.raise = tease((q2 - 0.4) / 0.15);
+  else if (q2 >= 0.55 && q2 < 0.6) {
+    out7.raise = 1;
+    out7.far = tease((q2 - 0.55) / 0.05);
+  } else if (q2 >= 0.6 && q2 < 0.66) {
+    out7.raise = 1;
+    out7.far = 1 - tease((q2 - 0.6) / 0.06);
+    out7.near = tease((q2 - 0.6) / 0.04 > 1 ? 1 : (q2 - 0.6) / 0.04);
+  } else if (q2 >= 0.66 && q2 < 0.86) {
+    const u = tease((q2 - 0.66) / 0.2);
+    out7.raise = 1 - u;
+    out7.near = 1 - u;
+  }
+  if (q2 >= 0.55 && q2 < 0.68) out7.slashFar = 1 - Math.abs((q2 - 0.585) / 0.06);
+  if (q2 >= 0.6 && q2 < 0.74) out7.slashNear = 1 - Math.abs((q2 - 0.635) / 0.07);
+  out7.slashFar = Math.max(0, out7.slashFar);
+  out7.slashNear = Math.max(0, out7.slashNear);
+  if (q2 >= 0.62 && q2 < 0.86) out7.sweep = (q2 - 0.62) / 0.24;
+  return out7;
+}
+function threshScythes(e, x, y, k, t, beat2) {
+  const P29 = MANTIS, sway = Math.sin(t * 1.3) * 0.03;
+  e.save();
+  e.translate(x, y);
+  e.scale(-k, k);
+  e.rotate(sway - beat2.raise * 0.1);
+  e.translate(-8, 40);
+  e.lineCap = "round";
+  e.lineJoin = "round";
+  const far2 = threshArm(beat2.raise * (1 - beat2.far), beat2.far), near5 = threshArm(beat2.raise * (1 - beat2.near), beat2.near);
+  threshScythe(
+    e,
+    [5, -45],
+    { c: [far2.c[0] - 3, far2.c[1] - 1], f: [far2.f[0] - 3, far2.f[1] - 1], t: [far2.t[0] - 3, far2.t[1] - 1] },
+    true
+  );
+  ell6(e, 6, -42, 5.2, 4.2, P29.b, true, 1.4);
+  ell6(e, 5, -43.6, 3, 1.3, P29.bL, false);
+  stroke2(
+    e,
+    [
+      [3, -40],
+      [9, -40.5]
+    ],
+    P29.bDD,
+    0.7
+  );
+  threshScythe(e, [8, -44], near5, false);
+  for (const [k2, a0] of [
+    [beat2.slashFar, -0.2],
+    [beat2.slashNear, 0.15]
+  ]) {
+    if (k2 <= 0) continue;
+    e.save();
+    e.globalAlpha = k2;
+    e.translate(30, -36);
+    e.rotate(a0);
+    e.beginPath();
+    e.arc(0, 0, 22, -1.1, 0.9);
+    e.arc(-3, -1, 19, 0.85, -1.05, true);
+    e.closePath();
+    e.fillStyle = "#fff8dc";
+    e.fill();
+    e.globalAlpha = k2 * 0.5;
+    e.strokeStyle = "#ffd25a";
+    e.lineWidth = 1;
+    e.stroke();
+    e.restore();
+  }
+  e.restore();
+}
+function wheatEar(e, x, y, a, L) {
+  e.save();
+  e.translate(x, y);
+  e.rotate(a);
+  if (L > 1.5) {
+    e.strokeStyle = MANTIS.bD;
+    e.lineWidth = 0.8;
+    e.beginPath();
+    e.moveTo(0, 0);
+    e.lineTo(0, -L + 3);
+    e.stroke();
+  }
+  e.strokeStyle = MANTIS.bDD;
+  e.lineWidth = 0.5;
+  e.beginPath();
+  e.moveTo(0, -L);
+  e.lineTo(-0.8, -L - 3.2);
+  e.moveTo(0.4, -L);
+  e.lineTo(1.4, -L - 3);
+  e.stroke();
+  for (let j = 0; j < 3; j++) {
+    ell6(e, -0.75, -L + 0.4 + j * 1.5, 0.85, 1.25, MANTIS.bL, true, 0.55);
+    ell6(e, 0.85, -L + 1.1 + j * 1.5, 0.85, 1.25, MANTIS.b, true, 0.55);
+  }
+  e.restore();
+}
+function clipping(e, x, y, a, k, i) {
+  e.save();
+  e.translate(x, y);
+  e.rotate(a);
+  e.globalAlpha *= k;
+  e.fillStyle = i % 3 ? MANTIS.grass : MANTIS.bL;
+  e.fillRect(-2.2, -0.65, 4.4, 1.3);
+  e.restore();
+}
+function earLean(f, t, sweep2) {
+  let a = Math.sin(f * 18 - t * 2.2) * 0.12 + 0.05;
+  if (sweep2 >= 0) {
+    const d = f - sweep2;
+    a += Math.exp(-(d * 9) * (d * 9)) * 0.9;
+  }
+  return a;
+}
+function wingTip(e, x, y, t) {
+  const flut = Math.sin(t * 2.2) * 0.5, path20 = () => {
+    e.beginPath();
+    e.moveTo(x - 4, y - 4.6);
+    e.quadraticCurveTo(x + 6, y - 6 - flut, x + 11, y - 2.6);
+    e.lineTo(x + 9.4, y - 1.1);
+    e.lineTo(x + 10.6, y + 0.2);
+    e.lineTo(x + 8.4, y + 1.2);
+    e.quadraticCurveTo(x + 4, y + 4.4, x - 4, y + 4.6);
+    e.closePath();
+  };
+  path20();
+  e.fillStyle = MANTIS.wing;
+  e.fill();
+  e.save();
+  path20();
+  e.clip();
+  e.fillStyle = MANTIS.wingD;
+  e.beginPath();
+  e.ellipse(x + 2, y + 4.6, 10, 3, 0, 0, TAU255);
+  e.fill();
+  e.strokeStyle = MANTIS.vein;
+  e.lineWidth = 0.55;
+  e.beginPath();
+  e.moveTo(x - 4, y - 1);
+  e.quadraticCurveTo(x + 4, y - 2.6, x + 10, y - 1.4);
+  e.moveTo(x - 4, y + 1.6);
+  e.quadraticCurveTo(x + 4, y + 1, x + 9, y + 0.6);
+  e.stroke();
+  for (let vx = x - 1; vx < x + 10; vx += 3) {
+    e.beginPath();
+    e.moveTo(vx, y - 6);
+    e.lineTo(vx - 1.2, y + 5);
+    e.stroke();
+  }
+  e.restore();
+  path20();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 1;
+  e.stroke();
+}
+var THRESHER_BAR = {
+  shape: (e, x, y, w, h) => pill(e, x, y, w, h),
+  chunk: ["#fff6d8", "#f0e2a8", "#cdb56a"],
+  under(e, x, y, w, h, t) {
+    wingTip(e, x + w, y + h / 2, t);
+  },
+  track(e, x, y, w, h) {
+    pill(e, x - 2.5, y - 2.5, w + 5, h + 5);
+    e.fillStyle = vgrad(e, y - 2.5, h + 5, [MANTIS.wing, MANTIS.wingD, MANTIS.vein]);
+    e.fill();
+    e.save();
+    pill(e, x - 2.5, y - 2.5, w + 5, h + 5);
+    e.clip();
+    e.strokeStyle = MANTIS.vein;
+    e.lineWidth = 0.55;
+    for (let vx = x + 3; vx < x + w; vx += 6) {
+      e.beginPath();
+      e.moveTo(vx, y - 3);
+      e.lineTo(vx - 1.6, y + h + 3);
+      e.stroke();
+    }
+    e.beginPath();
+    e.moveTo(x - 2, y - 1.2);
+    e.lineTo(x + w + 2, y - 1.2);
+    e.moveTo(x - 2, y + h + 1.2);
+    e.lineTo(x + w + 2, y + h + 1.2);
+    e.stroke();
+    e.restore();
+    pill(e, x - 2.5, y - 2.5, w + 5, h + 5);
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    pill(e, x, y, w, h);
+    e.fillStyle = STUBBLE2;
+    e.fill();
+    e.save();
+    e.clip();
+    const r = seeded2(19);
+    e.strokeStyle = "#5a4a20";
+    e.lineWidth = 0.7;
+    for (let sx = x + 2; sx < x + w; sx += 2.5 + r() * 2.5) {
+      e.beginPath();
+      e.moveTo(sx, y + h);
+      e.lineTo(sx + 0.5, y + h - 1.6 - r() * 2);
+      e.stroke();
+    }
+    e.restore();
+  },
+  fill(e, x, y, w, h, t, fullW) {
+    e.save();
+    pill(e, x, y, w, h);
+    e.clip();
+    e.fillStyle = vgrad(e, y, h, [MANTIS.bL, MANTIS.b, MANTIS.bD]);
+    e.fillRect(x, y, w, h);
+    e.lineWidth = 0.7;
+    for (let sx = x + 1; sx < x + w; sx += 2.2) {
+      const f = (sx - x) / fullW, lean = Math.sin(f * 18 - t * 2.2) * 0.9;
+      e.strokeStyle = Math.round(sx) % 3 ? MANTIS.bD : MANTIS.bDD;
+      e.beginPath();
+      e.moveTo(sx, y + h);
+      e.lineTo(sx + lean, y);
+      e.stroke();
+    }
+    e.fillStyle = "rgba(255,246,208,0.35)";
+    e.fillRect(x, y + 0.5, w, h * 0.25);
+    e.restore();
+  },
+  edge(e, x, y, h) {
+    e.strokeStyle = EDGE5;
+    e.lineWidth = 1.1;
+    e.beginPath();
+    e.moveTo(x, y);
+    e.lineTo(x + 0.6, y + h);
+    e.stroke();
+  },
+  // cut straw off the lost chunk
+  chunkMotion(e, x, y, w, h, t) {
+    for (let i = 0; i < 4; i++) {
+      const q2 = (t * 0.55 + i / 4) % 1, cx = x + w * (0.15 + i * 0.24) + Math.sin(q2 * 7 + i) * 2.5, cy2 = y + h + q2 * 11;
+      e.save();
+      e.globalAlpha = 1 - q2;
+      e.translate(cx, cy2);
+      e.rotate(q2 * 6 + i);
+      e.fillStyle = i % 2 ? "#f0e2a8" : "#cdb56a";
+      e.fillRect(-2, -0.45, 4, 0.9);
+      e.restore();
+    }
+  },
+  over(e, x, y, w, h, t, frac, impact3) {
+    const low = frac < 0.5, beat2 = threshBeat(t, low, impact3), filled = w * frac;
+    for (let ex = x + 5, i = 0; ex < x + filled - 2; ex += 6, i++) {
+      const f = (ex - x) / w;
+      wheatEar(e, ex, y - 1, earLean(f, t, beat2.sweep >= 0 ? beat2.sweep * frac : -1), i % 2 ? 3.8 : 4.4);
+    }
+    if (beat2.sweep >= 0 && filled > 10) {
+      const sx = x + filled * beat2.sweep, k = Math.sin(beat2.sweep * Math.PI);
+      e.save();
+      const g2 = e.createLinearGradient(sx - 30, 0, sx + 3, 0);
+      g2.addColorStop(0, "rgba(255,248,220,0)");
+      g2.addColorStop(1, "rgba(255,248,220,0.95)");
+      e.globalAlpha = k;
+      e.fillStyle = g2;
+      e.beginPath();
+      e.moveTo(sx - 30, y - 1.6);
+      e.quadraticCurveTo(sx - 12, y - 6, sx + 3, y - 4.6);
+      e.quadraticCurveTo(sx - 12, y - 0.4, sx - 30, y - 0.8);
+      e.closePath();
+      e.fill();
+      e.restore();
+      for (let i = 0; i < 7; i++) {
+        const u = (beat2.sweep * 5 + i * 0.37) % 1, a = -1.9 + i * 0.35;
+        clipping(
+          e,
+          sx - u * 6 + Math.cos(a) * u * 12,
+          y - 3 + Math.sin(a) * u * 11 + u * u * 8,
+          u * 6 + i,
+          k * (1 - u),
+          i
+        );
+      }
+    }
+    if (low)
+      for (let i = 0; i < 4; i++) {
+        const q2 = (t * 0.5 + i / 4) % 1, cx = x + w * frac + w * (1 - frac) * ((i * 0.37 + 0.15) % 1) + Math.sin(q2 * 5 + i) * 2, cy2 = y + h + 2 + q2 * 10;
+        e.globalAlpha = 1 - q2;
+        dot17(e, cx, cy2, 0.9, "#cdb56a");
+        e.globalAlpha = 1;
+      }
+    if (impact3 > 0) {
+      const hx2 = x + filled, u = 1 - impact3;
+      for (let i = 0; i < 6; i++) {
+        const a = -1.2 + i * 0.45, d = 3 + u * 11;
+        clipping(e, hx2 + Math.cos(a) * d, y + h / 2 + Math.sin(a) * d + u * u * 5, u * 5 + i, impact3, i);
+      }
+    }
+    threshScythes(e, x - 2, y + h / 2, 0.72, t, beat2);
+  }
+};
+function drawThresherBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 4, y: y + NAME_GAP, w: w - 14, h: BAR_H }, i, THRESHER_BAR, a);
+  thresherName(e, x + w / 2, y + 13, t.name);
+}
+function thresherName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#1c1406";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#fff6d0", "#efd682", "#b8922c"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -330080,7 +330504,8 @@ var LESSER_BARS = Object.freeze({
   vinegorger: Object.freeze({ draw: drawVinegorgerBar, side: 18 }),
   rotbloom: Object.freeze({ draw: drawRotbloomBar, side: 20 }),
   gulpjaw: Object.freeze({ draw: drawGulpjawBar, side: 22 }),
-  rootgorger: Object.freeze({ draw: drawRootgorgerBar, side: 22 })
+  rootgorger: Object.freeze({ draw: drawRootgorgerBar, side: 22 }),
+  thresher: Object.freeze({ draw: drawThresherBar, side: 30 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
