@@ -251714,10 +251714,24 @@ function createInventoryPresentation({
       b.dataset.itemId = id2;
       b.append(itemIcon(item2));
       if (d.rarityTier) b.append(element("span", d.rarityTier + "\u2605", "gx-stars"));
-      b.setAttribute("aria-label", `${SLOT_NAMES[slot]}: ${displayName(d)}, ${rarity(d)}`);
+      const lv = item2.generated?.itemPower;
+      if (lv !== void 0 && lv !== null) {
+        const chip6 = element("span", "", "gx-lv");
+        chip6.append(element("span", "Lv ", "gx-lvword"), statText(lv));
+        b.append(chip6);
+      }
+      b.setAttribute(
+        "aria-label",
+        `${SLOT_NAMES[slot]}: ${displayName(d)}, ${rarity(d)}` + (lv != null ? `, level ${statText(lv)}` : "")
+      );
     } else {
       b.innerHTML = EMPTY_SLOT_SVG[slotIconKind(slot)];
       b.setAttribute("aria-label", `${SLOT_NAMES[slot]}: empty`);
+    }
+    const tune = inv.economy?.slotLevels?.[slot] ?? 0;
+    if (tune > 0) {
+      b.append(element("span", "\u25C6" + tune, "gx-tune"));
+      b.setAttribute("aria-label", b.getAttribute("aria-label") + `, slot attunement ${tune}`);
     }
     if (scan.upSlots.has(slot)) {
       b.append(markup(element("span", "", "gx-up"), UP_BADGE));
