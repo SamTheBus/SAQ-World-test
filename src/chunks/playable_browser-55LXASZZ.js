@@ -333163,6 +333163,317 @@ function spinegroveName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var SIRO = SIRO_PAL.A;
+var SIRO_SCOUR = "#3a2814";
+var SIRO_SCOURL = "#4e3720";
+var SIRO_DUST = { edge: "#ffcf7a", fill: "#c98a3a", lit: "#fff0cc", dark: "rgba(60,36,10,.6)" };
+var siroEase = (x) => x * x * (3 - 2 * x);
+var siroClamp = (x) => Math.max(0, Math.min(1, x));
+function siroBeat(t, low, impact3) {
+  const T121 = low ? 3.4 : 5, s = t % T121 * (5 / T121);
+  const b = { cast: 0, hold: 0, warn: 0, run: 0, devil: 0, age: s };
+  if (s >= 0.7 && s < 1.3) b.cast = siroEase((s - 0.7) / 0.5 > 1 ? 1 : (s - 0.7) / 0.5);
+  if (s >= 1.3 && s < 1.9) {
+    const u = (s - 1.3) / 0.6;
+    b.cast = 1 - siroEase(siroClamp(u * 2));
+    b.hold = siroEase(siroClamp(u * 2));
+    b.warn = u;
+  }
+  if (s >= 1.9 && s < 4.2) {
+    b.hold = 1;
+    b.run = siroClamp((s - 1.9) / 1.1);
+    b.devil = siroEase(siroClamp((s - 1.9) / 0.25));
+  }
+  if (s >= 4.2 && s < 4.7) {
+    const u = (s - 4.2) / 0.5;
+    b.hold = 1 - siroEase(u);
+    b.run = 1;
+    b.devil = 1 - siroEase(u);
+  }
+  if (impact3 > 0) b.cast *= 0.4;
+  return b;
+}
+function siroPebbles(e, cx, cy2, t, spin, front2) {
+  for (let i = 0; i < 5; i++) {
+    const a = t * 1.6 * spin + i * TAU256 / 5, z = Math.sin(a);
+    if (z > 0 !== front2) continue;
+    ell6(
+      e,
+      cx + Math.cos(a) * 13,
+      cy2 + z * 2.6 + Math.sin(i * 2.1) * 2.6,
+      1.3 + i % 2 * 0.4,
+      1 + i % 2 * 0.3,
+      front2 ? SIRO.stone : SIRO.stoneD,
+      true,
+      0.6
+    );
+  }
+}
+function siroWisp(e, x, y, k, flip) {
+  e.save();
+  e.translate(x, y);
+  e.scale(k * (flip ? -1 : 1), k);
+  e.lineCap = "round";
+  e.beginPath();
+  e.moveTo(-2, 1);
+  e.quadraticCurveTo(3, 1.5, 4, -1.5);
+  e.quadraticCurveTo(4.4, -3.4, 2.4, -3);
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 2.4;
+  e.stroke();
+  e.strokeStyle = SIRO.s1;
+  e.lineWidth = 1.1;
+  e.stroke();
+  e.restore();
+}
+function siroRing(e, x, y, rx, ry, t, k, flash2) {
+  e.save();
+  e.globalAlpha = k;
+  e.fillStyle = SIRO_DUST.fill + "55";
+  e.beginPath();
+  e.ellipse(x, y, rx, ry, 0, 0, TAU256);
+  e.fill();
+  e.strokeStyle = SIRO_DUST.dark;
+  e.lineWidth = 2.4;
+  e.stroke();
+  e.strokeStyle = flash2 ? "#ffffff" : SIRO_DUST.edge;
+  e.lineWidth = 1.1;
+  e.setLineDash([3, 2.2]);
+  e.lineDashOffset = -t * 20;
+  e.beginPath();
+  e.ellipse(x, y, rx, ry, 0, 0, TAU256);
+  e.stroke();
+  e.setLineDash([]);
+  e.restore();
+}
+var SIROCCO_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: [SIRO.streak, SIRO.s1, SIRO.s2],
+  under(e, o, t, i, a, l) {
+    const x = o + i - 2, y = t + a / 2, w = Math.sin(l * 2.4) * 0.6;
+    e.save();
+    e.lineCap = "round";
+    e.beginPath();
+    e.moveTo(x, y + 1);
+    e.quadraticCurveTo(x + 8, y + 2.5, x + 9.5, y - 3 + w);
+    e.quadraticCurveTo(x + 10.5, y - 8.5 + w, x + 5.5, y - 7.6 + w);
+    e.quadraticCurveTo(x + 2.8, y - 6.6, x + 4.6, y - 4.6);
+    e.strokeStyle = EDGE5;
+    e.lineWidth = 4.6;
+    e.stroke();
+    e.strokeStyle = SIRO.s2;
+    e.lineWidth = 2.6;
+    e.stroke();
+    e.strokeStyle = SIRO.streak;
+    e.lineWidth = 0.8;
+    e.beginPath();
+    e.moveTo(x + 2, y);
+    e.quadraticCurveTo(x + 7.6, y + 1, x + 8.6, y - 3 + w);
+    e.stroke();
+    e.restore();
+    for (let k = 0; k < 3; k++) {
+      const q2 = (l * 0.8 + k / 3) % 1;
+      e.globalAlpha = 1 - q2;
+      dot17(e, x + 10 + q2 * 9, y - 5 + k * 3 - q2 * 2, 0.7, k % 2 ? SIRO.s1 : SIRO.streak);
+    }
+    e.globalAlpha = 1;
+  },
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, [SIRO.stoneD, "#8a5e30", SIRO.stoneDD]);
+    e.fill();
+    e.save();
+    e.clip();
+    e.strokeStyle = "rgba(240,207,152,.55)";
+    e.lineWidth = 0.6;
+    for (const [f, ph] of [
+      [-1.3, 0],
+      [a + 1.4, 2]
+    ]) {
+      e.beginPath();
+      for (let x = o - 2; x <= o + i + 2; x += 3) {
+        const yy = t + f + Math.sin(x * 0.09 + ph) * 0.35;
+        x === o - 2 ? e.moveTo(x, yy) : e.lineTo(x, yy);
+      }
+      e.stroke();
+    }
+    const rnd27 = seeded2(13);
+    e.strokeStyle = SIRO.stoneDD;
+    e.lineWidth = 0.7;
+    for (let x = o + 20 + rnd27() * 30; x < o + i - 6; x += 50 + rnd27() * 60) {
+      e.beginPath();
+      e.moveTo(x, t - 2.5);
+      e.lineTo(x - 1, t - 1.2);
+      e.lineTo(x + 0.4, t - 0.4);
+      e.stroke();
+    }
+    e.restore();
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    pill(e, o, t, i, a);
+    e.fillStyle = SIRO_SCOUR;
+    e.fill();
+    e.save();
+    e.clip();
+    e.fillStyle = SIRO_SCOURL;
+    e.fillRect(o, t, i, a * 0.3);
+    e.strokeStyle = "rgba(0,0,0,.28)";
+    e.lineWidth = 0.6;
+    for (let x = o + 7; x < o + i; x += 13) {
+      e.beginPath();
+      e.moveTo(x, t + a * 0.75);
+      e.quadraticCurveTo(x + 3, t + a * 0.45, x + 6, t + a * 0.75);
+      e.stroke();
+    }
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    const low = i / n < 0.5, b = siroBeat(l, low, 0), speed = (low ? 26 : 16) * (1 + b.cast * 1.2 - b.hold * 0.4);
+    e.fillStyle = vgrad(e, t, a, ["#f4e0ae", SIRO.s1, SIRO.s2, SIRO.s3]);
+    e.fillRect(o, t, i, a);
+    const gap2 = 8, off = l * speed % gap2;
+    for (let x = o - gap2 + off; x < o + i; x += gap2) {
+      e.strokeStyle = "rgba(110,70,30,.55)";
+      e.lineWidth = 0.8;
+      e.beginPath();
+      e.ellipse(x, t + a / 2, 2.6, a / 2 - 0.3, -0.3, -Math.PI / 2, Math.PI / 2);
+      e.stroke();
+      e.strokeStyle = "rgba(255,246,220,.5)";
+      e.lineWidth = 0.6;
+      e.beginPath();
+      e.ellipse(x - 1.4, t + a / 2, 2.6, a / 2 - 1, -0.3, -Math.PI / 2, -0.2);
+      e.stroke();
+    }
+    e.strokeStyle = SIRO.streak;
+    e.lineWidth = 0.9;
+    e.lineCap = "round";
+    const rnd27 = seeded2(5);
+    for (let k = 0; k < 10; k++) {
+      const row2 = k % 2, L = 5 + rnd27() * 9, sp = speed * (1.4 + rnd27() * 0.8), base3 = rnd27() * n, x = o + (base3 + l * sp) % (n + L) - L, yy = t + (row2 === 0 ? 1.3 : a * 0.62);
+      const x0 = Math.max(o, x), x1 = Math.min(o + i - 1, x + L);
+      if (x1 <= x0) continue;
+      e.globalAlpha = row2 ? 0.6 : 0.95;
+      e.beginPath();
+      e.moveTo(x0, yy);
+      e.lineTo(x1, yy);
+      e.stroke();
+    }
+    e.globalAlpha = 1;
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 6; n++) {
+      const r = (l * 1.3 + n / 6) % 1;
+      e.globalAlpha = 1 - r;
+      dot17(
+        e,
+        o + i * (0.1 + n * 0.16) + r * 8,
+        t + a * (0.2 + n % 3 * 0.3) - r * 3,
+        0.7,
+        n % 2 ? SIRO.s1 : SIRO.streak
+      );
+    }
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a, l) {
+    e.fillStyle = SIRO.s1;
+    e.beginPath();
+    e.arc(o - 0.6, t + i / 2, i / 2, -Math.PI / 2, Math.PI / 2);
+    e.fill();
+    e.strokeStyle = "rgba(110,70,30,.7)";
+    e.lineWidth = 0.7;
+    e.beginPath();
+    e.arc(o - 1.4, t + i / 2, i * 0.28, -Math.PI / 2 + Math.sin(l * 6) * 0.3, Math.PI * 0.7);
+    e.stroke();
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const low = n < 0.5, b = siroBeat(l, low, r), fx = o + i * n, spin = 1 + b.cast * 1.4 - b.hold * 0.5;
+    for (let k = 0; k < (low ? 4 : 2); k++) {
+      const q2 = (l * (low ? 0.9 : 0.55) + k / (low ? 4 : 2)) % 1, x = o + 14 + q2 * (fx - o - 20);
+      if (x > fx - 4) continue;
+      e.globalAlpha = Math.sin(q2 * Math.PI);
+      siroWisp(e, x, t - 1 - q2 * 2.5, 0.7, false);
+    }
+    e.globalAlpha = 1;
+    const cx = o - 5, base3 = t + a + 5, top = t - 15 - b.cast * 3;
+    siroPebbles(e, cx, top + 5, l, spin, false);
+    e.save();
+    e.translate(cx, base3);
+    drawTwister(e, l, {
+      y0: -1,
+      y1: top - base3,
+      r0: 1.6,
+      r1: 9.5 + b.cast * 1.2 - b.hold * 1.6,
+      n: 7,
+      spin,
+      sway: 1.6 * (1 - b.hold * 0.6),
+      P: SIRO
+    });
+    e.restore();
+    siroPebbles(e, cx, top + 5, l, spin, true);
+    if (r <= 0 && fx > o + 30) {
+      const tx = o + Math.max(28, Math.min((fx - o) * 0.45, i * 0.3)), ty = t + a / 2 + 0.6;
+      if (b.warn > 0)
+        siroRing(e, tx, ty, 7.5, 3.6, l, Math.min(1, b.warn * 4), b.warn > 0.8 && Math.sin(b.warn * 60) > 0);
+      if (b.devil > 0) {
+        const ru = siroEase(b.run), dx = cx + 4 + (tx - cx - 4) * ru + (b.run >= 1 ? Math.sin(l * 7) * 3 : 0), dy = t + a / 2 + 2;
+        siroRing(e, dx, ty, 7.5 * b.devil, 3.6 * b.devil, l, b.devil * 0.9, false);
+        for (let k = 1; k < 6; k++) {
+          const sx = dx - k * 5 * (b.run < 1 ? 1 : 0.4);
+          if (sx < cx + 4) break;
+          e.globalAlpha = b.devil * (1 - k / 6) * 0.9;
+          ell6(
+            e,
+            sx + Math.sin(k * 2.3) * 1.5,
+            ty + Math.cos(k * 1.7) * 1.2,
+            1.2,
+            0.7,
+            k % 2 ? "#c4a062" : "#e3c78e",
+            false
+          );
+        }
+        e.globalAlpha = 1;
+        e.save();
+        e.translate(dx, dy);
+        e.scale(b.devil, 0.2 + b.devil * 0.8);
+        drawTwister(e, l, { y0: -1, y1: -14, r0: 1.1, r1: 5.8, n: 6, spin: 1.6, sway: 1.4, P: SIRO_PAL.S });
+        e.restore();
+      }
+    }
+    if (r > 0) {
+      for (let k = 0; k < 8; k++) {
+        const d = 1 - r, hx2 = (k - 3) * 2.2 * (0.4 + d) + d * 6, vy = -4 + d * d * 12 + k % 2 * 2;
+        e.globalAlpha = r;
+        dot17(e, fx + hx2, t + a / 2 + vy, 1.1, k % 3 ? SIRO.s1 : SIRO.streak);
+      }
+      e.globalAlpha = 1;
+      siroWisp(e, fx + 4 + (1 - r) * 6, t - 2, 0.8 * r + 0.2, false);
+    }
+  }
+};
+function drawSiroccoBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 12, y: y + NAME_GAP, w: w - 24, h: BAR_H }, i, SIROCCO_BAR, a);
+  siroccoName(e, x + w / 2, y + 13, t.name);
+}
+function siroccoName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#2a170a";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#fff0cc", "#ffcf7a", "#e07a2a"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -333174,7 +333485,8 @@ var LESSER_BARS = Object.freeze({
   thresher: Object.freeze({ draw: drawThresherBar, side: 30 }),
   waxcrown: Object.freeze({ draw: drawWaxcrownBar, side: 20 }),
   pitjaw: Object.freeze({ draw: drawPitjawBar, side: 18 }),
-  spinegrove: Object.freeze({ draw: drawSpinegroveBar, side: 16 })
+  spinegrove: Object.freeze({ draw: drawSpinegroveBar, side: 16 }),
+  sirocco: Object.freeze({ draw: drawSiroccoBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
