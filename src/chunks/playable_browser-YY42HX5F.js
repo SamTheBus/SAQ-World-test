@@ -336750,6 +336750,420 @@ function shardheartName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var RMH = TROLL_PAL.A;
+var RMH_STONE = "#28313c";
+var RMH_STONEL = "#36414f";
+var rmhEase = (x) => x * x * (3 - 2 * x);
+var rmhClamp = (x) => Math.max(0, Math.min(1, x));
+var rmhSeg = (t, a, b) => rmhClamp((t - a) / (b - a));
+var rmhMix = (a, b, u) => a + (b - a) * u;
+var RMH_BALLS = [
+  [0, 0.3, 0.75, 0.4],
+  [0.85, 1.15, 1.6, 0.58]
+];
+var RMH_GATHER = [1.9, 2.6];
+var RMH_LIFT = 3;
+var RMH_LAND = 3.45;
+var RMH_END = 5.2;
+var RMH_HEAVE_AT = 0.8;
+function rmhBeat(t, low) {
+  const T121 = low ? 3 : 6, s = (t % T121 + T121) % T121 / T121 * 6 - 0.6;
+  const on = s >= 0 && s < RMH_END;
+  return {
+    s,
+    on,
+    gather: on && s >= RMH_GATHER[0] && s < RMH_LIFT ? rmhSeg(s, RMH_GATHER[0], RMH_GATHER[1]) : -1,
+    fly: on && s >= RMH_LIFT && s < RMH_LAND ? (s - RMH_LIFT) / (RMH_LAND - RMH_LIFT) : -1,
+    burst: on && s >= RMH_LAND && s < RMH_LAND + 0.45 ? (s - RMH_LAND) / 0.45 : -1,
+    drift: on && s >= RMH_LAND ? 1 - rmhSeg(s, RMH_END - 0.9, RMH_END) : 0,
+    winded: on ? rmhEase(rmhSeg(s, RMH_LAND + 0.1, RMH_LAND + 0.4)) * (1 - rmhSeg(s, RMH_END - 0.5, RMH_END)) : 0
+  };
+}
+function rmhRamHorn(c, x, y, k) {
+  c.save();
+  c.translate(x, y);
+  c.scale(k, k);
+  const N5 = 24, turn7 = 1.3, pts2 = [];
+  for (let i = 0; i <= N5; i++) {
+    const u = i / N5, a = -1.75 - u * turn7 * Math.PI, r = 11 * (1 - u * 0.5), w = 7.4 * (1 - u * 0.68) + 0.8;
+    pts2.push({ x: Math.cos(a) * r * 1.05 + u * 3, y: Math.sin(a) * r + u * 4, w, u });
+  }
+  const L = [], R18 = [];
+  for (let i = 0; i <= N5; i++) {
+    const p = pts2[i], q2 = pts2[Math.min(N5, i + 1)], o = pts2[Math.max(0, i - 1)], dx = q2.x - o.x, dy = q2.y - o.y, l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
+    L.push([p.x + nx * p.w / 2, p.y + ny * p.w / 2]);
+    R18.push([p.x - nx * p.w / 2, p.y - ny * p.w / 2]);
+  }
+  const ribbon3 = (a, b) => {
+    c.beginPath();
+    for (let i = a; i <= b; i++) i === a ? c.moveTo(...L[i]) : c.lineTo(...L[i]);
+    for (let i = b; i >= a; i--) c.lineTo(...R18[i]);
+    c.closePath();
+  };
+  ribbon3(0, N5);
+  c.fillStyle = RMH.horn;
+  c.fill();
+  c.save();
+  ribbon3(0, N5);
+  c.clip();
+  c.strokeStyle = RMH.hornD;
+  c.lineWidth = 0.9;
+  for (let i = 2; i < N5 - 2; i += 2) {
+    c.beginPath();
+    c.moveTo(...L[i]);
+    c.lineTo(...R18[i]);
+    c.stroke();
+  }
+  c.fillStyle = RMH.hornL;
+  c.beginPath();
+  for (let i = 0; i < N5 * 0.6; i++) c.lineTo(...L[i]);
+  for (let i = Math.floor(N5 * 0.6); i >= 0; i--) {
+    const p = pts2[i];
+    c.lineTo(rmhMix(L[i][0], p.x, 0.6), rmhMix(L[i][1], p.y, 0.6));
+  }
+  c.fill();
+  const r0 = Math.floor(N5 * 0.84);
+  c.fillStyle = RMH.rime;
+  ribbon3(r0, N5);
+  c.fill();
+  c.fillStyle = RMH.rimeD;
+  c.beginPath();
+  for (let i = r0; i <= N5; i++) c.lineTo(...R18[i]);
+  for (let i = N5; i >= r0; i--) {
+    const p = pts2[i];
+    c.lineTo(p.x, p.y);
+  }
+  c.fill();
+  c.restore();
+  ribbon3(0, N5);
+  c.strokeStyle = EDGE5;
+  c.lineWidth = 1.4;
+  c.lineJoin = "round";
+  c.stroke();
+  c.restore();
+}
+function rmhBall(e, x, y, r) {
+  e.beginPath();
+  e.arc(x, y, r, 0, TAU259);
+  e.fillStyle = "#f6fafc";
+  e.fill();
+  e.save();
+  e.clip();
+  e.fillStyle = "#c3d6e4";
+  e.beginPath();
+  e.rect(x - r * 2, y - r * 2, r * 4, r * 4);
+  e.arc(x - r * 0.25, y - r * 0.3, r * 0.95, 0, TAU259, true);
+  e.fill("evenodd");
+  e.restore();
+  e.beginPath();
+  e.arc(x, y, r, 0, TAU259);
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 0.9;
+  e.stroke();
+}
+function rmhRing(e, x, cy2, rx, ry, u) {
+  e.save();
+  e.globalAlpha = Math.min(1, u * 5);
+  e.strokeStyle = "rgba(12,22,34,.65)";
+  e.lineWidth = 2.4;
+  e.beginPath();
+  e.ellipse(x, cy2, rx, ry, 0, 0, TAU259);
+  e.stroke();
+  e.strokeStyle = "#e4f4ff";
+  e.lineWidth = 1;
+  e.stroke();
+  e.fillStyle = "rgba(214,241,255,.35)";
+  e.beginPath();
+  e.ellipse(x, cy2, rx * u, ry * u, 0, 0, TAU259);
+  e.fill();
+  e.restore();
+}
+function rmhPuff(e, x, cy2, u, big) {
+  const R18 = big ? 1.7 : 1;
+  e.save();
+  e.globalAlpha = 1 - u;
+  e.fillStyle = "#ffffff";
+  for (let j = 0; j < (big ? 10 : 6); j++) {
+    const ang = Math.PI + j / ((big ? 10 : 6) - 1) * Math.PI, d = (3 + u * 9) * R18;
+    e.beginPath();
+    e.arc(x + Math.cos(ang) * d * 1.3, cy2 + Math.sin(ang) * d * 0.7, (1.8 - u) * R18, 0, TAU259);
+    e.fill();
+  }
+  e.strokeStyle = "#ffffff";
+  e.lineWidth = 1.4;
+  e.beginPath();
+  e.ellipse(x, cy2, (4 + u * 10) * R18, (2.5 + u * 4) * R18, 0, 0, TAU259);
+  e.stroke();
+  e.restore();
+}
+var RIMEHORN_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: [RMH.rime, RMH.rimeD, RMH.iceD],
+  under(e, o, t, i, a, l, n) {
+    rmhRamHorn(e, o - 2, t + a / 2 - 1.5, 1.05);
+  },
+  track(e, o, t, i, a) {
+    const r = seeded2(43);
+    e.fillStyle = RMH.furD;
+    e.beginPath();
+    for (let x2 = o + 8; x2 < o + i - 8; x2 += 6 + r() * 9) {
+      const h = 1.4 + r() * 2, wd = 2 + r() * 2;
+      e.moveTo(x2 - wd, t + a + 2);
+      e.quadraticCurveTo(x2 - wd * 0.2, t + a + 2 + h * 0.6, x2 - 0.8 - r(), t + a + 2 + h);
+      e.quadraticCurveTo(x2 + wd * 0.3, t + a + 2 + h * 0.4, x2 + wd, t + a + 2);
+    }
+    e.fill();
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, [RMH.furL, RMH.fur, RMH.furD]);
+    e.fill();
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    const y0 = t - 1.6;
+    e.beginPath();
+    e.moveTo(o + 3, y0 + 1.2);
+    let x = o + 3;
+    e.lineTo(x, y0);
+    while (x < o + i - 9) {
+      const w = 4 + r() * 3, h = 1.4 + r() * 1.6 + (r() < 0.2 ? 1 : 0), tx = x + w * 0.05 - 0.8, ty = y0 - h;
+      e.quadraticCurveTo(x + w * 0.2, y0 - h * 0.45, tx, ty);
+      e.quadraticCurveTo(x + w + 0.4, y0 - h * 1.05, x + w, y0 + 0.2);
+      x += w;
+    }
+    e.lineTo(o + i - 3, y0 + 1.2);
+    e.closePath();
+    e.fillStyle = RMH.fur;
+    e.fill();
+    e.strokeStyle = EDGE5;
+    e.lineWidth = 0.7;
+    e.lineJoin = "round";
+    e.stroke();
+    e.fillStyle = RMH.furL;
+    e.fillRect(o + 4, t - 1.4, i - 8, 0.7);
+    for (const f of [0.17, 0.36, 0.63, 0.9]) {
+      const x2 = o + i * f, L = 3 + r() * 2.5;
+      e.beginPath();
+      e.moveTo(x2 - 1.3, t + a + 2.2);
+      e.lineTo(x2 + 0.2, t + a + 2.2 + L);
+      e.lineTo(x2 + 1.3, t + a + 2.2);
+      e.closePath();
+      e.fillStyle = RMH.ice;
+      e.fill();
+      e.strokeStyle = EDGE5;
+      e.lineWidth = 0.6;
+      e.stroke();
+    }
+    pill(e, o, t, i, a);
+    e.fillStyle = RMH_STONE;
+    e.fill();
+    e.save();
+    e.clip();
+    for (let x2 = o + 3; x2 < o + i; x2 += 5 + r() * 7) {
+      e.fillStyle = RMH_STONEL;
+      e.beginPath();
+      e.ellipse(x2, t + a * (0.45 + r() * 0.35), 1.6 + r() * 1.6, 1 + r() * 0.6, 0, 0, TAU259);
+      e.fill();
+      if (r() < 0.55) dot17(e, x2 + r() * 3, t + 0.8 + r() * 1.2, 0.5 + r() * 0.35, "rgba(230,240,248,.55)");
+    }
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    e.fillStyle = RMH.horn;
+    e.fillRect(o, t, i, a);
+    e.fillStyle = RMH.hornL;
+    e.fillRect(o, t, i, a * 0.32);
+    e.fillStyle = RMH.hornD;
+    e.fillRect(o, t + a * 0.7, i, a * 0.3);
+    const rg = seeded2(29);
+    for (let x = o + 4; x < o + i; x += 7 + rg() * 4) {
+      e.strokeStyle = "rgba(133,115,86,.7)";
+      e.lineWidth = 0.6;
+      e.beginPath();
+      e.moveTo(x, t);
+      e.quadraticCurveTo(x + 1.3, t + a / 2, x, t + a);
+      e.stroke();
+      e.strokeStyle = "rgba(255,248,230,.55)";
+      e.lineWidth = 0.4;
+      e.beginPath();
+      e.moveTo(x + 0.9, t + 0.4);
+      e.quadraticCurveTo(x + 2, t + a * 0.3, x + 1.9, t + a * 0.45);
+      e.stroke();
+    }
+    e.fillStyle = "rgba(255,250,236,.7)";
+    e.fillRect(o, t + 0.5, i, 0.6);
+    const rw = Math.min(i, 12), rx = o + i - rw;
+    const g2 = e.createLinearGradient(rx, 0, o + i, 0);
+    g2.addColorStop(0, "rgba(214,241,255,0)");
+    g2.addColorStop(0.55, "rgba(214,241,255,.85)");
+    g2.addColorStop(1, RMH.rime);
+    e.fillStyle = g2;
+    e.fillRect(rx, t, rw, a);
+    e.fillStyle = "rgba(143,195,223,.7)";
+    e.fillRect(rx + rw * 0.4, t + a * 0.66, rw * 0.6, a * 0.34);
+    const r = seeded2(17);
+    for (let k = 0; k < 4; k++) dot17(e, rx + rw * (0.45 + r() * 0.5), t + r() * a, 0.45, "#ffffff");
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 4; n++) {
+      const r = (l * 0.9 + n / 4) % 1;
+      e.globalAlpha = 1 - r;
+      dot17(e, o + i * (0.15 + n * 0.23), t + a - 1 + r * 4, 0.8, "#ffffff");
+    }
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a) {
+    e.fillStyle = RMH.hornD;
+    e.beginPath();
+    e.moveTo(o - 2, t);
+    e.lineTo(o + 0.5, t);
+    e.lineTo(o - 0.4, t + i * 0.35);
+    e.lineTo(o + 0.6, t + i * 0.7);
+    e.lineTo(o - 0.2, t + i);
+    e.lineTo(o - 2, t + i);
+    e.closePath();
+    e.fill();
+    e.strokeStyle = RMH.rime;
+    e.lineWidth = 0.6 + a * 0.6;
+    e.beginPath();
+    e.moveTo(o + 0.5, t);
+    e.lineTo(o - 0.4, t + i * 0.35);
+    e.lineTo(o + 0.6, t + i * 0.7);
+    e.lineTo(o - 0.2, t + i);
+    e.stroke();
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const low = n < 0.5, b = rmhBeat(l, low), fx = o + i * n, cy2 = t + a / 2, sx = o + 8, sy = t - 13;
+    for (const [w0, w1, land, f] of RMH_BALLS) {
+      if (!b.on || b.s < w0 || b.s >= land + 0.4) continue;
+      const tx = o + i * f;
+      if (b.s < land) rmhRing(e, tx, cy2, 7, 4.5, rmhSeg(b.s, w0, land));
+      if (b.s < w1) rmhBall(e, sx, sy + 2 - rmhEase(rmhSeg(b.s, w0, w1)) * 3, 1.2 + rmhEase(rmhSeg(b.s, w0, w1)) * 2.2);
+      else if (b.s < land) {
+        const u = (b.s - w1) / (land - w1), x = rmhMix(sx, tx, u), y = rmhMix(sy - 1, cy2 - 2, u) - Math.sin(u * Math.PI) * 12;
+        for (let j = 1; j < 4; j++) {
+          const v = Math.max(0, u - j * 0.06);
+          e.globalAlpha = 0.7 - j * 0.18;
+          dot17(e, rmhMix(sx, tx, v), rmhMix(sy - 1, cy2 - 2, v) - Math.sin(v * Math.PI) * 12, 1.6 - j * 0.3, "#ffffff");
+        }
+        e.globalAlpha = 1;
+        rmhBall(e, x, y, 3.4);
+      } else rmhPuff(e, tx, cy2, (b.s - land) / 0.4, false);
+    }
+    const hx2 = o + i * RMH_HEAVE_AT;
+    if (b.gather >= 0 || b.fly >= 0) rmhRing(e, hx2, cy2, 15, 7, rmhSeg(b.s, RMH_GATHER[0], RMH_LAND));
+    if (b.gather >= 0) {
+      for (let k = 0; k < 7; k++) {
+        const q2 = (b.s * 1.6 + k / 7) % 1, from = o + 14 + k * 0.41 % 1 * 70;
+        e.globalAlpha = Math.sin(q2 * Math.PI) * 0.9;
+        dot17(e, rmhMix(from, sx, q2), rmhMix(t - 2, sy, q2), 1.1, "#ffffff");
+      }
+      e.globalAlpha = 1;
+      const grow2 = rmhEase(b.gather), rise = b.s > RMH_GATHER[1] ? rmhEase(rmhSeg(b.s, RMH_GATHER[1], RMH_LIFT)) : 0, sh3 = b.s > RMH_GATHER[1] ? Math.sin(b.s * 70) * 0.5 : 0;
+      snowChunk(e, sx + 2 + sh3, sy + 1 - rise * 4, 3 + grow2 * 4.5, -0.1);
+    }
+    if (b.fly >= 0) {
+      const u = b.fly, x = rmhMix(sx + 2, hx2, u), y = rmhMix(sy - 3, cy2 - 4, u * u) - Math.sin(u * Math.PI) * 10;
+      snowChunk(e, x, y, 7.5, -0.1 - u * 1.4);
+    }
+    if (b.drift > 0) {
+      const grow2 = rmhEase(rmhClamp(b.drift * 1.4)), half2 = 9 + 13 * grow2, top = 1 + 3.2 * grow2, rd = seeded2(9);
+      e.save();
+      e.globalAlpha = rmhClamp(b.drift * 2);
+      const bumps = [];
+      for (let k = 0; k <= 6; k++) bumps.push(rd() * 0.8);
+      const mound5 = (closed2) => {
+        e.beginPath();
+        e.moveTo(hx2 - half2 - 6, t + a);
+        e.quadraticCurveTo(hx2 - half2 - 2, t + a * 0.2, hx2 - half2, t - 0.2);
+        for (let k = 0; k <= 6; k++) {
+          const u = k / 6, x = hx2 - half2 + u * half2 * 2, hump = Math.sin(u * Math.PI) * top + (k % 2 ? 0.6 : 0) * grow2;
+          e.quadraticCurveTo(x - half2 / 6, t - hump - 1 - bumps[k], x, t - hump * 0.7);
+        }
+        e.quadraticCurveTo(hx2 + half2 + 2, t + a * 0.2, hx2 + half2 + 6, t + a);
+        if (closed2) e.closePath();
+      };
+      mound5(true);
+      e.fillStyle = "#f6fafc";
+      e.fill();
+      e.save();
+      e.clip();
+      e.fillStyle = "#c3d6e4";
+      e.fillRect(hx2 - half2 - 3, t + a * 0.45, half2 * 2 + 6, a);
+      for (let k = 0; k < 6; k++) dot17(e, hx2 - half2 + rd() * half2 * 2, t - rd() * top, 0.45, "#9fb8cb");
+      e.restore();
+      mound5(false);
+      e.strokeStyle = EDGE5;
+      e.lineWidth = 0.8;
+      e.lineJoin = "round";
+      e.stroke();
+      e.restore();
+    }
+    if (b.burst >= 0) {
+      rmhPuff(e, hx2, cy2, b.burst, true);
+      for (let k = 0; k < 6; k++) {
+        const d = b.burst, vx = (k - 2.5) * 5 * d, vy = -6 * Math.sin(d * Math.PI) + k % 2 * 1.5;
+        e.globalAlpha = 1 - d;
+        dot17(e, hx2 + vx, cy2 + vy, 1, k % 3 ? RMH.iceD : RMH_STONEL);
+      }
+      e.globalAlpha = 1;
+    }
+    if (b.winded > 0)
+      for (let k = 0; k < 3; k++) {
+        const q2 = (b.s * 1.4 + k / 3) % 1;
+        e.save();
+        e.globalAlpha = b.winded * (1 - q2) * 0.75;
+        e.fillStyle = "#eef6fb";
+        e.beginPath();
+        e.arc(o + 12 + q2 * 9, t - 6 - q2 * 7, 1.4 + q2 * 2.6, 0, TAU259);
+        e.fill();
+        e.restore();
+      }
+    if (low)
+      for (let k = 0; k < 4; k++) {
+        const q2 = (l * 0.35 + k / 4) % 1, x = o + 20 + (k * 0.29 + 0.13) % 1 * (i - 40);
+        e.globalAlpha = Math.sin(q2 * Math.PI) * 0.85;
+        dot17(e, x + Math.sin(q2 * 5 + k) * 2, t - 12 + q2 * 11, 0.8, "#ffffff");
+      }
+    e.globalAlpha = 1;
+    if (r > 0) {
+      for (let k = 0; k < 7; k++) {
+        const d = 1 - r, dx = (k - 3) * 2.4 * (0.4 + d), vy = -4 + d * d * 14 + k % 2 * 2;
+        e.globalAlpha = r;
+        e.fillStyle = k % 3 ? RMH.hornL : RMH.rime;
+        e.beginPath();
+        e.moveTo(fx + dx, cy2 + vy - 1);
+        e.lineTo(fx + dx + 0.9, cy2 + vy);
+        e.lineTo(fx + dx, cy2 + vy + 1);
+        e.lineTo(fx + dx - 0.9, cy2 + vy);
+        e.closePath();
+        e.fill();
+      }
+      e.globalAlpha = 1;
+    }
+  }
+};
+function drawRimehornBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 18, y: y + NAME_GAP, w: w - 24, h: BAR_H }, i, RIMEHORN_BAR, a);
+  rimehornName(e, x + w / 2, y + 13, t.name);
+}
+function rimehornName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#1a222c";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#ffffff", "#e6eef4", "#a9bccc"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -336769,7 +337183,8 @@ var LESSER_BARS = Object.freeze({
   ironhorn: Object.freeze({ draw: drawIronhornBar, side: 16 }),
   stormtalon: Object.freeze({ draw: drawStormtalonBar, side: 16 }),
   cairnwarden: Object.freeze({ draw: drawCairnwardenBar, side: 16 }),
-  shardheart: Object.freeze({ draw: drawShardheartBar, side: 16 })
+  shardheart: Object.freeze({ draw: drawShardheartBar, side: 16 }),
+  rimehorn: Object.freeze({ draw: drawRimehornBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
