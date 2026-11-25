@@ -316671,7 +316671,7 @@ function drawPersistentStatus(ctx, e, target, tick, time3, lane2 = 0, part3 = "a
     const fall2 = (time3 / 650 + x * 0.037) % 1;
     drawStatusIcon(ctx, "bleed", x + 5, y - 4 + fall2 * 7, 3 * (1 - fall2) + 1);
   } else if (onBody && e.kind === "shock") drawShockMarks(ctx, x, y - 10, time3 / 1e3, 0.85);
-  else if (onBody && !MASTERY_COLORS[e.kind]) {
+  else if (onBody && e.kind === "burn") {
     ctx.globalAlpha = 0.45 + 0.2 * Math.sin(time3 / 110 + target.position.x);
     for (let i = 0; i < 3; i++) drawStatusIcon(ctx, "burn", x + (i - 1) * 7, y - 7 - Math.sin(time3 / 150 + i) * 2, 7);
   }
