@@ -1,6 +1,6 @@
 {
-  "runtimeId": "56fade77f5d50e6f",
-  "runtimeSha256": "56fade77f5d50e6f8691f7a5f37041cbf486050b022c63a75244295ae8bc5e32",
+  "runtimeId": "37e153ab2186dfbc",
+  "runtimeSha256": "37e153ab2186dfbc7855bb8592b16062145c7818b1915790db324ac221f7282a",
   "files": [
     {
       "path": ".nojekyll",
@@ -530,7 +530,7 @@
     {
       "path": "index.html",
       "bytes": 13989,
-      "sha256": "03f3249db1b0ce2a5343c4ecd8fd638f8edf4f3e568eb9103cd2bc7cfad5ee8c"
+      "sha256": "1effdb3b116101fb0bf42b5a2559ffb966a3f834e084861b35864ee418ef74ef"
     },
     {
       "path": "manifest.webmanifest",
@@ -539,8 +539,8 @@
     },
     {
       "path": "save-worker.js",
-      "bytes": 2718688,
-      "sha256": "7faacaca008cfe23ce332abd9f51882a7a671301bf415a366b25271d19f13b7f"
+      "bytes": 2714787,
+      "sha256": "aa00f21ca73743b2d6b02ceaec17008dfa374abf6e0a7319b07b81727529a748"
     },
     {
       "path": "src/chunks/chunk-NJNFU55O.js",
@@ -553,9 +553,9 @@
       "sha256": "7db8c23d3d071f10af27f69428fb3f40deb5eeb8a332946192a66dc1e22e73e4"
     },
     {
-      "path": "src/chunks/playable_browser-LDY3ZDTY.js",
-      "bytes": 13750640,
-      "sha256": "0433d047fa16fe8ca322f2d9c03497c1892a29cd2bfdc2d7cf015be581b826f4"
+      "path": "src/chunks/playable_browser-BO5IJEZ2.js",
+      "bytes": 13746790,
+      "sha256": "58c2706914924c80e84a08134863f809d054852c88002047e0c0eaba1c686b44"
     },
     {
       "path": "src/chunks/world_browser-37FJDWCR.js",
@@ -575,7 +575,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2162,
-      "sha256": "7ea945110139c511f276f861ff4768f449d23a424c1a4d87211ff49023522621"
+      "sha256": "b871a53aa58a842796f3d66b158299f737e8250f6d3783dd28600e41b270bbba"
     },
     {
       "path": "world-maker-worker.js",
@@ -584,8 +584,8 @@
     },
     {
       "path": "world.css",
-      "bytes": 275080,
-      "sha256": "45ee92c4f8e3e98b7b2322846890951f385e1c62000ce00348ce5cf0b0912173"
+      "bytes": 279231,
+      "sha256": "767c39775f232cc1b9e2ce538424fe3e38d44f00523da8e2cba8526715e83619"
     }
   ]
 }

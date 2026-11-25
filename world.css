@@ -2121,3 +2121,53 @@ body #rpg-interaction-alt-v1{flex-direction:row;align-items:center;gap:8px;min-h
 body #rpg-interaction-alt-v1>.interaction-icon{width:28px;height:28px;border-radius:50%}
 body #rpg-interaction-alt-v1 small{font:700 9.5px/1 var(--rpg-ui,system-ui);letter-spacing:.14em;color:#e2c47e}
 body #rpg-interaction-alt-v1 strong{font:700 13.5px/1.1 var(--rpg-ui,system-ui)}
+/* Landscape pass (Sammy 2026-11-24: "Fix all of them"): phone landscape only; portrait and desktop unchanged. */
+@media (orientation:landscape) and (max-height:500px){
+html body #world-inventory.rpg-menu>.rm-sub{grid-area:top;align-self:center;justify-self:start;z-index:2;width:min(420px,calc(100% - 420px));margin-left:96px;padding:0}
+html body #world-inventory.rpg-menu:has(>.rm-sub:not([hidden])) #world-bag-title{visibility:hidden}
+html body #world-inventory.rpg-menu button.rm-subtab{height:32px}
+html body #world-inventory[data-section=bag] #world-bag-browse>section{max-width:none}
+html body #world-inventory[data-section=materials] #world-materials-view{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px;align-content:start}
+html body #world-inventory[data-section=materials] #world-materials-view>:not(.mt-row){grid-column:1/-1}
+html body #world-inventory[data-section=materials] #world-materials-view>.mt-row{margin:0}
+html body .cs-bubble{position:fixed;top:50%!important;left:50%;right:auto;z-index:60;width:min(600px,calc(100vw - 32px));max-height:calc(100dvh - 24px);overflow:auto;transform:translate(-50%,-50%)}
+html body .cs-bubble::before{display:none}
+html body .cs-bubble .cs-learn{position:sticky;bottom:0;z-index:1;flex:none;box-shadow:0 -10px 14px #151d26,0 16px 0 #151d26}
+html body .bestiary-v1 .bv-chips{padding-right:36px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent)}
+html body #world-inventory .bestiary-v1 .bv-chips button{min-height:0;height:30px;padding:0 10px;border-radius:99px;font-size:11.5px}
+html body .m2-sheet{bottom:12px;width:min(660px,calc(100% - 120px));max-height:calc(100% - 24px);padding:10px 14px}
+html body .m2-sheet h4{font-size:19px}
+html body .m2-key{grid-template-columns:repeat(3,minmax(0,1fr));gap:0 14px;margin-top:4px}
+html body .m2-key div{font-size:13px;line-height:22px}
+html body .m2-key em{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body .m2-note{margin-top:6px;font-size:12.5px;line-height:1.35}
+html body #quest-board .qb,html body #quest-board .qx-sheet{width:min(860px,calc(100vw - 16px))}
+html body #quest-board .qb{max-height:calc(100dvh - 40px)}
+html body #quest-board .qb-head{padding:5px 10px 5px 18px}
+html body #quest-board .qb-how{display:none}
+html body #quest-board .qb-tabs{padding-top:5px}
+html body #quest-board .qb-tab{min-height:34px}
+html body #quest-board .qb-cork{padding:12px 12px 10px}
+html body #quest-board .qb-card{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);column-gap:18px;align-items:start}
+html body #quest-board .qb-card>*{grid-column:1}
+html body #quest-board .qb-card>.qr,html body #quest-board .qb-card>.qb-take{grid-column:2}
+html body #quest-board .qb-card>.qr{grid-row:1/span 4}
+html body .hc-head{display:flex;align-items:center;gap:14px;padding:6px 14px;text-align:left}
+html body .hc-head h2{flex:none;font-size:20px}
+html body .hc-head .nw-strip{flex:1;width:auto;min-width:0;margin:0}
+html body .hc-foot{flex-wrap:nowrap;padding:6px 14px}
+html body .hc-status{flex:1 1 auto;text-align:left}
+html body .hero-creator-v1 .hc-confirm{flex:0 0 280px;min-height:40px}
+html body #settlement-services .tn-notice{margin:0 14px 4px;padding:4px 10px;font-size:12px}
+html body #settlement-services .tn-pick .tn-chip,html body #settlement-services .tn-filters .tn-chip{height:28px}
+html body #settlement-services .tn-pick .tn-hint{display:none}
+html body #settlement-services[data-service-kind=inn]{height:fit-content!important}
+html body #settlement-services .tn-body>.tn-pick{align-self:stretch}
+html body #world-event-hud-v4{width:min(250px,40vw);padding:6px 10px 7px 13px}
+html body #world-event-hud-v4 strong{font-size:16px;margin:0 0 2px}
+html body #quest-tracker.qx-under{width:min(250px,40vw)}
+html body #world-event-hud-v4 button{min-height:30px!important;height:30px;padding:0 10px}
+html body #world-settings-view .st-line{flex-wrap:wrap}
+html body #world-settings-view .st-line>.st-name{flex:1 1 140px;min-width:0}
+html body #world-settings-view .st-line select{min-width:130px;max-width:100%}
+}

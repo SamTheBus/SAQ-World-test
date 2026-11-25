@@ -19606,27 +19606,6 @@ var CRYPT_POPULATION_TIERS = freezeWire({
 var cryptPopulationRecipe = (seed, tier2, index) => tier2 === "small" ? cryptFloorRecipe(seed, tier2, index) : cryptFloorRecipeV2(seed, tier2, index);
 var cryptPopulationLinks = (tier2) => tier2 === "small" ? cryptFloorLinks(tier2) : cryptFloorLinksV2(tier2);
 
-// src/shared/generation/exterior_once_v1.js
-var byTerrain = /* @__PURE__ */ new WeakMap();
-var realized = /* @__PURE__ */ new WeakMap();
-function exteriorOnceV1(terrain2, asset, kind2, id2, build) {
-  if (!terrain2 || typeof terrain2 !== "object") return build();
-  let slots2 = byTerrain.get(terrain2);
-  if (!slots2) byTerrain.set(terrain2, slots2 = /* @__PURE__ */ new Map());
-  const key9 = kind2 + "|" + id2, had = slots2.get(key9);
-  if (had && had.asset === asset) return had.exterior;
-  const exterior = build();
-  slots2.set(key9, { asset, exterior });
-  return exterior;
-}
-function keepRealizedExteriorV1(realization, terrain2, asset, id2, exterior) {
-  if (realization && typeof realization === "object") realized.set(realization, { terrain: terrain2, asset, id: id2, exterior });
-}
-function realizedExteriorV1(realization, terrain2, asset, id2) {
-  const had = realization && typeof realization === "object" ? realized.get(realization) : null;
-  return had && had.terrain === terrain2 && had.asset === asset && had.id === id2 ? had.exterior : null;
-}
-
 // src/shared/generation/site_names_v1.js
 var LAND = {
   woodland: ["Mossy", "Bramble", "Fernshade", "Oakroot", "Thornwood", "Gloomwood", "Briar", "Ivy"],
@@ -19814,10 +19793,7 @@ function createNaturalProtection(asset, { ruinFootprints = [] } = {}) {
 }
 
 // src/shared/generation/planned_crypt_v1.js
-function createPlannedCryptExterior(asset, id2, terrain2) {
-  return terrain2 ? exteriorOnceV1(terrain2, asset, "crypt-v1", id2, () => createPlannedCryptExteriorBuilt(asset, id2, terrain2)) : createPlannedCryptExteriorBuilt(asset, id2);
-}
-function createPlannedCryptExteriorBuilt(asset, id2, terrain2 = createPlannedTerrain(asset)) {
+function createPlannedCryptExterior(asset, id2, terrain2 = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id2), d = asset.routes.destinations.find((s) => s.id === id2);
   requireContract(
     r?.familyId === "site-family:crypt" && r.tier === "small" && r.footprint.length === 1 && r.approach.length === 1 && d?.point,
@@ -19977,10 +19953,7 @@ async function derivePlannedCryptReservation(asset, binding, sha256, { reservati
 }
 
 // src/shared/generation/planned_crypt_v2.js
-function createPlannedCryptExteriorV2(asset, id2, terrain2) {
-  return terrain2 ? exteriorOnceV1(terrain2, asset, "crypt-v2", id2, () => createPlannedCryptExteriorV2Built(asset, id2, terrain2)) : createPlannedCryptExteriorV2Built(asset, id2);
-}
-function createPlannedCryptExteriorV2Built(asset, id2, terrain2 = createPlannedTerrain(asset)) {
+function createPlannedCryptExteriorV2(asset, id2, terrain2 = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id2), d = asset.routes.destinations.find((s) => s.id === id2);
   requireContract(
     r?.familyId === "site-family:crypt" && ["standard", "large", "deep"].includes(r.tier) && r.footprint.length === 1 && r.approach.length === 1 && d?.point,
@@ -20415,13 +20388,7 @@ function createRuinGrovePlan(ruin, seed, nativeTile) {
 }
 
 // src/shared/generation/planned_ruin_v1.js
-function createPlannedRuinExterior(asset, reservationId, terrain2, realization = null) {
-  if (!terrain2) return createPlannedRuinExteriorBuilt(asset, reservationId, void 0, realization);
-  if (realization)
-    return realizedExteriorV1(realization, terrain2, asset, reservationId) ?? createPlannedRuinExteriorBuilt(asset, reservationId, terrain2, realization);
-  return exteriorOnceV1(terrain2, asset, "ruin-v1", reservationId, () => createPlannedRuinExteriorBuilt(asset, reservationId, terrain2, null));
-}
-function createPlannedRuinExteriorBuilt(asset, reservationId, terrain2 = createPlannedTerrain(asset), realization = null) {
+function createPlannedRuinExterior(asset, reservationId, terrain2 = createPlannedTerrain(asset), realization = null) {
   const r = asset.sites.find((s) => s.id === reservationId), d = asset.routes.destinations.find((s) => s.id === reservationId), policy = realization?.policy ?? RUIN_TIER_POLICY[r?.tier];
   requireContract(r?.familyId === "site-family:ruin" && policy && d?.point, "Ruin requires an existing reservation");
   const xs = r.footprint.map((c) => c.x), ys = r.footprint.map((c) => c.y), minX = Math.min(...xs), minY = Math.min(...ys), maxX = Math.max(...xs), maxY = Math.max(...ys), [width, height] = realization?.tiles ?? (policy.exteriorTiles[0] <= (maxX - minX + 1) * 32 && policy.exteriorTiles[1] <= (maxY - minY + 1) * 26 ? policy.exteriorTiles : [policy.exteriorTiles[1], policy.exteriorTiles[0]]), left = realization?.left ?? minX * 32 + Math.floor(((maxX - minX + 1) * 32 - width) / 2), top = realization?.top ?? minY * 26;
@@ -20730,10 +20697,7 @@ async function derivePlannedRuinReservation(asset, binding, sha256, { reservatio
 }
 
 // src/shared/generation/planned_ruin_v2.js
-function createPlannedRuinExteriorV2(asset, id2, terrain2) {
-  return terrain2 ? exteriorOnceV1(terrain2, asset, "ruin-v2", id2, () => createPlannedRuinExteriorV2Built(asset, id2, terrain2)) : createPlannedRuinExteriorV2Built(asset, id2);
-}
-function createPlannedRuinExteriorV2Built(asset, id2, terrain2 = createPlannedTerrain(asset)) {
+function createPlannedRuinExteriorV2(asset, id2, terrain2 = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id2), policy = RUIN_TIER_POLICY_V2[r?.tier];
   requireContract(r?.familyId === "site-family:ruin" && policy, "Ruin V2 requires a Ruin reservation");
   if (["small", "standard"].includes(r.tier)) return createPlannedRuinExterior(asset, id2, terrain2);
@@ -20825,9 +20789,6 @@ async function derivePlannedRuinReservationV2(asset, binding, sha256, { reservat
 
 // src/shared/generation/alpha_population_runtime_v1.js
 function createPopulationRuinExterior(asset, id2, terrain2) {
-  return exteriorOnceV1(terrain2, asset, "population-ruin", id2, () => createPopulationRuinExteriorBuilt(asset, id2, terrain2));
-}
-function createPopulationRuinExteriorBuilt(asset, id2, terrain2) {
   const g = createPlannedRuinExteriorV2(asset, id2, terrain2);
   if (terrain2.base(g.entrance.x, g.entrance.y).biome === BIOME_CODES[plannedSiteBiome(asset, id2)]) return g;
   const r = g.reservation, minX = Math.min(...r.footprint.map((c) => c.x)) * 32, minY = Math.min(...r.footprint.map((c) => c.y)) * 26, maxX = (Math.max(...r.footprint.map((c) => c.x)) + 1) * 32, maxY = (Math.max(...r.footprint.map((c) => c.y)) + 1) * 26, locations = [];
@@ -20839,10 +20800,8 @@ function createPopulationRuinExteriorBuilt(asset, id2, terrain2) {
   for (const q of locations.slice(0, 64))
     try {
       const n = createPlannedRuinExterior(asset, id2, terrain2, q);
-      if (terrain2.base(n.entrance.x, n.entrance.y).biome === BIOME_CODES[plannedSiteBiome(asset, id2)]) {
-        keepRealizedExteriorV1(q, terrain2, asset, id2, n);
+      if (terrain2.base(n.entrance.x, n.entrance.y).biome === BIOME_CODES[plannedSiteBiome(asset, id2)])
         return Object.freeze({ ...n, populationRealization: q });
-      }
     } catch {
     }
   throw new TypeError("No compatible Ruin anchor within its existing footprint/approach");
@@ -20853,9 +20812,6 @@ async function derivePopulationRuinReservation(asset, binding, sha256, options) 
   return completePopulationReservation(r, asset, binding, sha256);
 }
 function createPopulationCryptExterior(asset, id2, terrain2) {
-  return exteriorOnceV1(terrain2, asset, "population-crypt", id2, () => createPopulationCryptExteriorBuilt(asset, id2, terrain2));
-}
-function createPopulationCryptExteriorBuilt(asset, id2, terrain2) {
   const r = asset.sites.find((r2) => r2.id === id2), g = (r.tier === "small" ? createPlannedCryptExterior : createPlannedCryptExteriorV2)(asset, id2, terrain2);
   return newPopulationSelection(id2) ? Object.freeze({ ...g, realizationVersion: CRYPT_POPULATION_VERSION }) : g;
 }
@@ -20890,13 +20846,7 @@ async function completePopulationReservation(r, asset, binding, sha256) {
 }
 
 // src/shared/generation/planned_fort_v1.js
-function createPlannedFortExterior(asset, reservationId, terrain2, realization = null) {
-  if (!terrain2) return createPlannedFortExteriorBuilt(asset, reservationId, void 0, realization);
-  if (realization)
-    return realizedExteriorV1(realization, terrain2, asset, reservationId) ?? createPlannedFortExteriorBuilt(asset, reservationId, terrain2, realization);
-  return exteriorOnceV1(terrain2, asset, "fort-v1", reservationId, () => createPlannedFortExteriorBuilt(asset, reservationId, terrain2, null));
-}
-function createPlannedFortExteriorBuilt(asset, reservationId, terrain2 = createPlannedTerrain(asset), realization = null) {
+function createPlannedFortExterior(asset, reservationId, terrain2 = createPlannedTerrain(asset), realization = null) {
   const r = asset.sites.find((s) => s.id === reservationId), d = asset.routes.destinations.find((s) => s.id === reservationId), policy = FORT_TIER_POLICY[r?.tier];
   requireContract(r?.familyId === "site-family:fort" && policy && d?.point, "Fort requires an existing reservation");
   const xs = r.footprint.map((c) => c.x), ys = r.footprint.map((c) => c.y), minX = Math.min(...xs), minY = Math.min(...ys), maxX = Math.max(...xs), maxY = Math.max(...ys), [width, height] = realization?.tiles ?? policy.exteriorTiles, left = realization?.left ?? minX * 32 + Math.floor(((maxX - minX + 1) * 32 - width) / 2), top = realization?.top ?? minY * 26;
@@ -21117,10 +21067,7 @@ async function derivePlannedFortReservation(asset, binding, sha256, { reservatio
 }
 
 // src/shared/generation/planned_fort_v2.js
-function createPlannedFortExteriorV2(asset, id2, terrain2) {
-  return terrain2 ? exteriorOnceV1(terrain2, asset, "fort-v2", id2, () => createPlannedFortExteriorV2Built(asset, id2, terrain2)) : createPlannedFortExteriorV2Built(asset, id2);
-}
-function createPlannedFortExteriorV2Built(asset, id2, terrain2 = createPlannedTerrain(asset)) {
+function createPlannedFortExteriorV2(asset, id2, terrain2 = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id2), p = FORT_TIER_POLICY[r?.tier];
   requireContract(r?.familyId === "site-family:fort" && p, "Fort V2 requires an existing Fort reservation");
   if (["small", "standard"].includes(r.tier)) {
@@ -22372,15 +22319,6 @@ function validateGeneratedWoodlandCaveD12_2(g) {
 
 // src/shared/generation/planned_cave_v1.js
 function createPlannedCaveExterior(asset, reservationId = PLANNED_CAVE_ID, sharedTerrain = null) {
-  return sharedTerrain ? exteriorOnceV1(
-    sharedTerrain,
-    asset,
-    "cave-v1",
-    reservationId,
-    () => createPlannedCaveExteriorBuilt(asset, reservationId, sharedTerrain)
-  ) : createPlannedCaveExteriorBuilt(asset, reservationId, null);
-}
-function createPlannedCaveExteriorBuilt(asset, reservationId = PLANNED_CAVE_ID, sharedTerrain = null) {
   const r = asset.sites.find((s) => s.id === reservationId), destination = asset.routes.destinations.find((d) => d.id === reservationId);
   requireContract(
     r?.familyId === "site-family:cave" && PLANNED_CAVE_TIERS.includes(r.tier) && r.footprint.length === 1 && r.approach.length === 1 && destination?.point,
