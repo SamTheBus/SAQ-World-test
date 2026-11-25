@@ -1158,7 +1158,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-NWBYPVTE.js";
+} from "./chunk-ZGRXU3SG.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -150171,7 +150171,7 @@ function validateMasteryCombat(s) {
             safeInteger(
               e.expiresTick,
               s.tick + 1,
-              s.tick + (e.kind === "expose" ? 360 : e.kind === "slow" || e.kind === "grudge" ? 240 : e.kind === "weaken" ? 360 : 90)
+              s.tick + (e.kind === "expose" ? 360 : e.kind === "slow" || e.kind === "grudge" ? 240 : e.kind === "weaken" ? 480 : 90)
             );
           }
         } else {
@@ -160281,7 +160281,7 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
     if (!collidesWithTiles(space(t), x, y, t.hullRadius)) t.position = { x, y };
   }
   const canStun = (a) => Boolean(s.subweaponCombat.mastery?.[a.entityId]);
-  const rank = (a, id2) => heroRank(owner(a), id2), aug = (a, id2, index) => hasAugment(owner(a)?.d8, id2, index), pct3 = (value2, percent) => multiplyCombat(value2, 100 + percent, 100);
+  const rank = (a, id2) => heroRank(owner(a), id2), above = (a, id2) => Math.max(0, Math.min(4, rank(a, id2) - 1)), ranked = (a, id2, value2, per = 10) => above(a, id2) ? pct3(value2, per * above(a, id2)) : value2, aug = (a, id2, index) => hasAugment(owner(a)?.d8, id2, index), pct3 = (value2, percent) => multiplyCombat(value2, 100 + percent, 100);
   const wears = (a, id2) => wearsUnique(owner(a), id2), worn = (a, id2) => wornUniqueValue(owner(a), id2), burn2 = (a, t, sourceItem, strength = 100) => {
     if (!t.alive || isPodCombatTargetV4(t)) return;
     const attack = getStats(a.entityId).attack;
@@ -160711,8 +160711,8 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
     return turned ?? true;
   }
   function earthBreaker2(a, stats3, aim2, commandId) {
-    const E9 = T115.earthBreaker, impact3 = rank(a, "impact_training"), n = paid(a, "earth_breaker"), base3 = addCombat(multiplyCombat(stats3.attack, ...E9.attack), shieldPacket(stats3)), hard = impact3 ? pct3(base3, 6 * impact3) : base3, raw = n ? pct3(hard, 20 * n) : hard, stunAll = aug(a, "earth_breaker", 0);
-    const reach2 = E9.radius * (100 + 6 * rank(a, "seismic_reach")) / 100 * (full(n) ? 1.5 : 1), targets = cone8(a, aim2, reach2, Math.PI);
+    const E9 = T115.earthBreaker, impact3 = rank(a, "impact_training"), n = paid(a, "earth_breaker"), base3 = addCombat(multiplyCombat(stats3.attack, ...E9.attack), shieldPacket(stats3)), hard = impact3 ? pct3(base3, 6 * impact3) : base3, raw = ranked(a, "earth_breaker", n ? pct3(hard, 20 * n) : hard), stunAll = aug(a, "earth_breaker", 0);
+    const reach2 = E9.radius * (100 + 6 * rank(a, "seismic_reach")) * (100 + 5 * above(a, "earth_breaker")) / 1e4 * (full(n) ? 1.5 : 1), targets = cone8(a, aim2, reach2, Math.PI);
     if (aug(a, "earth_breaker", 1)) for (const t of targets) pull(a, t, E9.pull);
     const combat = c.actors[a.entityId], hit2 = titanUp(a, combat, crowd(a, raw, targets.length));
     for (const t of targets) {
@@ -160741,7 +160741,7 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
     }
     if (--k.ticks > 0) return;
     clearSkillState(combat, "aftershock");
-    const stats3 = getStats(a.entityId), hit2 = multiplyCombat(breakerHit(a, stats3, T115.earthBreaker.attack), ...T115.aftershock), sourceItem = damageSourceItem(owner(a), "bash");
+    const stats3 = getStats(a.entityId), hit2 = multiplyCombat(ranked(a, "earth_breaker", breakerHit(a, stats3, T115.earthBreaker.attack)), ...T115.aftershock), sourceItem = damageSourceItem(owner(a), "bash");
     for (const t of around3(a, k, k.r)) damage2(a, t, hit2, "quake", null, { sourceItem, trigger: "skill" });
   }
   function stepFault(a, combat) {
@@ -160762,8 +160762,9 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
   function rallyingCry2(a, stats3, aim2) {
     const R18 = T115.rallyingCry, secondWind = aug(a, "rallying_cry", 0), n = paid(a, "rallying_cry"), [hn, hd] = secondWind ? R18.secondWind : R18.heal;
     const near5 = cone8(a, aim2, R18.radius, Math.PI).filter((t) => !isPodCombatTargetV4(t)), rousing = aug(a, "rallying_cry", 1) ? Math.min(R18.rousingMax, near5.length) : 0;
-    heal(a, stats3, hn + (3 * n + rousing) * hd / 100, hd);
-    if (!secondWind && canStun(a)) for (const t of near5) effects2.status(a, t, "weaken", 1, R18.weakenTicks);
+    const up2 = above(a, "rallying_cry");
+    heal(a, stats3, hn + (3 * n + rousing + 2 * up2) * hd / 100, hd);
+    if (!secondWind && canStun(a)) for (const t of near5) effects2.status(a, t, "weaken", 1, R18.weakenTicks + 30 * up2);
     const k = classSkillsRecord(c.actors[a.entityId]);
     if (aug(a, "rallying_cry", 2)) k.hymn = HYMN_TICKS;
     if (aug(a, "rallying_cry", 3)) k.firm = FIRM_TICKS;
@@ -160773,13 +160774,13 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
   }
   function counterStance2(a) {
     const combat = c.actors[a.entityId];
-    openCounterWindow(combat, COUNTER_WINDOW_TICKS);
+    openCounterWindow(combat, COUNTER_WINDOW_TICKS + 15 * above(a, "counter_stance"));
     if (aug(a, "counter_stance", 3)) classSkillsRecord(combat).counters = MAX_COUNTERS;
     else if (combat.skills) delete combat.skills.counters;
     return true;
   }
   function shieldCharge2(a, stats3, aim2) {
-    const R18 = T115.shieldCharge, n = paid(a, "shield_charge"), reach2 = (aug(a, "shield_charge", 1) ? scaled3(R18.reach, T115.wider) : R18.reach) * (100 + 10 * n) / 100, end = pathEnd(a, { x: aim2.x, y: aim2.y, remaining: reach2 }), len = Math.hypot(end.x - a.position.x, end.y - a.position.y);
+    const R18 = T115.shieldCharge, n = paid(a, "shield_charge"), reach2 = (aug(a, "shield_charge", 1) ? scaled3(R18.reach, T115.wider) : R18.reach) * (100 + 10 * n) * (100 + 5 * above(a, "shield_charge")) / 1e4, end = pathEnd(a, { x: aim2.x, y: aim2.y, remaining: reach2 }), len = Math.hypot(end.x - a.position.x, end.y - a.position.y);
     classSkillsRecord(c.actors[a.entityId]).ram = {
       x: end.x,
       y: end.y,
@@ -160876,7 +160877,7 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
   }
   const rushHit = (a, hit2) => {
     const n = spendOf(a, "shield_charge");
-    return n ? pct3(hit2, 20 * n) : hit2;
+    return ranked(a, "shield_charge", n ? pct3(hit2, 20 * n) : hit2);
   };
   function shieldSlam(...args) {
     waving = true;
@@ -160933,10 +160934,17 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
     return first ? landingOffset(a, first.position) : landingOffset(a, end);
   }
   function throwHit(a, stats3, t) {
-    damage2(a, t, addCombat(multiplyCombat(stats3.attack, ...T115.shieldThrow.attack), shieldPacket(stats3)), "bash", null, {
-      sourceItem: damageSourceItem(owner(a), "bash"),
-      trigger: "skill"
-    });
+    damage2(
+      a,
+      t,
+      ranked(a, "shield_throw", addCombat(multiplyCombat(stats3.attack, ...T115.shieldThrow.attack), shieldPacket(stats3))),
+      "bash",
+      null,
+      {
+        sourceItem: damageSourceItem(owner(a), "bash"),
+        trigger: "skill"
+      }
+    );
     if (aug(a, "shield_throw", 2)) bleed(a, t, stats3);
     if (full(spendOf(a, "shield_throw"))) knockOut(a, t, T115.heavy.stun, T115.heavy.eliteStun);
   }
@@ -160967,7 +160975,7 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
     }
     const out7 = th.tx !== void 0, goal = target ? target.position : out7 ? { x: th.tx, y: th.ty } : a.position, reach2 = target ? (target.hullRadius ?? 0) + 6 : out7 ? 4 : (a.hullRadius ?? 0) + 4, dx = goal.x - th.x, dy = goal.y - th.y, l = Math.hypot(dx, dy);
     if (l > reach2) {
-      const m = Math.min(S19.speed, l);
+      const m = Math.min(target || out7 ? S19.speed : S19.speed * (100 + 10 * above(a, "shield_throw")) / 100, l);
       th.x += dx / l * m;
       th.y += dy / l * m;
     }
@@ -161003,7 +161011,7 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
     k.banner = {
       x: at10.x,
       y: at10.y,
-      ticks: BANNER_TICKS + 120 * paid(a, "war_banner"),
+      ticks: BANNER_TICKS + 60 * above(a, "war_banner") + 120 * paid(a, "war_banner"),
       next: 60,
       ...on ? { on: on.entityId } : {}
     };
@@ -161020,7 +161028,7 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
     for (const t of around3(a, b, T115.warBanner.radius))
       if (!isPodCombatTargetV4(t)) effects2.status(a, t, "slow", SPORE_SLOW, Math.max(UQ_PULSE_TICKS + 10, linger));
   }
-  const bannerBonus = (a) => full(spendOf(a, "war_banner")) ? 25 : aug(a, "war_banner", 0) && !c.actors[a.entityId]?.skills?.banner?.on ? T115.warBanner.carried : null;
+  const bannerBonus = (a) => 2 * above(a, "war_banner") + (full(spendOf(a, "war_banner")) ? 25 : aug(a, "war_banner", 0) && !c.actors[a.entityId]?.skills?.banner?.on ? T115.warBanner.carried : T115.warBanner.attack);
   const nearBanner = (a) => {
     const b = c.actors[a.entityId]?.skills?.banner;
     return Boolean(b && a.alive && Math.hypot(a.position.x - b.x, a.position.y - b.y) <= T115.warBanner.radius);
@@ -161070,7 +161078,7 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
       return;
     const t = around3(a, a.position, T115.counter.ready).filter((t2) => !isPodCombatTargetV4(t2)).sort((x, y) => distance11(a, x) - distance11(a, y) || x.entityId.localeCompare(y.entityId))[0];
     if (!t) return;
-    const stats3 = getStats(a.entityId), grit = spendOf(a, "counter_stance"), strike2 = grit ? pct3(multiplyCombat(stats3.attack, ...T115.counter.attack), 40 * grit) : multiplyCombat(stats3.attack, ...T115.counter.attack);
+    const stats3 = getStats(a.entityId), grit = spendOf(a, "counter_stance"), hard = ranked(a, "counter_stance", multiplyCombat(stats3.attack, ...T115.counter.attack)), strike2 = grit ? pct3(hard, 40 * grit) : hard;
     markFoe(a, t);
     damage2(a, t, multiplyCombat(strike2, 1, 2), "riposte", null, {
       sourceItem: damageSourceItem(owner(a), "bash"),
@@ -161120,13 +161128,17 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
     for (const t of around3(a, a.position, P29.radius * effects2.area(a)))
       if (!isPodCombatTargetV4(t) && !definition2(t).isBoss) {
         n++;
-        knockback(a, t, (definition2(t).isElite || definition2(t).isMiniboss ? P29.shove / 2 : P29.shove) * (strong ? 2 : 1));
+        knockback(
+          a,
+          t,
+          (definition2(t).isElite || definition2(t).isMiniboss ? P29.shove / 2 : P29.shove) * (strong ? 2 : 1) * (100 + 10 * above(a, "aegis_pulse")) / 100
+        );
         if (strong && t.alive && ordinary(t) && canStun(a)) stun(a, t, stunTicks(a, T115.repulsor));
       }
     return n;
   }
   function aegisPulse2(a, stats3) {
-    const P29 = T115.aegisPulse, shoved = shove2(a, aug(a, "aegis_pulse", 2)), bulwark2 = aug(a, "aegis_pulse", 1) ? Math.min(P29.bulwarkMax, shoved) : 0, worth = combatInteger(multiplyCombat(stats3.maxHp, P29.worth + P29.bulwark * bulwark2, 100)), spent = spentOn(a, "aegis_pulse"), hp = spent ? combatInteger(pct3(worth, PIP_BONUS * spent)) : worth;
+    const P29 = T115.aegisPulse, shoved = shove2(a, aug(a, "aegis_pulse", 2)), bulwark2 = aug(a, "aegis_pulse", 1) ? Math.min(P29.bulwarkMax, shoved) : 0, worth = combatInteger(multiplyCombat(stats3.maxHp, P29.worth + 3 * above(a, "aegis_pulse") + P29.bulwark * bulwark2, 100)), spent = spentOn(a, "aegis_pulse"), hp = spent ? combatInteger(pct3(worth, PIP_BONUS * spent)) : worth;
     if (compareCombat(hp, 0) > 0)
       classSkillsRecord(c.actors[a.entityId]).aegis = {
         hp,
@@ -161162,7 +161174,7 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
     if (--l.ticks > 0) return;
     clearSkillState(combat, "leap");
     treadSlam(a, { x: l.sx, y: l.sy });
-    const L = T115.skyfallLeap, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), radius = (aug(a, "skyfall_leap", 0) ? scaled3(L.radius, T115.wide) : L.radius) * effects2.area(a), near5 = around3(a, a.position, radius), crash2 = titanUp(a, combat, crowd(a, breakerHit(a, stats3, L.attack), near5.length)), heavy2 = aug(a, "skyfall_leap", 2), flown = Math.min(L.reach, Math.round(Math.hypot(l.x - l.sx, l.y - l.sy))), hit2 = heavy2 ? multiplyCombat(crash2, L.reach + flown, L.reach) : crash2, heavyStun = heavy2 ? 2 : 1;
+    const L = T115.skyfallLeap, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), radius = (aug(a, "skyfall_leap", 0) ? scaled3(L.radius, T115.wide) : L.radius) * (100 + 5 * above(a, "skyfall_leap")) / 100 * effects2.area(a), near5 = around3(a, a.position, radius), crash2 = titanUp(a, combat, crowd(a, ranked(a, "skyfall_leap", breakerHit(a, stats3, L.attack)), near5.length)), heavy2 = aug(a, "skyfall_leap", 2), flown = Math.min(L.reach, Math.round(Math.hypot(l.x - l.sx, l.y - l.sy))), hit2 = heavy2 ? multiplyCombat(crash2, L.reach + flown, L.reach) : crash2, heavyStun = heavy2 ? 2 : 1;
     for (const t of near5) {
       damage2(a, t, hit2, "quake", null, { sourceItem, trigger: "skill" });
       if (!t.alive || isPodCombatTargetV4(t)) continue;
@@ -161192,7 +161204,15 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
     titanSet(a, combat);
   }
   function retribution2(a, stats3, aim2, commandId) {
-    const R18 = T115.retribution, k = classSkillsRecord(c.actors[a.entityId]), held2 = k.held ?? [], base3 = held2.reduce((sum2, h) => addCombat(sum2, h.amount), multiplyCombat(stats3.attack, ...R18.attack)), missing = aug(a, "retribution", 2) ? Math.max(0, Math.min(99, 100 - Number(BigInt(a.hp) * 100n / BigInt(stats3.maxHp)))) : 0, raw = missing ? multiplyCombat(base3, 100 + missing, 100) : base3, reach2 = Math.min(400, (aug(a, "retribution", 0) ? scaled3(R18.radius, T115.wide) : R18.radius) * effects2.area(a)), sourceItem = damageSourceItem(owner(a), "bash");
+    const R18 = T115.retribution, k = classSkillsRecord(c.actors[a.entityId]), held2 = k.held ?? [], base3 = addCombat(
+      ranked(a, "retribution", multiplyCombat(stats3.attack, ...R18.attack)),
+      ranked(
+        a,
+        "retribution",
+        held2.reduce((sum2, h) => addCombat(sum2, h.amount), multiplyCombat(stats3.attack, 0, 1)),
+        5
+      )
+    ), missing = aug(a, "retribution", 2) ? Math.max(0, Math.min(99, 100 - Number(BigInt(a.hp) * 100n / BigInt(stats3.maxHp)))) : 0, raw = missing ? multiplyCombat(base3, 100 + missing, 100) : base3, reach2 = Math.min(400, (aug(a, "retribution", 0) ? scaled3(R18.radius, T115.wide) : R18.radius) * effects2.area(a)), sourceItem = damageSourceItem(owner(a), "bash");
     delete k.held;
     const struck = around3(a, a.position, reach2);
     markFoe(a, [...struck].sort((x, y) => distance11(a, x) - distance11(a, y) || x.entityId.localeCompare(y.entityId))[0]);
@@ -165501,7 +165521,7 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
       if (!source3.alive) return;
     }
     if (defense.counter === "stance") {
-      const grit = spendOf(target, "counter_stance"), strike2 = grit ? pct3(multiplyCombat(stats3.attack, ...T115.counter.attack), 40 * grit) : multiplyCombat(stats3.attack, ...T115.counter.attack), lid = combat && target.alive ? worn(target, "vaultlid") : null;
+      const grit = spendOf(target, "counter_stance"), hard = ranked(target, "counter_stance", multiplyCombat(stats3.attack, ...T115.counter.attack)), strike2 = grit ? pct3(hard, 40 * grit) : hard, lid = combat && target.alive ? worn(target, "vaultlid") : null;
       markFoe(target, source3);
       if (lid) lidOpen(target, source3, combat, grit);
       else
@@ -165520,7 +165540,7 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
       if (aug(target, "counter_stance", 2) && combat) {
         for (const t of around3(target, target.position, T115.reprisal * effects2.area(target)))
           if (t !== source3)
-            damage2(target, t, multiplyCombat(stats3.attack, ...T115.counter.attack), "riposte", null, {
+            damage2(target, t, hard, "riposte", null, {
               sourceItem: damageSourceItem(p, "bash"),
               trigger: "reactive"
             });
@@ -248899,6 +248919,43 @@ function augmentBadgeSvg(skillId, index, rarity) {
 // src/shared/content/class_tree_ranks_v1.js
 var CD = (s) => [`${s} cooldown {v}% shorter`, 2];
 var CLASS_TREE_RANKS = freezeWire({
+  // Knight active ranks (Sammy 2026-11-24, "Skills look good", page TgnRgvhe...): rank 1 is the skill as it was.
+  rallying_cry: [
+    ["Heals {v}% of max HP", [15, 17, 19, 21, 23]],
+    ["Weakens enemies for {v}s", [6, 6.5, 7, 7.5, 8]]
+  ],
+  war_banner: [
+    ["+{v}% Attack and Defense near it", [15, 17, 19, 21, 23]],
+    ["Stands {v}s", [10, 11, 12, 13, 14]]
+  ],
+  aegis_pulse: [
+    ["Barrier worth {v}% of max HP", [20, 23, 26, 29, 32]],
+    ["Shoves {v}% as far", [100, 110, 120, 130, 140]]
+  ],
+  earth_breaker: [
+    ["Hits {v}% as hard", [100, 110, 120, 130, 140]],
+    ["Slams {v}% as wide", [100, 105, 110, 115, 120]]
+  ],
+  shield_charge: [
+    ["Hits {v}% as hard", [100, 110, 120, 130, 140]],
+    ["Rushes {v}% as far", [100, 105, 110, 115, 120]]
+  ],
+  skyfall_leap: [
+    ["Hits {v}% as hard", [100, 110, 120, 130, 140]],
+    ["Lands {v}% as wide", [100, 105, 110, 115, 120]]
+  ],
+  counter_stance: [
+    ["Strikes back for {v}% of Attack", [300, 330, 360, 390, 420]],
+    ["Stance lasts {v}s", [2, 2.25, 2.5, 2.75, 3]]
+  ],
+  shield_throw: [
+    ["Hits {v}% as hard", [100, 110, 120, 130, 140]],
+    ["Flies back {v}% as fast", [100, 110, 120, 130, 140]]
+  ],
+  retribution: [
+    ["The blast hits {v}% as hard", [100, 110, 120, 130, 140]],
+    ["Blocked hits return at {v}%", [100, 105, 110, 115, 120]]
+  ],
   afterimage: [["Afterimage bursts for {v}% of your Attack", 20]],
   arcane_syphon: [["Cast hits {v}% harder (spends 10% Barrier)", 6]],
   assassinate: [["Shadowstep\u2019s crit deals {v}% more", 10]],
@@ -249434,7 +249491,7 @@ function createClassSkillsViewV1({ document: document2, send }) {
     points2.replaceChildren(
       el3("b", "", String(unspent)),
       el3("span", "", unspent === 1n ? " skill point" : " skill points"),
-      el3("small", "", ` \xB7 1 per level, up to ${CLASS_TREE_POINT_CAP}`)
+      el3("small", "", ` \xB7 1 per level, 3 every 5th, up to ${CLASS_TREE_POINT_CAP}`)
     );
     points2.classList.toggle("has", unspent > 0n);
     for (const [id2, { b, badge: badge2 }] of Object.entries(tabButtons)) {

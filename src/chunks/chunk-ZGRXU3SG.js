@@ -8290,7 +8290,7 @@ var questGearSourceIdV1 = (seedHex, playerId, questId) => "ent:" + [0, 1, 2, 3].
 
 // src/shared/content/class_trees_v1.js
 var CLASS_TREE_TIER_POINTS = 5;
-var CLASS_TREE_POINT_CAP = 49;
+var CLASS_TREE_POINT_CAP = 69;
 var AUGMENT_SLOTS = 2;
 var AUGMENT_UNLOCK_POINTS = Object.freeze([5, 10, 15, 20, 10]);
 var CLASS_TREES = freezeWire({
@@ -8446,7 +8446,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 1,
     kind: "active",
     name: "Rallying Cry",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Shout to heal 15% of your max HP. Nearby enemies deal 20% less damage for 6 seconds."
   },
@@ -8513,7 +8513,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 3,
     kind: "active",
     name: "War Banner",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Plant a banner for 10 seconds. While you stand near it you get +15% Attack and Defense."
   },
@@ -8580,7 +8580,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 5,
     kind: "active",
     name: "Aegis Pulse",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Shove every enemy around you away and gain a Barrier worth 20% of your max HP for 6 seconds."
   },
@@ -8624,7 +8624,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 1,
     kind: "active",
     name: "Earth-Breaker",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Slam the ground all around you. Everything hit takes damage and is slowed for 3 seconds."
   },
@@ -8690,7 +8690,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 3,
     kind: "active",
     name: "Shield Charge",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Rush forward behind your shield. Enemies in the way get pushed along and stunned at the end."
   },
@@ -8757,7 +8757,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 5,
     kind: "active",
     name: "Skyfall Leap",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Leap to a spot and crash down, damaging and stunning everything around where you land."
   },
@@ -8801,7 +8801,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 1,
     kind: "active",
     name: "Counter Stance",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Brace for 2 seconds. The next hit does nothing to you, and you strike back for 300% Attack and stun the attacker."
   },
@@ -8867,7 +8867,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 3,
     kind: "active",
     name: "Shield Throw",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Throw your shield. It bounces between up to 3 enemies and comes back. You can't Guard until it returns."
   },
@@ -8934,7 +8934,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 5,
     kind: "active",
     name: "Retribution",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Release every hit you blocked in the last 6 seconds as a blast around you."
   },
@@ -14025,6 +14025,7 @@ var augmentPrice = (id, index2) => AUGMENT_PRICES[augmentRarity(id, index2)] ?? 
 
 // src/shared/contracts/class_tree_progression_v1.js
 var classRank = (d8, id) => d8?.classRanks?.[id] ?? 0;
+var CLASS_TREE_BONUS_EVERY = 5n;
 var classTierGate = (tier) => (tier - 1) * CLASS_TREE_TIER_POINTS;
 function classTreeSpent(d8, treeId, belowTier = Infinity) {
   let n = 0;
@@ -14035,7 +14036,7 @@ function classTreeSpent(d8, treeId, belowTier = Infinity) {
   return n;
 }
 function classTreePoints(d8) {
-  const level = d8?.heroClass ? progressionBigInt(d8.highestHeroLevel) - 1n : 0n, cap3 = BigInt(CLASS_TREE_POINT_CAP), earned = level < cap3 ? level : cap3, spent = BigInt(Object.values(d8?.classRanks ?? {}).reduce((a, b) => a + b, 0));
+  const top = d8?.heroClass ? progressionBigInt(d8.highestHeroLevel) : 0n, level = top > 0n ? top - 1n + 2n * (top / CLASS_TREE_BONUS_EVERY) : 0n, cap3 = BigInt(CLASS_TREE_POINT_CAP), earned = level < cap3 ? level : cap3, spent = BigInt(Object.values(d8?.classRanks ?? {}).reduce((a, b) => a + b, 0));
   return { earned, spent, unspent: earned - spent, cap: cap3 };
 }
 function learnedClassActives(d8) {
@@ -14055,7 +14056,7 @@ function learnAvailability(d8, id) {
   if (classTreePoints(d8).unspent < 1n)
     return {
       ok: false,
-      reason: classTreePoints(d8).earned >= BigInt(CLASS_TREE_POINT_CAP) ? "All 49 points are spent" : "No skill points left",
+      reason: classTreePoints(d8).earned >= BigInt(CLASS_TREE_POINT_CAP) ? `All ${CLASS_TREE_POINT_CAP} points are spent` : "No skill points left",
       rank
     };
   return { ok: true, rank, nextRank: rank + 1 };
