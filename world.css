@@ -1234,11 +1234,10 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 #world-inventory .gx-slot img,#world-inventory .gx-tile img{width:44px;height:44px;image-rendering:pixelated;border:0;background:none;box-shadow:none;margin:0}
 #world-inventory .gx-stars,#world-inventory .gx-lv{position:absolute;left:4px;font:700 10px/1 system-ui,sans-serif;color:#eee7d9;background:#0c1219d9;border-radius:6px;padding:2px 4px;pointer-events:none}
 #world-inventory .gx-slot .gx-stars{top:3px}
-/* Worn tiles show the item level (bottom left) and the slot's attunement in gold (bottom right), like the bag. */
-#world-inventory .gx-slot .gx-lv,#world-inventory .gx-tune{bottom:3px}
-#world-inventory .gx-tune{position:absolute;right:3px;font:700 10px/1 system-ui,sans-serif;color:#e6cf98;background:#0c1219d9;border-radius:6px;padding:2px 4px;pointer-events:none}
-#world-inventory .gx-doll .gx-slot .gx-stars,#world-inventory .gx-doll .gx-slot .gx-lv,#world-inventory .gx-doll .gx-tune{font-size:9px;padding:1px 2px;border-radius:5px;letter-spacing:-.02em}
-#world-inventory .gx-doll .gx-slot .gx-stars,#world-inventory .gx-doll .gx-slot .gx-lv{left:2px}#world-inventory .gx-doll .gx-tune{right:2px}#world-inventory .gx-doll .gx-slot .gx-stars{top:2px}#world-inventory .gx-doll .gx-slot .gx-lv,#world-inventory .gx-doll .gx-tune{bottom:2px}
+/* Worn tiles show the item level bottom left, like the bag. The slot's attunement is a gold badge on the frame's corner: it belongs to the slot, not the item. */
+#world-inventory .gx-slot .gx-lv{bottom:3px}
+#world-inventory .gx-tune{position:absolute;bottom:-4px;right:-10px;z-index:1;box-sizing:border-box;min-width:19px;height:16px;padding:0 3px;letter-spacing:-.02em;display:flex;align-items:center;justify-content:center;font:800 9px/1 system-ui,sans-serif;color:#f3e1b0;background:linear-gradient(#4a3a1f,#2b2213);border:1.5px solid #c9a65c;border-radius:9px;box-shadow:0 0 0 2px #0c1219;pointer-events:none}
+#world-inventory .gx-doll .gx-slot .gx-stars,#world-inventory .gx-doll .gx-slot .gx-lv{font-size:9px;padding:1px 3px;border-radius:5px;left:2px}#world-inventory .gx-doll .gx-slot .gx-stars{top:2px}#world-inventory .gx-doll .gx-slot .gx-lv{bottom:2px}
 #world-inventory .gx-tile .gx-stars{top:4px}
 #world-inventory .gx-lv{bottom:4px;color:#cfd5d6}
 #world-inventory .gx-up,#world-inventory .gx-lock{position:absolute;top:-7px;right:-7px;width:20px;height:20px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #0c1219;pointer-events:none}
@@ -1694,7 +1693,6 @@ body #world-inventory.rpg-menu[data-section=forge]>.bag-section-tabs{display:non
  body #world-inventory.rpg-menu .gx-doll .gx-slotlabel{display:none}
  body #world-inventory.rpg-menu .gx-doll button.gx-slot{width:50px;height:50px;border-radius:11px}
  body #world-inventory.rpg-menu .gx-doll .gx-slot img{width:36px;height:36px}
- body #world-inventory.rpg-menu .gx-doll .gx-lvword{display:none}
  body #world-inventory.rpg-menu .gx-side .gx-keystat{padding:7px 4px}
  body #world-inventory.rpg-menu .gx-side .gx-attr{padding:8px 6px}
  body #world-inventory.rpg-menu .gx-side .gx-statrow{padding:8px 0;font-size:13px}

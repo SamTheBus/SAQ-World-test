@@ -251715,11 +251715,7 @@ function createInventoryPresentation({
       b.append(itemIcon(item2));
       if (d.rarityTier) b.append(element("span", d.rarityTier + "\u2605", "gx-stars"));
       const lv = item2.generated?.itemPower;
-      if (lv !== void 0 && lv !== null) {
-        const chip6 = element("span", "", "gx-lv");
-        chip6.append(element("span", "Lv ", "gx-lvword"), statText(lv));
-        b.append(chip6);
-      }
+      if (lv !== void 0 && lv !== null) b.append(element("span", "Lv " + statText(lv), "gx-lv"));
       b.setAttribute(
         "aria-label",
         `${SLOT_NAMES[slot]}: ${displayName(d)}, ${rarity(d)}` + (lv != null ? `, level ${statText(lv)}` : "")
