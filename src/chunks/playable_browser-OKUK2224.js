@@ -337008,6 +337008,321 @@ function stormtalonName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var CRN = CAIRN_PAL.A;
+var CRN_FRAME = ["#8a877c", "#57554d", "#36342f"];
+var CRN_PEAT = "#1d1913";
+var CRN_PEATL = "#2b261d";
+var crnEase = (x) => x * x * (3 - 2 * x);
+var crnClamp = (x) => Math.max(0, Math.min(1, x));
+var crnMix = (a, b, u) => a + (b - a) * u;
+function crnSlabs(n) {
+  const r = seeded2(19), out7 = [];
+  for (let x = 0; x < n; ) {
+    const len = 12 + r() * 9;
+    out7.push([x, Math.min(n, x + len), r() * 4 | 0, r()]);
+    x += len + 1.8;
+  }
+  return out7;
+}
+var CRN_SLING = [
+  ["belly", 0.11, 0.9, 66, 209],
+  ["chest", 0.2, 0.79, 99, 214],
+  ["mantle", 0.29, 0.68, 132, 219]
+];
+function crnBeat(t, low) {
+  const T121 = low ? 3 : 6, u = (t % T121 + T121) % T121 / T121 * 6, A2 = (u - 0.8) * 60;
+  return {
+    u,
+    A: A2,
+    on: A2 >= 0 && A2 < 249,
+    glow: A2 >= 0 && A2 < 219 ? crnEase(crnClamp(A2 / 30)) : 0,
+    call: A2 >= 138 && A2 < 189 ? (A2 - 138) / 51 : -1,
+    stagger: A2 >= 219 && A2 < 249 ? (A2 - 219) / 30 : -1
+  };
+}
+function crnStoneAt(b, k, x0, y, n) {
+  const [, sock, tgt, land, home] = CRN_SLING[k], sx = x0 + sock * n, tx = x0 + tgt * n, hy = y - 9 - k * 2, A2 = b.A;
+  if (!b.on || A2 >= home) return null;
+  if (A2 < 30) {
+    const q3 = crnEase(A2 / 30);
+    return { x: sx, y: crnMix(y + 3.5, hy, q3), rot: 0, out: q3 };
+  }
+  if (A2 < land - 24)
+    return { x: sx, y: hy + Math.sin(A2 * 0.05 + k * 2) * 0.8, rot: Math.sin(A2 * 0.033 + k) * 0.06, out: 1 };
+  if (A2 < land) {
+    const q3 = (A2 - (land - 24)) / 24;
+    return {
+      x: crnMix(sx, tx, q3),
+      y: crnMix(hy, y + 1, q3) - Math.sin(q3 * Math.PI) * 12,
+      rot: crnEase(q3) * TAU258 * (k % 2 ? -1 : 1),
+      out: 1,
+      fly: q3
+    };
+  }
+  if (A2 < home - 20) return { x: tx, y: y + 1, rot: 0, out: 1, landed: A2 - land };
+  const q2 = (A2 - (home - 20)) / 20;
+  return {
+    x: crnMix(tx, sx, q2),
+    y: crnMix(y + 1, y + 3.5, q2) - Math.sin(q2 * Math.PI) * 8,
+    rot: 0,
+    out: 1 - q2 * 0.2,
+    back: q2
+  };
+}
+function crnSeam(e, x, y, h, k) {
+  e.globalAlpha = 0.35 + k * 0.65;
+  e.fillStyle = CRN.glowD;
+  e.fillRect(x - 1.2, y, 2.4, h);
+  e.fillStyle = CRN.glow;
+  e.fillRect(x - 0.8, y, 1.6, h);
+  e.fillStyle = CRN.glowL;
+  e.fillRect(x - 0.3, y + h * 0.15, 0.6, h * 0.7);
+  e.globalAlpha = 1;
+}
+var CAIRNWARDEN_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: [CRN.glowL, CRN.glow, CRN.glowD],
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, CRN_FRAME);
+    e.fill();
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    const r = seeded2(43);
+    for (let x = o + 8; x < o + i - 8; x += 22 + r() * 28) {
+      e.fillStyle = CRN.mossD;
+      e.beginPath();
+      e.ellipse(x, t - 1.6, 3 + r() * 2.5, 1.2, 0, 0, TAU258);
+      e.fill();
+      e.fillStyle = CRN.moss;
+      e.beginPath();
+      e.ellipse(x - 0.4, t - 1.9, 2.2 + r() * 1.5, 0.8, 0, 0, TAU258);
+      e.fill();
+    }
+    for (let x = o + 15; x < o + i - 8; x += 30 + r() * 30) dot17(e, x, t + a + 1.4, 0.8, CRN.lichen);
+    pill(e, o, t, i, a);
+    e.fillStyle = CRN_PEAT;
+    e.fill();
+    e.save();
+    e.clip();
+    e.fillStyle = CRN_PEATL;
+    e.fillRect(o, t, i, a * 0.3);
+    for (let x = o + 3; x < o + i; x += 4 + r() * 6) dot17(e, x, t + a * (0.5 + r() * 0.35), 0.5 + r() * 0.5, "#4a463c");
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    const b = crnBeat(l, i / n < 0.5), dim = b.stagger >= 0 ? Math.sin(b.stagger * Math.PI) : 0, shake = b.stagger >= 0 && b.stagger < 0.3 ? Math.sin(b.stagger * 60) * 0.6 : 0, pulse3 = 0.75 + Math.sin(l * 2.2) * 0.15 + b.glow * 0.25 - dim * 0.6;
+    e.save();
+    e.translate(shake, 0);
+    for (const [x0, x1, tone93, lich] of crnSlabs(n)) {
+      const sx = o + x0, ex = Math.min(o + x1, o + i + 2);
+      if (sx > o + i) break;
+      const T121 = CRN.tones[tone93];
+      e.fillStyle = T121[0];
+      e.fillRect(sx, t, ex - sx, a);
+      e.fillStyle = T121[2];
+      e.fillRect(sx, t, ex - sx, a * 0.32);
+      e.fillStyle = T121[1];
+      e.fillRect(sx, t + a * 0.72, ex - sx, a * 0.28);
+      e.strokeStyle = EDGE5;
+      e.lineWidth = 0.7;
+      e.strokeRect(sx + 0.35, t - 1, ex - sx - 0.7, a + 2);
+      if (lich < 0.6) dot17(e, sx + (ex - sx) * (0.25 + lich), t + a * 0.5, 0.7, CRN.lichen);
+      if (lich > 0.7) {
+        e.strokeStyle = T121[1];
+        e.lineWidth = 0.6;
+        e.beginPath();
+        e.moveTo(sx + (ex - sx) * 0.55, t + a * 0.3);
+        e.lineTo(sx + (ex - sx) * 0.62, t + a * 0.6);
+        e.lineTo(sx + (ex - sx) * 0.58, t + a);
+        e.stroke();
+      }
+      if (o + x1 < o + i) crnSeam(e, o + x1 + 0.9, t, a, pulse3);
+    }
+    CRN_SLING.forEach((sl, k) => {
+      const s = crnStoneAt(b, k, o, t, n);
+      if (!s) return;
+      const w = 5 + k * 1.5, x = o + sl[1] * n;
+      if (x + w > o + i) return;
+      e.globalAlpha = Math.min(1, s.out * 1.5);
+      e.fillStyle = "#24170a";
+      e.fillRect(x - w, t, w * 2, a);
+      const g2 = 0.6 + Math.sin(l * 6 + k) * 0.25;
+      e.fillStyle = CRN.glowD;
+      e.beginPath();
+      e.ellipse(x, t + a * 0.55, w * 0.85, a * 0.32, 0, 0, TAU258);
+      e.fill();
+      e.globalAlpha *= g2;
+      e.fillStyle = CRN.glow;
+      e.beginPath();
+      e.ellipse(x, t + a * 0.55, w * 0.6, a * 0.2, 0, 0, TAU258);
+      e.fill();
+      e.fillStyle = CRN.glowL;
+      e.fillRect(x - w * 0.35, t + a * 0.5, w * 0.7, 0.6);
+      e.globalAlpha = 1;
+    });
+    e.restore();
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 4; n++) {
+      const r = (l * 0.8 + n / 4) % 1;
+      e.globalAlpha = 1 - r;
+      dot17(e, o + i * (0.15 + n * 0.23), t + a - 1 + r * 4, 0.8, CRN.tones[n % 4][1]);
+    }
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a) {
+    e.fillStyle = CRN.glow;
+    e.globalAlpha = 0.6 + a * 0.4;
+    e.fillRect(o - 0.6, t, 1.4, i);
+    e.globalAlpha = 1;
+    e.fillStyle = CRN.stoneD;
+    e.beginPath();
+    e.moveTo(o - 2.2, t);
+    e.lineTo(o - 0.6, t);
+    e.lineTo(o - 1.4, t + i * 0.4);
+    e.lineTo(o - 0.4, t + i * 0.7);
+    e.lineTo(o - 1.2, t + i);
+    e.lineTo(o - 2.2, t + i);
+    e.closePath();
+    e.fill();
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const low = n < 0.5, b = crnBeat(l, low), fx = o + i * n, slabs2 = crnSlabs(i);
+    slabs2.forEach(([x0, x1, , lich], k) => {
+      const cx = o + (x0 + x1) / 2;
+      if (cx > fx - 4 || cx < o + 14) return;
+      if (k % 3 === 1)
+        for (let j = 0; j < 3; j++) {
+          const sx = cx - 2 + j * 2, len = 2.5 + (j + k) % 3 + Math.sin(l * 1.6 + k + j) * 0.4;
+          e.strokeStyle = j % 2 ? CRN.moss : CRN.mossD;
+          e.lineWidth = 1;
+          e.beginPath();
+          e.moveTo(sx, t + a + 1.5);
+          e.quadraticCurveTo(sx + 0.6, t + a + 1.5 + len * 0.6, sx + 0.2, t + a + 1.5 + len);
+          e.stroke();
+        }
+      if (k % 5 === 3 && (cx < o + i * 0.36 || cx > o + i * 0.64)) {
+        e.strokeStyle = CRN.stem;
+        e.lineWidth = 0.6;
+        e.beginPath();
+        for (const dx of [-1.2, 0, 1.2]) {
+          e.moveTo(cx + dx * 0.4, t - 2);
+          e.lineTo(cx + dx, t - 4.4);
+        }
+        e.stroke();
+        for (const [dx, dy] of [
+          [-1.2, -4.6],
+          [0, -5.2],
+          [1.2, -4.6],
+          [-0.6, -3.8],
+          [0.7, -3.9]
+        ])
+          dot17(e, cx + dx, t + dy, 0.7, lich > 0.5 ? CRN.heather : CRN.heatherL);
+      }
+    });
+    e.save();
+    e.translate(o + 1.5, t + a / 2 - 3.5);
+    e.rotate(-Math.PI / 2 + 0.08);
+    e.scale(0.56, 0.56);
+    cairnStone(e, l, "chest", 0, 0.55 + b.glow * 0.45 - (b.stagger >= 0 ? Math.sin(b.stagger * Math.PI) * 0.4 : 0));
+    e.restore();
+    CRN_SLING.forEach(([, , tgt, land], k) => {
+      if (!b.on || b.A < 30 + k * 33 || b.A > land + 30) return;
+      const x = o + tgt * i, fill8 = crnClamp((b.A - 30 - k * 33) / 36), gone = crnClamp((b.A - land) / 30);
+      e.save();
+      e.globalAlpha = 1 - gone;
+      e.strokeStyle = "rgba(40,24,4,.6)";
+      e.lineWidth = 2.4;
+      e.beginPath();
+      e.ellipse(x, t + a / 2, 8, a / 2 + 2.5, 0, 0, TAU258);
+      e.stroke();
+      e.strokeStyle = CRN.glow;
+      e.lineWidth = 1.2;
+      e.stroke();
+      e.fillStyle = "rgba(255,211,106,.35)";
+      e.beginPath();
+      e.ellipse(x, t + a / 2, 8 * fill8, (a / 2 + 2.5) * fill8, 0, 0, TAU258);
+      e.fill();
+      e.restore();
+    });
+    if (b.call >= 0)
+      CRN_SLING.forEach(([, sock, tgt], k) => {
+        const a0 = Math.min(1, b.call * 3), x0 = o + tgt * i, x1 = o + sock * i;
+        e.save();
+        e.globalAlpha = a0;
+        e.setLineDash([3, 2]);
+        e.lineDashOffset = l * 24;
+        e.strokeStyle = CRN.glowD;
+        e.lineWidth = 1.6;
+        const y = t - 2.4;
+        e.beginPath();
+        e.moveTo(x0, y);
+        e.lineTo(x1, y);
+        e.stroke();
+        e.strokeStyle = CRN.glowL;
+        e.lineWidth = 0.7;
+        e.stroke();
+        e.setLineDash([]);
+        e.restore();
+      });
+    CRN_SLING.forEach(([which], k) => {
+      const s = crnStoneAt(b, k, o, t, i);
+      if (!s || s.out <= 0.05) return;
+      if (s.landed >= 0 && s.landed < 15) {
+        const q2 = s.landed / 15;
+        e.globalAlpha = (1 - q2) * 0.8;
+        for (const d of [-1, 1]) dot17(e, s.x + d * (6 + q2 * 5), t + a - q2 * 3, 1.2 + q2 * 1.6, "#c9b08a");
+        e.globalAlpha = 1;
+      }
+      e.save();
+      e.translate(s.x, s.y);
+      e.rotate(s.rot);
+      e.scale(0.36, 0.36);
+      cairnStone(e, l, which, 0, 0.7);
+      e.restore();
+    });
+    if (low)
+      for (let k = 0; k < 3; k++) {
+        const q2 = (l * 0.6 + k / 3) % 1, x = o + 16 + (k * 0.37 + 0.2) % 1 * Math.max(0, fx - o - 20);
+        e.globalAlpha = 1 - q2;
+        dot17(e, x, t + a + 1 + q2 * 5, 0.7, k % 2 ? CRN.glow : CRN.stoneL);
+      }
+    e.globalAlpha = 1;
+    if (r > 0) {
+      for (let k = 0; k < 7; k++) {
+        const d = 1 - r, sx = (k - 3) * 2.4 * (0.4 + d), vy = -4 + d * d * 14 + k % 2 * 2;
+        e.globalAlpha = r;
+        e.fillStyle = k % 3 ? CRN.stoneL : CRN.glow;
+        e.fillRect(fx + sx - 0.7, t + a / 2 + vy - 0.6, 1.5, 1.2);
+      }
+      e.globalAlpha = 1;
+    }
+  }
+};
+function drawCairnwardenBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 18, y: y + NAME_GAP, w: w - 24, h: BAR_H }, i, CAIRNWARDEN_BAR, a);
+  cairnwardenName(e, x + w / 2, y + 13, t.name);
+}
+function cairnwardenName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#1a140a";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#fff4c8", "#ffd36a", "#d18a1c"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -337025,7 +337340,8 @@ var LESSER_BARS = Object.freeze({
   croakmaw: Object.freeze({ draw: drawCroakmawBar, side: 16 }),
   gorgeleech: Object.freeze({ draw: drawGorgeleechBar, side: 16 }),
   ironhorn: Object.freeze({ draw: drawIronhornBar, side: 16 }),
-  stormtalon: Object.freeze({ draw: drawStormtalonBar, side: 16 })
+  stormtalon: Object.freeze({ draw: drawStormtalonBar, side: 16 }),
+  cairnwarden: Object.freeze({ draw: drawCairnwardenBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
