@@ -336180,6 +336180,402 @@ function gorgeleechName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var IRH = RUST_PAL.B;
+var IRH_STONE = ["#c4c0b2", "#8d8a80", "#5c5952"];
+var IRH_CAVE = "#1c1b18";
+var IRH_CAVEL = "#2a2924";
+var IRH_LICHEN = "#c8c25a";
+var irhEase = (x) => x * x * (3 - 2 * x);
+var irhClamp = (x) => Math.max(0, Math.min(1, x));
+var IRH_ROCKS = [
+  [0.86, 0.15, 6.6, 1],
+  [0.16, 0.27, 5.8, 2],
+  [0.7, 0.38, 5.4, 3],
+  [0.3, 0.52, 6.2, 4]
+];
+function irhBeat(t, low) {
+  const T121 = low ? 3 : 6, u = (t % T121 + T121) % T121 / T121 * 6;
+  const b = { u, pull: 0, thrust: 0, crack: -1, dazed: -1, gone: 0, paw: [] };
+  if (u >= 0.8 && u < 1.75) {
+    const q2 = (u - 0.8) / 0.95;
+    b.pull = irhEase(irhClamp(q2 / 0.6));
+    for (const p0 of [0.35, 0.7]) if (q2 >= p0 && q2 < p0 + 0.3) b.paw.push((q2 - p0) / 0.3);
+  } else if (u >= 1.75 && u < 2.15) {
+    const q2 = (u - 1.75) / 0.4;
+    b.pull = 1 - irhEase(irhClamp(q2 / 0.4));
+    b.thrust = irhEase(irhClamp((q2 - 0.3) / 0.7));
+  } else if (u >= 2.15 && u < 2.75) b.thrust = 1 - irhEase(irhClamp((u - 2.15) / 0.6)) * 0.7;
+  else if (u >= 2.75 && u < 3.3) b.thrust = 0.3 * (1 - irhEase((u - 2.75) / 0.55));
+  if (u >= 2.15 && u < 4.25) {
+    b.crack = irhClamp((u - 2.15) / 0.22);
+    b.gone = irhClamp((u - 3.75) / 0.5);
+  }
+  if (u >= 2.75 && u < 4.25) b.dazed = (u - 2.75) / 1.5;
+  b.ram = u >= 2.15 && u < 2.65 ? (u - 2.15) / 0.5 : -1;
+  return b;
+}
+function irhRock(b, k) {
+  const [, at10] = IRH_ROCKS[k], land = 2.15 + at10, fall2 = 0.42;
+  if (b.u < land - fall2 || b.u >= 4.25) return null;
+  if (b.u < land) return { f: (b.u - (land - fall2)) / fall2, after: -1, gone: 0 };
+  return { f: 1, after: b.u - land, gone: b.gone };
+}
+function irhHorn(e, x, y, h, b, t) {
+  const cy2 = y + h / 2, lunge2 = b.thrust * 4 - b.pull * 2, wob4 = b.dazed >= 0 ? Math.sin(t * 11) * 0.09 * (1 - irhClamp((b.dazed - 0.75) / 0.25)) : 0, tilt = -b.pull * 0.22 + b.thrust * 0.3 + wob4;
+  e.save();
+  e.translate(x + lunge2, cy2);
+  e.rotate(tilt * 0.35);
+  const plate8 = () => {
+    e.beginPath();
+    e.moveTo(9, -4.4);
+    e.lineTo(1, -4.8);
+    e.quadraticCurveTo(-4.6, -4.8, -5.6, 0);
+    e.quadraticCurveTo(-4.6, 4.6, 1, 4.5);
+    e.lineTo(9, 4.2);
+    e.quadraticCurveTo(10.2, 0, 9, -4.4);
+    e.closePath();
+  };
+  plate8();
+  e.fillStyle = vgrad(e, -6, 11, [IRH.shellL, IRH.shell, IRH.shellD]);
+  e.fill();
+  e.save();
+  e.clip();
+  e.fillStyle = "rgba(255,220,190,.35)";
+  e.fillRect(-8, -5.2, 21, 1.4);
+  e.fillStyle = IRH.shellD;
+  e.fillRect(-9, 2.2, 23, 3);
+  e.fillStyle = "rgba(255,225,200,.3)";
+  e.beginPath();
+  e.ellipse(-0.5, -3.2, 4.4, 0.9, -0.05, 0, TAU258);
+  e.fill();
+  e.fillStyle = IRH.patinaD;
+  e.fillRect(-6, 0.1, 17, 0.9);
+  e.fillStyle = IRH.patina;
+  e.beginPath();
+  e.ellipse(-3.4, 2.4, 1.6, 0.9, 0, 0, TAU258);
+  e.fill();
+  dot17(e, -3.6, 2.2, 0.4, IRH.crust);
+  dot17(e, 3, 2.8, 0.5, IRH.pit);
+  dot17(e, -2.2, 3.1, 0.4, IRH.pit);
+  e.restore();
+  plate8();
+  e.lineWidth = 1.1;
+  e.strokeStyle = EDGE5;
+  e.stroke();
+  e.save();
+  e.translate(1.6, -4.2);
+  e.rotate(0.28 + tilt);
+  e.scale(0.66, 0.62);
+  e.translate(-20.5, 34);
+  const hp = () => {
+    e.beginPath();
+    e.moveTo(14.5, -35.5);
+    e.bezierCurveTo(18, -45, 24, -52, 31, -56.5);
+    e.lineTo(33.4, -60.2);
+    e.quadraticCurveTo(35.2, -57.6, 34.6, -55.4);
+    e.lineTo(39.6, -56.4);
+    e.quadraticCurveTo(38.6, -52.6, 35.4, -50.6);
+    e.bezierCurveTo(30.5, -47, 27.4, -41, 26.4, -32.5);
+    e.closePath();
+  };
+  hp();
+  e.fillStyle = IRH.horn;
+  e.fill();
+  e.save();
+  hp();
+  e.clip();
+  e.fillStyle = IRH.hornD;
+  e.beginPath();
+  e.moveTo(26.4, -32.5);
+  e.bezierCurveTo(27.4, -41, 30.5, -47, 35.4, -50.6);
+  e.lineTo(40, -49);
+  e.lineTo(30, -30);
+  e.closePath();
+  e.fill();
+  e.fillStyle = IRH.hornL;
+  e.beginPath();
+  e.moveTo(14.5, -35.5);
+  e.bezierCurveTo(18, -45, 24, -52, 31, -56.5);
+  e.lineTo(32, -54.4);
+  e.bezierCurveTo(26, -50, 21, -44, 18.2, -35);
+  e.closePath();
+  e.fill();
+  e.fillStyle = "rgba(255,255,255,.4)";
+  e.beginPath();
+  e.ellipse(23.4, -47.6, 1.1, 4.2, 0.62, 0, TAU258);
+  e.fill();
+  e.fillStyle = IRH.patinaD;
+  e.beginPath();
+  e.ellipse(20.6, -33.8, 8, 4.2, -0.2, 0, TAU258);
+  e.fill();
+  e.fillStyle = IRH.patina;
+  e.beginPath();
+  e.ellipse(20.2, -34.6, 7.4, 3.4, -0.2, 0, TAU258);
+  e.fill();
+  e.restore();
+  hp();
+  e.lineWidth = 2.2;
+  e.strokeStyle = EDGE5;
+  e.stroke();
+  e.lineWidth = 1.3;
+  for (const [x0, y0, x1, y1] of [
+    [18.6, -40.4, 26.8, -39],
+    [21.6, -45.6, 28.6, -44.4],
+    [25.4, -50.4, 31.4, -49.2]
+  ]) {
+    e.beginPath();
+    e.moveTo(x0, y0);
+    e.quadraticCurveTo((x0 + x1) / 2, (y0 + y1) / 2 - 1.1, x1, y1);
+    e.stroke();
+  }
+  e.restore();
+  e.restore();
+}
+function irhCrack(e, x0, x1, y, h, p, seed2) {
+  if (p <= 0 || x1 <= x0) return;
+  const r = seeded2(seed2), end = x0 + (x1 - x0) * p;
+  e.beginPath();
+  let x = x0, yy = y + h / 2;
+  e.moveTo(x, yy);
+  const side = [];
+  while (x < end) {
+    x = Math.min(end, x + 3 + r() * 4);
+    yy = y + h * (0.3 + r() * 0.4);
+    e.lineTo(x, yy);
+    if (r() < 0.35) side.push([x, yy, r() < 0.5 ? -1 : 1]);
+  }
+  for (const [sx, sy, d] of side) {
+    e.moveTo(sx, sy);
+    e.lineTo(sx + 2, d < 0 ? y + 0.3 : y + h - 0.3);
+  }
+}
+var IRONHORN_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: [IRH.crust, IRH.patina, IRH.patinaD],
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, IRH_STONE);
+    e.fill();
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    const r = seeded2(41);
+    for (let x = o + 6; x < o + i - 4; x += 16 + r() * 22) {
+      const top = r() < 0.5;
+      dot17(e, x, top ? t - 1.4 : t + a + 1.4, 0.9 + r() * 0.5, IRH_LICHEN);
+      dot17(e, x + 1.4, top ? t - 1.1 : t + a + 1.1, 0.5, IRH_LICHEN);
+    }
+    e.strokeStyle = IRH_STONE[2];
+    e.lineWidth = 0.6;
+    e.beginPath();
+    for (let x = o + 14; x < o + i - 8; x += 26 + r() * 30) {
+      e.moveTo(x, t - 2.3);
+      e.lineTo(x + 1.2, t - 0.6);
+    }
+    e.stroke();
+    pill(e, o, t, i, a);
+    e.fillStyle = IRH_CAVE;
+    e.fill();
+    e.save();
+    e.clip();
+    e.fillStyle = IRH_CAVEL;
+    e.fillRect(o, t, i, a * 0.3);
+    for (let x = o + 3; x < o + i; x += 3 + r() * 6) dot17(e, x, t + a * (0.5 + r() * 0.4), 0.5 + r() * 0.5, "#3a3830");
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    const low = i / n < 0.5, b = irhBeat(l, low);
+    e.fillStyle = IRH.shell;
+    e.fillRect(o, t, i, a);
+    e.fillStyle = IRH.shellL;
+    e.fillRect(o, t + 0.5, i, a * 0.22);
+    e.fillStyle = IRH.shellD;
+    e.fillRect(o, t + a * 0.66, i, a * 0.34);
+    e.fillStyle = IRH.under;
+    e.fillRect(o, t + a - 1, i, 1);
+    const r = seeded2(77);
+    for (let x = o + 10 + r() * 10; x < o + n; x += 20 + r() * 26) {
+      const w = 3 + r() * 3, top = r() < 0.6;
+      if (x - w > o + i) break;
+      const py = top ? t + 1.8 : t + a - 2;
+      e.fillStyle = IRH.patinaD;
+      e.beginPath();
+      e.ellipse(x, py + 0.5, w, 1.9, 0, 0, TAU258);
+      e.ellipse(x + w * 0.7, py - 0.2, w * 0.55, 1.5, 0, 0, TAU258);
+      e.fill();
+      e.fillStyle = IRH.patina;
+      e.beginPath();
+      e.ellipse(x, py, w * 0.9, 1.5, 0, 0, TAU258);
+      e.ellipse(x + w * 0.7, py - 0.5, w * 0.45, 1.1, 0, 0, TAU258);
+      e.fill();
+      dot17(e, x - w * 0.3, py - 0.4, 0.45, IRH.crust);
+      if (top && r() < 0.6) {
+        e.fillStyle = IRH.patina;
+        e.fillRect(x + 1, py, 0.9, 2.4 + r() * 1.5);
+        dot17(e, x + 1.45, py + 3.2, 0.6, IRH.patina);
+      }
+    }
+    e.fillStyle = IRH.patinaD;
+    e.fillRect(o, t + a * 0.42, i, 0.8);
+    for (let x = o + 7; x < o + i - 2; x += 15 + r() * 12) dot17(e, x, t + a * (0.3 + r() * 0.5), 0.45, IRH.pit);
+    e.fillStyle = "rgba(255,230,200,.35)";
+    for (let x = o + 4; x < o + i - 4; x += 18) e.fillRect(x, t + 0.7, 6, 0.6);
+    if (b.crack >= 0 && b.gone < 1) {
+      e.globalAlpha = 1 - b.gone;
+      irhCrack(e, o + 10, Math.min(o + i, o + 130), t, a, b.crack, 5);
+      e.strokeStyle = IRH.shellL;
+      e.lineWidth = 1;
+      e.save();
+      e.translate(0, 0.6);
+      e.stroke();
+      e.restore();
+      irhCrack(e, o + 10, Math.min(o + i, o + 130), t, a, b.crack, 5);
+      e.strokeStyle = EDGE5;
+      e.lineWidth = 0.75;
+      e.stroke();
+      e.globalAlpha = 1;
+    }
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 4; n++) {
+      const r = (l * 0.8 + n / 4) % 1;
+      e.globalAlpha = 1 - r;
+      e.fillStyle = n % 2 ? IRH.patina : IRH.shellL;
+      e.fillRect(o + i * (0.15 + n * 0.23), t + a - 1.5 + r * 4, 1.4, 1);
+    }
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a) {
+    e.fillStyle = IRH.shellD;
+    e.beginPath();
+    e.moveTo(o - 1.6, t);
+    e.lineTo(o + 0.6, t + i * 0.3);
+    e.lineTo(o - 0.8, t + i * 0.55);
+    e.lineTo(o + 0.8, t + i);
+    e.lineTo(o - 1.6, t + i);
+    e.closePath();
+    e.fill();
+    dot17(e, o - 0.4, t + i * 0.3, 0.7 + a * 0.6, IRH.patinaL);
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const low = n < 0.5, b = irhBeat(l, low), fx = o + i * n;
+    for (const q2 of b.paw)
+      for (let k = 0; k < 3; k++) dust(e, o - 9 - q2 * 8 - k * 2.5, t + a - q2 * 4 + k, 1.2 + q2 * 1.8, (1 - q2) * 0.85);
+    IRH_ROCKS.forEach(([f, , R18, seed2], k) => {
+      const s = irhRock(b, k);
+      if (!s) return;
+      const x = o + f * i, rest2 = t - R18 * 0.35;
+      if (s.after < 0) {
+        e.globalAlpha = 0.15 + s.f * 0.35;
+        e.fillStyle = "#000";
+        e.beginPath();
+        e.ellipse(x, t + a / 2, 1.5 + s.f * R18, 1 + s.f * 1.6, 0, 0, TAU258);
+        e.fill();
+        e.globalAlpha = 1;
+        const y = rest2 - (1 - s.f * s.f) * 22;
+        boulder4(e, x, y, R18, s.f * 0.8 * (k % 2 ? 1 : -1), seed2);
+        return;
+      }
+      const bounce = s.after < 0.18 ? Math.sin(s.after / 0.18 * Math.PI) * 2.2 : 0, sink2 = s.gone;
+      e.save();
+      e.globalAlpha = 1 - sink2;
+      boulder4(e, x, rest2 - bounce + sink2 * 3, R18, 0.8 * (k % 2 ? 1 : -1), seed2);
+      e.restore();
+      if (s.after < 0.45) {
+        const q2 = s.after / 0.45;
+        dust(e, x - R18 - q2 * 4, t + a - 1 - q2 * 2, 1.2 + q2 * 2, (1 - q2) * 0.8);
+        dust(e, x + R18 + q2 * 4, t + a - 1 - q2 * 2, 1.2 + q2 * 2, (1 - q2) * 0.8);
+        e.globalAlpha = (1 - q2) * 0.8;
+        for (let j = 0; j < 4; j++) {
+          const ang = -Math.PI * (0.15 + j * 0.23);
+          dot17(e, x + Math.cos(ang) * (R18 + q2 * 8), rest2 + Math.sin(ang) * (R18 * 0.6 + q2 * 6) + q2 * q2 * 8, 0.8, "#b9b5a8");
+        }
+        e.globalAlpha = 1;
+      }
+    });
+    e.save();
+    e.translate(o, t + a / 2);
+    e.scale(1.5, 1.5);
+    e.translate(-o, -t - a / 2);
+    irhHorn(e, o, t, a, b, l);
+    e.restore();
+    if (b.ram >= 0) {
+      const q2 = b.ram, hx2 = o + 20, hy = t - 10;
+      e.globalAlpha = 1 - q2;
+      e.strokeStyle = "#fff8e2";
+      e.lineWidth = 1.7;
+      e.beginPath();
+      for (let j = 0; j < 6; j++) {
+        const ang = j / 6 * TAU258 + 0.3, r0 = 2 + q2 * 5, r1 = 4 + q2 * 9;
+        e.moveTo(hx2 + Math.cos(ang) * r0, hy + Math.sin(ang) * r0 * 0.8);
+        e.lineTo(hx2 + Math.cos(ang) * r1, hy + Math.sin(ang) * r1 * 0.8);
+      }
+      e.stroke();
+      e.globalAlpha = 1;
+    }
+    if (b.dazed >= 0 && b.dazed < 0.85) {
+      const fade = Math.min(1, b.dazed * 6, (0.85 - b.dazed) * 6);
+      e.globalAlpha = fade;
+      for (let j = 0; j < 3; j++) {
+        const ang = l * 5 + j * TAU258 / 3, sx = o + 1 + Math.cos(ang) * 10, sy = t - 14 + Math.sin(ang) * 3;
+        irhStar(e, sx, sy, Math.sin(ang) > 0 ? 2.6 : 1.9);
+      }
+      e.globalAlpha = 1;
+    }
+    if (low)
+      for (let k = 0; k < 3; k++) {
+        const q2 = (l * 0.6 + k / 3) % 1, x = o + 16 + (k * 0.37 + 0.2) % 1 * Math.max(0, fx - o - 20);
+        e.globalAlpha = 1 - q2;
+        e.fillStyle = k % 2 ? IRH.patina : IRH.flake;
+        e.fillRect(x + Math.sin(q2 * 6) * 1.5, t + a + 1 + q2 * 5, 1.3, 0.9);
+      }
+    e.globalAlpha = 1;
+    if (r > 0) {
+      for (let k = 0; k < 7; k++) {
+        const d = 1 - r, sx = (k - 3) * 2.4 * (0.4 + d), vy = -4 + d * d * 14 + k % 2 * 2;
+        e.globalAlpha = r;
+        e.fillStyle = k % 3 ? IRH.shellL : IRH.patina;
+        e.fillRect(fx + sx - 0.7, t + a / 2 + vy - 0.5, 1.5, 1.1);
+      }
+      e.globalAlpha = 1;
+    }
+  }
+};
+function irhStar(e, x, y, s) {
+  e.beginPath();
+  for (let j = 0; j < 10; j++) {
+    const ang = -Math.PI / 2 + j * Math.PI / 5, rr7 = j % 2 ? s * 0.45 : s;
+    e.lineTo(x + Math.cos(ang) * rr7, y + Math.sin(ang) * rr7);
+  }
+  e.closePath();
+  e.fillStyle = "#fff1a8";
+  e.fill();
+  e.lineWidth = 0.6;
+  e.strokeStyle = EDGE5;
+  e.stroke();
+}
+function drawIronhornBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 18, y: y + NAME_GAP, w: w - 24, h: BAR_H }, i, IRONHORN_BAR, a);
+  ironhornName(e, x + w / 2, y + 13, t.name);
+}
+function ironhornName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#10140e";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#effff6", "#a6e2c6", "#5fa58a"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -336195,7 +336591,8 @@ var LESSER_BARS = Object.freeze({
   sirocco: Object.freeze({ draw: drawSiroccoBar, side: 16 }),
   mirelily: Object.freeze({ draw: drawMirelilyBar, side: 16 }),
   croakmaw: Object.freeze({ draw: drawCroakmawBar, side: 16 }),
-  gorgeleech: Object.freeze({ draw: drawGorgeleechBar, side: 16 })
+  gorgeleech: Object.freeze({ draw: drawGorgeleechBar, side: 16 }),
+  ironhorn: Object.freeze({ draw: drawIronhornBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
