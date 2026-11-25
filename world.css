@@ -1236,7 +1236,7 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 #world-inventory .gx-slot .gx-stars{top:3px}
 /* Worn tiles show the item level bottom left, like the bag. The slot's attunement is a gold badge on the frame's corner: it belongs to the slot, not the item. */
 #world-inventory .gx-slot .gx-lv{bottom:3px}
-#world-inventory .gx-tune{position:absolute;bottom:-4px;right:-10px;z-index:1;box-sizing:border-box;min-width:19px;height:16px;padding:0 3px;letter-spacing:-.02em;display:flex;align-items:center;justify-content:center;font:800 9px/1 system-ui,sans-serif;color:#f3e1b0;background:linear-gradient(#4a3a1f,#2b2213);border:1.5px solid #c9a65c;border-radius:9px;box-shadow:0 0 0 2px #0c1219;pointer-events:none}
+#world-inventory .gx-tune{position:absolute;bottom:-4px;right:-10px;z-index:1;box-sizing:border-box;min-width:19px;height:16px;padding:0 3px;letter-spacing:-.02em;display:flex;align-items:center;justify-content:center;font:800 9px/1 system-ui,sans-serif;color:#f3e1b0;background:linear-gradient(#4a3a1f,#2b2213);border:1.5px solid #c9a65c;border-radius:9px;box-shadow:0 0 0 2px #0c1219;pointer-events:none}#world-inventory .gx-tune.is-wide{font-size:8px;letter-spacing:-.05em;padding:0 2px}
 #world-inventory .gx-doll .gx-slot .gx-stars,#world-inventory .gx-doll .gx-slot .gx-lv{font-size:9px;padding:1px 3px;border-radius:5px;left:2px}#world-inventory .gx-doll .gx-slot .gx-stars{top:2px}#world-inventory .gx-doll .gx-slot .gx-lv{bottom:2px}
 #world-inventory .gx-tile .gx-stars{top:4px}
 #world-inventory .gx-lv{bottom:4px;color:#cfd5d6}

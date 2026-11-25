@@ -251726,7 +251726,7 @@ function createInventoryPresentation({
     }
     const tune = inv.economy?.slotLevels?.[slot] ?? 0;
     if (tune > 0) {
-      b.append(element("span", "\u25C6" + tune, "gx-tune"));
+      b.append(element("span", "\u25C6" + tune, "gx-tune" + (tune >= 100 ? " is-wide" : "")));
       b.setAttribute("aria-label", b.getAttribute("aria-label") + `, slot attunement ${tune}`);
     }
     if (scan.upSlots.has(slot)) {
