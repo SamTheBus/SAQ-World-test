@@ -175590,10 +175590,6 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
             if (!slowView.has(name)) slowView.set(name, fn());
             return slowView.get(name);
           };
-          const siteDoorOpen = (payload) => slowCached(
-            "site-door:" + payload.siteId + "/" + payload.direction + "/" + (payload.transitionId ?? payload.extractionId ?? "") + "/" + (state2.primary.actorsById[local8.entityId]?.current ? 1 : 0),
-            () => Boolean(functionalSiteTransitionTargetD9(state2, local8, payload))
-          );
           const serviceNpcs = slowCached("serviceNpcs", () => projectedServiceNpcs(state2, player)), questRev = (questLogV1(state2, player.playerId)?.revision ?? 0) + "/" + (state2.d9World?.navigation?.knowledge?.revision ?? 0), questView = state2.d9World ? slowCached("quests:" + questRev, () => projectQuestsV1(state2, player, local8, serviceNpcs)) : null;
           const tavernBinding = campaignTavernBinding(state2), tavernFloor = tavernBinding ? floorForSpace(tavernBinding, ctx.spaceInstanceId) : null, townHere = tavernFloor ? null : townInteriorForSpace(state2, ctx.spaceInstanceId), townBinding = townHere ? townInteriorBinding(state2, townHere.siteId) : null, townName = townHere ? generatedTownV1(townHere.record.settlementId)?.name ?? "Town" : "";
           const functional = functionalSiteForSpaceD12(state2, ctx.spaceInstanceId), inFunctional = Boolean(functional), functionalFloor = functional ? functionalSiteFloorForSpaceD12(functional, ctx.spaceInstanceId) : null, inOverworld = ctx.spaceInstanceId === state2.overworldInstanceId, c = space.collision, interior2 = inFunctional ? isGeneratedInteriorFamily(functional) ? {
@@ -176099,7 +176095,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                     x: anchor2.x,
                     y: anchor2.y,
                     radius: SITE_INTERACTION_RADIUS,
-                    available: siteDoorOpen(payload),
+                    available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)),
                     label: functional.siteKind === "procedural-fort" ? "Leave Fort" : functional.siteKind === "procedural-ruin" ? "Leave Ruin" : functional.siteKind === "procedural-crypt" ? "Leave Crypt" : `Leave Cave`
                   });
                 }
@@ -176112,7 +176108,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                     siteAction: payload,
                     siteKind: functional.siteKind,
                     .../* boss skip v1: out from the last floor's stairs */
-                    direction2 === "up" && functionalFloor.index === functional.floors.length - 1 && siteBossDoorV1(functional) && siteDoorOpen({ siteId: functional.siteId, direction: "exit" }) ? {
+                    direction2 === "up" && functionalFloor.index === functional.floors.length - 1 && siteBossDoorV1(functional) && functionalSiteTransitionTargetD9(state2, local8, { siteId: functional.siteId, direction: "exit" }) ? {
                       altAction: {
                         siteAction: { siteId: functional.siteId, direction: "exit" },
                         label: functional.siteKind === "procedural-fort" ? "Leave Fort" : functional.siteKind === "procedural-ruin" ? "Leave Ruin" : functional.siteKind === "procedural-crypt" ? "Leave Crypt" : "Leave Cave",
@@ -176125,7 +176121,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                     x: anchor2.x,
                     y: anchor2.y,
                     radius: SITE_INTERACTION_RADIUS,
-                    available: siteDoorOpen(payload),
+                    available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)),
                     label: transition2.label ?? (direction2 === "down" ? "Descend" : "Ascend")
                   });
                 }
@@ -176144,7 +176140,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                     x: anchor2.x,
                     y: anchor2.y,
                     radius: SITE_INTERACTION_RADIUS,
-                    available: siteDoorOpen(payload),
+                    available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)),
                     label: functional.siteKind === "procedural-fort" ? "Return to Fort Entrance" : functional.siteKind === "procedural-ruin" ? "Return to Ruin Entrance" : functional.siteKind === "procedural-crypt" ? "Return to Crypt Entrance" : "Return to Cave Mouth"
                   });
                 }
@@ -176157,7 +176153,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                   x: anchor2.x,
                   y: anchor2.y,
                   radius: SITE_INTERACTION_RADIUS,
-                  available: siteDoorOpen(payload),
+                  available: Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)),
                   label: functional.siteKind === "woodland-fort" ? "Leave Keep" : `Leave ${functional.label}`
                 });
               }
@@ -176166,7 +176162,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                 const anchor2 = siteEnterPointV1(truth.packageId, front2);
                 const bound = state2.d9World.functionalSitesById[truth.siteId], keep8 = bound?.siteKind === "woodland-fort" || truth.packageId === "procedural-fort-family";
                 if (Math.hypot(anchor2.x - local8.position.x, anchor2.y - local8.position.y) > 900) continue;
-                const payload = { siteId: truth.siteId, direction: "enter" }, available = bound ? siteDoorOpen(payload) : local8.alive && !state2.primary.actorsById[local8.entityId].current && Math.hypot(anchor2.x - local8.position.x, anchor2.y - local8.position.y) <= SITE_INTERACTION_RADIUS;
+                const payload = { siteId: truth.siteId, direction: "enter" }, available = bound ? Boolean(functionalSiteTransitionTargetD9(state2, local8, payload)) : local8.alive && !state2.primary.actorsById[local8.entityId].current && Math.hypot(anchor2.x - local8.position.x, anchor2.y - local8.position.y) <= SITE_INTERACTION_RADIUS;
                 exits.push({
                   exitId: `site-enter:${truth.siteId}`,
                   siteAction: payload,
