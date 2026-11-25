@@ -119502,6 +119502,8 @@ var PIP_SPENDERS = Object.freeze({
   mage: Object.freeze(["firebloom", "flame_wall", "flashfreeze", "ice_barrier", "ball_lightning", "static_field"])
 });
 var isPipSpender = (id2) => Object.values(PIP_SPENDERS).some((list) => list.includes(id2));
+var PIP_SPENDER_MIN = 1;
+var spendsPips = (d8, id2) => Boolean(isPipSpender(id2) && d8?.classAugments?.[id2]?.includes(PIP_SPEND_AUGMENT));
 var BANNER_CAP = BANNER_MAX + 120 * PIPS_CAP;
 var SMOKE_CAP = SMOKE_MAX + 60 * PIPS_CAP;
 var WALL_CAP = WALL_MAX + 60 * PIPS_CAP;
@@ -164167,6 +164169,7 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
     weaving = weave2 && element && last && last.element !== element ? weave2 : 0;
     const own = c.actors[a.entityId], ends = finisher(a, skillId), cost = costed(a, skillId) ? pipCostOf(skillId) + (skillId === "cast" && rank(a, "overload") ? OVERLOAD_PIP : 0) : 0, free = Boolean(cost && own?.skills?.free?.[skillId]);
     if (cost && (!free && (own?.skills?.pips?.n ?? 0) < cost || going(own, skillId))) return false;
+    if (!cost && spender(a, skillId) && (own?.skills?.pips?.n ?? 0) < PIP_SPENDER_MIN) return false;
     const paid2 = Boolean(cost && paidSkill(skillId)), was = (ends || paid2) && own.skills ? { pips: own.skills.pips, spent: own.skills.spent, free: own.skills.free } : null;
     if (was) {
       const n = was.pips?.n ?? 0;
@@ -164243,7 +164246,8 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
       if (!free && FREE_SKILLS.includes(skillId) && aug(a, skillId, FREE_AUG[skillId]))
         (record3.free ??= {})[skillId] = FREE_TICKS;
     }
-    if (skillId === "lunge" && aug(a, "lunge", 3)) {
+    if (spender(a, skillId)) delete record3.cooldowns[skillId];
+    if (skillId === "lunge" && aug(a, "lunge", 3) && !spender(a, "lunge")) {
       if (record3.again) {
         record3.cooldowns.lunge = record3.again.cool;
         delete record3.again;
@@ -241004,14 +241008,14 @@ function createSkillWheelV1({
   const local8 = (m) => m.playersById[m.localPlayerId];
   let arranging = false, draft = null, picked = null;
   const entries = (m) => arranging && draft ? draft : wheelEntriesV1(local8(m));
-  const costFor = (heroClass, skillId, ranks) => CLASS_FINISHERS[heroClass?.id]?.includes(skillId) || heroClass && PAID_SKILLS.includes(skillId) ? pipCostFor(skillId, ranks) : 0, affords = (c, heroClass, skillId, ranks) => {
-    const cost = costFor(heroClass, skillId, ranks);
+  const costFor = (heroClass, skillId, ranks, d8) => CLASS_FINISHERS[heroClass?.id]?.includes(skillId) || heroClass && PAID_SKILLS.includes(skillId) ? pipCostFor(skillId, ranks) : heroClass && spendsPips(d8, skillId) ? PIP_SPENDER_MIN : 0, affords = (c, heroClass, skillId, ranks, d8) => {
+    const cost = costFor(heroClass, skillId, ranks, d8);
     return !cost || Boolean(c?.skills?.free?.[skillId]) || (c?.skills?.pips?.n ?? 0) >= cost;
   };
   function ready(m, skillId) {
     const p = local8(m), c = m.subweapon, heroClass = heroClassOf(p?.d8);
     return Boolean(
-      CLASS_SKILLS[skillId] && heroClass && c && !c.suppressed && m.entitiesById[p.entityId]?.alive && p.stats.subType === heroClass.offhand && !c.skills?.cooldowns?.[skillId] && affords(c, heroClass, skillId, p?.d8?.classRanks) && !c.skills?.flurry && m.persistence.phase === "encounter"
+      CLASS_SKILLS[skillId] && heroClass && c && !c.suppressed && m.entitiesById[p.entityId]?.alive && p.stats.subType === heroClass.offhand && !c.skills?.cooldowns?.[skillId] && affords(c, heroClass, skillId, p?.d8?.classRanks, p?.d8) && !c.skills?.flurry && m.persistence.phase === "encounter"
     );
   }
   let pending = null;
@@ -249057,6 +249061,8 @@ function createClassSkillsViewV1({ document: document2, send }) {
       row2.disabled = !ready || !offer.ok && !on;
       const text3 = el3("span");
       text3.append(el3("b", "", a.name), document2.createTextNode(a.description));
+      if (i === PIP_SPEND_AUGMENT)
+        text3.append(document2.createTextNode(` No cooldown: needs at least 1 ${PIP_NAMES[s.classId]}.`));
       const rarity = augmentRarity(id2, i), owned2 = ownsAugment(d, id2, i);
       row2.style.setProperty("--r", AUGMENT_RARITY_COLORS[rarity] ?? "#56636f");
       row2.dataset.rarity = rarity ?? "";
