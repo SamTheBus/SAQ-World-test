@@ -50527,10 +50527,18 @@ var COMPLETED_COMBAT_WINDOW = 16;
 var same24 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var deepFrozen = (v) => v === null || typeof v !== "object" || Object.isFrozen(v) && Object.values(v).every(deepFrozen);
 var checkedProfiles = /* @__PURE__ */ new WeakSet();
+var passedText = /* @__PURE__ */ new WeakMap();
 var supportedProfile = (profile2) => {
   if (checkedProfiles.has(profile2)) return true;
+  const mutable = profile2 !== null && typeof profile2 === "object";
+  let text = null;
+  if (mutable) {
+    text = JSON.stringify(profile2);
+    if (passedText.get(profile2) === text) return true;
+  }
   if (!same24(profile2, SHIELD_SWORD_PRIMARY)) return false;
   if (deepFrozen(profile2)) checkedProfiles.add(profile2);
+  else if (mutable) passedText.set(profile2, text);
   return true;
 };
 function validatePrimaryAim(aim) {

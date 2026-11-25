@@ -1691,7 +1691,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-KO7IQ3CF.js";
+} from "./chunk-MGTBMCE4.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -152214,19 +152214,19 @@ function createEncounterRenewal(s, m, onRenew) {
   const near5 = (g2, a, r) => a.residency.spaceInstanceId === g2.spaceInstanceId && (g2.siteId !== null || !inSettlement(s, m, a)) && (g2.siteId !== null || defs.get(g2.groupId).members.some((member) => Math.hypot(a.position.x - member.position.x, a.position.y - member.position.y) <= r));
   function tick() {
     const econ = s.encounterEconomy, actors2 = Object.values(s.playersById).map((p) => s.entitiesById[p.entityId]);
-    for (const g2 of Object.values(s.groupsById)) {
+    let siteGroupIds = null;
+    for (const groupId in s.groupsById) {
+      const g2 = s.groupsById[groupId];
+      if (!g2 || !g2.cleared) continue;
       const e = econ.groups[g2.groupId];
-      if (!g2.cleared) continue;
       if (e.clearedTick === null) {
         e.clearedTick = s.tick;
         ensurePersonalFinaleClaimsD13D_G1(s, g2.groupId);
         noteAreaBossV1(s, g2.groupId);
       }
       const occupied = actors2.some((a) => near5(g2, a, ORDINARY_ACTIVITY_RADII.leaveRadius));
-      if (Object.values(s.d9World?.functionalSitesById ?? {}).some(
-        (site) => functionalSiteGroupsD12(site).includes(g2.groupId)
-      ))
-        continue;
+      siteGroupIds ??= new Set(Object.values(s.d9World?.functionalSitesById ?? {}).flatMap(functionalSiteGroupsD12));
+      if (siteGroupIds.has(g2.groupId)) continue;
       const procedural = s.d9World?.episodes[g2.groupId];
       if (procedural && !procedural.origin) {
         procedural.clearedTick = e.clearedTick;
@@ -159111,6 +159111,10 @@ function createSpatialIndex(cellSize = 256) {
     keysById.delete(id2);
   }
   function insert(id2, instance, points2) {
+    if (points2.length === 1) {
+      const k = key4(instance, Math.floor(points2[0].x / cellSize), Math.floor(points2[0].y / cellSize)), had = keysById.get(id2);
+      if (had && had.size === 1 && had.has(k)) return;
+    }
     remove(id2);
     const keys2 = new Set(points2.map((p) => key4(instance, Math.floor(p.x / cellSize), Math.floor(p.y / cellSize))));
     for (const k of keys2) {
@@ -171535,7 +171539,8 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     return activeIds;
   }
   function refreshSpatial() {
-    for (const id2 of spatialIds) spatial.remove(id2);
+    const now3 = new Set(activeIds);
+    for (const id2 of spatialIds) if (!now3.has(id2)) spatial.remove(id2);
     spatialIds = activeIds.slice();
     for (const id2 of activeIds) {
       const a = state2.entitiesById[id2];
@@ -175967,10 +175972,11 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
   let safeRegions = null;
   const playerViews = /* @__PURE__ */ new Map(), creatureFacingViews = /* @__PURE__ */ new Map(), fairRatios = /* @__PURE__ */ new Map();
   let eventKey = null, eventView = null;
+  const eventCopies = /* @__PURE__ */ new WeakMap();
   const SITE_TRUTH_REFRESH_TICKS = 15;
   let siteTruthState = null, siteTruthKey = null, siteTruthTick = -Infinity, siteTruthView = null;
-  const SLOW_REFRESH_TICKS = 15;
-  let slowViewKey = null, slowViewState = null, slowView = /* @__PURE__ */ new Map();
+  const SLOW_REFRESH_TICKS = 15, STEADY_REFRESH_TICKS = 60;
+  let slowViewKey = null, slowViewState = null, slowView = /* @__PURE__ */ new Map(), steadyViewKey = null, steadyViewState = null, steadyView = /* @__PURE__ */ new Map();
   function getReadModel() {
     return authority.withAuthority(
       (engine) => engine.withAuthorityState((state2) => {
@@ -175989,6 +175995,16 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           const slowCached = (name, fn) => {
             if (!slowView.has(name)) slowView.set(name, fn());
             return slowView.get(name);
+          };
+          const steadyKey = `${ctx.spaceInstanceId}/${state2.d9World?.runtime.revision ?? 0}/${state2.d9World?.navigation.revision ?? 0}/${Math.floor(state2.tick / STEADY_REFRESH_TICKS)}`;
+          if (steadyKey !== steadyViewKey || state2 !== steadyViewState) {
+            steadyView = /* @__PURE__ */ new Map();
+            steadyViewKey = steadyKey;
+            steadyViewState = state2;
+          }
+          const steadyCached = (name, fn) => {
+            if (!steadyView.has(name)) steadyView.set(name, fn());
+            return steadyView.get(name);
           };
           const siteDoorOpen = (payload) => slowCached(
             "site-door:" + payload.siteId + "/" + payload.direction + "/" + (payload.transitionId ?? payload.extractionId ?? "") + "/" + (state2.primary.actorsById[local8.entityId]?.current ? 1 : 0),
@@ -176466,10 +176482,17 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                 }
               } : e;
             };
-            eventView = freezeWire(
+            const eventCopy = (e) => {
+              const fair = fairEvent(e);
+              if (fair !== e) return freezeWire(fair);
+              let copy4 = eventCopies.get(e);
+              if (!copy4) eventCopies.set(e, copy4 = freezeWire(e));
+              return copy4;
+            };
+            eventView = Object.freeze(
               history.filter(
                 (e) => e.spaceInstanceId === ctx.spaceInstanceId && (entitiesById[e.source.entityId] || entitiesById[e.subject.entityId])
-              ).map(fairEvent)
+              ).map(eventCopy)
             );
             eventKey = nextEventKey;
           }
@@ -176681,7 +176704,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
               root: state2.d9World.discoveryIndex,
               // The map's site tables change rarely: made a few times a second with the other slow views,
               // not for every screen view (a row per site, about 50 MB every 40 s standing still).
-              boundSitesById: slowCached(
+              boundSitesById: steadyCached(
                 "nav.bound",
                 () => freezeProjection(
                   Object.fromEntries(
@@ -176696,7 +176719,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
                   )
                 )
               ),
-              navigableSitesById: slowCached(
+              navigableSitesById: steadyCached(
                 "nav.navigable",
                 () => freezeProjection(
                   Object.fromEntries(
