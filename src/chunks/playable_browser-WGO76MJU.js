@@ -335897,6 +335897,289 @@ function croakmawName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var LCH = LEECH_PAL;
+var LCH_SILT = "#1c1a10";
+var LCH_SILTL = "#2c2a18";
+var lchEase = (x) => x * x * (3 - 2 * x);
+var lchClamp = (x) => Math.max(0, Math.min(1, x));
+function lchBeat(t, low, impact3) {
+  const T121 = low ? 2.7 : 5.4, s = t % T121 * (5.4 / T121);
+  const b = { s, rear: 0, lunge: 0, gape: 0, blood: 0, slump: 0, drink: -1, bite: 0 };
+  if (s >= 0.6 && s < 1.6) {
+    const q2 = lchEase((s - 0.6) / 1);
+    b.rear = q2;
+    b.gape = q2 * 0.35;
+  } else if (s >= 1.6 && s < 1.75) {
+    const q2 = (s - 1.6) / 0.15;
+    b.rear = 1 - q2 * 0.6;
+    b.lunge = lchEase(q2);
+    b.gape = 0.35 + q2 * 0.65;
+  } else if (s >= 1.75 && s < 3.75) {
+    const a = s - 1.75;
+    b.rear = 0.4;
+    b.lunge = 1 - lchEase(lchClamp((a - 1.7) / 0.3)) * 0.3;
+    b.bite = Math.max(0, 1 - a % 0.5 / 0.18);
+    b.gape = 0.6 + b.bite * 0.4;
+    b.blood = lchEase(lchClamp(a / 1.4));
+    b.drink = a;
+  } else if (s >= 3.75 && s < 4.95) {
+    const q2 = (s - 3.75) / 1.2;
+    b.slump = q2 < 0.2 ? lchEase(q2 / 0.2) : 1 - lchEase(lchClamp((q2 - 0.6) / 0.4));
+    b.blood = 1 - lchEase(q2);
+    b.lunge = 0.7 * (1 - lchEase(lchClamp(q2 / 0.3)));
+    b.rear = 0.4 * (1 - lchEase(lchClamp(q2 / 0.3)));
+  }
+  if (low) b.blood = Math.max(b.blood, 0.3);
+  if (impact3 > 0) {
+    b.gape = Math.min(b.gape, 0.3);
+    b.bite = 0;
+  }
+  return b;
+}
+var lchMix = (a, b, t) => {
+  const A2 = parseInt(a.slice(1), 16), B9 = parseInt(b.slice(1), 16), ch = (n) => Math.round((A2 >> n & 255) + ((B9 >> n & 255) - (A2 >> n & 255)) * t);
+  return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+};
+function lchHead(e, x, y, h, b, t) {
+  const back = lchMix(LCH.back, "#7a2a30", b.blood * 0.55), belly = lchMix(LCH.belly, LCH.bloodL, b.blood * 0.7), sway = Math.sin(t * 2.2) * 0.6 * (1 - b.lunge), hx2 = x - 7 - b.lunge * 7 + b.slump * 2, hy = y + h / 2 - b.rear * 7 + b.slump * 1.5 + sway, w0 = h + 1.6, w1 = h - 1.2 - b.lunge * 1.2;
+  const ang = Math.atan2(hy - (y + h / 2), hx2 - x);
+  const nx = Math.sin(ang), ny = -Math.cos(ang);
+  const neck = () => {
+    e.beginPath();
+    const mx = (x + 4 + hx2) / 2, my = (y + h / 2 + hy) / 2, wm = (w0 + w1) / 2;
+    e.moveTo(x + 4, y - 0.8);
+    e.quadraticCurveTo(mx - nx * wm / 2 + 1, my - ny * wm / 2, hx2 - nx * w1 / 2, hy - ny * w1 / 2);
+    e.arc(hx2, hy, w1 / 2, ang + Math.PI / 2, ang - Math.PI / 2, true);
+    e.quadraticCurveTo(mx + nx * wm / 2 + 1, my + ny * wm / 2, x + 4, y + h + 0.8);
+    e.closePath();
+  };
+  neck();
+  e.fillStyle = back;
+  e.fill();
+  e.save();
+  neck();
+  e.clip();
+  e.fillStyle = belly;
+  e.beginPath();
+  e.moveTo(x + 4, y + h * 0.7);
+  e.quadraticCurveTo(x - 2, y + h * 0.75, hx2 + nx * w1 * 0.2, hy + ny * w1 * 0.2);
+  e.lineTo(hx2 + nx * w1, hy + ny * w1);
+  e.lineTo(x + 4, y + h + 2);
+  e.closePath();
+  e.fill();
+  e.strokeStyle = LCH.stripe;
+  e.lineWidth = 0.9;
+  e.beginPath();
+  e.moveTo(x + 4, y + h * 0.3);
+  e.quadraticCurveTo(x - 2, y + h * 0.3, hx2 - nx * w1 * 0.1, hy - ny * w1 * 0.1);
+  e.stroke();
+  e.strokeStyle = LCH.backD;
+  e.lineWidth = 0.6;
+  e.globalAlpha = 0.45;
+  for (let k = 1; k < 5; k++) {
+    const u = k / 5, cx = x + 4 + (hx2 - x - 4) * u, cy2 = y + h / 2 + (hy - y - h / 2) * u, ww = (w0 + (w1 - w0) * u) / 2;
+    e.beginPath();
+    e.moveTo(cx - nx * ww, cy2 - ny * ww);
+    e.lineTo(cx + nx * ww, cy2 + ny * ww);
+    e.stroke();
+  }
+  e.globalAlpha = 1;
+  e.restore();
+  neck();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 1.1;
+  e.stroke();
+  for (let k = 0; k < 4; k++) {
+    const u = 0.68 + (k >> 1) * 0.12, cx = x + 4 + (hx2 - x - 4) * u, cy2 = y + h / 2 + (hy - y - h / 2) * u, o = -1.4 + k % 2 * 0.9;
+    dot17(e, cx + nx * o, cy2 + ny * o, 0.55, LCH.spot);
+  }
+  const g2 = lchClamp(b.gape), ry = w1 * 0.5 + g2 * 2.4;
+  e.save();
+  e.translate(hx2 + Math.cos(ang) * (w1 / 2 - 0.6), hy + Math.sin(ang) * (w1 / 2 - 0.6));
+  e.rotate(ang);
+  ell6(e, 0, 0, 1.8 + g2 * 0.6, ry, LCH.sucker, true, 0.9);
+  ell6(e, 0.4, 0, 1.1 + g2 * 0.4, ry * 0.72, g2 > 0.15 ? LCH.mouth : LCH.suckerD, false);
+  if (g2 > 0.15) {
+    const R18 = ry * 0.62;
+    e.fillStyle = LCH.teeth;
+    e.strokeStyle = EDGE5;
+    e.lineWidth = 0.4;
+    for (let j = 0; j < 3; j++) {
+      const a = -Math.PI / 2 + j * TAU258 / 3;
+      e.save();
+      e.translate(0.5, 0);
+      e.scale(0.45, 1);
+      e.beginPath();
+      e.moveTo(Math.cos(a) * R18, Math.sin(a) * R18);
+      e.lineTo(Math.cos(a + 0.34) * R18 * 0.25, Math.sin(a + 0.34) * R18 * 0.25);
+      e.lineTo(Math.cos(a - 0.34) * R18 * 0.25, Math.sin(a - 0.34) * R18 * 0.25);
+      e.closePath();
+      e.fill();
+      e.stroke();
+      e.restore();
+    }
+  }
+  e.restore();
+  if (b.bite > 0.3) {
+    e.globalAlpha = b.bite;
+    for (let j = 0; j < 3; j++) dot17(e, hx2 - 2.5 - j * 1.6, hy - 2 + j * 1.8, 0.8, LCH.bloodL);
+    e.globalAlpha = 1;
+  }
+}
+function lchTail(e, x, y, h, t) {
+  const p = 1 + Math.sin(t * 1.6) * 0.04;
+  ell6(e, x + 1.5, y + h / 2, 3.4 * p, (h / 2 + 3.2) * p, LCH.sucker, true, 1);
+  ell6(e, x + 2.2, y + h / 2, 2, (h / 2 + 1.2) * p, LCH.suckerD, false);
+  ell6(e, x + 0.9, y + h / 2 - 2.6, 0.9, 1.6, LCH.suckerL, false);
+}
+var LCH_SPOTS = Array.from({ length: 22 }, (_, k) => (k + 0.5) / 22);
+var GORGELEECH_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: ["#ffd6dc", "#e0566a", "#a8243a"],
+  under(e, o, t, i, a, l) {
+    lchTail(e, o + i, t, a, l);
+  },
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, [LCH.suckerL, LCH.sucker, LCH.suckerD]);
+    e.fill();
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    pill(e, o, t, i, a);
+    e.fillStyle = LCH_SILT;
+    e.fill();
+    e.save();
+    e.clip();
+    e.fillStyle = LCH_SILTL;
+    e.fillRect(o, t, i, a * 0.3);
+    const r = seeded2(23);
+    for (let x = o + 3; x < o + i; x += 4 + r() * 7) dot17(e, x, t + a * (0.45 + r() * 0.4), 0.5, "#3a3620");
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    const low = i / n < 0.5, b = lchBeat(l, low, 0), back = lchMix(LCH.back, "#7a2a30", b.blood * 0.55), backL = lchMix(LCH.backL, "#b0505a", b.blood * 0.5), belly = lchMix(LCH.belly, LCH.bloodL, b.blood * 0.7);
+    e.fillStyle = back;
+    e.fillRect(o, t, i, a);
+    e.fillStyle = backL;
+    e.fillRect(o, t + 0.4, i, a * 0.2);
+    e.fillStyle = LCH.backD;
+    e.fillRect(o, t + a * 0.56, i, a * 0.14);
+    e.fillStyle = belly;
+    e.fillRect(o, t + a * 0.7, i, a * 0.3);
+    e.fillStyle = LCH.stripe;
+    e.fillRect(o, t + a * 0.2, i, 1.1);
+    e.fillRect(o, t + a * 0.46, i, 1.1);
+    e.fillStyle = LCH.spot;
+    for (const f of LCH_SPOTS) {
+      const x = o + f * n;
+      if (x > o + i - 1) continue;
+      e.beginPath();
+      e.ellipse(x, t + a * 0.36, 1.2, 0.7, 0, 0, TAU258);
+      e.fill();
+    }
+    e.strokeStyle = LCH.backD;
+    e.lineWidth = 0.5;
+    e.globalAlpha = 0.3;
+    const off = l * 1.2 % 4;
+    e.beginPath();
+    for (let x = o + off; x < o + i; x += 4) {
+      e.moveTo(x, t);
+      e.lineTo(x, t + a * 0.7);
+    }
+    e.stroke();
+    e.globalAlpha = 1;
+    if (b.drink >= 0)
+      for (let k = 0; k < 4; k++) {
+        const g2 = b.drink - k * 0.5;
+        if (g2 < 0) continue;
+        const x = o + g2 * 120;
+        if (x > o + i) continue;
+        e.fillStyle = "rgba(224,86,106,.55)";
+        e.beginPath();
+        e.ellipse(x, t + a / 2, 3.2, a / 2, 0, 0, TAU258);
+        e.fill();
+      }
+    e.fillStyle = LCH.gloss;
+    for (let x = o + 3; x < o + i - 3; x += 14) e.fillRect(x, t + 0.6, 5, 0.7);
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 4; n++) {
+      const r = (l * 0.9 + n / 4) % 1;
+      e.globalAlpha = 1 - r;
+      dot17(e, o + i * (0.15 + n * 0.23), t + a - 1 + r * 4, 0.9, LCH.blood);
+    }
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a) {
+    e.fillStyle = LCH.backD;
+    e.beginPath();
+    e.arc(o - 0.5, t + i / 2, i / 2, -Math.PI / 2, Math.PI / 2);
+    e.fill();
+    dot17(e, o - 0.6, t + i * 0.3, 0.7 + a * 0.6, LCH.gloss);
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const low = n < 0.5, b = lchBeat(l, low, r), fx = o + i * n;
+    if (b.drink >= 0 && r <= 0)
+      for (let k = 0; k < 4; k++) {
+        const g2 = b.drink - k * 0.5;
+        if (g2 < 0) continue;
+        const x = o + g2 * 120;
+        if (x > fx - 3) continue;
+        e.strokeStyle = "rgba(23,12,7,.7)";
+        e.lineWidth = 0.8;
+        e.beginPath();
+        e.ellipse(x, t + a / 2, 3.6, a / 2 + 1.1, 0, Math.PI * 1.2, Math.PI * 1.8);
+        e.stroke();
+        e.beginPath();
+        e.ellipse(x, t + a / 2, 3.6, a / 2 + 1.1, 0, Math.PI * 0.2, Math.PI * 0.8);
+        e.stroke();
+      }
+    e.save();
+    e.translate(o + 3, t + a / 2);
+    e.scale(1.5, 1.5);
+    e.translate(-o - 3, -t - a / 2);
+    lchHead(e, o, t, a, b, l);
+    e.restore();
+    if (low)
+      for (let k = 0; k < 3; k++) {
+        const q2 = (l * 0.7 + k / 3) % 1, x = o + 12 + (k * 0.37 + 0.2) % 1 * Math.max(0, fx - o - 16);
+        e.globalAlpha = 1 - q2;
+        dot17(e, x, t + a + 1 + q2 * 5, 0.9, LCH.blood);
+      }
+    e.globalAlpha = 1;
+    if (r > 0) {
+      for (let k = 0; k < 7; k++) {
+        const d = 1 - r, sx = (k - 3) * 2.4 * (0.4 + d), vy = -4 + d * d * 14 + k % 2 * 2;
+        e.globalAlpha = r;
+        dot17(e, fx + sx, t + a / 2 + vy, 1.1, k % 3 ? LCH.bloodL : LCH.blood);
+      }
+      e.globalAlpha = 1;
+    }
+  }
+};
+function drawGorgeleechBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 18, y: y + NAME_GAP, w: w - 24, h: BAR_H }, i, GORGELEECH_BAR, a);
+  gorgeleechName(e, x + w / 2, y + 13, t.name);
+}
+function gorgeleechName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#1a0a08";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#fff0c8", "#ffc566", "#e58a2c"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -335911,7 +336194,8 @@ var LESSER_BARS = Object.freeze({
   spinegrove: Object.freeze({ draw: drawSpinegroveBar, side: 16 }),
   sirocco: Object.freeze({ draw: drawSiroccoBar, side: 16 }),
   mirelily: Object.freeze({ draw: drawMirelilyBar, side: 16 }),
-  croakmaw: Object.freeze({ draw: drawCroakmawBar, side: 16 })
+  croakmaw: Object.freeze({ draw: drawCroakmawBar, side: 16 }),
+  gorgeleech: Object.freeze({ draw: drawGorgeleechBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
