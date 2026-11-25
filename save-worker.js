@@ -29858,6 +29858,44 @@ var UNIQUE_ITEMS = freezeWire(
         "tropical",
         "A critical hit makes you hop up and belly-flop where you stand: enemies around you take {0} of your Attack, are pushed back, and a poison puddle slows them 30% for 3 s. Once every 6 s.",
         "One small hop for a frog."
+      ),
+      // Desert lesser bosses (Sammy 2026-11-24, set page MhQq68wV..., all three passes approved): one damage, one defensive
+      // and one utility item. Pitjaw's sand pit while you stand still, Spinegrove's needle husk, Sirocco's dust devil.
+      unique(
+        "pitjaw-mandibles",
+        "Pitjaw Mandibles",
+        "gloves",
+        null,
+        "Gloves",
+        null,
+        "pitjaw",
+        "desert",
+        "Stand still for 1 s and a sand pit opens around you. Enemies in it slide slowly toward you, and every 1.5 s antlion jaws snap shut on every enemy close to you for {0} of your Attack. Walking fills the pit back in.",
+        "You will find a new definition of pain."
+      ),
+      unique(
+        "spinegrove-mantle",
+        "Spinegrove Mantle",
+        "cape",
+        null,
+        "Mantle",
+        null,
+        "spinegrove",
+        "desert",
+        "A husk of cactus needles covers you and soaks up damage worth {0} of your max Health. When it breaks, it bursts into 8 needle lines that hit enemies for 60% of your Attack. It grows back 10 s after it breaks.",
+        "Can\u2019t touch this."
+      ),
+      unique(
+        "sirocco-striders",
+        "Sirocco Striders",
+        "boots",
+        null,
+        "Treads",
+        null,
+        "sirocco",
+        "desert",
+        "Every 8 s, when enemies are near, a dust devil spins off your heels and drifts to the biggest group close by. For {0} it drags them into one tight clump and slows them 50%. It does no damage.",
+        "Gone with the wind."
       )
     ].map((u) => [u.id, u])
   )
@@ -30253,6 +30291,22 @@ var UNIQUE_TIERS = freezeWire({
     lines: ["critChance", "atkPct", "lifeHit", "maxHpPct", "defPct"],
     stars: [150, 190, 230, 290],
     unit: "pct"
+  },
+  // Desert lesser bosses (v3 lines below; these five are the v2 fallback).
+  "pitjaw-mandibles": {
+    lines: ["atkPct", "critChance", "lifeHit", "maxHpPct", "eliteDmg"],
+    stars: [140, 175, 210, 260],
+    unit: "pct"
+  },
+  "spinegrove-mantle": {
+    lines: ["maxHpPct", "defPct", "lifeHit", "cdr", "atkPct"],
+    stars: [12, 15, 18, 22],
+    unit: "pct"
+  },
+  "sirocco-striders": {
+    lines: ["moveSpeed", "maxHpPct", "defPct", "cdr", "atkPct"],
+    stars: [150, 180, 210, 240],
+    unit: "ticks"
   }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
@@ -30683,6 +30737,21 @@ var UNIQUE_LINES_V3 = freezeWire({
   "gulpjaw-hood": {
     always: "critChance",
     pool: ["atkPct", "lifeHit", "maxHpPct", "defPct", "areaDmg", "ailingDmg", "mainAttr"],
+    leg: []
+  },
+  "pitjaw-mandibles": {
+    always: "atkPct",
+    pool: ["critChance", "lifeHit", "maxHpPct", "areaDmg", "closeDmg", "eliteDmg", "mainAttr"],
+    leg: []
+  },
+  "spinegrove-mantle": {
+    always: "maxHpPct",
+    pool: ["defPct", "lifeHit", "cdr", "eliteDr", "areaDr", "counterDmg", "mainAttr"],
+    leg: []
+  },
+  "sirocco-striders": {
+    always: "moveSpeed",
+    pool: ["maxHpPct", "defPct", "cdr", "lifeHit", "areaDmg", "controlDur", "mainAttr"],
     leg: []
   }
 });
@@ -50252,6 +50321,16 @@ var SN_END = 198;
 var SN_MAX = 2;
 var GJ_END = 198;
 var GJ_EVERY = 360;
+var PM_STILL = 60;
+var PM_FIRST = 30;
+var PM_EVERY = 90;
+var PM_FILL = 20;
+var SG_REGROW = 600;
+var SG_SHOW = 40;
+var SR_EVERY = 480;
+var SR_ARRIVE = 34;
+var SR_FADE = 20;
+var SR_HOLD_MAX = 240;
 var RS_CURL = 120;
 var RS_POP = 26;
 var FR_LIFE = 240;
@@ -50324,6 +50403,13 @@ var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" }
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
 var LIVE = [
+  "pmStill",
+  "pmPit",
+  "pmFill",
+  "sgHusk",
+  "sgBurst",
+  "srCd",
+  "srDevil",
   "wcCd",
   "wcBurst",
   "snSprouts",
@@ -51643,6 +51729,32 @@ function validateClassSkillState(s, combat, actor) {
       requireContract(pos2(k.gjFlop), "Invalid belly flop");
       safeInteger(k.gjFlop.age, 0, GJ_END - 1);
     }
+    if (k.pmStill !== void 0) safeInteger(k.pmStill, 1, PM_STILL);
+    for (const [key9, top] of [
+      ["pmPit", PM_FIRST + PM_EVERY - 1],
+      ["pmFill", PM_FILL - 1],
+      ["sgBurst", SG_SHOW - 1]
+    ])
+      if (k[key9] !== void 0) {
+        closedRecord(k[key9], ["x", "y", "age"]);
+        requireContract(pos2(k[key9]), "Invalid " + key9);
+        safeInteger(k[key9].age, 0, top);
+      }
+    if (k.sgHusk !== void 0) {
+      const h = k.sgHusk;
+      closedRecord(h, [], ["hp", "ticks"]);
+      requireContract(h.hp === void 0 !== (h.ticks === void 0), "Invalid husk");
+      if (h.ticks !== void 0) safeInteger(h.ticks, 1, SG_REGROW);
+      else requireContract(typeof h.hp === "string" && /^[1-9][0-9]{0,29}$/.test(h.hp), "Invalid husk");
+    }
+    if (k.srCd !== void 0) safeInteger(k.srCd, 1, SR_EVERY);
+    if (k.srDevil !== void 0) {
+      const d = k.srDevil;
+      closedRecord(d, ["fx", "fy", "x", "y", "hold", "age"]);
+      requireContract(pos2(d) && Number.isFinite(d.fx) && Number.isFinite(d.fy), "Invalid dust devil");
+      safeInteger(d.hold, 1, SR_HOLD_MAX);
+      safeInteger(d.age, 0, SR_ARRIVE + d.hold + SR_FADE - 1);
+    }
     if (k.swStone !== void 0) {
       closedRecord(k.swStone, ["x", "y", "age"]);
       requireContract(pos2(k.swStone), "Invalid stone skin");
@@ -51933,6 +52045,8 @@ var TREE_STATUSES = Object.freeze({
   struck: [3, 600],
   hinder: [6, 180],
   rime: [1, 240],
+  // The Sirocco Striders' dust devil: 50% slower while it holds you.
+  dust: [1, 240],
   // Rattled (Knight passive): a stunned enemy hits softer for 4 seconds after it wakes.
   rattled: [5, 330]
 });

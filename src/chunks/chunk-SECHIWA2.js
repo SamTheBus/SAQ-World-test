@@ -7272,6 +7272,44 @@ var UNIQUE_ITEMS = freezeWire(
         "tropical",
         "A critical hit makes you hop up and belly-flop where you stand: enemies around you take {0} of your Attack, are pushed back, and a poison puddle slows them 30% for 3 s. Once every 6 s.",
         "One small hop for a frog."
+      ),
+      // Desert lesser bosses (Sammy 2026-11-24, set page MhQq68wV..., all three passes approved): one damage, one defensive
+      // and one utility item. Pitjaw's sand pit while you stand still, Spinegrove's needle husk, Sirocco's dust devil.
+      unique(
+        "pitjaw-mandibles",
+        "Pitjaw Mandibles",
+        "gloves",
+        null,
+        "Gloves",
+        null,
+        "pitjaw",
+        "desert",
+        "Stand still for 1 s and a sand pit opens around you. Enemies in it slide slowly toward you, and every 1.5 s antlion jaws snap shut on every enemy close to you for {0} of your Attack. Walking fills the pit back in.",
+        "You will find a new definition of pain."
+      ),
+      unique(
+        "spinegrove-mantle",
+        "Spinegrove Mantle",
+        "cape",
+        null,
+        "Mantle",
+        null,
+        "spinegrove",
+        "desert",
+        "A husk of cactus needles covers you and soaks up damage worth {0} of your max Health. When it breaks, it bursts into 8 needle lines that hit enemies for 60% of your Attack. It grows back 10 s after it breaks.",
+        "Can\u2019t touch this."
+      ),
+      unique(
+        "sirocco-striders",
+        "Sirocco Striders",
+        "boots",
+        null,
+        "Treads",
+        null,
+        "sirocco",
+        "desert",
+        "Every 8 s, when enemies are near, a dust devil spins off your heels and drifts to the biggest group close by. For {0} it drags them into one tight clump and slows them 50%. It does no damage.",
+        "Gone with the wind."
       )
     ].map((u) => [u.id, u])
   )
@@ -7667,6 +7705,22 @@ var UNIQUE_TIERS = freezeWire({
     lines: ["critChance", "atkPct", "lifeHit", "maxHpPct", "defPct"],
     stars: [150, 190, 230, 290],
     unit: "pct"
+  },
+  // Desert lesser bosses (v3 lines below; these five are the v2 fallback).
+  "pitjaw-mandibles": {
+    lines: ["atkPct", "critChance", "lifeHit", "maxHpPct", "eliteDmg"],
+    stars: [140, 175, 210, 260],
+    unit: "pct"
+  },
+  "spinegrove-mantle": {
+    lines: ["maxHpPct", "defPct", "lifeHit", "cdr", "atkPct"],
+    stars: [12, 15, 18, 22],
+    unit: "pct"
+  },
+  "sirocco-striders": {
+    lines: ["moveSpeed", "maxHpPct", "defPct", "cdr", "atkPct"],
+    stars: [150, 180, 210, 240],
+    unit: "ticks"
   }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
@@ -8097,6 +8151,21 @@ var UNIQUE_LINES_V3 = freezeWire({
   "gulpjaw-hood": {
     always: "critChance",
     pool: ["atkPct", "lifeHit", "maxHpPct", "defPct", "areaDmg", "ailingDmg", "mainAttr"],
+    leg: []
+  },
+  "pitjaw-mandibles": {
+    always: "atkPct",
+    pool: ["critChance", "lifeHit", "maxHpPct", "areaDmg", "closeDmg", "eliteDmg", "mainAttr"],
+    leg: []
+  },
+  "spinegrove-mantle": {
+    always: "maxHpPct",
+    pool: ["defPct", "lifeHit", "cdr", "eliteDr", "areaDr", "counterDmg", "mainAttr"],
+    leg: []
+  },
+  "sirocco-striders": {
+    always: "moveSpeed",
+    pool: ["maxHpPct", "defPct", "cdr", "lifeHit", "areaDmg", "controlDur", "mainAttr"],
     leg: []
   }
 });
