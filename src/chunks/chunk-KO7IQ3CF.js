@@ -7348,6 +7348,44 @@ var UNIQUE_ITEMS = freezeWire(
         "wetland",
         "When you dash, a leech latches onto the nearest enemy within 4 tiles. Every half second it drinks and heals you {0} of your max Health. When that enemy dies it jumps to the next one close by; it drops off after 6 s. Once every 6 s.",
         "I vant to suck your blood."
+      ),
+      // Upland lesser bosses (Sammy 2026-11-25, all three passes approved): always-on toughness, not procs. Ironhorn's Defense
+      // that hardens as you are hit, Stormtalon's dodge on shots, Cairnwarden's max Health and its three orbiting stones.
+      unique(
+        "ironhorn-carapace",
+        "Ironhorn Carapace",
+        "overall",
+        null,
+        "Carapace",
+        null,
+        "ironhorn",
+        "upland",
+        "You have {0} more Defense. Each hit you take hardens the shell for 4% more Defense for 4 s, stacking up to 5 times.",
+        "I\u2019m the Juggernaut!"
+      ),
+      unique(
+        "stormtalon-mantle",
+        "Stormtalon Mantle",
+        "cape",
+        null,
+        "Mantle",
+        null,
+        "stormtalon",
+        "upland",
+        "You have a {0} chance to dodge an enemy\u2019s ranged attack completely. You take 20% less damage from ground warnings.",
+        "Fly, you fools!"
+      ),
+      unique(
+        "cairnwarden-grips",
+        "Cairnwarden Grips",
+        "gloves",
+        null,
+        "Gloves",
+        null,
+        "cairnwarden",
+        "upland",
+        "You have {0} more max Health. Three stones orbit you, each adding 3% more max Health while it is up. A hit worth more than 10% of your max Health knocks one loose; it grows back after 8 s.",
+        "Sticks and stones."
       )
     ].map((u) => [u.id, u])
   )
@@ -7775,6 +7813,22 @@ var UNIQUE_TIERS = freezeWire({
     lines: ["lifeHit", "maxHpPct", "moveSpeed", "cdr", "atkPct"],
     stars: [15, 20, 25, 30],
     unit: "permille"
+  },
+  // Upland lesser bosses (v3 lines below; these five are the v2 fallback).
+  "ironhorn-carapace": {
+    lines: ["maxHpPct", "defPct", "lifeHit", "eliteDr", "atkPct"],
+    stars: [15, 20, 25, 30],
+    unit: "pct"
+  },
+  "stormtalon-mantle": {
+    lines: ["moveSpeed", "maxHpPct", "defPct", "cdr", "atkPct"],
+    stars: [15, 20, 25, 30],
+    unit: "pct"
+  },
+  "cairnwarden-grips": {
+    lines: ["defPct", "maxHpPct", "lifeHit", "eliteDr", "atkPct"],
+    stars: [10, 13, 16, 20],
+    unit: "pct"
   }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
@@ -8235,6 +8289,21 @@ var UNIQUE_LINES_V3 = freezeWire({
   "gorgeleech-coil": {
     always: "lifeHit",
     pool: ["maxHpPct", "defPct", "moveSpeed", "cdr", "eliteDr", "critChance", "mainAttr"],
+    leg: []
+  },
+  "ironhorn-carapace": {
+    always: "maxHpPct",
+    pool: ["defPct", "lifeHit", "eliteDr", "areaDr", "counterDmg", "closeDmg", "mainAttr"],
+    leg: []
+  },
+  "stormtalon-mantle": {
+    always: "moveSpeed",
+    pool: ["maxHpPct", "defPct", "areaDr", "cdr", "eliteDr", "critChance", "mainAttr"],
+    leg: []
+  },
+  "cairnwarden-grips": {
+    always: "defPct",
+    pool: ["maxHpPct", "lifeHit", "eliteDr", "areaDr", "cdr", "closeDmg", "mainAttr"],
     leg: []
   }
 });
@@ -41774,6 +41843,2387 @@ var ACTIVE_NODES = Object.freeze(
   )
 );
 
+// src/shared/contracts/class_skills_v1.js
+var FLURRY_CUTS = 3;
+var FLURRY_GAP_TICKS = 7;
+var SKILL_LAST_TICKS = 45;
+var PARRY_WINDOW_TICKS = 180;
+var COUNTER_WINDOW_TICKS = 120;
+var COUNTER_WINDOW_MAX = 240;
+var SURGE_TICKS = 180;
+var BULWARK_TICKS = 240;
+var EN_GARDE_TICKS = 300;
+var CHARGE_TICKS = 180;
+var ORB_TICKS = 240;
+var ORB_ZAP_TICKS = 30;
+var MAX_ORBS = 2;
+var RUSH_TICKS = 180;
+var HIT_AND_RUN_TICKS = 180;
+var TRAIL_TICKS = 120;
+var TRAIL_PULSE_TICKS = 30;
+var RAM_TICKS = 32;
+var THROW_TICKS = 150;
+var BANNER_TICKS = 600;
+var BANNER_MAX = 900;
+var STILL_TICKS = 60;
+var MAX_THROW_TARGETS = 5;
+var RIPOSTE_TICKS = 90;
+var KEEN_TICKS = 300;
+var EVADE_TICKS = 180;
+var SMOKE_TICKS = 240;
+var SMOKE_MAX = 420;
+var WALL_TICKS = 300;
+var WALL_MAX = 480;
+var ICE_TICKS = 480;
+var FIELD_TICKS = 360;
+var FIELD_MAX = 540;
+var WEAVE_TICKS = 1200;
+var PULSE_TICKS = 60;
+var BREATH_REST_TICKS = 3600;
+var MEND_TICKS = 180;
+var REFILL_MAX = 150;
+var RIPOSTE_MAX = 180;
+var AFTERSHOCK_TICKS = 60;
+var FAULT_TICKS = 180;
+var HYMN_TICKS = 360;
+var FIRM_TICKS = 240;
+var JUGG_TICKS = 180;
+var AGAIN_TICKS = 120;
+var SPIN_TICKS = 36;
+var TORNADO_TICKS = 72;
+var CLOAK_TICKS = 60;
+var SEED_TICKS = 60;
+var RIME_TICKS = 240;
+var THUNDER_TICKS = 60;
+var LEAP_HEAVY_TICKS = 30;
+var TWIN_TICKS = 2;
+var MAX_SEEDS = 2;
+var MAX_THAW = 40;
+var MAX_COUNTERS = 2;
+var WAVE_TICKS = 20;
+var SHAKE_TICKS = 10;
+var STORM_TICKS = 120;
+var DUEL_TICKS = 300;
+var MAX_DUEL = 10;
+var PHOENIX_TICKS = 7200;
+var SHADE_TICKS = 20;
+var BLOOM_TICKS = 180;
+var MAX_BLOOMS = 4;
+var AEGIS_TICKS = 360;
+var LEAP_TICKS = 20;
+var TITAN_TICKS = 180;
+var SPITE_TICKS = 300;
+var MEMORY_TICKS = 360;
+var MEMORY_MAX = 600;
+var HELD_MAX = 24;
+var CUT_GAP_TICKS = 5;
+var MAX_CUTS = 16;
+var FLOWER_TICKS = 300;
+var ECHO_TICKS = 30;
+var STEPPED_TICKS = 180;
+var METEOR_FALL_TICKS = 60;
+var METEOR_FALL_MAX = 80;
+var METEOR_GROUND_TICKS = 240;
+var METEOR_GROUND_MAX = 420;
+var MAX_METEORS = 6;
+var CRACK_TICKS = 180;
+var CRACK_MAX = 240;
+var QUICK_TICKS = 180;
+var LONGER_COOLDOWN = Object.freeze([13, 10]);
+var SPELL_ELEMENTS = Object.freeze(["fire", "frost", "lightning"]);
+var POOL_TICKS = 180;
+var POOL_PULSE_TICKS = 30;
+var SHELL_TICKS = 600;
+var HIDE_TICKS = 300;
+var MAX_HIDE = 5;
+var POOL_MAX_TICKS = 240;
+var TRAIL_MAX_TICKS = 180;
+var SHELL_MAX_TICKS = 840;
+var SUN_MAX = 4;
+var SUNFALL_MAX_CASTS = 5;
+var SUN_BEAM_TICKS = 15;
+var STAFF_SUNS_TICKS = 40;
+var SUN_BEAM_REACH = 200;
+function sunBeamReach(since) {
+  const v = Math.max(0, Math.min(1, since / SUN_BEAM_TICKS));
+  return SUN_BEAM_REACH * (30 + 290 * (1 - Math.pow(1 - v, 1.5))) / 320;
+}
+var MOSS_TICKS = 600;
+var MIST_TICKS = 180;
+var VEIL_MAX_TICKS = 480;
+var GOLD_TICKS = 900;
+var BARK_MAX = 3;
+var BARK_SHOT_TICKS = 30;
+var BARK_REACH = 140;
+var ROOT_TICKS = 180;
+var ROOT_SLOW = 3;
+var ROOT_NEAR = 48;
+var SILK_EVERY = 4;
+var WEB_TICKS = 180;
+var WEB_HOLD = 33;
+var COCOON_EVERY = 360;
+var COCOON_TICKS = 90;
+var COCOON_ELITE_HOLD = 60;
+var COCOON_RADIUS = 56;
+var FURROW_TICKS = 120;
+var FURROW_REACH = 72;
+var FURROW_CONE = 0.9;
+var VENT_EVERY = 4;
+var VENT_TICKS = 60;
+var MAX_VENTS = 8;
+var VENT_ARM = 56;
+var VENT_HALF = 12;
+var CORE_TICKS = 180;
+var CORE_REACH = 150;
+var STRIP_TICKS = 120;
+var UQ_PULSE_TICKS = 30;
+var TREAD_EVERY = 240;
+var TREAD_RADIUS = 56;
+var TREAD_KNOCK = 20;
+var TREAD_ELITE_KNOCK = 8;
+var TREAD_WAIT = 40;
+var QUAKE_TICKS = 30;
+var CLEAVE_EVERY = 240;
+var CLEAVE_RADIUS = 64;
+var CLEAVE_SHOW = 90;
+var GRAVE_RADIUS = 56;
+var GRAVE_RISE = 30;
+var GRAVE_SINK = 24;
+var GRAVE_HOLD_MAX = 300;
+var GRAVE_HELD = 12;
+var GRAVE_HIT = 60;
+var SKULL_EVERY = 240;
+var SKULL_FLIGHT = 48;
+var SKULL_RADIUS = 48;
+var SKULL_SHOW = 44;
+var SHROUD_SINK = 72;
+var SHROUD_HEAL = 30;
+var SHROUD_BURST = 175;
+var SHROUD_RADIUS = 56;
+var SHROUD_SHOW = 44;
+var SHROUD_MAX = 18e3;
+var LODE_RADIUS = 64;
+var LODE_SHOWN = 12;
+var LODE_TICKS = 30;
+var OATH_EVERY = 180;
+var OATH_REACH = 150;
+var OATH_SPEED = 5;
+var OATH_HIT = 16;
+var OATH_MAX_HITS = 24;
+var OATH_TICKS = 120;
+var WARD_SHIELDS = 3;
+var WARD_LAST = 480;
+var WARD_RADIUS = 56;
+var WARD_HIT_TICKS = 30;
+var PLATE_BELOW = 40;
+var PLATE_TICKS = 240;
+var PLATE_EVERY = 1800;
+var PLATE_RADIUS = 56;
+var PLATE_KNOCK = 24;
+var PLATE_ELITE_KNOCK = 10;
+var SPORE_EVERY = 240;
+var SPORE_SLOW = 2;
+var SPORE_SHOW_TICKS = 36;
+var GAZECAP_MAX = 6;
+var GAZECAP_RADIUS = 40;
+var CAP_POP_TICKS = 36;
+var EYE_EVERY = 240;
+var EYE_TICKS = 105;
+var EYE_MAX_RAYS = 3;
+var EYE_RAYS = Object.freeze([30, 48, 66]);
+var EYE_REACH = 120;
+var CROWN_EVERY = 480;
+var CROWN_MARK_TICKS = 240;
+var CROWN_REACH = 160;
+var CROAK_EVERY = 4;
+var CROAK_REACH = 96;
+var CROAK_TICKS = 45;
+var CROAK_SHOVE = 13;
+var CROAK_ELITE_SHOVE = 6;
+var LASH_EVERY = 360;
+var LASH_REACH = 160;
+var LASH_REEL = 23;
+var LASH_HIT = 53;
+var LASH_TICKS = 84;
+var SPAWN_EVERY = 4;
+var HOPPER_MAX = 3;
+var EGG_LAND = 45;
+var EGG_HATCH = 75;
+var HOP_OUT = 93;
+var HOP_SPEED = 1.5;
+var HOP_REACH = 200;
+var HOP_SWELL = 15;
+var HOP_LIFE = 420;
+var HOP_POP_RADIUS = 28;
+var HOP_SLOW = 6;
+var HOP_SLOW_TICKS = 120;
+var HOP_POP_TICKS = 96;
+var BOIL_EVERY = 240;
+var BOIL_MAX = 3;
+var BOIL_REACH = 64;
+var BOIL_POP_TICKS = 96;
+var SCORCH_WAIT = 24;
+var SCORCH_BURN = 180;
+var SCORCH_HALF = 14;
+var SCORCH_AHEAD = 20;
+var HARE_MAX = 3;
+var HARE_EVERY_MAX = 240;
+var HARE_WAKE = 18;
+var HARE_HOP = 25;
+var HARE_REST = 14;
+var HARE_HOPS = 4;
+var HARE_REACH = 120;
+var HARE_HIT = 18;
+var HARE_ATTACK = 70;
+var HARE_POP_TICKS = 24;
+var CINDER_TICKS = 180;
+var CINDER_RADIUS = 14;
+var CINDER_MAX = 12;
+var KINDLE_NEAR = 64;
+var KINDLE_RADIUS = 64;
+var KINDLE_ATTACK = 150;
+var KINDLE_KNOCK = 24;
+var KINDLE_ELITE_KNOCK = 10;
+var KINDLE_TICKS = 170;
+var KINDLE_EVERY_MAX = 600;
+var ANTLER_TICKS = 42;
+var ANTLER_PULSES = 3;
+var HARE_LIFE = HARE_WAKE + HARE_HOPS * (HARE_HOP + HARE_REST);
+var PANE_HIT = 16;
+var PANE_SHATTER = 58;
+var PANE_TICKS = 88;
+var PANE_SIDE = 26;
+var SS_EVERY = 180;
+var SS_STOPS = 3;
+var SS_BURST = 24;
+var SS_RING = 36;
+var SS_RADIUS = 36;
+var SS_RISE_MAX = 120;
+var SPL_EVERY = 4;
+var SPL_SHARDS = 5;
+var SPL_SPREAD = 0.25;
+var SPL_SPEED = 6;
+var SPL_HIT = 10;
+var SPL_BOUNCES = 2;
+var SPL_LIFE = 70;
+var GV_BELOW = 50;
+var GV_TICKS = 480;
+var GV_OUT = 18;
+var GV_EVERY = 2400;
+var GV_ACT = 45;
+var GV_SPEED = 2.4;
+var GV_REACH = 150;
+var GV_POP = 40;
+var GV_BESIDE = 26;
+var HF_LOCK = 36;
+var HF_DROP = 48;
+var HF_TICKS = 132;
+var HF_RADIUS = 40;
+var SH_FORM = 34;
+var SH_SPIN = 56;
+var SH_TICKS = 115;
+var SH_CUTS = 3;
+var CLOCK_TICKS = 240;
+var CLOCK_RADIUS = 66;
+var CLOCK_CHILL_EVERY = 30;
+var CLOCK_SLOW_DEN = 5;
+var TB_WAIT = 62;
+var TB_SHOW = 80;
+var TB_EVERY_MAX = 1440;
+var clockSkipsTick = (tick) => tick % CLOCK_SLOW_DEN === 1 || tick % CLOCK_SLOW_DEN === 3;
+var LID_BITE = 8;
+var LID_REACH = 46;
+var LID_HALF = 0.9;
+var LID_TICKS = 90;
+var ST_FLY = 12;
+var ST_LIFE = 180;
+var ST_SETTLE = 44;
+var ST_FADE = 30;
+var ST_END = 266;
+var ST_CR = 6.5;
+var ST_SPEED = 1.7;
+var ST_HIT_EVERY = 60;
+var ST_RETOUCH = 14;
+var ST_SEARCH = 200;
+var ST_BESIDE = 12;
+var ST_SEEN_MAX = 24;
+var BL_COINS = 3;
+var BL_SIDE = 34;
+var BL_RELEASE = 18;
+var BL_GAP = 6;
+var BL_FLY = 14;
+var BL_PAST = 18;
+var BL_FUSE = 60;
+var BL_RADIUS = 20;
+var BL_END = 254;
+var TITHE_EVERY = 480;
+var TITHE_TICKS = 240;
+var TITHE_PULSE = 60;
+var TITHE_SNAP = 80;
+var TITHE_FADE = 18;
+var blBoomAge = (i) => BL_RELEASE + i * BL_GAP + BL_FLY + BL_FUSE;
+var MC_R = 48;
+var MC_EVERY = 240;
+var MC_SLOW = 120;
+var MC_SHOW = 40;
+var MC_HINDER = 6;
+var SF_FLY = 22;
+var SF_HIT = 22;
+var SF_POOL_R = 34;
+var SF_POOL = 180;
+var FS_FLY = 24;
+var FS_OUT = 85;
+var FS_WAIT = 30;
+var FS_TOUCH = 14;
+var FS_POD_R = 30;
+var FS_SHOW = 30;
+var FS_PODS = 3;
+var BH_CHANCE = 2e3;
+var BH_EVERY = 120;
+var BH_MAX = 3;
+var BH_FLY = 18;
+var BH_LAND = 44;
+var BH_SPEED = 1;
+var BH_GULP = 12;
+var BH_LIFE = 300;
+var BH_SLAG = 4;
+var BH_STEP = 4;
+var BH_TRAIL = 180;
+var BH_TRAIL_R = 10;
+var BH_TRAIL_MAX = 160;
+var BH_SHOW = 20;
+var MW_R = 50;
+var MW_PULL = 120;
+var MW_LIFE = 260;
+var MW_TUG = 0.15;
+var RT_RUN = 11;
+var RT_HALF = 8;
+var RT_LIFE = 90;
+var RT_HITS = 16;
+var HS_FIRST = 30;
+var HS_EVERY = 42;
+var HS_WIND = 14;
+var HS_LIFE = 114;
+var HS_SEARCH = 200;
+var HS_HALF = 8;
+var HS_PAST = 22;
+var HS_ORX = 40;
+var HS_ORY = 14;
+var HS_SPIN = 0.025;
+var HS_OUT = 18;
+var HS_BACK = 18;
+var HS_SHOTS = 4;
+var MR_R = 48;
+var MR_LIFE = 240;
+var MR_EVERY = 480;
+var RF_R = 72;
+var RF_FIRST = 14;
+var RF_PULSE = 30;
+var RF_OPEN = 180;
+var RF_END = 212;
+var RF_SLOW = 40;
+var HT_R = 40;
+var HT_LOCK = 18;
+var HT_HIT = 30;
+var HT_END = 96;
+var HT_SLOW = 120;
+var SM_EVERY = 360;
+var SC_LEN = 96;
+var SC_HALF = 0.46;
+var SC_HIT = 6;
+var SC_PULSE = 30;
+var SC_END = 122;
+var AS_KILLS = 5;
+var AS_R = 70;
+var AS_HIT = 20;
+var AS_END = 130;
+var RG_R = 48;
+var RG_N = 2;
+var RG_TRAVEL = 14;
+var RG_HOLD = 90;
+var RG_SLOW = 40;
+var RG_EVERY = 120;
+var RG_SHOW = 134;
+var RP_R = 46;
+var RP_HALF = 0.55;
+var RP_OFF = 0.5;
+var RP_AHEAD = 4;
+var RP_KNOCK = 8;
+var RP_FIRST = 2;
+var RP_SECOND = 10;
+var RP_SHOW = 100;
+var RP_EVERY = 180;
+var WX_RANGE = 80;
+var WX_EVERY = 90;
+var WX_FLIGHT = 16;
+var WX_SLOW = 30;
+var WX_HOLD = 120;
+var WX_SHOW = 42;
+var WC_R = 36;
+var WC_HIT = 6;
+var WC_END = 72;
+var WC_KNOCK = 22;
+var WC_SHOVE = 34;
+var WC_EVERY = 300;
+var SN_RANGE = 160;
+var SN_FLY = 18;
+var SN_R = 24;
+var SN_BITE = 30;
+var SN_END = 198;
+var SN_MAX = 2;
+var GJ_LAND = 18;
+var GJ_R = 32;
+var GJ_KNOCK = 14;
+var GJ_PR = 26;
+var GJ_PULSE = 15;
+var GJ_HOLD = 20;
+var GJ_SLOW = 30;
+var GJ_END = 198;
+var GJ_EVERY = 360;
+var PM_STILL = 60;
+var PM_OPEN = 6;
+var PM_R = 52;
+var PM_CORE = 18;
+var PM_PULL = 0.4;
+var PM_SNAP_R = 34;
+var PM_FIRST = 30;
+var PM_EVERY = 90;
+var PM_FILL = 20;
+var SG_REGROW = 600;
+var SG_NEEDLE = 60;
+var SG_LEN = 80;
+var SG_W = 8;
+var SG_SHOW = 40;
+var SR_EVERY = 480;
+var SR_NEAR = 64;
+var SR_SEEK = 160;
+var SR_GROUP = 48;
+var SR_ARRIVE = 34;
+var SR_R = 56;
+var SR_PULL = 1.2;
+var SR_CLUMP = 17;
+var SR_PULSE = 10;
+var SR_FADE = 20;
+var SR_HOLD_MAX = 240;
+var ML_NEED = 3;
+var ML_R = 64;
+var ML_CLOUD = 240;
+var ML_SICK = 180;
+var ML_PULSE = 10;
+var ML_EVERY = 600;
+var CJ_EVERY = 3;
+var CJ_R = 80;
+var CJ_PUSH = 26;
+var CJ_SHOW = 36;
+var CJ_BAR = 300;
+var GL_SEEK = 128;
+var GL_JUMP = 64;
+var GL_FLY = 12;
+var GL_DRINK = 30;
+var GL_LIFE = 360;
+var GL_EVERY = 360;
+var GL_DROP = 30;
+var IH_PER = 4;
+var IH_MAX = 5;
+var IH_LAST = 240;
+var IH_SNAP = 36;
+var ST_LESS = 20;
+var ST_SHOW = 36;
+var ST_LIFT = 30;
+var CW_EACH = 3;
+var CW_STONES = 3;
+var CW_BIG = 10;
+var CW_REGROW = 480;
+var CW_POP = 40;
+var RS_CURL = 120;
+var RS_SPEED = 130;
+var RS_REACH = 6;
+var RS_KNOCK = 18;
+var RS_DIZZY = 90;
+var RS_POP = 26;
+var FR_R = 46;
+var FR_LIFE = 240;
+var FR_EVERY = 30;
+var FR_SLOW = 40;
+var FR_HOLD = 40;
+var SW_BELOW = 30;
+var SW_STONE = 120;
+var SW_LIFE = 150;
+var SW_R = 56;
+var SW_EVERY = 3600;
+var SEAL_R = 70;
+var SEAL_MAX = 7200;
+var SEAL_SHOW = 40;
+var FC_R = 72;
+var FC_SNAP = 80;
+var FC_TICKS = 112;
+var SL_JUMP = 20;
+var SL_FLY = 10;
+var SL_SEARCH = 160;
+var SL_END = 46;
+var SL_MAX = 24;
+var MS_EVERY = 240;
+var MS_BACK = 14;
+var MS_TICKS = 34;
+var CLASS_FINISHERS = Object.freeze({
+  knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]),
+  rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]),
+  mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"])
+});
+var CHAIN_SLAM = 30;
+var CHAIN_EXPOSE = 15;
+var CHAIN_SHATTER = 50;
+var EXPOSE_TICKS = 240;
+var PERFECT_TICKS = 18;
+var PERFECT_SHOW_TICKS = 30;
+var BUCKLER_PERFECT_TICKS = 6;
+var PERFECT_GEAR_TICKS = 12;
+var SHARP_TICKS = 180;
+var HIT_CD_TICKS = 60;
+var KILL_CD_TICKS = 30;
+var PERF_CD_TICKS = 120;
+var COMBO_DAMAGE = Object.freeze([90, 90, 120]);
+var COMBO_FINISH_PIPS = 1;
+var PIPS_MAX = 5;
+var PIPS_CAP = 7;
+var PIP_IDLE_TICKS = 360;
+var PIP_FADE_TICKS = 60;
+var PIP_CRIT_TICKS = 30;
+var PIP_SPENT_TICKS = 480;
+var PIP_EARNED_TICKS = 600;
+var PIP_BONUS = 15;
+var PIP_SPEND_AUGMENT = 4;
+var SPEND_HOLD_MAX = 1800;
+var PIP_SPENDERS = Object.freeze({
+  knight: Object.freeze([
+    "rallying_cry",
+    "war_banner",
+    "earth_breaker",
+    "shield_charge",
+    "counter_stance",
+    "shield_throw"
+  ]),
+  rogue: Object.freeze(["lunge", "riposte", "toxic_fan", "whirling_blades", "smoke_veil"]),
+  mage: Object.freeze(["firebloom", "flame_wall", "flashfreeze", "ice_barrier", "ball_lightning", "static_field"])
+});
+var isPipSpender = (id) => Object.values(PIP_SPENDERS).some((list2) => list2.includes(id));
+var PIP_SPENDER_MIN = 1;
+var spendsPips = (d8, id) => Boolean(isPipSpender(id) && d8?.classAugments?.[id]?.includes(PIP_SPEND_AUGMENT));
+var BANNER_CAP = BANNER_MAX + 120 * PIPS_CAP;
+var SMOKE_CAP = SMOKE_MAX + 60 * PIPS_CAP;
+var WALL_CAP = WALL_MAX + 60 * PIPS_CAP;
+var ORB_CAP = ORB_TICKS * 2 + 60 * PIPS_CAP;
+var THROW_CAP = MAX_THROW_TARGETS + PIPS_CAP;
+var PAID_SKILLS = Object.freeze(["cast", "flurry"]);
+var PIP_COSTS = Object.freeze({
+  cast: 1,
+  flurry: 1,
+  retribution: 3,
+  skyfall_leap: 3,
+  aegis_pulse: 4,
+  thousand_cuts: 3,
+  shadowstep: 2,
+  noxious_bloom: 3,
+  rupture: 3,
+  meteor: 4,
+  thunderfall: 3,
+  glacial_burst: 3
+});
+var FREE_TICKS = 180;
+var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
+var LIVING_STORM_TICKS = 360;
+var pipCostOf = (id) => PIP_COSTS[id] ?? 0;
+var OVERLOAD_PIP = 1;
+var pipCostFor = (id, ranks) => pipCostOf(id) + (id === "cast" && ranks?.overload ? OVERLOAD_PIP : 0);
+var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
+var TOME_EL = ["fire", "frost", "lightning"];
+var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
+var TIMED = [
+  "sharp",
+  "woven",
+  "hitCd",
+  "killCd",
+  "perfCd",
+  "guardUp",
+  "mist",
+  "veil",
+  "gold",
+  "surge",
+  "enGarde",
+  "rush",
+  "shell",
+  "riposte",
+  "keen",
+  "evade",
+  "rest",
+  "mend",
+  "titan",
+  "spite",
+  "stepped",
+  "quick",
+  "wave",
+  "phoenix",
+  "hymn",
+  "firm",
+  "jugg",
+  "cloak",
+  "twinned",
+  "regrow",
+  "wrapCd",
+  "core",
+  "treadCd",
+  "sporeCd",
+  "eyeCd",
+  "crownCd",
+  "oathCd",
+  "plate",
+  "plateCd",
+  "cleaveCd",
+  "skullCd",
+  "shroudCd",
+  "lashCd",
+  "zip",
+  "perfReady",
+  "hareCd",
+  "kindleCd",
+  "antler",
+  "ssCd",
+  "gvCd",
+  "tbCd",
+  "titheCd",
+  "msCd",
+  "mcCd",
+  "bhCd",
+  "mrCd",
+  "smCd",
+  "swCd",
+  "rgCd",
+  "rpCd",
+  "wxCd",
+  "wcCd",
+  "gjCd",
+  "srCd",
+  "mlCd",
+  "glCd",
+  "ihSnap",
+  "stLift"
+];
+var LIVE = [
+  "ihHits",
+  "ihSnap",
+  "stDodge",
+  "stLift",
+  "cwPop",
+  "mlCd",
+  "mlCloud",
+  "cjN",
+  "cjCroak",
+  "cjBar",
+  "glCd",
+  "glLeech",
+  "glDrop",
+  "pmStill",
+  "pmPit",
+  "pmFill",
+  "sgHusk",
+  "sgBurst",
+  "srCd",
+  "srDevil",
+  "wcCd",
+  "wcBurst",
+  "snSprouts",
+  "gjCd",
+  "gjFlop",
+  "rgCd",
+  "rgRoot",
+  "rpCd",
+  "rpReap",
+  "wxCd",
+  "wxBee",
+  "rsWalk",
+  "rsRoll",
+  "rsPop",
+  "frRing",
+  "swCd",
+  "swStone",
+  "mwWell",
+  "rtLance",
+  "hsOrb",
+  "hsShots",
+  "hsBack",
+  "mrCd",
+  "mrSheet",
+  "rfPit",
+  "htStrike",
+  "smCd",
+  "smBreath",
+  "asN",
+  "asBurst",
+  "mcCd",
+  "mcSlam",
+  "sfGlob",
+  "sfPool",
+  "fsPods",
+  "bhCd",
+  "bhN",
+  "bhSheds",
+  "bhTrail",
+  "bhGulps",
+  "seal",
+  "sealBurst",
+  "fcCage",
+  "slShards",
+  "msCd",
+  "msHit",
+  "lidBite",
+  "stCoin",
+  "blCoins",
+  "titheCd",
+  "tithe",
+  "hfGlass",
+  "shEcho",
+  "clock",
+  "tbCd",
+  "turn",
+  "pane",
+  "ssCd",
+  "mirrors",
+  "splN",
+  "splinters",
+  "gvCd",
+  "glass",
+  "glassPop",
+  "scorch",
+  "hareCd",
+  "hares",
+  "harePops",
+  "cinders",
+  "kindleCd",
+  "kindle",
+  "antler",
+  "zip",
+  "perfReady",
+  "cleave",
+  "cleaveCd",
+  "grave",
+  "skull",
+  "skullCd",
+  "skullHit",
+  "shroudCd",
+  "sunk",
+  "risen",
+  "croakN",
+  "croak",
+  "lashCd",
+  "lash",
+  "spawnN",
+  "hoppers",
+  "hopPops",
+  "boil",
+  "boilPop",
+  "lode",
+  "oath",
+  "oathCd",
+  "wardOut",
+  "wardUp",
+  "wardHit",
+  "plate",
+  "plateCd",
+  "sporeCd",
+  "spores",
+  "gazecaps",
+  "capPops",
+  "eyeCd",
+  "eye",
+  "crownCd",
+  "crownMark",
+  "treadCd",
+  "tread",
+  "quake",
+  "bark",
+  "barkShot",
+  "silk",
+  "web",
+  "wrapCd",
+  "cocoon",
+  "furrow",
+  "vent",
+  "vents",
+  "core",
+  "strip",
+  "sharp",
+  "woven",
+  "hitCd",
+  "killCd",
+  "perfCd",
+  "pips",
+  "spent",
+  "spends",
+  "free",
+  "earned",
+  "guarding",
+  "guardUp",
+  "perfect",
+  "moss",
+  "mist",
+  "veil",
+  "gold",
+  "aftershock",
+  "fault",
+  "hymn",
+  "firm",
+  "jugg",
+  "counters",
+  "regrow",
+  "leapSpare",
+  "leapRefill",
+  "again",
+  "spin",
+  "cloak",
+  "twin",
+  "twinned",
+  "seeds",
+  "thaw",
+  "rime",
+  "thunder",
+  "wave",
+  "shake",
+  "storm",
+  "duel",
+  "phoenix",
+  "blaze",
+  "shade",
+  "blooms",
+  "aegis",
+  "leap",
+  "titan",
+  "spite",
+  "held",
+  "cuts",
+  "flower",
+  "echo",
+  "stepped",
+  "stepSpare",
+  "stepRefill",
+  "meteors",
+  "crack",
+  "quick",
+  "rest",
+  "mend",
+  "spare",
+  "refill",
+  "last",
+  "flurry",
+  "parry",
+  "counter",
+  "surge",
+  "bulwark",
+  "focus",
+  "enGarde",
+  "charge",
+  "orbs",
+  "rush",
+  "trail",
+  "pool",
+  "wail",
+  "shell",
+  "hide",
+  "sun",
+  "sunBeam",
+  "casts",
+  "staffSuns",
+  "ram",
+  "thrown",
+  "banner",
+  "still",
+  "riposte",
+  "keen",
+  "evade",
+  "weave",
+  "smoke",
+  "wall",
+  "ice",
+  "field"
+];
+var ZIP_TICKS = 120;
+var PERF_READY_TICKS = 180;
+function skillCooldown(combat, skillId) {
+  return combat?.skills?.cooldowns?.[skillId] ?? 0;
+}
+function canUseClassSkill(player, actor, combat, stats, skillId, suppressed = false) {
+  const heroClass = heroClassOf(player?.d8), skill = CLASS_SKILLS[skillId];
+  return Boolean(
+    heroClass && skill && combat && actor?.alive && !suppressed && skill.classId === heroClass.id && classSkillsFor(player.d8).includes(skillId) && stats.subType === heroClass.offhand && !skillCooldown(combat, skillId) && !combat.skills?.flurry && !combat.skills?.sunk
+  );
+}
+function classSkillsRecord(combat) {
+  return combat.skills ??= { cooldowns: {} };
+}
+function prune(combat) {
+  const k = combat.skills;
+  if (k && !Object.keys(k.cooldowns).length && !LIVE.some((key5) => k[key5])) delete combat.skills;
+}
+function pruneClassSkills(combat) {
+  if (combat?.skills) prune(combat);
+}
+function openParryWindow(combat) {
+  classSkillsRecord(combat).parry = PARRY_WINDOW_TICKS;
+}
+function spendParryWindow(combat) {
+  if (combat?.skills?.parry) {
+    delete combat.skills.parry;
+    prune(combat);
+  }
+}
+function openCounterWindow(combat, ticks2 = COUNTER_WINDOW_TICKS) {
+  classSkillsRecord(combat).counter = ticks2;
+}
+function spendCounterWindow(combat) {
+  const k = combat?.skills;
+  if (!k?.counter) return;
+  if (k.counters > 0) {
+    if (--k.counters <= 0) delete k.counters;
+    return;
+  }
+  delete k.counter;
+  prune(combat);
+}
+function advanceClassSkillTimers(tick, combat, { holdCooldowns = false } = {}) {
+  const k = combat.skills;
+  if (!k) return;
+  if (!holdCooldowns)
+    for (const [id, left] of Object.entries(k.cooldowns)) {
+      if (left <= 1) delete k.cooldowns[id];
+      else k.cooldowns[id] = left - 1;
+    }
+  if (k.last && tick - k.last.tick >= SKILL_LAST_TICKS) delete k.last;
+  if (k.parry) {
+    if (k.parry <= 1) delete k.parry;
+    else k.parry--;
+  }
+  if (k.counter) {
+    if (k.counter <= 1) {
+      delete k.counter;
+      delete k.counters;
+    } else k.counter--;
+  }
+  for (const key5 of TIMED)
+    if (k[key5]) {
+      if (k[key5] <= 1) delete k[key5];
+      else k[key5]--;
+    }
+  for (const key5 of [
+    "bulwark",
+    "charge",
+    "hide",
+    "weave",
+    "ice",
+    "aegis",
+    "shake",
+    "duel",
+    "shade",
+    "spent",
+    "barkShot",
+    "quake",
+    "spores",
+    "lode",
+    "boilPop",
+    "cleave",
+    "skullHit",
+    "risen",
+    "kindle",
+    "glassPop",
+    "cjBar"
+  ])
+    if (k[key5]) {
+      if (k[key5].ticks <= 1) delete k[key5];
+      else k[key5].ticks--;
+    }
+  if (k.capPops) {
+    for (const q of k.capPops) q.ticks--;
+    k.capPops = k.capPops.filter((q) => q.ticks > 0);
+    if (!k.capPops.length) delete k.capPops;
+  }
+  if (k.harePops) {
+    for (const q of k.harePops) q.ticks--;
+    k.harePops = k.harePops.filter((q) => q.ticks > 0);
+    if (!k.harePops.length) delete k.harePops;
+  }
+  if (k.hopPops) {
+    for (const q of k.hopPops) q.ticks--;
+    k.hopPops = k.hopPops.filter((q) => q.ticks > 0);
+    if (!k.hopPops.length) delete k.hopPops;
+  }
+  if (k.perfect !== void 0 && tick - k.perfect >= PERFECT_SHOW_TICKS) delete k.perfect;
+  if (k.pips) {
+    const p = k.pips;
+    if (p.crit) {
+      if (p.crit <= 1) delete p.crit;
+      else p.crit--;
+    }
+    if (p.idle > 1) p.idle--;
+    else if (p.n > 1) {
+      p.n--;
+      p.idle = PIP_FADE_TICKS;
+    } else delete k.pips;
+  }
+  if (k.earned) {
+    for (const [id, e] of Object.entries(k.earned)) {
+      if (e.ticks <= 1) delete k.earned[id];
+      else e.ticks--;
+    }
+    if (!Object.keys(k.earned).length) delete k.earned;
+  }
+  if (k.spends) {
+    for (const [id, e] of Object.entries(k.spends)) {
+      if (e.ticks <= 1) delete k.spends[id];
+      else e.ticks--;
+    }
+    if (!Object.keys(k.spends).length) delete k.spends;
+  }
+  if (k.free) {
+    for (const [id, t] of Object.entries(k.free)) {
+      if (t <= 1) delete k.free[id];
+      else k.free[id] = t - 1;
+    }
+    if (!Object.keys(k.free).length) delete k.free;
+  }
+  prune(combat);
+}
+var BLOCK_BASH_REFUND_TICKS = 60;
+function reduceSkillCooldown(combat, skillId, ticks2) {
+  const k = combat?.skills;
+  if (!k?.cooldowns[skillId]) return;
+  const left = k.cooldowns[skillId] - ticks2;
+  if (left >= 1) k.cooldowns[skillId] = left;
+  else {
+    delete k.cooldowns[skillId];
+    prune(combat);
+  }
+}
+function clearOrbs(combat) {
+  if (combat?.skills) {
+    delete combat.skills.orbs;
+    prune(combat);
+  }
+}
+function clearTrail(combat) {
+  if (combat?.skills) {
+    delete combat.skills.trail;
+    prune(combat);
+  }
+}
+function clearPool(combat) {
+  if (combat?.skills) {
+    delete combat.skills.pool;
+    prune(combat);
+  }
+}
+function cancelClassSkillAction(combat) {
+  if (combat?.skills) {
+    delete combat.skills.flurry;
+    delete combat.skills.orbs;
+    delete combat.skills.trail;
+    delete combat.skills.pool;
+    delete combat.skills.ram;
+    delete combat.skills.thrown;
+    for (const key5 of [
+      "banner",
+      "smoke",
+      "wall",
+      "field",
+      "leap",
+      "cuts",
+      "flower",
+      "echo",
+      "meteors",
+      "crack",
+      "storm",
+      "blooms",
+      "shake",
+      "shade",
+      "duel",
+      "aftershock",
+      "fault",
+      "spin",
+      "seeds",
+      "thaw",
+      "rime",
+      "thunder",
+      "twin",
+      "bark",
+      "web",
+      "cocoon",
+      "furrow",
+      "vents",
+      "strip"
+    ])
+      delete combat.skills[key5];
+    prune(combat);
+  }
+}
+function clearSkillState(combat, key5) {
+  if (combat?.skills?.[key5] !== void 0) {
+    delete combat.skills[key5];
+    prune(combat);
+  }
+}
+function validateClassSkillState(s, combat, actor) {
+  const k = combat.skills;
+  if (k === void 0) return;
+  closedRecord(k, ["cooldowns"], LIVE);
+  if (k.parry !== void 0) safeInteger(k.parry, 1, PARRY_WINDOW_TICKS);
+  if (k.counter !== void 0) safeInteger(k.counter, 1, COUNTER_WINDOW_MAX);
+  if (k.surge !== void 0) safeInteger(k.surge, 1, SURGE_TICKS);
+  if (k.zip !== void 0) safeInteger(k.zip, 1, ZIP_TICKS);
+  if (k.perfReady !== void 0) safeInteger(k.perfReady, 1, PERF_READY_TICKS);
+  if (k.enGarde !== void 0) safeInteger(k.enGarde, 1, EN_GARDE_TICKS);
+  if (k.rush !== void 0) safeInteger(k.rush, 1, RUSH_TICKS);
+  if (k.trail !== void 0) {
+    closedRecord(k.trail, ["x", "y", "x2", "y2", "ticks", "next"], ["fire", "frost", "spark", "venom"]);
+    requireContract(
+      ["x", "y", "x2", "y2"].every((key5) => Number.isFinite(k.trail[key5])) && ["fire", "frost", "spark", "venom"].every((key5) => k.trail[key5] === void 0 || k.trail[key5] === true) && actor.alive,
+      "Invalid trail"
+    );
+    safeInteger(k.trail.ticks, 1, TRAIL_MAX_TICKS);
+    safeInteger(k.trail.next, 1, TRAIL_PULSE_TICKS);
+  }
+  if (k.pool !== void 0) {
+    closedRecord(k.pool, ["x", "y", "ticks", "next"], ["el"]);
+    tomeEl(k.pool);
+    requireContract(Number.isFinite(k.pool.x) && Number.isFinite(k.pool.y) && actor.alive, "Invalid pool");
+    safeInteger(k.pool.ticks, 1, POOL_MAX_TICKS);
+    safeInteger(k.pool.next, 1, POOL_PULSE_TICKS);
+  }
+  if (k.moss !== void 0) {
+    closedRecord(k.moss, ["ticks"], ["hp"]);
+    safeInteger(k.moss.ticks, 1, MOSS_TICKS);
+    requireContract(
+      k.moss.hp === void 0 || typeof k.moss.hp === "string" && /^[1-9][0-9]{0,29}$/.test(k.moss.hp),
+      "Invalid moss"
+    );
+  }
+  if (k.mist !== void 0) safeInteger(k.mist, 1, MIST_TICKS);
+  if (k.veil !== void 0) safeInteger(k.veil, 1, VEIL_MAX_TICKS);
+  if (k.gold !== void 0) safeInteger(k.gold, 1, GOLD_TICKS);
+  if (k.shell !== void 0) safeInteger(k.shell, 1, SHELL_MAX_TICKS);
+  if (k.sun !== void 0) safeInteger(k.sun, 1, SUN_MAX);
+  if (k.casts !== void 0) safeInteger(k.casts, 1, SUNFALL_MAX_CASTS - 1);
+  for (const [key5, stacks, ticks2] of [
+    ["bulwark", 3, BULWARK_TICKS],
+    ["charge", 5, CHARGE_TICKS],
+    ["hide", MAX_HIDE, HIDE_TICKS]
+  ])
+    if (k[key5] !== void 0) {
+      closedRecord(k[key5], ["stacks", "ticks"]);
+      safeInteger(k[key5].stacks, 1, stacks);
+      safeInteger(k[key5].ticks, 1, ticks2);
+    }
+  if (k.focus !== void 0) {
+    closedRecord(k.focus, ["target", "hits"]);
+    requireContract(typeof k.focus.target === "string" && k.focus.target.length <= 200, "Invalid Focus target");
+    safeInteger(k.focus.hits, 1, 5);
+  }
+  const pos = (v) => Number.isFinite(v.x) && Number.isFinite(v.y), ids = (list2, max) => requireContract(
+    Array.isArray(list2) && list2.length <= max && list2.every((id) => typeof id === "string" && id.length <= 200),
+    "Invalid skill targets"
+  );
+  if (k.sunBeam !== void 0) {
+    closedRecord(k.sunBeam, ["x", "y", "x2", "y2", "since", "power", "hit"]);
+    requireContract(
+      pos(k.sunBeam) && Number.isFinite(k.sunBeam.x2) && Number.isFinite(k.sunBeam.y2) && actor.alive && Array.isArray(k.sunBeam.hit) && k.sunBeam.hit.length <= 64 && k.sunBeam.hit.every((id) => typeof id === "string"),
+      "Invalid Sunshield beam"
+    );
+    safeInteger(k.sunBeam.since, 0, SUN_BEAM_TICKS);
+    safeInteger(k.sunBeam.power, 1, SUN_MAX);
+  }
+  if (k.staffSuns !== void 0) {
+    closedRecord(k.staffSuns, ["x", "y", "seed", "ticks"], ["el"]);
+    tomeEl(k.staffSuns);
+    requireContract(pos(k.staffSuns) && actor.alive, "Invalid Undying Sun suns");
+    safeInteger(k.staffSuns.seed, 0);
+    safeInteger(k.staffSuns.ticks, 1, STAFF_SUNS_TICKS);
+  }
+  if (k.ram !== void 0) {
+    closedRecord(k.ram, ["x", "y", "dx", "dy", "ticks"], ["hit"]);
+    requireContract(
+      pos(k.ram) && Math.abs(Math.hypot(k.ram.dx, k.ram.dy) - 1) < 1e-9 && actor.alive,
+      "Invalid Shield Charge"
+    );
+    safeInteger(k.ram.ticks, 1, RAM_TICKS);
+    if (k.ram.hit !== void 0) ids(k.ram.hit, 24);
+  }
+  if (k.thrown !== void 0) {
+    closedRecord(k.thrown, ["x", "y", "ids", "hit", "ticks"], ["tx", "ty", "back", "sun"]);
+    if (k.thrown.sun !== void 0) safeInteger(k.thrown.sun, 1, 64);
+    requireContract(
+      pos(k.thrown) && actor.alive && k.thrown.tx === void 0 === (k.thrown.ty === void 0) && (k.thrown.tx === void 0 || Number.isFinite(k.thrown.tx) && Number.isFinite(k.thrown.ty)),
+      "Invalid Shield Throw"
+    );
+    ids(k.thrown.ids, 1);
+    ids(k.thrown.hit, THROW_CAP);
+    if (k.thrown.back !== void 0) ids(k.thrown.back, 24);
+    safeInteger(k.thrown.ticks, 1, THROW_TICKS);
+  }
+  if (k.banner !== void 0) {
+    closedRecord(k.banner, ["x", "y", "ticks", "next"], ["on"]);
+    requireContract(
+      pos(k.banner) && (k.banner.on === void 0 || typeof k.banner.on === "string" && k.banner.on.length <= 200),
+      "Invalid War Banner"
+    );
+    safeInteger(k.banner.ticks, 1, BANNER_CAP);
+    safeInteger(k.banner.next, 1, 60);
+  }
+  if (k.still !== void 0) safeInteger(k.still, 1, STILL_TICKS);
+  if (k.rest !== void 0) safeInteger(k.rest, 1, BREATH_REST_TICKS);
+  if (k.mend !== void 0) {
+    safeInteger(k.mend, 1, MEND_TICKS);
+    requireContract(actor.alive, "Invalid Second Breath");
+  }
+  if (k.spare !== void 0) requireContract(k.spare === true && k.refill === void 0, "Invalid spare Dash");
+  if (k.refill !== void 0) safeInteger(k.refill, 1, REFILL_MAX);
+  if (k.riposte !== void 0) safeInteger(k.riposte, 1, RIPOSTE_MAX);
+  if (k.keen !== void 0) safeInteger(k.keen, 1, KEEN_TICKS);
+  if (k.evade !== void 0) safeInteger(k.evade, 1, EVADE_TICKS);
+  if (k.weave !== void 0) {
+    closedRecord(k.weave, ["element", "ticks"]);
+    requireContract(SPELL_ELEMENTS.includes(k.weave.element), "Invalid Spell Weaving element");
+    safeInteger(k.weave.ticks, 1, WEAVE_TICKS);
+  }
+  for (const [key5, max] of [
+    ["smoke", SMOKE_CAP],
+    ["field", FIELD_MAX]
+  ])
+    if (k[key5] !== void 0) {
+      closedRecord(k[key5], ["x", "y", "ticks", "next"]);
+      requireContract(pos(k[key5]) && actor.alive, "Invalid " + key5);
+      safeInteger(k[key5].ticks, 1, max);
+      safeInteger(k[key5].next, 1, PULSE_TICKS);
+    }
+  if (k.wall !== void 0) {
+    closedRecord(k.wall, ["x", "y", "dx", "dy", "ticks", "next"], ["ring", "long"]);
+    requireContract(
+      pos(k.wall) && Math.abs(Math.hypot(k.wall.dx, k.wall.dy) - 1) < 1e-9 && actor.alive && (k.wall.ring === void 0 || k.wall.ring === true) && (k.wall.long === void 0 || k.wall.long === true),
+      "Invalid Flame Wall"
+    );
+    safeInteger(k.wall.ticks, 1, WALL_CAP);
+    safeInteger(k.wall.next, 1, PULSE_TICKS);
+  }
+  if (k.ice !== void 0) {
+    closedRecord(k.ice, ["hp", "ticks"], ["grown"]);
+    requireContract(
+      typeof k.ice.hp === "string" && /^[1-9][0-9]{0,29}$/.test(k.ice.hp) && actor.alive && [void 0, true].includes(k.ice.grown),
+      "Invalid Ice Barrier"
+    );
+    safeInteger(k.ice.ticks, 1, ICE_TICKS);
+  }
+  const whole = (v) => typeof v === "string" && /^[1-9][0-9]{0,29}$/.test(v), reach = (v) => Number.isFinite(v) && v > 0 && v <= 400;
+  if (k.aegis !== void 0) {
+    closedRecord(k.aegis, ["hp", "full", "ticks"], ["over", "echo"]);
+    requireContract(
+      whole(k.aegis.hp) && whole(k.aegis.full) && BigInt(k.aegis.hp) <= BigInt(k.aegis.full) && actor.alive && [void 0, true].includes(k.aegis.over) && [void 0, true].includes(k.aegis.echo),
+      "Invalid Aegis Pulse"
+    );
+    safeInteger(k.aegis.ticks, 1, AEGIS_TICKS);
+  }
+  if (k.leap !== void 0) {
+    closedRecord(k.leap, ["x", "y", "sx", "sy", "ticks"], ["of"]);
+    requireContract(
+      pos(k.leap) && Number.isFinite(k.leap.sx) && Number.isFinite(k.leap.sy) && actor.alive && [void 0, LEAP_TICKS + LEAP_HEAVY_TICKS].includes(k.leap.of),
+      "Invalid Skyfall Leap"
+    );
+    safeInteger(k.leap.ticks, 1, k.leap.of ?? LEAP_TICKS);
+  }
+  const own3 = (v) => typeof v === "string" && v.length <= 200;
+  for (const [key5, max] of [
+    ["aftershock", AFTERSHOCK_TICKS],
+    ["fault", FAULT_TICKS],
+    ["rime", RIME_TICKS]
+  ])
+    if (k[key5] !== void 0) {
+      closedRecord(k[key5], ["x", "y", "r", "ticks"], key5 === "aftershock" ? [] : ["next"]);
+      requireContract(
+        pos(k[key5]) && reach(k[key5].r) && actor.alive && key5 === "aftershock" === (k[key5].next === void 0),
+        "Invalid " + key5
+      );
+      safeInteger(k[key5].ticks, 1, max);
+      if (k[key5].next !== void 0) safeInteger(k[key5].next, 1, PULSE_TICKS);
+    }
+  for (const [key5, max] of [
+    ["hymn", HYMN_TICKS],
+    ["firm", FIRM_TICKS],
+    ["jugg", JUGG_TICKS],
+    ["cloak", CLOAK_TICKS],
+    ["twinned", STEPPED_TICKS],
+    ["regrow", ICE_TICKS],
+    ["thunder", THUNDER_TICKS]
+  ])
+    if (k[key5] !== void 0) safeInteger(k[key5], 1, max);
+  if (k.counters !== void 0) {
+    safeInteger(k.counters, 1, MAX_COUNTERS);
+    requireContract(k.counter !== void 0, "Invalid Riposte Chain");
+  }
+  if (k.leapSpare !== void 0)
+    requireContract(k.leapSpare === true && k.leapRefill === void 0, "Invalid Double Jump");
+  if (k.leapRefill !== void 0)
+    safeInteger(
+      k.leapRefill,
+      1,
+      Math.ceil(CLASS_SKILLS.skyfall_leap.cooldownTicks * LONGER_COOLDOWN[0] / LONGER_COOLDOWN[1])
+    );
+  if (k.again !== void 0) {
+    closedRecord(k.again, ["ticks", "cool"]);
+    safeInteger(k.again.ticks, 1, AGAIN_TICKS);
+    safeInteger(
+      k.again.cool,
+      1,
+      Math.ceil(CLASS_SKILLS.lunge.cooldownTicks * LONGER_COOLDOWN[0] / LONGER_COOLDOWN[1])
+    );
+    requireContract(!k.cooldowns.lunge, "Invalid Double Lunge");
+  }
+  if (k.spin !== void 0) {
+    closedRecord(k.spin, ["ticks", "r"], ["hits", "next"]);
+    requireContract(
+      reach(k.spin.r) && actor.alive && k.spin.hits === void 0 === (k.spin.next === void 0),
+      "Invalid spin"
+    );
+    safeInteger(k.spin.ticks, 1, TORNADO_TICKS);
+    if (k.spin.hits !== void 0) {
+      safeInteger(k.spin.hits, 1, 8);
+      safeInteger(k.spin.next, 1, TORNADO_TICKS);
+    }
+  }
+  if (k.twin !== void 0) {
+    closedRecord(k.twin, ["target", "ticks"]);
+    requireContract(own3(k.twin.target), "Invalid Twin Strike");
+    safeInteger(k.twin.ticks, 1, TWIN_TICKS);
+  }
+  if (k.seeds !== void 0) {
+    requireContract(
+      Array.isArray(k.seeds) && k.seeds.length >= 1 && k.seeds.length <= MAX_SEEDS && actor.alive,
+      "Invalid Seed of Fire"
+    );
+    for (const e of k.seeds) {
+      closedRecord(e, ["x", "y", "r", "ticks"]);
+      requireContract(pos(e) && reach(e.r), "Invalid seed");
+      safeInteger(e.ticks, 1, SEED_TICKS);
+    }
+  }
+  if (k.thaw !== void 0) {
+    requireContract(
+      Array.isArray(k.thaw) && k.thaw.length >= 1 && k.thaw.length <= MAX_THAW && actor.alive,
+      "Invalid Shatter Nova"
+    );
+    for (const e of k.thaw) {
+      closedRecord(e, ["target", "at"]);
+      requireContract(own3(e.target), "Invalid thaw");
+      safeInteger(e.at, 0, s.tick + 600);
+    }
+  }
+  for (const [key5, max] of [
+    ["titan", TITAN_TICKS],
+    ["spite", SPITE_TICKS],
+    ["stepped", STEPPED_TICKS],
+    ["quick", QUICK_TICKS]
+  ])
+    if (k[key5] !== void 0) safeInteger(k[key5], 1, max);
+  if (k.held !== void 0) {
+    requireContract(Array.isArray(k.held) && k.held.length >= 1 && k.held.length <= HELD_MAX, "Invalid Retribution");
+    for (const h of k.held) {
+      closedRecord(h, ["amount", "ticks"]);
+      requireContract(whole(h.amount), "Invalid blocked hit");
+      safeInteger(h.ticks, 1, MEMORY_MAX);
+    }
+  }
+  if (k.cuts !== void 0) {
+    closedRecord(k.cuts, ["target", "left", "next"], ["extra"]);
+    requireContract(
+      typeof k.cuts.target === "string" && k.cuts.target.length <= 200 && actor.alive,
+      "Invalid Thousand Cuts"
+    );
+    safeInteger(k.cuts.left, 1, MAX_CUTS);
+    safeInteger(k.cuts.next, Math.max(0, s.tick - 1), s.tick + CUT_GAP_TICKS);
+    if (k.cuts.extra !== void 0) safeInteger(k.cuts.extra, 1, 3);
+  }
+  if (k.flower !== void 0) {
+    closedRecord(k.flower, ["x", "y", "r", "ticks", "next"]);
+    requireContract(pos(k.flower) && reach(k.flower.r) && actor.alive, "Invalid Noxious Bloom");
+    safeInteger(k.flower.ticks, 1, FLOWER_TICKS);
+    safeInteger(k.flower.next, 1, PULSE_TICKS);
+  }
+  if (k.echo !== void 0) {
+    closedRecord(k.echo, ["x", "y", "ticks"]);
+    requireContract(pos(k.echo) && actor.alive, "Invalid Afterimage");
+    safeInteger(k.echo.ticks, 1, ECHO_TICKS);
+  }
+  if (k.stepSpare !== void 0)
+    requireContract(k.stepSpare === true && k.stepRefill === void 0, "Invalid Double Step");
+  if (k.stepRefill !== void 0)
+    safeInteger(
+      k.stepRefill,
+      1,
+      Math.ceil(CLASS_SKILLS.shadowstep.cooldownTicks * LONGER_COOLDOWN[0] / LONGER_COOLDOWN[1])
+    );
+  if (k.meteors !== void 0) {
+    requireContract(
+      Array.isArray(k.meteors) && k.meteors.length >= 1 && k.meteors.length <= MAX_METEORS && actor.alive,
+      "Invalid Meteor"
+    );
+    for (const m of k.meteors) {
+      closedRecord(m, ["x", "y", "fall", "ticks", "next", "r"]);
+      requireContract(pos(m) && reach(m.r), "Invalid meteor");
+      safeInteger(m.fall, 0, METEOR_FALL_MAX);
+      safeInteger(m.ticks, 1, METEOR_GROUND_MAX);
+      safeInteger(m.next, 1, PULSE_TICKS);
+    }
+  }
+  if (k.crack !== void 0) {
+    closedRecord(k.crack, ["x", "y", "r", "rank", "ticks", "next"]);
+    requireContract(pos(k.crack) && reach(k.crack.r) && actor.alive, "Invalid cracked ground");
+    safeInteger(k.crack.rank, 1, 6);
+    safeInteger(k.crack.ticks, 1, CRACK_MAX);
+    safeInteger(k.crack.next, 1, PULSE_TICKS);
+  }
+  for (const [key5, max] of [
+    ["wave", WAVE_TICKS],
+    ["phoenix", PHOENIX_TICKS]
+  ])
+    if (k[key5] !== void 0) safeInteger(k[key5], 1, max);
+  if (k.blaze !== void 0) requireContract(k.blaze === true && k.phoenix !== void 0, "Invalid Phoenix");
+  if (k.shake !== void 0) {
+    closedRecord(k.shake, ["x", "y", "dx", "dy", "r", "ticks"]);
+    requireContract(
+      pos(k.shake) && Math.abs(Math.hypot(k.shake.dx, k.shake.dy) - 1) < 1e-9 && Number.isFinite(k.shake.r) && k.shake.r > 0 && k.shake.r <= 400,
+      "Invalid Earthshaker"
+    );
+    safeInteger(k.shake.ticks, 1, SHAKE_TICKS);
+  }
+  if (k.storm !== void 0) {
+    closedRecord(k.storm, ["next", "left"]);
+    safeInteger(k.storm.next, 1, STORM_TICKS);
+    safeInteger(k.storm.left, 1, LIVING_STORM_TICKS);
+    requireContract(actor.alive, "Invalid Living Storm");
+  }
+  if (k.duel !== void 0) {
+    closedRecord(k.duel, ["target", "stacks", "ticks"]);
+    requireContract(typeof k.duel.target === "string" && k.duel.target.length <= 200, "Invalid Master Duelist");
+    safeInteger(k.duel.stacks, 1, MAX_DUEL);
+    safeInteger(k.duel.ticks, 1, DUEL_TICKS);
+  }
+  if (k.shade !== void 0) {
+    closedRecord(k.shade, ["x", "y", "ticks"]);
+    requireContract(pos(k.shade), "Invalid Shadow Assassin");
+    safeInteger(k.shade.ticks, 1, SHADE_TICKS);
+  }
+  if (k.blooms !== void 0) {
+    requireContract(
+      Array.isArray(k.blooms) && k.blooms.length >= 1 && k.blooms.length <= MAX_BLOOMS && actor.alive,
+      "Invalid Virulent Bloom"
+    );
+    for (const b of k.blooms) {
+      closedRecord(b, ["x", "y", "r", "ticks", "next"]);
+      requireContract(pos(b) && reach(b.r), "Invalid bloom");
+      safeInteger(b.ticks, 1, BLOOM_TICKS);
+      safeInteger(b.next, 1, PULSE_TICKS);
+    }
+  }
+  if (k.orbs !== void 0) {
+    requireContract(
+      Array.isArray(k.orbs) && k.orbs.length >= 1 && k.orbs.length <= MAX_ORBS && actor.alive,
+      "Invalid orbs"
+    );
+    for (const o of k.orbs) {
+      closedRecord(o, ["x", "y", "dx", "dy", "ticks", "next"], ["boom"]);
+      requireContract(
+        Number.isFinite(o.x) && Number.isFinite(o.y) && Math.abs(Math.hypot(o.dx, o.dy) - 1) < 1e-9 && [void 0, true].includes(o.boom),
+        "Invalid orb"
+      );
+      safeInteger(o.ticks, 1, ORB_CAP);
+      safeInteger(o.next, 1, ORB_ZAP_TICKS);
+    }
+  }
+  closedRecord(k.cooldowns, [], CLASS_SKILL_IDS);
+  for (const [id, left] of Object.entries(k.cooldowns))
+    safeInteger(
+      left,
+      1,
+      Math.ceil(
+        Math.min(MAX_SKILL_COOLDOWN_TICKS, CLASS_SKILLS[id].cooldownTicks) * LONGER_COOLDOWN[0] / LONGER_COOLDOWN[1]
+      )
+    );
+  const unit3 = (v) => Number.isFinite(v.x) && Number.isFinite(v.y) && Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9;
+  if (k.last) {
+    closedRecord(k.last, ["skillId", "tick", "x", "y"], ["r", "ox", "oy", "ox2", "oy2", "spread", "n", "air", "late"]);
+    if (k.last.late !== void 0) safeInteger(k.last.late, 1, SKULL_FLIGHT);
+    if (k.last.n !== void 0) safeInteger(k.last.n, 0, 12);
+    if (k.last.air !== void 0) safeInteger(k.last.air, 1, LEAP_TICKS + LEAP_HEAVY_TICKS);
+    if (k.last.r !== void 0)
+      requireContract(Number.isFinite(k.last.r) && k.last.r >= 0 && k.last.r <= 400, "Invalid skill reach");
+    if (k.last.spread !== void 0)
+      requireContract(
+        Number.isFinite(k.last.spread) && k.last.spread >= 0 && k.last.spread <= 3.2,
+        "Invalid skill spread"
+      );
+    for (const key5 of ["ox", "oy", "ox2", "oy2"])
+      if (k.last[key5] !== void 0)
+        requireContract(Number.isFinite(k.last[key5]) && Math.abs(k.last[key5]) <= 400, "Invalid skill landing");
+    requireContract(CLASS_SKILL_IDS.includes(k.last.skillId) && unit3(k.last), "Invalid skill use record");
+    safeInteger(k.last.tick, Math.max(0, s.tick - SKILL_LAST_TICKS - 2), s.tick);
+  }
+  if (k.flurry) {
+    closedRecord(k.flurry, ["cutsLeft", "nextTick", "x", "y"]);
+    safeInteger(k.flurry.cutsLeft, 1, FLURRY_CUTS);
+    safeInteger(k.flurry.nextTick, Math.max(0, s.tick - 1), s.tick + FLURRY_GAP_TICKS);
+    requireContract(unit3(k.flurry) && actor.alive, "Invalid Flurry");
+  }
+  if (k.pips !== void 0) {
+    closedRecord(k.pips, ["n", "idle"], ["el", "crit", "blocks"]);
+    safeInteger(k.pips.n, 0, PIPS_CAP);
+    safeInteger(k.pips.idle, 1, PIP_IDLE_TICKS);
+    if (k.pips.el !== void 0) requireContract(SPELL_ELEMENTS.includes(k.pips.el), "Invalid pip element");
+    if (k.pips.crit !== void 0) safeInteger(k.pips.crit, 1, PIP_CRIT_TICKS);
+    if (k.pips.blocks !== void 0) safeInteger(k.pips.blocks, 1, 2);
+  }
+  if (k.guarding !== void 0) requireContract(k.guarding === true && actor.alive, "Invalid guarding");
+  if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS + PERFECT_GEAR_TICKS + BUCKLER_PERFECT_TICKS);
+  if (k.sharp !== void 0) safeInteger(k.sharp, 1, SHARP_TICKS);
+  if (k.woven !== void 0) safeInteger(k.woven, 1, SHARP_TICKS);
+  if (k.hitCd !== void 0) safeInteger(k.hitCd, 1, HIT_CD_TICKS);
+  if (k.killCd !== void 0) safeInteger(k.killCd, 1, KILL_CD_TICKS);
+  if (k.perfCd !== void 0) safeInteger(k.perfCd, 1, PERF_CD_TICKS);
+  if (k.perfect !== void 0) safeInteger(k.perfect, Math.max(0, s.tick - PERFECT_SHOW_TICKS), s.tick);
+  if (k.spent !== void 0) {
+    closedRecord(k.spent, ["skillId", "n", "ticks"]);
+    requireContract(CLASS_SKILL_IDS.includes(k.spent.skillId), "Invalid spent pips");
+    safeInteger(k.spent.n, 1, PIPS_CAP);
+    safeInteger(k.spent.ticks, 1, PIP_SPENT_TICKS);
+  }
+  if (k.spends !== void 0) {
+    closedRecord(k.spends, [], CLASS_SKILL_IDS);
+    requireContract(
+      Object.keys(k.spends).length > 0 && Object.keys(k.spends).every(isPipSpender),
+      "Invalid spent pips"
+    );
+    for (const e of Object.values(k.spends)) {
+      closedRecord(e, ["n", "ticks"]);
+      safeInteger(e.n, 1, PIPS_CAP);
+      safeInteger(e.ticks, 1, SPEND_HOLD_MAX);
+    }
+  }
+  if (k.free !== void 0) {
+    closedRecord(k.free, [], FREE_SKILLS);
+    requireContract(Object.keys(k.free).length > 0, "Invalid free finisher");
+    for (const t of Object.values(k.free)) safeInteger(t, 1, FREE_TICKS);
+  }
+  if (k.earned !== void 0) {
+    closedRecord(k.earned, [], CLASS_SKILL_IDS);
+    requireContract(Object.keys(k.earned).length > 0, "Invalid earned pips");
+    for (const e of Object.values(k.earned)) {
+      closedRecord(e, ["n", "ticks"]);
+      safeInteger(e.n, 1, 3);
+      safeInteger(e.ticks, 1, PIP_EARNED_TICKS);
+    }
+  }
+  {
+    const pos2 = (v) => Number.isFinite(v.x) && Number.isFinite(v.y);
+    if (k.bark !== void 0) {
+      safeInteger(k.bark, 1, BARK_MAX);
+      requireContract(actor.alive, "Invalid bark");
+    }
+    if (k.barkShot !== void 0) {
+      closedRecord(k.barkShot, ["ticks", "x", "y", "at"]);
+      safeInteger(k.barkShot.ticks, 1, BARK_SHOT_TICKS);
+      requireContract(
+        pos2(k.barkShot) && Array.isArray(k.barkShot.at) && k.barkShot.at.length >= 1 && k.barkShot.at.length <= BARK_MAX,
+        "Invalid bark burst"
+      );
+      for (const p of k.barkShot.at) {
+        closedRecord(p, ["x", "y"]);
+        requireContract(pos2(p), "Invalid bark burst");
+      }
+    }
+    for (const [key5, max] of [
+      ["silk", SILK_EVERY - 1],
+      ["vent", VENT_EVERY - 1],
+      ["wrapCd", COCOON_EVERY],
+      ["core", CORE_TICKS],
+      ["treadCd", TREAD_EVERY],
+      ["sporeCd", SPORE_EVERY],
+      ["eyeCd", EYE_EVERY],
+      ["crownCd", CROWN_EVERY],
+      ["croakN", CROAK_EVERY - 1],
+      ["lashCd", LASH_EVERY],
+      ["spawnN", SPAWN_EVERY - 1]
+    ])
+      if (k[key5] !== void 0) safeInteger(k[key5], 1, max);
+    const id = (v) => typeof v === "string" && v.length > 0 && v.length <= 200;
+    if (k.spores !== void 0) {
+      closedRecord(k.spores, ["x", "y", "ticks"]);
+      requireContract(pos2(k.spores), "Invalid spores");
+      safeInteger(k.spores.ticks, 1, SPORE_SHOW_TICKS);
+    }
+    if (k.gazecaps !== void 0) {
+      requireContract(
+        Array.isArray(k.gazecaps) && k.gazecaps.length >= 1 && k.gazecaps.length <= GAZECAP_MAX && new Set(k.gazecaps.map((g) => g.target)).size === k.gazecaps.length,
+        "Invalid Gazecaps"
+      );
+      for (const g of k.gazecaps) {
+        closedRecord(g, ["target", "n"]);
+        requireContract(id(g.target), "Invalid Gazecap");
+        safeInteger(g.n, 0, 1e9);
+      }
+    }
+    if (k.capPops !== void 0) {
+      requireContract(
+        Array.isArray(k.capPops) && k.capPops.length >= 1 && k.capPops.length <= GAZECAP_MAX * 2,
+        "Invalid Gazecap pops"
+      );
+      for (const q of k.capPops) {
+        closedRecord(q, ["x", "y", "ticks"]);
+        requireContract(pos2(q), "Invalid Gazecap pop");
+        safeInteger(q.ticks, 1, CAP_POP_TICKS);
+      }
+    }
+    if (k.eye !== void 0) {
+      closedRecord(k.eye, ["x", "y", "targets", "rays", "ticks"], ["dx", "dy", "next", "v"]);
+      if (k.eye.dx !== void 0)
+        requireContract(Math.abs(Math.hypot(k.eye.dx, k.eye.dy) - 1) < 1e-6, "Invalid Waking Eye drift");
+      if (k.eye.next !== void 0) safeInteger(k.eye.next, 1, ORB_ZAP_TICKS);
+      if (k.eye.v !== void 0) safeInteger(k.eye.v, 0, 999);
+      requireContract(
+        pos2(k.eye) && Array.isArray(k.eye.targets) && k.eye.targets.length <= EYE_MAX_RAYS && k.eye.targets.every(id) && Array.isArray(k.eye.rays) && k.eye.rays.length <= 3,
+        "Invalid Waking Eye"
+      );
+      for (const r of k.eye.rays) {
+        closedRecord(r, ["x", "y"]);
+        requireContract(pos2(r), "Invalid ray");
+      }
+      safeInteger(k.eye.ticks, 1, k.eye.dx !== void 0 ? ORB_CAP : EYE_TICKS);
+    }
+    if (k.crownMark !== void 0) {
+      closedRecord(k.crownMark, ["target", "ticks"]);
+      requireContract(id(k.crownMark.target), "Invalid crown mark");
+      safeInteger(k.crownMark.ticks, 1, CROWN_MARK_TICKS);
+    }
+    if (k.croak !== void 0) {
+      closedRecord(k.croak, ["x", "y", "ticks", "hit"]);
+      requireContract(
+        pos2(k.croak) && Array.isArray(k.croak.hit) && k.croak.hit.length <= 200 && k.croak.hit.every(id) && new Set(k.croak.hit).size === k.croak.hit.length,
+        "Invalid croak"
+      );
+      safeInteger(k.croak.ticks, 1, CROAK_TICKS);
+    }
+    if (k.lash !== void 0) {
+      closedRecord(k.lash, ["target", "ticks"]);
+      requireContract(id(k.lash.target), "Invalid lash");
+      safeInteger(k.lash.ticks, 1, LASH_TICKS);
+    }
+    if (k.hoppers !== void 0) {
+      requireContract(
+        Array.isArray(k.hoppers) && k.hoppers.length >= 1 && k.hoppers.length <= HOPPER_MAX,
+        "Invalid Eyehoppers"
+      );
+      for (const h of k.hoppers) {
+        closedRecord(h, ["n", "fx", "fy", "x", "y", "age", "target", "pop"], ["el"]);
+        tomeEl(h);
+        requireContract(
+          pos2(h) && Number.isFinite(h.fx) && Number.isFinite(h.fy) && (h.target === "" || id(h.target)),
+          "Invalid Eyehopper"
+        );
+        safeInteger(h.n, 0, 1e9);
+        safeInteger(h.age, 0, HOP_LIFE + HOP_SWELL);
+        safeInteger(h.pop, 0, HOP_LIFE + HOP_SWELL);
+      }
+    }
+    if (k.hopPops !== void 0) {
+      requireContract(
+        Array.isArray(k.hopPops) && k.hopPops.length >= 1 && k.hopPops.length <= HOPPER_MAX * 2,
+        "Invalid Eyehopper pops"
+      );
+      for (const q of k.hopPops) {
+        closedRecord(q, ["x", "y", "ticks"], ["el"]);
+        tomeEl(q);
+        requireContract(pos2(q), "Invalid Eyehopper pop");
+        safeInteger(q.ticks, 1, HOP_POP_TICKS);
+      }
+    }
+    if (k.boil !== void 0) {
+      closedRecord(k.boil, ["n", "grow", "first"]);
+      safeInteger(k.boil.n, 0, BOIL_MAX - 1);
+      safeInteger(k.boil.grow, 1, BOIL_EVERY);
+      safeInteger(k.boil.first, 0, BOIL_MAX - 1);
+    }
+    if (k.boilPop !== void 0) {
+      closedRecord(k.boilPop, ["x", "y", "i", "ticks"]);
+      requireContract(pos2(k.boilPop), "Invalid boil burst");
+      safeInteger(k.boilPop.i, 0, BOIL_MAX - 1);
+      safeInteger(k.boilPop.ticks, 1, BOIL_POP_TICKS);
+    }
+    if (k.tread !== void 0) {
+      closedRecord(k.tread, ["x", "y", "ticks"]);
+      requireContract(pos2(k.tread) && actor.alive, "Invalid tread");
+      safeInteger(k.tread.ticks, 1, TREAD_WAIT);
+    }
+    if (k.quake !== void 0) {
+      closedRecord(k.quake, ["x", "y", "fx", "fy", "ticks"]);
+      requireContract(pos2(k.quake) && Number.isFinite(k.quake.fx) && Number.isFinite(k.quake.fy), "Invalid quake");
+      safeInteger(k.quake.ticks, 1, QUAKE_TICKS);
+    }
+    if (k.web !== void 0) {
+      closedRecord(k.web, ["x", "y", "ticks", "next"], ["el", "held"]);
+      requireContract(k.web.held === void 0 || k.web.held === true, "Invalid web hold");
+      tomeEl(k.web);
+      requireContract(pos2(k.web) && actor.alive, "Invalid web");
+      safeInteger(k.web.ticks, 1, WEB_TICKS);
+      safeInteger(k.web.next, 1, UQ_PULSE_TICKS);
+    }
+    if (k.cocoon !== void 0) {
+      closedRecord(k.cocoon, ["target", "x", "y", "ticks"]);
+      requireContract(
+        typeof k.cocoon.target === "string" && k.cocoon.target.length <= 200 && pos2(k.cocoon) && actor.alive,
+        "Invalid cocoon"
+      );
+      safeInteger(k.cocoon.ticks, 1, COCOON_TICKS);
+    }
+    if (k.furrow !== void 0) {
+      closedRecord(k.furrow, ["x", "y", "dx", "dy", "ticks", "next"], ["round"]);
+      requireContract(k.furrow.round === void 0 || k.furrow.round === true, "Invalid round furrow");
+      requireContract(
+        pos2(k.furrow) && Math.abs(Math.hypot(k.furrow.dx, k.furrow.dy) - 1) < 1e-9 && actor.alive,
+        "Invalid furrows"
+      );
+      safeInteger(k.furrow.ticks, 1, FURROW_TICKS);
+      safeInteger(k.furrow.next, 1, UQ_PULSE_TICKS);
+    }
+    if (k.vents !== void 0) {
+      requireContract(
+        Array.isArray(k.vents) && k.vents.length >= 1 && k.vents.length <= MAX_VENTS && actor.alive,
+        "Invalid vents"
+      );
+      for (const v of k.vents) {
+        closedRecord(v, ["x", "y", "ticks"]);
+        requireContract(pos2(v), "Invalid vent");
+        safeInteger(v.ticks, 1, VENT_TICKS);
+      }
+    }
+    if (k.strip !== void 0) {
+      closedRecord(k.strip, ["x", "y", "x2", "y2", "ticks", "next"], ["el"]);
+      tomeEl(k.strip);
+      requireContract(
+        pos2(k.strip) && Number.isFinite(k.strip.x2) && Number.isFinite(k.strip.y2) && actor.alive,
+        "Invalid strip"
+      );
+      safeInteger(k.strip.ticks, 1, STRIP_TICKS);
+      safeInteger(k.strip.next, 1, UQ_PULSE_TICKS);
+    }
+    for (const [key5, max] of [
+      ["hareCd", HARE_EVERY_MAX],
+      ["kindleCd", KINDLE_EVERY_MAX],
+      ["antler", ANTLER_TICKS]
+    ])
+      if (k[key5] !== void 0) safeInteger(k[key5], 1, max);
+    if (k.scorch !== void 0) {
+      closedRecord(k.scorch, ["x", "y", "x2", "y2", "ticks", "next"]);
+      requireContract(
+        pos2(k.scorch) && Number.isFinite(k.scorch.x2) && Number.isFinite(k.scorch.y2),
+        "Invalid burning furrow"
+      );
+      safeInteger(k.scorch.ticks, 1, SCORCH_WAIT + SCORCH_BURN);
+      safeInteger(k.scorch.next, 1, UQ_PULSE_TICKS);
+    }
+    if (k.hares !== void 0) {
+      requireContract(
+        Array.isArray(k.hares) && k.hares.length >= 1 && k.hares.length <= HARE_MAX,
+        "Invalid ember bunnies"
+      );
+      for (const h of k.hares) {
+        closedRecord(h, ["n", "bx", "by", "fx", "fy", "tx", "ty", "age", "last"]);
+        requireContract(
+          [h.bx, h.by, h.fx, h.fy, h.tx, h.ty].every(Number.isFinite) && (h.last === "" || id(h.last)),
+          "Invalid ember bunny"
+        );
+        safeInteger(h.n, 0, 1e9);
+        safeInteger(h.age, 0, HARE_LIFE);
+      }
+    }
+    if (k.harePops !== void 0) {
+      requireContract(
+        Array.isArray(k.harePops) && k.harePops.length >= 1 && k.harePops.length <= HARE_MAX * 2,
+        "Invalid ember bursts"
+      );
+      for (const q of k.harePops) {
+        closedRecord(q, ["x", "y", "ticks"]);
+        requireContract(pos2(q), "Invalid ember burst");
+        safeInteger(q.ticks, 1, HARE_POP_TICKS);
+      }
+    }
+    if (k.cinders !== void 0) {
+      requireContract(
+        Array.isArray(k.cinders) && k.cinders.length >= 1 && k.cinders.length <= CINDER_MAX,
+        "Invalid cinders"
+      );
+      for (const q of k.cinders) {
+        closedRecord(q, ["x", "y", "ticks", "next"]);
+        requireContract(pos2(q), "Invalid cinder patch");
+        safeInteger(q.ticks, 1, CINDER_TICKS);
+        safeInteger(q.next, 1, UQ_PULSE_TICKS);
+      }
+    }
+    if (k.kindle !== void 0) {
+      closedRecord(k.kindle, ["x", "y", "ticks"]);
+      requireContract(pos2(k.kindle), "Invalid starburst");
+      safeInteger(k.kindle.ticks, 1, KINDLE_TICKS);
+    }
+    for (const [key5, max] of [
+      ["ssCd", SS_EVERY],
+      ["splN", SPL_EVERY - 1],
+      ["gvCd", GV_EVERY]
+    ])
+      if (k[key5] !== void 0) safeInteger(k[key5], 1, max);
+    if (k.pane !== void 0) {
+      const p = k.pane;
+      closedRecord(p, ["x", "y", "ax", "ay", "age"]);
+      requireContract(pos2(p) && Math.abs(Math.hypot(p.ax, p.ay) - 1) < 1e-6 && actor.alive, "Invalid glass copy");
+      safeInteger(p.age, 0, PANE_TICKS - 1);
+    }
+    if (k.mirrors !== void 0) {
+      requireContract(
+        Array.isArray(k.mirrors) && k.mirrors.length >= 1 && k.mirrors.length <= SS_STOPS,
+        "Invalid mirrors"
+      );
+      for (const m of k.mirrors) {
+        closedRecord(m, ["x", "y", "rise", "age"]);
+        requireContract(pos2(m), "Invalid mirror");
+        safeInteger(m.rise, 0, SS_RISE_MAX);
+        safeInteger(m.age, 0, m.rise + SS_BURST + SS_RING - 1);
+      }
+    }
+    if (k.splinters !== void 0) {
+      requireContract(
+        Array.isArray(k.splinters) && k.splinters.length >= 1 && k.splinters.length <= SPL_SHARDS * 2,
+        "Invalid glass shards"
+      );
+      for (const q of k.splinters) {
+        closedRecord(q, ["n", "x", "y", "vx", "vy", "b", "age"], ["el"]);
+        tomeEl(q);
+        requireContract(pos2(q) && Number.isFinite(q.vx) && Number.isFinite(q.vy), "Invalid glass shard");
+        safeInteger(q.n, 0, 1e9);
+        safeInteger(q.b, 0, SPL_BOUNCES);
+        safeInteger(q.age, 0, SPL_LIFE - 1);
+      }
+    }
+    if (k.glass !== void 0) {
+      const g = k.glass;
+      closedRecord(g, ["x", "y", "ticks", "act", "age", "ax", "ay", "n", "tx", "ty"], ["el"]);
+      tomeEl(g);
+      requireContract(
+        pos2(g) && [g.ax, g.ay, g.tx, g.ty].every(Number.isFinite) && ["", "bash", "combo", "cast", "flurry"].includes(g.act) && actor.alive,
+        "Invalid reflection"
+      );
+      safeInteger(g.ticks, 1, GV_TICKS);
+      safeInteger(g.age, 0, GV_TICKS);
+      safeInteger(g.n, 0, 1e6);
+    }
+    if (k.glassPop !== void 0) {
+      closedRecord(k.glassPop, ["x", "y", "ticks"]);
+      requireContract(pos2(k.glassPop), "Invalid shattered reflection");
+      safeInteger(k.glassPop.ticks, 1, GV_POP);
+    }
+    if (k.tbCd !== void 0) safeInteger(k.tbCd, 1, TB_EVERY_MAX);
+    if (k.hfGlass !== void 0) {
+      const g = k.hfGlass;
+      closedRecord(g, ["x", "y", "target", "age"]);
+      requireContract(pos2(g) && typeof g.target === "string" && g.target.length <= 240, "Invalid hourglass");
+      safeInteger(g.age, 0, HF_TICKS - 1);
+    }
+    if (k.shEcho !== void 0) {
+      const e = k.shEcho;
+      closedRecord(e, ["x", "y", "r", "age"]);
+      requireContract(pos2(e), "Invalid sand echo");
+      safeInteger(e.r, 1, 400);
+      safeInteger(e.age, 0, SH_TICKS - 1);
+    }
+    if (k.clock !== void 0) {
+      closedRecord(k.clock, ["x", "y", "age"]);
+      requireContract(pos2(k.clock), "Invalid frozen clock");
+      safeInteger(k.clock.age, 0, CLOCK_TICKS - 1);
+    }
+    if (k.turn !== void 0) {
+      closedRecord(k.turn, ["skill", "age"]);
+      requireContract(CLASS_SKILL_IDS.includes(k.turn.skill), "Invalid turn back");
+      safeInteger(k.turn.age, 0, TB_SHOW - 1);
+    }
+    if (k.lidBite !== void 0) {
+      const b = k.lidBite;
+      closedRecord(b, ["x", "y", "dx", "dy", "age", "src", "grit"]);
+      requireContract(
+        pos2(b) && Number.isFinite(b.dx) && Number.isFinite(b.dy) && typeof b.src === "string" && b.src.length <= 240,
+        "Invalid vault lid"
+      );
+      safeInteger(b.age, 0, LID_TICKS - 1);
+      safeInteger(b.grit, 0, 99);
+    }
+    if (k.stCoin !== void 0) {
+      const q = k.stCoin, ids2 = (m) => m && typeof m === "object" && !Array.isArray(m) && Object.keys(m).length <= ST_SEEN_MAX && Object.entries(m).every(([id2, t]) => id2.length <= 240 && Number.isSafeInteger(t));
+      closedRecord(q, ["ox", "oy", "x", "y", "vx", "vy", "age", "last", "touch", "seen", "hitAt"]);
+      requireContract(
+        pos2(q) && [q.ox, q.oy, q.vx, q.vy].every(Number.isFinite) && typeof q.last === "string" && q.last.length <= 240 && ids2(q.seen) && ids2(q.hitAt),
+        "Invalid spinning coin"
+      );
+      safeInteger(q.age, 0, ST_END - 1);
+      safeInteger(q.touch, 0, ST_END);
+    }
+    if (k.blCoins !== void 0) {
+      const b = k.blCoins;
+      closedRecord(b, ["age", "coins"]);
+      requireContract(
+        Array.isArray(b.coins) && b.coins.length >= 1 && b.coins.length <= BL_COINS,
+        "Invalid bomb coins"
+      );
+      for (const q of b.coins) {
+        closedRecord(q, ["fx", "fy", "x", "y"]);
+        requireContract(pos2(q) && Number.isFinite(q.fx) && Number.isFinite(q.fy), "Invalid bomb coin");
+      }
+      safeInteger(b.age, 0, BL_END - 1);
+    }
+    if (k.titheCd !== void 0) safeInteger(k.titheCd, 1, TITHE_EVERY);
+    if (k.tithe !== void 0) {
+      const t = k.tithe;
+      closedRecord(t, ["target", "x", "y", "age", "end"], ["snap"]);
+      requireContract(
+        pos2(t) && typeof t.target === "string" && t.target.length <= 240 && (t.snap === void 0 || t.snap === true),
+        "Invalid tithe tether"
+      );
+      safeInteger(t.age, 0, TITHE_TICKS + TITHE_FADE);
+      safeInteger(t.end, 0, TITHE_TICKS);
+    }
+    if (k.seal !== void 0) safeInteger(k.seal, 1, SEAL_MAX);
+    if (k.sealBurst !== void 0) {
+      closedRecord(k.sealBurst, ["x", "y", "age"]);
+      requireContract(pos2(k.sealBurst), "Invalid seal burst");
+      safeInteger(k.sealBurst.age, 0, SEAL_SHOW - 1);
+    }
+    if (k.fcCage !== void 0) {
+      closedRecord(k.fcCage, ["x", "y", "r", "age"]);
+      requireContract(pos2(k.fcCage), "Invalid crystal cage");
+      safeInteger(k.fcCage.r, 1, 400);
+      safeInteger(k.fcCage.age, 0, FC_TICKS - 1);
+    }
+    if (k.slShards !== void 0) {
+      requireContract(
+        Array.isArray(k.slShards) && k.slShards.length >= 1 && k.slShards.length <= SL_MAX,
+        "Invalid split bolts"
+      );
+      for (const q of k.slShards) {
+        closedRecord(q, ["from", "x", "y", "age"], ["to", "tx", "ty"]);
+        requireContract(
+          pos2(q) && typeof q.from === "string" && q.from.length <= 240 && (q.to === void 0 ? q.tx === void 0 && q.ty === void 0 : typeof q.to === "string" && q.to.length <= 240 && Number.isFinite(q.tx) && Number.isFinite(q.ty)),
+          "Invalid split bolt"
+        );
+        safeInteger(q.age, 0, SL_END - 1);
+      }
+    }
+    if (k.msCd !== void 0) safeInteger(k.msCd, 1, MS_EVERY);
+    if (k.mcCd !== void 0) safeInteger(k.mcCd, 1, MC_EVERY);
+    if (k.mcSlam !== void 0) {
+      closedRecord(k.mcSlam, ["x", "y", "age"]);
+      requireContract(pos2(k.mcSlam), "Invalid acid slam");
+      safeInteger(k.mcSlam.age, 0, MC_SHOW - 1);
+    }
+    if (k.sfGlob !== void 0) {
+      const g = k.sfGlob;
+      closedRecord(g, ["x", "y", "tx", "ty", "age"]);
+      requireContract(pos2(g) && Number.isFinite(g.tx) && Number.isFinite(g.ty), "Invalid bile glob");
+      safeInteger(g.age, 0, SF_FLY - 1);
+    }
+    if (k.sfPool !== void 0) {
+      closedRecord(k.sfPool, ["x", "y", "age", "next"]);
+      requireContract(pos2(k.sfPool), "Invalid bile puddle");
+      safeInteger(k.sfPool.age, 0, SF_POOL - 1);
+      safeInteger(k.sfPool.next, 1, 30);
+    }
+    if (k.fsPods !== void 0) {
+      requireContract(
+        Array.isArray(k.fsPods) && k.fsPods.length >= 1 && k.fsPods.length <= FS_PODS * 2,
+        "Invalid spore pods"
+      );
+      for (const q of k.fsPods) {
+        closedRecord(q, ["x", "y", "fx", "fy", "age"], ["pop"]);
+        requireContract(pos2(q) && Number.isFinite(q.fx) && Number.isFinite(q.fy), "Invalid spore pod");
+        safeInteger(q.age, 0, FS_FLY + FS_WAIT + FS_SHOW);
+        if (q.pop !== void 0) safeInteger(q.pop, FS_FLY, FS_FLY + FS_WAIT);
+      }
+    }
+    if (k.bhCd !== void 0) safeInteger(k.bhCd, 1, BH_EVERY);
+    if (k.bhN !== void 0) safeInteger(k.bhN, 0, 1e6);
+    if (k.bhSheds !== void 0) {
+      requireContract(
+        Array.isArray(k.bhSheds) && k.bhSheds.length >= 1 && k.bhSheds.length <= BH_MAX,
+        "Invalid boglings"
+      );
+      for (const q of k.bhSheds) {
+        closedRecord(q, ["n", "x", "y", "fx", "fy", "age"], ["slag"]);
+        requireContract(
+          pos2(q) && Number.isFinite(q.fx) && Number.isFinite(q.fy) && (q.slag === void 0 || q.slag === true),
+          "Invalid bogling"
+        );
+        safeInteger(q.n, 0, 1e6);
+        safeInteger(q.age, 0, BH_LIFE - 1);
+      }
+    }
+    if (k.bhTrail !== void 0) {
+      requireContract(
+        Array.isArray(k.bhTrail) && k.bhTrail.length >= 1 && k.bhTrail.length <= BH_TRAIL_MAX,
+        "Invalid slag trail"
+      );
+      for (const q of k.bhTrail) {
+        closedRecord(q, ["n", "x", "y", "age"]);
+        requireContract(pos2(q), "Invalid slag trail");
+        safeInteger(q.n, 0, 1e6);
+        safeInteger(q.age, 0, BH_TRAIL - 1);
+      }
+    }
+    if (k.mwWell !== void 0) {
+      closedRecord(k.mwWell, ["x", "y", "age"]);
+      requireContract(pos2(k.mwWell), "Invalid moon well");
+      safeInteger(k.mwWell.age, 0, MW_LIFE - 1);
+    }
+    if (k.rtLance !== void 0) {
+      const l = k.rtLance;
+      closedRecord(l, ["x", "y", "dx", "dy", "len", "age", "hit"]);
+      requireContract(
+        pos2(l) && Number.isFinite(l.dx) && Number.isFinite(l.dy) && Math.abs(Math.hypot(l.dx, l.dy) - 1) < 1e-3 && Number.isFinite(l.len) && l.len > 0 && l.len <= 400 && Array.isArray(l.hit) && l.hit.length <= RT_HITS && l.hit.every((id2) => typeof id2 === "string"),
+        "Invalid rime lance"
+      );
+      safeInteger(l.age, 0, RT_LIFE - 1);
+    }
+    if (k.hsOrb !== void 0) {
+      closedRecord(k.hsOrb, ["age", "n"]);
+      safeInteger(k.hsOrb.age, 0, 1e6);
+      safeInteger(k.hsOrb.n, 0, 1e6);
+    }
+    if (k.hsShots !== void 0) {
+      requireContract(
+        Array.isArray(k.hsShots) && k.hsShots.length >= 1 && k.hsShots.length <= HS_SHOTS,
+        "Invalid shard lances"
+      );
+      for (const q of k.hsShots) {
+        closedRecord(q, ["i", "x", "y", "tx", "ty", "age"]);
+        requireContract(pos2(q) && Number.isFinite(q.tx) && Number.isFinite(q.ty), "Invalid shard lance");
+        safeInteger(q.i, 0, 3);
+        safeInteger(q.age, 0, HS_LIFE - 1);
+      }
+    }
+    if (k.hsBack !== void 0) {
+      closedRecord(k.hsBack, ["age", "orb"]);
+      safeInteger(k.hsBack.age, 0, HS_BACK - 1);
+      safeInteger(k.hsBack.orb, 0, 1e6);
+    }
+    if (k.mrCd !== void 0) safeInteger(k.mrCd, 1, MR_EVERY);
+    if (k.mrSheet !== void 0) {
+      closedRecord(k.mrSheet, ["x", "y", "age"]);
+      requireContract(pos2(k.mrSheet), "Invalid frozen sheet");
+      safeInteger(k.mrSheet.age, 0, MR_LIFE - 1);
+    }
+    if (k.rfPit !== void 0) {
+      closedRecord(k.rfPit, ["x", "y", "age"]);
+      requireContract(pos2(k.rfPit), "Invalid ruinfall pit");
+      safeInteger(k.rfPit.age, 0, RF_END - 1);
+    }
+    if (k.htStrike !== void 0) {
+      const h = k.htStrike;
+      closedRecord(h, ["x", "y", "target", "age"]);
+      requireContract(pos2(h) && typeof h.target === "string" && h.target.length <= 240, "Invalid hooked tail");
+      safeInteger(h.age, 0, HT_END - 1);
+    }
+    if (k.smCd !== void 0) safeInteger(k.smCd, 1, SM_EVERY);
+    if (k.smBreath !== void 0) {
+      const b = k.smBreath;
+      closedRecord(b, ["x", "y", "dx", "dy", "age"]);
+      requireContract(
+        pos2(b) && Number.isFinite(b.dx) && Number.isFinite(b.dy) && Math.abs(Math.hypot(b.dx, b.dy) - 1) < 0.01,
+        "Invalid scarlet fire"
+      );
+      safeInteger(b.age, 0, SC_END - 1);
+    }
+    if (k.asN !== void 0) safeInteger(k.asN, 1, AS_KILLS - 1);
+    if (k.asBurst !== void 0) {
+      closedRecord(k.asBurst, ["x", "y", "age"]);
+      requireContract(pos2(k.asBurst), "Invalid ashscale flare");
+      safeInteger(k.asBurst.age, 0, AS_END - 1);
+    }
+    if (k.rsWalk !== void 0) safeInteger(k.rsWalk, 1, RS_CURL);
+    if (k.rsRoll !== void 0) {
+      closedRecord(k.rsRoll, ["age", "hit"]);
+      safeInteger(k.rsRoll.age, 0, 1e9);
+      requireContract(
+        Array.isArray(k.rsRoll.hit) && k.rsRoll.hit.length <= 64 && k.rsRoll.hit.every((id2) => typeof id2 === "string"),
+        "Invalid shell roll"
+      );
+    }
+    if (k.rsPop !== void 0) {
+      closedRecord(k.rsPop, ["x", "y", "age"]);
+      requireContract(pos2(k.rsPop), "Invalid shell pop");
+      safeInteger(k.rsPop.age, 0, RS_POP - 1);
+    }
+    if (k.frRing !== void 0) {
+      closedRecord(k.frRing, ["x", "y", "age", "at"]);
+      requireContract(pos2(k.frRing), "Invalid fairy ring");
+      safeInteger(k.frRing.age, 0, FR_LIFE - 1);
+      safeInteger(k.frRing.at, 0, 1e12);
+    }
+    if (k.swCd !== void 0) safeInteger(k.swCd, 1, SW_EVERY);
+    if (k.rgCd !== void 0) safeInteger(k.rgCd, 1, RG_EVERY);
+    if (k.rgRoot !== void 0) {
+      closedRecord(k.rgRoot, ["x", "y", "age", "to"]);
+      requireContract(pos2(k.rgRoot), "Invalid root burst");
+      safeInteger(k.rgRoot.age, 0, RG_SHOW - 1);
+      requireContract(
+        Array.isArray(k.rgRoot.to) && k.rgRoot.to.length <= RG_N && k.rgRoot.to.every((t) => t && typeof t.id === "string" && pos2(t) && Object.keys(t).length === 3),
+        "Invalid root targets"
+      );
+    }
+    if (k.rpCd !== void 0) safeInteger(k.rpCd, 1, RP_EVERY);
+    if (k.rpReap !== void 0) {
+      closedRecord(k.rpReap, ["x", "y", "ax", "ay", "age"]);
+      requireContract(pos2(k.rpReap) && Number.isFinite(k.rpReap.ax) && Number.isFinite(k.rpReap.ay), "Invalid reap");
+      safeInteger(k.rpReap.age, 0, RP_SHOW - 1);
+    }
+    if (k.wxCd !== void 0) safeInteger(k.wxCd, 1, WX_EVERY);
+    if (k.wxBee !== void 0) {
+      closedRecord(k.wxBee, ["x", "y", "id", "tx", "ty", "age"]);
+      requireContract(
+        pos2(k.wxBee) && typeof k.wxBee.id === "string" && Number.isFinite(k.wxBee.tx) && Number.isFinite(k.wxBee.ty),
+        "Invalid bee"
+      );
+      safeInteger(k.wxBee.age, 0, WX_SHOW - 1);
+    }
+    if (k.wcCd !== void 0) safeInteger(k.wcCd, 1, WC_EVERY);
+    if (k.wcBurst !== void 0) {
+      const w = k.wcBurst;
+      closedRecord(w, ["x", "y", "target", "age"]);
+      requireContract(pos2(w) && typeof w.target === "string" && w.target.length <= 240, "Invalid thorn wyrm");
+      safeInteger(w.age, 0, WC_END - 1);
+    }
+    if (k.snSprouts !== void 0) {
+      requireContract(
+        Array.isArray(k.snSprouts) && k.snSprouts.length >= 1 && k.snSprouts.length <= SN_MAX,
+        "Invalid snapseed sprouts"
+      );
+      for (const q of k.snSprouts) {
+        closedRecord(q, ["fx", "fy", "x", "y", "age"]);
+        requireContract(pos2(q) && Number.isFinite(q.fx) && Number.isFinite(q.fy), "Invalid snapseed sprout");
+        safeInteger(q.age, 0, SN_END - 1);
+      }
+    }
+    if (k.gjCd !== void 0) safeInteger(k.gjCd, 1, GJ_EVERY);
+    if (k.gjFlop !== void 0) {
+      closedRecord(k.gjFlop, ["x", "y", "age"]);
+      requireContract(pos2(k.gjFlop), "Invalid belly flop");
+      safeInteger(k.gjFlop.age, 0, GJ_END - 1);
+    }
+    if (k.pmStill !== void 0) safeInteger(k.pmStill, 1, PM_STILL);
+    for (const [key5, top] of [
+      ["pmPit", PM_FIRST + PM_EVERY - 1],
+      ["pmFill", PM_FILL - 1],
+      ["sgBurst", SG_SHOW - 1]
+    ])
+      if (k[key5] !== void 0) {
+        closedRecord(k[key5], ["x", "y", "age"]);
+        requireContract(pos2(k[key5]), "Invalid " + key5);
+        safeInteger(k[key5].age, 0, top);
+      }
+    if (k.sgHusk !== void 0) {
+      const h = k.sgHusk;
+      closedRecord(h, [], ["hp", "ticks"]);
+      requireContract(h.hp === void 0 !== (h.ticks === void 0), "Invalid husk");
+      if (h.ticks !== void 0) safeInteger(h.ticks, 1, SG_REGROW);
+      else requireContract(typeof h.hp === "string" && /^[1-9][0-9]{0,29}$/.test(h.hp), "Invalid husk");
+    }
+    if (k.srCd !== void 0) safeInteger(k.srCd, 1, SR_EVERY);
+    if (k.srDevil !== void 0) {
+      const d = k.srDevil;
+      closedRecord(d, ["fx", "fy", "x", "y", "hold", "age"]);
+      requireContract(pos2(d) && Number.isFinite(d.fx) && Number.isFinite(d.fy), "Invalid dust devil");
+      safeInteger(d.hold, 1, SR_HOLD_MAX);
+      safeInteger(d.age, 0, SR_ARRIVE + d.hold + SR_FADE - 1);
+    }
+    if (k.ihHits !== void 0) {
+      requireContract(
+        Array.isArray(k.ihHits) && k.ihHits.length >= 1 && k.ihHits.length <= IH_MAX,
+        "Invalid hardening"
+      );
+      for (const n of k.ihHits) safeInteger(n, 1, IH_LAST);
+    }
+    if (k.ihSnap !== void 0) safeInteger(k.ihSnap, 1, IH_SNAP);
+    if (k.stLift !== void 0) safeInteger(k.stLift, 1, ST_LIFT);
+    if (k.stDodge !== void 0) {
+      closedRecord(k.stDodge, ["dx", "dy", "age"]);
+      requireContract([k.stDodge.dx, k.stDodge.dy].every(Number.isFinite), "Invalid dodge");
+      safeInteger(k.stDodge.age, 0, ST_SHOW - 1);
+    }
+    if (k.cwPop !== void 0) {
+      closedRecord(k.cwPop, ["x", "y", "dx", "age"]);
+      requireContract(pos2(k.cwPop) && Number.isFinite(k.cwPop.dx), "Invalid stone");
+      safeInteger(k.cwPop.age, 0, CW_POP - 1);
+    }
+    if (k.mlCd !== void 0) safeInteger(k.mlCd, 1, ML_EVERY);
+    if (k.glCd !== void 0) safeInteger(k.glCd, 1, GL_EVERY);
+    if (k.cjN !== void 0) safeInteger(k.cjN, 1, CJ_EVERY - 1);
+    for (const [key5, top] of [
+      ["mlCloud", ML_CLOUD - 1],
+      ["cjCroak", CJ_SHOW - 1],
+      ["glDrop", GL_DROP - 1]
+    ])
+      if (k[key5] !== void 0) {
+        closedRecord(k[key5], ["x", "y", "age"]);
+        requireContract(pos2(k[key5]), "Invalid " + key5);
+        safeInteger(k[key5].age, 0, top);
+      }
+    if (k.cjBar !== void 0) {
+      const b = k.cjBar;
+      closedRecord(b, ["hp", "full", "ticks"]);
+      for (const n of [b.hp, b.full])
+        requireContract(typeof n === "string" && /^[1-9][0-9]{0,29}$/.test(n), "Invalid croak Barrier");
+      requireContract(BigInt(b.hp) <= BigInt(b.full), "Invalid croak Barrier");
+      safeInteger(b.ticks, 1, CJ_BAR);
+    }
+    if (k.glLeech !== void 0) {
+      const l = k.glLeech;
+      closedRecord(l, ["target", "fx", "fy", "tx", "ty", "at", "age"]);
+      requireContract(typeof l.target === "string" && l.target.length > 0, "Invalid leech");
+      requireContract([l.fx, l.fy, l.tx, l.ty].every(Number.isFinite), "Invalid leech");
+      safeInteger(l.age, 0, GL_LIFE - 1);
+      safeInteger(l.at, 0, l.age);
+    }
+    if (k.swStone !== void 0) {
+      closedRecord(k.swStone, ["x", "y", "age"]);
+      requireContract(pos2(k.swStone), "Invalid stone skin");
+      safeInteger(k.swStone.age, 0, SW_LIFE - 1);
+    }
+    if (k.bhGulps !== void 0) {
+      requireContract(
+        Array.isArray(k.bhGulps) && k.bhGulps.length >= 1 && k.bhGulps.length <= BH_MAX * 2,
+        "Invalid gulps"
+      );
+      for (const q of k.bhGulps) {
+        closedRecord(q, ["n", "x", "y", "age"], ["slag", "melt"]);
+        requireContract(
+          pos2(q) && (q.slag === void 0 || q.slag === true) && (q.melt === void 0 || q.melt === true),
+          "Invalid gulp"
+        );
+        safeInteger(q.n, 0, 1e6);
+        safeInteger(q.age, 0, BH_SHOW - 1);
+      }
+    }
+    if (k.msHit !== void 0) {
+      const h = k.msHit;
+      closedRecord(h, ["src", "x", "y", "age"]);
+      requireContract(pos2(h) && typeof h.src === "string" && h.src.length <= 240, "Invalid mirror strike");
+      safeInteger(h.age, 0, MS_TICKS - 1);
+    }
+    for (const [key5, max] of [
+      ["oathCd", OATH_EVERY],
+      ["plate", PLATE_TICKS],
+      ["plateCd", PLATE_EVERY]
+    ])
+      if (k[key5] !== void 0) safeInteger(k[key5], 1, max);
+    if (k.lode !== void 0) {
+      closedRecord(k.lode, ["x", "y", "ticks", "from"]);
+      requireContract(
+        pos2(k.lode) && Array.isArray(k.lode.from) && k.lode.from.length <= LODE_SHOWN,
+        "Invalid lodestone pull"
+      );
+      for (const p of k.lode.from) {
+        closedRecord(p, ["x", "y"]);
+        requireContract(pos2(p), "Invalid lodestone pull");
+      }
+      safeInteger(k.lode.ticks, 1, LODE_TICKS);
+    }
+    if (k.oath !== void 0) {
+      const o = k.oath;
+      closedRecord(o, ["x", "y", "fx", "fy", "tx", "ty", "back", "hit", "ticks"]);
+      requireContract(
+        pos2(o) && [o.fx, o.fy, o.tx, o.ty].every(Number.isFinite) && typeof o.back === "boolean" && Array.isArray(o.hit) && o.hit.length <= OATH_MAX_HITS && o.hit.every(id) && new Set(o.hit).size === o.hit.length,
+        "Invalid spirit shield"
+      );
+      safeInteger(o.ticks, 1, OATH_TICKS);
+    }
+    if (k.wardUp !== void 0) {
+      closedRecord(k.wardUp, ["n", "ticks"]);
+      safeInteger(k.wardUp.n, 1, WARD_SHIELDS);
+      safeInteger(k.wardUp.ticks, 1, WARD_LAST);
+    }
+    if (k.wardHit !== void 0) {
+      closedRecord(k.wardHit, ["x", "y", "dx", "dy", "ticks"], ["el"]);
+      tomeEl(k.wardHit);
+      requireContract(
+        pos2(k.wardHit) && Number.isFinite(k.wardHit.dx) && Number.isFinite(k.wardHit.dy),
+        "Invalid shield burst"
+      );
+      safeInteger(k.wardHit.ticks, 1, WARD_HIT_TICKS);
+    }
+    for (const [key5, max] of [
+      ["cleaveCd", CLEAVE_EVERY],
+      ["skullCd", SKULL_EVERY],
+      ["shroudCd", SHROUD_MAX]
+    ])
+      if (k[key5] !== void 0) safeInteger(k[key5], 1, max);
+    if (k.cleave !== void 0) {
+      closedRecord(k.cleave, ["x", "y", "sx", "sy", "ticks"]);
+      requireContract(
+        pos2(k.cleave) && Number.isFinite(k.cleave.sx) && Number.isFinite(k.cleave.sy),
+        "Invalid grave cleave"
+      );
+      safeInteger(k.cleave.ticks, 1, CLEAVE_SHOW);
+    }
+    if (k.grave !== void 0) {
+      const g = k.grave;
+      closedRecord(g, ["x", "y", "ticks", "hold", "held"]);
+      requireContract(
+        pos2(g) && Array.isArray(g.held) && g.held.length <= GRAVE_HELD && g.held.every(id) && new Set(g.held).size === g.held.length,
+        "Invalid grave"
+      );
+      safeInteger(g.hold, 1, GRAVE_HOLD_MAX);
+      safeInteger(g.ticks, 1, GRAVE_RISE + g.hold + GRAVE_SINK);
+    }
+    if (k.skull !== void 0) {
+      closedRecord(k.skull, ["x", "y", "tx", "ty", "ticks"], ["el", "r", "n", "tx2", "ty2"]);
+      tomeEl(k.skull);
+      if (k.skull.r !== void 0) safeInteger(k.skull.r, 1, 400);
+      if (k.skull.n !== void 0) safeInteger(k.skull.n, 0, 12);
+      requireContract(
+        k.skull.tx2 === void 0 === (k.skull.ty2 === void 0) && (k.skull.tx2 === void 0 || Number.isFinite(k.skull.tx2) && Number.isFinite(k.skull.ty2)),
+        "Invalid second skull"
+      );
+      requireContract(
+        pos2(k.skull) && Number.isFinite(k.skull.tx) && Number.isFinite(k.skull.ty),
+        "Invalid crown flame"
+      );
+      safeInteger(k.skull.ticks, 1, SKULL_FLIGHT);
+    }
+    for (const [key5, max] of [
+      ["skullHit", SKULL_SHOW],
+      ["sunk", SHROUD_SINK],
+      ["risen", SHROUD_SHOW]
+    ])
+      if (k[key5] !== void 0) {
+        closedRecord(k[key5], ["x", "y", "ticks"], key5 === "skullHit" ? ["el", "r", "x2", "y2"] : []);
+        if (key5 === "skullHit") {
+          if (k[key5].r !== void 0) safeInteger(k[key5].r, 1, 400);
+          requireContract(
+            k[key5].x2 === void 0 === (k[key5].y2 === void 0) && (k[key5].x2 === void 0 || Number.isFinite(k[key5].x2) && Number.isFinite(k[key5].y2)),
+            "Invalid second skull burst"
+          );
+        }
+        tomeEl(k[key5]);
+        requireContract(pos2(k[key5]), "Invalid " + key5);
+        safeInteger(k[key5].ticks, 1, max);
+      }
+  }
+  requireContract(Object.keys(k.cooldowns).length || LIVE.some((key5) => k[key5]), "Empty skill record");
+}
+
 // src/shared/contracts/participant_progression.js
 var D8_PROGRESSION_VERSION = "participant-progression-d8-v1";
 var MASTERY_FAMILIES = Object.freeze(["shield", "dagger", "tome"]);
@@ -42155,8 +44605,12 @@ function clearMasteryTreeTransient(t, tree) {
   for (const key5 of fields) t[key5] = empty[key5];
 }
 function validateMasteryTransient(t) {
-  closedRecord(t, Object.keys(emptyMasteryTransient()), ["vigor"]);
+  closedRecord(t, Object.keys(emptyMasteryTransient()), ["vigor", "cairn"]);
   requireContract(t.vigor === void 0 || t.vigor === true, "Vigor blessing flag");
+  if (t.cairn !== void 0) {
+    requireContract(Array.isArray(t.cairn) && t.cairn.length >= 1 && t.cairn.length <= CW_STONES, "Cairn stones");
+    for (const n of t.cairn) safeInteger(n, 1, CW_REGROW);
+  }
   for (const [key5, max] of Object.entries({
     fortitudeStacks: 5,
     fortitudeTicks: 360,
@@ -52826,6 +55280,15 @@ function resolveD9PlayerStats(player) {
       effects[k] = addCombat(effects[k] ?? 0, multiplyCombat(exactDecimal(v), scale3, 1e3));
     for (const k of ["str", "dex", "int"])
       attributes[k] = addCombat(attributes[k], multiplyCombat(exactDecimal(d.attributes?.[k] ?? 0), scale3, 1e3));
+    if (d.unique === "ironhorn-carapace")
+      effects.defPct = addCombat(effects.defPct ?? 0, combatAmount(uniqueStarValue("ironhorn-carapace", d.rarityTier ?? 0), 100));
+    if (d.unique === "cairnwarden-grips") {
+      const up = CW_STONES - (player.d8?.transient?.cairn?.length ?? 0);
+      effects.maxHpPct = addCombat(
+        effects.maxHpPct ?? 0,
+        combatAmount(uniqueStarValue("cairnwarden-grips", d.rarityTier ?? 0) + CW_EACH * up, 100)
+      );
+    }
   }
   for (const [k, v] of Object.entries(classTreeEffects(player.d8))) effects[k] = addCombat(effects[k] ?? 0, v);
   {
@@ -55215,9 +57678,7 @@ export {
   CLASS_SKILL_IDS,
   SKILL_SLOT_COUNT,
   MOVE_SLOT,
-  MAX_SKILL_COOLDOWN_TICKS,
   heroClassOf,
-  classSkillsFor,
   wheelEntriesFor,
   skillLoadout,
   FACES,
@@ -56030,6 +58491,541 @@ export {
   projectLargeCaveFinaleExtractionD13D_G,
   CONSTELLATIONS,
   ACTIVE_NODES,
+  FLURRY_CUTS,
+  FLURRY_GAP_TICKS,
+  COUNTER_WINDOW_TICKS,
+  COUNTER_WINDOW_MAX,
+  SURGE_TICKS,
+  BULWARK_TICKS,
+  EN_GARDE_TICKS,
+  CHARGE_TICKS,
+  ORB_TICKS,
+  ORB_ZAP_TICKS,
+  RUSH_TICKS,
+  HIT_AND_RUN_TICKS,
+  TRAIL_TICKS,
+  TRAIL_PULSE_TICKS,
+  RAM_TICKS,
+  THROW_TICKS,
+  BANNER_TICKS,
+  STILL_TICKS,
+  MAX_THROW_TARGETS,
+  RIPOSTE_TICKS,
+  KEEN_TICKS,
+  EVADE_TICKS,
+  SMOKE_TICKS,
+  WALL_TICKS,
+  ICE_TICKS,
+  FIELD_TICKS,
+  FIELD_MAX,
+  WEAVE_TICKS,
+  PULSE_TICKS,
+  BREATH_REST_TICKS,
+  MEND_TICKS,
+  RIPOSTE_MAX,
+  AFTERSHOCK_TICKS,
+  FAULT_TICKS,
+  HYMN_TICKS,
+  FIRM_TICKS,
+  JUGG_TICKS,
+  AGAIN_TICKS,
+  SPIN_TICKS,
+  TORNADO_TICKS,
+  CLOAK_TICKS,
+  SEED_TICKS,
+  RIME_TICKS,
+  THUNDER_TICKS,
+  MAX_SEEDS,
+  MAX_THAW,
+  MAX_COUNTERS,
+  WAVE_TICKS,
+  SHAKE_TICKS,
+  STORM_TICKS,
+  DUEL_TICKS,
+  MAX_DUEL,
+  PHOENIX_TICKS,
+  SHADE_TICKS,
+  BLOOM_TICKS,
+  MAX_BLOOMS,
+  AEGIS_TICKS,
+  LEAP_TICKS,
+  TITAN_TICKS,
+  SPITE_TICKS,
+  MEMORY_TICKS,
+  HELD_MAX,
+  CUT_GAP_TICKS,
+  FLOWER_TICKS,
+  ECHO_TICKS,
+  STEPPED_TICKS,
+  METEOR_FALL_TICKS,
+  METEOR_GROUND_TICKS,
+  MAX_METEORS,
+  CRACK_TICKS,
+  CRACK_MAX,
+  QUICK_TICKS,
+  POOL_TICKS,
+  POOL_PULSE_TICKS,
+  SHELL_TICKS,
+  HIDE_TICKS,
+  MAX_HIDE,
+  SUN_MAX,
+  SUN_BEAM_TICKS,
+  STAFF_SUNS_TICKS,
+  SUN_BEAM_REACH,
+  sunBeamReach,
+  MOSS_TICKS,
+  MIST_TICKS,
+  GOLD_TICKS,
+  BARK_MAX,
+  BARK_SHOT_TICKS,
+  BARK_REACH,
+  ROOT_TICKS,
+  ROOT_SLOW,
+  ROOT_NEAR,
+  WEB_TICKS,
+  WEB_HOLD,
+  COCOON_EVERY,
+  COCOON_TICKS,
+  COCOON_ELITE_HOLD,
+  COCOON_RADIUS,
+  FURROW_TICKS,
+  FURROW_REACH,
+  FURROW_CONE,
+  VENT_TICKS,
+  MAX_VENTS,
+  VENT_ARM,
+  VENT_HALF,
+  CORE_TICKS,
+  CORE_REACH,
+  STRIP_TICKS,
+  UQ_PULSE_TICKS,
+  TREAD_EVERY,
+  TREAD_RADIUS,
+  TREAD_KNOCK,
+  TREAD_ELITE_KNOCK,
+  TREAD_WAIT,
+  QUAKE_TICKS,
+  CLEAVE_RADIUS,
+  CLEAVE_SHOW,
+  GRAVE_RADIUS,
+  GRAVE_RISE,
+  GRAVE_SINK,
+  GRAVE_HELD,
+  GRAVE_HIT,
+  SKULL_FLIGHT,
+  SKULL_RADIUS,
+  SKULL_SHOW,
+  SHROUD_SINK,
+  SHROUD_HEAL,
+  SHROUD_BURST,
+  SHROUD_RADIUS,
+  SHROUD_SHOW,
+  SHROUD_MAX,
+  LODE_RADIUS,
+  LODE_SHOWN,
+  LODE_TICKS,
+  OATH_EVERY,
+  OATH_REACH,
+  OATH_SPEED,
+  OATH_HIT,
+  OATH_MAX_HITS,
+  OATH_TICKS,
+  WARD_SHIELDS,
+  WARD_LAST,
+  WARD_RADIUS,
+  WARD_HIT_TICKS,
+  PLATE_BELOW,
+  PLATE_TICKS,
+  PLATE_EVERY,
+  PLATE_RADIUS,
+  PLATE_KNOCK,
+  PLATE_ELITE_KNOCK,
+  SPORE_SLOW,
+  SPORE_SHOW_TICKS,
+  GAZECAP_MAX,
+  GAZECAP_RADIUS,
+  CAP_POP_TICKS,
+  EYE_TICKS,
+  EYE_MAX_RAYS,
+  EYE_REACH,
+  CROWN_EVERY,
+  CROWN_MARK_TICKS,
+  CROWN_REACH,
+  CROAK_REACH,
+  CROAK_TICKS,
+  CROAK_SHOVE,
+  CROAK_ELITE_SHOVE,
+  LASH_REACH,
+  LASH_REEL,
+  LASH_HIT,
+  LASH_TICKS,
+  SPAWN_EVERY,
+  HOPPER_MAX,
+  EGG_LAND,
+  EGG_HATCH,
+  HOP_OUT,
+  HOP_SPEED,
+  HOP_REACH,
+  HOP_SWELL,
+  HOP_LIFE,
+  HOP_POP_RADIUS,
+  HOP_SLOW,
+  HOP_SLOW_TICKS,
+  HOP_POP_TICKS,
+  BOIL_EVERY,
+  BOIL_MAX,
+  BOIL_REACH,
+  BOIL_POP_TICKS,
+  SCORCH_WAIT,
+  SCORCH_BURN,
+  SCORCH_HALF,
+  SCORCH_AHEAD,
+  HARE_MAX,
+  HARE_WAKE,
+  HARE_HOP,
+  HARE_REST,
+  HARE_REACH,
+  HARE_HIT,
+  HARE_ATTACK,
+  HARE_POP_TICKS,
+  CINDER_TICKS,
+  CINDER_RADIUS,
+  CINDER_MAX,
+  KINDLE_NEAR,
+  KINDLE_RADIUS,
+  KINDLE_ATTACK,
+  KINDLE_KNOCK,
+  KINDLE_ELITE_KNOCK,
+  KINDLE_TICKS,
+  KINDLE_EVERY_MAX,
+  ANTLER_TICKS,
+  ANTLER_PULSES,
+  HARE_LIFE,
+  PANE_HIT,
+  PANE_SHATTER,
+  PANE_TICKS,
+  PANE_SIDE,
+  SS_EVERY,
+  SS_BURST,
+  SS_RING,
+  SS_RADIUS,
+  SS_RISE_MAX,
+  SPL_EVERY,
+  SPL_SHARDS,
+  SPL_SPREAD,
+  SPL_SPEED,
+  SPL_HIT,
+  SPL_BOUNCES,
+  SPL_LIFE,
+  GV_BELOW,
+  GV_TICKS,
+  GV_OUT,
+  GV_EVERY,
+  GV_ACT,
+  GV_SPEED,
+  GV_REACH,
+  GV_POP,
+  GV_BESIDE,
+  HF_LOCK,
+  HF_DROP,
+  HF_TICKS,
+  HF_RADIUS,
+  SH_FORM,
+  SH_SPIN,
+  SH_TICKS,
+  SH_CUTS,
+  CLOCK_TICKS,
+  CLOCK_RADIUS,
+  CLOCK_CHILL_EVERY,
+  TB_WAIT,
+  TB_SHOW,
+  TB_EVERY_MAX,
+  clockSkipsTick,
+  LID_BITE,
+  LID_REACH,
+  LID_HALF,
+  LID_TICKS,
+  ST_FLY,
+  ST_LIFE,
+  ST_SETTLE,
+  ST_FADE,
+  ST_END,
+  ST_CR,
+  ST_SPEED,
+  ST_HIT_EVERY,
+  ST_RETOUCH,
+  ST_SEARCH,
+  ST_BESIDE,
+  ST_SEEN_MAX,
+  BL_COINS,
+  BL_SIDE,
+  BL_RELEASE,
+  BL_GAP,
+  BL_FLY,
+  BL_PAST,
+  BL_FUSE,
+  BL_RADIUS,
+  BL_END,
+  TITHE_EVERY,
+  TITHE_TICKS,
+  TITHE_PULSE,
+  TITHE_SNAP,
+  TITHE_FADE,
+  blBoomAge,
+  MC_R,
+  MC_EVERY,
+  MC_SLOW,
+  MC_SHOW,
+  MC_HINDER,
+  SF_FLY,
+  SF_HIT,
+  SF_POOL_R,
+  SF_POOL,
+  FS_FLY,
+  FS_OUT,
+  FS_WAIT,
+  FS_TOUCH,
+  FS_POD_R,
+  FS_SHOW,
+  FS_PODS,
+  BH_CHANCE,
+  BH_EVERY,
+  BH_MAX,
+  BH_FLY,
+  BH_LAND,
+  BH_SPEED,
+  BH_GULP,
+  BH_LIFE,
+  BH_SLAG,
+  BH_STEP,
+  BH_TRAIL,
+  BH_TRAIL_R,
+  BH_TRAIL_MAX,
+  BH_SHOW,
+  MW_R,
+  MW_PULL,
+  MW_LIFE,
+  MW_TUG,
+  RT_RUN,
+  RT_HALF,
+  RT_LIFE,
+  RT_HITS,
+  HS_FIRST,
+  HS_EVERY,
+  HS_WIND,
+  HS_LIFE,
+  HS_SEARCH,
+  HS_HALF,
+  HS_PAST,
+  HS_ORX,
+  HS_ORY,
+  HS_SPIN,
+  HS_OUT,
+  HS_BACK,
+  HS_SHOTS,
+  MR_R,
+  MR_LIFE,
+  MR_EVERY,
+  RF_R,
+  RF_FIRST,
+  RF_PULSE,
+  RF_OPEN,
+  RF_END,
+  RF_SLOW,
+  HT_R,
+  HT_LOCK,
+  HT_HIT,
+  HT_END,
+  HT_SLOW,
+  SM_EVERY,
+  SC_LEN,
+  SC_HALF,
+  SC_HIT,
+  SC_PULSE,
+  SC_END,
+  AS_KILLS,
+  AS_R,
+  AS_HIT,
+  AS_END,
+  RG_R,
+  RG_N,
+  RG_TRAVEL,
+  RG_HOLD,
+  RG_SLOW,
+  RG_EVERY,
+  RG_SHOW,
+  RP_R,
+  RP_HALF,
+  RP_OFF,
+  RP_AHEAD,
+  RP_KNOCK,
+  RP_FIRST,
+  RP_SECOND,
+  RP_SHOW,
+  RP_EVERY,
+  WX_RANGE,
+  WX_EVERY,
+  WX_FLIGHT,
+  WX_SLOW,
+  WX_HOLD,
+  WX_SHOW,
+  WC_R,
+  WC_HIT,
+  WC_END,
+  WC_KNOCK,
+  WC_SHOVE,
+  WC_EVERY,
+  SN_RANGE,
+  SN_FLY,
+  SN_R,
+  SN_BITE,
+  SN_END,
+  SN_MAX,
+  GJ_LAND,
+  GJ_R,
+  GJ_KNOCK,
+  GJ_PR,
+  GJ_PULSE,
+  GJ_HOLD,
+  GJ_SLOW,
+  GJ_END,
+  GJ_EVERY,
+  PM_STILL,
+  PM_OPEN,
+  PM_R,
+  PM_CORE,
+  PM_PULL,
+  PM_SNAP_R,
+  PM_FIRST,
+  PM_EVERY,
+  PM_FILL,
+  SG_REGROW,
+  SG_NEEDLE,
+  SG_LEN,
+  SG_W,
+  SG_SHOW,
+  SR_EVERY,
+  SR_NEAR,
+  SR_SEEK,
+  SR_GROUP,
+  SR_ARRIVE,
+  SR_R,
+  SR_PULL,
+  SR_CLUMP,
+  SR_PULSE,
+  SR_FADE,
+  ML_NEED,
+  ML_R,
+  ML_CLOUD,
+  ML_SICK,
+  ML_PULSE,
+  ML_EVERY,
+  CJ_EVERY,
+  CJ_R,
+  CJ_PUSH,
+  CJ_SHOW,
+  CJ_BAR,
+  GL_SEEK,
+  GL_JUMP,
+  GL_FLY,
+  GL_DRINK,
+  GL_LIFE,
+  GL_EVERY,
+  GL_DROP,
+  IH_PER,
+  IH_MAX,
+  IH_LAST,
+  IH_SNAP,
+  ST_LESS,
+  ST_SHOW,
+  ST_LIFT,
+  CW_STONES,
+  CW_BIG,
+  CW_REGROW,
+  CW_POP,
+  RS_CURL,
+  RS_SPEED,
+  RS_REACH,
+  RS_KNOCK,
+  RS_DIZZY,
+  RS_POP,
+  FR_R,
+  FR_LIFE,
+  FR_EVERY,
+  FR_SLOW,
+  FR_HOLD,
+  SW_BELOW,
+  SW_STONE,
+  SW_LIFE,
+  SW_R,
+  SW_EVERY,
+  SEAL_R,
+  SEAL_MAX,
+  SEAL_SHOW,
+  FC_R,
+  FC_SNAP,
+  FC_TICKS,
+  SL_JUMP,
+  SL_FLY,
+  SL_SEARCH,
+  SL_END,
+  SL_MAX,
+  MS_EVERY,
+  MS_BACK,
+  MS_TICKS,
+  CLASS_FINISHERS,
+  CHAIN_SLAM,
+  CHAIN_EXPOSE,
+  CHAIN_SHATTER,
+  EXPOSE_TICKS,
+  PERFECT_TICKS,
+  BUCKLER_PERFECT_TICKS,
+  PERFECT_GEAR_TICKS,
+  SHARP_TICKS,
+  HIT_CD_TICKS,
+  KILL_CD_TICKS,
+  PERF_CD_TICKS,
+  COMBO_DAMAGE,
+  COMBO_FINISH_PIPS,
+  PIPS_MAX,
+  PIPS_CAP,
+  PIP_IDLE_TICKS,
+  PIP_CRIT_TICKS,
+  PIP_SPENT_TICKS,
+  PIP_EARNED_TICKS,
+  PIP_BONUS,
+  PIP_SPEND_AUGMENT,
+  isPipSpender,
+  PIP_SPENDER_MIN,
+  spendsPips,
+  BANNER_CAP,
+  SMOKE_CAP,
+  WALL_CAP,
+  ORB_CAP,
+  PAID_SKILLS,
+  FREE_TICKS,
+  FREE_SKILLS,
+  LIVING_STORM_TICKS,
+  pipCostOf,
+  OVERLOAD_PIP,
+  pipCostFor,
+  PIP_NAMES,
+  canUseClassSkill,
+  classSkillsRecord,
+  pruneClassSkills,
+  openParryWindow,
+  spendParryWindow,
+  openCounterWindow,
+  spendCounterWindow,
+  advanceClassSkillTimers,
+  BLOCK_BASH_REFUND_TICKS,
+  reduceSkillCooldown,
+  clearOrbs,
+  clearTrail,
+  clearPool,
+  cancelClassSkillAction,
+  clearSkillState,
+  validateClassSkillState,
   MASTERY_FAMILIES,
   ATTRIBUTE_RESET_GOLD,
   initialD8Progression,
