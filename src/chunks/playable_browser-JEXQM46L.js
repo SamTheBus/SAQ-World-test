@@ -333816,6 +333816,292 @@ function mirelilyName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var CRK = FROG_PAL.B;
+var CRK_RING = { edge: "#ff9a7a", fill: "#e0603a", lit: "#ffe3d6", dark: "rgba(48,12,6,.62)", safe: "#eaffd0" };
+var CRK_WATER = ["#3d7f7c", "#24575a", "#163a40"];
+var CRK_MUD = "#2c1c12";
+var CRK_PAD = "#4f9a3e";
+var CRK_PADD = "#2f6a2a";
+var CRK_PADL = "#8cd06a";
+var CRK_REED = "#6b8a3a";
+var CRK_CAT = "#7a4a26";
+var crkEase = (x) => x * x * (3 - 2 * x);
+var crkClamp = (x) => Math.max(0, Math.min(1, x));
+var CRK_CROAKS = [0.8, 1.7, 2.6];
+var CRK_GAPS = [0.1, -0.5, 0.45];
+function crkBeat(t, low, impact3) {
+  const T121 = low ? 2.5 : 5, s = t % T121 * (5 / T121);
+  let swell = 0, gape = 0;
+  for (const c of CRK_CROAKS) {
+    const w = crkClamp((s - (c - 0.5)) / 0.5), a = crkClamp((s - c) / 0.3);
+    if (s < c - 0.5 || s > c + 0.3) continue;
+    swell = Math.max(swell, crkEase(w) * (1 - crkEase(a)));
+    gape = Math.max(gape, a > 0 ? Math.sin(a * Math.PI) : 0);
+  }
+  if (impact3 > 0) gape = 0;
+  return { s, swell, gape, tired: s > 3.2 && s < 4.4 ? 1 : 0 };
+}
+function crkReeds(e, x, y, t, shake) {
+  for (const [dx, h, ph] of [
+    [-6, 20, 0],
+    [-2, 25, 1.4],
+    [3, 17, 2.6]
+  ]) {
+    const sw = Math.sin(t * 1.4 + ph) * 1.2 + Math.sin(t * 30 + ph) * shake * 1.2, tx = x + dx + sw, ty = y - h;
+    e.lineCap = "round";
+    e.beginPath();
+    e.moveTo(x + dx, y);
+    e.quadraticCurveTo(x + dx, y - h * 0.5, tx, ty);
+    e.strokeStyle = EDGE5;
+    e.lineWidth = 2.4;
+    e.stroke();
+    e.strokeStyle = CRK_REED;
+    e.lineWidth = 1.1;
+    e.stroke();
+    e.save();
+    e.translate(tx, ty + 3);
+    e.rotate(sw * 0.06);
+    e.beginPath();
+    e.moveTo(0, -3.4);
+    e.lineTo(0, -6);
+    e.strokeStyle = EDGE5;
+    e.lineWidth = 1;
+    e.stroke();
+    ell6(e, 0, 0, 1.5, 3.6, CRK_CAT, true, 0.8);
+    e.fillStyle = "#a06a3a";
+    e.fillRect(-1, -2.4, 0.7, 4);
+    e.restore();
+  }
+}
+function crkPad(e, x, y, t, bob) {
+  const yy = y + bob;
+  e.beginPath();
+  e.moveTo(x, yy);
+  e.ellipse(x, yy, 11, 4.4, 0, 0.35, TAU256 - 0.15);
+  e.closePath();
+  e.fillStyle = CRK_PAD;
+  e.fill();
+  e.save();
+  e.clip();
+  e.fillStyle = CRK_PADD;
+  e.fillRect(x - 10, yy + 0.8, 20, 4);
+  e.strokeStyle = CRK_PADL;
+  e.lineWidth = 0.6;
+  for (const a of [2.2, 2.9, 3.6, 4.3, 5]) {
+    e.beginPath();
+    e.moveTo(x, yy);
+    e.lineTo(x + Math.cos(a) * 10, yy + Math.sin(a) * 4);
+    e.stroke();
+  }
+  e.restore();
+  e.beginPath();
+  e.moveTo(x, yy);
+  e.ellipse(x, yy, 11, 4.4, 0, 0.35, TAU256 - 0.15);
+  e.closePath();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 1;
+  e.stroke();
+  for (let i = 0; i < 6; i++) {
+    const a = i / 6 * TAU256 + 0.3;
+    ell6(
+      e,
+      x - 3.5 + Math.cos(a) * 2.2,
+      yy - 2 + Math.sin(a) * 1.1,
+      2.1,
+      1.15,
+      i % 2 ? "#ffe3d6" : "#ffb4a0",
+      true,
+      0.5,
+      a
+    );
+  }
+  ell6(e, x - 3.5, yy - 2.1, 1.2, 0.7, "#ffd84a", true, 0.4);
+}
+function crkRing(e, fx, cy2, gapAt, k) {
+  if (k <= 0) return;
+  const G6 = CRK_RING, R18 = 13, cx = fx - R18, span3 = 0.72, gap2 = 0.2, parts = [
+    [-span3, gapAt - gap2],
+    [gapAt + gap2, span3]
+  ];
+  e.save();
+  e.globalAlpha = k;
+  e.lineCap = "round";
+  for (const [w, col2] of [
+    [4.4, G6.dark],
+    [2.6, G6.fill],
+    [1, G6.lit]
+  ])
+    for (const [p0, p1] of parts) {
+      if (p1 - p0 < 0.05) continue;
+      e.beginPath();
+      e.arc(cx, cy2, R18, p0, p1);
+      e.strokeStyle = col2;
+      e.lineWidth = w;
+      e.stroke();
+    }
+  const gx = cx + Math.cos(gapAt) * R18 + 2.2, gy = cy2 + Math.sin(gapAt) * R18;
+  e.strokeStyle = G6.safe;
+  e.lineWidth = 1.1;
+  e.beginPath();
+  e.moveTo(gx - 1.8, gy - 1.5);
+  e.lineTo(gx, gy);
+  e.lineTo(gx - 1.8, gy + 1.5);
+  e.stroke();
+  e.restore();
+}
+var CRK_SPOTS = (() => {
+  const r = seeded2(77), out7 = [];
+  for (let i = 0; i < 26; i++) out7.push([r(), r() < 0.5 ? 0 : 1, 0.8 + r() * 1]);
+  return out7;
+})();
+var CROAKMAW_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: ["#e8fbff", "#bfe9f2", "#7cc6d6"],
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, [CRK.skinL, CRK.skin, CRK.skinD]);
+    e.fill();
+    e.save();
+    e.clip();
+    e.fillStyle = CRK.spot;
+    for (const [f, side, r3] of CRK_SPOTS) {
+      e.beginPath();
+      e.ellipse(o + f * i, side ? t + a + 1.4 : t - 1.4, r3 * 1.3, r3 * 0.75, 0.2, 0, TAU256);
+      e.fill();
+    }
+    e.fillStyle = "rgba(255,255,255,.45)";
+    e.fillRect(o + 3, t - 2, i - 6, 0.6);
+    e.restore();
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    pill(e, o, t, i, a);
+    e.fillStyle = CRK_MUD;
+    e.fill();
+    e.save();
+    e.clip();
+    e.fillStyle = "#3c281a";
+    e.fillRect(o, t, i, a * 0.3);
+    e.strokeStyle = "rgba(0,0,0,.4)";
+    e.lineWidth = 0.6;
+    const r = seeded2(19);
+    for (let x = o + 5; x < o + i; x += 8 + r() * 9) {
+      e.beginPath();
+      e.moveTo(x, t);
+      e.lineTo(x + 1.5, t + a * 0.5);
+      e.lineTo(x + 0.5, t + a);
+      e.stroke();
+    }
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    const low = i / n < 0.5, b = crkBeat(l, low, 0);
+    e.fillStyle = vgrad(e, t, a, CRK_WATER);
+    e.fillRect(o, t, i, a);
+    e.strokeStyle = "rgba(190,240,240,.5)";
+    e.lineWidth = 0.6;
+    for (let k = 0; k < 8; k++) {
+      const x = o + (k * 0.137 + 0.05) % 1 * n + Math.sin(l * 0.8 + k) * 3;
+      if (x > o + i - 3) continue;
+      e.beginPath();
+      e.ellipse(x, t + a * (k % 2 ? 0.35 : 0.65), 2.4, 0.6, 0, Math.PI, TAU256);
+      e.stroke();
+    }
+    for (const [j, c] of CRK_CROAKS.entries()) {
+      const age = b.s - c;
+      if (age < 0) continue;
+      const x = o - 9 + 12 + age * 150;
+      if (x > o + i + 6) continue;
+      e.fillStyle = `rgba(255,227,214,${0.25 * (1 - age / 3)})`;
+      e.beginPath();
+      e.ellipse(x - 2, t + a / 2, 4, a / 2, 0, 0, TAU256);
+      e.fill();
+    }
+    e.fillStyle = "rgba(255,255,255,.35)";
+    e.fillRect(o, t + 0.8, i, 0.6);
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 4; n++) {
+      const r = (l * 1.1 + n / 4) % 1;
+      e.globalAlpha = 1 - r;
+      dot17(e, o + i * (0.15 + n * 0.23), t + a - 1 + r * 4, 0.8, "#bfe9f2");
+    }
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a, l) {
+    e.fillStyle = CRK_WATER[0];
+    e.beginPath();
+    e.arc(o - 0.5, t + i / 2, i / 2, -Math.PI / 2, Math.PI / 2);
+    e.fill();
+    e.strokeStyle = "#bff3f0";
+    e.lineWidth = 0.7;
+    e.beginPath();
+    e.arc(o - 0.8 + Math.sin(l * 5) * 0.3, t + i / 2, i / 2 - 0.6, -Math.PI / 2, Math.PI / 2);
+    e.stroke();
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const low = n < 0.5, b = crkBeat(l, low, r), fx = o + i * n, px7 = o - 9, py = t + a / 2 + 1;
+    if (r <= 0)
+      for (const [j, c] of CRK_CROAKS.entries()) {
+        const age = b.s - c;
+        if (age < 0) continue;
+        const rr7 = 12 + age * 150, front2 = px7 + rr7;
+        if (front2 > fx + 10) continue;
+        if (front2 < o + 6) continue;
+        crkRing(e, front2, t + a / 2, CRK_GAPS[j] * 0.8, 1 - crkClamp((front2 - fx + 20) / 30));
+      }
+    crkReeds(e, px7 - 1, py + 1, l, b.gape);
+    if (b.gape > 0) {
+      e.save();
+      e.globalAlpha = b.gape;
+      e.strokeStyle = CRK_RING.lit;
+      e.lineWidth = 1.2;
+      e.beginPath();
+      e.ellipse(px7, py - 0.5, 11 + (1 - b.gape) * 6, 4.8 + (1 - b.gape) * 2.4, 0, 0, TAU256);
+      e.stroke();
+      e.restore();
+    }
+    crkPad(e, px7, py, l, -b.swell * 1.2 + Math.sin(l * 1.7) * 0.4 + b.tired * 0.5);
+    if (low)
+      for (let k = 0; k < 3; k++) {
+        const q2 = (l * 0.8 + k / 3) % 1, x = o + 14 + (k * 0.31 + 0.2) % 1 * Math.max(0, fx - o - 18);
+        e.globalAlpha = 1 - q2;
+        ell6(e, x, t + 1 - q2 * 6, 0.8 + q2 * 0.6, 0.8 + q2 * 0.6, "rgba(190,240,240,.25)", true, 0.5);
+      }
+    e.globalAlpha = 1;
+    if (r > 0) {
+      for (let k = 0; k < 8; k++) {
+        const d = 1 - r, sx = (k - 3.5) * 2.2 * (0.4 + d), vy = -4 + d * d * 14 + k % 2 * 2;
+        e.globalAlpha = r;
+        dot17(e, fx + sx, t + a / 2 + vy, 1, k % 3 ? "#bfe9f2" : CRK_WATER[0]);
+      }
+      e.globalAlpha = 1;
+    }
+  }
+};
+function drawCroakmawBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 14, y: y + NAME_GAP, w: w - 18, h: BAR_H }, i, CROAKMAW_BAR, a);
+  croakmawName(e, x + w / 2, y + 13, t.name);
+}
+function croakmawName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#2a0808";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#ffe3d6", "#ff8a66", "#e0412b"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -333829,7 +334115,8 @@ var LESSER_BARS = Object.freeze({
   pitjaw: Object.freeze({ draw: drawPitjawBar, side: 18 }),
   spinegrove: Object.freeze({ draw: drawSpinegroveBar, side: 16 }),
   sirocco: Object.freeze({ draw: drawSiroccoBar, side: 16 }),
-  mirelily: Object.freeze({ draw: drawMirelilyBar, side: 16 })
+  mirelily: Object.freeze({ draw: drawMirelilyBar, side: 16 }),
+  croakmaw: Object.freeze({ draw: drawCroakmawBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
