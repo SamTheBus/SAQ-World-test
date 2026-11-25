@@ -8386,7 +8386,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tree: "bastion",
     tier: 1,
     kind: "passive",
-    name: "Bulwark Stance",
+    name: "Braced",
     maxRank: 5,
     requires: null,
     description: "Each block makes you take 2% less damage per rank for 4 seconds, stacking 3 times."
@@ -8477,8 +8477,8 @@ var CLASS_TREE_SKILLS = freezeWire({
     kind: "passive",
     name: "Standard Bearer",
     maxRank: 5,
-    requires: "war_banner",
-    description: "While you stand near your banner, Guard refills 5% faster per rank."
+    requires: null,
+    description: "Guard refills 3% faster per rank, 6% near your War Banner."
   },
   last_stand: {
     id: "last_stand",
@@ -8486,7 +8486,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tree: "bastion",
     tier: 4,
     kind: "passive",
-    name: "Last Stand",
+    name: "Backs to the Wall",
     maxRank: 1,
     requires: null,
     description: "Below 30% health you take 30% less damage, but deal 15% less.",
@@ -8522,8 +8522,8 @@ var CLASS_TREE_SKILLS = freezeWire({
     kind: "passive",
     name: "Bastion Ward",
     maxRank: 5,
-    requires: "aegis_pulse",
-    description: "While Aegis Pulse's Barrier holds, each block restores 2% of it per rank."
+    requires: null,
+    description: "Each block adds 0.5% of your max HP per rank to a Barrier, up to 10%. While Aegis Pulse\u2019s Barrier holds, each block restores 2% of it per rank instead."
   },
   bulwark_colossus: {
     id: "bulwark_colossus",
@@ -8545,7 +8545,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     name: "Heavy Hands",
     maxRank: 5,
     requires: null,
-    description: "Your stuns last 10% longer per rank."
+    description: "Your stuns last 10% longer per rank. Bosses can\u2019t be stunned, so your stuns slow them 6% per rank instead."
   },
   earth_breaker: {
     id: "earth_breaker",
@@ -8586,10 +8586,10 @@ var CLASS_TREE_SKILLS = freezeWire({
     tree: "breaker",
     tier: 2,
     kind: "passive",
-    name: "Concussion",
+    name: "Stone Skin",
     maxRank: 5,
     requires: null,
-    description: "Bosses can't be stunned, so your stuns slow them 6% per rank instead."
+    description: "Take 2% less damage per rank for each stunned enemy near you, up to 5 enemies."
   },
   impact_training: {
     id: "impact_training",
@@ -8655,8 +8655,8 @@ var CLASS_TREE_SKILLS = freezeWire({
     kind: "passive",
     name: "Avalanche",
     maxRank: 5,
-    requires: "shield_charge",
-    description: "Killing a stunned enemy takes 1 second per rank off Shield Charge."
+    requires: null,
+    description: "When a stunned enemy dies, enemies next to it are stunned for 0.3 seconds per rank."
   },
   tremor: {
     id: "tremor",
@@ -8664,10 +8664,10 @@ var CLASS_TREE_SKILLS = freezeWire({
     tree: "breaker",
     tier: 4,
     kind: "passive",
-    name: "Tremor",
+    name: "Rattled",
     maxRank: 5,
     requires: null,
-    description: "Hitting a slowed enemy with a Breaker skill stuns it for 0.2 seconds per rank."
+    description: "Enemies you stun deal 4% less damage per rank for 4 seconds after they wake up."
   },
   groundbreaker: {
     id: "groundbreaker",
@@ -8699,8 +8699,8 @@ var CLASS_TREE_SKILLS = freezeWire({
     kind: "passive",
     name: "Titan",
     maxRank: 5,
-    requires: "skyfall_leap",
-    description: "After Skyfall Leap, your next Earth-Breaker within 3 seconds deals 15% more per rank."
+    requires: null,
+    description: "After a Breaker skill, your next Breaker skill within 3 seconds deals 8% more damage per rank."
   },
   earthshaker: {
     id: "earthshaker",
@@ -8710,8 +8710,8 @@ var CLASS_TREE_SKILLS = freezeWire({
     kind: "capstone",
     name: "Earthshaker",
     maxRank: 1,
-    requires: "skyfall_leap",
-    description: "Shield Charge and Skyfall Leap end with a free Earth-Breaker, augments included."
+    requires: null,
+    description: "Every Breaker skill ends with a free Earth-Breaker, augments included. Earth-Breaker itself lands twice."
   },
   retaliation: {
     id: "retaliation",
@@ -8719,7 +8719,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tree: "reprisal",
     tier: 1,
     kind: "passive",
-    name: "Retaliation",
+    name: "Barbed Guard",
     maxRank: 5,
     requires: null,
     description: "Every block hits the attacker back for 10% of your Defense per rank."
@@ -8765,8 +8765,8 @@ var CLASS_TREE_SKILLS = freezeWire({
     kind: "passive",
     name: "Unbroken",
     maxRank: 5,
-    requires: "counter_stance",
-    description: "Each block takes 0.3 seconds per rank off Counter Stance."
+    requires: null,
+    description: "Each block takes 0.2 seconds per rank off your Reprisal cooldowns."
   },
   serrated_edge: {
     id: "serrated_edge",
@@ -8832,8 +8832,8 @@ var CLASS_TREE_SKILLS = freezeWire({
     kind: "passive",
     name: "Marked Foe",
     maxRank: 5,
-    requires: "shield_throw",
-    description: "Shield Throw's first target takes 4% more damage from you per rank for 5 seconds."
+    requires: null,
+    description: "The first enemy each Reprisal skill hits takes 4% more damage from you per rank for 5 seconds."
   },
   red_harvest: {
     id: "red_harvest",
