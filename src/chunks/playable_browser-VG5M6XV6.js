@@ -120441,7 +120441,7 @@ function validateClassSkillState(s, combat, actor) {
         Math.min(MAX_SKILL_COOLDOWN_TICKS, CLASS_SKILLS[id2].cooldownTicks) * LONGER_COOLDOWN[0] / LONGER_COOLDOWN[1]
       )
     );
-  const unit17 = (v) => Number.isFinite(v.x) && Number.isFinite(v.y) && Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9;
+  const unit18 = (v) => Number.isFinite(v.x) && Number.isFinite(v.y) && Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9;
   if (k.last) {
     closedRecord(k.last, ["skillId", "tick", "x", "y"], ["r", "ox", "oy", "ox2", "oy2", "spread", "n", "air", "late"]);
     if (k.last.late !== void 0) safeInteger(k.last.late, 1, SKULL_FLIGHT);
@@ -120457,14 +120457,14 @@ function validateClassSkillState(s, combat, actor) {
     for (const key4 of ["ox", "oy", "ox2", "oy2"])
       if (k.last[key4] !== void 0)
         requireContract(Number.isFinite(k.last[key4]) && Math.abs(k.last[key4]) <= 400, "Invalid skill landing");
-    requireContract(CLASS_SKILL_IDS.includes(k.last.skillId) && unit17(k.last), "Invalid skill use record");
+    requireContract(CLASS_SKILL_IDS.includes(k.last.skillId) && unit18(k.last), "Invalid skill use record");
     safeInteger(k.last.tick, Math.max(0, s.tick - SKILL_LAST_TICKS - 2), s.tick);
   }
   if (k.flurry) {
     closedRecord(k.flurry, ["cutsLeft", "nextTick", "x", "y"]);
     safeInteger(k.flurry.cutsLeft, 1, FLURRY_CUTS);
     safeInteger(k.flurry.nextTick, Math.max(0, s.tick - 1), s.tick + FLURRY_GAP_TICKS);
-    requireContract(unit17(k.flurry) && actor.alive, "Invalid Flurry");
+    requireContract(unit18(k.flurry) && actor.alive, "Invalid Flurry");
   }
   if (k.pips !== void 0) {
     closedRecord(k.pips, ["n", "idle"], ["el", "crit", "blocks"]);
@@ -147393,16 +147393,16 @@ function chooseWorld(document2, { pick: pick4, text: text3, roll: roll10, moving
       }
     });
     function paint4() {
-      const seeded2 = pick4 === "seeded", seed2 = worldSeedV1(input.value);
-      seededCard.setAttribute("aria-pressed", String(seeded2));
-      seedBox.hidden = !seeded2;
-      word.hidden = !(seeded2 && seed2?.word);
+      const seeded3 = pick4 === "seeded", seed2 = worldSeedV1(input.value);
+      seededCard.setAttribute("aria-pressed", String(seeded3));
+      seedBox.hidden = !seeded3;
+      word.hidden = !(seeded3 && seed2?.word);
       word.replaceChildren();
       if (!word.hidden) {
         const n = el3("strong", "", seed2.seed);
         word.append(`\u201C${seed2.word}\u201D becomes seed `, n);
       }
-      const blocked3 = seeded2 && !seed2;
+      const blocked3 = seeded3 && !seed2;
       next.disabled = blocked3;
       next.textContent = blocked3 ? "Type or roll a seed" : moving2 ? "Build this world" : "Next: make your hero";
     }
@@ -153117,10 +153117,10 @@ var HOSTILE_PROJECTILE_LIMITS = Object.freeze({
 });
 var same4 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
 var ranged = ordinaryRangedProfile;
-var vector = (v, unit17 = false) => {
+var vector = (v, unit18 = false) => {
   closedRecord(v, ["x", "y"]);
   requireContract(Number.isFinite(v.x) && Number.isFinite(v.y), "Hostile projectile vector");
-  if (unit17) requireContract(Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9, "Hostile projectile direction");
+  if (unit18) requireContract(Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9, "Hostile projectile direction");
 };
 var idleHostileRangedAction = (tick) => ({
   phase: "idle",
@@ -162875,10 +162875,10 @@ function createClassSkills(s, { damage: damage2, effects: effects2, periodic: pe
       q2.vx = v.x * ST_SPEED;
       q2.vy = v.y * ST_SPEED;
     } else {
-      const dot18 = q2.vx * n.x + q2.vy * n.y;
-      if (dot18 < 0) {
-        q2.vx -= 2 * dot18 * n.x;
-        q2.vy -= 2 * dot18 * n.y;
+      const dot19 = q2.vx * n.x + q2.vy * n.y;
+      if (dot19 < 0) {
+        q2.vx -= 2 * dot19 * n.x;
+        q2.vy -= 2 * dot19 * n.y;
       }
     }
   }
@@ -179814,7 +179814,7 @@ RINGS["turnback-band"] = function(c, A2) {
   gem3(c, 16, 23.8, 2, A2.gem);
 };
 RINGS["fairy-ring"] = function(c, A2) {
-  const BIRCH = { b: "#efe8da", d: "#c9bfa9", l: "#ffffff" }, VINE3 = "#d9a92a", LEAF7 = { b: "#7fb85a", d: "#5a9640" }, MOSS20 = { b: "#78a84e", d: "#557f36" };
+  const BIRCH = { b: "#efe8da", d: "#c9bfa9", l: "#ffffff" }, VINE4 = "#d9a92a", LEAF7 = { b: "#7fb85a", d: "#5a9640" }, MOSS20 = { b: "#78a84e", d: "#557f36" };
   band8(c, BIRCH, { thick: 2 });
   c.save();
   c.fillStyle = "#4a4038";
@@ -179826,7 +179826,7 @@ RINGS["fairy-ring"] = function(c, A2) {
   ])
     c.fillRect(x, y, w, 0.45);
   c.lineCap = "round";
-  c.strokeStyle = VINE3;
+  c.strokeStyle = VINE4;
   c.lineWidth = 0.45;
   c.beginPath();
   for (let k = 0; k <= 24; k++) {
@@ -182784,9 +182784,9 @@ function createQuestUiV1({
         const seg9 = el3("span");
         seg9.style.cssText = "width:" + r.percent + "%;background:" + RARITY_COLORS[r.tier];
         bar3.append(seg9);
-        const k = el3("span"), dot18 = el3("i");
-        dot18.style.background = RARITY_COLORS[r.tier];
-        k.append(dot18, RARITY_NAMES[r.tier] + " " + r.percent + "%");
+        const k = el3("span"), dot19 = el3("i");
+        dot19.style.background = RARITY_COLORS[r.tier];
+        k.append(dot19, RARITY_NAMES[r.tier] + " " + r.percent + "%");
         legend.append(k);
       }
       odds.append(el3("span", "Rarity odds", "qr-lbl"), bar3, legend);
@@ -183577,24 +183577,24 @@ function createQuestUiV1({
     kids.push(main);
     pageRoot.replaceChildren(...kids);
   }
-  const pill = el3("div", null, null);
-  pill.id = "quest-pill";
-  pill.setAttribute("aria-live", "polite");
-  doc.body.append(pill);
+  const pill2 = el3("div", null, null);
+  pill2.id = "quest-pill";
+  pill2.setAttribute("aria-live", "polite");
+  doc.body.append(pill2);
   let pillTimer = 0, lastHave = /* @__PURE__ */ new Map();
   function showPill(a, got) {
     const full = a.have >= a.need;
-    pill.className = "";
-    pill.replaceChildren(
+    pill2.className = "";
+    pill2.replaceChildren(
       questItemCanvasV1(doc, a.item.art, 22),
       (full ? "" : "+" + got + " ") + a.item.name + " ",
       el3("b", a.have + "/" + a.need)
     );
-    pill.classList.toggle("full", full);
-    void pill.offsetWidth;
-    pill.classList.add("on");
+    pill2.classList.toggle("full", full);
+    void pill2.offsetWidth;
+    pill2.classList.add("on");
     env.clearTimeout?.(pillTimer);
-    pillTimer = env.setTimeout?.(() => pill.classList.remove("on"), 1600);
+    pillTimer = env.setTimeout?.(() => pill2.classList.remove("on"), 1600);
   }
   let etcKey = "";
   const etcRoot = el3("div", null, null);
@@ -183788,7 +183788,7 @@ function createQuestUiV1({
     },
     destroy() {
       env.clearTimeout?.(pillTimer);
-      for (const e of [board2, talk, log2, tracker, style, pageRoot, pill, etcRoot]) e.remove();
+      for (const e of [board2, talk, log2, tracker, style, pageRoot, pill2, etcRoot]) e.remove();
     }
   };
 }
@@ -206238,8 +206238,8 @@ function localDirection(direction2, rotation, facing2) {
   return { x: (co * direction2.x + si * direction2.y) * facing2, y: -si * direction2.x + co * direction2.y };
 }
 function swordRay(u) {
-  const dot18 = STRIKE_GRIP.x * u.x + STRIKE_GRIP.y * u.y, perp2 = STRIKE_GRIP.x ** 2 + STRIKE_GRIP.y ** 2 - dot18 * dot18;
-  return dot18 + Math.sqrt(Math.max(0, BLADE_REACH ** 2 - perp2));
+  const dot19 = STRIKE_GRIP.x * u.x + STRIKE_GRIP.y * u.y, perp2 = STRIKE_GRIP.x ** 2 + STRIKE_GRIP.y ** 2 - dot19 * dot19;
+  return dot19 + Math.sqrt(Math.max(0, BLADE_REACH ** 2 - perp2));
 }
 function armorSwordFrontV4(direction2, rotation, facing2 = 1, size = 1) {
   return swordRay(localDirection(direction2, rotation, facing2)) * SCALE5 * size;
@@ -206675,8 +206675,8 @@ function localDirection2(direction2, rotation, facing2) {
   return { x: (co * direction2.x + si * direction2.y) * facing2, y: -si * direction2.x + co * direction2.y };
 }
 function swordRay2(u) {
-  const dot18 = STRIKE_GRIP2.x * u.x + STRIKE_GRIP2.y * u.y, perp2 = STRIKE_GRIP2.x ** 2 + STRIKE_GRIP2.y ** 2 - dot18 * dot18;
-  return dot18 + Math.sqrt(Math.max(0, BLADE_REACH2 ** 2 - perp2));
+  const dot19 = STRIKE_GRIP2.x * u.x + STRIKE_GRIP2.y * u.y, perp2 = STRIKE_GRIP2.x ** 2 + STRIKE_GRIP2.y ** 2 - dot19 * dot19;
+  return dot19 + Math.sqrt(Math.max(0, BLADE_REACH2 ** 2 - perp2));
 }
 function gargoyleSwordFrontV4(direction2, rotation, facing2 = 1, size = 1) {
   return swordRay2(localDirection2(direction2, rotation, facing2)) * SCALE6 * size;
@@ -235538,8 +235538,8 @@ var party3 = (model) => Object.values(model.entitiesById ?? {}).filter((a) => a.
 var sideOf2 = (dx, fallback) => Math.abs(dx) > 1 ? dx < 0 ? -1 : 1 : fallback;
 var vineSide = (actor, k) => sideOf2(k.target && k.origin ? k.target.x - k.origin.x : 0, actor.presentationFacingX === -1 ? -1 : 1);
 function vinePose(actor, k, tick, s) {
-  const VINE3 = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], hold = VINE3.snare ? VINE3.rootTicks : 36;
-  if (VINE3.snare) s.alt = true;
+  const VINE4 = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], hold = VINE4.snare ? VINE4.rootTicks : 36;
+  if (VINE4.snare) s.alt = true;
   let face5 = actor.presentationFacingX === -1 ? -1 : 1, x = 0, y = 0, clip22 = false, ahead = VINE_AHEAD;
   const mel = meleeOf6(actor, tick);
   if (mel && (!k || k.phase === "ready")) {
@@ -235552,7 +235552,7 @@ function vinePose(actor, k, tick, s) {
     } else s.gape = 0.35 + (1 - mel.p) * 0.4;
   }
   if (k && k.phase !== "ready") {
-    const { age, q: q2 } = phaseAge(k, VINE3, tick);
+    const { age, q: q2 } = phaseAge(k, VINE4, tick);
     face5 = vineSide(actor, k);
     if (k.phase === "dive") {
       s.dive = ease7(q2) * 1.02;
@@ -235570,7 +235570,7 @@ function vinePose(actor, k, tick, s) {
         s.emerge = true;
         ahead = -6;
         y = ease7((age - hold) / 12) * 48;
-      } else y = (1 - ease7((age - hold - 12) / (VINE3.upTicks - hold - 12))) * 30;
+      } else y = (1 - ease7((age - hold - 12) / (VINE4.upTicks - hold - 12))) * 30;
     }
   }
   return { face: face5, x: x + face5 * ahead, y, rot: 0, sq: 1, clip: clip22 };
@@ -235674,9 +235674,9 @@ function tongueLine(actor, k, tick) {
   return null;
 }
 function vineGround(c, actor, k, tick) {
-  const VINE3 = LESSER_BOSS_TRICKS_V1[actor.enemyFamily];
-  if (VINE3.snare && k.phase === "up") return snareGround(c, actor, k, tick);
-  const G6 = VINE3.snare ? OPEN_LOOKS.root : GROUND_LOOKS.thorn, { age, q: q2 } = phaseAge(k, VINE3, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T121 = k.target;
+  const VINE4 = LESSER_BOSS_TRICKS_V1[actor.enemyFamily];
+  if (VINE4.snare && k.phase === "up") return snareGround(c, actor, k, tick);
+  const G6 = VINE4.snare ? OPEN_LOOKS.root : GROUND_LOOKS.thorn, { age, q: q2 } = phaseAge(k, VINE4, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T121 = k.target;
   if (!T121) return;
   if (k.phase === "dive") craterBack(c, hole.x, hole.y, 9, Math.max(0.6, q2));
   else if (k.phase === "tunnel") {
@@ -235685,13 +235685,13 @@ function vineGround(c, actor, k, tick) {
   } else if (k.phase === "warn") {
     craterBack(c, hole.x, hole.y, 9, 0.6 * (1 - clamp13((q2 - 0.35) / 0.65)));
     if (q2 < 0.25) ridge2(c, hole.x + f * 4, hole.y, T121.x, T121.y + 1, 1, tick * SEC7);
-    gameWarn(c, T121.x, T121.y, VINE3.radius, q2, age * SEC7, G6);
+    gameWarn(c, T121.x, T121.y, VINE4.radius, q2, age * SEC7, G6);
     cracks(c, T121.x, T121.y, 24, ease7(q2));
   } else if (k.phase === "up") {
-    const fade = 1 - ease7(clamp13((age - 48) / (VINE3.upTicks - 48)));
+    const fade = 1 - ease7(clamp13((age - 48) / (VINE4.upTicks - 48)));
     cracks(c, T121.x, T121.y, 24, fade);
     craterBack(c, T121.x, T121.y, 11, fade);
-    gameBurst(c, T121.x, T121.y, VINE3.radius, age * SEC7, G6, 0.5);
+    gameBurst(c, T121.x, T121.y, VINE4.radius, age * SEC7, G6, 0.5);
   }
 }
 function seedsTimeline(k, tick) {
@@ -235765,9 +235765,9 @@ function tongueGround(c, actor, k, tick) {
   }
 }
 function vineItems(model, actor, k, tick, out7) {
-  const VINE3 = LESSER_BOSS_TRICKS_V1[actor.enemyFamily];
-  if (VINE3.snare && k.phase === "up") return snareItems(model, actor, k, tick, out7);
-  const P29 = VINE3.snare ? VINE_PAL.B : VINE_PAL.A, { age, q: q2 } = phaseAge(k, VINE3, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T121 = k.target, id2 = "lesser-vfx/" + actor.entityId;
+  const VINE4 = LESSER_BOSS_TRICKS_V1[actor.enemyFamily];
+  if (VINE4.snare && k.phase === "up") return snareItems(model, actor, k, tick, out7);
+  const P29 = VINE4.snare ? VINE_PAL.B : VINE_PAL.A, { age, q: q2 } = phaseAge(k, VINE4, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T121 = k.target, id2 = "lesser-vfx/" + actor.entityId;
   if (!T121) return;
   if (k.phase === "dive")
     out7.push({
@@ -235797,7 +235797,7 @@ function vineItems(model, actor, k, tick, out7) {
         }
       }
     });
-  } else if (k.phase === "warn" && VINE3.snare) snareWarnItems(actor, k, q2, tick, out7);
+  } else if (k.phase === "warn" && VINE4.snare) snareWarnItems(actor, k, q2, tick, out7);
   else if (k.phase === "warn" && q2 > 0.55)
     for (let i = 0; i < 9; i++) {
       const a = i / 9 * TAU138 + 0.2, x = T121.x + Math.cos(a) * 17 + Math.sin(tick * 0.67 + i) * 0.4, y = T121.y + Math.sin(a) * 17 * 0.7;
@@ -235809,7 +235809,7 @@ function vineItems(model, actor, k, tick, out7) {
       });
     }
   else if (k.phase === "up") {
-    const fade = 1 - ease7(clamp13((age - 48) / (VINE3.upTicks - 48))), retract = ease7(clamp13((age - 27) / 21));
+    const fade = 1 - ease7(clamp13((age - 48) / (VINE4.upTicks - 48))), retract = ease7(clamp13((age - 27) / 21));
     out7.push({
       id: id2 + "/lip",
       anchorX: T121.x,
@@ -247576,11 +247576,11 @@ function gearStatGroupsV1(player) {
     return [];
   }
   if (!t?.any) return [];
-  const show = (v, unit17, sign4 = "+") => sign4 + (unit17 === "s" ? trim2(v / 60) + " s" : unit17 === "n" ? String(v) : trim2(v / 100) + "%"), out7 = [];
+  const show = (v, unit18, sign4 = "+") => sign4 + (unit18 === "s" ? trim2(v / 60) + " s" : unit18 === "n" ? String(v) : trim2(v / 100) + "%"), out7 = [];
   for (const [title17, lines2] of GEAR_GROUPS) {
-    const rows = lines2.filter(([k]) => t[k] > 0).map(([k, unit17 = "%", label7, sign4]) => ({
+    const rows = lines2.filter(([k]) => t[k] > 0).map(([k, unit18 = "%", label7, sign4]) => ({
       label: label7 ?? lineLabel("fx:" + k),
-      value: show(t[k], unit17, sign4),
+      value: show(t[k], unit18, sign4),
       icon: "fx:" + k
     }));
     if (title17 === "Skills") {
@@ -249074,12 +249074,12 @@ function rankValue(line45, rank) {
 }
 function rankParts(line45, rank, withStep = false) {
   const v = rankValue(line45, rank), add2 = v - rankValue(line45, rank - 1), plural3 = (t) => t.replace(/\{([^|}]*)\|([^}]*)\}/g, (m, one, many) => v === 1 ? one : many);
-  const at10 = line45[0].indexOf("{v}"), unit17 = /^[%°s]/.test(line45[0].slice(at10 + 3)) ? line45[0][at10 + 3] : "";
+  const at10 = line45[0].indexOf("{v}"), unit18 = /^[%°s]/.test(line45[0].slice(at10 + 3)) ? line45[0][at10 + 3] : "";
   return {
     pre: plural3(line45[0].slice(0, at10)),
-    value: tidy(v) + unit17,
-    post: plural3(line45[0].slice(at10 + 3 + unit17.length)),
-    step: withStep && rank > 1 && add2 ? `(+${tidy(add2)}${unit17})` : "",
+    value: tidy(v) + unit18,
+    post: plural3(line45[0].slice(at10 + 3 + unit18.length)),
+    step: withStep && rank > 1 && add2 ? `(+${tidy(add2)}${unit18})` : "",
     changed: rank <= 1 || add2 !== 0
   };
 }
@@ -293015,13 +293015,13 @@ function drawCartographyD9(ctx, {
       for (let py = 0; py < rows; py++)
         for (let px7 = 0; px7 < cols; px7++) if (page.tiles[py * cols + px7] === "p") road.add(px7 + "," + py);
       if (road.size && !planned) {
-        const unit17 = Math.min(cw, ch);
+        const unit18 = Math.min(cw, ch);
         ctx.beginPath();
-        addRoadShape(ctx, road, x, y, cw, ch, Math.max(1.5, unit17 * 0.3));
+        addRoadShape(ctx, road, x, y, cw, ch, Math.max(1.5, unit18 * 0.3));
         ctx.fillStyle = "#4b3825";
         ctx.fill();
         ctx.beginPath();
-        addRoadShape(ctx, road, x, y, cw, ch, Math.max(1, unit17 * 0.19));
+        addRoadShape(ctx, road, x, y, cw, ch, Math.max(1, unit18 * 0.19));
         ctx.fillStyle = "#c6aa70";
         ctx.fill();
       }
@@ -296801,20 +296801,20 @@ function drawHeroNameTagV1(c, actor) {
   c.textAlign = "center";
   c.textBaseline = "middle";
   c.lineJoin = "round";
-  const x = Math.round(actor.position.x), y = Math.round(actor.position.y) + 27, w = c.measureText(name).width, dot18 = CLASS_COL[actor.heroLook.cls];
-  const tx = dot18 ? x + 4 : x;
+  const x = Math.round(actor.position.x), y = Math.round(actor.position.y) + 27, w = c.measureText(name).width, dot19 = CLASS_COL[actor.heroLook.cls];
+  const tx = dot19 ? x + 4 : x;
   c.lineWidth = 3.5;
   c.strokeStyle = "rgba(16,11,6,.92)";
   c.strokeText(name, tx, y);
   c.fillStyle = "#fff6df";
   c.fillText(name, tx, y);
-  if (dot18) {
+  if (dot19) {
     const dx = tx - w / 2 - 6;
     c.fillStyle = "rgba(16,11,6,.92)";
     c.beginPath();
     c.arc(dx, y, 4.2, 0, 7);
     c.fill();
-    c.fillStyle = dot18;
+    c.fillStyle = dot19;
     c.beginPath();
     c.arc(dx, y, 2.8, 0, 7);
     c.fill();
@@ -297311,13 +297311,13 @@ var clamp89 = (v, a, b) => Math.max(a, Math.min(b, v));
 var styles = /* @__PURE__ */ new Set(["thorn", "frost", "fireball", "maelstrom", "void", "clockwork", "arrow"]);
 function ordinaryHostileProjectilePose(projectile, presentationTick) {
   const direction2 = projectile.direction ?? { x: 1, y: 0 }, length = Math.hypot(direction2.x, direction2.y);
-  const unit17 = length > 1e-3 ? { x: direction2.x / length, y: direction2.y / length } : { x: 1, y: 0 };
+  const unit18 = length > 1e-3 ? { x: direction2.x / length, y: direction2.y / length } : { x: 1, y: 0 };
   const age = Number.isFinite(projectile.firedTick) ? Math.max(0, presentationTick - projectile.firedTick) : 3;
   const radius = clamp89(Number.isFinite(projectile.radius) ? projectile.radius : 6, 2, 8);
   return {
     position: { x: projectile.position.x, y: projectile.position.y - 8 },
-    direction: unit17,
-    angle: Math.atan2(unit17.y, unit17.x),
+    direction: unit18,
+    angle: Math.atan2(unit18.y, unit18.x),
     radius,
     age,
     style: styles.has(projectile.style) ? projectile.style : null
@@ -328307,6 +328307,696 @@ function createEmissiveOcclusionV1(doc) {
   });
 }
 
+// src/client/lesser_boss_bars_v1.js
+var TAU255 = Math.PI * 2;
+var EDGE5 = "#170c07";
+var unit17 = (e) => Math.max(0, Math.min(1, e));
+function octagon(e, o, t, i, a, l) {
+  e.beginPath(), e.moveTo(o + l, t), e.lineTo(o + i - l, t), e.lineTo(o + i, t + l), e.lineTo(o + i, t + a - l), e.lineTo(o + i - l, t + a), e.lineTo(o + l, t + a), e.lineTo(o, t + a - l), e.lineTo(o, t + l), e.closePath();
+}
+function pill(e, o, t, i, a) {
+  let l = Math.min(a / 2, i / 2);
+  e.beginPath(), e.moveTo(o + l, t), e.lineTo(o + i - l, t), e.arc(o + i - l, t + l, l, -Math.PI / 2, Math.PI / 2), e.lineTo(o + l, t + a), e.arc(o + l, t + l, l, Math.PI / 2, Math.PI * 1.5), e.closePath();
+}
+function vgrad(e, o, t, i) {
+  let a = e.createLinearGradient(0, o, 0, o + t);
+  return i.forEach((l, n) => a.addColorStop(n / (i.length - 1), l)), a;
+}
+function seeded2(e) {
+  let o = e >>> 0 || 1;
+  return () => (o = Math.imul(o, 1103515245) + 12345 >>> 0) / 4294967296;
+}
+function dot17(e, o, t, i, a) {
+  e.beginPath(), e.arc(o, t, i, 0, TAU255), e.fillStyle = a, e.fill();
+}
+function drawBar(e, o, t, i, a) {
+  let { x: l, y: n, w: r, h: s } = o, f = unit17(t.actual), h = Math.max(f, unit17(t.trail)), d = t.impact || 0, u = d > 0 ? Math.sin(d * 31) * d * 2 : 0;
+  e.save(), e.translate(u, 0), i.under?.(e, l, n, r, s, a, f, d), i.track(e, l, n, r, s, a), e.save(), i.shape(e, l, n, r, s), e.clip(), h > f + 5e-4 && (e.fillStyle = t.flash ? "#ffffff" : vgrad(e, n, s, i.chunk), e.fillRect(l + r * f, n, r * (h - f) + 0.5, s), i.chunkMotion?.(e, l + r * f, n, r * (h - f), s, a)), f > 0 && i.fill(e, l, n, r * f, s, a, r), e.fillStyle = "#0000004d";
+  for (let y = 1; y < 10; y++) y !== 5 && e.fillRect(l + r * y / 10 - 0.5, n + s * 0.5, 1, s * 0.5);
+  e.fillStyle = "#fff3d6c0", e.fillRect(l + r * 0.5 - 0.75, n, 1.5, s), f > 0 && f < 1 && i.edge(e, l + r * f, n, s, d, a), e.restore(), i.over?.(e, l, n, r, s, a, f, d), e.restore();
+}
+var BAR_H = 7;
+var NAME_GAP = 19;
+var RUST8 = {
+  shell: "#ef7a2a",
+  shellD: "#b84a1e",
+  shellL: "#ffae62",
+  rim: "#8f3a16",
+  under: "#3a1d10",
+  head: "#5e2e16",
+  headD: "#3c1c0d",
+  eye: "#ffedb3",
+  iron: "#7b8794",
+  ironD: "#4f5964",
+  ironL: "#b5c0ca",
+  flake: "#c25a22"
+};
+var RUST_PLATES = [
+  [0.12, 0.9],
+  [0.37, 1.1],
+  [0.63, 0.85],
+  [0.86, 1]
+];
+var RUST_SPIKES = [0.18, 0.31, 0.55, 0.69, 0.9];
+function rustPincers(e, o, t, i) {
+  for (let a of [true, false]) {
+    let l = a ? -1 : 1, n = -l;
+    e.save(), e.translate(o, t + (a ? -2.6 : 2.6)), e.rotate(l * (0.12 + i * 0.5)), e.scale(0.92, 0.92);
+    let r = () => {
+      e.beginPath(), e.moveTo(-2, -3.2 * n), e.quadraticCurveTo(9, -6.5 * n, 17, -3 * n), e.quadraticCurveTo(22, -0.5 * n, 22.5, 3.5 * n), e.quadraticCurveTo(19, 0.8 * n, 15, 1.2 * n), e.lineTo(13, 3 * n), e.lineTo(11, 1.4 * n), e.lineTo(8.5, 3.2 * n), e.lineTo(6.5, 1.6 * n), e.quadraticCurveTo(2, 2.8 * n, -2, 3 * n), e.closePath();
+    };
+    r(), e.fillStyle = a ? "#3a1e10" : "#5a2e18", e.fill(), e.save(), r(), e.clip(), e.fillStyle = a ? "#5e3820" : "#9a6440", e.beginPath(), e.moveTo(0, -2.4 * n), e.quadraticCurveTo(9, -5.4 * n, 16.5, -2.4 * n), e.quadraticCurveTo(9, -2.6 * n, 0, -0.4 * n), e.closePath(), e.fill(), e.restore(), r(), e.strokeStyle = EDGE5, e.lineWidth = 1.3, e.stroke(), e.restore();
+  }
+  hexBolt(e, o, t, 3.4);
+}
+function hexBolt(e, o, t, i) {
+  e.beginPath();
+  for (let a = 0; a < 6; a++) {
+    let l = a * TAU255 / 6 + Math.PI / 6;
+    e.lineTo(o + Math.cos(l) * i, t + Math.sin(l) * i);
+  }
+  e.closePath(), e.fillStyle = vgrad(e, t - i, i * 2, [RUST8.ironL, RUST8.ironD]), e.fill(), e.lineWidth = 0.8, e.strokeStyle = EDGE5, e.stroke(), dot17(e, o, t, i * 0.35, RUST8.ironD);
+}
+var RUSTMAW_BAR = {
+  shape: (e, o, t, i, a) => octagon(e, o, t, i, a, 2),
+  chunk: ["#e9eef1", "#aab5be", "#77828c"],
+  under(e, o, t, i, a) {
+    for (let l of RUST_SPIKES) {
+      let n = o + i * l, r = n - 3.5, s = t - 9;
+      e.beginPath(), e.moveTo(n - 2.4, t - 1), e.lineTo(r, s), e.lineTo(n + 2.4, t - 1), e.closePath(), e.fillStyle = RUST8.iron, e.fill(), e.lineWidth = 0.9, e.strokeStyle = EDGE5, e.stroke(), e.beginPath(), e.moveTo(n - 2.4, t - 1), e.lineTo(r, s), e.lineTo(n - 0.6, t - 1), e.closePath(), e.fillStyle = RUST8.ironL, e.fill(), e.beginPath(), e.moveTo(r, s), e.lineTo(r + (n - 2.4 - r) * 0.3, s + (t - 1 - s) * 0.3), e.lineTo(r + (n + 2.4 - r) * 0.3, s + (t - 1 - s) * 0.3), e.closePath(), e.fillStyle = RUST8.shellD, e.fill();
+    }
+    e.beginPath(), e.moveTo(o + i, t - 3.5), e.lineTo(o + i + 5, t - 2), e.lineTo(o + i + 3.5, t + a * 0.35), e.lineTo(o + i + 7, t + a * 0.55), e.lineTo(o + i + 4, t + a + 3.5), e.lineTo(o + i, t + a + 3.5), e.closePath(), e.fillStyle = vgrad(e, t - 3.5, a + 7, [RUST8.ironL, RUST8.ironD]), e.fill(), e.lineWidth = 1, e.strokeStyle = EDGE5, e.stroke();
+  },
+  track(e, o, t, i, a) {
+    octagon(e, o - 2.5, t - 2.5, i + 5, a + 5, 3), e.fillStyle = vgrad(e, t - 2.5, a + 5, [RUST8.ironL, RUST8.iron, RUST8.ironD]), e.fill(), e.lineWidth = 1, e.strokeStyle = EDGE5, e.stroke(), e.fillStyle = RUST8.flake;
+    for (let l of [0.27, 0.48, 0.74]) e.fillRect(o + i * l - 0.6, t - 2.2, 1.2, 2.6);
+    octagon(e, o, t, i, a, 2), e.fillStyle = "#1a0f0a", e.fill();
+  },
+  fill(e, o, t, i, a, l, n) {
+    e.fillStyle = vgrad(e, t, a, [RUST8.shellL, RUST8.shell, RUST8.shellD]), e.fillRect(o, t, i, a), e.fillStyle = RUST8.under, e.globalAlpha = 0.42, e.fillRect(o, t + a * 0.72, i, a * 0.28), e.globalAlpha = 1;
+    for (let [s, f] of RUST_PLATES) {
+      let h = o + s * n;
+      if (h + 9 > o + i) continue;
+      let d = 9 * f;
+      e.beginPath(), e.moveTo(h, t + 1.6), e.lineTo(h + d, t + 0.5), e.lineTo(h + d + 1.4, t + a - 1.6), e.lineTo(h + 0.8, t + a - 0.6), e.closePath(), e.fillStyle = RUST8.iron, e.fill(), e.lineWidth = 0.7, e.strokeStyle = EDGE5, e.stroke(), e.fillStyle = RUST8.ironL, e.fillRect(h + 0.6, t + 1.4, d - 0.6, 1), dot17(e, h + 1.6, t + 2.6, 0.55, RUST8.ironD), dot17(e, h + d - 1, t + 2.4, 0.55, RUST8.ironD), e.fillStyle = RUST8.shellD, e.globalAlpha = 0.7, e.fillRect(h + d * 0.55, t + a - 2.6, 1, 1.6), e.globalAlpha = 1;
+    }
+    e.fillStyle = "#ffffff66", e.fillRect(o + 2, t + 1, Math.max(0, i - 4), 0.9);
+    let r = (l * 0.18 % 1.4 - 0.2) * n;
+    if (r > 0 && r < i) {
+      let s = e.createLinearGradient(o + r - 14, 0, o + r + 14, 0);
+      s.addColorStop(0, "#fff0"), s.addColorStop(0.5, "#ffffff59"), s.addColorStop(1, "#fff0"), e.fillStyle = s, e.fillRect(o + r - 14, t, 28, a);
+    }
+  },
+  chunkMotion(e, o, t, i, a) {
+    let l = seeded2(23);
+    e.fillStyle = RUST8.flake;
+    for (let n = 0; n < i / 5; n++)
+      e.globalAlpha = 0.5 + l() * 0.4, e.fillRect(o + l() * i, t + l() * (a - 1.5), 1 + l() * 1.4, 1);
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a) {
+    let l = a > 0 ? a * 2 : 0;
+    e.fillStyle = RUST8.headD, e.beginPath(), e.moveTo(o - 1, t);
+    for (let n = 0; n < 4; n++) {
+      let r = t + (n + 0.5) * i / 4;
+      e.lineTo(o + 2.6 - l, r), e.lineTo(o - 1, t + (n + 1) * i / 4);
+    }
+    e.closePath(), e.fill(), e.fillStyle = `rgba(255,226,170,${0.4 + a * 0.6})`, e.fillRect(o - 1.6, t, 1, i);
+  },
+  over(e, o, t, i, a, l, n, r) {
+    for (let y = 1; y < 10; y++)
+      y !== 5 && (dot17(e, o + i * y / 10 + 0.3, t - 1, 0.95, RUST8.ironD), dot17(e, o + i * y / 10, t - 1.3, 0.9, RUST8.ironL));
+    hexBolt(e, o + i / 2, t - 1.2, 2.4), hexBolt(e, o + i / 2, t + a + 1.2, 2.4);
+    let s = n < 0.5, f = o + i * n;
+    if (s)
+      for (let y = 0; y < 4; y++) {
+        let p = (l * 0.7 + y * 0.27) % 1, g2 = o + i * (0.15 + y * 0.22);
+        e.globalAlpha = 1 - p, e.fillStyle = RUST8.flake, e.fillRect(g2, t + a + 2.5 + p * 7, 1.2, 1.6 + p * 1.5);
+      }
+    if (e.globalAlpha = 1, r > 0)
+      for (let y = 0; y < 6; y++) {
+        let p = 1 - r, g2 = (y - 2.5) * 2.4 * (0.4 + p), b = -4 + p * p * 16 + y % 2 * 2;
+        e.globalAlpha = r, e.fillStyle = y % 3 === 0 ? RUST8.ironL : y % 2 ? RUST8.flake : RUST8.shellD, e.fillRect(f + g2, t + a / 2 + b, 1.8, 1.4);
+      }
+    e.globalAlpha = 1;
+    let h = s ? 1.3 : 2.6, d = l % h, u = r > 0 ? 0 : d < 0.5 ? Math.sin(d / 0.5 * Math.PI) * 0.9 : 0.12 + Math.sin(l * 2.2) * 0.06;
+    rustPincers(e, o - 4, t + a / 2, u);
+  }
+};
+function drawRustmawBar(e, o, t, i, a) {
+  let { x: l, y: n, w: r } = o;
+  rustmawName(e, l + r / 2, n + 13, t.name), drawBar(e, { x: l, y: n + NAME_GAP, w: r, h: BAR_H }, i, RUSTMAW_BAR, a);
+}
+function rustmawName(e, o, t, i) {
+  e.save(), e.textAlign = "center", e.textBaseline = "alphabetic", e.lineJoin = "round", e.font = "900 13px Georgia,serif", e.shadowColor = "#000000a0", e.shadowBlur = 4, e.shadowOffsetY = 1, e.lineWidth = 3.4, e.strokeStyle = "#1c0d06", e.strokeText(i, o, t), e.shadowColor = "transparent", e.fillStyle = vgrad(e, t - 10, 11, [RUST8.eye, "#ffd08a", RUST8.shellL]), e.fillText(i, o, t), e.restore();
+}
+var SPORE2 = SPORE_PAL.A;
+var BELL = {
+  st: "#e6d3a8",
+  stD: "#b99566",
+  bell: "#8a5a32",
+  bellD: "#5e3a1e",
+  bellL: "#c08a52",
+  edge: "#2a1a10",
+  shelf: "#c9a26a",
+  shelfD: "#8e6a3c",
+  shelfL: "#ecd3a0",
+  ring: "#7e5a34"
+};
+var SPORE_WARTS = [
+  [0.05, 0.3, 2.6],
+  [0.16, 0.6, 2.2],
+  [0.29, 0.28, 2.4],
+  [0.41, 0.55, 2],
+  [0.54, 0.3, 2.6],
+  [0.66, 0.62, 2.1],
+  [0.79, 0.3, 2.3],
+  [0.9, 0.55, 2]
+];
+function bellShroom(e, o, t, i, a, l, n) {
+  e.save(), e.translate(o, t), e.rotate(a + n), e.lineCap = "round", e.lineJoin = "round";
+  let r = () => {
+    e.beginPath(), e.moveTo(0, 0), e.lineTo(l * 0.18, -i * 0.45), e.lineTo(-l * 0.08, -i * 0.82);
+  }, s = Math.max(1.3, l * 0.36);
+  r(), e.strokeStyle = EDGE5, e.lineWidth = s + 1.4, e.stroke(), r(), e.strokeStyle = BELL.st, e.lineWidth = s, e.stroke(), e.strokeStyle = BELL.stD, e.lineWidth = 0.6, e.beginPath(), e.moveTo(l * 0.15, -i * 0.1), e.lineTo(l * 0.25, -i * 0.42), e.stroke();
+  let f = -i * 0.82, h = l * 1.45, d = () => {
+    e.beginPath(), e.moveTo(-l, f + h * 0.18), e.bezierCurveTo(-l * 1.02, f - h * 0.5, -l * 0.45, f - h, 0, f - h * 1.05), e.bezierCurveTo(l * 0.45, f - h, l * 1.02, f - h * 0.5, l, f + h * 0.18);
+    for (let u = 0; u <= 6; u++) e.lineTo(l - u * l / 3, f + h * 0.18 + (u % 2 ? h * 0.16 : 0));
+    e.closePath();
+  };
+  d(), e.fillStyle = BELL.bell, e.fill(), e.save(), d(), e.clip(), e.fillStyle = BELL.bellD, e.beginPath(), e.ellipse(l * 0.55, f, l * 0.7, h * 1.1, 0, 0, TAU255), e.fill(), e.strokeStyle = BELL.bellD, e.lineWidth = 0.5;
+  for (let u of [-0.5, 0, 0.5])
+    e.beginPath(), e.moveTo(u * l * 0.35, f - h * 0.95), e.quadraticCurveTo(u * l * 0.9, f - h * 0.4, u * l * 1.05, f + h * 0.2), e.stroke();
+  e.fillStyle = BELL.bellL, e.beginPath(), e.ellipse(-l * 0.4, f - h * 0.55, l * 0.18, h * 0.28, -0.2, 0, TAU255), e.fill(), e.fillStyle = BELL.edge, e.fillRect(-l * 1.1, f + h * 0.06, l * 2.2, h * 0.4), e.restore(), d(), e.strokeStyle = EDGE5, e.lineWidth = 0.9, e.stroke(), e.restore();
+}
+function shelfFungus(e, o, t, i, a) {
+  let l = () => {
+    e.beginPath(), e.moveTo(o - i * 0.6, t + a * 0.5), e.quadraticCurveTo(o - i * 0.5, t - a * 1.2, o + i * 0.35, t - a), e.quadraticCurveTo(o + i * 1.05, t - a * 0.6, o + i, t + a * 0.2), e.quadraticCurveTo(o + i * 0.3, t + a * 0.9, o - i * 0.6, t + a * 0.5), e.closePath();
+  };
+  l(), e.fillStyle = BELL.shelf, e.fill(), e.save(), l(), e.clip(), e.fillStyle = BELL.shelfD, e.beginPath(), e.ellipse(o + i * 0.3, t + a * 0.7, i, a * 0.6, 0, 0, TAU255), e.fill(), e.strokeStyle = BELL.ring, e.lineWidth = 0.6;
+  for (let n of [0.45, 0.75])
+    e.beginPath(), e.ellipse(o - i * 0.35, t + a * 0.4, i * 1.3 * n, a * 1.4 * n, -0.15, -1.4, 0.3), e.stroke();
+  e.fillStyle = BELL.shelfL, e.beginPath(), e.ellipse(o, t - a * 0.55, i * 0.45, a * 0.22, -0.2, 0, TAU255), e.fill(), e.restore(), l(), e.strokeStyle = EDGE5, e.lineWidth = 0.9, e.stroke();
+}
+var SPORECROWN_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: ["#fbf0c4", "#f6e3a2", "#d8c27e"],
+  under(e, o, t, i, a, l, n) {
+    let r = n < 0.5 ? 2.2 : 1;
+    for (let [s, f, h, d, u] of [
+      [-1, 9, -0.55, 2.4, 0],
+      [3.5, 15, -0.25, 3.6, 1.1],
+      [9, 12, 0.12, 3, 2.3],
+      [14, 7, 0.45, 2.2, 3.1]
+    ])
+      bellShroom(e, o + s, t - 1.2, f, h, d, Math.sin(l * 2.2 + u) * 0.05 * r);
+    shelfFungus(e, o + i + 3, t + a * 0.8, 6.5, 3), shelfFungus(e, o + i + 1, t + a * 0.05, 4.8, 2.3);
+  },
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5), e.fillStyle = vgrad(e, t - 2.5, a + 5, [SPORE2.stemL, SPORE2.stem, SPORE2.stemD]), e.fill(), e.save(), pill(e, o - 2.5, t - 2.5, i + 5, a + 5), e.clip(), e.strokeStyle = SPORE2.groove, e.globalAlpha = 0.35, e.lineWidth = 0.7;
+    let l = seeded2(31);
+    for (let n = o; n < o + i; n += 4 + l() * 4)
+      e.beginPath(), e.moveTo(n, t - 2.5), e.lineTo(n + l() * 1.5 - 0.75, t + a + 2.5), e.stroke();
+    e.restore(), pill(e, o - 2.5, t - 2.5, i + 5, a + 5), e.lineWidth = 1, e.strokeStyle = EDGE5, e.stroke(), pill(e, o, t, i, a), e.fillStyle = SPORE2.gill, e.fill(), e.save(), e.clip(), e.strokeStyle = SPORE2.gillD, e.lineWidth = 0.8;
+    for (let n = o + 1.5; n < o + i; n += 2.6) e.beginPath(), e.moveTo(n, t), e.lineTo(n + 0.6, t + a), e.stroke();
+    e.fillStyle = "#00000040", e.fillRect(o, t, i, a), e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    e.fillStyle = SPORE2.cap, e.fillRect(o, t, i, a), e.fillStyle = SPORE2.capL, e.globalAlpha = 0.8, e.fillRect(o, t + 0.8, i, a * 0.28), e.globalAlpha = 1;
+    for (let [r, s, f] of SPORE_WARTS) {
+      let h = o + r * n;
+      if (h + f > o + i) continue;
+      let d = t + 1.2 + s * (a * 0.5), u = [];
+      for (let p = 0; p < 6; p++) {
+        let g2 = p / 6 * TAU255 + r * 7, b = 0.7 + (r * 13 + p * 0.37) % 1 * 0.45;
+        u.push([h + Math.cos(g2) * f * b, d + Math.sin(g2) * f * b * 0.6]);
+      }
+      let y = (p) => {
+        e.beginPath(), e.moveTo(u[0][0], u[0][1] + p);
+        for (let g2 of u) e.lineTo(g2[0], g2[1] + p);
+        e.closePath();
+      };
+      y(0.6), e.fillStyle = SPORE2.wartD, e.fill(), y(0), e.fillStyle = SPORE2.wart, e.fill();
+    }
+    e.strokeStyle = SPORE2.crack, e.lineWidth = 0.6, e.globalAlpha = 0.75;
+    for (let r of [0.23, 0.71]) {
+      let s = o + r * n;
+      s > o + i - 2 || (e.beginPath(), e.moveTo(s, t + 0.5), e.lineTo(s + 1.5, t + 2.5), e.lineTo(s + 0.5, t + 4), e.stroke());
+    }
+    e.globalAlpha = 1, e.fillStyle = SPORE2.capD, e.fillRect(o, t + a * 0.66, i, a * 0.34), e.fillStyle = SPORE2.rim, e.fillRect(o, t + a * 0.82, i, a * 0.18), e.fillStyle = SPORE2.rimL, e.globalAlpha = 0.6, e.fillRect(o, t + a * 0.8, i, 0.6), e.globalAlpha = 1;
+    for (let r of [0.12, 0.47, 0.83]) {
+      let s = o + r * n;
+      if (!(s > o + i - 3))
+        for (let f = 0; f < 3; f++)
+          dot17(e, s + f * 2.2, t + a * 0.78 - f % 2 * 0.7, 1.2, SPORE2.moss), dot17(e, s + f * 2.2 - 0.4, t + a * 0.74 - f % 2 * 0.7, 0.45, SPORE2.mossL);
+    }
+  },
+  edge(e, o, t, i) {
+    e.fillStyle = SPORE2.rim, e.beginPath(), e.moveTo(o - 1, t), e.lineTo(o + 1.4, t + i * 0.2), e.lineTo(o + 0.2, t + i * 0.38), e.lineTo(o + 2.2, t + i * 0.62), e.lineTo(o + 0.6, t + i * 0.8), e.lineTo(o + 1.6, t + i), e.lineTo(o - 1, t + i), e.closePath(), e.fill();
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 3; n++) {
+      let r = (l * 0.8 + n / 3) % 1;
+      e.save(), e.translate(o + i * (0.2 + n * 0.3), t + a * 0.6 - r * 4), e.scale(0.55, 0.55), drawSporePuff(e, 0, 0, r, false), e.restore();
+    }
+  },
+  over(e, o, t, i, a, l, n, r) {
+    let s = o + i / 2;
+    e.beginPath(), e.ellipse(s, t - 2.6, 2.2, 1.9, 0, 0, TAU255), e.fillStyle = BELL.bell, e.fill(), e.lineWidth = 0.8, e.strokeStyle = EDGE5, e.stroke(), dot17(e, s - 0.7, t - 3.3, 0.6, BELL.bellL);
+    let f = n < 0.5 ? 10 : 5;
+    for (let h = 0; h < f; h++) {
+      let d = (l * (n < 0.5 ? 0.55 : 0.35) + h / f) % 1, u = o + i * (h * 0.618 % 1) + Math.sin(d * 5 + h) * 2;
+      e.globalAlpha = d < 0.15 ? d / 0.15 : 1 - (d - 0.15) / 0.85, dot17(e, u, t + a + 3 + d * 12, 0.9, SPORE2.spore), e.globalAlpha = 1;
+    }
+    r > 0 && (e.save(), e.translate(o + i * n, t + a / 2 - 4 * (1 - r)), e.scale(0.8, 0.8), drawSporePuff(e, 0, 0, 1 - r, false), e.restore());
+  }
+};
+function drawSporecrownBar(e, o, t, i, a) {
+  let { x: l, y: n, w: r } = o;
+  sporecrownName(e, l + r / 2, n + 13, t.name), drawBar(e, { x: l + 6, y: n + NAME_GAP, w: r - 6, h: BAR_H }, i, SPORECROWN_BAR, a);
+}
+function sporecrownName(e, o, t, i) {
+  e.save(), e.textAlign = "center", e.textBaseline = "alphabetic", e.lineJoin = "round", e.font = "900 13px Georgia,serif", e.shadowColor = "#000000a0", e.shadowBlur = 4, e.shadowOffsetY = 1, e.lineWidth = 3.4, e.strokeStyle = "#1c120b", e.strokeText(i, o, t), e.shadowColor = "transparent", e.fillStyle = vgrad(e, t - 10, 11, ["#f6ead0", "#e6d3a8", "#e47c3e"]), e.fillText(i, o, t), e.restore();
+}
+var GRAVE2 = GRAVE_PAL.A;
+var GRAVE_CRACKS = [0.2, 0.46, 0.74];
+var GRAVE_LATE_CRACKS = [0.09, 0.33, 0.6, 0.86];
+function graveWing(e, o, t, i, a, l) {
+  e.save(), e.translate(o, t), e.scale(i * 0.52, 0.52), e.rotate(-a), e.lineCap = "round", e.lineJoin = "round";
+  let n = [20, -22], r = [
+    [43, -17],
+    [47, 1],
+    [37, 16]
+  ], s = [3, 15], f = (d, u, y = 0.3) => {
+    let p = [(d[0] + u[0]) / 2, (d[1] + u[1]) / 2];
+    return [p[0] + (n[0] - p[0]) * y, p[1] + (n[1] - p[1]) * y];
+  }, h = () => {
+    e.beginPath(), e.moveTo(0, 0), e.lineTo(...n), e.lineTo(...r[0]), e.quadraticCurveTo(...f(r[0], r[1]), ...r[1]), e.quadraticCurveTo(...f(r[1], r[2]), ...r[2]), e.quadraticCurveTo(...f(r[2], s, 0.25), ...s), e.closePath();
+  };
+  h(), e.fillStyle = GRAVE2.wing, e.fill(), e.save(), h(), e.clip(), e.fillStyle = GRAVE2.wingD, e.beginPath(), e.ellipse(12, 18, 22, 10, -0.3, 0, TAU255), e.fill(), e.fillStyle = GRAVE2.wingL, e.beginPath(), e.moveTo(0, 0), e.lineTo(...n), e.lineTo(...r[0]), e.lineTo(30, -12), e.lineTo(8, 2), e.closePath(), e.fill(), e.strokeStyle = GRAVE2.wingD, e.lineWidth = 1.2;
+  for (let d of r)
+    e.beginPath(), e.moveTo(n[0] * 0.6, n[1] * 0.6 + 4), e.quadraticCurveTo((n[0] + d[0]) / 2, (n[1] + d[1]) / 2 + 5, d[0] - 3, d[1]), e.stroke();
+  e.restore(), h(), e.strokeStyle = EDGE5, e.lineWidth = 2, e.stroke(), limb(e, [[0, 0], [n[0] * 0.5, n[1] * 0.62], n], GRAVE2.st, 3.6);
+  for (let [d, u] of r.entries()) limb(e, [n, u], GRAVE2.st, 2.3 - d * 0.3);
+  stroke2(
+    e,
+    [
+      [1, -1.4],
+      [n[0] * 0.5, n[1] * 0.62 - 1.2],
+      [n[0] - 1, n[1] - 1]
+    ],
+    GRAVE2.stL,
+    1.4
+  ), circ2(e, n[0], n[1], 2.6, GRAVE2.st, true, 1.8), poly10(
+    e,
+    [
+      [n[0] - 1.6, n[1] - 1],
+      [n[0] + 1, n[1] - 7.5],
+      [n[0] + 2.6, n[1] - 0.6]
+    ],
+    GRAVE2.horn,
+    true,
+    1.8
+  );
+  for (let d of r)
+    poly10(
+      e,
+      [
+        [d[0] - 1, d[1] - 1],
+        [d[0] + 2.6, d[1] + 0.6],
+        [d[0] - 0.4, d[1] + 1.4]
+      ],
+      GRAVE2.horn,
+      true,
+      1.4
+    );
+  l && amberLine(
+    e,
+    [
+      [26, -4],
+      [29, -1.6],
+      [28.4, 1.6]
+    ],
+    1.8
+  ), e.restore();
+}
+function amberLine(e, o, t = 1.2) {
+  e.save(), e.lineCap = "round", e.lineJoin = "round", e.shadowColor = GRAVE2.glow, e.shadowBlur = 3, stroke2(e, o, GRAVE2.glow, t * 0.8), e.restore(), stroke2(e, o, GRAVE2.core, t * 0.28);
+}
+function amberCrack(e, o, t, i, a, l) {
+  let n = seeded2(Math.floor(a * 997) + 3), r = [[o, t - 0.5]], s = t;
+  for (; s < t + i; ) s += 1.6 + n() * 1.6, r.push([o + (n() - 0.5) * 3.2, Math.min(t + i + 0.5, s)]);
+  if (amberLine(e, r, l ? 1.3 : 1), l) {
+    let f = r[1];
+    amberLine(e, [f, [f[0] + 2.4, f[1] + 1.2]], 0.8);
+  }
+}
+var GRAVEWING_BAR = {
+  shape: (e, o, t, i, a) => octagon(e, o, t, i, a, 2),
+  chunk: ["#9a6a3a", "#7a4c26", "#4e2e16"],
+  under(e, o, t, i, a, l, n) {
+    let r = Math.sin(l * (n < 0.5 ? 3.6 : 2.2)) * (n < 0.5 ? 0.12 : 0.07);
+    graveWing(e, o - 2, t + a / 2 + 2, -1, r, false), graveWing(e, o + i + 2, t + a / 2 + 2, 1, r, true);
+  },
+  track(e, o, t, i, a) {
+    octagon(e, o - 2.5, t - 2.5, i + 5, a + 5, 3), e.fillStyle = vgrad(e, t - 2.5, a + 5, [GRAVE2.stD, GRAVE2.stDD]), e.fill(), e.lineWidth = 1, e.strokeStyle = EDGE5, e.stroke(), e.fillStyle = GRAVE2.st, e.globalAlpha = 0.6, e.fillRect(o + 1, t - 2, i - 2, 0.7), e.globalAlpha = 1, e.fillStyle = GRAVE2.stDD;
+    for (let [l, n] of [
+      [0.07, 1],
+      [0.28, 0],
+      [0.41, 1],
+      [0.63, 0],
+      [0.8, 1],
+      [0.94, 0]
+    ]) {
+      let r = o + l * i, s = n ? t - 2.5 : t + a + 2.5, f = n ? 1 : -1;
+      e.beginPath(), e.moveTo(r - 1.8, s), e.lineTo(r, s + f * 1.6), e.lineTo(r + 1.6, s), e.closePath(), e.fill();
+    }
+    octagon(e, o, t, i, a, 2), e.fillStyle = "#0d1114", e.fill();
+  },
+  fill(e, o, t, i, a, l, n) {
+    e.fillStyle = vgrad(e, t, a, [GRAVE2.stL, GRAVE2.st, GRAVE2.stD]), e.fillRect(o, t, i, a), e.fillStyle = "#c4ced2", e.globalAlpha = 0.7, e.fillRect(o, t + 0.6, i, 0.8), e.globalAlpha = 1, e.fillStyle = GRAVE2.stD, e.fillRect(o, t + a * 0.72, i, a * 0.28), e.save(), e.shadowColor = GRAVE2.glow, e.shadowBlur = 3, e.fillStyle = GRAVE2.glow, e.globalAlpha = 0.8 + 0.2 * Math.sin(l * 3), e.fillRect(o, t + a - 1.3, i, 1.3), e.restore(), e.strokeStyle = GRAVE2.stDD, e.lineWidth = 0.8;
+    let r = seeded2(23);
+    for (let f = o + 14 + r() * 10; f < o + i - 2; f += 26 + r() * 18)
+      e.beginPath(), e.moveTo(f, t), e.lineTo(f + (r() - 0.5) * 1.4, t + a), e.stroke();
+    e.fillStyle = GRAVE2.stDD;
+    for (let f of [0.15, 0.39, 0.57, 0.81, 0.95]) {
+      let h = o + f * n;
+      h > o + i - 3 || (e.beginPath(), e.moveTo(h - 1.6, t + a), e.lineTo(h, t + a - 1.6), e.lineTo(h + 1.6, t + a), e.closePath(), e.fill());
+    }
+    let s = i / n;
+    for (let f of GRAVE_CRACKS) {
+      let h = o + f * n;
+      h < o + i - 3 && amberCrack(e, h, t, a, f, true);
+    }
+    if (s < 0.5)
+      for (let f of GRAVE_LATE_CRACKS) {
+        let h = o + f * n;
+        h < o + i - 3 && amberCrack(e, h, t, a, f + 0.5, false);
+      }
+  },
+  edge(e, o, t, i) {
+    e.fillStyle = GRAVE2.stDD, e.beginPath(), e.moveTo(o - 1.4, t), e.lineTo(o + 0.8, t), e.lineTo(o - 0.2, t + i * 0.4), e.lineTo(o + 1, t + i * 0.65), e.lineTo(o - 0.4, t + i), e.lineTo(o - 1.4, t + i), e.closePath(), e.fill(), amberLine(
+      e,
+      [
+        [o + 0.2, t],
+        [o - 0.8, t + i * 0.4],
+        [o + 0.4, t + i * 0.65],
+        [o - 0.6, t + i]
+      ],
+      1.3
+    );
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    e.fillStyle = GRAVE2.stD;
+    for (let n = 0; n < 4; n++) {
+      let r = (l * 0.9 + n / 4) % 1, s = o + i * (0.15 + n * 0.23), f = t + a + r * 9;
+      e.globalAlpha = 1 - r, e.beginPath(), e.moveTo(s - 1.2, f), e.lineTo(s + 0.4, f - 1.4), e.lineTo(s + 1.3, f + 0.6), e.closePath(), e.fill();
+    }
+    e.globalAlpha = 1;
+  },
+  over(e, o, t, i, a, l, n, r) {
+    let s = o + i / 2, f = t + a + 4.2, h = 0.75 + Math.sin(l * (n < 0.5 ? 6 : 3)) * 0.25;
+    if (amberLine(
+      e,
+      [
+        [s - 3.6, f - 1.2],
+        [s - 6, f - 2.6],
+        [s - 7.4, f - 1.8]
+      ],
+      0.9
+    ), amberLine(
+      e,
+      [
+        [s + 3.4, f + 0.8],
+        [s + 5.6, f + 2.4],
+        [s + 7.6, f + 2]
+      ],
+      0.9
+    ), e.beginPath(), e.ellipse(s, f, 4.4, 4.6, 0, 0, TAU255), e.fillStyle = GRAVE2.stDD, e.fill(), e.lineWidth = 1, e.strokeStyle = EDGE5, e.stroke(), e.save(), e.shadowColor = GRAVE2.glow, e.shadowBlur = 5 + h * 5, e.fillStyle = GRAVE2.glow, e.beginPath(), e.moveTo(s, f - 3.5), e.lineTo(s + 2.7, f), e.lineTo(s, f + 3.5), e.lineTo(s - 2.7, f), e.closePath(), e.fill(), e.restore(), e.fillStyle = GRAVE2.core, e.globalAlpha = h, e.beginPath(), e.moveTo(s - 0.5, f - 2.2), e.lineTo(s + 0.8, f - 0.6), e.lineTo(s - 0.5, f + 0.6), e.lineTo(s - 1.3, f - 0.6), e.closePath(), e.fill(), e.globalAlpha = 1, r > 0) {
+      let d = o + i * n, u = 1 - r;
+      for (let y = 0; y < 5; y++) {
+        let p = -1.2 + y * 0.6, g2 = 3 + u * 10, b = d + Math.cos(p) * g2, T121 = t + a / 2 + Math.sin(p) * g2 + u * u * 6;
+        e.globalAlpha = r, y % 2 ? (e.fillStyle = GRAVE2.stL, e.beginPath(), e.moveTo(b - 1.3, T121), e.lineTo(b, T121 - 1.4), e.lineTo(b + 1.3, T121 + 0.5), e.closePath(), e.fill()) : dot17(e, b, T121, 0.9, GRAVE2.glow);
+      }
+      e.globalAlpha = 1;
+    }
+  }
+};
+function drawGravewingBar(e, o, t, i, a) {
+  let { x: l, y: n, w: r } = o;
+  gravewingName(e, l + r / 2, n + 13, t.name), drawBar(e, { x: l, y: n + NAME_GAP, w: r, h: BAR_H }, i, GRAVEWING_BAR, a);
+}
+function gravewingName(e, o, t, i) {
+  e.save(), e.textAlign = "center", e.textBaseline = "alphabetic", e.lineJoin = "round", e.font = "900 13px Georgia,serif", e.shadowColor = "#000000a0", e.shadowBlur = 4, e.shadowOffsetY = 1, e.lineWidth = 3.4, e.strokeStyle = "#0b0d0f", e.strokeText(i, o, t), e.shadowColor = "transparent", e.fillStyle = vgrad(e, t - 10, 11, ["#e6ecee", "#9aa8ae", "#ffb347"]), e.fillText(i, o, t), e.restore();
+}
+var VINE3 = VINE_PAL.A;
+var SOIL8 = "#2a1a0e";
+function vineFrill(e, o, t) {
+  let i = 1 + Math.sin(o * 2) * 0.05 + t * 0.18, a = (l, n, r, s, f, h) => {
+    let d = Math.cos(l), u = Math.sin(l), y = -u, p = d;
+    n *= i;
+    let g2 = [d * 5 + y * r * 0.5, u * 5 + p * r * 0.5], b = [d * 5 - y * r * 0.5, u * 5 - p * r * 0.5], T121 = () => {
+      e.beginPath(), e.moveTo(...g2), e.quadraticCurveTo(d * n * 0.6 + y * r, u * n * 0.6 + p * r, d * n, u * n), e.quadraticCurveTo(d * n * 0.6 - y * r, u * n * 0.6 - p * r, ...b), e.closePath();
+    };
+    T121(), e.fillStyle = s, e.fill(), e.save(), T121(), e.clip(), e.fillStyle = f, e.beginPath(), e.moveTo(...g2), e.quadraticCurveTo(d * n * 0.6 + y * r, u * n * 0.6 + p * r, d * n, u * n), e.lineTo(d * 5, u * 5), e.closePath(), e.fill(), e.restore(), e.strokeStyle = h, e.lineWidth = 1, e.beginPath(), e.moveTo(d * 6, u * 6), e.lineTo(d * n * 0.8, u * n * 0.8), e.stroke(), T121(), e.strokeStyle = EDGE5, e.lineWidth = 1.8, e.stroke();
+  };
+  for (let l = 0; l < 9; l++)
+    a(-Math.PI * 0.36 - l * 0.29 + Math.sin(o * 1.6 + l) * 0.03, 23, 5.6, "#a8264f", "#c93a63", "#7a1838");
+  for (let l = 0; l < 8; l++)
+    a(-Math.PI * 0.36 - 0.14 - l * 0.29 + Math.sin(o * 1.6 + l + 1) * 0.03, 17, 4.8, "#e04a78", "#ff9cbc", "#b02a55");
+  e.fillStyle = "#ffd23c";
+  for (let l = 0; l < 8; l++) {
+    let n = -Math.PI * 0.4 - l * 0.29;
+    e.beginPath(), e.arc(Math.cos(n) * 12.5, Math.sin(n) * 12.5, 1.2, 0, TAU255), e.fill(), e.strokeStyle = "#b8860b", e.lineWidth = 0.6, e.stroke();
+  }
+}
+function vineHead(e, o, t, i, a, l) {
+  e.save(), e.translate(o, t), e.scale(-i, i), e.rotate(0.14 + Math.sin(a * 1.25 + 0.6) * 0.06), e.lineCap = "round", e.lineJoin = "round", e.save(), e.translate(-5, -2.5), vineFrill(e, a, l), e.restore(), e.save(), e.translate(-3, 3.5), e.rotate(l * 0.62), poly10(
+    e,
+    [
+      [-2, -2],
+      [18, -1.2],
+      [18, 4.5]
+    ],
+    "#3b0f19",
+    false
+  ), e.fillStyle = "#c94a5e", e.beginPath(), e.ellipse(9, 0.6, 6, 1.4, 0, 0, TAU255), e.fill();
+  for (let u = 0; u < 4; u++) {
+    let y = 6 + u * 3.2;
+    poly10(
+      e,
+      [
+        [y - 1.2, 0],
+        [y + 1.2, 0],
+        [y + 0.2, -3.2 - (u === 3 ? 1.4 : 0)]
+      ],
+      "#fff4d6",
+      true,
+      1
+    );
+  }
+  poly10(
+    e,
+    [
+      [-4, -1],
+      [19, 0],
+      [20, 2.4],
+      [15, 6],
+      [2, 6.6],
+      [-5, 4]
+    ],
+    VINE3.headD,
+    true,
+    2.2
+  ), poly10(
+    e,
+    [
+      [-3, 0],
+      [18, 0.8],
+      [17, 2.4],
+      [-3, 2.2]
+    ],
+    VINE3.head,
+    false
+  ), e.restore();
+  let n = [
+    [-10, -1],
+    [-9, -7],
+    [-3, -11],
+    [5, -10.5],
+    [10, -7.5],
+    [17, -4.5],
+    [21, -1.5],
+    [21, 1.5],
+    [17, 3.2],
+    [4, 4],
+    [-4, 5],
+    [-9, 3.5]
+  ];
+  poly10(e, n, VINE3.head, false), e.save(), poly10(e, n, null, false), e.clip(), e.fillStyle = VINE3.headD, e.beginPath(), e.moveTo(-10, 2), e.lineTo(21, 0), e.lineTo(21, 6), e.lineTo(-10, 6), e.closePath(), e.fill(), e.beginPath(), e.ellipse(9, -1, 12, 4, 0.12, 0, TAU255), e.fillStyle = VINE3.head, e.fill(), e.fillStyle = VINE3.headL, e.beginPath(), e.moveTo(-8, -6), e.quadraticCurveTo(-3, -11, 5, -10), e.quadraticCurveTo(11, -8, 16, -4.6), e.lineTo(9, -5.6), e.quadraticCurveTo(1, -8, -7, -4), e.closePath(), e.fill(), e.restore(), poly10(e, n, null, true, 2.2);
+  for (let u = 0; u < 5; u++) {
+    let y = 4 + u * 3.3, p = u === 4 || u === 1;
+    poly10(
+      e,
+      [
+        [y - 1.3, 3.6 - u * 0.1],
+        [y + 1.3, 3.5 - u * 0.1],
+        [y + 0.3, 7.4 + (p ? 2 : 0) - u * 0.1]
+      ],
+      "#fff4d6",
+      true,
+      1
+    );
+  }
+  e.save(), e.shadowColor = VINE3.glow, e.shadowBlur = 5, ell6(e, 6.5, -4.8, 2.8, 2.1, VINE3.eye, false), e.restore(), ell6(e, 6.5, -4.8, 2.8, 2.1, null, true, 1.4), e.fillStyle = EDGE5, e.beginPath(), e.ellipse(7, -4.8, 0.7, 1.9, 0, 0, TAU255), e.fill(), e.fillStyle = "#fff8e0", e.beginPath(), e.arc(5.6, -5.6, 0.6, 0, TAU255), e.fill(), e.fillStyle = EDGE5, e.beginPath(), e.ellipse(18.5, -2.2, 1.1, 0.6, 0.3, 0, TAU255), e.fill(), poly10(
+    e,
+    [
+      [1.5, -6.4],
+      [10.5, -8.6],
+      [11.5, -6.8],
+      [3, -4.6]
+    ],
+    VINE3.headD,
+    true,
+    1.4
+  );
+  for (let [u, y, p] of [
+    [-8, 2, 2.5],
+    [-9.5, -1.5, 2.85]
+  ])
+    e.save(), e.translate(u, y), e.rotate(p), poly10(
+      e,
+      [
+        [0, -1.6],
+        [6, 0],
+        [0, 1.6]
+      ],
+      VINE3.thorn,
+      true,
+      1.4
+    ), e.restore();
+  let r = -1, s = 13, f = 6, h = [
+    [r, -9.5],
+    [r - s * 0.6, -9.5 - f - 3],
+    [r - s, -9.5 - f],
+    [r - s * 0.45, -7.5 - f * 0.3]
+  ], d = () => {
+    e.beginPath(), e.moveTo(...h[0]), e.quadraticCurveTo(h[1][0], h[1][1], h[2][0], h[2][1]), e.quadraticCurveTo(h[3][0], h[3][1], r + 2, -7.8), e.closePath();
+  };
+  d(), e.fillStyle = VINE3.head, e.fill(), e.save(), d(), e.clip(), e.fillStyle = VINE3.headL, e.beginPath(), e.moveTo(...h[0]), e.quadraticCurveTo(h[1][0], h[1][1], h[2][0], h[2][1]), e.lineTo(r - s * 0.4, -9.6 - f * 0.5), e.closePath(), e.fill(), e.restore(), d(), e.strokeStyle = EDGE5, e.lineWidth = 1.6, e.stroke(), l > 0.3 && (e.fillStyle = "#bff0a0", e.strokeStyle = EDGE5, e.lineWidth = 0.8, e.beginPath(), e.ellipse(14, 6 + l * 6, 0.9, 1.6 + l, 0, 0, TAU255), e.fill(), e.stroke()), e.restore();
+}
+function vineGape(e, o) {
+  let t = o ? 1.6 : 3.2, i = e % t / t, a = 0.12 + Math.sin(e * 1.7) * 0.06;
+  return i > 0.62 && i < 0.82 ? a + (i - 0.62) / 0.2 * ((i - 0.62) / 0.2) * (3 - 2 * (i - 0.62) / 0.2) * 0.85 : i >= 0.82 && i < 0.87 ? (a + 0.85) * (1 - (i - 0.82) / 0.05) : a;
+}
+function vineThorn(e, o, t, i) {
+  let a = Math.max(1.4, i * 0.3), l = o + i * 0.75, n = t - i * 0.8, r = () => {
+    e.beginPath(), e.moveTo(o - a, t), e.quadraticCurveTo(o + i * 0.1, t - i * 0.6, l, n), e.quadraticCurveTo(o + i * 0.35, t - i * 0.35, o + a, t), e.closePath();
+  };
+  r(), e.fillStyle = VINE3.thorn, e.fill(), e.save(), r(), e.clip(), e.fillStyle = VINE3.thornL, e.beginPath(), e.moveTo(o - a, t), e.quadraticCurveTo(o + i * 0.1, t - i * 0.6, l, n), e.lineTo(o, t), e.closePath(), e.fill(), e.fillStyle = VINE3.tip, e.beginPath(), e.arc(l, n, i * 0.3, 0, TAU255), e.fill(), e.restore(), r(), e.strokeStyle = EDGE5, e.lineWidth = 0.9, e.stroke();
+}
+function vineSegments(e) {
+  let o = Math.max(8, Math.round(e / 13));
+  return { n: o, sw: e / o };
+}
+var VINEGORGER_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: ["#ffe4ec", "#ffc2d4", "#e88aa8"],
+  under(e, o, t, i, a, l, n, r) {
+    let s = Math.sin(l * 3.1) * 0.25, f = o + i + 1.5, h = t + a / 2;
+    e.save(), e.translate(f, h), e.rotate(s);
+    let d = () => {
+      e.beginPath(), e.moveTo(0, -2.6), e.quadraticCurveTo(6, -3, 10, 0), e.quadraticCurveTo(6, 2.4, 0, 2.6), e.closePath();
+    };
+    d(), e.fillStyle = VINE3.thorn, e.fill(), e.save(), d(), e.clip(), e.fillStyle = VINE3.tip, e.beginPath(), e.arc(10, 0, 3, 0, TAU255), e.fill(), e.restore(), d(), e.strokeStyle = EDGE5, e.lineWidth = 1, e.stroke(), e.restore();
+  },
+  track(e, o, t, i, a, l) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5), e.fillStyle = vgrad(e, t - 2.5, a + 5, [VINE3.thorn, VINE3.dark, "#0f4a2a"]), e.fill(), e.save(), pill(e, o - 2.5, t - 2.5, i + 5, a + 5), e.clip(), e.strokeStyle = VINE3.thornL, e.lineWidth = 0.8, e.globalAlpha = 0.8;
+    for (let r of [0, 1]) {
+      e.beginPath();
+      for (let s = o - 2; s <= o + i + 2; s += 2) {
+        let f = (r ? t + a + 1.3 : t - 1.3) + Math.sin(s * 0.35 + r * Math.PI) * 0.9;
+        s === o - 2 ? e.moveTo(s, f) : e.lineTo(s, f);
+      }
+      e.stroke();
+    }
+    e.restore(), pill(e, o - 2.5, t - 2.5, i + 5, a + 5), e.lineWidth = 1, e.strokeStyle = EDGE5, e.stroke(), pill(e, o, t, i, a), e.fillStyle = SOIL8, e.fill(), e.save(), e.clip();
+    let n = seeded2(41);
+    e.fillStyle = "#4a3220";
+    for (let r = o + 2; r < o + i; r += 5 + n() * 7) dot17(e, r, t + 1.5 + n() * (a - 3), 0.5 + n() * 0.7, "#4a3220");
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    let { n: r, sw: s } = vineSegments(n);
+    e.save(), e.beginPath(), e.rect(o, t, i, a), e.clip();
+    for (let f = r - 1; f >= 0; f--) {
+      let h = o + f * s;
+      if (h > o + i) continue;
+      let d = () => {
+        e.beginPath(), e.moveTo(h - 1, t), e.lineTo(h + s, t), e.ellipse(h + s, t + a / 2, 3.2, a / 2, 0, -Math.PI / 2, Math.PI / 2), e.lineTo(h - 1, t + a), e.closePath();
+      };
+      d(), e.fillStyle = VINE3.seg, e.fill(), e.save(), d(), e.clip(), e.fillStyle = VINE3.light, e.fillRect(h, t + 0.5, s * 0.8, a * 0.28), e.fillStyle = VINE3.dark, e.beginPath(), e.ellipse(h + s + 1, t + a * 0.55, s * 0.42, a * 0.5, 0, 0, TAU255), e.fill(), e.fillStyle = VINE3.belly, e.fillRect(h - 1, t + a * 0.72, s + 4, a * 0.28), e.strokeStyle = VINE3.bellyD, e.lineWidth = 0.7;
+      for (let u of [0.3, 0.65])
+        e.beginPath(), e.moveTo(h + u * s, t + a * 0.74), e.lineTo(h + u * s - 0.5, t + a), e.stroke();
+      e.restore(), e.beginPath(), e.ellipse(h + s, t + a / 2, 3.2, a / 2, 0, -Math.PI / 2, Math.PI / 2), e.strokeStyle = "#0f4a2a", e.lineWidth = 0.8, e.stroke();
+    }
+    e.restore();
+  },
+  edge(e, o, t, i) {
+    e.beginPath(), e.ellipse(o, t + i / 2, 3, i / 2, 0, -Math.PI / 2, Math.PI / 2), e.closePath(), e.fillStyle = VINE3.seg, e.fill(), e.fillStyle = VINE3.belly, e.fillRect(o, t + i * 0.72, 2.4, i * 0.28), e.beginPath(), e.ellipse(o, t + i / 2, 3, i / 2, 0, -Math.PI / 2, Math.PI / 2), e.strokeStyle = EDGE5, e.lineWidth = 1, e.stroke();
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 3; n++) {
+      let r = (l * 0.7 + n / 3) % 1, s = o + i * (0.2 + n * 0.3) + Math.sin(r * 6 + n) * 2, f = t + a + r * 10;
+      e.save(), e.globalAlpha = 1 - r, e.translate(s, f), e.rotate(r * 4 + n), e.beginPath(), e.ellipse(0, 0, 1.8, 0.9, 0, 0, TAU255), e.fillStyle = "#e04a78", e.fill(), e.restore();
+    }
+  },
+  over(e, o, t, i, a, l, n, r) {
+    let { n: s, sw: f } = vineSegments(i);
+    for (let d = 0; d < s; d++) {
+      let u = o + d * f + f * 0.45;
+      if (u > o + i * n - 2) break;
+      vineThorn(e, u, t - 1.8, d % 2 ? 4.6 : 5.8);
+    }
+    if (n < 0.5)
+      for (let d = 0; d < 4; d++) {
+        let u = (l * 0.6 + d / 4) % 1, y = o + i * n + i * (1 - n) * ((d * 0.37 + 0.15) % 1), p = t + a + 2 + u * 10;
+        e.globalAlpha = 1 - u, dot17(e, y, p, 1.1, "#5a3e26"), e.globalAlpha = 1;
+      }
+    if (r > 0) {
+      let d = o + i * n, u = 1 - r;
+      for (let y = 0; y < 4; y++) {
+        let p = -1 + y * 0.55, g2 = 3 + u * 11;
+        e.save(), e.globalAlpha = r, e.translate(d + Math.cos(p) * g2, t + a / 2 + Math.sin(p) * g2 + u * u * 5), e.rotate(u * 5 + y), e.beginPath(), e.ellipse(0, 0, 2, 1, 0, 0, TAU255), e.fillStyle = y % 2 ? "#ff9cbc" : "#e04a78", e.fill(), e.restore();
+      }
+    }
+    let h = r > 0 ? Math.max(0, 0.9 - r * 2) : vineGape(l, n < 0.5);
+    vineHead(e, o - 6, t + a / 2 + 1.5, 0.5, l, h);
+  }
+};
+function drawVinegorgerBar(e, o, t, i, a) {
+  let { x: l, y: n, w: r } = o;
+  vinegorgerName(e, l + r / 2, n + 13, t.name), drawBar(e, { x: l + 6, y: n + NAME_GAP, w: r - 6, h: BAR_H }, i, VINEGORGER_BAR, a);
+}
+function vinegorgerName(e, o, t, i) {
+  e.save(), e.textAlign = "center", e.textBaseline = "alphabetic", e.lineJoin = "round", e.font = "900 13px Georgia,serif", e.shadowColor = "#000000a0", e.shadowBlur = 4, e.shadowOffsetY = 1, e.lineWidth = 3.4, e.strokeStyle = "#0b1a10", e.strokeText(i, o, t), e.shadowColor = "transparent", e.fillStyle = vgrad(e, t - 10, 11, ["#d8ffd0", "#7ae59a", "#27a05e"]), e.fillText(i, o, t), e.restore();
+}
+var LESSER_BARS = Object.freeze({
+  rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
+  sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
+  gravewing: Object.freeze({ draw: drawGravewingBar, side: 27 }),
+  vinegorger: Object.freeze({ draw: drawVinegorgerBar, side: 18 })
+});
+function drawLesserBossBarV1(e, o, t, i, a) {
+  let l = LESSER_BARS[t?.id];
+  if (!l) return false;
+  let n = Math.min(360, o.width - 28 - l.side * 2), r = (o.width - n) / 2;
+  return e.save(), l.draw(e, { x: r, y: 12, w: n }, t, i, a / 1e3), e.restore(), true;
+}
+function hasLesserBossBarV1(id2) {
+  return Object.hasOwn(LESSER_BARS, id2);
+}
+
 // src/client/minor_boss_bar_v1.js
 var MINOR_BOSS_BAR_V1 = Object.freeze({ pickUp: 380, letGo: 640, width: 340 });
 var GOLD42 = "#e9c766";
@@ -328315,7 +329005,7 @@ function minorBossOfV1(actor) {
   if (!actor?.alive || actor.team !== "hostile" || actor.boss) return null;
   const named2 = NAMED_ENDS_V1[actor.elite?.namedEliteId];
   if (named2)
-    return LESSER_BOSSES_V1[named2.id] ? { name: title3(named2.label), tag: "LESSER BOSS", accent: GOLD42, half: true } : { name: title3(named2.label), tag: "NAMED ELITE", accent: GOLD42, half: false };
+    return LESSER_BOSSES_V1[named2.id] ? { name: title3(named2.label), tag: "LESSER BOSS", accent: GOLD42, half: true, id: named2.id } : { name: title3(named2.label), tag: "NAMED ELITE", accent: GOLD42, half: false };
   if (actor.champion?.name)
     return actor.champion.tag === "ALPHA" ? { name: actor.champion.name, tag: "DEN ALPHA", accent: "#d9a05a", half: false } : { name: actor.champion.name, tag: actor.champion.tag ?? "CHAMPION", accent: "#ffb0a0", half: false };
   if (actor.brood?.sac) return { name: "Brood Mother", tag: "NEST", accent: "#c9a0ff", half: false };
@@ -328346,7 +329036,8 @@ function createMinorBossBarV1() {
       const actor = shownId ? model.entitiesById[shownId] : null, kind = minorBossOfV1(actor);
       if (!kind) return false;
       const reading = trails3.sample("boss/" + shownId, actorHealthRatio(actor), time3);
-      drawMinorBossPanelV1(c, canvas, kind, reading);
+      if (!(hasLesserBossBarV1(kind.id) && drawLesserBossBarV1(c, canvas, kind, reading, time3)))
+        drawMinorBossPanelV1(c, canvas, kind, reading);
       return true;
     },
     shown: () => shownId,
@@ -328391,7 +329082,7 @@ function drawMinorBossPanelV1(c, canvas, kind, reading) {
 }
 
 // src/client/boss_bar_treant_v1.js
-var TAU255 = Math.PI * 2;
+var TAU256 = Math.PI * 2;
 var clamp102 = (v) => Math.max(0, Math.min(1, v));
 var ease65 = (v) => {
   v = clamp102(v);
@@ -328413,7 +329104,7 @@ var AMBER5 = "#ffb547";
 var AMBER_LIT = "#ffe2a8";
 var HEART = ["#f3dcae", "#dcb27c", "#a97c4b"];
 var GROOVE2 = "#1a130d";
-function vgrad(c, y, h, stops) {
+function vgrad2(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -328538,13 +329229,13 @@ function spider2(c, x, y, t, mark2) {
       c.stroke();
     }
   c.beginPath();
-  c.ellipse(0, 1.2, 1.9, 2.2, 0, 0, TAU255);
+  c.ellipse(0, 1.2, 1.9, 2.2, 0, 0, TAU256);
   c.fillStyle = "#2b2018";
   c.fill();
   c.lineWidth = 0.7;
   c.stroke();
   c.beginPath();
-  c.arc(0, -1.4, 1.1, 0, TAU255);
+  c.arc(0, -1.4, 1.1, 0, TAU256);
   c.fillStyle = "#3a2b20";
   c.fill();
   c.stroke();
@@ -328570,7 +329261,7 @@ function styledBar(c, box6, reading, s, t, st) {
   s.shape(c, x, y, w, h);
   c.clip();
   if (tr > a + 5e-4) {
-    c.fillStyle = reading.flash ? "#ffffff" : vgrad(c, y, h, s.chunk);
+    c.fillStyle = reading.flash ? "#ffffff" : vgrad2(c, y, h, s.chunk);
     c.fillRect(x + w * a, y, w * (tr - a) + 0.5, h);
     s.chunkMotion?.(c, x + w * a, y, w * (tr - a), h, t);
   }
@@ -328584,7 +329275,7 @@ function styledBar(c, box6, reading, s, t, st) {
   s.over?.(c, x, y, w, h, t, a, imp2, st);
   c.restore();
 }
-var BAR_H = 7;
+var BAR_H2 = 7;
 var BAR_Y = 19;
 var WRAPS = [0.17, 0.44, 0.81];
 var MOSS_AT = [
@@ -328608,26 +329299,26 @@ var TREANT_BAR = {
   under(c, x, y, w, h) {
     const ex = x + w + 2.4, ey = y + h / 2;
     c.beginPath();
-    c.ellipse(ex, ey, 3.2, 5.6, 0, 0, TAU255);
+    c.ellipse(ex, ey, 3.2, 5.6, 0, 0, TAU256);
     c.fillStyle = DARK15;
     c.fill();
     c.lineWidth = 0.9;
     c.strokeStyle = INK82;
     c.stroke();
     c.beginPath();
-    c.ellipse(ex + 0.5, ey, 2.3, 4.5, 0, 0, TAU255);
+    c.ellipse(ex + 0.5, ey, 2.3, 4.5, 0, 0, TAU256);
     c.fillStyle = "#d2a56c";
     c.fill();
     c.strokeStyle = "#9a6e42";
     c.lineWidth = 0.45;
     for (const r of [3.3, 2.2, 1.2]) {
       c.beginPath();
-      c.ellipse(ex + 0.6, ey, r * 0.5, r, 0, 0, TAU255);
+      c.ellipse(ex + 0.6, ey, r * 0.5, r, 0, 0, TAU256);
       c.stroke();
     }
     c.fillStyle = "#7a5432";
     c.beginPath();
-    c.arc(ex + 0.7, ey, 0.5, 0, TAU255);
+    c.arc(ex + 0.7, ey, 0.5, 0, TAU256);
     c.fill();
     c.strokeStyle = "#7a5432";
     c.lineWidth = 0.5;
@@ -328638,7 +329329,7 @@ var TREANT_BAR = {
   },
   track(c, x, y, w, h) {
     chamfer3(c, x - 2.2, y - 2.2, w + 4.4, h + 4.4, 2.6);
-    c.fillStyle = vgrad(c, y - 2.2, h + 4.4, [RIDGE9, BARK7, DARK15]);
+    c.fillStyle = vgrad2(c, y - 2.2, h + 4.4, [RIDGE9, BARK7, DARK15]);
     c.fill();
     c.lineWidth = 1;
     c.strokeStyle = INK82;
@@ -328659,7 +329350,7 @@ var TREANT_BAR = {
     c.stroke();
   },
   fill(c, x, y, fw, h, t, W21, st) {
-    c.fillStyle = vgrad(c, y, h, [LIGHT14, BARK7, BARK7, DARK15]);
+    c.fillStyle = vgrad2(c, y, h, [LIGHT14, BARK7, BARK7, DARK15]);
     c.fillRect(x, y, fw, h);
     c.lineCap = "round";
     c.strokeStyle = GRAIN2;
@@ -328771,7 +329462,7 @@ var TREANT_BAR = {
       c.stroke();
       c.fillStyle = MOSS_LIGHT3;
       c.beginPath();
-      c.ellipse(mx - mw * 0.12, y - 0.7, mw * 0.2, 0.55, -0.2, 0, TAU255);
+      c.ellipse(mx - mw * 0.12, y - 0.7, mw * 0.2, 0.55, -0.2, 0, TAU256);
       c.fill();
     }
     for (const f of SPRIGS) {
@@ -328826,7 +329517,7 @@ var TREANT_BAR = {
         c.lineTo(-pw / 2 + 1, h / 2 + 1.2);
         c.lineTo(-pw / 2 - 0.8, 0);
         c.closePath();
-        c.fillStyle = vgrad(c, -h / 2 - 1.8, h + 3.3, [RIDGE9, DARK15, "#2e2119"]);
+        c.fillStyle = vgrad2(c, -h / 2 - 1.8, h + 3.3, [RIDGE9, DARK15, "#2e2119"]);
         c.fill();
         c.lineWidth = 0.8;
         c.strokeStyle = INK82;
@@ -328900,7 +329591,7 @@ var TREANT_BAR = {
     }
     const sx = x - 2.6, sy = y + h / 2, sw = Math.sin(t * 1.8) * 0.08 * (st.amber ? 1.8 : 1);
     c.save();
-    c.fillStyle = vgrad(c, sy - 3, 6, [LIGHT14, BARK7, DARK15]);
+    c.fillStyle = vgrad2(c, sy - 3, 6, [LIGHT14, BARK7, DARK15]);
     c.beginPath();
     c.moveTo(sx + 3, sy - 3.4);
     c.lineTo(sx - 2.4, sy - 2.6);
@@ -328934,11 +329625,11 @@ var TREANT_BAR = {
         c.globalAlpha = Math.sin(f * Math.PI) * 0.9;
         c.fillStyle = EYE4;
         c.beginPath();
-        c.arc(px7, py, 1, 0, TAU255);
+        c.arc(px7, py, 1, 0, TAU256);
         c.fill();
         c.fillStyle = "#efffc9";
         c.beginPath();
-        c.arc(px7 - 0.3, py - 0.3, 0.4, 0, TAU255);
+        c.arc(px7 - 0.3, py - 0.3, 0.4, 0, TAU256);
         c.fill();
         c.restore();
       }
@@ -328974,7 +329665,7 @@ function title4(c, cx, y, name) {
   c.strokeStyle = "#0f150c";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad(c, y - 10, 11, ["#f4f8d8", LEAF_HI2, MOSS_LIGHT3]);
+  c.fillStyle = vgrad2(c, y - 10, 11, ["#f4f8d8", LEAF_HI2, MOSS_LIGHT3]);
   c.fillText(name, cx, y);
   c.restore();
 }
@@ -328983,7 +329674,7 @@ function drawTreantBar(c, canvas, reading, time3, st = {}, name = "Arachnid Trea
   const w = Math.min(360, canvas.width - 28 - TREANT_BAR_SIDE * 2), x = (canvas.width - w) / 2 + TREANT_BAR_SIDE * 0.3, y = 12, t = time3 / 1e3;
   c.save();
   title4(c, canvas.width / 2, y + 13, name);
-  styledBar(c, { x, y: y + BAR_Y, w, h: BAR_H }, reading, TREANT_BAR, t, {
+  styledBar(c, { x, y: y + BAR_Y, w, h: BAR_H2 }, reading, TREANT_BAR, t, {
     amber: false,
     shield: false,
     shieldAge: 0,
@@ -328995,7 +329686,7 @@ function drawTreantBar(c, canvas, reading, time3, st = {}, name = "Arachnid Trea
 }
 
 // src/client/boss_bar_brimstone_v1.js
-var TAU256 = Math.PI * 2;
+var TAU257 = Math.PI * 2;
 var clamp103 = (v) => Math.max(0, Math.min(1, v));
 var INK83 = "#101316";
 var IRON25 = "#454955";
@@ -329008,7 +329699,7 @@ var WHITE9 = "#fff0ba";
 var RIVET2 = "#8c929e";
 var SLAG = ["#7a3b24", "#4a2c24", "#2c2220"];
 var GROOVE3 = "#141217";
-function vgrad2(c, y, h, stops) {
+function vgrad3(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -329046,15 +329737,15 @@ function poly38(c, p, fill8, edge = true, lw = 1) {
 function rivet4(c, x, y, r = 1) {
   c.fillStyle = INK83;
   c.beginPath();
-  c.arc(x, y, r + 0.45, 0, TAU256);
+  c.arc(x, y, r + 0.45, 0, TAU257);
   c.fill();
   c.fillStyle = RIVET2;
   c.beginPath();
-  c.arc(x, y, r, 0, TAU256);
+  c.arc(x, y, r, 0, TAU257);
   c.fill();
   c.fillStyle = "#d4d8de";
   c.beginPath();
-  c.arc(x - r * 0.35, y - r * 0.35, r * 0.4, 0, TAU256);
+  c.arc(x - r * 0.35, y - r * 0.35, r * 0.4, 0, TAU257);
   c.fill();
 }
 function seam4(c, pts2, tick, phase3 = 0, w = 1.2) {
@@ -329270,7 +329961,7 @@ function styledBar2(c, box6, reading, s, t, st) {
   s.shape(c, x, y, w, h);
   c.clip();
   if (tr > a + 5e-4) {
-    c.fillStyle = reading.flash ? "#ffffff" : vgrad2(c, y, h, s.chunk);
+    c.fillStyle = reading.flash ? "#ffffff" : vgrad3(c, y, h, s.chunk);
     c.fillRect(x + w * a, y, w * (tr - a) + 0.5, h);
     if (!reading.flash) s.chunkMotion?.(c, x + w * a, y, w * (tr - a), h, t);
   }
@@ -329284,7 +329975,7 @@ function styledBar2(c, box6, reading, s, t, st) {
   s.over?.(c, x, y, w, h, t, a, imp2, st);
   c.restore();
 }
-var BAR_H2 = 7;
+var BAR_H3 = 7;
 var BAR_Y2 = 19;
 var TICK3 = 60;
 var BRIM_BAR = {
@@ -329321,7 +330012,7 @@ var BRIM_BAR = {
   },
   track(c, x, y, w, h) {
     chamfer4(c, x - 2.2, y - 2.2, w + 4.4, h + 4.4, 2.6);
-    c.fillStyle = vgrad2(c, y - 2.2, h + 4.4, [LIT5, IRON25, SHADE3]);
+    c.fillStyle = vgrad3(c, y - 2.2, h + 4.4, [LIT5, IRON25, SHADE3]);
     c.fill();
     c.lineWidth = 1;
     c.strokeStyle = INK83;
@@ -329343,7 +330034,7 @@ var BRIM_BAR = {
   },
   fill(c, x, y, fw, h, t, W21, a) {
     const tick = t * TICK3, f = 0.5 + 0.5 * Math.sin(tick * 0.11), low = a < 0.5;
-    c.fillStyle = vgrad2(c, y, h, [HOT6, "#ff9a3c", ORANGE2, "#b8401c"]);
+    c.fillStyle = vgrad3(c, y, h, [HOT6, "#ff9a3c", ORANGE2, "#b8401c"]);
     c.fillRect(x, y, fw, h);
     c.save();
     c.globalAlpha = 0.35 + f * 0.25;
@@ -329352,7 +330043,7 @@ var BRIM_BAR = {
       const sx = x + (i * 22 + t * 9) % (W21 + 22) - 11;
       if (sx > x + fw + 6) continue;
       c.beginPath();
-      c.ellipse(sx, y + 2.6 + Math.sin(i * 1.7) * 0.8, 4.5, 0.7, 0, 0, TAU256);
+      c.ellipse(sx, y + 2.6 + Math.sin(i * 1.7) * 0.8, 4.5, 0.7, 0, 0, TAU257);
       c.fill();
     }
     c.restore();
@@ -329401,7 +330092,7 @@ var BRIM_BAR = {
       const sx = x + i * 5 + hash82(i) * 3, sy = y + 1.5 + hash82(i + 7) * 4;
       c.fillStyle = i % 3 ? "#3a2622" : "#6a3a26";
       c.beginPath();
-      c.ellipse(sx, sy, 1.6 + hash82(i + 2), 1, 0, 0, TAU256);
+      c.ellipse(sx, sy, 1.6 + hash82(i + 2), 1, 0, 0, TAU257);
       c.fill();
       if (i % 4 === 0) {
         c.fillStyle = "#d0582a99";
@@ -329532,7 +330223,7 @@ function title5(c, cx, y, name) {
   c.strokeStyle = "#1a0f0a";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad2(c, y - 10, 11, [WHITE9, HOT6, ORANGE2]);
+  c.fillStyle = vgrad3(c, y - 10, 11, [WHITE9, HOT6, ORANGE2]);
   c.fillText(name, cx, y);
   c.restore();
 }
@@ -329541,12 +330232,12 @@ function drawBrimstoneBar(c, canvas, reading, time3, st = {}, name = "Brimstone 
   const w = Math.min(360, canvas.width - 28 - BRIM_BAR_SIDE * 2), x = (canvas.width - w) / 2 + BRIM_BAR_SIDE * 0.3, y = 12, t = time3 / 1e3;
   c.save();
   title5(c, canvas.width / 2, y + 13, name);
-  styledBar2(c, { x, y: y + BAR_Y2, w, h: BAR_H2 }, reading, BRIM_BAR, t, st);
+  styledBar2(c, { x, y: y + BAR_Y2, w, h: BAR_H3 }, reading, BRIM_BAR, t, st);
   c.restore();
 }
 
 // src/client/boss_bar_warden_v1.js
-var TAU257 = Math.PI * 2;
+var TAU258 = Math.PI * 2;
 var clamp104 = (v) => Math.max(0, Math.min(1, v));
 var ease66 = (p) => {
   p = clamp104(p);
@@ -329568,7 +330259,7 @@ var STONE_LIT6 = "#8f8a7f";
 var STONE_SHADE2 = "#4d4a44";
 var CHIP = ["#7a756b", "#5a564f", "#3c3a36"];
 var GROOVE4 = "#0b1117";
-function vgrad3(c, y, h, stops) {
+function vgrad4(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -329592,15 +330283,15 @@ function hash83(n) {
 function rivet5(c, x, y, r = 0.8) {
   c.fillStyle = INK84;
   c.beginPath();
-  c.arc(x, y, r + 0.45, 0, TAU257);
+  c.arc(x, y, r + 0.45, 0, TAU258);
   c.fill();
   c.fillStyle = "#9aa6b0";
   c.beginPath();
-  c.arc(x, y, r, 0, TAU257);
+  c.arc(x, y, r, 0, TAU258);
   c.fill();
   c.fillStyle = "#e0e6ea";
   c.beginPath();
-  c.arc(x - r * 0.35, y - r * 0.35, r * 0.4, 0, TAU257);
+  c.arc(x - r * 0.35, y - r * 0.35, r * 0.4, 0, TAU258);
   c.fill();
 }
 function diamondJoint(c, x, y, r, f, dim) {
@@ -329659,7 +330350,7 @@ function lodestone(c, x, y, r, t, sw) {
   c.rotate(sw);
   for (let i = 0; i < 4; i++) {
     c.save();
-    c.rotate(i * TAU257 / 4 + TAU257 / 8);
+    c.rotate(i * TAU258 / 4 + TAU258 / 8);
     poly27(
       c,
       [
@@ -329675,7 +330366,7 @@ function lodestone(c, x, y, r, t, sw) {
     c.restore();
   }
   const oct6 = Array.from({ length: 8 }, (_, i) => {
-    const a = i * TAU257 / 8 + TAU257 / 16;
+    const a = i * TAU258 / 8 + TAU258 / 16;
     return [Math.cos(a) * r, Math.sin(a) * r];
   });
   poly27(c, oct6, "#2c3440", true, 0.8);
@@ -329731,7 +330422,7 @@ function styledBar3(c, box6, reading, s, t, st) {
   s.shape(c, x, y, w, h);
   c.clip();
   if (tr > a + 5e-4) {
-    c.fillStyle = reading.flash ? "#ffffff" : vgrad3(c, y, h, s.chunk);
+    c.fillStyle = reading.flash ? "#ffffff" : vgrad4(c, y, h, s.chunk);
     c.fillRect(x + w * a, y, w * (tr - a) + 0.5, h);
     if (!reading.flash) s.chunkMotion?.(c, x + w * a, y, w * (tr - a), h, t);
   }
@@ -329745,7 +330436,7 @@ function styledBar3(c, box6, reading, s, t, st) {
   s.over?.(c, x, y, w, h, t, a, imp2, st);
   c.restore();
 }
-var BAR_H3 = 7;
+var BAR_H4 = 7;
 var BAR_Y3 = 19;
 var TICK4 = 60;
 var WARDEN_BAR = {
@@ -329761,7 +330452,7 @@ var WARDEN_BAR = {
       c.strokeStyle = INK84;
       c.lineWidth = 1.8;
       c.beginPath();
-      c.ellipse(0, 0, 1.5, 1, 0, 0, TAU257);
+      c.ellipse(0, 0, 1.5, 1, 0, 0, TAU258);
       c.stroke();
       c.strokeStyle = "#8a96a2";
       c.lineWidth = 0.7;
@@ -329797,7 +330488,7 @@ var WARDEN_BAR = {
   },
   track(c, x, y, w, h) {
     chamfer5(c, x - 2.2, y - 2.2, w + 4.4, h + 4.4, 2.6);
-    c.fillStyle = vgrad3(c, y - 2.2, h + 4.4, [STEEL_LIT5, STEEL15, STEEL_SHADE3]);
+    c.fillStyle = vgrad4(c, y - 2.2, h + 4.4, [STEEL_LIT5, STEEL15, STEEL_SHADE3]);
     c.fill();
     c.lineWidth = 1;
     c.strokeStyle = INK84;
@@ -329823,7 +330514,7 @@ var WARDEN_BAR = {
   },
   fill(c, x, y, fw, h, t, W21, st) {
     const tick = t * TICK4, f = 0.6 + 0.4 * Math.sin(tick * 0.09), dim = st.dazed ? 1 : 0, hot = st.enraged ? 0.5 + 0.5 * Math.sin(t * 9) : 0;
-    c.fillStyle = vgrad3(
+    c.fillStyle = vgrad4(
       c,
       y,
       h,
@@ -329925,7 +330616,7 @@ var WARDEN_BAR = {
       c.fillStyle = GROOVE4;
       c.fill();
       if (tr > 0) {
-        c.fillStyle = vgrad3(c, ty, 2.6, [STONE_LIT6, STONE39, STONE_SHADE2]);
+        c.fillStyle = vgrad4(c, ty, 2.6, [STONE_LIT6, STONE39, STONE_SHADE2]);
         c.fillRect(x, ty, tw * tr, 2.6);
         c.save();
         c.shadowColor = CYAN2;
@@ -329943,7 +330634,7 @@ var WARDEN_BAR = {
     c.lineTo(hx2 + flap * 0.6, hy + 6.6);
     c.lineTo(hx2 - 4 + flap, hy + 8);
     c.closePath();
-    c.fillStyle = vgrad3(c, hy, 8, [CLOTH_LIT2, CLOTH10, CLOTH_DEEP2]);
+    c.fillStyle = vgrad4(c, hy, 8, [CLOTH_LIT2, CLOTH10, CLOTH_DEEP2]);
     c.fill();
     c.lineWidth = 0.8;
     c.strokeStyle = INK84;
@@ -329964,7 +330655,7 @@ var WARDEN_BAR = {
           al = 1 - k / 24;
           dy = k * k * 0.05;
         }
-        const ang = t * 1.4 + i * TAU257 / 3, rr6 = 16 * (rec != null ? 1 - ease66(rec) : 1), px7 = sx + Math.cos(ang) * rr6, py = sy - 3 + Math.sin(ang) * rr6 * 0.4 + dy;
+        const ang = t * 1.4 + i * TAU258 / 3, rr6 = 16 * (rec != null ? 1 - ease66(rec) : 1), px7 = sx + Math.cos(ang) * rr6, py = sy - 3 + Math.sin(ang) * rr6 * 0.4 + dy;
         if (Math.sin(ang) < 0 !== back) continue;
         spiritShield(c, px7, py, 0.58, ang * 0.5, tick, al);
       }
@@ -329987,7 +330678,7 @@ var WARDEN_BAR = {
     }
     if (st.dazed)
       for (let i = 0; i < 3; i++) {
-        const ang = t * 5.4 + i * TAU257 / 3;
+        const ang = t * 5.4 + i * TAU258 / 3;
         star10(c, sx + Math.cos(ang) * 9, sy - sh3 / 2 - 3 + Math.sin(ang) * 2.2, 0.55);
       }
     if (imp2 > 0) {
@@ -330024,7 +330715,7 @@ function title6(c, cx, y, name) {
   c.strokeStyle = "#0b1520";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad3(c, y - 10, 11, [CORE, CYAN_LIGHT, "#7fd6dc"]);
+  c.fillStyle = vgrad4(c, y - 10, 11, [CORE, CYAN_LIGHT, "#7fd6dc"]);
   c.fillText(name, cx, y);
   c.restore();
 }
@@ -330033,12 +330724,12 @@ function drawWardenBar(c, canvas, reading, time3, st = {}, name = "Shield Warden
   const w = Math.min(360, canvas.width - 28 - WARDEN_BAR_SIDE * 2), x = (canvas.width - w) / 2 + WARDEN_BAR_SIDE * 0.3, y = 12, t = time3 / 1e3;
   c.save();
   title6(c, canvas.width / 2, y + 13, name);
-  styledBar3(c, { x, y: y + BAR_Y3, w, h: BAR_H3 }, reading, WARDEN_BAR, t, { sworn: 3, tower: null, ...st });
+  styledBar3(c, { x, y: y + BAR_Y3, w, h: BAR_H4 }, reading, WARDEN_BAR, t, { sworn: 3, tower: null, ...st });
   c.restore();
 }
 
 // src/client/boss_bar_barrow_v1.js
-var TAU258 = Math.PI * 2;
+var TAU259 = Math.PI * 2;
 var clamp105 = (v) => Math.max(0, Math.min(1, v));
 var INK85 = "#17130f";
 var BONE9 = "#e4dfc8";
@@ -330054,9 +330745,9 @@ var STEEL16 = "#aab2b7";
 var STEEL_LIT6 = "#e2e8ec";
 var STEEL_SH3 = "#78828a";
 var STEEL_DP = "#565e64";
-var RUST8 = ["#b56a40", "#94502f", "#5e2f1c"];
+var RUST9 = ["#b56a40", "#94502f", "#5e2f1c"];
 var GROOVE5 = "#101410";
-function vgrad4(c, y, h, stops) {
+function vgrad5(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -330081,9 +330772,9 @@ function poly39(c, p, fill8, edge = true, w = 0.7) {
     c.stroke();
   }
 }
-function dot17(c, x, y, r, fill8, edge = false) {
+function dot18(c, x, y, r, fill8, edge = false) {
   c.beginPath();
-  c.arc(x, y, r, 0, TAU258);
+  c.arc(x, y, r, 0, TAU259);
   c.fillStyle = fill8;
   c.fill();
   if (edge) {
@@ -330163,9 +330854,9 @@ function hilt(c, x, y, s) {
     GOLD_LIT4,
     false
   );
-  dot17(c, 0, -10.8, 2, GOLD43, true);
-  dot17(c, 0, -10.8, 0.9, GHOST_D4, true);
-  dot17(c, -0.55, -11.4, 0.45, GOLD_LIT4);
+  dot18(c, 0, -10.8, 2, GOLD43, true);
+  dot18(c, 0, -10.8, 0.9, GHOST_D4, true);
+  dot18(c, -0.55, -11.4, 0.45, GOLD_LIT4);
   c.restore();
 }
 function crown5(c, x, y, s, t, ph2) {
@@ -330230,8 +330921,8 @@ function crown5(c, x, y, s, t, ph2) {
     [3, -10.4],
     [8.6, -7]
   ]) {
-    dot17(c, px7, py - 0.8, 1.05, GOLD43, true);
-    dot17(c, px7 - 0.3, py - 1.1, 0.4, GOLD_LIT4);
+    dot18(c, px7, py - 0.8, 1.05, GOLD43, true);
+    dot18(c, px7 - 0.3, py - 1.1, 0.4, GOLD_LIT4);
   }
   poly39(
     c,
@@ -330262,14 +330953,14 @@ function crown5(c, x, y, s, t, ph2) {
     [5, "#3a8ad8"]
   ]) {
     c.beginPath();
-    c.ellipse(px7, 1.2, 1.25, 1, 0, 0, TAU258);
+    c.ellipse(px7, 1.2, 1.25, 1, 0, 0, TAU259);
     c.fillStyle = col2;
     c.fill();
-    dot17(c, px7 - 0.4, 0.8, 0.38, "#ffffffcc");
+    dot18(c, px7 - 0.4, 0.8, 0.38, "#ffffffcc");
   }
   c.restore();
 }
-var BAR_H4 = 7;
+var BAR_H5 = 7;
 var BAR_Y4 = 19;
 var NOTCHES = [
   [0.23, -1],
@@ -330286,7 +330977,7 @@ function styledBar4(c, box6, reading, s, t, st = {}) {
   c.rect(x, y, w, h);
   c.clip();
   if (tr > a + 5e-4) {
-    c.fillStyle = reading.flash ? "#ffffff" : vgrad4(c, y, h, s.chunk);
+    c.fillStyle = reading.flash ? "#ffffff" : vgrad5(c, y, h, s.chunk);
     c.fillRect(x + w * a, y, w * (tr - a) + 0.5, h);
     if (!reading.flash) s.chunkMotion(c, x + w * a, y, w * (tr - a), h, t);
   }
@@ -330301,7 +330992,7 @@ function styledBar4(c, box6, reading, s, t, st = {}) {
   c.restore();
 }
 var BARROW_BAR = {
-  chunk: RUST8,
+  chunk: RUST9,
   track(c, x, y, w, h) {
     const tip = x + w + 11;
     poly39(
@@ -330399,7 +331090,7 @@ var BARROW_BAR = {
     c.strokeRect(x, y, w, h);
   },
   fill(c, x, y, fw, h, t, W21, ph2) {
-    c.fillStyle = vgrad4(c, y, h, ph2 ? [GHOST_L5, GHOST_L5, GHOST5, GHOST_D4] : [GHOST_L5, GHOST5, GHOST5, GHOST_D4]);
+    c.fillStyle = vgrad5(c, y, h, ph2 ? [GHOST_L5, GHOST_L5, GHOST5, GHOST_D4] : [GHOST_L5, GHOST5, GHOST5, GHOST_D4]);
     c.fillRect(x, y, fw, h);
     c.save();
     for (let i = 0; i < Math.ceil(W21 / 7); i++) {
@@ -330436,13 +331127,13 @@ var BARROW_BAR = {
   chunkMotion(c, x, y, cw, h, t) {
     for (let i = 0; i < cw / 4; i++) {
       const sx = x + i * 4 + hash84(i) * 2.5, sy = y + 1.4 + hash84(i + 7) * 4.2;
-      c.fillStyle = i % 2 ? RUST8[2] : RUST8[0];
+      c.fillStyle = i % 2 ? RUST9[2] : RUST9[0];
       c.fillRect(sx - 0.8, sy - 0.5, 1.6, 1);
     }
     for (let i = 0; i < 5; i++) {
       const k = (t * 1.1 + i / 5) % 1, px7 = x + cw * (0.12 + i * 0.18) + Math.sin(t * 3 + i) * 1.2, py = y + h + 2.6 + k * 9;
       c.globalAlpha = 1 - k;
-      c.fillStyle = i % 2 ? RUST8[0] : RUST8[1];
+      c.fillStyle = i % 2 ? RUST9[0] : RUST9[1];
       c.save();
       c.translate(px7, py);
       c.rotate(t * 4 + i);
@@ -330467,7 +331158,7 @@ var BARROW_BAR = {
         c.globalAlpha = 1 - f * f;
         c.shadowColor = GHOST5;
         c.shadowBlur = 3;
-        dot17(c, px7, py, (1 - f) * 0.9 + 0.35, f < 0.4 ? GHOST_L5 : GHOST5);
+        dot18(c, px7, py, (1 - f) * 0.9 + 0.35, f < 0.4 ? GHOST_L5 : GHOST5);
         c.restore();
       }
     if (imp2 > 0) {
@@ -330504,7 +331195,7 @@ function title7(c, cx, y, name) {
   c.strokeStyle = "#1e0f26";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad4(c, y - 10, 11, [GOLD_LIT4, GOLD43, GOLD_SH5]);
+  c.fillStyle = vgrad5(c, y - 10, 11, [GOLD_LIT4, GOLD43, GOLD_SH5]);
   c.fillText(name, cx, y);
   c.restore();
 }
@@ -330513,14 +331204,14 @@ function drawBarrowKingBar(c, canvas, reading, time3, st = {}, name = "Barrow Ki
   const w = Math.min(360, canvas.width - 28 - BARROW_BAR_SIDE * 2), x = (canvas.width - w) / 2 + BARROW_BAR_SIDE * 0.35, y = 12, t = time3 / 1e3;
   c.save();
   title7(c, canvas.width / 2, y + 13, name);
-  styledBar4(c, { x, y: y + BAR_Y4, w, h: BAR_H4 }, reading, BARROW_BAR, t, st);
+  styledBar4(c, { x, y: y + BAR_Y4, w, h: BAR_H5 }, reading, BARROW_BAR, t, st);
   c.restore();
 }
 
 // src/client/boss_bar_pharaoh_v1.js
-var TAU259 = Math.PI * 2;
+var TAU260 = Math.PI * 2;
 var clamp106 = (v) => Math.max(0, Math.min(1, v));
-function vgrad5(c, y, h, stops) {
+function vgrad6(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -330563,7 +331254,7 @@ function styledBar5(c, box6, reading, s, t, st = {}) {
   s.shape(c, x, y, w, h);
   c.clip();
   if (tr > a + 5e-4) {
-    c.fillStyle = reading.flash ? "#ffffff" : vgrad5(c, y, h, s.chunk);
+    c.fillStyle = reading.flash ? "#ffffff" : vgrad6(c, y, h, s.chunk);
     c.fillRect(x + w * a, y, w * (tr - a) + 0.5, h);
     s.chunkMotion?.(c, x + w * a, y, w * (tr - a), h, t);
   }
@@ -330577,7 +331268,7 @@ function styledBar5(c, box6, reading, s, t, st = {}) {
   s.over?.(c, x, y, w, h, t, a, imp2, st);
   c.restore();
 }
-var BAR_H5 = 7;
+var BAR_H6 = 7;
 var BAR_Y5 = 19;
 var TICK5 = 60;
 var SUN_BAR = {
@@ -330586,8 +331277,8 @@ var SUN_BAR = {
   under(c, x, y, w, h, t, a) {
     const ex = x + w + 2.6, ey = y + h / 2;
     c.beginPath();
-    c.ellipse(ex, ey, 3.4, 4.6, 0, 0, TAU259);
-    c.fillStyle = vgrad5(c, ey - 4.6, 9.2, [PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD_SH]);
+    c.ellipse(ex, ey, 3.4, 4.6, 0, 0, TAU260);
+    c.fillStyle = vgrad6(c, ey - 4.6, 9.2, [PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD_SH]);
     c.fill();
     c.lineWidth = 0.8;
     c.strokeStyle = PHARAOH_PAL.INK;
@@ -330600,7 +331291,7 @@ var SUN_BAR = {
   },
   track(c, x, y, w, h) {
     chamfer6(c, x - 2.2, y - 2.2, w + 4.4, h + 4.4, 2.6);
-    c.fillStyle = vgrad5(c, y - 2.2, h + 4.4, [PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD_DP]);
+    c.fillStyle = vgrad6(c, y - 2.2, h + 4.4, [PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD_DP]);
     c.fill();
     c.lineWidth = 1;
     c.strokeStyle = PHARAOH_PAL.INK;
@@ -330615,7 +331306,7 @@ var SUN_BAR = {
     for (let i = 1; i < 10; i++) c.fillRect(x + w * i / 10 - 1, y, 2, h);
   },
   fill(c, x, y, fw, h, t, W21) {
-    c.fillStyle = vgrad5(c, y, h, [PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD_SH]);
+    c.fillStyle = vgrad6(c, y, h, [PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD_SH]);
     c.fillRect(x, y, fw, h);
     c.fillStyle = "#fffbe0";
     c.globalAlpha = 0.8;
@@ -330680,24 +331371,24 @@ var SUN_BAR = {
     c.lineTo(gx, gy + 4.4);
     c.lineTo(gx - 4.2, gy);
     c.closePath();
-    c.fillStyle = vgrad5(c, gy - 4.4, 8.8, [PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD_SH]);
+    c.fillStyle = vgrad6(c, gy - 4.4, 8.8, [PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD_SH]);
     c.fill();
     c.lineWidth = 0.8;
     c.strokeStyle = PHARAOH_PAL.INK;
     c.stroke();
     c.beginPath();
-    c.arc(gx, gy, 2.3, 0, TAU259);
+    c.arc(gx, gy, 2.3, 0, TAU260);
     c.fillStyle = PHARAOH_PAL.CARN;
     c.fill();
     c.lineWidth = 0.5;
     c.stroke();
     c.beginPath();
-    c.arc(gx - 0.6, gy - 0.7, 0.9, 0, TAU259);
+    c.arc(gx - 0.6, gy - 0.7, 0.9, 0, TAU260);
     c.fillStyle = PHARAOH_PAL.CARN_LIT;
     c.fill();
     const sx = x - 3, sy = y + h / 2;
     c.save();
-    c.fillStyle = vgrad5(c, sy - 2.2, 4.4, [PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD_SH]);
+    c.fillStyle = vgrad6(c, sy - 2.2, 4.4, [PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD, PHARAOH_PAL.GOLD_SH]);
     c.fillRect(sx - 1, sy - 2, 4.5, 4);
     c.strokeStyle = PHARAOH_PAL.INK;
     c.lineWidth = 0.6;
@@ -330756,7 +331447,7 @@ function title8(c, cx, y, name) {
   c.strokeStyle = "#0b1226";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad5(c, y - 10, 11, [PHARAOH_PAL.SUN_CORE, PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD]);
+  c.fillStyle = vgrad6(c, y - 10, 11, [PHARAOH_PAL.SUN_CORE, PHARAOH_PAL.GOLD_LIT, PHARAOH_PAL.GOLD]);
   c.fillText(name, cx, y);
   c.restore();
 }
@@ -330765,12 +331456,12 @@ function drawSunPharaohBar(c, canvas, reading, time3, st = {}, name = "Sun Phara
   const w = Math.min(360, canvas.width - 28 - SUN_BAR_SIDE * 2), x = (canvas.width - w) / 2 + SUN_BAR_SIDE * 0.3, y = 12, t = time3 / 1e3;
   c.save();
   title8(c, canvas.width / 2, y + 13, name);
-  styledBar5(c, { x, y: y + BAR_Y5, w, h: BAR_H5 }, reading, SUN_BAR, t, st);
+  styledBar5(c, { x, y: y + BAR_Y5, w, h: BAR_H6 }, reading, SUN_BAR, t, st);
   c.restore();
 }
 
 // src/client/boss_bar_cinderhart_v1.js
-var TAU260 = Math.PI * 2;
+var TAU261 = Math.PI * 2;
 var clamp107 = (v) => Math.max(0, Math.min(1, v));
 var INK86 = "#101318";
 var CHAR3 = "#2f2725";
@@ -330780,7 +331471,7 @@ var RED4 = "#ba442a";
 var FIRE8 = "#f27632";
 var GOLD44 = "#ffc36b";
 var HOT7 = "#fff0b5";
-function vgrad6(c, y, h, stops) {
+function vgrad7(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -330832,7 +331523,7 @@ function styledBar6(c, box6, reading, s, t, st = {}) {
   s.shape(c, x, y, w, h);
   c.clip();
   if (tr > a + 5e-4) {
-    c.fillStyle = reading.flash ? "#ffffff" : vgrad6(c, y, h, s.chunk);
+    c.fillStyle = reading.flash ? "#ffffff" : vgrad7(c, y, h, s.chunk);
     c.fillRect(x + w * a, y, w * (tr - a) + 0.5, h);
   }
   if (a > 0) s.fill(c, x, y, w * a, h, t, w, st);
@@ -330846,7 +331537,7 @@ function styledBar6(c, box6, reading, s, t, st = {}) {
   s.over?.(c, x, y, w, h, t, a, imp2, st);
   c.restore();
 }
-var BAR_H6 = 7;
+var BAR_H7 = 7;
 var BAR_Y6 = 19;
 var CINDER_BAR = {
   shape: (c, x, y, w, h) => beam6(c, x, y, w, h, 2.5),
@@ -330870,13 +331561,13 @@ var CINDER_BAR = {
     c.strokeStyle = st.ph2 ? GOLD44 : FIRE8;
     c.stroke();
     c.beginPath();
-    c.arc(ex + 8.4, ey - 1, 1.3, 0, TAU260);
+    c.arc(ex + 8.4, ey - 1, 1.3, 0, TAU261);
     c.fillStyle = st.ph2 ? HOT7 : GOLD44;
     c.fill();
   },
   track(c, x, y, w, h) {
     beam6(c, x - 2.3, y - 2.3, w + 4.6, h + 4.6, 4);
-    c.fillStyle = vgrad6(c, y - 2.3, h + 4.6, [CHAR_LIT, CHAR3, "#1e1817"]);
+    c.fillStyle = vgrad7(c, y - 2.3, h + 4.6, [CHAR_LIT, CHAR3, "#1e1817"]);
     c.fill();
     c.lineWidth = 1;
     c.strokeStyle = INK86;
@@ -330903,7 +331594,7 @@ var CINDER_BAR = {
   },
   fill(c, x, y, fw, h, t, W21, st) {
     const ph2 = st.ph2;
-    c.fillStyle = vgrad6(c, y, h, ph2 ? [HOT7, GOLD44, GOLD44, FIRE8] : [GOLD44, FIRE8, FIRE8, RED4]);
+    c.fillStyle = vgrad7(c, y, h, ph2 ? [HOT7, GOLD44, GOLD44, FIRE8] : [GOLD44, FIRE8, FIRE8, RED4]);
     c.fillRect(x, y, fw, h);
     c.save();
     c.beginPath();
@@ -330913,7 +331604,7 @@ var CINDER_BAR = {
       const per = 3.2, u = (t / per + i / 4) % 1, gx = x + u * (W21 + 40) - 20;
       c.fillStyle = ph2 ? "#ffffffaa" : "#ffe2a080";
       c.beginPath();
-      c.ellipse(gx, y + h * 0.42, 9, h * 0.22, 0, 0, TAU260);
+      c.ellipse(gx, y + h * 0.42, 9, h * 0.22, 0, 0, TAU261);
       c.fill();
     }
     c.restore();
@@ -330974,12 +331665,12 @@ var CINDER_BAR = {
     c.shadowColor = FIRE8;
     c.shadowBlur = 3 + pulse3 * 2;
     c.beginPath();
-    c.arc(gx, gy + 0.2, 2.3, 0, TAU260);
+    c.arc(gx, gy + 0.2, 2.3, 0, TAU261);
     c.fillStyle = ph2 ? GOLD44 : FIRE8;
     c.fill();
     c.restore();
     c.beginPath();
-    c.arc(gx - 0.5, gy - 0.4, 1, 0, TAU260);
+    c.arc(gx - 0.5, gy - 0.4, 1, 0, TAU261);
     c.fillStyle = ph2 ? "#ffffff" : HOT7;
     c.fill();
     const sx = x - 1, sy = y + h / 2;
@@ -331016,7 +331707,7 @@ var CINDER_BAR = {
     for (const [i, p] of tines.entries()) draw(p, i ? 0.9 : 1.3, ph2 ? GOLD44 : FIRE8);
     if (ph2) for (const [i, p] of tines.entries()) draw(p, i ? 0.35 : 0.5, HOT7);
     c.beginPath();
-    c.ellipse(sx, sy, 2.6, h / 2 + 2.8, 0, 0, TAU260);
+    c.ellipse(sx, sy, 2.6, h / 2 + 2.8, 0, 0, TAU261);
     c.fillStyle = CHAR_LIT;
     c.fill();
     c.lineWidth = 1;
@@ -331024,14 +331715,14 @@ var CINDER_BAR = {
     c.stroke();
     for (let i = 0; i < 4; i++) {
       c.beginPath();
-      c.arc(sx + (i % 2 ? 0.6 : -0.6), sy - h / 2 - 1.5 + i * (h + 3) / 3, 0.8, 0, TAU260);
+      c.arc(sx + (i % 2 ? 0.6 : -0.6), sy - h / 2 - 1.5 + i * (h + 3) / 3, 0.8, 0, TAU261);
       c.fillStyle = ph2 ? GOLD44 : RED4;
       c.fill();
     }
     for (const [i, p] of tines.entries()) {
       const [px7, py] = p.at(-1);
       c.beginPath();
-      c.arc(px7, py, 1.2, 0, TAU260);
+      c.arc(px7, py, 1.2, 0, TAU261);
       c.fillStyle = ph2 ? HOT7 : GOLD44;
       c.fill();
       tongue13(c, px7, py + 0.5, ph2 ? 2.4 : 1.8, ph2 ? 8.5 : 5.5, t, i, ph2);
@@ -331077,7 +331768,7 @@ function title9(c, cx, y, name) {
   c.strokeStyle = "#1a0d08";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad6(c, y - 10, 11, [HOT7, GOLD44, FIRE8]);
+  c.fillStyle = vgrad7(c, y - 10, 11, [HOT7, GOLD44, FIRE8]);
   c.fillText(name, cx, y);
   c.restore();
 }
@@ -331086,12 +331777,12 @@ function drawCinderhartBar(c, canvas, reading, time3, st = {}, name = "Cinderhar
   const w = Math.min(360, canvas.width - 28 - CINDER_BAR_SIDE * 2), x = (canvas.width - w) / 2 + CINDER_BAR_SIDE * 0.3, y = 12, t = time3 / 1e3;
   c.save();
   title9(c, canvas.width / 2, y + 13, name);
-  styledBar6(c, { x, y: y + BAR_Y6, w, h: BAR_H6 }, reading, CINDER_BAR, t, st);
+  styledBar6(c, { x, y: y + BAR_Y6, w, h: BAR_H7 }, reading, CINDER_BAR, t, st);
   c.restore();
 }
 
 // src/client/boss_bar_ashfang_v1.js
-var TAU261 = Math.PI * 2;
+var TAU262 = Math.PI * 2;
 var clamp108 = (v) => Math.max(0, Math.min(1, v));
 var INK87 = "#100e17";
 var BLACK3 = "#1c1219";
@@ -331104,7 +331795,7 @@ var GOLD45 = "#ffd27a";
 var HOT8 = "#fff0c0";
 var HORN5 = "#d77a3a";
 var HORN_LIT = "#efaa59";
-function vgrad7(c, y, h, stops) {
+function vgrad8(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -331156,7 +331847,7 @@ function styledBar7(c, box6, reading, s, t, st = {}) {
   s.shape(c, x, y, w, h);
   c.clip();
   if (tr > a + 5e-4) {
-    c.fillStyle = reading.flash ? "#ffffff" : vgrad7(c, y, h, s.chunk);
+    c.fillStyle = reading.flash ? "#ffffff" : vgrad8(c, y, h, s.chunk);
     c.fillRect(x + w * a, y, w * (tr - a) + 0.5, h);
   }
   if (a > 0) s.fill(c, x, y, w * a, h, t, w, st);
@@ -331170,7 +331861,7 @@ function styledBar7(c, box6, reading, s, t, st = {}) {
   s.over?.(c, x, y, w, h, t, a, imp2, st);
   c.restore();
 }
-var BAR_H7 = 7;
+var BAR_H8 = 7;
 var BAR_Y7 = 19;
 var ASH_BAR = {
   shape: (c, x, y, w, h) => band11(c, x, y, w, h, 2.5),
@@ -331198,7 +331889,7 @@ var ASH_BAR = {
   },
   track(c, x, y, w, h) {
     band11(c, x - 2.3, y - 2.3, w + 4.6, h + 4.6, 4);
-    c.fillStyle = vgrad7(c, y - 2.3, h + 4.6, [BLACK_LIT, BLACK3, "#120a10"]);
+    c.fillStyle = vgrad8(c, y - 2.3, h + 4.6, [BLACK_LIT, BLACK3, "#120a10"]);
     c.fill();
     c.lineWidth = 1;
     c.strokeStyle = INK87;
@@ -331230,7 +331921,7 @@ var ASH_BAR = {
   },
   fill(c, x, y, fw, h, t, W21, st) {
     const ph2 = st.ph2;
-    c.fillStyle = vgrad7(c, y, h, ph2 ? [EMBER7, FIRE9, SCARLET3, HIDE] : [SCARLET3, "#a82430", HIDE, "#5a1420"]);
+    c.fillStyle = vgrad8(c, y, h, ph2 ? [EMBER7, FIRE9, SCARLET3, HIDE] : [SCARLET3, "#a82430", HIDE, "#5a1420"]);
     c.fillRect(x, y, fw, h);
     c.strokeStyle = "#4e1a22";
     c.lineWidth = 0.8;
@@ -331284,7 +331975,7 @@ var ASH_BAR = {
       c.globalAlpha = (1 - k) * 0.85;
       c.fillStyle = SMOKE3[i % 3];
       c.beginPath();
-      c.arc(px7, py, r, 0, TAU261);
+      c.arc(px7, py, r, 0, TAU262);
       c.fill();
     }
     c.globalAlpha = 1;
@@ -331308,16 +331999,16 @@ var ASH_BAR = {
     c.shadowColor = FIRE9;
     c.shadowBlur = 2 + pulse3 * 2 + (ph2 ? 2 : 0);
     c.beginPath();
-    c.ellipse(gx, gy, 2.9, 1.8, 0, 0, TAU261);
+    c.ellipse(gx, gy, 2.9, 1.8, 0, 0, TAU262);
     c.fillStyle = ph2 ? "#ff7a3a" : "#e8302a";
     c.fill();
     c.restore();
     c.beginPath();
-    c.ellipse(gx, gy, 0.6, 1.6, 0, 0, TAU261);
+    c.ellipse(gx, gy, 0.6, 1.6, 0, 0, TAU262);
     c.fillStyle = "#09080f";
     c.fill();
     c.beginPath();
-    c.arc(gx - 1.2, gy - 0.6, 0.5, 0, TAU261);
+    c.arc(gx - 1.2, gy - 0.6, 0.5, 0, TAU262);
     c.fillStyle = ph2 ? HOT8 : "#ffd0a0";
     c.fill();
     const sx = x - 1, sy = y + h / 2;
@@ -331348,13 +332039,13 @@ var ASH_BAR = {
     c.stroke();
     if (ph2) {
       c.beginPath();
-      c.arc(sx - 10, sy - 21, 1.3, 0, TAU261);
+      c.arc(sx - 10, sy - 21, 1.3, 0, TAU262);
       c.fillStyle = HOT8;
       c.fill();
       tongue14(c, sx - 10, sy - 20, 2.2, 8, t, 3, true);
     }
     c.beginPath();
-    c.ellipse(sx, sy, 2.6, h / 2 + 2.8, 0, 0, TAU261);
+    c.ellipse(sx, sy, 2.6, h / 2 + 2.8, 0, 0, TAU262);
     c.fillStyle = BLACK_LIT;
     c.fill();
     c.lineWidth = 1;
@@ -331362,7 +332053,7 @@ var ASH_BAR = {
     c.stroke();
     for (let i = 0; i < 3; i++) {
       c.beginPath();
-      c.arc(sx, sy - h / 2 - 0.8 + i * (h + 1.6) / 2, 0.75, 0, TAU261);
+      c.arc(sx, sy - h / 2 - 0.8 + i * (h + 1.6) / 2, 0.75, 0, TAU262);
       c.fillStyle = ph2 ? GOLD45 : FIRE9;
       c.fill();
     }
@@ -331406,7 +332097,7 @@ function title10(c, cx, y, name) {
   c.strokeStyle = "#1a080c";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad7(c, y - 10, 11, [GOLD45, EMBER7, SCARLET3]);
+  c.fillStyle = vgrad8(c, y - 10, 11, [GOLD45, EMBER7, SCARLET3]);
   c.fillText(name, cx, y);
   c.restore();
 }
@@ -331415,12 +332106,12 @@ function drawAshfangBar(c, canvas, reading, time3, st = {}, name = "Ashfang") {
   const w = Math.min(360, canvas.width - 28 - ASHFANG_BAR_SIDE * 2), x = (canvas.width - w) / 2 + ASHFANG_BAR_SIDE * 0.3, y = 12, t = time3 / 1e3;
   c.save();
   title10(c, canvas.width / 2, y + 13, name);
-  styledBar7(c, { x, y: y + BAR_Y7, w, h: BAR_H7 }, reading, ASH_BAR, t, st);
+  styledBar7(c, { x, y: y + BAR_Y7, w, h: BAR_H8 }, reading, ASH_BAR, t, st);
   c.restore();
 }
 
 // src/client/boss_bar_hollowglass_v1.js
-var TAU262 = Math.PI * 2;
+var TAU263 = Math.PI * 2;
 var clamp109 = (v) => Math.max(0, Math.min(1, v));
 var INK88 = "#131722";
 var SIL3 = "#aab4c6";
@@ -331438,7 +332129,7 @@ var GEM_LIT2 = "#c8f6ff";
 var EYE5 = "#c9f8ff";
 var EYE_GLOW2 = "#5fdcf2";
 var BODY3 = "#131a2e";
-function vgrad8(c, y, h, stops) {
+function vgrad9(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -331517,7 +332208,7 @@ function styledBar8(c, box6, reading, s, t, st = {}) {
   s.shape(c, x, y, w, h);
   c.clip();
   if (tr > a + 5e-4) {
-    c.fillStyle = reading.flash ? "#ffffff" : vgrad8(c, y, h, CHUNK);
+    c.fillStyle = reading.flash ? "#ffffff" : vgrad9(c, y, h, CHUNK);
     c.fillRect(x + w * a, y, w * (tr - a) + 0.5, h);
   }
   if (a > 0) s.fill(c, x, y, w * a, h, t, w, st);
@@ -331531,14 +332222,14 @@ function styledBar8(c, box6, reading, s, t, st = {}) {
   s.over?.(c, x, y, w, h, t, a, imp2, st);
   c.restore();
 }
-var BAR_H8 = 7;
+var BAR_H9 = 7;
 var BAR_Y8 = 19;
 var CRACKS2 = [0.09, 0.27, 0.44, 0.62, 0.81].map((u, i) => ({ u, v: 0.3 + hash88(i + 5) * 0.4 }));
 function star11(c, cx, cy2, r, seed2, dark = GL_DK2) {
   const n = 6;
   const ends = [];
   for (let i = 0; i < n; i++) {
-    const a = i * TAU262 / n + hash88(seed2 + i) * 0.6, l = r * (0.6 + hash88(seed2 * 3 + i) * 0.5);
+    const a = i * TAU263 / n + hash88(seed2 + i) * 0.6, l = r * (0.6 + hash88(seed2 * 3 + i) * 0.5);
     ends.push([
       cx + Math.cos(a) * l,
       cy2 + Math.sin(a) * l * 0.8,
@@ -331567,7 +332258,7 @@ function star11(c, cx, cy2, r, seed2, dark = GL_DK2) {
   }
   c.fillStyle = "#ffffff";
   c.beginPath();
-  c.arc(cx, cy2, 0.7, 0, TAU262);
+  c.arc(cx, cy2, 0.7, 0, TAU263);
   c.fill();
 }
 var MIRROR_BAR = {
@@ -331603,7 +332294,7 @@ var MIRROR_BAR = {
   },
   track(c, x, y, w, h) {
     band12(c, x - 2.6, y - 2.6, w + 5.2, h + 5.2, 4);
-    c.fillStyle = vgrad8(c, y - 2.6, h + 5.2, [SIL_LIT2, SIL3, SIL_SH3, SIL_DP2]);
+    c.fillStyle = vgrad9(c, y - 2.6, h + 5.2, [SIL_LIT2, SIL3, SIL_SH3, SIL_DP2]);
     c.fill();
     c.lineWidth = 1;
     c.strokeStyle = INK88;
@@ -331612,22 +332303,22 @@ var MIRROR_BAR = {
       const bx = x + 5 + i * 11;
       c.fillStyle = SIL_LIT2;
       c.beginPath();
-      c.arc(bx, y - 1.3, 0.55, 0, TAU262);
+      c.arc(bx, y - 1.3, 0.55, 0, TAU263);
       c.fill();
       c.fillStyle = SIL_DK;
       c.beginPath();
-      c.arc(bx + 5.5, y + h + 1.3, 0.55, 0, TAU262);
+      c.arc(bx + 5.5, y + h + 1.3, 0.55, 0, TAU263);
       c.fill();
     }
     band12(c, x, y, w, h, 2.5);
-    c.fillStyle = vgrad8(c, y, h, ["#0b1222", "#070a14"]);
+    c.fillStyle = vgrad9(c, y, h, ["#0b1222", "#070a14"]);
     c.fill();
     c.lineWidth = 0.7;
     c.strokeStyle = INK88;
     c.stroke();
   },
   fill(c, x, y, fw, h, t, W21, st) {
-    c.fillStyle = vgrad8(c, y, h, st.ph2 ? [GL_MID2, GL_LOW2, GL_DP2, GL_DK2] : [GL_TOP2, GL_MID2, GL_LOW2, GL_DP2]);
+    c.fillStyle = vgrad9(c, y, h, st.ph2 ? [GL_MID2, GL_LOW2, GL_DP2, GL_DK2] : [GL_TOP2, GL_MID2, GL_LOW2, GL_DP2]);
     c.fillRect(x, y, fw, h);
     for (let i = 0; i < 2; i++) {
       const g2 = (t * 0.22 + i * 0.5) % 1.6 / 1.6, gx = x - 20 + (W21 + 40) * g2;
@@ -331680,7 +332371,7 @@ var MIRROR_BAR = {
       c.save();
       c.globalAlpha = 0.55;
       band12(c, fx, fy, fw, fh, 5);
-      c.fillStyle = vgrad8(c, fy, fh, ["#f2fbff", "#c4dcef", "#8fb3d4"]);
+      c.fillStyle = vgrad9(c, fy, fh, ["#f2fbff", "#c4dcef", "#8fb3d4"]);
       c.fill();
       c.restore();
       band12(c, fx, fy, fw, fh, 5);
@@ -331720,14 +332411,14 @@ var MIRROR_BAR = {
     }
     const gx = x + w / 2, gy = y + h + 5.2;
     c.beginPath();
-    c.ellipse(gx, gy, 7.2, 4.6, 0, 0, TAU262);
+    c.ellipse(gx, gy, 7.2, 4.6, 0, 0, TAU263);
     c.fillStyle = SIL3;
     c.fill();
     c.lineWidth = 0.9;
     c.strokeStyle = INK88;
     c.stroke();
     c.beginPath();
-    c.ellipse(gx, gy, 5.6, 3.3, 0, 0, TAU262);
+    c.ellipse(gx, gy, 5.6, 3.3, 0, 0, TAU263);
     c.fillStyle = BODY3;
     c.fill();
     const blink = st.dazed || t % 4.6 > 4.45;
@@ -331756,7 +332447,7 @@ var MIRROR_BAR = {
     }
     if (st.dazed)
       for (let i = 0; i < 3; i++) {
-        const q2 = t * 3 + i * TAU262 / 3;
+        const q2 = t * 3 + i * TAU263 / 3;
         shardAt2(c, gx + Math.cos(q2) * 10, gy - 1 + Math.sin(q2) * 2.6, 2.2, q2, Math.cos(q2));
       }
     const sx = x - 3, sy = y + h / 2;
@@ -331810,7 +332501,7 @@ var MIRROR_BAR = {
     c.restore();
     c.fillStyle = GEM_LIT2;
     c.beginPath();
-    c.arc(sx - 3.6, sy - 0.8, 0.7, 0, TAU262);
+    c.arc(sx - 3.6, sy - 0.8, 0.7, 0, TAU263);
     c.fill();
     if (ph2) {
       c.strokeStyle = INK88;
@@ -331824,7 +332515,7 @@ var MIRROR_BAR = {
     c.restore();
     if (ph2)
       for (let i = 0; i < 4; i++) {
-        const q2 = t * 1.6 + i * TAU262 / 4;
+        const q2 = t * 1.6 + i * TAU263 / 4;
         shardAt2(c, sx - 3 + Math.cos(q2) * 15, sy + Math.sin(q2) * 7, 2.4 + i % 2, q2 * 0.8 + i, Math.cos(t * 2 + i));
       }
     if (imp2 > 0) {
@@ -331852,7 +332543,7 @@ function title11(c, cx, y, name) {
   c.strokeStyle = "#0d1220";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad8(c, y - 10, 11, ["#ffffff", "#cfe6f6", "#7fa8cc"]);
+  c.fillStyle = vgrad9(c, y - 10, 11, ["#ffffff", "#cfe6f6", "#7fa8cc"]);
   c.fillText(name, cx, y);
   c.restore();
 }
@@ -331861,12 +332552,12 @@ function drawMirrorBar(c, canvas, reading, time3, st = {}, name = "Hollowglass")
   const w = Math.min(360, canvas.width - 28 - MIRROR_BAR_SIDE * 2), x = (canvas.width - w) / 2 + MIRROR_BAR_SIDE * 0.3, y = 12, t = time3 / 1e3;
   c.save();
   title11(c, canvas.width / 2, y + 13, name);
-  styledBar8(c, { x, y: y + BAR_Y8, w, h: BAR_H8 }, reading, MIRROR_BAR, t, st);
+  styledBar8(c, { x, y: y + BAR_Y8, w, h: BAR_H9 }, reading, MIRROR_BAR, t, st);
   c.restore();
 }
 
 // src/client/boss_bar_sandglass_v1.js
-var TAU263 = Math.PI * 2;
+var TAU264 = Math.PI * 2;
 var clamp110 = (v) => Math.max(0, Math.min(1, v));
 var INK89 = "#14202a";
 var BRONZE3 = "#9a6a2e";
@@ -331878,7 +332569,7 @@ var GLASS_SH = "#a9cdcc";
 var HOOD_CORE = "#0f0b14";
 var SAND16 = { sand: "#e2c27a", shade: "#b88a48", deep: "#8a6232", light: "#fbecc2", eye: "#ffd86b" };
 var EMBER8 = { sand: "#f08a3c", shade: "#b5512a", deep: "#7a3418", light: "#ffd27a", eye: "#ff9a4a" };
-function vgrad9(c, y, h, stops) {
+function vgrad10(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -331971,7 +332662,7 @@ function miniGlass(c, x, y, flip, S19, cracked) {
   }
   c.restore();
 }
-var BAR_H9 = 7;
+var BAR_H10 = 7;
 var BAR_Y9 = 19;
 function styledBar9(c, { x, y, w, h }, reading, t, st) {
   const S19 = st.ph2 ? EMBER8 : SAND16, a = clamp110(reading.actual), tr = Math.max(a, clamp110(reading.trail)), imp2 = reading.impact || 0, jolt = imp2 > 0 ? Math.sin(imp2 * 31) * imp2 * 2 : 0;
@@ -331981,7 +332672,7 @@ function styledBar9(c, { x, y, w, h }, reading, t, st) {
   c.lineCap = "round";
   const ex = x + w + 2, ey = y + h / 2;
   c.beginPath();
-  c.ellipse(ex + 1, ey, 2.4, h / 2 + 2.6, 0, 0, TAU263);
+  c.ellipse(ex + 1, ey, 2.4, h / 2 + 2.6, 0, 0, TAU264);
   c.fillStyle = BRONZE3;
   c.fill();
   c.lineWidth = 1;
@@ -331996,7 +332687,7 @@ function styledBar9(c, { x, y, w, h }, reading, t, st) {
   c.fill();
   c.stroke();
   band13(c, x - 2.4, y - 2.4, w + 4.8, h + 4.8, 3.2);
-  c.fillStyle = vgrad9(c, y - 2.4, h + 4.8, [BRONZE_LIT, BRONZE3, BRONZE_DK]);
+  c.fillStyle = vgrad10(c, y - 2.4, h + 4.8, [BRONZE_LIT, BRONZE3, BRONZE_DK]);
   c.fill();
   c.lineWidth = 1.1;
   c.strokeStyle = INK89;
@@ -332016,7 +332707,7 @@ function styledBar9(c, { x, y, w, h }, reading, t, st) {
     }
   }
   band13(c, x, y, w, h, 2);
-  c.fillStyle = vgrad9(c, y, h, [GLASS_LIT, GLASS26, GLASS_SH]);
+  c.fillStyle = vgrad10(c, y, h, [GLASS_LIT, GLASS26, GLASS_SH]);
   c.fill();
   c.save();
   band13(c, x, y, w, h, 2);
@@ -332027,7 +332718,7 @@ function styledBar9(c, { x, y, w, h }, reading, t, st) {
   }
   if (a > 0) {
     const fw = w * a;
-    c.fillStyle = vgrad9(c, y, h, [S19.light, S19.sand, S19.sand, S19.shade]);
+    c.fillStyle = vgrad10(c, y, h, [S19.light, S19.sand, S19.sand, S19.shade]);
     c.fillRect(x, y + 1, fw, h - 1);
     c.beginPath();
     c.moveTo(x, y + 1.2);
@@ -332244,7 +332935,7 @@ function title12(c, cx, y, name, ph2) {
   c.strokeStyle = "#1d1408";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad9(c, y - 10, 11, ph2 ? ["#ffd27a", "#f08a3c", "#b5512a"] : ["#fbecc2", "#e2c27a", "#b88a48"]);
+  c.fillStyle = vgrad10(c, y - 10, 11, ph2 ? ["#ffd27a", "#f08a3c", "#b5512a"] : ["#fbecc2", "#e2c27a", "#b88a48"]);
   c.fillText(name, cx, y);
   c.restore();
 }
@@ -332253,12 +332944,12 @@ function drawSandglassBar(c, canvas, reading, time3, st = {}, name = "Hourglass 
   const w = Math.min(360, canvas.width - 28 - SANDGLASS_BAR_SIDE * 2), x = (canvas.width - w) / 2 + SANDGLASS_BAR_SIDE * 0.2, y = 12, t = time3 / 1e3;
   c.save();
   title12(c, canvas.width / 2, y + 13, name, st.ph2);
-  styledBar9(c, { x, y: y + BAR_Y9, w, h: BAR_H9 }, reading, t, st);
+  styledBar9(c, { x, y: y + BAR_Y9, w, h: BAR_H10 }, reading, t, st);
   c.restore();
 }
 
 // src/client/boss_bar_vault_keeper_v1.js
-var TAU264 = Math.PI * 2;
+var TAU265 = Math.PI * 2;
 var clamp111 = (v) => Math.max(0, Math.min(1, v));
 var INK90 = "#14130f";
 var WOOD70 = "#67412b";
@@ -332273,7 +332964,7 @@ var PALE10 = "#fff0b4";
 var RUBY4 = "#e33a66";
 var COIN4 = { gold: "#e9b747", shade: "#b07a2c", deep: "#7d5222", light: "#fbe08a", edge: "#c48f36" };
 var HOT9 = { gold: "#f2a640", shade: "#b8612a", deep: "#7a3418", light: "#ffd27a", edge: "#d07a34" };
-function vgrad10(c, y, h, stops) {
+function vgrad11(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -332367,7 +333058,7 @@ function miniCrown(c, x, y, ph2, jolt) {
   );
   for (const s of [-1, 1]) {
     c.beginPath();
-    c.arc(s * 4, 2.4, 0.9, 0, TAU264);
+    c.arc(s * 4, 2.4, 0.9, 0, TAU265);
     c.fillStyle = "#3f7fd8";
     c.fill();
   }
@@ -332380,7 +333071,7 @@ function heart(c, x, y, S19, ph2, throb, dim) {
   c.save();
   c.translate(x, y);
   c.beginPath();
-  c.arc(0, 0, r * 2.4, 0, TAU264);
+  c.arc(0, 0, r * 2.4, 0, TAU265);
   const g2 = c.createRadialGradient(0, 0, 0, 0, 0, r * 2.4);
   g2.addColorStop(0, ph2 ? `rgba(255,110,60,${0.5 * (1 - dim)})` : `rgba(255,80,120,${0.4 * (1 - dim)})`);
   g2.addColorStop(1, "rgba(255,80,120,0)");
@@ -332497,7 +333188,7 @@ function stack(c, x, y, hits2, age) {
   }
   c.restore();
 }
-var BAR_H10 = 7;
+var BAR_H11 = 7;
 var BAR_Y10 = 19;
 function styledBar10(c, { x, y, w, h }, reading, t, st) {
   const S19 = st.ph2 ? HOT9 : COIN4, a = clamp111(reading.actual), tr = Math.max(a, clamp111(reading.trail)), imp2 = reading.impact || 0, jolt = imp2 > 0 ? Math.sin(imp2 * 31) * imp2 * 2 : 0;
@@ -332507,13 +333198,13 @@ function styledBar10(c, { x, y, w, h }, reading, t, st) {
   c.lineCap = "round";
   const ex = x + w + 3, ey = y + h / 2;
   band14(c, ex - 1, ey - 6, 9, 12, 2);
-  c.fillStyle = vgrad10(c, ey - 6, 12, [LIGHT15, GOLD46, BRASS12]);
+  c.fillStyle = vgrad11(c, ey - 6, 12, [LIGHT15, GOLD46, BRASS12]);
   c.fill();
   c.lineWidth = 0.9;
   c.strokeStyle = INK90;
   c.stroke();
   c.beginPath();
-  c.arc(ex + 3.5, ey - 1.2, 1.3, 0, TAU264);
+  c.arc(ex + 3.5, ey - 1.2, 1.3, 0, TAU265);
   c.fillStyle = INK90;
   c.fill();
   poly41(
@@ -332528,7 +333219,7 @@ function styledBar10(c, { x, y, w, h }, reading, t, st) {
     null
   );
   band14(c, x - 2.6, y - 2.6, w + 5.2, h + 5.2, 2.4);
-  c.fillStyle = vgrad10(c, y - 2.6, h + 5.2, [WOOD_LIT2, WOOD70, WOOD_DK]);
+  c.fillStyle = vgrad11(c, y - 2.6, h + 5.2, [WOOD_LIT2, WOOD70, WOOD_DK]);
   c.fill();
   c.lineWidth = 1.1;
   c.strokeStyle = INK90;
@@ -332543,14 +333234,14 @@ function styledBar10(c, { x, y, w, h }, reading, t, st) {
   }
   for (const k of [0, 0.25, 0.75, 1]) {
     const bx = x + w * k - (k === 1 ? 3.4 : k === 0 ? 0 : 1.7);
-    c.fillStyle = vgrad10(c, y - 2.6, h + 5.2, [IRON_LIT3, IRON26, IRON26]);
+    c.fillStyle = vgrad11(c, y - 2.6, h + 5.2, [IRON_LIT3, IRON26, IRON26]);
     c.fillRect(bx, y - 2.6, 3.4, h + 5.2);
     c.lineWidth = 0.6;
     c.strokeStyle = INK90;
     c.strokeRect(bx, y - 2.6, 3.4, h + 5.2);
     for (const ry of [y - 1.3, y + h + 1.3]) {
       c.beginPath();
-      c.arc(bx + 1.7, ry, 0.7, 0, TAU264);
+      c.arc(bx + 1.7, ry, 0.7, 0, TAU265);
       c.fillStyle = BRASS12;
       c.fill();
     }
@@ -332567,7 +333258,7 @@ function styledBar10(c, { x, y, w, h }, reading, t, st) {
   }
   if (a > 0) {
     const fw = w * a;
-    c.fillStyle = vgrad10(c, y, h, [S19.light, S19.gold, S19.gold, S19.shade]);
+    c.fillStyle = vgrad11(c, y, h, [S19.light, S19.gold, S19.gold, S19.shade]);
     c.fillRect(x, y, fw, h);
     c.fillStyle = S19.edge;
     for (let px7 = x + 3; px7 < x + fw; px7 += 3) c.fillRect(px7, y + 1, 0.6, h - 1.6);
@@ -332642,7 +333333,7 @@ function styledBar10(c, { x, y, w, h }, reading, t, st) {
       const k = (t * 1.1 + i / 7) % 1, px7 = cx + cw * ((0.1 + 0.13 * i) % 1), py = y + h + 2 + k * 12, sp = Math.abs(Math.sin(t * 9 + i));
       c.globalAlpha = 1 - k;
       c.beginPath();
-      c.ellipse(px7, py, 1.6, 0.4 + sp * 1.2, 0, 0, TAU264);
+      c.ellipse(px7, py, 1.6, 0.4 + sp * 1.2, 0, 0, TAU265);
       c.fillStyle = i % 2 ? S19.gold : S19.light;
       c.fill();
       c.lineWidth = 0.4;
@@ -332665,9 +333356,9 @@ function styledBar10(c, { x, y, w, h }, reading, t, st) {
   miniCrown(c, sx, sy, !!st.ph2, st.crownJolt ?? 0);
   if (st.dazed) {
     for (let i = 0; i < 3; i++) {
-      const an = t * 4 + i * TAU264 / 3;
+      const an = t * 4 + i * TAU265 / 3;
       c.beginPath();
-      c.ellipse(sx + Math.cos(an) * 8, sy - 8 + Math.sin(an) * 2, 1.5, 1, 0, 0, TAU264);
+      c.ellipse(sx + Math.cos(an) * 8, sy - 8 + Math.sin(an) * 2, 1.5, 1, 0, 0, TAU265);
       c.fillStyle = LIGHT15;
       c.fill();
       c.lineWidth = 0.4;
@@ -332715,7 +333406,7 @@ function title13(c, cx, y, name, ph2) {
   c.strokeStyle = "#1d1408";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad10(c, y - 10, 11, ph2 ? ["#ffd27a", "#f2a640", "#b8612a"] : ["#fff0b4", "#e9b747", "#ad752d"]);
+  c.fillStyle = vgrad11(c, y - 10, 11, ph2 ? ["#ffd27a", "#f2a640", "#b8612a"] : ["#fff0b4", "#e9b747", "#ad752d"]);
   c.fillText(name, cx, y);
   c.restore();
 }
@@ -332724,12 +333415,12 @@ function drawVaultKeeperBar(c, canvas, reading, time3, st = {}, name = "Gilded V
   const w = Math.min(360, canvas.width - 28 - VAULT_BAR_SIDE * 2), x = (canvas.width - w) / 2 + VAULT_BAR_SIDE * 0.2, y = 12, t = time3 / 1e3;
   c.save();
   title13(c, canvas.width / 2, y + 13, name, st.ph2);
-  styledBar10(c, { x, y: y + BAR_Y10, w, h: BAR_H10 }, reading, t, st);
+  styledBar10(c, { x, y: y + BAR_Y10, w, h: BAR_H11 }, reading, t, st);
   c.restore();
 }
 
 // src/client/boss_bar_nexus_overseer_v1.js
-var TAU265 = Math.PI * 2;
+var TAU266 = Math.PI * 2;
 var clamp112 = (v) => Math.max(0, Math.min(1, v));
 var mix48 = (a, b, t) => a + (b - a) * t;
 var ease67 = (x) => {
@@ -332769,7 +333460,7 @@ var FORMS2 = [
     [-29, 9]
   ]
 ];
-function vgrad11(c, y, h, stops) {
+function vgrad12(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -332832,11 +333523,11 @@ function miniCrystal(c, x, y, s, shape4, teal = false, eye6 = true) {
   poly42(c, v, null, GOLD47, 1.1);
   if (eye6) {
     c.beginPath();
-    c.arc(cx, cy2, 5 * s * 1.4, 0, TAU265);
+    c.arc(cx, cy2, 5 * s * 1.4, 0, TAU266);
     c.fillStyle = GOLD47;
     c.fill();
     c.beginPath();
-    c.arc(cx, cy2, 3.7 * s * 1.4, 0, TAU265);
+    c.arc(cx, cy2, 3.7 * s * 1.4, 0, TAU266);
     c.fillStyle = TEAL8;
     c.fill();
     c.lineWidth = 0.5;
@@ -332850,7 +333541,7 @@ function idleShape(t) {
   const T121 = 5, cyc = (t % (T121 * 3) + T121 * 3) % (T121 * 3), i = Math.floor(cyc / T121), q2 = clamp112((cyc % T121 - (T121 - 1.2)) / 1.2);
   return [i, (i + 1) % 3, q2];
 }
-var BAR_H11 = 7;
+var BAR_H12 = 7;
 var BAR_Y11 = 19;
 function styledBar11(c, { x, y, w, h }, reading, t, st) {
   const a = clamp112(reading.actual), tr = Math.max(a, clamp112(reading.trail)), imp2 = reading.impact || 0, jolt = imp2 > 0 ? Math.sin(imp2 * 31) * imp2 * 2 : 0;
@@ -332896,7 +333587,7 @@ function styledBar11(c, { x, y, w, h }, reading, t, st) {
     0.7
   );
   band15(c, x - 2.6, y - 2.6, w + 5.2, h + 5.2, 1.6);
-  c.fillStyle = vgrad11(c, y - 2.6, h + 5.2, [HI, LIGHT16, MID3, DEEP8]);
+  c.fillStyle = vgrad12(c, y - 2.6, h + 5.2, [HI, LIGHT16, MID3, DEEP8]);
   c.fill();
   c.lineWidth = 1.1;
   c.strokeStyle = INK91;
@@ -332905,7 +333596,7 @@ function styledBar11(c, { x, y, w, h }, reading, t, st) {
   c.fillRect(x - 1.6, y - 2, w + 3.2, 0.7);
   for (const k of [0, 0.25, 0.5, 0.75, 1]) {
     const bx = x + w * k - (k === 1 ? 3 : k === 0 ? 0 : 1.5);
-    c.fillStyle = vgrad11(c, y - 2.6, h + 5.2, [GOLD_HI2, GOLD47, GOLD_DK]);
+    c.fillStyle = vgrad12(c, y - 2.6, h + 5.2, [GOLD_HI2, GOLD47, GOLD_DK]);
     c.fillRect(bx, y - 2.6, 3, h + 5.2);
     c.lineWidth = 0.6;
     c.strokeStyle = INK91;
@@ -332936,7 +333627,7 @@ function styledBar11(c, { x, y, w, h }, reading, t, st) {
   }
   if (a > 0) {
     const fw = w * a;
-    c.fillStyle = vgrad11(c, y, h, ["#d6ccff", "#9a88ee", "#6a58c0", "#3f3190"]);
+    c.fillStyle = vgrad12(c, y, h, ["#d6ccff", "#9a88ee", "#6a58c0", "#3f3190"]);
     c.fillRect(x, y, fw, h);
     for (let px7 = x - 6, i = 0; px7 < x + fw; px7 += 9, i++) {
       c.fillStyle = i % 2 ? "rgba(255,255,255,.16)" : "rgba(30,20,70,.18)";
@@ -333161,7 +333852,7 @@ function title14(c, cx, y, name, sealed) {
   c.strokeStyle = "#130e24";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad11(c, y - 10, 11, sealed ? ["#e9fffb", "#8ff0de", "#2a8f98"] : ["#f1ecff", "#b6a6ff", "#6a58c0"]);
+  c.fillStyle = vgrad12(c, y - 10, 11, sealed ? ["#e9fffb", "#8ff0de", "#2a8f98"] : ["#f1ecff", "#b6a6ff", "#6a58c0"]);
   c.fillText(name, cx, y);
   c.fillStyle = GOLD47;
   for (const s of [-1, 1]) {
@@ -333186,12 +333877,12 @@ function drawNexusBar(c, canvas, reading, time3, st = {}, name = "Shifting Prism
   const w = Math.min(360, canvas.width - 28 - NEXUS_BAR_SIDE * 2), x = (canvas.width - w) / 2 + NEXUS_BAR_SIDE * 0.2, y = 12, t = time3 / 1e3;
   c.save();
   title14(c, canvas.width / 2, y + 13, name, st.sealed);
-  styledBar11(c, { x, y: y + BAR_Y11, w, h: BAR_H11 }, reading, t, st);
+  styledBar11(c, { x, y: y + BAR_Y11, w, h: BAR_H12 }, reading, t, st);
   c.restore();
 }
 
 // src/client/boss_bar_corrosive_v1.js
-var TAU266 = Math.PI * 2;
+var TAU267 = Math.PI * 2;
 var clamp113 = (v) => Math.max(0, Math.min(1, v));
 var ease68 = (x) => {
   x = clamp113(x);
@@ -333222,7 +333913,7 @@ var BONE10 = "#ece4c8";
 var BONE_DK = "#a89a72";
 var REED3 = "#5e7a2e";
 var CAT = "#7a4a26";
-function vgrad12(c, y, h, stops) {
+function vgrad13(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -333238,10 +333929,10 @@ function band16(c, x, y, w, h, k) {
 function blobPath3(c, x, y, r, seed2, n = 8, j = 0.14) {
   c.beginPath();
   for (let i = 0; i <= n; i++) {
-    const a = i / n * TAU266, f = 1 + j * Math.sin(i * 2.3 + seed2), px7 = x + Math.cos(a) * r * f, py = y + Math.sin(a) * r * f * 0.9;
+    const a = i / n * TAU267, f = 1 + j * Math.sin(i * 2.3 + seed2), px7 = x + Math.cos(a) * r * f, py = y + Math.sin(a) * r * f * 0.9;
     if (!i) c.moveTo(px7, py);
     else {
-      const am = (i - 0.5) / n * TAU266, fm = 1 + j * Math.sin((i - 0.5) * 2.3 + seed2);
+      const am = (i - 0.5) / n * TAU267, fm = 1 + j * Math.sin((i - 0.5) * 2.3 + seed2);
       c.quadraticCurveTo(x + Math.cos(am) * r * fm * 1.08, y + Math.sin(am) * r * fm * 0.97, px7, py);
     }
   }
@@ -333270,9 +333961,9 @@ function pod3(c, x, y, r, t, glow27) {
   }
   c.beginPath();
   for (let i = 0; i < 7; i++) {
-    const a = i / 7 * TAU266, px7 = x + Math.cos(a) * r * 0.55, py = y + Math.sin(a) * r * 0.5;
+    const a = i / 7 * TAU267, px7 = x + Math.cos(a) * r * 0.55, py = y + Math.sin(a) * r * 0.5;
     c.moveTo(px7 + r * 0.5, py);
-    c.arc(px7, py, r * 0.5, 0, TAU266);
+    c.arc(px7, py, r * 0.5, 0, TAU267);
   }
   c.fillStyle = "#c2c86a";
   c.fill();
@@ -333280,18 +333971,18 @@ function pod3(c, x, y, r, t, glow27) {
   c.strokeStyle = INK92;
   c.stroke();
   c.beginPath();
-  c.arc(x, y, r * 0.62, 0, TAU266);
+  c.arc(x, y, r * 0.62, 0, TAU267);
   c.fillStyle = "#d9de86";
   c.fill();
   for (let i = 0; i < 4; i++) {
     const a = i * 1.7 + t * 0.6, px7 = x + Math.cos(a) * r * 0.35, py = y + Math.sin(a) * r * 0.3;
     c.beginPath();
-    c.arc(px7, py, r * 0.14, 0, TAU266);
+    c.arc(px7, py, r * 0.14, 0, TAU267);
     c.fillStyle = "#fbff9a";
     c.fill();
   }
   c.beginPath();
-  c.arc(x - r * 0.25, y - r * 0.3, r * 0.18, 0, TAU266);
+  c.arc(x - r * 0.25, y - r * 0.3, r * 0.18, 0, TAU267);
   c.fillStyle = "rgba(255,255,230,.7)";
   c.fill();
 }
@@ -333308,7 +333999,7 @@ function miniHeap(c, x, y, s, t, P29, p2) {
   c.quadraticCurveTo(17, 1, 15, 10);
   c.quadraticCurveTo(0, 13, -15, 10);
   c.closePath();
-  c.fillStyle = vgrad12(c, -16, 28, P29.gel);
+  c.fillStyle = vgrad13(c, -16, 28, P29.gel);
   c.globalAlpha = 0.95;
   c.fill();
   c.globalAlpha = 1;
@@ -333343,11 +334034,11 @@ function miniHeap(c, x, y, s, t, P29, p2) {
   c.stroke();
   c.fillStyle = MOSS_HI;
   c.beginPath();
-  c.ellipse(-3, -12 - wob4, 3, 1.2, -0.2, 0, TAU266);
+  c.ellipse(-3, -12 - wob4, 3, 1.2, -0.2, 0, TAU267);
   c.fill();
   const bl = t % 4.3 > 4.12 ? 0.15 : 1;
   c.beginPath();
-  c.ellipse(1, 1, 6.2, 5.4, 0, 0, TAU266);
+  c.ellipse(1, 1, 6.2, 5.4, 0, 0, TAU267);
   c.fillStyle = "#2a5a3a";
   c.fill();
   c.lineWidth = 0.9;
@@ -333355,7 +334046,7 @@ function miniHeap(c, x, y, s, t, P29, p2) {
   c.stroke();
   c.save();
   c.beginPath();
-  c.ellipse(1, 1, 4.6, 3.9 * bl, 0, 0, TAU266);
+  c.ellipse(1, 1, 4.6, 3.9 * bl, 0, 0, TAU267);
   c.fillStyle = P29.eye;
   c.fill();
   c.clip();
@@ -333372,11 +334063,11 @@ function miniHeap(c, x, y, s, t, P29, p2) {
   }
   c.fillStyle = P29.pupil;
   c.beginPath();
-  c.ellipse(1.4, 1, 1.1, 3.2, 0, 0, TAU266);
+  c.ellipse(1.4, 1, 1.1, 3.2, 0, 0, TAU267);
   c.fill();
   c.fillStyle = "rgba(255,255,255,.85)";
   c.beginPath();
-  c.arc(-0.8, -0.6, 1, 0, TAU266);
+  c.arc(-0.8, -0.6, 1, 0, TAU267);
   c.fill();
   c.restore();
   c.strokeStyle = "rgba(230,255,220,.55)";
@@ -333390,7 +334081,7 @@ function miniHeap(c, x, y, s, t, P29, p2) {
   }
   c.restore();
 }
-var BAR_H12 = 7;
+var BAR_H13 = 7;
 var BAR_Y12 = 19;
 function styledBar12(c, { x, y, w, h }, reading, t, st) {
   const p2k = st.phase2 ? ease68((st.phase2Age ?? 1) / 0.6) : 0, P29 = p2k > 0.5 ? P27 : P1, mixc2 = (a2, b) => p2k > 0 && p2k < 1 ? p2k > 0.5 ? b : a2 : p2k >= 1 ? b : a2;
@@ -333421,7 +334112,7 @@ function styledBar12(c, { x, y, w, h }, reading, t, st) {
   c.stroke();
   c.restore();
   blobPath3(c, ex + 3, ey, 6.2, 3, 8, 0.1);
-  c.fillStyle = vgrad12(c, ey - 6, 12, P29.gel);
+  c.fillStyle = vgrad13(c, ey - 6, 12, P29.gel);
   c.fill();
   c.lineWidth = 1;
   c.strokeStyle = INK92;
@@ -333432,7 +334123,7 @@ function styledBar12(c, { x, y, w, h }, reading, t, st) {
   c.arc(ex + 2, ey - 1, 3.6, 3.5, 4.6);
   c.stroke();
   band16(c, x - 2.8, y - 2.8, w + 5.6, h + 5.6, 3.6);
-  c.fillStyle = vgrad12(c, y - 2.8, h + 5.6, P29.gel);
+  c.fillStyle = vgrad13(c, y - 2.8, h + 5.6, P29.gel);
   c.globalAlpha = 0.94;
   c.fill();
   c.globalAlpha = 1;
@@ -333453,14 +334144,14 @@ function styledBar12(c, { x, y, w, h }, reading, t, st) {
   }
   if (a > 0) {
     const fw = w * a, boil = 1 + p2k * 0.9;
-    c.fillStyle = vgrad12(c, y, h, P29.fill);
+    c.fillStyle = vgrad13(c, y, h, P29.fill);
     c.fillRect(x, y, fw, h);
     for (let i = 0; i < w / 22; i++) {
       const px7 = x + ((hash92(i) * w + t * 6 * (i % 2 ? 1 : -1)) % w + w) % w, py = y + h * 0.62;
       if (px7 > x + fw) continue;
       c.fillStyle = "rgba(20,50,15,.22)";
       c.beginPath();
-      c.ellipse(px7, py, 5 + hash92(i + 3) * 5, 1.5, 0, 0, TAU266);
+      c.ellipse(px7, py, 5 + hash92(i + 3) * 5, 1.5, 0, 0, TAU267);
       c.fill();
     }
     c.strokeStyle = "rgba(255,255,230,.7)";
@@ -333477,7 +334168,7 @@ function styledBar12(c, { x, y, w, h }, reading, t, st) {
       const py = y + h - 1 - ph * (h - 1.5), r = 0.55 + ph * 0.75;
       if (ph < 0.85) {
         c.beginPath();
-        c.arc(px7, py, r, 0, TAU266);
+        c.arc(px7, py, r, 0, TAU267);
         c.fillStyle = P29.bub;
         c.globalAlpha = 0.85;
         c.fill();
@@ -333489,7 +334180,7 @@ function styledBar12(c, { x, y, w, h }, reading, t, st) {
         c.strokeStyle = "rgba(255,255,220,.8)";
         c.lineWidth = 0.4;
         c.beginPath();
-        c.arc(px7, y + 1.4, 1 + (ph - 0.85) * 12, 0, TAU266);
+        c.arc(px7, y + 1.4, 1 + (ph - 0.85) * 12, 0, TAU267);
         c.stroke();
       }
     }
@@ -333502,7 +334193,7 @@ function styledBar12(c, { x, y, w, h }, reading, t, st) {
       c.fillStyle = "#ffffff";
       c.globalAlpha = 0.4;
       c.beginPath();
-      c.ellipse(gx, y + 2, 5, 1.1, 0, 0, TAU266);
+      c.ellipse(gx, y + 2, 5, 1.1, 0, 0, TAU267);
       c.fill();
       c.restore();
     }
@@ -333536,8 +334227,8 @@ function styledBar12(c, { x, y, w, h }, reading, t, st) {
     c.stroke();
     for (const s of [-1, 1]) {
       c.beginPath();
-      c.arc(-1.1 * big, s * (h / 2 + 3.2) * big, 1.2 * big, 0, TAU266);
-      c.arc(1.1 * big, s * (h / 2 + 3.2) * big, 1.2 * big, 0, TAU266);
+      c.arc(-1.1 * big, s * (h / 2 + 3.2) * big, 1.2 * big, 0, TAU267);
+      c.arc(1.1 * big, s * (h / 2 + 3.2) * big, 1.2 * big, 0, TAU267);
       c.fill();
       c.stroke();
     }
@@ -333578,7 +334269,7 @@ function styledBar12(c, { x, y, w, h }, reading, t, st) {
     const px7 = x + hash92(i + 41) * w;
     c.fillStyle = MOSS_HI;
     c.beginPath();
-    c.ellipse(px7, y - 3.6, 2, 0.8, 0, 0, TAU266);
+    c.ellipse(px7, y - 3.6, 2, 0.8, 0, 0, TAU267);
     c.fill();
   }
   for (let i = 0; i < 4; i++) {
@@ -333608,7 +334299,7 @@ function styledBar12(c, { x, y, w, h }, reading, t, st) {
       const ang = -1.6 + i * 0.5, d = 3 + k * 11, px7 = fx + Math.cos(ang) * d, py = y + h / 2 + Math.sin(ang) * d + k * k * 8;
       c.globalAlpha = imp2;
       c.beginPath();
-      c.arc(px7, py, 1 + i % 2 * 0.4, 0, TAU266);
+      c.arc(px7, py, 1 + i % 2 * 0.4, 0, TAU267);
       c.fillStyle = i % 2 ? P29.fill[0] : P29.fill[1];
       c.fill();
     }
@@ -333625,7 +334316,7 @@ function styledBar12(c, { x, y, w, h }, reading, t, st) {
     c.stroke();
     c.fillStyle = P29.eye;
     c.beginPath();
-    c.arc(px7 + 0.4, py, 0.8, 0, TAU266);
+    c.arc(px7 + 0.4, py, 0.8, 0, TAU267);
     c.fill();
     c.globalAlpha = 1;
   }
@@ -333655,7 +334346,7 @@ function title15(c, cx, y, name, P29) {
   c.strokeStyle = "#0f1a0c";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad12(c, y - 10, 11, P29.name);
+  c.fillStyle = vgrad13(c, y - 10, 11, P29.name);
   c.fillText(name, cx, y);
   const w = c.measureText(name).width / 2 + 9;
   for (const s of [-1, 1]) drop3(c, cx + s * w, y - 3.4, 1.7, P29.fill[1]);
@@ -333667,12 +334358,12 @@ function drawCorrosiveBar(c, canvas, reading, time3, st = {}, name = "Corrosive 
   const P29 = st.phase2 && (st.phase2Age ?? 1) > 0.3 ? P27 : P1;
   c.save();
   title15(c, canvas.width / 2, y + 13, name, P29);
-  styledBar12(c, { x, y: y + BAR_Y12, w, h: BAR_H12 }, reading, t, st);
+  styledBar12(c, { x, y: y + BAR_Y12, w, h: BAR_H13 }, reading, t, st);
   c.restore();
 }
 
 // src/client/boss_bar_hollow_moon_v1.js
-var TAU267 = Math.PI * 2;
+var TAU268 = Math.PI * 2;
 var clamp114 = (v) => Math.max(0, Math.min(1, v));
 var ease69 = (x) => {
   x = clamp114(x);
@@ -333696,7 +334387,7 @@ var P28 = {
   neb: ["220,140,255", "150,120,255", "255,140,230"]
 };
 var STONE40 = ["#f2f6fa", "#ccd7e3", "#9fb0c4", "#73859e"];
-function vgrad13(c, y, h, stops) {
+function vgrad14(c, y, h, stops) {
   const g2 = c.createLinearGradient(0, y, 0, y + h);
   stops.forEach((s, i) => g2.addColorStop(i / (stops.length - 1), s));
   return g2;
@@ -333752,7 +334443,7 @@ function crystal6(c, x, y, s, a, seed2, glow27 = 0, t = 0) {
     c.fillRect(-s * 2.8, -s * 2.8, s * 5.6, s * 5.6);
   }
   const k = [0, 1, 2, 3, 4, 5].map((i) => {
-    const an = i / 6 * TAU267 - Math.PI / 2 + (hash93(seed2 + i) - 0.5) * 0.5, r = s * (i % 3 === 0 ? 1.15 : 0.8 + hash93(seed2 * 3 + i) * 0.3);
+    const an = i / 6 * TAU268 - Math.PI / 2 + (hash93(seed2 + i) - 0.5) * 0.5, r = s * (i % 3 === 0 ? 1.15 : 0.8 + hash93(seed2 * 3 + i) * 0.3);
     return [Math.cos(an) * r * 0.78, Math.sin(an) * r];
   });
   const m = [(hash93(seed2 + 9) - 0.5) * s * 0.2, -s * 0.08];
@@ -333763,7 +334454,7 @@ function crystal6(c, x, y, s, a, seed2, glow27 = 0, t = 0) {
   poly43(c, [k[2], k[3], m], "#7fb0cf", null);
   if (glow27 > 0) {
     c.beginPath();
-    c.arc(m[0], m[1] + s * 0.2, s * 0.35, 0, TAU267);
+    c.arc(m[0], m[1] + s * 0.2, s * 0.35, 0, TAU268);
     c.fillStyle = `rgba(225,190,255,${0.8 * glow27})`;
     c.fill();
   }
@@ -333796,12 +334487,12 @@ function miniMoon(c, x, y, s, t, look, p2k, pull) {
       c.strokeStyle = `rgba(225,242,255,${far2 ? 0.3 : 0.45})`;
       c.lineWidth = 0.8;
       c.beginPath();
-      c.ellipse(0, 0, rx, ry, 0, far2 ? Math.PI : 0, far2 ? TAU267 : Math.PI);
+      c.ellipse(0, 0, rx, ry, 0, far2 ? Math.PI : 0, far2 ? TAU268 : Math.PI);
       c.stroke();
     }
     const n = shards3 ? 4 : 6;
     for (let i = 0; i < n; i++) {
-      const an = spin + i / n * TAU267, sn = Math.sin(an);
+      const an = spin + i / n * TAU268, sn = Math.sin(an);
       if (far2 !== sn < 0) continue;
       const dep = 0.8 + 0.2 * (sn + 1) / 2;
       crystal6(
@@ -333823,16 +334514,16 @@ function miniMoon(c, x, y, s, t, look, p2k, pull) {
   g2.addColorStop(0.5, "#cfdae6");
   g2.addColorStop(1, "#7a8ca6");
   c.beginPath();
-  c.arc(0, 0, R18, 0, TAU267);
+  c.arc(0, 0, R18, 0, TAU268);
   c.fillStyle = g2;
   c.fill();
   c.save();
   c.beginPath();
-  c.arc(0, 0, R18, 0, TAU267);
+  c.arc(0, 0, R18, 0, TAU268);
   c.clip();
   c.beginPath();
-  c.arc(0, 0, R18 + 1, 0, TAU267);
-  c.arc(-2.6, -2.6, R18, 0, TAU267, true);
+  c.arc(0, 0, R18 + 1, 0, TAU268);
+  c.arc(-2.6, -2.6, R18, 0, TAU268, true);
   c.fillStyle = "rgba(56,70,104,.32)";
   c.fill("evenodd");
   for (const [cx, cy2, r] of [
@@ -333843,11 +334534,11 @@ function miniMoon(c, x, y, s, t, look, p2k, pull) {
     [2, -8.5, 1]
   ]) {
     c.beginPath();
-    c.ellipse(cx, cy2, r, r * 0.85, 0, 0, TAU267);
+    c.ellipse(cx, cy2, r, r * 0.85, 0, 0, TAU268);
     c.fillStyle = "rgba(84,102,132,.5)";
     c.fill();
     c.beginPath();
-    c.ellipse(cx + r * 0.2, cy2 + r * 0.18, r * 0.75, r * 0.6, 0, 0, TAU267);
+    c.ellipse(cx + r * 0.2, cy2 + r * 0.18, r * 0.75, r * 0.6, 0, 0, TAU268);
     c.fillStyle = "rgba(52,66,94,.4)";
     c.fill();
     c.beginPath();
@@ -333881,7 +334572,7 @@ function miniMoon(c, x, y, s, t, look, p2k, pull) {
     c.stroke();
     c.fillStyle = "rgba(255,255,255,.95)";
     c.beginPath();
-    c.ellipse(-4, -8, 3, 1, -0.3, 0, TAU267);
+    c.ellipse(-4, -8, 3, 1, -0.3, 0, TAU268);
     c.fill();
     sparkle4(c, 3, -7.5, 1.6, 0.5 + 0.5 * Math.sin(t * 2.6));
     sparkle4(c, -7, -6, 1.1, 0.5 + 0.5 * Math.sin(t * 2.1 + 2));
@@ -333955,7 +334646,7 @@ function miniMoon(c, x, y, s, t, look, p2k, pull) {
     c.strokeStyle = `rgba(${glow27},.7)`;
     c.lineWidth = 0.55;
     c.beginPath();
-    for (let an = 0; an < TAU267 * 0.9; an += 0.2) {
+    for (let an = 0; an < TAU268 * 0.9; an += 0.2) {
       const r = 0.6 + an * 0.8, px7 = Math.cos(an + arm15 + t * 1.2) * r, py = 0.6 + Math.sin(an + arm15 + t * 1.2) * r * 0.75;
       an ? c.lineTo(px7, py) : c.moveTo(px7, py);
     }
@@ -333978,7 +334669,7 @@ function miniMoon(c, x, y, s, t, look, p2k, pull) {
   c.fillRect(lx - 3, -2.4, 6, 6);
   c.fillStyle = "#fbf6ff";
   c.beginPath();
-  c.ellipse(lx, 0.6, 0.75, 2.3, 0, 0, TAU267);
+  c.ellipse(lx, 0.6, 0.75, 2.3, 0, 0, TAU268);
   c.fill();
   c.fillStyle = "#3a1470";
   c.fillRect(lx - 0.18, -1.1, 0.36, 3.4);
@@ -333990,7 +334681,7 @@ function miniMoon(c, x, y, s, t, look, p2k, pull) {
   c.lineWidth = 0.8;
   c.stroke();
   c.beginPath();
-  c.arc(0, 0, R18, 0, TAU267);
+  c.arc(0, 0, R18, 0, TAU268);
   c.strokeStyle = INK93;
   c.lineWidth = 1.15;
   c.stroke();
@@ -334011,7 +334702,7 @@ function crescent2(c, x, y, s, t) {
   const r = 4.3, d = 2.4, r24 = 3.6, ix = (d * d + r * r - r24 * r24) / (2 * d), iy = Math.sqrt(r * r - ix * ix), a = Math.atan2(iy, ix), b = Math.atan2(iy, ix - d);
   const shape4 = () => {
     c.beginPath();
-    c.arc(0, 0, r, a, TAU267 - a);
+    c.arc(0, 0, r, a, TAU268 - a);
     c.arc(d, 0, r24, -b, b, true);
     c.closePath();
   };
@@ -334030,11 +334721,11 @@ function crescent2(c, x, y, s, t) {
   shape4();
   c.clip();
   c.beginPath();
-  c.ellipse(-2.9, 1.2, 0.75, 0.6, 0, 0, TAU267);
+  c.ellipse(-2.9, 1.2, 0.75, 0.6, 0, 0, TAU268);
   c.fillStyle = "rgba(84,102,132,.5)";
   c.fill();
   c.beginPath();
-  c.arc(d, 0, r24 + 0.9, 0, TAU267);
+  c.arc(d, 0, r24 + 0.9, 0, TAU268);
   c.strokeStyle = "rgba(90,110,145,.45)";
   c.lineWidth = 1;
   c.stroke();
@@ -334042,7 +334733,7 @@ function crescent2(c, x, y, s, t) {
   c.restore();
   sparkle4(c, x + s * 7, y - 3.6, 1.6, 0.55 + 0.45 * Math.sin(t * 2.4 + s));
 }
-var BAR_H13 = 7;
+var BAR_H14 = 7;
 var BAR_Y13 = 19;
 function styledBar13(c, { x, y, w, h }, reading, t, st) {
   const p2k = st.phase2 ? ease69((st.phase2Age ?? 1) / 0.6) : 0, P29 = p2k > 0.5 ? P28 : P110, pull = clamp114(st.pull ?? 0);
@@ -334053,7 +334744,7 @@ function styledBar13(c, { x, y, w, h }, reading, t, st) {
   c.lineCap = "round";
   endCluster(c, x + w + 6, y + h / 2 - 0.5, t);
   band17(c, x - 3, y - 3, w + 6, h + 6, 3.8);
-  c.fillStyle = vgrad13(c, y - 3, h + 6, STONE40);
+  c.fillStyle = vgrad14(c, y - 3, h + 6, STONE40);
   c.fill();
   c.save();
   band17(c, x - 3, y - 3, w + 6, h + 6, 3.8);
@@ -334065,7 +334756,7 @@ function styledBar13(c, { x, y, w, h }, reading, t, st) {
   for (let i = 0; i < w / 11; i++) {
     const px7 = x + hash93(i + 3) * w, py = hash93(i + 13) < 0.5 ? y - 1.5 : y + h + 1.4, r = 0.8 + hash93(i + 23) * 0.8;
     c.beginPath();
-    c.ellipse(px7, py, r * 1.5, r * 0.75, 0, 0, TAU267);
+    c.ellipse(px7, py, r * 1.5, r * 0.75, 0, 0, TAU268);
     c.fillStyle = "rgba(66,84,112,.5)";
     c.fill();
     c.beginPath();
@@ -334129,7 +334820,7 @@ function styledBar13(c, { x, y, w, h }, reading, t, st) {
   }
   if (a > 0) {
     const fw = w * a, rest2 = 1 + p2k * 0.8;
-    c.fillStyle = vgrad13(c, y, h, P29.fill);
+    c.fillStyle = vgrad14(c, y, h, P29.fill);
     c.fillRect(x, y, fw, h);
     c.save();
     c.beginPath();
@@ -334148,7 +334839,7 @@ function styledBar13(c, { x, y, w, h }, reading, t, st) {
       c.strokeStyle = `rgba(${P29.glow},.28)`;
       c.lineWidth = 0.6;
       c.beginPath();
-      c.ellipse(px7, y + h * 0.55, 4 + hash93(i + 3) * 4, 1.3, 0, (t * rest2 + i) % TAU267, (t * rest2 + i) % TAU267 + 3.4);
+      c.ellipse(px7, y + h * 0.55, 4 + hash93(i + 3) * 4, 1.3, 0, (t * rest2 + i) % TAU268, (t * rest2 + i) % TAU268 + 3.4);
       c.stroke();
     }
     for (let i = 0; i < w / 7; i++) {
@@ -334171,7 +334862,7 @@ function styledBar13(c, { x, y, w, h }, reading, t, st) {
     c.fillStyle = "#ffffff";
     c.globalAlpha = 0.45;
     c.beginPath();
-    c.ellipse(gx, y + 1.5, 6, 0.9, 0, 0, TAU267);
+    c.ellipse(gx, y + 1.5, 6, 0.9, 0, 0, TAU268);
     c.fill();
     c.globalAlpha = 1;
     if (st.lanceAge != null && st.lanceAge < 0.45) {
@@ -334237,7 +334928,7 @@ function styledBar13(c, { x, y, w, h }, reading, t, st) {
       const px7 = x + hash93(i + 21) * w;
       c.fillStyle = "rgba(255,255,255,1)";
       c.beginPath();
-      c.ellipse(px7, y - 3.3, 1.8, 0.55, 0, 0, TAU267);
+      c.ellipse(px7, y - 3.3, 1.8, 0.55, 0, 0, TAU268);
       c.fill();
     }
     for (let i = 0; i < w / 40; i++) {
@@ -334248,7 +334939,7 @@ function styledBar13(c, { x, y, w, h }, reading, t, st) {
       const px7 = x + hash93(i + 141) * w;
       c.fillStyle = "rgba(150,190,230,.7)";
       c.beginPath();
-      c.arc(px7, y - 2, 0.45, 0, TAU267);
+      c.arc(px7, y - 2, 0.45, 0, TAU268);
       c.fill();
     }
     c.restore();
@@ -334338,7 +335029,7 @@ function title16(c, cx, y, name, P29, t) {
   c.strokeStyle = "#0d0a18";
   c.strokeText(name, cx, y);
   c.shadowColor = "transparent";
-  c.fillStyle = vgrad13(c, y - 10, 11, P29.name);
+  c.fillStyle = vgrad14(c, y - 10, 11, P29.name);
   c.fillText(name, cx, y);
   const w = c.measureText(name).width / 2 + 11;
   for (const s of [-1, 1]) crescent2(c, cx + s * w, y - 4, s, t);
@@ -334350,7 +335041,7 @@ function drawHollowMoonBar(c, canvas, reading, time3, st = {}, name = "Hollow Mo
   const P29 = st.phase2 && (st.phase2Age ?? 1) > 0.3 ? P28 : P110;
   c.save();
   title16(c, canvas.width / 2, y + 13, name, P29, t);
-  styledBar13(c, { x, y: y + BAR_Y13, w, h: BAR_H13 }, reading, t, st);
+  styledBar13(c, { x, y: y + BAR_Y13, w, h: BAR_H14 }, reading, t, st);
   c.restore();
 }
 
@@ -334483,7 +335174,7 @@ function drawStyledBossBarV1(c, canvas, model, boss, reading, time3) {
 }
 
 // src/client/aegis_mimic_presentation_v2.js
-var TAU268 = Math.PI * 2;
+var TAU269 = Math.PI * 2;
 var clamp116 = (v) => Math.max(0, Math.min(1, v));
 function drawAttachedAegisMimic(c, actor, tick, flash2 = false) {
   const m = actor.aegisMimic;
@@ -334493,7 +335184,7 @@ function drawAttachedAegisMimic(c, actor, tick, flash2 = false) {
   c.translate(actor.position.x, actor.position.y);
   c.fillStyle = "#0c142b44";
   c.beginPath();
-  c.ellipse(0, 8, 13, 5, 0, 0, TAU268);
+  c.ellipse(0, 8, 13, 5, 0, 0, TAU269);
   c.fill();
   c.translate(0, -lift);
   c.save();
@@ -334552,7 +335243,7 @@ function aegisMimicTetherDepthItems(model, tick) {
 }
 
 // src/client/boss_presentation_aegis_v1.js
-var TAU269 = Math.PI * 2;
+var TAU270 = Math.PI * 2;
 var clamp117 = (v) => Math.max(0, Math.min(1, v));
 function drawAegisBossHud(c, canvas, model) {
   const actor = Object.values(model.entitiesById).find((a) => a.alive && a.boss?.bossDefinitionId === "aegis_goliath");
