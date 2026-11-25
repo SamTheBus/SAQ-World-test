@@ -94,10 +94,18 @@ function walkWire(value, mode) {
         "Oversize record"
       );
       const cloned2 = mode ? /* @__PURE__ */ Object.create(null) : null;
-      if (mode) for (const key2 of [...keys].sort()) cloned2[key2] = null;
+      if (mode) {
+        let sorted = true;
+        for (let i = 1; i < keys.length; i++)
+          if (keys[i - 1] > keys[i]) {
+            sorted = false;
+            break;
+          }
+        if (!sorted) for (const key2 of [...keys].sort()) cloned2[key2] = null;
+      }
       for (const key2 of keys) {
         requireContract(
-          key2.length > 0 && key2.length <= 128 && !["__proto__", "prototype", "constructor"].includes(key2),
+          key2.length > 0 && key2.length <= 128 && key2 !== "__proto__" && key2 !== "prototype" && key2 !== "constructor",
           "Unsafe record key"
         );
         const descriptor = Object.getOwnPropertyDescriptor(current, key2);

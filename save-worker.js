@@ -176,10 +176,18 @@ function walkWire(value, mode) {
         "Oversize record"
       );
       const cloned2 = mode ? /* @__PURE__ */ Object.create(null) : null;
-      if (mode) for (const key9 of [...keys2].sort()) cloned2[key9] = null;
+      if (mode) {
+        let sorted2 = true;
+        for (let i = 1; i < keys2.length; i++)
+          if (keys2[i - 1] > keys2[i]) {
+            sorted2 = false;
+            break;
+          }
+        if (!sorted2) for (const key9 of [...keys2].sort()) cloned2[key9] = null;
+      }
       for (const key9 of keys2) {
         requireContract(
-          key9.length > 0 && key9.length <= 128 && !["__proto__", "prototype", "constructor"].includes(key9),
+          key9.length > 0 && key9.length <= 128 && key9 !== "__proto__" && key9 !== "prototype" && key9 !== "constructor",
           "Unsafe record key"
         );
         const descriptor = Object.getOwnPropertyDescriptor(current, key9);
@@ -45315,8 +45323,9 @@ function captureWorldPositionsD9(state) {
     positionCaptures.delete(state);
     return;
   }
-  const positions = {}, frames = world.runtime.frames, frameInputs = frameCaptureInputs(frames), prior = positionCaptures.get(state), reuse = sameFrameCaptureInputs(frameInputs, prior?.frameInputs), next = /* @__PURE__ */ new Map();
-  for (const a of Object.values(state.entitiesById))
+  const positions = {}, frames = world.runtime.frames, frameInputs = frameCaptureInputs(frames), prior = positionCaptures.get(state), reuse = sameFrameCaptureInputs(frameInputs, prior?.frameInputs), next = /* @__PURE__ */ new Map(), byId2 = state.entitiesById;
+  for (const entityKey in byId2) {
+    const a = byId2[entityKey];
     if (a.residency.spaceInstanceId === state.overworldInstanceId) {
       const input = finitePositionInputs(a.position), old = reuse && input ? prior.actors.get(a.entityId) : null;
       const p = old && Object.is(old.x, input[0]) && Object.is(old.y, input[1]) ? old.position : localFramePositionD9(a.position, frames);
@@ -45329,6 +45338,7 @@ function captureWorldPositionsD9(state) {
         localY: p.localY
       });
     }
+  }
   world.positions = positions;
   if (frameInputs) positionCaptures.set(state, { frameInputs, actors: next });
   else positionCaptures.delete(state);
