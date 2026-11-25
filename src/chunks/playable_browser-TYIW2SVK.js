@@ -337323,6 +337323,302 @@ function cairnwardenName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var SHD = SHARD_PAL.A;
+var SHD_FROST = ["#ffffff", "#dceaf4", "#9fbfd6"];
+var SHD_DEEP = "#0d1a2c";
+var SHD_DEEPL = "#17294a";
+var shdEase = (x) => x * x * (3 - 2 * x);
+var shdClamp = (x) => Math.max(0, Math.min(1, x));
+var shdSeg = (t, a, b) => shdClamp((t - a) / (b - a));
+var shdMix = (a, b, u) => a + (b - a) * u;
+var SHD_CAGE = [0.68, 0.88];
+var SHD_PILLARS = [0, 0.17, 0.34, 0.5, 0.66, 0.83, 1];
+var SHD_SHARDS = [
+  [-2.25, 19, 0.55, 0],
+  [-1.88, 25, 0.7, 1],
+  [-1.5, 23, 0.85, 0.34],
+  [-1.12, 17, 1, 0.66]
+];
+function shdBeat(t, low) {
+  const T121 = low ? 3 : 6, u = (t % T121 + T121) % T121 / T121 * 6, s = u - 0.8, CLOSE2 = 1.45, NOVA2 = 1.9, THAW2 = 2.9, END = 4.5;
+  const on = s >= 0 && s < END;
+  return {
+    s,
+    on,
+    cast: on ? s < 1 ? shdEase(shdSeg(s, 0, 0.45)) : 1 - shdEase(shdSeg(s, 1.05, 1.4)) : 0,
+    warn: on && s >= 0.35 && s < CLOSE2 ? shdSeg(s, 0.35, CLOSE2) : -1,
+    shut: on && s >= CLOSE2 && s < NOVA2 ? shdSeg(s, CLOSE2, NOVA2) : -1,
+    nova: on && s >= NOVA2 && s < NOVA2 + 0.5 ? (s - NOVA2) / 0.5 : -1,
+    frozen: on && s >= NOVA2 && s < THAW2 + 0.5 ? 1 - shdSeg(s, THAW2, THAW2 + 0.5) : 0,
+    pillars: on && s >= CLOSE2 - 0.15 && s < THAW2 + 0.5 ? shdEase(shdSeg(s, CLOSE2 - 0.15, CLOSE2 + 0.1)) * (1 - shdSeg(s, THAW2, THAW2 + 0.5)) : 0,
+    spent: on ? shdEase(shdSeg(s, 2.15, 2.6)) * (1 - shdEase(shdSeg(s, END - 0.6, END))) : 0,
+    regrow: on && s >= END - 0.6 ? shdSeg(s, END - 0.6, END) : -1
+  };
+}
+function shdGlow(b, t) {
+  const beat2 = Math.pow(Math.max(0, Math.sin(t * 3.2)), 6);
+  const flick = b.spent > 0.3 ? Math.sin(t * 23) > 0.6 ? 0.25 : 0 : 0;
+  return shdClamp(0.55 + beat2 * 0.3 + b.cast * 0.35 - b.spent * 0.55 + flick);
+}
+var SHARDHEART_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: [SHD.coreL, SHD.core, SHD.coreD],
+  under(e, o, t, i, a, l, n) {
+    const b = shdBeat(l, n < 0.5);
+    for (const [k, [ang, L, at10]] of SHD_SHARDS.entries()) {
+      let len = L;
+      if (b.on && b.s >= at10 && b.regrow < 0) continue;
+      if (b.regrow >= 0) len = L * shdEase(shdClamp(b.regrow * 1.4 - k * 0.12));
+      const lift = b.cast * 1.2;
+      crystal3(
+        e,
+        o + 3 + k * 2.2,
+        t + a / 2 - lift,
+        ang - b.cast * 0.05 * (k - 1.5),
+        len,
+        7,
+        SHD,
+        {},
+        { frost: true, lw: 1 }
+      );
+    }
+  },
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, SHD_FROST);
+    e.fill();
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    const r = seeded2(37);
+    e.fillStyle = "#ffffff";
+    for (let x = o + 6; x < o + i - 6; x += 9 + r() * 14) {
+      e.beginPath();
+      e.ellipse(x, t - 2.3, 3 + r() * 3.5, 1.1 + r() * 0.5, 0, Math.PI, TAU258);
+      e.fill();
+    }
+    e.strokeStyle = SHD.frostD;
+    e.lineWidth = 0.5;
+    e.beginPath();
+    for (let x = o + 10; x < o + i - 6; x += 18 + r() * 14) {
+      e.moveTo(x, t + a + 0.8);
+      e.lineTo(x + 0.4, t + a + 2.1);
+    }
+    e.stroke();
+    pill(e, o, t, i, a);
+    e.fillStyle = SHD_DEEP;
+    e.fill();
+    e.save();
+    e.clip();
+    e.fillStyle = SHD_DEEPL;
+    e.fillRect(o, t, i, a * 0.3);
+    e.strokeStyle = "rgba(160,200,230,.18)";
+    e.lineWidth = 0.5;
+    e.beginPath();
+    for (let x = o + 4; x < o + i; x += 9 + r() * 14) {
+      const d = r() < 0.5 ? -1 : 1;
+      e.moveTo(x, t + r() * a * 0.3);
+      e.lineTo(x + d * (1 + r() * 2.5), t + a * (0.4 + r() * 0.3));
+      if (r() < 0.6) e.lineTo(x + d * (r() * 3 - 1), t + a);
+    }
+    e.stroke();
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    const b = shdBeat(l, i / n < 0.5), g2 = shdGlow(b, l);
+    e.fillStyle = SHD.ice;
+    e.fillRect(o, t, i, a);
+    e.fillStyle = SHD.iceL;
+    e.fillRect(o, t, i, a * 0.3);
+    e.fillStyle = SHD.iceD;
+    e.fillRect(o, t + a * 0.68, i, a * 0.32);
+    const r = seeded2(61);
+    e.strokeStyle = "rgba(255,255,255,.7)";
+    e.lineWidth = 0.6;
+    e.beginPath();
+    for (let x = o + 5; x < o + i; x += 9 + r() * 8) {
+      e.moveTo(x, t);
+      e.lineTo(x + 2.2, t + a * 0.3);
+    }
+    e.stroke();
+    e.strokeStyle = SHD.iceDD;
+    e.lineWidth = 0.6;
+    e.beginPath();
+    for (let x = o + 8; x < o + i; x += 11 + r() * 9) {
+      e.moveTo(x, t + a * 0.68);
+      e.lineTo(x - 2, t + a);
+    }
+    e.stroke();
+    e.fillStyle = SHD.rim;
+    e.fillRect(o, t + 0.4, i, 0.6);
+    e.globalAlpha = g2;
+    e.fillStyle = SHD.coreD;
+    e.fillRect(o, t + a * 0.4, i, a * 0.26);
+    e.fillStyle = SHD.core;
+    e.fillRect(o, t + a * 0.45, i, a * 0.16);
+    e.fillStyle = SHD.coreL;
+    e.fillRect(o, t + a * 0.5, Math.min(i, 30 + g2 * 40), 0.5);
+    e.globalAlpha = 1;
+    for (let k = 0; k < 6; k++) {
+      const q2 = (l * 0.12 + k / 6) % 1, x = o + q2 * n;
+      if (x > o + i - 1) continue;
+      e.globalAlpha = g2 * Math.sin(q2 * Math.PI);
+      dot17(e, x, t + a * (0.3 + k * 0.37 % 0.4), 0.6, SHD.coreL);
+    }
+    e.globalAlpha = 1;
+    const c0 = o + SHD_CAGE[0] * n, c1 = o + SHD_CAGE[1] * n;
+    if ((b.shut >= 0 || b.frozen > 0) && c0 < o + i) {
+      const x1 = Math.min(c1, o + i), k = b.frozen > 0 ? b.frozen : b.shut;
+      e.fillStyle = "rgba(240,250,255," + (0.25 + k * 0.6).toFixed(3) + ")";
+      e.fillRect(c0, t, x1 - c0, a);
+      const rr7 = seeded2(5);
+      e.fillStyle = SHD.frostD;
+      for (let x = c0 + 2; x < x1 - 1; x += 3 + rr7() * 3) {
+        if (rr7() > k) continue;
+        dot17(e, x, t + rr7() * a, 0.5 + rr7() * 0.4, rr7() < 0.5 ? SHD.frostD : "#ffffff");
+      }
+    }
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 4; n++) {
+      const r = (l * 0.9 + n / 4) % 1;
+      e.globalAlpha = 1 - r;
+      dot17(e, o + i * (0.15 + n * 0.23), t + a - 1 + r * 4, 0.8, "#ffffff");
+    }
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a) {
+    e.fillStyle = SHD.iceDD;
+    e.beginPath();
+    e.moveTo(o - 2, t);
+    e.lineTo(o + 0.6, t);
+    e.lineTo(o - 0.8, t + i * 0.45);
+    e.lineTo(o + 0.4, t + i);
+    e.lineTo(o - 2, t + i);
+    e.closePath();
+    e.fill();
+    e.strokeStyle = SHD.rim;
+    e.lineWidth = 0.6 + a * 0.6;
+    e.beginPath();
+    e.moveTo(o + 0.6, t);
+    e.lineTo(o - 0.8, t + i * 0.45);
+    e.lineTo(o + 0.4, t + i);
+    e.stroke();
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const low = n < 0.5, b = shdBeat(l, low), fx = o + i * n, c0 = o + SHD_CAGE[0] * i, c1 = o + SHD_CAGE[1] * i, cy2 = t + a / 2;
+    if (b.warn >= 0) {
+      e.save();
+      e.globalAlpha = Math.min(1, b.warn * 4);
+      e.strokeStyle = "rgba(6,24,44,.6)";
+      e.lineWidth = 2.6;
+      pill(e, c0 - 2, t - 3, c1 - c0 + 4, a + 6);
+      e.stroke();
+      e.strokeStyle = "#bfe6ff";
+      e.lineWidth = 1.1;
+      e.stroke();
+      e.fillStyle = "rgba(191,230,255,.3)";
+      e.fillRect(c0, t - 1, (c1 - c0) * b.warn, a + 2);
+      e.restore();
+    }
+    for (const [k, [, L, at10, land]] of SHD_SHARDS.entries()) {
+      if (!b.on || b.s < at10 || b.s >= at10 + 0.42) continue;
+      const u = (b.s - at10) / 0.42, sx = o + 6, sy = t - 14, tx = c0 + (c1 - c0) * land, x = shdMix(sx, tx, u), y = shdMix(sy, t - 1, u) - Math.sin(u * Math.PI) * 14, dx = tx - sx, dy = t - 1 - sy - Math.cos(u * Math.PI) * 14 * Math.PI, ang = Math.atan2(dy, dx);
+      for (let j = 1; j < 5; j++) {
+        const v = Math.max(0, u - j * 0.05);
+        e.globalAlpha = 0.9 - j * 0.18;
+        dot17(e, shdMix(sx, tx, v), shdMix(sy, t - 1, v) - Math.sin(v * Math.PI) * 14, 1.4 - j * 0.22, SHD.coreL);
+      }
+      e.globalAlpha = 1;
+      crystal3(
+        e,
+        x - Math.cos(ang) * L * 0.45,
+        y - Math.sin(ang) * L * 0.45,
+        ang,
+        L * 0.9,
+        6,
+        SHD,
+        {},
+        { frost: true, lw: 1 }
+      );
+    }
+    if (b.pillars > 0)
+      for (const [k, f] of SHD_PILLARS.entries()) {
+        const x = c0 + (c1 - c0) * f, big = k % 2 === 0, L = (big ? 15 : 11) * b.pillars;
+        crystal3(e, x, t + 1.5, -Math.PI / 2 + (k % 3 - 1) * 0.08, L, big ? 6 : 5, SHD, {}, { frost: true, lw: 1 });
+      }
+    if (b.shut >= 0 && (l * 10 | 0) % 2) {
+      e.strokeStyle = "#ffffff";
+      e.lineWidth = 0.8;
+      pill(e, c0 - 1, t - 1, c1 - c0 + 2, a + 2);
+      e.stroke();
+    }
+    if (b.nova >= 0) {
+      const q2 = b.nova, mx = (c0 + c1) / 2, rx = (c1 - c0) / 2 + 4 + q2 * 16, ry = a / 2 + 3 + q2 * 7;
+      e.save();
+      e.globalAlpha = 1 - q2;
+      e.strokeStyle = "#ffffff";
+      e.lineWidth = 2;
+      e.beginPath();
+      e.ellipse(mx, cy2, rx, ry, 0, 0, TAU258);
+      e.stroke();
+      e.strokeStyle = "#bfe6ff";
+      e.lineWidth = 1;
+      e.beginPath();
+      e.ellipse(mx, cy2, rx * 0.8, ry * 0.75, 0, 0, TAU258);
+      e.stroke();
+      for (let j = 0; j < 8; j++) {
+        const ang = j / 8 * TAU258;
+        dot17(e, mx + Math.cos(ang) * rx * 0.9, cy2 + Math.sin(ang) * ry * 0.9, 1, "#ffffff");
+      }
+      e.restore();
+    }
+    if (low)
+      for (let k = 0; k < 3; k++) {
+        const q2 = (l * 0.5 + k / 3) % 1, x = o + 16 + (k * 0.37 + 0.2) % 1 * Math.max(0, fx - o - 20);
+        e.globalAlpha = (1 - q2) * 0.9;
+        dot17(e, x + Math.sin(q2 * 6 + k) * 1.5, t - 1 - q2 * 6, 0.7, SHD.coreL);
+      }
+    e.globalAlpha = 1;
+    if (r > 0) {
+      for (let k = 0; k < 7; k++) {
+        const d = 1 - r, sx = (k - 3) * 2.4 * (0.4 + d), vy = -4 + d * d * 14 + k % 2 * 2;
+        e.globalAlpha = r;
+        e.fillStyle = k % 3 ? SHD.iceL : SHD.core;
+        e.beginPath();
+        e.moveTo(fx + sx, cy2 + vy - 1);
+        e.lineTo(fx + sx + 0.9, cy2 + vy);
+        e.lineTo(fx + sx, cy2 + vy + 1);
+        e.lineTo(fx + sx - 0.9, cy2 + vy);
+        e.closePath();
+        e.fill();
+      }
+      e.globalAlpha = 1;
+    }
+  }
+};
+function drawShardheartBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 18, y: y + NAME_GAP, w: w - 24, h: BAR_H }, i, SHARDHEART_BAR, a);
+  shardheartName(e, x + w / 2, y + 13, t.name);
+}
+function shardheartName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#0a1a2c";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#f0ffff", "#9fe8ff", "#3fa8d8"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -337341,7 +337637,8 @@ var LESSER_BARS = Object.freeze({
   gorgeleech: Object.freeze({ draw: drawGorgeleechBar, side: 16 }),
   ironhorn: Object.freeze({ draw: drawIronhornBar, side: 16 }),
   stormtalon: Object.freeze({ draw: drawStormtalonBar, side: 16 }),
-  cairnwarden: Object.freeze({ draw: drawCairnwardenBar, side: 16 })
+  cairnwarden: Object.freeze({ draw: drawCairnwardenBar, side: 16 }),
+  shardheart: Object.freeze({ draw: drawShardheartBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
