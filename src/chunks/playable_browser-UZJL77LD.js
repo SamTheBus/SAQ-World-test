@@ -332438,6 +332438,306 @@ function waxcrownName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var PIT3 = PIT_PAL.A;
+var PIT_BANDS = ["#d0ae6e", "#c4a062", "#b69254", "#a68347", "#93723b"];
+var TRENCH = "#33240f";
+var pitEase = (x) => x * x * (3 - 2 * x);
+function pitJawPath(e, len, sd) {
+  const yb = (u) => (3.2 + (0.9 - 3.2) * u) * sd;
+  e.beginPath();
+  e.moveTo(0, -3.2 * sd);
+  e.quadraticCurveTo(len * 0.5, -6 * sd, len * 0.9, -1.8 * sd);
+  e.quadraticCurveTo(len * 1.05, 0.2 * sd, len * 0.92, 2.6 * sd);
+  e.lineTo(len * 0.84, yb(0.84));
+  for (const u of [0.7, 0.52, 0.34]) {
+    const jx = len * u;
+    e.lineTo(jx + 1.4, yb(u + 0.03));
+    e.lineTo(jx, yb(u) + 2.6 * sd);
+    e.lineTo(jx - 1.4, yb(u - 0.03));
+  }
+  e.lineTo(0, 3.2 * sd);
+  e.closePath();
+}
+function pitJaw(e, x, y, a, k, sd, far2) {
+  const len = 26;
+  e.save();
+  e.translate(x, y);
+  e.rotate(a);
+  e.scale(k, k);
+  pitJawPath(e, len, sd);
+  e.fillStyle = far2 ? PIT3.jawD : PIT3.jaw;
+  e.fill();
+  e.save();
+  pitJawPath(e, len, sd);
+  e.clip();
+  e.fillStyle = PIT3.tip;
+  e.beginPath();
+  e.ellipse(len * 0.98, 0, len * 0.17, 5, 0, 0, TAU256);
+  e.fill();
+  if (!far2) {
+    e.strokeStyle = PIT3.jawL;
+    e.lineWidth = 1.3;
+    e.beginPath();
+    e.moveTo(2, -2 * sd);
+    e.quadraticCurveTo(len * 0.5, -4.4 * sd, len * 0.82, -1.6 * sd);
+    e.stroke();
+  }
+  e.restore();
+  pitJawPath(e, len, sd);
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 1.6;
+  e.lineJoin = "round";
+  e.stroke();
+  e.restore();
+}
+function pitBeat(t, low, impact3) {
+  const T121 = low ? 1.8 : 3.6, q2 = t % T121 / T121, out7 = { open: 0, pull: 0, snap: 0 };
+  if (impact3 > 0) return out7;
+  if (q2 > 0.42 && q2 < 0.56) out7.open = pitEase((q2 - 0.42) / 0.14);
+  else if (q2 >= 0.56 && q2 < 0.82) {
+    out7.open = 1;
+    out7.pull = Math.sin((q2 - 0.56) / 0.26 * Math.PI);
+  } else if (q2 >= 0.82 && q2 < 0.95) {
+    out7.open = 1 - pitEase((q2 - 0.82) / 0.13);
+    out7.snap = 1 - (q2 - 0.82) / 0.13;
+  }
+  return out7;
+}
+function pitFlow(t, low) {
+  const T121 = low ? 1.8 : 3.6, span3 = T121 * 0.26, rush = 26, per = rush * span3 * 2 / Math.PI, n = Math.floor(t / T121), q2 = t % T121 / T121;
+  let part3 = 0;
+  if (q2 >= 0.82) part3 = per;
+  else if (q2 > 0.56) part3 = rush * span3 * (1 - Math.cos((q2 - 0.56) / 0.26 * Math.PI)) / Math.PI;
+  return t * 6 + n * per + part3;
+}
+function sandFunnel(e, x, y, R18, t, spin) {
+  const ry = 0.42;
+  e.save();
+  PIT_BANDS.forEach((col2, i) => {
+    const r = R18 * (1 - i * 0.18);
+    e.fillStyle = col2;
+    e.beginPath();
+    e.ellipse(x, y + i * 0.7, r, r * ry, 0, 0, TAU256);
+    e.fill();
+  });
+  e.lineCap = "round";
+  for (let j = 0; j < 7; j++) {
+    const a0 = j * TAU256 / 7 - t * spin;
+    e.beginPath();
+    for (let q2 = 0; q2 <= 10; q2++) {
+      const v = q2 / 10, r = R18 * (0.92 + (0.14 - 0.92) * v), a = a0 + v * 1.9, px7 = x + Math.cos(a) * r, py = y + Math.sin(a) * r * ry + v * 2.4;
+      q2 ? e.lineTo(px7, py) : e.moveTo(px7, py);
+    }
+    e.strokeStyle = j % 2 ? "#f3e0b2" : "#8a6a36";
+    e.lineWidth = 0.8;
+    e.globalAlpha = 0.75;
+    e.stroke();
+  }
+  e.globalAlpha = 1;
+  e.fillStyle = TRENCH;
+  e.beginPath();
+  e.ellipse(x, y + 2.6, R18 * 0.16, R18 * 0.16 * ry, 0, 0, TAU256);
+  e.fill();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 2.6;
+  e.beginPath();
+  e.ellipse(x, y, R18 + 1, (R18 + 1) * ry, 0, 0, TAU256);
+  e.stroke();
+  e.strokeStyle = PIT3.sandD;
+  e.lineWidth = 1.4;
+  e.stroke();
+  e.strokeStyle = PIT3.sandL;
+  e.lineWidth = 0.8;
+  e.beginPath();
+  e.ellipse(x, y - 0.3, R18 + 0.6, (R18 + 0.6) * ry, 0, Math.PI * 1.05, Math.PI * 1.95);
+  e.stroke();
+  e.restore();
+}
+function sandThroat(e, x, y, R18) {
+  const ry = 0.42, cy2 = y + 2.6;
+  e.save();
+  e.beginPath();
+  e.rect(x - R18, cy2, R18 * 2, R18);
+  e.clip();
+  for (const i of [3, 4]) {
+    const r = R18 * (1 - i * 0.18);
+    e.fillStyle = PIT_BANDS[i];
+    e.beginPath();
+    e.ellipse(x, y + i * 0.7, r, r * ry, 0, 0, TAU256);
+    e.fill();
+  }
+  e.restore();
+  e.strokeStyle = "rgba(94,63,34,0.7)";
+  e.lineWidth = 0.7;
+  e.beginPath();
+  e.ellipse(x, y + 2.8, R18 * 0.46, R18 * 0.46 * ry, 0, 0.15, Math.PI - 0.15);
+  e.stroke();
+  e.strokeStyle = "#f3e0b2";
+  e.lineWidth = 0.6;
+  e.beginPath();
+  e.ellipse(x, y + 3.4, R18 * 0.42, R18 * 0.42 * ry, 0, 0.35, Math.PI - 0.35);
+  e.stroke();
+}
+function sandRipples(e, x, y, w, h, flow) {
+  const off = flow % 11;
+  for (let rx = x - 11 - off; rx < x + w + 11; rx += 11) {
+    e.fillStyle = "rgba(94,63,34,0.45)";
+    e.beginPath();
+    e.moveTo(rx, y + h);
+    e.quadraticCurveTo(rx + 3, y + h * 0.35, rx + 7.5, y + h * 0.3);
+    e.quadraticCurveTo(rx + 5, y + h * 0.6, rx + 6, y + h);
+    e.closePath();
+    e.fill();
+    e.strokeStyle = "rgba(255,244,214,0.9)";
+    e.lineWidth = 0.8;
+    e.beginPath();
+    e.moveTo(rx + 0.5, y + h * 0.8);
+    e.quadraticCurveTo(rx + 3, y + h * 0.3, rx + 7.5, y + h * 0.3);
+    e.stroke();
+  }
+  const r = seeded2(7);
+  for (let i = 0; i < w / 4; i++) {
+    const sx = x + (r() * w + flow * 0.6) % w;
+    dot17(e, sx, y + 1 + r() * (h - 2), 0.35, r() < 0.5 ? "#fff4d6" : "#8a6a36");
+  }
+}
+var PITJAW_BAR = {
+  shape: (e, x, y, w, h) => pill(e, x, y, w, h),
+  chunk: ["#fbf0d4", "#efd9a6", "#d2b27a"],
+  track(e, x, y, w, h) {
+    pill(e, x - 2.5, y - 2.5, w + 5, h + 5);
+    e.fillStyle = vgrad(e, y - 2.5, h + 5, [PIT3.bD, "#7a5530", PIT3.bDD]);
+    e.fill();
+    e.save();
+    pill(e, x - 2.5, y - 2.5, w + 5, h + 5);
+    e.clip();
+    e.strokeStyle = "rgba(236,210,156,0.45)";
+    e.lineWidth = 0.6;
+    for (const side of [0, 1]) {
+      e.beginPath();
+      for (let gx = x - 2; gx <= x + w + 2; gx += 3) {
+        const gy = (side ? y + h + 1.2 : y - 1.2) + Math.sin(gx * 0.05 + side) * 0.5;
+        gx === x - 2 ? e.moveTo(gx, gy) : e.lineTo(gx, gy);
+      }
+      e.stroke();
+    }
+    e.restore();
+    pill(e, x - 2.5, y - 2.5, w + 5, h + 5);
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    pill(e, x, y, w, h);
+    e.fillStyle = TRENCH;
+    e.fill();
+    e.save();
+    e.clip();
+    const r = seeded2(53);
+    for (let px7 = x + 3; px7 < x + w; px7 += 6 + r() * 9) dot17(e, px7, y + h - 1.6 - r() * 2, 0.5 + r() * 0.6, "#5a4224");
+    e.restore();
+  },
+  fill(e, x, y, w, h, t, fullW) {
+    e.save();
+    pill(e, x, y, w, h);
+    e.clip();
+    e.fillStyle = vgrad(e, y, h, ["#f6e4b6", "#e3c78e", PIT_BANDS[1], PIT_BANDS[3]]);
+    e.fillRect(x, y, w, h);
+    sandRipples(e, x, y, w, h, pitFlow(t, w / fullW < 0.5));
+    e.restore();
+  },
+  edge(e, x, y, h) {
+    e.beginPath();
+    e.moveTo(x - 0.5, y);
+    e.quadraticCurveTo(x + 1.5, y + h * 0.5, x + 3.2, y + h);
+    e.lineTo(x - 0.5, y + h);
+    e.closePath();
+    e.fillStyle = PIT_BANDS[1];
+    e.fill();
+    e.strokeStyle = PIT3.sandD;
+    e.lineWidth = 0.7;
+    e.stroke();
+  },
+  // dry sand pouring off the lost chunk
+  chunkMotion(e, x, y, w, h, t) {
+    for (let i = 0; i < 7; i++) {
+      const q2 = (t * 0.9 + i / 7) % 1, cx = x + w * ((i * 0.37 + 0.1) % 1), cy2 = y + h + q2 * q2 * 11;
+      e.globalAlpha = 1 - q2;
+      dot17(e, cx, cy2, 0.7, i % 2 ? "#efd9a6" : "#c4a062");
+      e.globalAlpha = 1;
+    }
+  },
+  over(e, x, y, w, h, t, frac, impact3) {
+    const low = frac < 0.5, beat2 = pitBeat(t, low, impact3), filled = w * frac;
+    const n = 6 + Math.round(beat2.pull * 10);
+    for (let i = 0; i < n; i++) {
+      const q2 = (t * (0.25 + beat2.pull * 0.9) + i / n) % 1, gx = x + filled * (1 - q2), gy = y - 0.6 - Math.sin(q2 * 9 + i) * 0.8;
+      if (gx > x + filled || gx < x + 2) continue;
+      dot17(e, gx, gy, 1, i % 3 ? "#f6e4b6" : "#a68347");
+    }
+    if (low)
+      for (let i = 0; i < 5; i++) {
+        const q2 = (t * 0.7 + i / 5) % 1, cx = x + filled + (w - filled) * ((i * 0.41 + 0.12) % 1), cy2 = y + h + 2.4 + q2 * 10;
+        e.globalAlpha = 1 - q2;
+        dot17(e, cx, cy2, 0.8, "#c4a062");
+        e.globalAlpha = 1;
+      }
+    if (impact3 > 0) {
+      const hx2 = x + filled, u = 1 - impact3;
+      for (let i = 0; i < 7; i++) {
+        const a = -Math.PI + i * 0.5, d = 2 + u * 10;
+        e.globalAlpha = impact3;
+        dot17(
+          e,
+          hx2 + Math.cos(a) * d,
+          y + h / 2 + Math.sin(a) * d * 0.8 + u * u * 4,
+          0.9 + i % 3 * 0.3,
+          i % 2 ? "#efd9a6" : "#c4a062"
+        );
+        e.globalAlpha = 1;
+      }
+    }
+    const px7 = x - 5, py = y + h / 2 + 3, R18 = 11 + beat2.open * 2.6;
+    sandFunnel(e, px7, py, R18, t, 1.4 + beat2.pull * 4);
+    const idle2 = 0.3 + Math.sin(t * 2.1) * 0.1, spread = impact3 > 0 ? 0.55 : idle2 + beat2.open * 0.45 - beat2.snap * (idle2 + 0.4), sp = Math.max(0.02, spread), gap2 = 1.2 + sp * 2.4, rise = 3.6;
+    pitJaw(e, px7 - gap2, py + rise, -Math.PI / 2 - sp, 0.6, 1, true);
+    pitJaw(e, px7 + gap2, py + rise, -Math.PI / 2 + sp, 0.6, -1, false);
+    sandThroat(e, px7, py, R18);
+    if (beat2.snap > 0)
+      for (let i = 0; i < 6; i++) {
+        const u = 1 - beat2.snap, a = -Math.PI / 2 + (i - 2.5) * 0.45;
+        e.globalAlpha = beat2.snap;
+        dot17(
+          e,
+          px7 + Math.cos(a) * (3 + u * 9),
+          py - 6 + Math.sin(a) * (3 + u * 7) + u * u * 6,
+          0.9,
+          i % 2 ? "#efd9a6" : "#c4a062"
+        );
+        e.globalAlpha = 1;
+      }
+  }
+};
+function drawPitjawBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 14, y: y + NAME_GAP, w: w - 14, h: BAR_H }, i, PITJAW_BAR, a);
+  pitjawName(e, x + w / 2, y + 13, t.name);
+}
+function pitjawName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#1e1408";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#fff1d0", "#ecd29c", "#b8803c"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -332447,7 +332747,8 @@ var LESSER_BARS = Object.freeze({
   gulpjaw: Object.freeze({ draw: drawGulpjawBar, side: 22 }),
   rootgorger: Object.freeze({ draw: drawRootgorgerBar, side: 22 }),
   thresher: Object.freeze({ draw: drawThresherBar, side: 30 }),
-  waxcrown: Object.freeze({ draw: drawWaxcrownBar, side: 20 })
+  waxcrown: Object.freeze({ draw: drawWaxcrownBar, side: 20 }),
+  pitjaw: Object.freeze({ draw: drawPitjawBar, side: 18 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
