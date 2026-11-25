@@ -337164,6 +337164,287 @@ function rimehornName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var FVG = WRAITH_PAL;
+var fvgEase = (x) => x * x * (3 - 2 * x);
+var fvgClamp = (x) => Math.max(0, Math.min(1, x));
+var fvgSeg = (t, a, b) => fvgClamp((t - a) / (b - a));
+var FVG_POOLS = [0.3, 0.72];
+var FVG_STORM = 0.8;
+var FVG_POOLS_AT = 0.55;
+var FVG_CALM = 3.4;
+var FVG_END = 4.7;
+function fvgBeat(t, low) {
+  const T121 = low ? 3 : 6, s = (t % T121 + T121) % T121 / T121 * 6 - 0.6;
+  const on = s >= 0 && s < FVG_END;
+  return {
+    s,
+    on,
+    raise: on ? s < FVG_CALM ? fvgEase(fvgSeg(s, 0, 0.5)) : 1 - fvgEase(fvgSeg(s, FVG_CALM, FVG_CALM + 0.3)) : 0,
+    warn: on && s >= 0.1 && s < FVG_STORM + 0.2 ? fvgSeg(s, 0.1, FVG_STORM) : -1,
+    storm: on ? s < FVG_CALM ? fvgSeg(s, FVG_STORM, FVG_STORM + 0.25) : 1 - fvgSeg(s, FVG_CALM, FVG_CALM + 0.35) : 0,
+    frost: on ? fvgSeg(s, FVG_STORM, FVG_CALM - 0.6) * (1 - fvgSeg(s, FVG_CALM + 0.1, FVG_END - 0.2)) : 0,
+    pools: on ? fvgSeg(s, FVG_POOLS_AT, FVG_POOLS_AT + 0.15) * (1 - fvgSeg(s, FVG_END - 0.4, FVG_END)) : 0,
+    gutter: on ? fvgEase(fvgSeg(s, FVG_CALM, FVG_CALM + 0.3)) * (1 - fvgEase(fvgSeg(s, FVG_END - 0.35, FVG_END))) : 0
+  };
+}
+function fvgTower(e, x, t, a) {
+  const y = t + a * 0.5;
+  e.fillStyle = FVG.emblem;
+  e.fillRect(x - 1.9, y + 2.1, 3.8, 0.9);
+  e.fillRect(x - 1.25, y - 1.4, 2.5, 3.6);
+  e.fillRect(x - 1.8, y - 1.9, 3.6, 0.7);
+  e.fillRect(x - 1.8, y - 2.9, 1, 1.1);
+  e.fillRect(x + 0.8, y - 2.9, 1, 1.1);
+  e.fillStyle = FVG.tabardD;
+  e.fillRect(x - 0.45, y + 0.7, 0.9, 1.5);
+}
+var FROSTVIGIL_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: [FVG.ghostL, FVG.ghost, FVG.ghostD],
+  under() {
+  },
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, [FVG.armorL, FVG.armor, FVG.armorD]);
+    e.fill();
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    const r = seeded2(53);
+    for (let x = o + 10; x < o + i - 8; x += 22) {
+      dot17(e, x, t - 1.3, 0.75, FVG.armorDD);
+      dot17(e, x - 0.25, t - 1.55, 0.3, FVG.armorL);
+      dot17(e, x, t + a + 1.3, 0.75, FVG.armorDD);
+    }
+    e.fillStyle = FVG.frost;
+    for (let x = o + 6; x < o + i - 6; x += 8 + r() * 12) {
+      e.beginPath();
+      e.ellipse(x, t - 2.2, 2.4 + r() * 3, 0.9 + r() * 0.4, 0, Math.PI, TAU259);
+      e.fill();
+    }
+    for (const f of [0.22, 0.47, 0.81]) {
+      const x = o + i * f, L = 2.5 + r() * 2;
+      e.beginPath();
+      e.moveTo(x - 1.1, t + a + 2.3);
+      e.lineTo(x + 0.1, t + a + 2.3 + L);
+      e.lineTo(x + 1.1, t + a + 2.3);
+      e.closePath();
+      e.fillStyle = FVG.frost;
+      e.fill();
+      e.strokeStyle = EDGE5;
+      e.lineWidth = 0.6;
+      e.stroke();
+    }
+    pill(e, o, t, i, a);
+    e.fillStyle = FVG.void;
+    e.fill();
+    e.save();
+    e.clip();
+    e.strokeStyle = "rgba(143,179,201,.22)";
+    e.lineWidth = 0.7;
+    e.beginPath();
+    for (let x = o + 6; x < o + i; x += 26 + r() * 20) {
+      e.moveTo(x, t + a * 0.6);
+      e.bezierCurveTo(x + 5, t + a * 0.1, x + 9, t + a * 0.9, x + 15, t + a * 0.4);
+    }
+    e.stroke();
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    const b = fvgBeat(l, i / n < 0.5);
+    e.fillStyle = FVG.tabard;
+    e.fillRect(o, t, i, a);
+    e.fillStyle = FVG.tabardL;
+    e.fillRect(o, t, i, a * 0.3);
+    e.fillStyle = FVG.tabardD;
+    e.fillRect(o, t + a * 0.7, i, a * 0.3);
+    e.strokeStyle = "rgba(40,10,10,.18)";
+    e.lineWidth = 0.4;
+    e.beginPath();
+    for (let x = o + 2; x < o + i; x += 2.2) {
+      e.moveTo(x, t + a * 0.3);
+      e.lineTo(x + 0.6, t + a * 0.7);
+    }
+    e.stroke();
+    e.fillStyle = FVG.emblem;
+    e.fillRect(o, t + 0.5, i, 0.45);
+    for (let x = o + 52; x < o + i - 6; x += 96) fvgTower(e, x, t, a);
+    const r = seeded2(71);
+    for (let x = o + 3; x < o + i; x += 4 + r() * 6) dot17(e, x, t + r() * a, 0.35, "rgba(243,249,252,.55)");
+    if (b.frost > 0) {
+      const g2 = e.createLinearGradient(o, 0, o + n, 0), pr = 0.045, f = b.frost;
+      g2.addColorStop(0, "rgba(232,244,252," + (0.85 * f).toFixed(3) + ")");
+      for (const p of FVG_POOLS) {
+        const k = b.pools;
+        g2.addColorStop(Math.max(0, p - pr - 0.03), "rgba(232,244,252," + (0.85 * f).toFixed(3) + ")");
+        g2.addColorStop(p, "rgba(232,244,252," + (0.85 * f * (1 - k)).toFixed(3) + ")");
+        g2.addColorStop(Math.min(1, p + pr + 0.03), "rgba(232,244,252," + (0.85 * f).toFixed(3) + ")");
+      }
+      g2.addColorStop(1, "rgba(232,244,252," + (0.85 * f).toFixed(3) + ")");
+      e.fillStyle = g2;
+      e.fillRect(o, t, i, a);
+      const rr8 = seeded2(13);
+      for (let x = o + 2; x < o + i; x += 2.5 + rr8() * 3) {
+        const q2 = (x - o) / n, near5 = FVG_POOLS.some((p) => Math.abs(q2 - p) < pr + 0.02);
+        if (near5 || rr8() > f) continue;
+        dot17(e, x, t + rr8() * a, 0.4 + rr8() * 0.3, rr8() < 0.5 ? FVG.frostD : "#ffffff");
+      }
+    }
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 4; n++) {
+      const r = (l * 0.9 + n / 4) % 1;
+      e.globalAlpha = 1 - r;
+      dot17(e, o + i * (0.15 + n * 0.23), t + a - r * 4, 0.8, FVG.ghostL);
+    }
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a) {
+    e.fillStyle = FVG.tabardD;
+    e.beginPath();
+    e.moveTo(o - 2, t);
+    e.lineTo(o + 0.8, t);
+    e.lineTo(o - 0.3, t + i * 0.25);
+    e.lineTo(o + 1, t + i * 0.5);
+    e.lineTo(o - 0.4, t + i * 0.75);
+    e.lineTo(o + 0.6, t + i);
+    e.lineTo(o - 2, t + i);
+    e.closePath();
+    e.fill();
+    e.strokeStyle = FVG.frost;
+    e.lineWidth = 0.6 + a * 0.6;
+    e.beginPath();
+    e.moveTo(o + 0.8, t);
+    e.lineTo(o - 0.3, t + i * 0.25);
+    e.lineTo(o + 1, t + i * 0.5);
+    e.lineTo(o - 0.4, t + i * 0.75);
+    e.lineTo(o + 0.6, t + i);
+    e.stroke();
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const low = n < 0.5, b = fvgBeat(l, low), fx = o + i * n, cy2 = t + a / 2;
+    if (b.warn >= 0) {
+      e.save();
+      e.globalAlpha = Math.min(1, b.warn * 3) * (1 - fvgSeg(b.s, FVG_STORM, FVG_STORM + 0.2));
+      e.strokeStyle = "rgba(8,16,30,.6)";
+      e.lineWidth = 2.6;
+      pill(e, o - 3.5, t - 3.5, i + 7, a + 7);
+      e.stroke();
+      e.strokeStyle = "#e8f4fc";
+      e.lineWidth = 1.1;
+      e.stroke();
+      e.restore();
+    }
+    if (b.pools > 0)
+      for (const p of FVG_POOLS) {
+        const x = o + i * p, k = b.pools * (1 - b.gutter * 0.6);
+        e.save();
+        e.globalAlpha = 0.7 * k;
+        e.translate(x, cy2);
+        e.scale(1.6, 1);
+        const g2 = e.createRadialGradient(0, 0, 0, 0, 0, 9);
+        g2.addColorStop(0, "rgba(255,244,200,.95)");
+        g2.addColorStop(0.45, "rgba(255,211,106,.5)");
+        g2.addColorStop(1, "rgba(255,211,106,0)");
+        e.fillStyle = g2;
+        e.fillRect(-9, -9, 18, 18);
+        e.restore();
+        if (b.s < FVG_CALM)
+          for (let j = 0; j < 2; j++) {
+            const ph = (l * 0.9 + j / 2) % 1, rx = 8 + (1 - ph) * 14, ry = 4.5 + (1 - ph) * 6;
+            e.save();
+            e.globalAlpha = Math.sin(ph * Math.PI) * 0.85 * k;
+            e.strokeStyle = "rgba(80,40,6,.5)";
+            e.lineWidth = 1.6;
+            e.beginPath();
+            e.ellipse(x, cy2, rx, ry, 0, 0, TAU259);
+            e.stroke();
+            e.strokeStyle = FVG.glass;
+            e.lineWidth = 0.7;
+            e.stroke();
+            e.restore();
+          }
+        if (b.s >= FVG_POOLS_AT && b.s < FVG_POOLS_AT + 0.35) {
+          const q2 = (b.s - FVG_POOLS_AT) / 0.35;
+          e.save();
+          e.globalAlpha = 1 - q2;
+          e.strokeStyle = FVG.glassL;
+          e.lineWidth = 1.4;
+          e.beginPath();
+          e.ellipse(x, cy2, 6 + q2 * 10, 3.5 + q2 * 5, 0, 0, TAU259);
+          e.stroke();
+          e.restore();
+        }
+      }
+    if (b.storm > 0) {
+      const rs = seeded2(91);
+      e.save();
+      e.lineCap = "round";
+      for (let k = 0; k < 14; k++) {
+        const sp = 0.55 + rs() * 0.5, q2 = (l * sp + rs()) % 1, x = o + i + 10 - q2 * (i + 30), y = t - 7 + rs() * (a + 12), len = 6 + rs() * 10;
+        e.globalAlpha = b.storm * Math.sin(q2 * Math.PI) * 0.8;
+        e.strokeStyle = "#f3f9fc";
+        e.lineWidth = 0.6 + rs() * 0.6;
+        e.beginPath();
+        e.moveTo(x, y);
+        e.quadraticCurveTo(x + len * 0.5, y - 1.2, x + len, y + 0.3);
+        e.stroke();
+      }
+      for (let k = 0; k < 10; k++) {
+        const q2 = (l * (0.7 + k % 3 * 0.2) + k / 10) % 1, x = o + i + 6 - q2 * (i + 16), y = t - 6 + k * 0.37 % 1 * (a + 10) + Math.sin(l * 6 + k) * 2;
+        e.globalAlpha = b.storm * 0.9;
+        dot17(e, x, y, 0.7, "#ffffff");
+      }
+      e.restore();
+    }
+    const flick = b.gutter > 0.3 ? Math.sin(l * 31) > 0.3 ? 0.15 : 0.55 : 1, glow28 = (0.45 + b.raise * 0.5) * (1 - b.gutter * 0.6) * flick + (b.gutter > 0.3 ? 0 : 0.05 * Math.sin(l * 3)), ly = t + a / 2 - 3.5 - b.raise * 3 + b.gutter * 1.5;
+    lantern27(e, o + 1, ly, 0.9, Math.max(0, glow28), { gutter: b.gutter > 0.3 }, l);
+    if (low)
+      for (let k = 0; k < 3; k++) {
+        const q2 = (l * 0.45 + k / 3) % 1, x = o + 18 + (k * 0.37 + 0.2) % 1 * Math.max(0, fx - o - 22);
+        e.globalAlpha = (1 - q2) * 0.8;
+        dot17(e, x + Math.sin(q2 * 6 + k) * 1.5, t - 1 - q2 * 7, 0.8, FVG.ghostL);
+      }
+    e.globalAlpha = 1;
+    if (r > 0) {
+      for (let k = 0; k < 7; k++) {
+        const d = 1 - r, dx = (k - 3) * 2.4 * (0.4 + d), vy = -4 + d * d * 14 + k % 2 * 2;
+        e.globalAlpha = r;
+        if (k % 3) {
+          e.strokeStyle = FVG.tabardL;
+          e.lineWidth = 0.7;
+          e.beginPath();
+          e.moveTo(fx + dx - 1, cy2 + vy);
+          e.lineTo(fx + dx + 1, cy2 + vy - 0.8);
+          e.stroke();
+        } else dot17(e, fx + dx, cy2 + vy, 0.8, FVG.frost);
+      }
+      e.globalAlpha = 1;
+    }
+  }
+};
+function drawFrostvigilBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 18, y: y + NAME_GAP, w: w - 24, h: BAR_H }, i, FROSTVIGIL_BAR, a);
+  frostvigilName(e, x + w / 2, y + 13, t.name);
+}
+function frostvigilName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#0f1a2c";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#f6fcff", "#cfe6f2", "#8fb3c9"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -337184,7 +337465,8 @@ var LESSER_BARS = Object.freeze({
   stormtalon: Object.freeze({ draw: drawStormtalonBar, side: 16 }),
   cairnwarden: Object.freeze({ draw: drawCairnwardenBar, side: 16 }),
   shardheart: Object.freeze({ draw: drawShardheartBar, side: 16 }),
-  rimehorn: Object.freeze({ draw: drawRimehornBar, side: 16 })
+  rimehorn: Object.freeze({ draw: drawRimehornBar, side: 16 }),
+  frostvigil: Object.freeze({ draw: drawFrostvigilBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
