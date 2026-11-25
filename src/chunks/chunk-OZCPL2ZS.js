@@ -43291,15 +43291,16 @@ function retireSettledSales(s, p) {
     delete l.salesByItemId[id];
   }
 }
-function saleQuote(p, item) {
+function saleQuote(p, item, legacy = false) {
   const d = itemDefinition(item), o = p.inventory.renewal?.originsByItemId[item?.itemId];
   if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !(ordinary.has(item.definitionId) || worldDrop(item, o)) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity)
     return null;
   if (!o.servicePurchase && !o.groupId && !o.quest) return null;
   const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
-  if (!ordinary.has(item.definitionId))
+  const world = combatPlayer(p);
+  if (!ordinary.has(item.definitionId) || world && !legacy)
     return String(
-      combatPlayer(p) ? salePriceV1(Number(power2), item.generated?.rarityTier ?? 0) : sellBase(item)
+      world ? salePriceV1(Number(power2), item.generated?.rarityTier ?? 0) : sellBase(item)
     );
   return String(
     SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded2 * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier
@@ -43543,7 +43544,7 @@ function validateSettlementServices(s, p, validateCommand2) {
       ...p,
       inventory: { ...p.inventory, renewal: { ...p.inventory.renewal, originsByItemId: { [id]: r.origin } } }
     };
-    requireContract(saleQuote(fake, i) === r.gold, "Sale eligibility/price drift");
+    requireContract(saleQuote(fake, i) === r.gold || saleQuote(fake, i, true) === r.gold, "Sale eligibility/price drift");
   }
   if (l.lastTransaction) {
     closedRecord(l.lastTransaction, ["command", "authorityOrder", "tick", "revision"]);

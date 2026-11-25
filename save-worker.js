@@ -35240,15 +35240,16 @@ var worldDrop = (item2, o) => Boolean(
   item2.generated && typeof item2.generated.progression?.combatHash === "string" && (o.groupId || o.servicePurchase || o.quest)
 );
 var MAX_HOT_SALE_RECEIPTS = 2048;
-function saleQuote(p, item2) {
+function saleQuote(p, item2, legacy = false) {
   const d = itemDefinition(item2), o = p.inventory.renewal?.originsByItemId[item2?.itemId];
   if (!item2 || item2.ownerPlayerId !== p.playerId || !o || item2.sourceEntityId === null || !(ordinary.has(item2.definitionId) || worldDrop(item2, o)) || item2.locked || item2.protected || item2.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item2.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item2.sourceEntityId) || isClassKitSource(p, item2.sourceEntityId) || (item2.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity)
     return null;
   if (!o.servicePurchase && !o.groupId && !o.quest) return null;
   const power2 = progressionBigInt(item2.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
-  if (!ordinary.has(item2.definitionId))
+  const world = combatPlayer(p);
+  if (!ordinary.has(item2.definitionId) || world && !legacy)
     return String(
-      combatPlayer(p) ? salePriceV1(Number(power2), item2.generated?.rarityTier ?? 0) : sellBase(item2)
+      world ? salePriceV1(Number(power2), item2.generated?.rarityTier ?? 0) : sellBase(item2)
     );
   return String(
     SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded2 * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item2.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier
@@ -35368,7 +35369,7 @@ function validateSettlementServices(s, p, validateCommand2) {
       ...p,
       inventory: { ...p.inventory, renewal: { ...p.inventory.renewal, originsByItemId: { [id2]: r.origin } } }
     };
-    requireContract(saleQuote(fake, i) === r.gold, "Sale eligibility/price drift");
+    requireContract(saleQuote(fake, i) === r.gold || saleQuote(fake, i, true) === r.gold, "Sale eligibility/price drift");
   }
   if (l.lastTransaction) {
     closedRecord(l.lastTransaction, ["command", "authorityOrder", "tick", "revision"]);
