@@ -7310,6 +7310,44 @@ var UNIQUE_ITEMS = freezeWire(
         "desert",
         "Every 8 s, when enemies are near, a dust devil spins off your heels and drifts to the biggest group close by. For {0} it drags them into one tight clump and slows them 50%. It does no damage.",
         "Gone with the wind."
+      ),
+      // Wetland lesser bosses (Sammy 2026-11-25, all three passes approved): three defensive items. Mirelily's carrion cloud
+      // when you are crowded, Croakmaw's croak and Barrier every third hit, Gorgeleech's leech on a Dash.
+      unique(
+        "mirelily-shroud",
+        "Mirelily Shroud",
+        "overall",
+        null,
+        "Hauberk",
+        null,
+        "mirelily",
+        "wetland",
+        "When 3 or more enemies are within 2 tiles of you, you belch a carrion cloud around you for 4 s. Enemies in it deal {0} less damage, and stay sick for 3 s after they leave it. Once every 10 s.",
+        "Smells like teen spirit."
+      ),
+      unique(
+        "croakmaw-jowls",
+        "Croakmaw Jowls",
+        "helmet",
+        null,
+        "Backwards Cap",
+        null,
+        "croakmaw",
+        "wetland",
+        "Every third hit you take, you croak: the ripple shoves enemies within 2.5 tiles away, and you gain a Barrier worth {0} of your max Health for 5 s.",
+        "Kiss me and find out."
+      ),
+      unique(
+        "gorgeleech-coil",
+        "Gorgeleech Coil",
+        "ring",
+        null,
+        "Band Ring",
+        null,
+        "gorgeleech",
+        "wetland",
+        "When you dash, a leech latches onto the nearest enemy within 4 tiles. Every half second it drinks and heals you {0} of your max Health. When that enemy dies it jumps to the next one close by; it drops off after 6 s. Once every 6 s.",
+        "I vant to suck your blood."
       )
     ].map((u) => [u.id, u])
   )
@@ -7721,6 +7759,22 @@ var UNIQUE_TIERS = freezeWire({
     lines: ["moveSpeed", "maxHpPct", "defPct", "cdr", "atkPct"],
     stars: [150, 180, 210, 240],
     unit: "ticks"
+  },
+  // Wetland lesser bosses (v3 lines below; these five are the v2 fallback).
+  "mirelily-shroud": {
+    lines: ["maxHpPct", "defPct", "lifeHit", "eliteDr", "atkPct"],
+    stars: [20, 25, 30, 38],
+    unit: "pct"
+  },
+  "croakmaw-jowls": {
+    lines: ["maxHpPct", "defPct", "lifeHit", "cdr", "atkPct"],
+    stars: [8, 10, 12, 15],
+    unit: "pct"
+  },
+  "gorgeleech-coil": {
+    lines: ["lifeHit", "maxHpPct", "moveSpeed", "cdr", "atkPct"],
+    stars: [15, 20, 25, 30],
+    unit: "permille"
   }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
@@ -8166,6 +8220,21 @@ var UNIQUE_LINES_V3 = freezeWire({
   "sirocco-striders": {
     always: "moveSpeed",
     pool: ["maxHpPct", "defPct", "cdr", "lifeHit", "areaDmg", "controlDur", "mainAttr"],
+    leg: []
+  },
+  "mirelily-shroud": {
+    always: "defPct",
+    pool: ["maxHpPct", "lifeHit", "eliteDr", "areaDr", "closeDmg", "controlDur", "mainAttr"],
+    leg: []
+  },
+  "croakmaw-jowls": {
+    always: "maxHpPct",
+    pool: ["defPct", "lifeHit", "cdr", "eliteDr", "areaDr", "counterDmg", "mainAttr"],
+    leg: []
+  },
+  "gorgeleech-coil": {
+    always: "lifeHit",
+    pool: ["maxHpPct", "defPct", "moveSpeed", "cdr", "eliteDr", "critChance", "mainAttr"],
     leg: []
   }
 });

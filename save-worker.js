@@ -29896,6 +29896,44 @@ var UNIQUE_ITEMS = freezeWire(
         "desert",
         "Every 8 s, when enemies are near, a dust devil spins off your heels and drifts to the biggest group close by. For {0} it drags them into one tight clump and slows them 50%. It does no damage.",
         "Gone with the wind."
+      ),
+      // Wetland lesser bosses (Sammy 2026-11-25, all three passes approved): three defensive items. Mirelily's carrion cloud
+      // when you are crowded, Croakmaw's croak and Barrier every third hit, Gorgeleech's leech on a Dash.
+      unique(
+        "mirelily-shroud",
+        "Mirelily Shroud",
+        "overall",
+        null,
+        "Hauberk",
+        null,
+        "mirelily",
+        "wetland",
+        "When 3 or more enemies are within 2 tiles of you, you belch a carrion cloud around you for 4 s. Enemies in it deal {0} less damage, and stay sick for 3 s after they leave it. Once every 10 s.",
+        "Smells like teen spirit."
+      ),
+      unique(
+        "croakmaw-jowls",
+        "Croakmaw Jowls",
+        "helmet",
+        null,
+        "Backwards Cap",
+        null,
+        "croakmaw",
+        "wetland",
+        "Every third hit you take, you croak: the ripple shoves enemies within 2.5 tiles away, and you gain a Barrier worth {0} of your max Health for 5 s.",
+        "Kiss me and find out."
+      ),
+      unique(
+        "gorgeleech-coil",
+        "Gorgeleech Coil",
+        "ring",
+        null,
+        "Band Ring",
+        null,
+        "gorgeleech",
+        "wetland",
+        "When you dash, a leech latches onto the nearest enemy within 4 tiles. Every half second it drinks and heals you {0} of your max Health. When that enemy dies it jumps to the next one close by; it drops off after 6 s. Once every 6 s.",
+        "I vant to suck your blood."
       )
     ].map((u) => [u.id, u])
   )
@@ -30307,6 +30345,22 @@ var UNIQUE_TIERS = freezeWire({
     lines: ["moveSpeed", "maxHpPct", "defPct", "cdr", "atkPct"],
     stars: [150, 180, 210, 240],
     unit: "ticks"
+  },
+  // Wetland lesser bosses (v3 lines below; these five are the v2 fallback).
+  "mirelily-shroud": {
+    lines: ["maxHpPct", "defPct", "lifeHit", "eliteDr", "atkPct"],
+    stars: [20, 25, 30, 38],
+    unit: "pct"
+  },
+  "croakmaw-jowls": {
+    lines: ["maxHpPct", "defPct", "lifeHit", "cdr", "atkPct"],
+    stars: [8, 10, 12, 15],
+    unit: "pct"
+  },
+  "gorgeleech-coil": {
+    lines: ["lifeHit", "maxHpPct", "moveSpeed", "cdr", "atkPct"],
+    stars: [15, 20, 25, 30],
+    unit: "permille"
   }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
@@ -30752,6 +30806,21 @@ var UNIQUE_LINES_V3 = freezeWire({
   "sirocco-striders": {
     always: "moveSpeed",
     pool: ["maxHpPct", "defPct", "cdr", "lifeHit", "areaDmg", "controlDur", "mainAttr"],
+    leg: []
+  },
+  "mirelily-shroud": {
+    always: "defPct",
+    pool: ["maxHpPct", "lifeHit", "eliteDr", "areaDr", "closeDmg", "controlDur", "mainAttr"],
+    leg: []
+  },
+  "croakmaw-jowls": {
+    always: "maxHpPct",
+    pool: ["defPct", "lifeHit", "cdr", "eliteDr", "areaDr", "counterDmg", "mainAttr"],
+    leg: []
+  },
+  "gorgeleech-coil": {
+    always: "lifeHit",
+    pool: ["maxHpPct", "defPct", "moveSpeed", "cdr", "eliteDr", "critChance", "mainAttr"],
     leg: []
   }
 });
@@ -50331,6 +50400,14 @@ var SR_EVERY = 480;
 var SR_ARRIVE = 34;
 var SR_FADE = 20;
 var SR_HOLD_MAX = 240;
+var ML_CLOUD = 240;
+var ML_EVERY = 600;
+var CJ_EVERY = 3;
+var CJ_SHOW = 36;
+var CJ_BAR = 300;
+var GL_LIFE = 360;
+var GL_EVERY = 360;
+var GL_DROP = 30;
 var RS_CURL = 120;
 var RS_POP = 26;
 var FR_LIFE = 240;
@@ -50403,6 +50480,14 @@ var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" }
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
 var LIVE = [
+  "mlCd",
+  "mlCloud",
+  "cjN",
+  "cjCroak",
+  "cjBar",
+  "glCd",
+  "glLeech",
+  "glDrop",
   "pmStill",
   "pmPit",
   "pmFill",
@@ -51755,6 +51840,35 @@ function validateClassSkillState(s, combat, actor) {
       safeInteger(d.hold, 1, SR_HOLD_MAX);
       safeInteger(d.age, 0, SR_ARRIVE + d.hold + SR_FADE - 1);
     }
+    if (k.mlCd !== void 0) safeInteger(k.mlCd, 1, ML_EVERY);
+    if (k.glCd !== void 0) safeInteger(k.glCd, 1, GL_EVERY);
+    if (k.cjN !== void 0) safeInteger(k.cjN, 1, CJ_EVERY - 1);
+    for (const [key9, top] of [
+      ["mlCloud", ML_CLOUD - 1],
+      ["cjCroak", CJ_SHOW - 1],
+      ["glDrop", GL_DROP - 1]
+    ])
+      if (k[key9] !== void 0) {
+        closedRecord(k[key9], ["x", "y", "age"]);
+        requireContract(pos2(k[key9]), "Invalid " + key9);
+        safeInteger(k[key9].age, 0, top);
+      }
+    if (k.cjBar !== void 0) {
+      const b = k.cjBar;
+      closedRecord(b, ["hp", "full", "ticks"]);
+      for (const n of [b.hp, b.full])
+        requireContract(typeof n === "string" && /^[1-9][0-9]{0,29}$/.test(n), "Invalid croak Barrier");
+      requireContract(BigInt(b.hp) <= BigInt(b.full), "Invalid croak Barrier");
+      safeInteger(b.ticks, 1, CJ_BAR);
+    }
+    if (k.glLeech !== void 0) {
+      const l = k.glLeech;
+      closedRecord(l, ["target", "fx", "fy", "tx", "ty", "at", "age"]);
+      requireContract(typeof l.target === "string" && l.target.length > 0, "Invalid leech");
+      requireContract([l.fx, l.fy, l.tx, l.ty].every(Number.isFinite), "Invalid leech");
+      safeInteger(l.age, 0, GL_LIFE - 1);
+      safeInteger(l.at, 0, l.age);
+    }
     if (k.swStone !== void 0) {
       closedRecord(k.swStone, ["x", "y", "age"]);
       requireContract(pos2(k.swStone), "Invalid stone skin");
@@ -52047,6 +52161,8 @@ var TREE_STATUSES = Object.freeze({
   rime: [1, 240],
   // The Sirocco Striders' dust devil: 50% slower while it holds you.
   dust: [1, 240],
+  // The Mirelily Shroud's carrion cloud: a sick enemy deals its rank (percent) less damage to heroes.
+  sick: [50, 180],
   // Rattled (Knight passive): a stunned enemy hits softer for 4 seconds after it wakes.
   rattled: [5, 330]
 });
