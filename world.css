@@ -2175,3 +2175,26 @@ html body #world-settings-view .st-line{flex-wrap:wrap}
 html body #world-settings-view .st-line>.st-name{flex:1 1 140px;min-width:0}
 html body #world-settings-view .st-line select{min-width:130px;max-width:100%}
 }
+/* One tree per class (constellation v7, 2026-11-25): the color key replaces the tree tabs; the tree is one tall SVG
+   drawn by class_skills_view_v1.js inside the scrolling body; skills open the centered card (.cs-bubble). */
+.cs-key{flex:1 1 320px;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:4px 2px;font:700 13px/1.2 system-ui,sans-serif;color:#d8d0c0}
+.cs-key-chip{display:inline-flex;align-items:center;gap:6px}
+.cs-key-chip i{width:11px;height:11px;border-radius:50%;background:var(--tree);box-shadow:0 0 0 2px #0e141b,0 0 0 3px #3a4654}
+.cs-key-chip b{min-width:18px;padding:2px 5px;border-radius:8px;background:var(--tree);color:#0c1219;font:800 11px/1 system-ui,sans-serif;text-align:center}
+.cs-stage{position:relative;min-width:640px;max-width:780px;margin:0 auto;border-radius:14px;overflow:hidden;border:1px solid #3a2e24;background:#0f0d0c}
+.cs-tree-svg{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none}
+.cs-hub-gate{font:800 13px system-ui,sans-serif;pointer-events:none}
+.cs-hub-name{font:700 12px Georgia,"Times New Roman",serif;letter-spacing:.14em;paint-order:stroke;stroke:#0b0806;stroke-width:4px;stroke-linejoin:round;pointer-events:none}
+.cs-node-rank{font:800 12px system-ui,sans-serif;pointer-events:none}
+.cs-node[role=button]{cursor:pointer;outline:none}
+.cs-node[role=button]:focus-visible>rect:nth-of-type(1),.cs-node[role=button]:focus-visible>circle:nth-of-type(1){stroke:#fff6df}
+.cs-node .cs-ready{animation:cs-ready 1.8s ease-in-out infinite}
+@keyframes cs-ready{50%{opacity:.55}}
+.cs-node.learned{animation:cs-node-learn .55s ease-out;transform-box:fill-box;transform-origin:center}
+@keyframes cs-node-learn{0%{transform:scale(1)}35%{transform:scale(1.14)}100%{transform:scale(1)}}
+.cs-foot{padding:10px 0 4px}
+@media(orientation:landscape) and (max-height:560px){.cs-head .cs-key{flex:1 1 0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}}
+@media(prefers-reduced-motion:reduce){.cs-node .cs-ready,.cs-node.learned{animation:none}}
+html body .cs-view>.cs-bubble{position:fixed;top:50%!important;left:50%;right:auto;bottom:auto!important;z-index:60;width:min(540px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;transform:translate(-50%,-50%);box-shadow:0 18px 50px #000c,0 0 0 1px #0b0806}
+html body .cs-view>.cs-bubble::before{display:none}
+html body .cs-view>.cs-bubble .cs-learn{position:sticky;bottom:0;z-index:1;flex:none;box-shadow:0 -10px 14px #151d26,0 16px 0 #151d26}

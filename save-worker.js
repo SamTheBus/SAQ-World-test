@@ -26363,13 +26363,17 @@ var legendaryAugmentIndex = (id2) => AUGMENT_RARITY[id2]?.indexOf(L2) ?? -1;
 var classRank = (d8, id2) => d8?.classRanks?.[id2] ?? 0;
 var CLASS_TREE_BONUS_EVERY = 5n;
 var classTierGate = (tier2) => (tier2 - 1) * CLASS_TREE_TIER_POINTS;
-function classTreeSpent(d8, treeId, belowTier = Infinity) {
+function classSpentBelow(d8, belowTier = Infinity) {
   let n = 0;
   for (const [id2, rank] of Object.entries(d8?.classRanks ?? {})) {
     const s = CLASS_TREE_SKILLS[id2];
-    if (s?.tree === treeId && s.tier < belowTier) n += rank;
+    if (s && s.tier < belowTier) n += rank;
   }
   return n;
+}
+function classLinkOf(id2) {
+  const req = CLASS_TREE_SKILLS[id2]?.requires;
+  return req && CLASS_TREE_SKILLS[req]?.kind !== "active" ? req : null;
 }
 function classTreePoints(d8) {
   const top = d8?.heroClass ? progressionBigInt(d8.highestHeroLevel) : 0n, level = top > 0n ? top - 1n + 2n * (top / CLASS_TREE_BONUS_EVERY) : 0n, cap3 = BigInt(CLASS_TREE_POINT_CAP), earned = level < cap3 ? level : cap3, spent = BigInt(Object.values(d8?.classRanks ?? {}).reduce((a, b) => a + b, 0));
@@ -26440,9 +26444,13 @@ function validateClassRanks(d8) {
       const s = CLASS_TREE_SKILLS[id2];
       safeInteger(rank, 1, s.maxRank);
       requireContract(LIVE_CLASS_SKILLS.has(id2), "Skill is not available yet");
-      requireContract(!s.requires || classRank(d8, s.requires) > 0, "Missing required skill");
-      requireContract(classTreeSpent(d8, s.tree, s.tier) >= classTierGate(s.tier), "Tier not open");
+      requireContract(!classLinkOf(id2) || classRank(d8, classLinkOf(id2)) > 0, "Missing required skill");
+      requireContract(classSpentBelow(d8, s.tier) >= classTierGate(s.tier), "Tier not open");
     }
+    requireContract(
+      Object.keys(ranks).filter((id2) => CLASS_TREE_SKILLS[id2].kind === "capstone").length <= 1,
+      "One key passive at most"
+    );
     requireContract(classTreePoints(d8).unspent >= 0n, "Overspent skill points");
   }
   const augs = d8.classAugments;
@@ -26489,9 +26497,9 @@ function fitClassTrees(d8) {
     }).map(([id2, r]) => [id2, Math.min(r, CLASS_TREE_SKILLS[id2].maxRank)])
   );
   for (let guard = 0; guard < 400; guard++) {
-    const probe = { ...d8, classRanks: ranks }, bad = Object.keys(ranks).find((id2) => {
-      const s = CLASS_TREE_SKILLS[id2];
-      return s.requires && !(ranks[s.requires] > 0) || classTreeSpent(probe, s.tree, s.tier) < classTierGate(s.tier);
+    const probe = { ...d8, classRanks: ranks }, caps = Object.keys(ranks).filter((id2) => CLASS_TREE_SKILLS[id2].kind === "capstone").sort(), bad = caps[1] ?? Object.keys(ranks).find((id2) => {
+      const s = CLASS_TREE_SKILLS[id2], link = classLinkOf(id2);
+      return link && !(ranks[link] > 0) || classSpentBelow(probe, s.tier) < classTierGate(s.tier);
     });
     if (bad) {
       delete ranks[bad];

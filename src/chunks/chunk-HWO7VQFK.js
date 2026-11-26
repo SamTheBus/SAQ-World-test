@@ -14242,6 +14242,21 @@ function classTreeSpent(d8, treeId, belowTier = Infinity) {
   }
   return n;
 }
+function classSpentBelow(d8, belowTier = Infinity) {
+  let n = 0;
+  for (const [id, rank] of Object.entries(d8?.classRanks ?? {})) {
+    const s = CLASS_TREE_SKILLS[id];
+    if (s && s.tier < belowTier) n += rank;
+  }
+  return n;
+}
+function classLinkOf(id) {
+  const req = CLASS_TREE_SKILLS[id]?.requires;
+  return req && CLASS_TREE_SKILLS[req]?.kind !== "active" ? req : null;
+}
+function chosenCapstone(d8) {
+  return Object.keys(d8?.classRanks ?? {}).find((id) => CLASS_TREE_SKILLS[id]?.kind === "capstone" && d8.classRanks[id] > 0) ?? null;
+}
 function classTreePoints(d8) {
   const top = d8?.heroClass ? progressionBigInt(d8.highestHeroLevel) : 0n, level = top > 0n ? top - 1n + 2n * (top / CLASS_TREE_BONUS_EVERY) : 0n, cap3 = BigInt(CLASS_TREE_POINT_CAP), earned = level < cap3 ? level : cap3, spent = BigInt(Object.values(d8?.classRanks ?? {}).reduce((a, b) => a + b, 0));
   return { earned, spent, unspent: earned - spent, cap: cap3 };
@@ -14253,13 +14268,14 @@ function learnedClassActives(d8) {
 function learnAvailability(d8, id) {
   const s = CLASS_TREE_SKILLS[id];
   if (!s || !d8?.heroClass || s.classId !== d8.heroClass) return { ok: false, reason: "Not one of your class skills" };
-  const rank = classRank(d8, id), gate = classTierGate(s.tier), tree = classTreeOf(s.classId, s.tree);
+  const rank = classRank(d8, id), gate = classTierGate(s.tier), link = classLinkOf(id), cap3 = chosenCapstone(d8);
   if (rank >= s.maxRank) return { ok: false, reason: "Maxed", rank };
   if (!LIVE_CLASS_SKILLS.has(id)) return { ok: false, reason: "Coming soon", rank };
-  if (s.requires && classRank(d8, s.requires) <= 0)
-    return { ok: false, reason: `Learn ${CLASS_TREE_SKILLS[s.requires].name} first`, rank };
-  if (classTreeSpent(d8, s.tree, s.tier) < gate)
-    return { ok: false, reason: `Needs ${gate} points in ${tree.name}`, rank };
+  if (link && classRank(d8, link) <= 0)
+    return { ok: false, reason: `Learn ${CLASS_TREE_SKILLS[link].name} first`, rank };
+  if (classSpentBelow(d8, s.tier) < gate) return { ok: false, reason: `Needs ${gate} points spent`, rank };
+  if (s.kind === "capstone" && cap3 && cap3 !== id)
+    return { ok: false, reason: `You chose ${CLASS_TREE_SKILLS[cap3].name} as your key passive`, rank };
   if (classTreePoints(d8).unspent < 1n)
     return {
       ok: false,
@@ -14349,9 +14365,13 @@ function validateClassRanks(d8) {
       const s = CLASS_TREE_SKILLS[id];
       safeInteger(rank, 1, s.maxRank);
       requireContract(LIVE_CLASS_SKILLS.has(id), "Skill is not available yet");
-      requireContract(!s.requires || classRank(d8, s.requires) > 0, "Missing required skill");
-      requireContract(classTreeSpent(d8, s.tree, s.tier) >= classTierGate(s.tier), "Tier not open");
+      requireContract(!classLinkOf(id) || classRank(d8, classLinkOf(id)) > 0, "Missing required skill");
+      requireContract(classSpentBelow(d8, s.tier) >= classTierGate(s.tier), "Tier not open");
     }
+    requireContract(
+      Object.keys(ranks).filter((id) => CLASS_TREE_SKILLS[id].kind === "capstone").length <= 1,
+      "One key passive at most"
+    );
     requireContract(classTreePoints(d8).unspent >= 0n, "Overspent skill points");
   }
   const augs = d8.classAugments;
@@ -14406,8 +14426,8 @@ function craftAugment(next, id, index2) {
   storeAugmentCraft(next, c);
 }
 function resetClassTree(next, treeId) {
-  requireContract(classTreeOf(next.heroClass, treeId), "Unknown class tree");
-  const inTree = (id) => CLASS_TREE_SKILLS[id].tree === treeId, kept = Object.fromEntries(Object.entries(next.classRanks ?? {}).filter(([id]) => !inTree(id)));
+  requireContract(treeId === "all" || classTreeOf(next.heroClass, treeId), "Unknown class tree");
+  const inTree = (id) => treeId === "all" || CLASS_TREE_SKILLS[id].tree === treeId, kept = Object.fromEntries(Object.entries(next.classRanks ?? {}).filter(([id]) => !inTree(id)));
   requireContract(Object.keys(kept).length < Object.keys(next.classRanks ?? {}).length, "Tree already empty");
   if (Object.keys(kept).length) next.classRanks = kept;
   else delete next.classRanks;
@@ -14431,9 +14451,9 @@ function fitClassTrees(d8) {
     }).map(([id, r]) => [id, Math.min(r, CLASS_TREE_SKILLS[id].maxRank)])
   );
   for (let guard = 0; guard < 400; guard++) {
-    const probe = { ...d8, classRanks: ranks }, bad = Object.keys(ranks).find((id) => {
-      const s = CLASS_TREE_SKILLS[id];
-      return s.requires && !(ranks[s.requires] > 0) || classTreeSpent(probe, s.tree, s.tier) < classTierGate(s.tier);
+    const probe = { ...d8, classRanks: ranks }, caps = Object.keys(ranks).filter((id) => CLASS_TREE_SKILLS[id].kind === "capstone").sort(), bad = caps[1] ?? Object.keys(ranks).find((id) => {
+      const s = CLASS_TREE_SKILLS[id], link = classLinkOf(id);
+      return link && !(ranks[link] > 0) || classSpentBelow(probe, s.tier) < classTierGate(s.tier);
     });
     if (bad) {
       delete ranks[bad];
@@ -57645,6 +57665,7 @@ export {
   combatInteger,
   outgoingCombat,
   resolveCombatDamage,
+  CLASS_TREE_TIER_POINTS,
   CLASS_TREE_POINT_CAP,
   AUGMENT_SLOTS,
   CLASS_TREE_SKILLS,
@@ -57668,6 +57689,9 @@ export {
   classRank,
   classTierGate,
   classTreeSpent,
+  classSpentBelow,
+  classLinkOf,
+  chosenCapstone,
   classTreePoints,
   learnedClassActives,
   learnAvailability,
