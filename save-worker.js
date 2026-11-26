@@ -24826,7 +24826,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 1,
     kind: "active",
     name: "Lunge",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Lunge at the nearest enemy in front of you and stab it for 250% Attack. Lunge crits twice as often as your other hits."
   },
@@ -24893,7 +24893,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 3,
     kind: "active",
     name: "Riposte",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Ready your blades for 1.5 seconds. Parry the next hit and cut back for 300% Attack. Your next Flurry crits."
   },
@@ -24960,7 +24960,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 5,
     kind: "active",
     name: "Thousand Cuts",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Strike one enemy 6 times in a blur. Every cut can crit."
   },
@@ -25004,7 +25004,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 1,
     kind: "active",
     name: "Toxic Fan",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Throw a fan of 5 poisoned knives in front of you."
   },
@@ -25070,7 +25070,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 3,
     kind: "active",
     name: "Rupture",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Tear open every Bleed on enemies around you. Each one deals all of its remaining damage at once."
   },
@@ -25137,7 +25137,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 5,
     kind: "active",
     name: "Noxious Bloom",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "A toxic flower bursts at your feet and poisons everything around you."
   },
@@ -25181,7 +25181,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 1,
     kind: "active",
     name: "Whirling Blades",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Spin and cut everything around you 3 times."
   },
@@ -25247,7 +25247,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 3,
     kind: "active",
     name: "Smoke Veil",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Drop a smoke cloud for 4 seconds. Enemies inside are slowed and Exposed, and you take 30% less damage while you're in it."
   },
@@ -25314,7 +25314,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 5,
     kind: "active",
     name: "Shadowstep",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Vanish and reappear behind the nearest enemy. Your next hit within 3 seconds is a crit that deals double damage."
   },
@@ -25358,7 +25358,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 1,
     kind: "active",
     name: "Firebloom",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Fire blossoms where you aim and burns everything inside it."
   },
@@ -25424,7 +25424,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 3,
     kind: "active",
     name: "Flame Wall",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Raise a wall of fire in front of you for 5 seconds. Enemies that cross it burn."
   },
@@ -25491,7 +25491,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 5,
     kind: "active",
     name: "Meteor",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Call a meteor onto a spot. It lands a second later and leaves the ground burning for 4 seconds."
   },
@@ -25535,7 +25535,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 1,
     kind: "active",
     name: "Flashfreeze",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Freeze everything around you in a flash. Ordinary enemies freeze, elites are chilled, and bosses slow down."
   },
@@ -25601,7 +25601,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 3,
     kind: "active",
     name: "Ice Barrier",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Wrap yourself in ice: gain a Barrier worth 25% of your max HP for 8 seconds. Enemies that hit it are chilled."
   },
@@ -25668,7 +25668,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 5,
     kind: "active",
     name: "Glacial Burst",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Spend all your Barrier in a blast of ice around you. It deals twice the Barrier you spent plus a spell hit as damage, and chills everything it hits."
   },
@@ -25712,7 +25712,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 1,
     kind: "active",
     name: "Ball Lightning",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Release a slow orb of lightning that drifts forward for 4 seconds, zapping every enemy near it twice a second."
   },
@@ -25778,7 +25778,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 3,
     kind: "active",
     name: "Static Field",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Charge the ground around you for 6 seconds. Enemies inside take a spark of damage every second, and your Storm Casts jump to enemies inside first."
   },
@@ -25845,7 +25845,7 @@ var CLASS_TREE_SKILLS = freezeWire({
     tier: 5,
     kind: "active",
     name: "Thunderfall",
-    maxRank: 1,
+    maxRank: 5,
     requires: null,
     description: "Call lightning down from above onto up to 5 enemies around you."
   },
