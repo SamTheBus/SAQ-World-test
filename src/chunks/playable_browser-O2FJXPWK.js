@@ -249505,6 +249505,88 @@ function createClassSkillsViewV1({ document: document2, send }) {
   svg3.addEventListener("click", (e) => {
     if (!e.target.closest?.(".cs-node")) close();
   });
+  let zoom = 1, baseW = 0, pinch = null;
+  const ZOOM_MAX = 3;
+  const zoomMin = () => {
+    const h = baseW * (CLASS_TREE_VIEW_BOX_V1.height / CLASS_TREE_VIEW_BOX_V1.width);
+    return h > 0 ? Math.min(1, Math.max(0.2, (body6.clientHeight - 8) / h)) : 1;
+  };
+  const measureBase = () => {
+    if (!baseW) baseW = stage2.getBoundingClientRect().width / zoom;
+  };
+  function setZoom(z, fx, fy, sx, sy) {
+    measureBase();
+    zoom = Math.min(ZOOM_MAX, Math.max(zoomMin(), z));
+    const on = Math.abs(zoom - 1) > 0.01;
+    if (!on) zoom = 1;
+    stage2.style.width = on ? `${Math.round(baseW * zoom)}px` : "";
+    stage2.style.minWidth = on ? "0" : "";
+    stage2.style.maxWidth = on ? "none" : "";
+    const r = stage2.getBoundingClientRect();
+    body6.scrollLeft += r.left + fx * r.width - sx;
+    body6.scrollTop += r.top + fy * r.height - sy;
+    if (!on) baseW = 0;
+  }
+  const mid = (t) => ({
+    x: (t[0].clientX + t[1].clientX) / 2,
+    y: (t[0].clientY + t[1].clientY) / 2,
+    d: Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY) || 1
+  });
+  stage2.addEventListener(
+    "touchstart",
+    (e) => {
+      if (e.touches.length !== 2) return;
+      measureBase();
+      const m = mid(e.touches), r = stage2.getBoundingClientRect();
+      pinch = { m0: m, m, z0: zoom, fx: (m.x - r.left) / r.width, fy: (m.y - r.top) / r.height };
+      stage2.style.transformOrigin = `${pinch.fx * 100}% ${pinch.fy * 100}%`;
+      if (e.cancelable) e.preventDefault();
+    },
+    { passive: false }
+  );
+  stage2.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!pinch || e.touches.length !== 2) return;
+      if (e.cancelable) e.preventDefault();
+      const m = pinch.m = mid(e.touches), z = Math.min(ZOOM_MAX, Math.max(zoomMin(), pinch.z0 * m.d / pinch.m0.d));
+      stage2.style.transform = `translate(${m.x - pinch.m0.x}px, ${m.y - pinch.m0.y}px) scale(${z / pinch.z0})`;
+    },
+    { passive: false }
+  );
+  const endPinch = (e) => {
+    if (!pinch || e.touches.length === 2) return;
+    const p = pinch;
+    pinch = null;
+    stage2.style.transform = "";
+    stage2.style.transformOrigin = "";
+    setZoom(p.z0 * p.m.d / p.m0.d, p.fx, p.fy, p.m.x, p.m.y);
+  };
+  stage2.addEventListener("touchend", endPinch);
+  stage2.addEventListener("touchcancel", endPinch);
+  stage2.addEventListener("gesturestart", (e) => e.preventDefault?.());
+  body6.addEventListener(
+    "wheel",
+    (e) => {
+      if (!e.ctrlKey || !stage2.contains?.(e.target)) return;
+      e.preventDefault();
+      const r = stage2.getBoundingClientRect();
+      setZoom(
+        zoom * Math.exp(-e.deltaY * 0.01),
+        (e.clientX - r.left) / r.width,
+        (e.clientY - r.top) / r.height,
+        e.clientX,
+        e.clientY
+      );
+    },
+    { passive: false }
+  );
+  const resetZoom = () => {
+    zoom = 1;
+    baseW = 0;
+    pinch = null;
+    stage2.style.width = stage2.style.minWidth = stage2.style.maxWidth = stage2.style.transform = "";
+  };
   function paintWheel() {
     const hc = heroClassOf(d);
     wheelBar.hidden = !hc;
@@ -250000,6 +250082,7 @@ function createClassSkillsViewV1({ document: document2, send }) {
       wheelPick = null;
       wheelOpen = false;
       scrolled = false;
+      resetZoom();
       const defs = mk("defs");
       defs.innerHTML = TREE_DEFS + trees2.map(
         (t, i) => `<radialGradient id="cst-halo${i}"><stop offset="0" stop-color="${t.color}" stop-opacity=".26"/><stop offset="1" stop-color="${t.color}" stop-opacity="0"/></radialGradient>`
@@ -250032,6 +250115,7 @@ function createClassSkillsViewV1({ document: document2, send }) {
       wheelPick = null;
       wheelOpen = false;
       scrolled = false;
+      resetZoom();
     },
     inspect: () => ({ selected })
   });

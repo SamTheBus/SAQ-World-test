@@ -2198,3 +2198,4 @@ html body #world-settings-view .st-line select{min-width:130px;max-width:100%}
 html body .cs-view>.cs-bubble{position:fixed;top:50%!important;left:50%;right:auto;bottom:auto!important;z-index:60;width:min(540px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;transform:translate(-50%,-50%);box-shadow:0 18px 50px #000c,0 0 0 1px #0b0806}
 html body .cs-view>.cs-bubble::before{display:none}
 html body .cs-view>.cs-bubble .cs-learn{position:sticky;bottom:0;z-index:1;flex:none;box-shadow:0 -10px 14px #151d26,0 16px 0 #151d26}
+.cs-stage{touch-action:pan-x pan-y}
