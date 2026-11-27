@@ -24137,7 +24137,7 @@ var FORGE_REVIEW_BUILD = false;
 var ACTIVITY_SAVE_NAMESPACE = FORGE_REVIEW_BUILD ? "saq-world-forge-review-v1" : "saq-world-activity-campaigns-v1";
 
 // src/shared/content/class_trees_v1.js
-var CLASS_TREE_TIER_POINTS = 5;
+var CLASS_TREE_TIER_GATES = Object.freeze([0, 4, 9, 16, 25, 35]);
 var CLASS_TREE_POINT_CAP = 69;
 var AUGMENT_SLOTS = 2;
 var AUGMENT_UNLOCK_POINTS = Object.freeze([5, 10, 15, 20, 10]);
@@ -26362,7 +26362,7 @@ var legendaryAugmentIndex = (id2) => AUGMENT_RARITY[id2]?.indexOf(L2) ?? -1;
 // src/shared/contracts/class_tree_progression_v1.js
 var classRank = (d8, id2) => d8?.classRanks?.[id2] ?? 0;
 var CLASS_TREE_BONUS_EVERY = 5n;
-var classTierGate = (tier2) => (tier2 - 1) * CLASS_TREE_TIER_POINTS;
+var classTierGate = (tier2) => CLASS_TREE_TIER_GATES[tier2 - 1];
 function classSpentBelow(d8, belowTier = Infinity) {
   let n = 0;
   for (const [id2, rank] of Object.entries(d8?.classRanks ?? {})) {

@@ -134,7 +134,7 @@ import {
   CLASS_SKILL_IDS,
   CLASS_TREE_POINT_CAP,
   CLASS_TREE_SKILLS,
-  CLASS_TREE_TIER_POINTS,
+  CLASS_TREE_TIER_GATES,
   CLEAVE_RADIUS,
   CLEAVE_SHOW,
   CLOAK_TICKS,
@@ -1695,7 +1695,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-QL37FY2F.js";
+} from "./chunk-OXVEJV47.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -249486,7 +249486,7 @@ var CLASS_TREE_VIEW_BOX_V1 = Object.freeze({ x: 80, y: -20, width: 1040, height:
 var CLASS_CORE_SKILL_V1 = Object.freeze({ knight: "shield_bash", rogue: "flurry", mage: "cast" });
 var MID = 600;
 var HUB_Y = (k) => 2120 - (k - 1) * 380;
-var classTreeHubGateV1 = (k) => CLASS_TREE_TIER_POINTS * (k - 1);
+var classTreeHubGateV1 = (k) => CLASS_TREE_TIER_GATES[k - 1];
 var cache7 = /* @__PURE__ */ new Map();
 function classTreeLayoutV1(classId) {
   if (cache7.has(classId)) return cache7.get(classId);

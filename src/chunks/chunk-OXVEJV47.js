@@ -8496,7 +8496,7 @@ var questGearSourceIdV1 = (seedHex, playerId, questId) => "ent:" + [0, 1, 2, 3].
 ).join("");
 
 // src/shared/content/class_trees_v1.js
-var CLASS_TREE_TIER_POINTS = 5;
+var CLASS_TREE_TIER_GATES = Object.freeze([0, 4, 9, 16, 25, 35]);
 var CLASS_TREE_POINT_CAP = 69;
 var AUGMENT_SLOTS = 2;
 var AUGMENT_UNLOCK_POINTS = Object.freeze([5, 10, 15, 20, 10]);
@@ -14233,7 +14233,7 @@ var augmentPrice = (id, index2) => AUGMENT_PRICES[augmentRarity(id, index2)] ?? 
 // src/shared/contracts/class_tree_progression_v1.js
 var classRank = (d8, id) => d8?.classRanks?.[id] ?? 0;
 var CLASS_TREE_BONUS_EVERY = 5n;
-var classTierGate = (tier) => (tier - 1) * CLASS_TREE_TIER_POINTS;
+var classTierGate = (tier) => CLASS_TREE_TIER_GATES[tier - 1];
 function classTreeSpent(d8, treeId, belowTier = Infinity) {
   let n = 0;
   for (const [id, rank] of Object.entries(d8?.classRanks ?? {})) {
@@ -57665,7 +57665,7 @@ export {
   combatInteger,
   outgoingCombat,
   resolveCombatDamage,
-  CLASS_TREE_TIER_POINTS,
+  CLASS_TREE_TIER_GATES,
   CLASS_TREE_POINT_CAP,
   AUGMENT_SLOTS,
   CLASS_TREE_SKILLS,
