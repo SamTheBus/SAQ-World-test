@@ -28127,6 +28127,10 @@ var CW_EACH = 3;
 var CW_STONES = 3;
 var CW_REGROW = 480;
 var CW_POP = 40;
+var SB_EVERY = 720;
+var SB_SHOW = 120;
+var RH_SHOW = 40;
+var FV_FLARE = 24;
 var RS_CURL = 120;
 var RS_POP = 26;
 var FR_LIFE = 240;
@@ -28199,6 +28203,10 @@ var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" }
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
 var LIVE = [
+  "sbCd",
+  "sbCage",
+  "rhOn",
+  "fvEat",
   "ihHits",
   "ihSnap",
   "stDodge",
@@ -29563,6 +29571,14 @@ function validateClassSkillState(s, combat, actor) {
       requireContract(pos2(d) && Number.isFinite(d.fx) && Number.isFinite(d.fy), "Invalid dust devil");
       safeInteger(d.hold, 1, SR_HOLD_MAX);
       safeInteger(d.age, 0, SR_ARRIVE + d.hold + SR_FADE - 1);
+    }
+    if (k.sbCd !== void 0) safeInteger(k.sbCd, 1, SB_EVERY);
+    if (k.rhOn !== void 0) safeInteger(k.rhOn, 1, RH_SHOW);
+    if (k.fvEat !== void 0) safeInteger(k.fvEat, 1, FV_FLARE);
+    if (k.sbCage !== void 0) {
+      closedRecord(k.sbCage, ["x", "y", "age"]);
+      requireContract(pos2(k.sbCage), "Invalid ice cage");
+      safeInteger(k.sbCage.age, 0, SB_SHOW - 1);
     }
     if (k.ihHits !== void 0) {
       requireContract(
@@ -31855,6 +31871,44 @@ var UNIQUE_ITEMS = freezeWire(
         "upland",
         "You have {0} more max Health. Three stones orbit you, each adding 3% more max Health while it is up. A hit worth more than 10% of your max Health knocks one loose; it grows back after 8 s.",
         "Sticks and stones."
+      ),
+      // Snow lesser bosses (Sammy 2026-11-27, all three passes approved): always-on toughness first. Shardheart's Defense and
+      // its Ice Cage when a big hit lands, Rimehorn's max Health and troll regeneration, Frostvigil's lantern light for the party.
+      unique(
+        "shardheart-band",
+        "Shardheart Band",
+        "ring",
+        null,
+        "Band Ring",
+        null,
+        "shardheart",
+        "frostland",
+        "You have {0} more Defense. When one hit takes more than 15% of your max Health, ice shards slam down in a ring around you: every enemy within 2 tiles is frozen for 1.5 s. Once every 12 s.",
+        "Ice to meet you."
+      ),
+      unique(
+        "rimehorn-treads",
+        "Rimehorn Treads",
+        "boots",
+        null,
+        "Treads",
+        null,
+        "rimehorn",
+        "frostland",
+        "You have {0} more max Health. Troll Blood: you regain 1% of your max Health every second, even while you are being hit; below half Health, 3% every second.",
+        "Snow problem."
+      ),
+      unique(
+        "frostvigil-helm",
+        "Frostvigil Helm",
+        "helmet",
+        null,
+        "Backwards Cap",
+        null,
+        "frostvigil",
+        "frostland",
+        "A warm lantern glow lights 2 tiles around you. You and friends in the glow take 6/8/10/12% less damage from every hit and {0} less damage over time (burns, poison, bleeding, storms). Slows and freezes on you wear off twice as fast.",
+        "And now my watch begins."
       )
     ].map((u) => [u.id, u])
   )
@@ -32297,6 +32351,22 @@ var UNIQUE_TIERS = freezeWire({
   "cairnwarden-grips": {
     lines: ["defPct", "maxHpPct", "lifeHit", "eliteDr", "atkPct"],
     stars: [10, 13, 16, 20],
+    unit: "pct"
+  },
+  // Snow lesser bosses (v3 lines below; these five are the v2 fallback).
+  "shardheart-band": {
+    lines: ["maxHpPct", "lifeHit", "atkPct", "eliteDmg", "critChance"],
+    stars: [10, 13, 16, 20],
+    unit: "pct"
+  },
+  "rimehorn-treads": {
+    lines: ["moveSpeed", "defPct", "lifeHit", "eliteDr", "atkPct"],
+    stars: [10, 13, 16, 20],
+    unit: "pct"
+  },
+  "frostvigil-helm": {
+    lines: ["maxHpPct", "defPct", "lifeHit", "cdr", "atkPct"],
+    stars: [20, 26, 33, 40],
     unit: "pct"
   }
 });
@@ -32773,6 +32843,21 @@ var UNIQUE_LINES_V3 = freezeWire({
   "cairnwarden-grips": {
     always: "defPct",
     pool: ["maxHpPct", "lifeHit", "eliteDr", "areaDr", "cdr", "closeDmg", "mainAttr"],
+    leg: []
+  },
+  "shardheart-band": {
+    always: "maxHpPct",
+    pool: ["atkPct", "critChance", "lifeHit", "eliteDr", "areaDr", "eliteDmg"],
+    leg: []
+  },
+  "rimehorn-treads": {
+    always: "moveSpeed",
+    pool: ["defPct", "lifeHit", "eliteDr", "areaDr", "cdr", "mainAttr"],
+    leg: []
+  },
+  "frostvigil-helm": {
+    always: "maxHpPct",
+    pool: ["defPct", "lifeHit", "cdr", "eliteDr", "areaDr", "counterDmg", "mainAttr"],
     leg: []
   }
 });
@@ -53949,6 +54034,10 @@ function resolveD9PlayerStats(player) {
       attributes[k] = addCombat(attributes[k], multiplyCombat(exactDecimal(d.attributes?.[k] ?? 0), scale3, 1e3));
     if (d.unique === "ironhorn-carapace")
       effects.defPct = addCombat(effects.defPct ?? 0, combatAmount(uniqueStarValue("ironhorn-carapace", d.rarityTier ?? 0), 100));
+    if (d.unique === "shardheart-band")
+      effects.defPct = addCombat(effects.defPct ?? 0, combatAmount(uniqueStarValue("shardheart-band", d.rarityTier ?? 0), 100));
+    if (d.unique === "rimehorn-treads")
+      effects.maxHpPct = addCombat(effects.maxHpPct ?? 0, combatAmount(uniqueStarValue("rimehorn-treads", d.rarityTier ?? 0), 100));
     if (d.unique === "cairnwarden-grips") {
       const up = CW_STONES - (player.d8?.transient?.cairn?.length ?? 0);
       effects.maxHpPct = addCombat(
