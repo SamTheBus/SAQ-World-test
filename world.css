@@ -2199,3 +2199,14 @@ html body .cs-view>.cs-bubble{position:fixed;top:50%!important;left:50%;right:au
 html body .cs-view>.cs-bubble::before{display:none}
 html body .cs-view>.cs-bubble .cs-learn{position:sticky;bottom:0;z-index:1;flex:none;box-shadow:0 -10px 14px #151d26,0 16px 0 #151d26}
 .cs-stage{touch-action:pan-x pan-y}
+/* Learn feedback (2026-11-25): the effects layer over the tree, its rising words, and the points pill ticking down. */
+.cs-fx{pointer-events:none}
+.cs-fx-text{font:900 22px Georgia,"Times New Roman",serif;letter-spacing:.08em;paint-order:stroke;stroke:#0b0806;stroke-width:5px;stroke-linejoin:round}
+.cs-points.cs-spent b{display:inline-block;animation:cs-spent .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes cs-spent{0%{transform:scale(1)}40%{transform:scale(1.45);color:#fff}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.cs-points.cs-spent b{animation:none}}
+.cs-toast{position:sticky;top:8px;left:0;z-index:4;height:0;display:flex;justify-content:center;pointer-events:none}
+.cs-toast span{display:block;padding:8px 16px;border-radius:999px;background:#1f2a35;border:2px solid #e2b55a;box-shadow:0 0 0 2px #0b0806,0 0 22px #ffb84a88;color:#ffe3a0;font:800 14px/1 Georgia,"Times New Roman",serif;letter-spacing:.12em;text-transform:uppercase;opacity:0;transform:translateY(-10px)}
+.cs-toast.show span{animation:cs-toast 2.2s ease-out both}
+@keyframes cs-toast{0%{opacity:0;transform:translateY(-10px) scale(.9)}12%{opacity:1;transform:translateY(0) scale(1.06)}20%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
+@media(prefers-reduced-motion:reduce){.cs-toast.show span{animation-duration:1.6s}}

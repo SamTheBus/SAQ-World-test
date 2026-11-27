@@ -249542,27 +249542,32 @@ function createClassSkillsViewV1({ document: document2, send }) {
     for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
     return e;
   };
+  const retrigger = (e, cls) => {
+    e.classList.remove(cls);
+    void e.offsetWidth;
+    e.classList.add(cls);
+  };
   const button3 = (cls, text3, fn) => {
     const b = el3("button", cls, text3);
     b.type = "button";
     b.onclick = fn;
     return b;
   };
-  const root6 = el3("div", "cs-view"), head19 = el3("div", "cs-head"), points2 = el3("div", "cs-points"), key4 = el3("div", "cs-key"), body6 = el3("div", "cs-body"), wheelBar = el3("section", "cs-wheel"), stage2 = el3("section", "cs-stage"), svg3 = mk("svg", {
+  const root6 = el3("div", "cs-view"), head19 = el3("div", "cs-head"), points2 = el3("div", "cs-points"), key4 = el3("div", "cs-key"), body6 = el3("div", "cs-body"), wheelBar = el3("section", "cs-wheel"), stage2 = el3("section", "cs-stage"), toast = el3("div", "cs-toast"), svg3 = mk("svg", {
     class: "cs-tree-svg",
     viewBox: `${CLASS_TREE_VIEW_BOX_V1.x} ${CLASS_TREE_VIEW_BOX_V1.y} ${CLASS_TREE_VIEW_BOX_V1.width} ${CLASS_TREE_VIEW_BOX_V1.height}`,
     role: "group",
     "aria-label": "Skill tree"
-  }), layer3 = mk("g"), bubble = el3("div", "cs-bubble"), foot2 = el3("div", "cs-foot");
+  }), layer3 = mk("g"), fx = mk("g", { class: "cs-fx", "aria-hidden": "true" }), bubble = el3("div", "cs-bubble"), foot2 = el3("div", "cs-foot");
   wheelBar.setAttribute("aria-label", "Skill wheel");
   key4.setAttribute("aria-label", "Tree colors");
   head19.append(points2, key4, wheelBar);
-  svg3.append(layer3);
+  svg3.append(layer3, fx);
   stage2.append(svg3);
-  body6.append(stage2, foot2);
+  body6.append(toast, stage2, foot2);
   bubble.hidden = true;
   root6.append(head19, body6, bubble);
-  let d = null, ready = false, classId = null, selected = null, confirmReset = false, lastRanks = {}, wheelPick = null, wheelOpen = false, scrolled = false, arts = {};
+  let d = null, ready = false, classId = null, selected = null, confirmReset = false, lastRanks = {}, lastSpent = null, gains = [], wheelPick = null, wheelOpen = false, scrolled = false, arts = {};
   svg3.addEventListener("click", (e) => {
     if (!e.target.closest?.(".cs-node")) close();
   });
@@ -249575,7 +249580,7 @@ function createClassSkillsViewV1({ document: document2, send }) {
   const measureBase = () => {
     if (!baseW) baseW = stage2.getBoundingClientRect().width / zoom;
   };
-  function setZoom(z, fx, fy, sx, sy) {
+  function setZoom(z, fx2, fy, sx, sy) {
     measureBase();
     zoom = Math.min(ZOOM_MAX, Math.max(zoomMin(), z));
     const on = Math.abs(zoom - 1) > 0.01;
@@ -249584,7 +249589,7 @@ function createClassSkillsViewV1({ document: document2, send }) {
     stage2.style.minWidth = on ? "0" : "";
     stage2.style.maxWidth = on ? "none" : "";
     const r = stage2.getBoundingClientRect();
-    body6.scrollLeft += r.left + fx * r.width - sx;
+    body6.scrollLeft += r.left + fx2 * r.width - sx;
     body6.scrollTop += r.top + fy * r.height - sy;
     if (!on) baseW = 0;
   }
@@ -249759,6 +249764,7 @@ function createClassSkillsViewV1({ document: document2, send }) {
     paintWheel();
   }
   function paintTree(trees2) {
+    gains = [];
     const L = classTreeLayoutV1(classId), spent = classSpentBelow(d), by = L.byId, treeColor = (n) => n.tree != null ? trees2[n.tree].color : "#e2b55a", lit2 = (n) => n.kind === "core" || (n.kind === "hub" ? spent >= n.gate : classRank(d, n.id) > 0), parts = [], P29 = (dd, attrs) => parts.push(mk("path", { d: dd, fill: "none", "stroke-linecap": "round", ...attrs }));
     parts.push(mk("rect", { x: CLASS_TREE_VIEW_BOX_V1.x, y: CLASS_TREE_VIEW_BOX_V1.y, width: CLASS_TREE_VIEW_BOX_V1.width, height: CLASS_TREE_VIEW_BOX_V1.height, fill: "url(#cst-bg)" }));
     let s = 11;
@@ -249820,6 +249826,208 @@ function createClassSkillsViewV1({ document: document2, send }) {
       parts.push(skillNode(n, lit2(n), treeColor(n), trees2));
     }
     layer3.replaceChildren(...parts);
+    const opened2 = lastSpent === null ? [] : L.nodes.filter((h) => h.kind === "hub" && h.gate > lastSpent && h.gate <= spent);
+    lastSpent = spent;
+    celebrate(L, gains, opened2);
+  }
+  const play = (e, frames, opts) => typeof e.animate === "function" ? e.animate(frames, { fill: "both", ...opts }) : null;
+  const spokeD = (a, b) => {
+    const mx = (a.x + b.x) / 2;
+    return `M${a.x} ${a.y}C${mx} ${a.y} ${mx} ${b.y} ${b.x} ${b.y}`;
+  };
+  function fxAdd(e, ms) {
+    fx.append(e);
+    setTimeout(() => e.remove(), ms);
+    return e;
+  }
+  const CENTER = "transform-box:fill-box;transform-origin:center";
+  function burst8(n, col2, at10, { rings: rings3 = 1, sparks: sparks2 = 14, gold = false, label: label7 = "+1", big = false } = {}) {
+    const r = R8[n.kind] + 3, warm2 = gold ? "#ffe39a" : col2;
+    play(
+      fxAdd(
+        mk("circle", { cx: n.x, cy: n.y, r: r + 2, fill: "#fff6df", style: CENTER, filter: "url(#cst-soft2)" }),
+        at10 + 700
+      ),
+      [
+        { opacity: 0, transform: "scale(.8)" },
+        { opacity: 0.55, transform: "scale(1)", offset: 0.2 },
+        { opacity: 0, transform: "scale(1.35)" }
+      ],
+      { duration: 380, delay: at10, easing: "ease-out" }
+    );
+    for (let i = 0; i < rings3; i++)
+      play(
+        fxAdd(
+          mk("circle", {
+            cx: n.x,
+            cy: n.y,
+            r,
+            fill: "none",
+            stroke: i ? "#fff6df" : warm2,
+            "stroke-width": big ? 5 : 4,
+            "vector-effect": "non-scaling-stroke",
+            style: CENTER
+          }),
+          at10 + 900
+        ),
+        [
+          { opacity: 1, transform: "scale(1)" },
+          { opacity: 0, transform: `scale(${big ? 3 : 2.3})` }
+        ],
+        { duration: 620, delay: at10 + i * 110, easing: "cubic-bezier(.2,.7,.3,1)" }
+      );
+    for (let i = 0; i < sparks2; i++) {
+      const a = i / sparks2 * Math.PI * 2 + (i % 2 ? 0.2 : -0.1), d2 = r * (big ? 2.6 : 1.9) + i % 3 * 9, s = mk("circle", { cx: n.x, cy: n.y, r: i % 3 ? 3 : 4.5, fill: i % 4 === 0 ? "#fff6df" : warm2, style: CENTER });
+      play(
+        fxAdd(s, at10 + 1e3),
+        [
+          { opacity: 1, transform: "translate(0px,0px) scale(1)", easing: "cubic-bezier(.15,.75,.35,1)" },
+          {
+            opacity: 1,
+            offset: 0.55,
+            transform: `translate(${(Math.cos(a) * d2 * 0.8).toFixed(1)}px,${(Math.sin(a) * d2 * 0.8).toFixed(1)}px) scale(.8)`
+          },
+          {
+            opacity: 0,
+            transform: `translate(${(Math.cos(a) * d2).toFixed(1)}px,${(Math.sin(a) * d2).toFixed(1)}px) scale(.3)`
+          }
+        ],
+        { duration: 600 + i % 3 * 120, delay: at10 }
+      );
+    }
+    const t = mk("text", {
+      x: n.x,
+      y: n.y - r - 10,
+      "text-anchor": "middle",
+      class: "cs-fx-text",
+      fill: gold ? "#ffe39a" : "#fff6df"
+    });
+    t.textContent = label7;
+    play(
+      fxAdd(t, at10 + 1300),
+      [
+        { opacity: 0, transform: "translate(0px,8px)" },
+        { opacity: 1, transform: "translate(0px,-6px)", offset: 0.2 },
+        { opacity: 1, transform: "translate(0px,-22px)", offset: 0.7 },
+        { opacity: 0, transform: "translate(0px,-34px)" }
+      ],
+      { duration: 1100, delay: at10, easing: "ease-out" }
+    );
+  }
+  function celebrate(L, gained, opened2) {
+    if (!gained.length && !opened2.length) return;
+    const calm = Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches), RUN = 340;
+    for (const { id: id2, n, g, col: col2, maxed, key: key5 } of gained) {
+      const hub = L.byId[L.edges.find((e) => e.to === id2).from];
+      if (calm) {
+        burst8(n, col2, 0, {
+          rings: 0,
+          sparks: 0,
+          gold: maxed || key5,
+          label: key5 ? "KEY PASSIVE" : maxed ? "MAX" : "+1"
+        });
+        continue;
+      }
+      const d2 = spokeD(hub, n);
+      for (const [w, stroke6, blur] of [
+        [12, col2, true],
+        [4, "#fff6df", false]
+      ])
+        play(
+          fxAdd(
+            mk("path", {
+              d: d2,
+              fill: "none",
+              stroke: stroke6,
+              "stroke-width": w,
+              "stroke-linecap": "round",
+              pathLength: 100,
+              "stroke-dasharray": "18 140",
+              ...blur ? { filter: "url(#cst-soft2)" } : {}
+            }),
+            RUN + 200
+          ),
+          [{ strokeDashoffset: 18 }, { strokeDashoffset: -100 }],
+          { duration: RUN, easing: "ease-in" }
+        );
+      play(
+        g,
+        [
+          { transform: "scale(1)" },
+          { transform: `scale(${key5 ? 1.28 : 1.2})`, offset: 0.35 },
+          { transform: "scale(1)" }
+        ],
+        {
+          duration: 460,
+          delay: RUN - 40,
+          easing: "cubic-bezier(.3,1.6,.5,1)"
+        }
+      );
+      g.style.transformBox = "fill-box";
+      g.style.transformOrigin = "center";
+      burst8(
+        n,
+        col2,
+        RUN - 40,
+        key5 ? { rings: 2, sparks: 24, gold: true, label: "KEY PASSIVE", big: true } : maxed ? { rings: 2, sparks: 18, gold: true, label: "MAX" } : {}
+      );
+    }
+    if (opened2.length) {
+      const h = opened2[opened2.length - 1], pill2 = el3("span", "", h.tier === 6 ? "Key passive open \xB7 pick one" : `Tier ${h.tier} open`);
+      toast.replaceChildren(pill2);
+      retrigger(toast, "show");
+    }
+    for (const h of opened2) {
+      const i = L.nodes.findIndex((x) => x.id === h.id), prev = L.nodes.slice(0, i).reverse().find((x) => x.kind === "hub" || x.kind === "core"), at10 = calm ? 0 : RUN + 260;
+      if (!calm && prev) {
+        const d2 = `M${prev.x} ${prev.y}C${prev.x} ${(prev.y + h.y) / 2} ${h.x} ${(prev.y + h.y) / 2} ${h.x} ${h.y}`;
+        play(
+          fxAdd(
+            mk("path", {
+              d: d2,
+              fill: "none",
+              stroke: "#ffe3a0",
+              "stroke-width": 10,
+              "stroke-linecap": "round",
+              pathLength: 100,
+              "stroke-dasharray": "22 140",
+              filter: "url(#cst-soft2)"
+            }),
+            at10 + 400
+          ),
+          [{ strokeDashoffset: 22 }, { strokeDashoffset: -100 }],
+          { duration: 420, delay: RUN, easing: "ease-in-out" }
+        );
+      }
+      burst8({ ...h, kind: "passive" }, "#ffe39a", at10, {
+        rings: calm ? 0 : 2,
+        sparks: calm ? 0 : 16,
+        gold: true,
+        label: h.tier === 6 ? "KEY PASSIVE OPEN" : `TIER ${h.tier} OPEN`,
+        big: true
+      });
+      if (!calm)
+        L.nodes.filter((x) => L.edges.some((e) => e.from === h.id && e.to === x.id)).forEach((x, k) => {
+          const node = layer3.querySelector?.(`.cs-node[data-skill="${x.id}"]`);
+          if (!node) return;
+          node.style.transformBox = "fill-box";
+          node.style.transformOrigin = "center";
+          play(
+            node,
+            [{ transform: "scale(1)" }, { transform: "scale(1.14)", offset: 0.4 }, { transform: "scale(1)" }],
+            {
+              duration: 420,
+              delay: at10 + 260 + k * 70,
+              easing: "ease-out"
+            }
+          );
+        });
+    }
+    try {
+      globalThis.navigator?.vibrate?.(opened2.length || gained.some((x) => x.maxed || x.key) ? [14, 60, 24] : 14);
+    } catch {
+    }
+    retrigger(points2, "cs-spent");
   }
   function hubMarker(n, on, capChosen) {
     const g = mk("g", { class: "cs-hub" }), top = n.tier === 6, bw = top ? 44 : 40, bh = 22;
@@ -249982,7 +250190,8 @@ function createClassSkillsViewV1({ document: document2, send }) {
           })
         );
       const before = lastRanks[id2];
-      if (before !== void 0 && st.rank > before) g.classList.add("learned");
+      if (before !== void 0 && st.rank > before)
+        gains.push({ id: id2, n, g, col: col2, maxed: st.rank >= skill.maxRank && skill.maxRank > 1, key: n.kind === "capstone" });
       lastRanks[id2] = st.rank;
     }
     return g;
@@ -250148,7 +250357,8 @@ function createClassSkillsViewV1({ document: document2, send }) {
       defs.innerHTML = TREE_DEFS + trees2.map(
         (t, i) => `<radialGradient id="cst-halo${i}"><stop offset="0" stop-color="${t.color}" stop-opacity=".26"/><stop offset="1" stop-color="${t.color}" stop-opacity="0"/></radialGradient>`
       ).join("");
-      svg3.replaceChildren(defs, layer3);
+      svg3.replaceChildren(defs, layer3, fx);
+      lastSpent = null;
     }
     if (selected && !CLASS_TREE_SKILLS[selected]) selected = null;
     paintHead(trees2);
