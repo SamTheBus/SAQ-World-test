@@ -108763,12 +108763,12 @@ function swampForSpaceV1(space) {
   const ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, built = /* @__PURE__ */ new Set();
   for (const q2 of v.blockers ?? []) {
     if (DRY2.has(standsPiece(q2.naturalClusterId)?.piece)) {
-      for (let y = q2.y; y < q2.y + q2.height; y++) for (let x = q2.x; x < q2.x + q2.width; x++) built.add(x + "," + y);
+      for (let y = q2.y; y < q2.y + q2.height; y++) for (let x = q2.x; x < q2.x + q2.width; x++) built.add(x * 65536 + y);
       continue;
     }
     if (NATURAL.has(q2.kind)) continue;
     for (let y = q2.y - 1; y < q2.y + q2.height + 1; y++)
-      for (let x = q2.x - 1; x < q2.x + q2.width + 1; x++) built.add(x + "," + y);
+      for (let x = q2.x - 1; x < q2.x + q2.width + 1; x++) built.add(x * 65536 + y);
   }
   const tile2 = (tx, ty) => {
     const k = v.biomes?.[ty - oy]?.[tx - ox];
@@ -108780,7 +108780,7 @@ function swampForSpaceV1(space) {
     codeAt: (x, y) => tile2(Math.floor(x / 32), Math.floor(y / 32)),
     okTile: (tx, ty) => {
       const t = v.terrain[ty - oy]?.[tx - ox];
-      if (t !== "g" && t !== "f" || built.has(tx + "," + ty)) return false;
+      if (t !== "g" && t !== "f" || built.has(tx * 65536 + ty)) return false;
       const st = readStandsCell(v.stands?.[ty - oy]?.[tx - ox]);
       return !st?.trail;
     }
@@ -115651,6 +115651,7 @@ var PLATE = {
   }
 };
 var overlaps = (a, b, p = 0) => a.x0 < b.x1 + p && a.x1 > b.x0 - p && a.y0 < b.y1 + p && a.y1 > b.y0 - p;
+var tileKey = (x, y) => (x + 32768) * 65536 + (y + 32768);
 function createForestStandsArtV2(env, prior) {
   const doc = env.document, pieces = createStandPieces(doc), lanes3 = createStandLanes(doc), terraces = createTerracePainter(), volcanoes = createVolcanoPainter(), kits = /* @__PURE__ */ new Map(), plates2 = /* @__PURE__ */ new Map(), bands = /* @__PURE__ */ new WeakMap(), casters = /* @__PURE__ */ new WeakMap(), fronts = /* @__PURE__ */ new WeakMap();
   let plateBytes = 0, models = /* @__PURE__ */ new WeakMap(), kitsAt = prior.kitGeneration?.() ?? 0;
@@ -115751,9 +115752,10 @@ function createForestStandsArtV2(env, prior) {
         if (!p) continue;
         if ((p.piece === "terrace" || p.piece === "volcano") && !mountains.has(p.key))
           mountains.set(p.key, { detail: p.detail, key: p.key, piece: p.piece });
+        const pb = { ...p, b };
         for (let y = b.y; y < b.y + b.height; y++)
           for (let x = b.x; x < b.x + b.width; x++) {
-            blocked3.set(x + "," + y, { ...p, b });
+            blocked3.set(tileKey(x, y), pb);
             if (p.piece === "mass" && ROCK_MASSES.includes(p.detail)) {
               if (!masses.has(p.key)) masses.set(p.key, []);
               masses.get(p.key).push([x, y]);
@@ -115805,7 +115807,7 @@ function createForestStandsArtV2(env, prior) {
         if (!c) continue;
         const code2 = codeAt(m, tx, ty), A2 = ART[code2];
         if (!A2) continue;
-        const seed2 = seedAt(m, tx, ty), n = H2(seed2, 3), p = m.blocked.get(tx + "," + ty), wid = tx + m.wox + "," + (ty + m.woy), add2 = (it) => {
+        const seed2 = seedAt(m, tx, ty), n = H2(seed2, 3), p = m.blocked.get(tileKey(tx, ty)), wid = tx + m.wox + "," + (ty + m.woy), add2 = (it) => {
           if (it) items3.push(it);
         }, sw = code2 === "m" ? swampForSpaceV1(m.space) : null, depth = (x, y) => sw ? sw.depth(x, y) : -99;
         if (p?.piece === "trunk") {
@@ -115822,7 +115824,7 @@ function createForestStandsArtV2(env, prior) {
           if (ROCK_MASSES.includes(p.detail)) {
             if (PLATE[code2]) {
               masses.add(p.key);
-              const below = m.blocked.get(tx + "," + (ty + 1));
+              const below = m.blocked.get(tileKey(tx, ty + 1));
               if (!(below?.piece === "mass" && below.key === p.key) && n % 4 === 0) {
                 const s = kit2(code2, pick2(A2.rock ?? ["rock", 1], n >>> 9), n >>> 15);
                 add2(
@@ -115889,7 +115891,7 @@ function createForestStandsArtV2(env, prior) {
             }
           }
         } else if (p?.piece === "log") {
-          const left = m.blocked.get(tx - 1 + "," + ty);
+          const left = m.blocked.get(tileKey(tx - 1, ty));
           if (!(left?.piece === "log" && left.key === p.key))
             add2(
               item2(
@@ -116037,8 +116039,11 @@ function createForestStandsArtV2(env, prior) {
           const [k, old2] = plates2.entries().next().value;
           plates2.delete(k);
           plateBytes -= old2.bytes;
+          for (const [list, uk] of old2.users) if (list.get(uk)?.[0]?.img === old2.slices[0]?.img) list.delete(uk);
+          old2.users.length = 0;
         }
       }
+      if (!p.users.some(([list, uk]) => list === m.plates && uk === key4)) p.users.push([m.plates, key4]);
       const dx = m.wox * T108, dy = m.woy * T108;
       local8 = p.slices.map((sl) => ({
         id: "stand-plate/" + key4 + "/" + sl.row,
@@ -116268,7 +116273,7 @@ function createForestStandsArtV2(env, prior) {
     }
     giveScratch(cov);
     giveScratch(out7);
-    return { slices, bytes };
+    return { slices, bytes, users: [] };
   }
   function floor(c, space, bounds3) {
     const m = modelFor(space);
@@ -116283,7 +116288,7 @@ function createForestStandsArtV2(env, prior) {
     };
     const sw = swampForSpaceV1(space), trunkNear = (x, y) => {
       for (let dy = -1; dy <= 1; dy++)
-        for (let dx = -1; dx <= 1; dx++) if (m.blocked.get(x + dx + "," + (y + dy))?.piece === "trunk") return true;
+        for (let dx = -1; dx <= 1; dx++) if (m.blocked.get(tileKey(x + dx, y + dy))?.piece === "trunk") return true;
       return false;
     };
     for (let ty = y0; ty <= y1; ty++)
@@ -116292,7 +116297,7 @@ function createForestStandsArtV2(env, prior) {
         if (!cell) continue;
         const code2 = codeAt(m, tx, ty), G6 = GROUND2[code2];
         if (!G6) continue;
-        const seed2 = seedAt(m, tx, ty), p = m.blocked.get(tx + "," + ty);
+        const seed2 = seedAt(m, tx, ty), p = m.blocked.get(tileKey(tx, ty));
         if (code2 === "m" && sw && sw.depth((tx + 0.5) * T108, (ty + 0.5) * T108) > -24) continue;
         if (cell.cover && G6.under) {
           const n2 = H2(seed2, 7), g2 = group(code2);
@@ -116392,7 +116397,7 @@ function createForestStandsArtV2(env, prior) {
     c.restore();
     for (let ty = Math.floor(r.y0 / T108); ty < Math.ceil(r.y1 / T108); ty++)
       for (let tx = Math.floor(r.x0 / T108); tx < Math.ceil(r.x1 / T108); tx++) {
-        const p = m.blocked.get(tx + "," + ty);
+        const p = m.blocked.get(tileKey(tx, ty));
         if (p)
           ids4?.push(obstacleTileVisualId(p.b, tx, ty, idKind(codeAt(m, tx, ty) ?? (p.b.kind === "rock" ? "r" : "w"))));
       }
@@ -330235,7 +330240,8 @@ function createEnvironmentCache(canvas, {
     touch2(pages2, id2, {
       raster: job.raster,
       signature: sig,
-      visual: currentVisual,
+      // A number, not the world copy itself: a page holding its copy kept every old copy (and the maps built
+      // from it) alive while the page lingered, 30-40 copies in Upland (reload hunt, 2026-11-27).
       visualGeneration,
       rasterGeneration: ++rasterGeneration,
       result
@@ -330371,7 +330377,7 @@ function createEnvironmentCache(canvas, {
       if (exitsKey !== null) {
         layouts3.clear();
         planKey = null;
-        for (const entry2 of pages2.values()) entry2.visual = null;
+        for (const entry2 of pages2.values()) entry2.visualGeneration = -1;
       }
       exitsKey = nextExits;
     }
@@ -330391,7 +330397,7 @@ function createEnvironmentCache(canvas, {
     {
       const g = kitGeneration?.() ?? 0;
       if (kitsSeen !== null && g !== kitsSeen) {
-        for (const entry2 of pages2.values()) entry2.visual = null;
+        for (const entry2 of pages2.values()) entry2.visualGeneration = -1;
         descriptors.clear();
         staleRecipeDrops++;
       }
@@ -330457,9 +330463,9 @@ function createEnvironmentCache(canvas, {
     let paintedTerrainTiles = 0, paintedBlockers = 0;
     for (const t of required) {
       let entry2 = pages2.get(t.id);
-      const sig = entry2?.visual === space.visual ? entry2.signature : signature(space, t.x, t.y);
+      const sig = entry2?.visualGeneration === visualGeneration ? entry2.signature : signature(space, t.x, t.y);
       if (!entry2 || entry2.signature !== sig) {
-        const missReason = !entry2 ? "page-absent" : entry2.visual !== space.visual ? "visual-projection-change" : "signature-change", task = { ...t, space, sig, scale: renderScale, missReason, visualGeneration };
+        const missReason = !entry2 ? "page-absent" : entry2.visualGeneration !== visualGeneration ? "visual-projection-change" : "signature-change", task = { ...t, space, sig, scale: renderScale, missReason, visualGeneration };
         requiredTasks.push(task);
         if (!queue.some((q2) => q2.id === task.id && q2.sig === task.sig)) {
           queue.unshift(task);
@@ -330516,7 +330522,6 @@ function createEnvironmentCache(canvas, {
         continue;
       } else {
         if (returnedIds.has(t.id)) retentionHits++;
-        entry2.visual = space.visual;
         entry2.visualGeneration = visualGeneration;
         emit("hit", { id: t.id });
       }
