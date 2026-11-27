@@ -251067,7 +251067,7 @@ function createFriendsClientV1({
       return {};
     }
   };
-  const write4 = (v) => {
+  const write5 = (v) => {
     try {
       storage?.setItem(key4, JSON.stringify(v));
     } catch {
@@ -251125,7 +251125,7 @@ function createFriendsClientV1({
         error = "";
         if (data.code && data.code !== me.code) {
           me = { ...me, code: data.code };
-          write4(me);
+          write5(me);
         }
         for (const n of data.notes ?? [])
           for (const f of noteListeners)
@@ -251138,7 +251138,7 @@ function createFriendsClientV1({
         error = e.message;
         if (e.status === 401) {
           me = { mode: me.mode, recent: me.recent };
-          write4(me);
+          write5(me);
           last = null;
         }
       } finally {
@@ -251179,7 +251179,7 @@ function createFriendsClientV1({
     setMode(mode) {
       if (!["open", "ask", "code"].includes(mode)) return;
       me = { ...me, mode };
-      write4(me);
+      write5(me);
       sync();
       tell();
     },
@@ -251205,7 +251205,7 @@ function createFriendsClientV1({
           ...(me.recent ?? []).filter((r) => !codes.has(r.code))
         ].slice(0, RECENT_LIMIT)
       };
-      write4(me);
+      write5(me);
       tell();
     },
     subscribe(f) {
@@ -251240,7 +251240,7 @@ function createFriendsClientV1({
     async register(name) {
       const data = await call("register", { name });
       me = { ...me, id: data.id, secret: data.secret, code: data.code, name: String(name).trim().replace(/\s+/g, " ") };
-      write4(me);
+      write5(me);
       await sync();
       if (running2) schedule();
       return data.code;
@@ -251248,7 +251248,7 @@ function createFriendsClientV1({
     async rename(name) {
       const data = await call("rename", { ...auth(), name });
       me = { ...me, code: data.code, name: String(name).trim().replace(/\s+/g, " ") };
-      write4(me);
+      write5(me);
       tell();
       return data.code;
     },
@@ -251259,7 +251259,7 @@ function createFriendsClientV1({
       if (!b) throw Error("That isn\u2019t a backup code. It starts with saqf1.");
       const data = await call("sync", { id: b.id, secret: b.secret });
       me = { ...me, id: b.id, secret: b.secret, code: data.code, name: String(data.code).replace(/#\d{4}$/, "") };
-      write4(me);
+      write5(me);
       last = { ...data, notes: [], at: now3() };
       error = "";
       tell();
@@ -255741,6 +255741,94 @@ function createPotionDragV1({ document: doc, environment: env }) {
   });
 }
 
+// src/client/memory_headroom_v1.js
+var HEADROOM_KEY_V1 = "saq-headroom-v1";
+var HEADROOM_STEP_MB_V1 = 16;
+var STEP_MS = 150;
+var CAP_MB = 6e3;
+var LIMIT_KEY = "saq-memory-test-v1";
+var readJson = (storage, key4) => {
+  try {
+    return JSON.parse(storage?.getItem(key4) ?? "null");
+  } catch {
+    return null;
+  }
+};
+var write4 = (storage, value2) => {
+  try {
+    storage?.setItem(HEADROOM_KEY_V1, JSON.stringify(value2));
+  } catch {
+  }
+};
+function headroomLimitV1(storage) {
+  const runs = readJson(storage, LIMIT_KEY)?.runs;
+  if (!Array.isArray(runs)) return null;
+  const closed2 = runs.filter((r) => r?.end === "closed" && Number.isFinite(r.mb)).map((r) => r.mb);
+  return closed2.length ? Math.max(...closed2) : null;
+}
+function headroomLastV1(storage, running2 = false) {
+  const r = readJson(storage, HEADROOM_KEY_V1);
+  if (!r || !Number.isFinite(r.mb)) return null;
+  if (r.end === "running" && !running2) {
+    r.end = "closed";
+    write4(storage, r);
+  }
+  return r;
+}
+function headroomTextV1(r, limit) {
+  if (!r) return "Fills extra memory while you play until the phone closes the game, then shows how much room it had.";
+  const where = r.where ? " (" + r.where + ")" : "";
+  if (r.end === "closed") {
+    const used = limit ? " The game was using about " + Math.max(0, limit - r.mb) + " of " + limit + " MB." : "";
+    return "Last test: the phone closed the game after " + r.mb + " MB extra" + where + "." + used;
+  }
+  if (r.end === "refused") return "Last test: the browser refused more memory at " + r.mb + " MB extra" + where + ".";
+  if (r.end === "cap") return "Last test: " + r.mb + " MB extra with no limit reached" + where + ".";
+  if (r.end === "stopped") return "Last test: stopped by you at " + r.mb + " MB extra" + where + ".";
+  return "Testing: " + r.mb + " MB extra so far" + where + ".";
+}
+var WORKER = `let seed=(Date.now()^0x9e3779b9)>>>0||1;const held=[];let mb=0;
+const step=()=>{try{const b=new Uint32Array(${HEADROOM_STEP_MB_V1}*262144);let s=seed;for(let i=0;i<b.length;i++){s^=s<<13;s^=s>>>17;s^=s<<5;b[i]=s}seed=s>>>0||1;held.push(b)}catch(e){postMessage({refused:mb});return}
+mb+=${HEADROOM_STEP_MB_V1};postMessage({mb});if(mb<${CAP_MB})setTimeout(step,${STEP_MS});else postMessage({cap:mb})};setTimeout(step,${STEP_MS});`;
+function startHeadroomV1({ environment: env, storage, where = "", build: build2 = "", onStep = () => {
+} }) {
+  const record2 = { t: Date.now(), mb: 0, end: "running", where, build: build2 };
+  write4(storage, record2);
+  let url = null, worker = null;
+  const finish4 = (end) => {
+    record2.end = end;
+    write4(storage, record2);
+    try {
+      worker?.terminate();
+    } catch {
+    }
+    worker = null;
+    if (url) env.URL.revokeObjectURL(url);
+    url = null;
+    onStep(record2);
+  };
+  try {
+    url = env.URL.createObjectURL(new env.Blob([WORKER], { type: "text/javascript" }));
+    worker = new env.Worker(url);
+  } catch {
+    finish4("refused");
+    return () => {
+    };
+  }
+  worker.onmessage = (e) => {
+    const d = e.data ?? {};
+    if (d.refused !== void 0) return finish4("refused");
+    if (d.cap !== void 0) return finish4("cap");
+    record2.mb = d.mb;
+    write4(storage, record2);
+    onStep(record2);
+  };
+  worker.onerror = () => finish4("refused");
+  return () => {
+    if (worker) finish4("stopped");
+  };
+}
+
 // src/client/settings_page_v1.js
 var SETTINGS_V1_KEY = "saq-world-settings-v1";
 var SHADOW_SETTINGS_V1 = Object.freeze(["full", "simple", "off"]);
@@ -256065,13 +256153,41 @@ function createSettingsPageV1({ document: doc, environment: env }) {
     });
     const goActs = el3("div", "st-acts");
     goActs.append(where, goBtn);
+    const roomNote = el3("small", null, ""), roomName = name("Memory room");
+    roomName.append(roomNote);
+    let stopRoom = null;
+    const roomText = () => {
+      roomNote.textContent = headroomTextV1(headroomLastV1(storage, Boolean(stopRoom)), headroomLimitV1(storage));
+    };
+    const roomBtn = btn("Test", "", () => {
+      if (stopRoom) {
+        stopRoom();
+        return;
+      }
+      roomBtn.textContent = "Stop";
+      stopRoom = startHeadroomV1({
+        environment: env,
+        storage,
+        where: (doc.getElementById("space-label")?.textContent ?? "").trim().slice(0, 40),
+        onStep: (r) => {
+          if (r.end !== "running") {
+            stopRoom = null;
+            roomBtn.textContent = "Test";
+          }
+          roomText();
+        }
+      });
+      roomText();
+    });
+    roomText();
     devSec = section(
       "Developer (test site)",
       line45(devName),
       line45(name("Level"), levelActs),
       line45(name("Unique"), giveActs),
       line45(name("Gold"), goldBtn),
-      line45(name("Travel"), goActs)
+      line45(name("Travel"), goActs),
+      line45(roomName, roomBtn)
     );
   }
   const perfNote = el3("small", null, "");
@@ -351538,7 +351654,7 @@ function startBlackboxV1({
     canvases: null,
     snapshot: null
   };
-  const write4 = () => {
+  const write5 = () => {
     record2.at = now3();
     record2.writes++;
     let text3;
@@ -351647,7 +351763,7 @@ function startBlackboxV1({
     }
     fresh = [];
     if (record2.writes % 4 === 0) askStorage();
-    return write4();
+    return write5();
   };
   const push = (list, entry2) => {
     list.push({ at: now3(), ...entry2 });
@@ -351655,13 +351771,13 @@ function startBlackboxV1({
   };
   const note2 = (text3) => {
     push(record2.notes, { text: String(text3).slice(0, 200) });
-    write4();
+    write5();
   };
   const doc = env.document, hidden = () => doc?.visibilityState === "hidden";
   const closing = (why) => () => {
     record2.clean = true;
     record2.exit = why;
-    write4();
+    write5();
   };
   const onHide = closing("pagehide"), onVisibility = () => {
     if (hidden()) {
@@ -351675,20 +351791,20 @@ function startBlackboxV1({
       if (record2.hiddenAt !== null) record2.hiddenS += Math.max(0, Math.round((now3() - record2.hiddenAt) / 1e3));
       record2.hiddenAt = null;
     }
-    write4();
+    write5();
   };
   const onError = (e) => {
     push(record2.errors, {
       message: String(e?.message ?? e?.reason?.message ?? e?.reason ?? "error").slice(0, 300),
       source: e?.filename ? String(e.filename).split("/").pop() + ":" + e.lineno : void 0
     });
-    write4();
+    write5();
   };
   env.addEventListener?.("pagehide", onHide);
   doc?.addEventListener?.("visibilitychange", onVisibility);
   env.addEventListener?.("error", onError);
   env.addEventListener?.("unhandledrejection", onError);
-  write4();
+  write5();
   let bigAt = now3();
   const timer2 = env.setInterval?.(
     () => {
