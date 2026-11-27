@@ -54704,16 +54704,23 @@ function validateSubweaponCombat(s) {
     );
   }
 }
+var EMPTY_TRANSIENT_TEXT = JSON.stringify(emptyMasteryTransient());
+var cancelledStats = /* @__PURE__ */ new WeakMap();
+var cancelledKey = (owner, actor) => owner.inventory?.revision + "/" + owner.d8.revision + "/" + JSON.stringify(owner.progression) + "/" + JSON.stringify(owner.bestiary?.stats ?? null) + "/" + JSON.stringify(actor.attackDamage) + "/" + actor.moveSpeed;
 function cancelSubweaponResidency(s, id2) {
   const c = s.subweaponCombat;
   if (!c) return;
   cancelMasteryCombat(s, id2);
   const owner = Object.values(s.playersById).find((p) => p.entityId === id2);
   if (owner?.d8) {
-    owner.d8.transient = emptyMasteryTransient();
-    const actor = s.entitiesById[id2], resolved = resolvePlayerStats(owner);
-    actor.attackDamage = copyWire(resolved.attack);
-    actor.moveSpeed = resolved.moveSpeed;
+    const actor = s.entitiesById[id2], was = JSON.stringify(owner.d8.transient);
+    if (!(was === EMPTY_TRANSIENT_TEXT && cancelledStats.get(owner) === cancelledKey(owner, actor))) {
+      owner.d8.transient = emptyMasteryTransient();
+      const resolved = resolvePlayerStats(owner);
+      actor.attackDamage = copyWire(resolved.attack);
+      actor.moveSpeed = resolved.moveSpeed;
+      cancelledStats.set(owner, cancelledKey(owner, actor));
+    }
   }
   for (const [key9, e] of Object.entries(c.controls ?? {}))
     if (e.sourceId === id2 || e.targetId === id2) delete c.controls[key9];

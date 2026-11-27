@@ -115970,6 +115970,40 @@ function createForestStandsArtV2(env, prior) {
         out7.push(blockFor(m, bx, by));
     return out7;
   }
+  const scratch2 = [];
+  let scratchAt = 0;
+  const SCRATCH_KEEP = 6, SCRATCH_IDLE_MS = 8e3;
+  function takeScratch(w, h) {
+    scratchAt = performance.now();
+    let at10 = -1;
+    for (let i = 0; i < scratch2.length; i++)
+      if (scratch2[i].width >= w && scratch2[i].height >= h && (at10 < 0 || scratch2[i].width * scratch2[i].height < scratch2[at10].width * scratch2[at10].height))
+        at10 = i;
+    if (at10 >= 0) {
+      const c2 = scratch2.splice(at10, 1)[0], g = c2.getContext("2d");
+      if (typeof g.reset === "function") {
+        g.reset();
+        return c2;
+      }
+      c2.width = w;
+      c2.height = h;
+      return c2;
+    }
+    const c = scratch2.pop() ?? doc.createElement("canvas");
+    c.width = Math.max(w, c.width > 1 ? c.width : 0);
+    c.height = Math.max(h, c.height > 1 ? c.height : 0);
+    return c;
+  }
+  function giveScratch(c) {
+    scratchAt = performance.now();
+    if (scratch2.length < SCRATCH_KEEP) scratch2.push(c);
+    else c.width = c.height = 1;
+  }
+  onIdleSweepV1((t) => {
+    if (!scratch2.length || t - scratchAt < SCRATCH_IDLE_MS) return;
+    for (const c of scratch2) c.width = c.height = 1;
+    scratch2.length = 0;
+  });
   function plateFor(m, key4) {
     let local8 = m.plates.get(key4);
     if (local8 !== void 0) return local8;
@@ -116019,10 +116053,7 @@ function createForestStandsArtV2(env, prior) {
     }
     const X0 = minX * T108 - 28, Y0 = minY * T108 - h - 20, W21 = (maxX - minX + 1) * T108 + 56, Hh = (maxY - minY + 1) * T108 + h + 40, cw = Math.ceil(W21 * PS), ch = Math.ceil(Hh * PS);
     const mk = () => {
-      const c = doc.createElement("canvas");
-      c.width = cw;
-      c.height = ch;
-      const g = c.getContext("2d");
+      const c = takeScratch(cw, ch), g = c.getContext("2d");
       g.setTransform(PS, 0, 0, PS, -X0 * PS, -Y0 * PS);
       return [c, g];
     };
@@ -116105,7 +116136,7 @@ function createForestStandsArtV2(env, prior) {
       g.globalCompositeOperation = "destination-out";
       g.fill(up2(h));
       raw(bg, () => bg.drawImage(mc, 0, 0));
-      mc.width = 1;
+      giveScratch(mc);
     }
     const top = up2(h);
     bg.save();
@@ -116140,7 +116171,7 @@ function createForestStandsArtV2(env, prior) {
       og.globalCompositeOperation = "source-over";
       og.drawImage(body6, 0, 0);
     });
-    body6.width = 1;
+    giveScratch(body6);
     const rows = /* @__PURE__ */ new Map();
     for (const t of ts) {
       if (!rows.has(t.y)) rows.set(t.y, []);
@@ -116183,7 +116214,7 @@ function createForestStandsArtV2(env, prior) {
           eg.restore();
         }
         raw(cg, () => cg.drawImage(e, 0, 0));
-        e.width = 1;
+        giveScratch(e);
       }
       const xs = row2.map((t) => t.x), x0 = Math.max(X0, Math.min(...xs) * T108 - 26), x1 = Math.min(X0 + W21, (Math.max(...xs) + 1) * T108 + 26), y0 = Math.max(Y0, r * T108 - h - 14), y1 = Math.min(Y0 + Hh, (r + 1) * T108 + 16);
       const cr = doc.createElement("canvas");
@@ -116217,11 +116248,13 @@ function createForestStandsArtV2(env, prior) {
           s.h * k
         );
       }
-      mc.width = sl.width = 1;
+      giveScratch(mc);
+      giveScratch(sl);
       slices.push({ row: r, y: (r + 1) * T108, x0, x1, y0, y1, img: cr });
       bytes += cr.width * cr.height * 4;
     }
-    cov.width = out7.width = 1;
+    giveScratch(cov);
+    giveScratch(out7);
     return { slices, bytes };
   }
   function floor(c, space, bounds3) {
@@ -151692,16 +151725,23 @@ function validateSubweaponCombat(s) {
     );
   }
 }
+var EMPTY_TRANSIENT_TEXT = JSON.stringify(emptyMasteryTransient());
+var cancelledStats = /* @__PURE__ */ new WeakMap();
+var cancelledKey = (owner, actor) => owner.inventory?.revision + "/" + owner.d8.revision + "/" + JSON.stringify(owner.progression) + "/" + JSON.stringify(owner.bestiary?.stats ?? null) + "/" + JSON.stringify(actor.attackDamage) + "/" + actor.moveSpeed;
 function cancelSubweaponResidency(s, id2) {
   const c = s.subweaponCombat;
   if (!c) return;
   cancelMasteryCombat(s, id2);
   const owner = Object.values(s.playersById).find((p) => p.entityId === id2);
   if (owner?.d8) {
-    owner.d8.transient = emptyMasteryTransient();
-    const actor = s.entitiesById[id2], resolved = resolvePlayerStats(owner);
-    actor.attackDamage = copyWire(resolved.attack);
-    actor.moveSpeed = resolved.moveSpeed;
+    const actor = s.entitiesById[id2], was = JSON.stringify(owner.d8.transient);
+    if (!(was === EMPTY_TRANSIENT_TEXT && cancelledStats.get(owner) === cancelledKey(owner, actor))) {
+      owner.d8.transient = emptyMasteryTransient();
+      const resolved = resolvePlayerStats(owner);
+      actor.attackDamage = copyWire(resolved.attack);
+      actor.moveSpeed = resolved.moveSpeed;
+      cancelledStats.set(owner, cancelledKey(owner, actor));
+    }
   }
   for (const [key4, e] of Object.entries(c.controls ?? {}))
     if (e.sourceId === id2 || e.targetId === id2) delete c.controls[key4];
@@ -329109,7 +329149,7 @@ function createEnvironmentCache(canvas, {
   kitGeneration = null,
   wantKits = null
 } = {}) {
-  const SIZE12 = 256, BASE_LIMIT = 32, MAX_LIMIT = 128, DESCRIPTORS = 64, PREFETCH = 8, ROUTE_PREFETCH = 16, RECENT = 24, LAYOUTS = 4;
+  const SIZE12 = 256, BASE_LIMIT = 32, MAX_LIMIT = 128, DESCRIPTORS = 64, PREFETCH = 8, ROUTE_PREFETCH = 16, RECENT = 24, LAYOUTS = 4, HANDOVER_MS = 5e3, FALLBACK_SPARES = 6;
   const pages2 = /* @__PURE__ */ new Map(), fallbacks = /* @__PURE__ */ new Map(), descriptors = /* @__PURE__ */ new Map(), layouts3 = /* @__PURE__ */ new Map(), stamps = /* @__PURE__ */ new Map(), flowerStamps = [], rasterPool = [];
   const leftAt = /* @__PURE__ */ new Map();
   let poolUsedAt = 0, idleFreed = 0;
@@ -329135,7 +329175,7 @@ function createEnvironmentCache(canvas, {
     }
   }
   let lastView = null, travelX = 0, travelY = 0, exitsKey = null, kitsSeen = null;
-  let layoutJob = null, activeJob = null, planKey = null, planVisual = null, key4 = null, scaleKey = null, queue = [], routeQueue = [], routeBurst = 0, pending = null, generation = 0, visualGeneration = 0, rasterGeneration = 0, currentVisual = null, currentSpace = null, frameSequence = 0, visibleIds = /* @__PURE__ */ new Set(), nearIds = /* @__PURE__ */ new Set(), pathScreenIds = /* @__PURE__ */ new Set(), preloadIds = /* @__PURE__ */ new Set(), recentIds = /* @__PURE__ */ new Set(), recentSeen = /* @__PURE__ */ new Map(), protectedIds = /* @__PURE__ */ new Set(), lastFlowers = [], lastWater = [], requiredTasks = [], builds = 0, created = 0, worstBuildMs = 0, descriptorReuses = 0, retentionHits = 0, peakNeeded = 0, peakPrefetched = 0, capacity = BASE_LIMIT, evictions = 0, misses = 0, fallbackBuilds = 0, fallbackHits = 0, peakFallbackPages = 0, visibleRasterPages = 0, fallbackPages = 0, activeColliderVisuals = 0, missingColliderVisuals = 0, underCoveredColliderVisuals = 0, lastColliderRepair = null, lastColliderAudit = null, lastRasterLifecycle = null, staleRasterDiscards = 0, atomicRasterReplacements = 0, rasterCompletenessRepairs = 0, clearCount = 0, parkCount = 0, staleRecipeDrops = 0, recipeFaults = 0, lastRecipeFault = null, lastClearReason = "none", lastMissReason = "none", clearReasons = /* @__PURE__ */ Object.create(null);
+  let layoutJob = null, activeJob = null, planKey = null, planVisual = null, key4 = null, scaleKey = null, queue = [], routeQueue = [], routeBurst = 0, pending = null, generation = 0, visualGeneration = 0, rasterGeneration = 0, currentVisual = null, currentSpace = null, frameSequence = 0, visibleIds = /* @__PURE__ */ new Set(), nearIds = /* @__PURE__ */ new Set(), pathScreenIds = /* @__PURE__ */ new Set(), preloadIds = /* @__PURE__ */ new Set(), recentIds = /* @__PURE__ */ new Set(), recentSeen = /* @__PURE__ */ new Map(), protectedIds = /* @__PURE__ */ new Set(), lastFlowers = [], lastWater = [], requiredTasks = [], builds = 0, created = 0, worstBuildMs = 0, descriptorReuses = 0, retentionHits = 0, peakNeeded = 0, peakPrefetched = 0, capacity = BASE_LIMIT, evictions = 0, handovers = 0, misses = 0, fallbackBuilds = 0, fallbackHits = 0, peakFallbackPages = 0, visibleRasterPages = 0, fallbackPages = 0, activeColliderVisuals = 0, missingColliderVisuals = 0, underCoveredColliderVisuals = 0, lastColliderRepair = null, lastColliderAudit = null, lastRasterLifecycle = null, staleRasterDiscards = 0, atomicRasterReplacements = 0, rasterCompletenessRepairs = 0, clearCount = 0, parkCount = 0, staleRecipeDrops = 0, recipeFaults = 0, lastRecipeFault = null, lastClearReason = "none", lastMissReason = "none", clearReasons = /* @__PURE__ */ Object.create(null);
   const emit = (kind, values = {}) => {
     if (diagnostics) diagnostics({ kind, at: performance.now(), ...values });
   };
@@ -329181,7 +329221,7 @@ function createEnvironmentCache(canvas, {
           break;
         }
       if (victim === void 0) break;
-      freeRaster(fallbacks.get(victim)?.raster);
+      spareFallbackRaster(fallbacks.get(victim)?.raster);
       fallbacks.delete(victim);
       pathStats.environmentFallbackEvictions++;
     }
@@ -329194,6 +329234,29 @@ function createEnvironmentCache(canvas, {
       }
     } catch {
     }
+  }
+  const fallbackSpares = [];
+  let fallbackSpareAt = 0;
+  function takeFallbackRaster(pixels3) {
+    fallbackSpareAt = performance.now();
+    for (let i = 0; i < fallbackSpares.length; i++) {
+      const c2 = fallbackSpares[i], g = c2.width === pixels3 && c2.height === pixels3 ? c2.getContext("2d") : null;
+      if (g && typeof g.reset === "function") {
+        fallbackSpares.splice(i, 1);
+        g.reset();
+        return c2;
+      }
+    }
+    const c = fallbackSpares.pop() ?? canvas.ownerDocument.createElement("canvas");
+    c.width = pixels3;
+    c.height = pixels3;
+    return c;
+  }
+  function spareFallbackRaster(raster) {
+    if (!raster) return;
+    fallbackSpareAt = performance.now();
+    if (fallbackSpares.length < FALLBACK_SPARES && !fallbackSpares.includes(raster)) fallbackSpares.push(raster);
+    else if (!fallbackSpares.includes(raster)) freeRaster(raster);
   }
   function releaseRaster(raster) {
     if (!raster) return;
@@ -329379,6 +329442,23 @@ function createEnvironmentCache(canvas, {
       }
     }
     if (!raster) {
+      const t = performance.now();
+      let victim, oldest = Infinity;
+      for (const [k, left] of leftAt)
+        if (k !== id2 && left < oldest && t - left >= HANDOVER_MS && pages2.has(k) && !visibleIds.has(k) && !nearIds.has(k) && !preloadIds.has(k)) {
+          oldest = left;
+          victim = k;
+        }
+      if (victim !== void 0) {
+        raster = pages2.get(victim).raster;
+        pages2.delete(victim);
+        recentSeen.delete(victim);
+        recentIds.delete(victim);
+        leftAt.delete(victim);
+        handovers++;
+      }
+    }
+    if (!raster) {
       raster = canvas.ownerDocument.createElement("canvas");
       created++;
       emit("allocate", { id: id2 });
@@ -329493,8 +329573,9 @@ function createEnvironmentCache(canvas, {
       rasterGeneration: ++rasterGeneration,
       result
     });
-    freeRaster(fallbacks.get(id2)?.raster);
+    spareFallbackRaster(fallbacks.get(id2)?.raster);
     fallbacks.delete(id2);
+    if (descriptors.get(id2) === descriptor) descriptors.delete(id2);
     if (replaced?.raster && replaced.raster !== job.raster) {
       releaseRaster(replaced.raster);
       atomicRasterReplacements++;
@@ -329732,10 +329813,7 @@ function createEnvironmentCache(canvas, {
             protected: protectedIds.size,
             pages: pages2.size
           });
-          const raster = canvas.ownerDocument.createElement("canvas"), pixels3 = Math.ceil(SIZE12 * renderScale);
-          raster.width = pixels3;
-          raster.height = pixels3;
-          const rc = raster.getContext("2d");
+          const pixels3 = Math.ceil(SIZE12 * renderScale), raster = takeFallbackRaster(pixels3), rc = raster.getContext("2d");
           rc.scale(pixels3 / SIZE12, pixels3 / SIZE12);
           rc.translate(-t.x, -t.y);
           result = drawFallback?.(rc, space, bounds3);
@@ -329958,6 +330036,10 @@ function createEnvironmentCache(canvas, {
       if (!inUse().has(raster) && !rasterPool.includes(raster)) freeRaster(raster);
       idleFreed++;
     }
+    if (fallbackSpares.length && t - fallbackSpareAt >= IDLE_SPRITE_MS) {
+      for (const c of fallbackSpares) freeRaster(c);
+      fallbackSpares.length = 0;
+    }
     if (t - poolUsedAt >= IDLE_SPRITE_MS && rasterPool.length > 2) {
       const used = inUse(), spare = [...new Set(rasterPool)].filter((r) => !used.has(r));
       rasterPool.length = 0;
@@ -329976,6 +330058,7 @@ function createEnvironmentCache(canvas, {
     park,
     resources: () => ({
       environmentIdleFreed: idleFreed,
+      environmentHandovers: handovers,
       environmentPoolSpares: rasterPool.length,
       ...pathStats,
       environmentCacheParks: parkCount,
