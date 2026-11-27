@@ -119,6 +119,7 @@ function walkWire(value, mode) {
   const cloned = visit(value, 0);
   return mode ? cloned : value;
 }
+var NO_OPTIONAL = Object.freeze([]);
 function freezeWire(value) {
   return walkWire(value, 2);
 }

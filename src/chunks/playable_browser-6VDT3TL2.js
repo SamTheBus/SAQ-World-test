@@ -1708,7 +1708,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-R4636ZO5.js";
+} from "./chunk-L4IMRLS2.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -102784,8 +102784,22 @@ function evict2() {
   }
 }
 var near2 = (o, R19, v, m) => o.x + R19.x0 < v.x + v.width + m && o.x + R19.x1 > v.x - m && o.y + R19.y0 < v.y + v.height + m && o.y + R19.y1 > v.y - m;
-var boxR = (p) => p.box ? { x0: p.box.x, y0: p.box.y, x1: p.box.x + p.box.w, y1: p.box.y + p.box.h } : p.region;
-var keyOf = (t, p, s) => t.id + "|" + p.id + "@" + s;
+var boxR = (p) => {
+  if (!p.box) return p.region;
+  if (p.rbOf !== p.box) {
+    p.rbOf = p.box;
+    p.rb = { x0: p.box.x, y0: p.box.y, x1: p.box.x + p.box.w, y1: p.box.y + p.box.h };
+  }
+  return p.rb;
+};
+var keyOf = (t, p, s) => {
+  if (p.keyT !== t || p.keyS !== s) {
+    p.keyT = t;
+    p.keyS = s;
+    p.key = t.id + "|" + p.id + "@" + s;
+  }
+  return p.key;
+};
 function prepareTownBuildingsV1(c, list, v) {
   const start = clock3();
   mainScale2 = quantize2(c.getTransform?.().a ?? 1);
@@ -300134,8 +300148,54 @@ var phase2 = (id2) => {
   return (h >>> 0) / 4294967296;
 };
 var now2 = () => (globalThis.performance?.now?.() ?? 0) / 1e3;
+var tagSprites = /* @__PURE__ */ new Map();
+var TAG_SPRITES = 96;
+function tagSprite(c, name, role) {
+  const doc = globalThis.document, m = typeof c.getTransform === "function" ? c.getTransform() : null;
+  if (!doc?.createElement || !m || !c.canvas) return null;
+  const s = Math.max(0.5, Math.min(4, Math.round(Math.hypot(m.a, m.b) * 4) / 4)), key4 = name + "\n" + role + "\n" + s;
+  let t = tagSprites.get(key4);
+  if (t) {
+    tagSprites.delete(key4);
+    tagSprites.set(key4, t);
+    return t;
+  }
+  const cv = doc.createElement("canvas"), g = cv.getContext("2d");
+  if (!g) return null;
+  g.font = "bold 12px system-ui";
+  const wn3 = g.measureText(name).width;
+  g.font = "10px system-ui";
+  const w = Math.ceil(Math.max(wn3, g.measureText(role).width) + 8), h = 30;
+  cv.width = Math.ceil(w * s);
+  cv.height = Math.ceil(h * s);
+  g.scale(s, s);
+  g.textAlign = "center";
+  g.lineWidth = 3;
+  g.strokeStyle = "#191523";
+  g.font = "bold 12px system-ui";
+  g.strokeText(name, w / 2, 13);
+  g.fillStyle = "#f4dfad";
+  g.fillText(name, w / 2, 13);
+  g.font = "10px system-ui";
+  g.strokeText(role, w / 2, 24);
+  g.fillStyle = "#d7d9ce";
+  g.fillText(role, w / 2, 24);
+  t = { cv, w, h };
+  tagSprites.set(key4, t);
+  while (tagSprites.size > TAG_SPRITES) {
+    const k = tagSprites.keys().next().value, old2 = tagSprites.get(k);
+    tagSprites.delete(k);
+    old2.cv.width = old2.cv.height = 0;
+  }
+  return t;
+}
 function nameTag(c, n, x, tag2) {
   const role = SHORT[n.role] ?? n.roleLabel ?? "";
+  const sprite8 = tagSprite(c, n.name, role);
+  if (sprite8) {
+    c.drawImage(sprite8.cv, x - sprite8.w / 2, tag2 - 61, sprite8.w, sprite8.h);
+    return;
+  }
   c.save();
   c.textAlign = "center";
   c.font = "bold 12px system-ui";

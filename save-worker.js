@@ -204,17 +204,12 @@ function walkWire(value, mode) {
 function validateWire(value) {
   return walkWire(value, 0);
 }
-function closedRecord(value, required, optional = []) {
+var NO_OPTIONAL = Object.freeze([]);
+function closedRecord(value, required, optional = NO_OPTIONAL) {
   requireContract(value !== null && typeof value === "object" && !Array.isArray(value), "Expected record");
-  const keys2 = Object.keys(value);
-  requireContract(
-    required.every((key9) => Object.hasOwn(value, key9)),
-    "Missing field"
-  );
-  requireContract(
-    keys2.every((key9) => required.includes(key9) || optional.includes(key9)),
-    "Unknown field"
-  );
+  for (let i = 0; i < required.length; i++) requireContract(Object.hasOwn(value, required[i]), "Missing field");
+  for (const key9 in value)
+    if (Object.hasOwn(value, key9)) requireContract(required.includes(key9) || optional.includes(key9), "Unknown field");
   return value;
 }
 function safeInteger(value, minimum = 0, maximum = Number.MAX_SAFE_INTEGER) {
@@ -4638,12 +4633,11 @@ function normalizeWorldPosition(p) {
   requireContract(Number.isFinite(p.localX) && Number.isFinite(p.localY), "Invalid local movement");
   const dx = Math.floor(p.localX / D9_PROFILE.chunkWidth), dy = Math.floor(p.localY / D9_PROFILE.chunkHeight);
   requireContract(Number.isSafeInteger(dx) && Number.isSafeInteger(dy), "Unbounded local movement");
-  const normalized = Object.assign(/* @__PURE__ */ Object.create(null), {
-    chunkX: addressWire(BigInt(p.chunkX) + BigInt(dx)),
-    chunkY: addressWire(BigInt(p.chunkY) + BigInt(dy)),
-    localX: p.localX - dx * D9_PROFILE.chunkWidth,
-    localY: p.localY - dy * D9_PROFILE.chunkHeight
-  });
+  const normalized = /* @__PURE__ */ Object.create(null);
+  normalized.chunkX = dx === 0 ? p.chunkX : addressWire(BigInt(p.chunkX) + BigInt(dx));
+  normalized.chunkY = dy === 0 ? p.chunkY : addressWire(BigInt(p.chunkY) + BigInt(dy));
+  normalized.localX = p.localX - dx * D9_PROFILE.chunkWidth;
+  normalized.localY = p.localY - dy * D9_PROFILE.chunkHeight;
   return Object.freeze(validateWorldPosition(normalized));
 }
 var legacyWorldPosition = (p) => normalizeWorldPosition({ chunkX: "0", chunkY: "0", localX: p.x, localY: p.y });
