@@ -243047,6 +243047,8 @@ var MOMENTS_V2 = Object.freeze({
 var lanes2 = /* @__PURE__ */ new WeakMap();
 var SVG2 = "http://www.w3.org/2000/svg";
 var GLYPHS = {
+  attribute: '<path d="M12 2l8 8h-5v4H9v-4H4z"/><path d="M6 17h12v2.4H6zM8 21h8v1.8H8z"/>',
+  utility: '<path d="M12 1.5l2.6 6.4 6.9.5-5.3 4.4 1.7 6.7L12 15.8l-5.9 3.7 1.7-6.7-5.3-4.4 6.9-.5z"/>',
   star: '<path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/>',
   swords: '<g transform="rotate(45 12 12)"><path d="M10.6 15V4.6L12 2l1.4 2.6V15z"/><path d="M7.6 14.6h8.8v2H7.6z"/><path d="M11 16.6h2v3.6h-2z"/><circle cx="12" cy="21.3" r="1.4"/></g><g transform="rotate(-45 12 12)"><path d="M10.6 15V4.6L12 2l1.4 2.6V15z"/><path d="M7.6 14.6h8.8v2H7.6z"/><path d="M11 16.6h2v3.6h-2z"/><circle cx="12" cy="21.3" r="1.4"/></g>'
 };
@@ -243142,8 +243144,22 @@ function laneFor2(doc) {
     const ribbon3 = el3("div", "moment-v2-ribbon", m.kicker), plate8 = el3("div", "moment-v2-plate");
     if (m.title) plate8.append(el3("strong", "moment-v2-title", m.title));
     if (m.sub) plate8.append(el3("span", "moment-v2-sub", m.sub));
+    if (m.rewards?.length) {
+      plate8.className += " is-rewards";
+      for (const r of m.rewards) {
+        const chip6 = el3("div", "moment-v2-chip"), icon2 = doc.createElementNS(SVG2, "svg");
+        chip6.dataset.reward = r.kind;
+        icon2.setAttribute("viewBox", "0 0 24 24");
+        icon2.setAttribute("aria-hidden", "true");
+        icon2.innerHTML = GLYPHS[r.kind] ?? GLYPHS.star;
+        const words = el3("span", "moment-v2-chip-words");
+        words.append(el3("b", "", "+" + r.amount), el3("small", "", r.label));
+        chip6.append(icon2, words);
+        plate8.append(chip6);
+      }
+    }
     stage2.append(rays, effectsFor(m.kind), ...m.kind === "boss" ? [] : [burst8], badge2, ribbon3);
-    if (m.title || m.sub) stage2.append(plate8);
+    if (m.title || m.sub || m.rewards?.length) stage2.append(plate8);
     root6.append(el3("div", "moment-v2-flash"), stage2);
     doc.body.append(root6);
     timer2 = setTimeout(next, ms);
@@ -243175,6 +243191,23 @@ function momentV2(doc, moment) {
   return laneFor2(doc).play(moment);
 }
 function levelUpMomentV2(doc, level, detail = "") {
+  if (detail && typeof detail === "object") {
+    const rewards = [];
+    const n = (v) => Number(v ?? 0);
+    if (n(detail.attribute) > 0)
+      rewards.push({
+        kind: "attribute",
+        amount: String(detail.attribute),
+        label: n(detail.attribute) === 1 ? "Attribute point" : "Attribute points"
+      });
+    if (n(detail.utility) > 0)
+      rewards.push({
+        kind: "utility",
+        amount: String(detail.utility),
+        label: n(detail.utility) === 1 ? "Utility skill point" : "Utility skill points"
+      });
+    return momentV2(doc, { kind: "level", kicker: "LEVEL UP", number: level, rewards });
+  }
   momentV2(doc, { kind: "level", kicker: "LEVEL UP", number: level, sub: detail });
 }
 function uniqueDropMomentV2(doc, { name, rarity = "", image = null, accent = null }) {
@@ -352706,13 +352739,13 @@ function mountPlayableClient({
   if (new URL(environment.location.href).searchParams.get("previewMoments") === "1") {
     if (doc.defaultView) doc.defaultView.previewMomentV2 = (moment) => momentV2(doc, moment);
     environment.setTimeout(() => {
-      levelUpMomentV2(doc, "12", "+3 attribute points \xB7 +1 utility SP");
+      levelUpMomentV2(doc, "12", { attribute: 3, utility: 1 });
       uniqueDropMomentV2(doc, { name: "Previewed Unique", rarity: "Legendary", accent: "#e67e22" });
     }, 4e3);
   }
   if (new URL(environment.location.href).searchParams.get("previewLevelUp") === "1")
     environment.setTimeout(() => {
-      levelUpCelebration.play("5", "+3 attribute points \xB7 +1 utility SP");
+      levelUpCelebration.play("5", { attribute: 3, utility: 1 });
       const m = port.getReadModel();
       renderer?.previewLevelUp?.(m.playersById[m.localPlayerId].entityId);
     }, 4e3);
@@ -353186,10 +353219,10 @@ function mountPlayableClient({
       if (observedProgression?.identity === identity2 && progressionBigInt(displayProgress.level) > progressionBigInt(observedProgression.level)) {
         if (levelNotice)
           levelNotice.textContent = `LEVEL UP! \xB7 ${progressionText(displayProgress.level)} \xB7 +${3n * (progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level))} AP \xB7 +${progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level)} Utility SP`;
-        levelUpCelebration.play(
-          progressionText(displayProgress.level),
-          `+${3n * (progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level))} attribute points \xB7 +${progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level)} utility SP`
-        );
+        levelUpCelebration.play(progressionText(displayProgress.level), {
+          attribute: 3n * (progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level)),
+          utility: progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level)
+        });
         levelNoticeUntil = time3 + 3e3;
       } else if (observedProgression?.identity !== identity2) levelNoticeUntil = 0;
       observedProgression = { identity: identity2, level: displayProgress.level };
