@@ -2736,3 +2736,41 @@ html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-sub{font-size:1
 html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-text::before{content:"TIER UP";font:400 10px/1 var(--ui2-display);letter-spacing:.14em;color:var(--ui2-gold-hi);-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
 html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-badge::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,#ffffff40 48%,transparent 60%);transform:translateX(-120%);animation:mo2-shine 1.2s ease-out .25s both;pointer-events:none}
 @keyframes mo2-shine{to{transform:translateX(120%)}}
+/* UI v2 step 6: each moment's own effects (Sammy 2026-11-28: "Those can have their own special effects").
+   Level up rises, a unique is revealed by a beam of its rarity's light, a boss kill hits, a tier-up card pulses. */
+.moment-v2-fx{position:absolute;left:0;top:0}
+.moment-v2-fx>*{position:absolute;display:block;pointer-events:none}
+/* Level up: a brass pillar rising behind the badge, motes floating up, one ring pulse. */
+.mo2-pillar{left:-46px;top:-40vh;width:92px;height:calc(40vh + 60px);background:linear-gradient(0deg,transparent 0,color-mix(in srgb,var(--ui2-gold) 70%,transparent) 30%,color-mix(in srgb,var(--ui2-gold-hi) 60%,transparent) 70%,transparent 100%);-webkit-mask:linear-gradient(90deg,transparent,#000 35%,#000 65%,transparent);mask:linear-gradient(90deg,transparent,#000 35%,#000 65%,transparent);transform-origin:50% 100%;animation:mo2-pillar 2.6s ease-out both}
+.mo2-pulse{left:-56px;top:-62px;width:112px;height:112px;box-sizing:border-box;border-radius:50%;border:4px solid var(--ui2-gold-hi);box-shadow:0 0 14px var(--ui2-gold);animation:mo2-pulse 1.1s ease-out .2s both}
+.moment-v2[data-kind=level] .moment-v2-fx i{left:var(--x);top:24px;width:var(--size);height:var(--size);border-radius:50%;background:var(--ui2-gold-hi);box-shadow:0 0 6px 2px color-mix(in srgb,var(--ui2-gold) 80%,transparent);animation:mo2-mote 2.2s ease-out both}
+@keyframes mo2-pillar{0%{opacity:0;transform:scaleY(0)}20%{opacity:1;transform:scaleY(1)}70%{opacity:.8}100%{opacity:0;transform:scaleY(1) scaleX(.5)}}
+@keyframes mo2-pulse{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(2.4)}}
+@keyframes mo2-mote{0%{opacity:0;transform:translateY(0)}15%{opacity:1}100%{opacity:0;transform:translateY(calc(-1 * var(--rise)))}}
+/* Unique: a beam of the rarity's light lands, then the item flips in inside a turning rune ring; stars twinkle. */
+.mo2-beam{left:-34px;top:-45vh;width:68px;height:calc(45vh + 10px);background:linear-gradient(180deg,transparent 0,color-mix(in srgb,var(--moment-accent) 70%,transparent) 55%,#fff 100%);-webkit-mask:linear-gradient(90deg,transparent,#000 35%,#000 65%,transparent);mask:linear-gradient(90deg,transparent,#000 35%,#000 65%,transparent);transform-origin:50% 0;animation:mo2-beam 2.1s ease-out both}
+.mo2-runes{left:-84px;top:-90px;width:168px;height:168px;box-sizing:border-box;border-radius:50%;border:3px dashed color-mix(in srgb,var(--moment-accent) 75%,#fff);box-shadow:0 0 14px color-mix(in srgb,var(--moment-accent) 60%,transparent),inset 0 0 14px color-mix(in srgb,var(--moment-accent) 40%,transparent);animation:mo2-runes-in .5s ease-out .35s both,mo2-turn 7s linear infinite}
+.moment-v2[data-kind=unique] .moment-v2-fx i{left:var(--x);top:calc(var(--y) - 6px);width:16px;height:16px;margin:-8px;background:#fff;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);filter:drop-shadow(0 0 4px var(--moment-accent));animation:mo2-twinkle 1.1s ease-in-out both}
+.moment-v2[data-kind=unique] .moment-v2-badge{animation:mo2-flip .75s cubic-bezier(.2,1.4,.4,1) .3s both}
+@keyframes mo2-beam{0%{opacity:1;transform:scaleY(0)}22%{opacity:1;transform:scaleY(1)}100%{opacity:0;transform:scaleY(1) scaleX(.3)}}
+@keyframes mo2-runes-in{from{opacity:0;scale:.5}}
+@keyframes mo2-turn{to{rotate:360deg}}
+@keyframes mo2-twinkle{0%{opacity:0;transform:scale(0) rotate(0)}50%{opacity:1;transform:scale(1) rotate(45deg)}100%{opacity:0;transform:scale(0) rotate(90deg)}}
+@keyframes mo2-flip{0%{opacity:0;transform:perspective(400px) rotateY(100deg) scale(.6)}100%{opacity:1;transform:none}}
+/* Boss kill: the badge slams down, the banner shakes, two shockwaves, debris thrown out that falls back. */
+.moment-v2[data-kind=boss] .moment-v2-stage{animation:mo2-stage var(--moment-ms,3600ms) ease-in forwards,mo2-shake .5s linear .2s both}
+.moment-v2[data-kind=boss] .moment-v2-badge{animation:mo2-slam .24s cubic-bezier(.55,0,.9,.4) both}
+.moment-v2[data-kind=boss] .moment-v2-rays{background:repeating-conic-gradient(from 0deg,transparent 0deg 10deg,color-mix(in srgb,var(--ui2-gold) 55%,transparent) 12deg 16deg,transparent 18deg 30deg)}
+.mo2-shock{left:-56px;top:-62px;width:112px;height:112px;box-sizing:border-box;border-radius:50%;border:7px solid var(--ui2-gold-hi);box-shadow:0 0 18px var(--ui2-gold);animation:mo2-shock .75s ease-out .2s both}
+.mo2-shock.mo2-shock-2{border-color:#fff;animation-delay:.36s}
+.moment-v2[data-kind=boss] .moment-v2-fx i{left:0;top:-6px;width:var(--size);height:var(--size);margin:calc(var(--size) / -2);border-radius:2px;background:linear-gradient(135deg,var(--ui2-gold-hi),var(--ui2-gold-lo));border:1.5px solid var(--ui2-ink);animation:mo2-debris 1.7s cubic-bezier(.2,.6,.4,1) both}
+@keyframes mo2-slam{0%{opacity:0;transform:scale(2.6)}100%{opacity:1;transform:none}}
+@keyframes mo2-shake{0%,100%{translate:0 0}12%{translate:9px 4px}24%{translate:-8px -5px}36%{translate:7px -3px}48%{translate:-6px 4px}60%{translate:4px 2px}74%{translate:-3px -2px}88%{translate:2px 1px}}
+@keyframes mo2-shock{0%{opacity:1;transform:scale(.9)}100%{opacity:0;transform:scale(3.2);border-width:1px}}
+@keyframes mo2-debris{0%{opacity:0;transform:translate(0,0) rotate(0)}8%{opacity:1}45%{transform:translate(var(--dx),var(--dy)) rotate(var(--spin))}100%{opacity:0;transform:translate(calc(var(--dx) * 1.3),calc(var(--dy) + 220px)) rotate(calc(var(--spin) * 2))}}
+/* Bestiary tier up: the frame pulses in the tier's color twice and sparkles rise off the monster card. */
+html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"]::before{display:block!important;content:"";position:absolute;inset:0;width:auto!important;background:none!important;border-radius:inherit;box-shadow:inset 0 0 0 2px var(--toast-accent),0 0 18px 3px var(--toast-accent)!important;opacity:0;animation:mo2-tierpulse 1s ease-out .1s 2 both;pointer-events:none}
+html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-text::after{content:"";position:absolute;left:6px;top:0;width:44px;height:100%;pointer-events:none;background:radial-gradient(circle,#fff 0 1.6px,transparent 2.6px) 6px 34px/100% 100% no-repeat,radial-gradient(circle,#fff 0 1.2px,transparent 2.2px) 30px 40px/100% 100% no-repeat,radial-gradient(circle,#fff 0 1.8px,transparent 2.8px) 18px 46px/100% 100% no-repeat,radial-gradient(circle,#fff 0 1.2px,transparent 2.2px) 38px 28px/100% 100% no-repeat;filter:drop-shadow(0 0 3px var(--toast-accent));animation:mo2-tiersparkle 1.3s ease-out .2s 2 both}
+@keyframes mo2-tierpulse{0%{opacity:1;scale:1}100%{opacity:0;scale:1.08}}
+@keyframes mo2-tiersparkle{0%{opacity:0;transform:translateY(8px)}30%{opacity:1}100%{opacity:0;transform:translateY(-30px)}}
+@media(prefers-reduced-motion:reduce){html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"]::before,html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-text::after{animation:none!important;opacity:0}}

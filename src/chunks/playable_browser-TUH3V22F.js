@@ -243068,6 +243068,48 @@ function laneFor2(doc) {
     if (text3 !== void 0) e.textContent = text3;
     return e;
   }
+  function effectsFor(kind) {
+    const fx = el3("div", "moment-v2-fx");
+    const bits2 = (n, make2) => {
+      for (let i = 0; i < n; i++) {
+        const b = doc.createElement("i");
+        for (const [k, v] of Object.entries(make2(i))) b.style.setProperty(k, v);
+        fx.append(b);
+      }
+    };
+    if (kind === "level") {
+      fx.append(el3("div", "mo2-pillar"), el3("div", "mo2-pulse"));
+      bits2(24, (i) => ({
+        "--x": i * 37 % 170 - 85 + "px",
+        "--rise": 150 + i * 53 % 90 + "px",
+        "--size": 5 + i % 3 * 2 + "px",
+        "animation-delay": i * 90 % 1500 + "ms"
+      }));
+    } else if (kind === "unique") {
+      fx.append(el3("div", "mo2-beam"), el3("div", "mo2-runes"));
+      bits2(18, (i) => {
+        const a = i / 18 * Math.PI * 2 + 0.4, r = 78 + i * 29 % 70;
+        return {
+          "--x": Math.cos(a) * r + "px",
+          "--y": Math.sin(a) * r * 0.75 + "px",
+          "animation-delay": 400 + i * 170 % 1900 + "ms"
+        };
+      });
+    } else if (kind === "boss") {
+      fx.append(el3("div", "mo2-shock"), el3("div", "mo2-shock mo2-shock-2"));
+      bits2(26, (i) => {
+        const a = Math.PI * (1.05 + i / 25 * 0.9) + (i % 3 - 1) * 0.12, d = 110 + i * 41 % 90;
+        return {
+          "--dx": Math.cos(a) * d + "px",
+          "--dy": Math.sin(a) * d * 0.9 + "px",
+          "--spin": i * 67 % 360 + "deg",
+          "--size": 8 + i % 4 * 2 + "px",
+          "animation-delay": 180 + i % 5 * 25 + "ms"
+        };
+      });
+    }
+    return fx;
+  }
   function build2(m, ms) {
     root6 = el3("div", "moment-v2");
     root6.dataset.kind = m.kind;
@@ -243100,7 +243142,7 @@ function laneFor2(doc) {
     const ribbon3 = el3("div", "moment-v2-ribbon", m.kicker), plate8 = el3("div", "moment-v2-plate");
     if (m.title) plate8.append(el3("strong", "moment-v2-title", m.title));
     if (m.sub) plate8.append(el3("span", "moment-v2-sub", m.sub));
-    stage2.append(rays, burst8, badge2, ribbon3);
+    stage2.append(rays, effectsFor(m.kind), ...m.kind === "boss" ? [] : [burst8], badge2, ribbon3);
     if (m.title || m.sub) stage2.append(plate8);
     root6.append(el3("div", "moment-v2-flash"), stage2);
     doc.body.append(root6);
