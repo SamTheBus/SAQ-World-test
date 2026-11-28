@@ -28125,6 +28125,27 @@ var SB_EVERY = 720;
 var SB_SHOW = 120;
 var RH_SHOW = 40;
 var FV_FLARE = 24;
+var VM_EVERY = 5;
+var VM_N = 3;
+var VM_GAP = 5;
+var VM_FLY = 30;
+var VM_POOL = 120;
+var VM_SHOW = 2 * VM_GAP + VM_FLY + VM_POOL + 30;
+var AG_SHOW = 30;
+var PT_SHOW = 30;
+var EMBER_MECHANICS = Object.freeze([
+  "fire",
+  "burn",
+  "slag",
+  "pyrelisk_fire",
+  "anvilgrim_fire",
+  "ventshell_bomb",
+  "ventshell_pool",
+  "cinderhart_fire",
+  "scarlet_fire",
+  "ashfang_scarlet_fire",
+  "crown_flame"
+]);
 var RS_CURL = 120;
 var RS_POP = 26;
 var FR_LIFE = 240;
@@ -28197,6 +28218,10 @@ var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" }
 var TOME_EL = ["fire", "frost", "lightning"];
 var tomeEl = (r) => requireContract(r.el === void 0 || TOME_EL.includes(r.el), "Invalid tome element");
 var LIVE = [
+  "vmN",
+  "vmErupt",
+  "agHit",
+  "ptOn",
   "sbCd",
   "sbCage",
   "rhOn",
@@ -29573,6 +29598,25 @@ function validateClassSkillState(s, combat, actor) {
       closedRecord(k.sbCage, ["x", "y", "age"]);
       requireContract(pos2(k.sbCage), "Invalid ice cage");
       safeInteger(k.sbCage.age, 0, SB_SHOW - 1);
+    }
+    if (k.vmN !== void 0) safeInteger(k.vmN, 1, VM_EVERY - 1);
+    if (k.ptOn !== void 0) safeInteger(k.ptOn, 1, PT_SHOW);
+    if (k.vmErupt !== void 0) {
+      const e = k.vmErupt;
+      closedRecord(e, ["x", "y", "age", "spots"]);
+      requireContract(
+        pos2(e) && Array.isArray(e.spots) && e.spots.length >= 1 && e.spots.length <= VM_N && e.spots.every((t) => t && typeof t.id === "string" && pos2(t) && Object.keys(t).length === 3),
+        "Invalid eruption"
+      );
+      safeInteger(e.age, 0, VM_SHOW - 1);
+    }
+    if (k.agHit !== void 0) {
+      closedRecord(k.agHit, ["id", "tx", "ty", "age"]);
+      requireContract(
+        typeof k.agHit.id === "string" && Number.isFinite(k.agHit.tx) && Number.isFinite(k.agHit.ty),
+        "Invalid sparks"
+      );
+      safeInteger(k.agHit.age, 0, AG_SHOW - 1);
     }
     if (k.ihHits !== void 0) {
       requireContract(
@@ -31903,6 +31947,44 @@ var UNIQUE_ITEMS = freezeWire(
         "frostland",
         "A warm lantern glow lights 2 tiles around you. You and friends in the glow take 6/8/10/12% less damage from every hit and {0} less damage over time (burns, poison, bleeding, storms). Slows and freezes on you wear off twice as fast.",
         "And now my watch begins."
+      ),
+      // Volcanic lesser bosses (Sammy 2026-11-27, all three passes approved): always-on toughness first. Ventshell's Defense
+      // and its eruption every 5th hit, Anvilgrim's melee guard and sparks back, Pyrelisk's max Health and Ember Skin.
+      unique(
+        "ventshell-mantle",
+        "Ventshell Mantle",
+        "cape",
+        null,
+        "Mantle",
+        null,
+        "ventshell",
+        "volcanic",
+        "You have {0} more Defense. Every 5th hit you take, the shell erupts: lava bombs land on up to 3 enemies within 4 tiles, each hitting for 100% of your Attack and leaving a lava pool that burns enemies in it for 2 s.",
+        "Home is where the heat is."
+      ),
+      unique(
+        "anvilgrim-gauntlets",
+        "Anvilgrim Gauntlets",
+        "gloves",
+        null,
+        "Gloves",
+        null,
+        "anvilgrim",
+        "volcanic",
+        "You take {0} less damage from melee hits. Each melee hit you take throws sparks back: the attacker takes fire damage worth 60% of your Attack.",
+        "Hammer time."
+      ),
+      unique(
+        "pyrelisk-treads",
+        "Pyrelisk Treads",
+        "boots",
+        null,
+        "Treads",
+        null,
+        "pyrelisk",
+        "volcanic",
+        "You have {0} more max Health. Ember Skin: you take 40% less damage from fire: burns, lava, lava bombs and fire on the ground.",
+        "We didn\u2019t start the fire."
       )
     ].map((u) => [u.id, u])
   )
@@ -32361,6 +32443,22 @@ var UNIQUE_TIERS = freezeWire({
   "frostvigil-helm": {
     lines: ["maxHpPct", "defPct", "lifeHit", "cdr", "atkPct"],
     stars: [20, 26, 33, 40],
+    unit: "pct"
+  },
+  // Volcanic lesser bosses (v3 lines below; these five are the v2 fallback).
+  "ventshell-mantle": {
+    lines: ["maxHpPct", "lifeHit", "atkPct", "eliteDr", "areaDr"],
+    stars: [10, 13, 16, 20],
+    unit: "pct"
+  },
+  "anvilgrim-gauntlets": {
+    lines: ["defPct", "maxHpPct", "lifeHit", "eliteDr", "atkPct"],
+    stars: [10, 13, 16, 20],
+    unit: "pct"
+  },
+  "pyrelisk-treads": {
+    lines: ["moveSpeed", "defPct", "lifeHit", "eliteDr", "atkPct"],
+    stars: [10, 13, 16, 20],
     unit: "pct"
   }
 });
@@ -32852,6 +32950,21 @@ var UNIQUE_LINES_V3 = freezeWire({
   "frostvigil-helm": {
     always: "maxHpPct",
     pool: ["defPct", "lifeHit", "cdr", "eliteDr", "areaDr", "counterDmg", "mainAttr"],
+    leg: []
+  },
+  "ventshell-mantle": {
+    always: "maxHpPct",
+    pool: ["atkPct", "critChance", "lifeHit", "eliteDr", "areaDr", "counterDmg"],
+    leg: []
+  },
+  "anvilgrim-gauntlets": {
+    always: "defPct",
+    pool: ["maxHpPct", "lifeHit", "eliteDr", "areaDr", "counterDmg", "closeDmg", "mainAttr"],
+    leg: []
+  },
+  "pyrelisk-treads": {
+    always: "moveSpeed",
+    pool: ["defPct", "lifeHit", "eliteDr", "areaDr", "cdr", "mainAttr"],
     leg: []
   }
 });
@@ -54032,6 +54145,10 @@ function resolveD9PlayerStats(player) {
       effects.defPct = addCombat(effects.defPct ?? 0, combatAmount(uniqueStarValue("shardheart-band", d.rarityTier ?? 0), 100));
     if (d.unique === "rimehorn-treads")
       effects.maxHpPct = addCombat(effects.maxHpPct ?? 0, combatAmount(uniqueStarValue("rimehorn-treads", d.rarityTier ?? 0), 100));
+    if (d.unique === "ventshell-mantle")
+      effects.defPct = addCombat(effects.defPct ?? 0, combatAmount(uniqueStarValue("ventshell-mantle", d.rarityTier ?? 0), 100));
+    if (d.unique === "pyrelisk-treads")
+      effects.maxHpPct = addCombat(effects.maxHpPct ?? 0, combatAmount(uniqueStarValue("pyrelisk-treads", d.rarityTier ?? 0), 100));
     if (d.unique === "cairnwarden-grips") {
       const up = CW_STONES - (player.d8?.transient?.cairn?.length ?? 0);
       effects.maxHpPct = addCombat(
