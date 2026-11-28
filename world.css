@@ -2452,3 +2452,76 @@ html body #world-inventory .gx-sheetfoot .gx-btn .gx-haul{font:900 10px/1.1 var(
 html body #world-inventory .gx-sheetfoot .gx-btn.is-primary .gx-haul{color:#5a3410;text-shadow:0 1px 0 #f8e2b080}
 html body #world-inventory .gx-sheetfoot .gx-btn.is-more{flex:none;padding-inline:12px}
 html body #world-inventory .gx-itemname .gx-uniquetag{font:900 10px/1.2 var(--ui2-body)!important;letter-spacing:.08em;-webkit-text-stroke:0;color:#3d2508!important;background:linear-gradient(180deg,#f8e2b0,#ddb15e)!important;border:1.5px solid var(--ui2-ink)}
+
+/* ==========================================================================================
+   UI v2, step 4 (2026-11-28): the town screens (Shop, Inn, Smith and its work tabs) in slate and brass, like
+   the Menu in step 2. Layouts stay; the frame, type, wells and buttons change. The notice board keeps its
+   wood and cork and only takes the new type.
+   ========================================================================================== */
+html body #settlement-services{--tn-panel:#1d273b;--tn-card:#1c263b;--tn-card2:#26324a;--tn-line:#0a0f1f;--tn-line2:#2c3a54;--tn-text:#eef1f6;--tn-muted:#c8d0de;--tn-dim:#8f9bb0;--tn-label:#ddb15e;--tn-gold:#ffe08f;--tn-up:#7dff8a;--tn-down:#ff8a7a;--tn-accent:#ddb15e;background:linear-gradient(180deg,#222d44 0%,#161e30 100%)!important;border:3px solid var(--ui2-ink)!important;border-radius:20px!important;box-shadow:inset 0 0 0 2px #ddb15e8c,inset 0 0 0 4px #0a0f1f99,0 6px 0 var(--ui2-ink),0 18px 50px #000a!important;color:var(--tn-text)}
+html body #settlement-services,html body #settlement-services :is(p,span,small,b,strong,i,em,div,button,h3,h4,h5,label,li){font-family:var(--ui2-body)!important}
+html body #settlement-services .tn-shell::before{display:none}
+/* Name, title, medallion and close. */
+html body #settlement-services .tn-who h3{font:400 24px/1.05 var(--ui2-display)!important;letter-spacing:.02em;color:var(--ui2-cream);-webkit-text-stroke:4.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)}
+html body #settlement-services .tn-who small{font-weight:900!important;color:var(--ui2-gold);text-shadow:0 1px 0 var(--ui2-ink)}
+html body #settlement-services .tn-npc{background:var(--ui2-orb-bg);border:3px solid var(--ui2-ink);box-shadow:inset 0 0 0 2.5px var(--ui2-gold),inset 0 0 0 4.5px var(--ui2-ink),inset 0 4px 0 #ffffff2e,0 3px 0 var(--ui2-ink)}
+html body #settlement-services .tn-x{border-radius:50%!important;background:var(--ui2-gloss)!important;border:3px solid var(--ui2-ink)!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),inset 0 3px 0 #ffffff40,0 3px 0 var(--ui2-ink)!important;color:#fff!important;transition:transform .06s}
+html body #settlement-services .tn-x:active{transform:translateY(3px);box-shadow:inset 0 0 0 1.5px var(--ui2-gold),0 0 0 var(--ui2-ink)!important}
+html body #settlement-services .tn-tier{background:var(--ui2-well);border:2px solid var(--ui2-ink);color:var(--ui2-gold);font-weight:900!important}
+/* Gold and materials in sunken wells. */
+html body #settlement-services .tn-chipv{background:var(--ui2-well);border:2.5px solid var(--ui2-ink);box-shadow:inset 0 3px 6px #0009;color:#fff;font-weight:900!important}
+html body #settlement-services .tn-wallet .tn-chipv:first-child{border-color:var(--ui2-ink);color:#ffe08f}
+/* Tabs: a brass rule; the open tab's letters and icon turn brass with a brass bar under it. */
+html body #settlement-services .tn-tabs{border-bottom:2px solid #ddb15e59;box-shadow:0 2px 0 #0a0f1f80}
+html body #settlement-services .tn-tab{background:none!important;border:0!important;box-shadow:none!important;color:#8090ad!important;font-weight:900!important}
+html body #settlement-services .tn-tab[aria-pressed=true]{color:#ffe08f!important;text-shadow:0 1px 0 var(--ui2-ink)}
+html body #settlement-services .tn-tab[aria-pressed=true]::after{height:4px;background:linear-gradient(90deg,#9c6e2c,#f6deaa,#9c6e2c);box-shadow:0 0 0 1.5px var(--ui2-ink)}
+/* Filter chips and option rows: wells; the picked one rises in glossy slate with brass letters. */
+html body #settlement-services .tn-chip{background:var(--ui2-well)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:inset 0 3px 6px #0008!important;color:#a9b5ca!important;font-weight:900!important;border-radius:12px!important}
+html body #settlement-services .tn-chip[aria-pressed=true]{background:var(--ui2-gloss)!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),inset 0 3px 0 #ffffff33,0 3px 0 var(--ui2-ink)!important;color:#ffe08f!important;text-shadow:0 1px 0 var(--ui2-ink)}
+html body #settlement-services .tn-chip em{color:#fff!important}
+html body #settlement-services :is(.tn-radio,.tn-slot){background:var(--ui2-well)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:inset 0 3px 6px #0008!important;border-radius:12px!important;color:#d6dce7!important}
+html body #settlement-services :is(.tn-radio,.tn-slot)[aria-pressed=true]{background:var(--ui2-gloss)!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),inset 0 3px 0 #ffffff33,0 3px 0 var(--ui2-ink)!important;color:#fff!important}
+html body #settlement-services .tn-radio .tn-dot{border-color:#5d6a82;background:var(--ui2-well)}
+html body #settlement-services .tn-radio[aria-pressed=true] .tn-dot{border-color:var(--ui2-gold)}
+/* Panels: slate in an ink outline with a brass inner line; the picked item's card keeps its rarity tint. */
+html body #settlement-services :is(.tn-card,.tn-restock,.tn-augrow){background:var(--ui2-panel);border:2.5px solid var(--ui2-ink);border-radius:16px;box-shadow:var(--ui2-line),inset 0 3px 0 #ffffff12,0 3px 0 #0a0f1fcc}
+html body #settlement-services .tn-augrow{border-left:4px solid var(--r);border-radius:12px}
+html body #settlement-services .tn-pickcard{background:linear-gradient(135deg,color-mix(in srgb,var(--r) 22%,#26324a),#1c263b 60%);border:2.5px solid var(--ui2-ink);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--r) 60%,transparent),inset 0 3px 0 #ffffff14,0 3px 0 #0a0f1fcc}
+html body #settlement-services .tn-pick{background:#0f1522;border:2.5px solid var(--ui2-ink);box-shadow:inset 0 3px 8px #0009}
+/* Wells inside panels. */
+html body #settlement-services :is(.tn-base,.tn-cost,.tn-pick .tn-restock){background:var(--ui2-well);border:2px solid var(--ui2-ink);border-radius:12px;box-shadow:inset 0 3px 7px #0009}
+html body #settlement-services .tn-cost.is-short{background:#2a1416;border-color:var(--ui2-ink);box-shadow:inset 0 0 0 1.5px #ff8a7a66,inset 0 3px 7px #0009}
+html body #settlement-services .tn-note{background:var(--ui2-well);border:2px solid var(--ui2-ink);border-left:4px solid var(--ui2-gold);box-shadow:inset 0 3px 7px #0009}
+html body #settlement-services .tn-notice{background:var(--ui2-well);border:2px solid var(--ui2-ink)}
+html body #settlement-services :is(.tn-sec,.tn-foot){border-top-color:#ddb15e40}
+html body #settlement-services .tn-foot{background:linear-gradient(#161e3000,#121a2a)}
+/* Labels in small brass capitals; names and big numbers in outlined Lilita One. */
+html body #settlement-services :is(.tn-sect,.tn-pickh b,.tn-rar){font-weight:900!important;color:var(--ui2-gold);text-shadow:0 1px 0 var(--ui2-ink)}
+html body #settlement-services .tn-gl{font-weight:900!important;color:#c8d0de}
+html body #settlement-services .tn-gl::after{background:#ddb15e40}
+html body #settlement-services :is(.tn-iname,.tn-pickcard .tn-iname,.tn-setname,.tn-upg h4,.tn-aughead h4){font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)}
+html body #settlement-services :is(.tn-base b,.tn-sum b,.tn-salebig,.tn-cost){font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+html body #settlement-services .tn-cost small{font-family:var(--ui2-body)!important;font-weight:800!important;-webkit-text-stroke:0}
+html body #settlement-services :is(.tn-nm,.tn-slotn,.tn-hint,.tn-isub,.tn-cmp,.tn-ln){font-weight:800!important}
+html body #settlement-services .tn-pr{font-weight:900!important;color:#ffe08f;text-shadow:0 1px 0 var(--ui2-ink)}
+/* Item frames: their rarity color with an ink drop. */
+html body #settlement-services .tn-tile{border-width:2.5px;box-shadow:0 3px 0 var(--ui2-ink)}
+html body #settlement-services .tn-cell.is-picked .tn-tile,html body #settlement-services .tn-cell.is-viewed .tn-tile{box-shadow:0 3px 0 var(--ui2-ink),0 0 0 3px var(--ui2-gold),0 0 14px #ddb15e99}
+html body #settlement-services .tn-pgrid .tn-cell[aria-pressed=true] .tn-tile{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--r) 80%,#000),0 0 0 2px var(--ui2-ink),0 0 0 4px var(--ui2-gold),0 0 16px #ddb15e88}
+/* Bars: brass progress, red health. */
+html body #settlement-services :is(.tn-bar,.tn-hp,.tn-roll){border:2px solid var(--ui2-ink);box-sizing:content-box}
+html body #settlement-services .tn-bar i{background:linear-gradient(180deg,#f6deaa,#ddb15e 50%,#9c6e2c)}
+html body #settlement-services .tn-pips i{border:1.5px solid var(--ui2-ink)}
+html body #settlement-services .tn-pips i.on{background:var(--ui2-gold)}
+/* Buttons: glossy slate in an ink outline that press down; the one main action is brass. */
+html body #settlement-services .tn-btn{border:3px solid var(--ui2-ink)!important;border-radius:14px!important;background:var(--ui2-gloss)!important;box-shadow:inset 0 3px 0 #ffffff40,inset 0 -4px 0 #00000038,0 4px 0 var(--ui2-ink)!important;color:#fff!important;font-family:var(--ui2-display)!important;font-weight:400!important;font-size:17px!important;letter-spacing:.03em;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;transition:transform .06s}
+html body #settlement-services .tn-btn.is-gold{background:linear-gradient(180deg,#f8e2b0 0%,#e9b960 48%,#d2913e 52%,#a8681c 100%)!important;-webkit-text-stroke:3.5px #5a3410}
+html body #settlement-services .tn-btn small{font-family:var(--ui2-body)!important;font-weight:900!important;-webkit-text-stroke:0;color:#fff;opacity:.9;text-shadow:0 1px 0 #5a3410}
+html body #settlement-services .tn-btn:active:not(:disabled){transform:translateY(4px);box-shadow:inset 0 3px 0 #ffffff30,0 0 0 var(--ui2-ink)!important}
+html body #settlement-services .tn-btn:disabled,html body #settlement-services .tn-btn.is-gold:disabled{opacity:1;filter:saturate(.2) brightness(.75);box-shadow:inset 0 3px 0 #ffffff20,0 4px 0 var(--ui2-ink)!important}
+html body #settlement-services .tn-link{border:2px solid var(--ui2-ink);background:var(--ui2-gloss);box-shadow:inset 0 0 0 1.5px #ddb15e80,0 2px 0 var(--ui2-ink);color:#ffe08f;font-weight:900!important}
+html body #settlement-services .tn-why{font-weight:800!important;color:#c8d0de}
+/* The notice board keeps its wood; only the type changes. */
+html body #quest-board :is(p,span,small,b,strong,div,button,h3,h4,li,em){font-family:var(--ui2-body)!important}
+html body #quest-board .qb-title :is(h2,h3,b,strong){font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em;font-variant:normal;-webkit-text-stroke:4px #2e1f15;paint-order:stroke fill;text-shadow:0 2px 0 #2e1f15}

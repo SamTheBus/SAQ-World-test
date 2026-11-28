@@ -1,6 +1,6 @@
 {
-  "runtimeId": "cbc82dc09aa34b5e",
-  "runtimeSha256": "cbc82dc09aa34b5e6b0e49776b4c128e679aa4c715fe2f9800d6b8aad8dbf4a5",
+  "runtimeId": "3bdb3d4b6e1f339d",
+  "runtimeSha256": "3bdb3d4b6e1f339da52bb915c75a0cc1bb084977f07ddc7a1f39d8ae3263880c",
   "files": [
     {
       "path": ".nojekyll",
@@ -550,7 +550,7 @@
     {
       "path": "index.html",
       "bytes": 13989,
-      "sha256": "df064683a25b484df0ceba5e722a01698503dd8a112fab7573158bc32883bd9a"
+      "sha256": "03e36994b65ba31c0421c91101398cb7a1223fe9a44bfcfdb0af87c74ebdd2d2"
     },
     {
       "path": "manifest.webmanifest",
@@ -609,8 +609,8 @@
     },
     {
       "path": "world.css",
-      "bytes": 319388,
-      "sha256": "6833294a23358c81cf40ffefc5b3dae49ce3126616bad43efe5e993110c2b74f"
+      "bytes": 330012,
+      "sha256": "1b47d1390688894e0b3ea828104838a8a1e71ae401a6f55f4ad7f19024526fdf"
     }
   ]
 }
