@@ -626,6 +626,7 @@ import {
   RUIN_TIER_POLICY,
   RUIN_TIER_POLICY_V2,
   RUSH_TICKS,
+  SALVAGE_MATERIALS,
   SB_BIG,
   SB_EVERY,
   SB_FREEZE,
@@ -1723,7 +1724,7 @@ import {
   worldTimeAtTick,
   wrathDamageV1,
   xpAtLevel
-} from "./chunk-N2U4QMMB.js";
+} from "./chunk-PFPDBTAG.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -248428,6 +248429,25 @@ function heroChanges(preview) {
   );
 }
 var isUpgrade = (preview) => Boolean(preview) && Object.values(preview.difference).some((v) => sign3(v) > 0) && !Object.values(preview.difference).some((v) => sign3(v) < 0);
+function swapVerdict(preview, level = 1, table2 = null) {
+  if (!preview) return null;
+  const n = (v) => Number(statValue(v ?? 0)) || 0, damage2 = (s) => n(s.attack) * (1 + Math.min(1, Math.max(0, n(s.critChance))) * Math.max(0, n(s.critMultiplier) - 1)), k = 20 + 12 * Math.max(1, Number(level) || 1), tough = (s) => n(s.maxHp) * Math.min(4, (k + Math.max(0, n(s.defense))) / k), pct3 = (a, b) => a > 0 ? Math.round((b / a - 1) * 100) : b > 0 ? 100 : 0, d = pct3(damage2(preview.before), damage2(preview.after)), t = pct3(tough(preview.before), tough(preview.after)), rows = table2 ? [...table2.base, ...table2.lines, ...table2.only.map(() => ({ win: "w" }))] : [], diffs = [...Object.values(preview.difference), ...rows.map((r) => r.win === "m" ? 1 : r.win === "w" ? -1 : 0)], up2 = d > 0 || t > 0 || d === 0 && t === 0 && diffs.some((v) => sign3(v) > 0), down = d < 0 || t < 0 || d === 0 && t === 0 && diffs.some((v) => sign3(v) < 0);
+  return { damage: d, toughness: t, kind: up2 && down ? "mixed" : up2 ? "up" : down ? "down" : "same" };
+}
+var VERDICT_NAMES = Object.freeze({ up: "Upgrade", mixed: "Trade-off", down: "Downgrade", same: "No change" });
+function compareTable(sections, worn) {
+  const byKey2 = (list) => {
+    const m = /* @__PURE__ */ new Map();
+    for (const l of list) m.set(l.key, m.has(l.key) ? sum(m.get(l.key), l.value) : l.value);
+    return m;
+  };
+  const wb = byKey2(worn.flatMap((w) => w.base)), wa = byKey2(worn.flatMap((w) => w.affixes)), nb = new Set(sections.base.map((l) => l.key)), na = new Set(sections.affixes.map((l) => l.key)), row2 = (l, mine2, other, otherNew) => {
+    const w = mine2.get(l.key) ?? (otherNew.has(l.key) ? void 0 : other.get(l.key)), s = w === void 0 ? 1 : sign3(statDifference(l.value, w));
+    return { ...l, worn: w ?? null, win: s > 0 ? "m" : s < 0 ? "w" : null };
+  }, base3 = sections.base.map((l) => row2(l, wb, wa, na)), lines2 = sections.affixes.map((l) => row2(l, wa, wb, nb)), gives = /* @__PURE__ */ new Set([...nb, ...na]);
+  const only = [...byKey2(worn.flatMap((w) => [...w.base, ...w.affixes]))].filter(([key4]) => !gives.has(key4)).map(([key4, value2]) => ({ key: key4, value: value2, flat: FLAT.includes(key4) }));
+  return { base: base3, lines: lines2, only };
+}
 var ICON_PATHS = {
   attack: ["#e8848c", '<path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="M13 19l6-6M16 16l4 4M19 21l2-2"/>'],
   defense: [
@@ -254223,6 +254243,27 @@ function createInventoryPresentation({
     );
     head19.append(frame6, info2, close2);
     scroll.append(head19);
+    const table2 = target ? compareTable(
+      sections,
+      worn.map((w) => itemSections(itemDefinition(w), w.generated))
+    ) : null, verdict = target ? swapVerdict(preview, local8.progression.level, table2) : null;
+    if (verdict) {
+      const band19 = element("div", "", "gx-verdict is-" + verdict.kind), chips3 = element("div", "", "gx-vchips");
+      band19.dataset.verdict = verdict.kind;
+      for (const [name, v, icon3] of [
+        ["Damage", verdict.damage, "attack"],
+        ["Toughness", verdict.toughness, "defense"]
+      ]) {
+        const chip6 = markup(
+          element("span", "", "gx-vchip " + (v > 0 ? "is-up" : v < 0 ? "is-down" : "is-same")),
+          statIcon(icon3, 14)
+        );
+        chip6.append(name, element("b", v > 0 ? `+${v}%` : v < 0 ? `\u2212${-v}%` : "\xB10"));
+        chips3.append(chip6);
+      }
+      band19.append(element("span", VERDICT_NAMES[verdict.kind], "gx-vtag"), chips3);
+      scroll.append(band19);
+    }
     if (target && d.slot === "ring") {
       const tabs = element("div", "", "gx-ringtabs");
       tabs.append(element("span", "Compare to", "gx-compareto"));
@@ -254243,14 +254284,7 @@ function createInventoryPresentation({
     } else {
       const note2 = element("div", "", "gx-compareline");
       if (equippedSlot) {
-      } else if (worn.length) {
-        note2.append("Arrows compare with your worn ");
-        for (const w of worn) {
-          const name = element("b", displayName(itemDefinition(w)));
-          rarityVar(name, itemDefinition(w));
-          note2.append(itemIcon(w), name);
-        }
-      } else if (target) note2.append(`Your ${SLOT_NAMES[target].replace(/ \d$/, "")} slot is empty`);
+      } else if (target && !worn.length) note2.append(`Your ${SLOT_NAMES[target].replace(/ \d$/, "")} slot is empty`);
       if (note2.childNodes.length) scroll.append(note2);
     }
     if (unique) {
@@ -254274,7 +254308,8 @@ function createInventoryPresentation({
     if (d.subType === "tome" && TOME_LINE[d.spellType])
       scroll.append(element("p", TOME_LINE[d.spellType], "gx-itemnote"));
     else if (d.description && !d.effects) scroll.append(element("p", d.description, "gx-itemnote"));
-    const tiles9 = cmp.base.filter((l) => l.flat), traits = cmp.base.filter((l) => !l.flat);
+    if (target) scroll.append(compareTableView(table2, worn));
+    const tiles9 = target ? [] : cmp.base.filter((l) => l.flat), traits = target ? [] : cmp.base.filter((l) => !l.flat);
     if (tiles9.length || traits.length) {
       const sec4 = element("section", "", "gx-section");
       sec4.append(element("h5", "Base stats", "gx-sectiontitle"));
@@ -254286,7 +254321,7 @@ function createInventoryPresentation({
       for (const l of traits) sec4.append(lineRow(l.key, l.value, l.mark, l.diff, "trait"));
       scroll.append(sec4);
     }
-    if (cmp.affixes.length) {
+    if (!target && cmp.affixes.length) {
       const sec4 = element("section", "", "gx-section");
       sec4.append(element("h5", `Affixes \xB7 ${cmp.affixes.length}`, "gx-sectiontitle"));
       for (const a of cmp.affixes) {
@@ -254360,8 +254395,8 @@ function createInventoryPresentation({
         scroll.append(sec4);
       }
     }
-    if (!cmp.base.length && !cmp.affixes.length) scroll.append(element("p", "No stat bonus", "gx-itemnote"));
-    for (const w of worn) {
+    if (!target && !cmp.base.length && !cmp.affixes.length) scroll.append(element("p", "No stat bonus", "gx-itemnote"));
+    for (const w of target ? [] : worn) {
       const wd = itemDefinition(w), ws = itemSections(wd, w.generated), box6 = element("div", "", "gx-worn"), h = element("h5", "", "gx-worntitle"), name = element("b", displayName(wd));
       rarityVar(name, wd);
       h.append("Wearing ", itemIcon(w), name);
@@ -254380,7 +254415,7 @@ function createInventoryPresentation({
       if (!lines2.length) box6.append(element("p", "No stat bonus", "gx-itemnote"));
       scroll.append(box6);
     }
-    if (cmp.lost.length) {
+    if (!target && cmp.lost.length) {
       const box6 = element("div", "", "gx-lost");
       box6.append(element("h5", `You lose from ${worn.map((w) => displayName(itemDefinition(w))).join(" + ")}`));
       for (const l of cmp.lost) box6.append(lineRow(l.key, l.value, "down", null, null, "gone"));
@@ -254462,10 +254497,10 @@ function createInventoryPresentation({
         key4 = null;
         refresh(readModel());
       });
-      more.className = "gx-btn";
+      more.className = "gx-btn is-more";
       more.dataset.action = "more";
       more.setAttribute("aria-expanded", String(moreOpen));
-      const caption = lock ? lock.text : d.slot === "ring" ? `${inv.equipped[target] ? "Replace" : "Equip to"} ${SLOT_NAMES[target]}` : "Equip", eq = button3(
+      const downgrade = verdict?.kind === "down", caption = lock ? lock.text : downgrade ? "Equip anyway" : d.slot === "ring" ? `${inv.equipped[target] ? "Replace" : "Equip to"} ${SLOT_NAMES[target]}` : "Equip", eq = button3(
         caption,
         () => {
           inspect = false;
@@ -254473,9 +254508,12 @@ function createInventoryPresentation({
         },
         !canEquip || Boolean(lock)
       );
-      eq.className = "gx-btn is-primary";
+      eq.className = downgrade ? "gx-btn" : "gx-btn is-primary";
       eq.dataset.action = "equip";
-      foot2.append(more, eq);
+      const sv = salvageButton(item2, local8, inv, canEquip);
+      if (sv && downgrade) sv.classList.add("is-primary");
+      if (sv && downgrade) foot2.append(sv, eq, more);
+      else foot2.append(eq, ...sv ? [sv] : [], more);
     }
     comparison.append(element("span", "", "gx-arrow"), scroll, foot2);
   }
@@ -254524,6 +254562,69 @@ function createInventoryPresentation({
       comparison.classList.add("is-opening");
       environment.requestAnimationFrame?.(() => placeSheet(false));
     }
+  }
+  function compareTableView(t, worn) {
+    const tbl = element("div", "", "gx-ct"), top = element("div", "", "gx-ctrow is-head"), wornHead = element("span", "", "gx-ctworn");
+    for (const w of worn) wornHead.append(itemIcon(w));
+    wornHead.append(worn.length ? "Worn" : "Empty");
+    top.append(element("span", ""), element("span", "This"), wornHead);
+    tbl.append(top);
+    const cap9 = (text3) => text3.charAt(0).toUpperCase() + text3.slice(1), cell = (v, key5, plus, cls) => element(
+      "span",
+      v == null ? "\u2014" : (plus ? "+" : "") + lineValue(key5, v),
+      "gx-ctv " + (v == null ? "is-none" : cls)
+    ), ctRow = (l, plus, tag2) => {
+      const r = element("div", "", "gx-ctrow"), name = element("span", "", "gx-ctname"), text3 = markup(element("span", "", "gx-ctlabel"), statIcon(l.key, 15));
+      text3.append(cap9(lineLabel(l.key)));
+      if (tag2) text3.append(element("small", tag2, "gx-tag"));
+      name.append(text3);
+      if (l.roll && !l.roll.fixed) {
+        const bar3 = element("div", "", "gx-roll" + (l.roll.max ? " is-max" : "")), fill8 = element("span", "");
+        fill8.style.width = (l.roll.quality * 100).toFixed(1) + "%";
+        bar3.append(fill8);
+        name.append(bar3);
+        if (l.roll.max) r.classList.add("is-max");
+      }
+      r.append(
+        name,
+        cell(l.value, l.key, plus, l.win === "m" ? "is-win" : l.win === "w" ? "is-lose" : ""),
+        cell(l.worn, l.key, plus, l.win === "w" ? "is-win" : l.win === "m" ? "is-lose" : "")
+      );
+      return r;
+    };
+    for (const l of t.base) tbl.append(ctRow(l, !l.flat, l.flat ? null : "trait"));
+    tbl.append(element("h5", `Bonus lines \xB7 ${t.lines.length}`, "gx-ctsub"));
+    if (t.lines.length) for (const l of t.lines) tbl.append(ctRow(l, true, l.roll?.fixed ? "fixed" : null));
+    else tbl.append(element("p", "None on this item", "gx-ctnone"));
+    if (t.only.length) {
+      tbl.append(element("h5", "Only on your worn gear", "gx-ctsub"));
+      for (const l of t.only) tbl.append(ctRow({ key: l.key, value: null, worn: l.value, win: "w" }, !l.flat));
+    }
+    return tbl;
+  }
+  function salvageButton(item2, local8, inv, canEquip) {
+    const protectedItem = Object.values(inv.subweapons?.claims ?? {}).some(
+      (c) => c.sourceEntityId === item2.sourceEntityId
+    );
+    if (item2.sourceEntityId === null || item2.definitionId === "worn-sword" || protectedItem) return null;
+    const quote = salvageQuote(local8, item2), haul = Object.entries(quote?.materials ?? {}).sort(
+      ([a], [b]) => SALVAGE_MATERIALS.indexOf(b) - SALVAGE_MATERIALS.indexOf(a)
+    ), sv = button3(
+      "",
+      () => {
+        salvagePending = { ...quote, itemId: item2.itemId, inventoryRevision: inv.revision };
+        moreOpen = true;
+        revealMore = true;
+        key4 = null;
+        refresh(readModel());
+      },
+      !canEquip
+    );
+    sv.className = "gx-btn is-salvage";
+    sv.dataset.action = "salvage-quick";
+    sv.append(element("span", "Salvage"));
+    if (haul.length) sv.append(element("small", `+${haul[0][1]} ${haul[0][0]}`, "gx-haul"));
+    return sv;
   }
   function moreActions(item2, d, local8, inv, canEquip) {
     const box6 = element("div", "", "gx-more"), row2 = element("div", "", "gx-morerow");

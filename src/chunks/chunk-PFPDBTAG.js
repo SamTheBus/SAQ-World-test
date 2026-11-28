@@ -58246,6 +58246,7 @@ export {
   rewardProgression,
   RARITY_NAMES4 as RARITY_NAMES,
   RARITY_COLORS4 as RARITY_COLORS,
+  SALVAGE_MATERIALS4 as SALVAGE_MATERIALS,
   gearHash4 as gearHash,
   gearSeed,
   affixRollRange,

@@ -2329,4 +2329,126 @@ html body .toast-lane-v1 .toast-v1 .toast-badge{border:2px solid var(--ui2-ink);
 html body .toast-lane-v1 .toast-v1 .toast-text strong{font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em;color:#fff!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill;text-shadow:none!important}
 html body .toast-lane-v1 .toast-v1 .toast-sub{font-family:var(--ui2-body)!important;font-weight:800!important;color:#dde2ec!important;opacity:1!important}
 html body .toast-lane-v1 .toast-v1 .toast-count{font-family:var(--ui2-display)!important;font-weight:400!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+/* ==========================================================================================
+   UI v2, step 2 (2026-11-27): the Menu and its pages (Gear, Bag, Stats, Skills) and the item card in slate
+   and brass. Layouts stay; type, frames, wells and buttons change. Small text is Nunito, names and numbers
+   are Lilita One in an ink outline, panels are slate in an ink outline with a brass inner line, item frames
+   take their rarity color, the one main action is brass, other buttons are glossy slate.
+   ========================================================================================== */
+html body #world-inventory{--rpg-ui:var(--ui2-body);--rpg-title:var(--ui2-display);--ui2-panel:linear-gradient(180deg,#2a3650 0%,#1d273b 60%,#172031 100%);--ui2-line:inset 0 0 0 1.5px #ddb15e73;--ui2-gloss:linear-gradient(180deg,#5a6d8f 0%,#34435f 50%,#26324a 52%,#1c263b 100%)}
+html body #world-inventory,html body #world-inventory :is(p,span,small,b,strong,i,em,div,button,h2,h3,h4,h5,label,li,input,select,nav,aside,section,header){font-family:var(--ui2-body)!important}
+html body #world-inventory.rpg-menu{background:linear-gradient(180deg,#222d44 0%,#161e30 100%)!important;border:3px solid var(--ui2-ink)!important;border-radius:20px!important;box-shadow:inset 0 0 0 2px #ddb15e8c,inset 0 0 0 4px #0a0f1f99,0 6px 0 var(--ui2-ink),0 18px 50px #000a!important}
+/* Outlined display lettering: titles, names, big numbers. */
+html body #world-inventory :is(#world-bag-title,.mh-name,.gx-heroname,.sx-name,.gx-itemname,.gx-keystat b,.gx-attr b,.sx-key b,.sx-aval,.cs-points b){font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)!important}
+html body #world-inventory #world-bag-title{font-size:23px!important;color:var(--ui2-cream)!important;-webkit-text-stroke:4.5px var(--ui2-ink)}
+html body #world-inventory :is(.gx-keystat b,.gx-attr b){font-size:20px!important}
+html body #world-inventory :is(.sx-value,.gx-statrow b,.gx-heroval b,.gx-base b){font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+/* Section labels: small brass capitals. */
+html body #world-inventory :is(.gx-cardtitle,.sx-title,.gx-sectiontitle,.gx-worntitle,.mh-kicker){font-family:var(--ui2-body)!important;font-weight:900!important;color:var(--ui2-gold)!important;text-shadow:0 1px 0 var(--ui2-ink)}
+html body #world-inventory :is(.gx-herosub,.sx-sub,.gx-itemsub,.gx-hint,.sx-label,.sx-adesc,.gx-compareline,.gx-bagmeta,.mh-tile small){color:#c8d0de!important}
+/* The header: a brass rule under it; gold and owned counts sit in sunken wells. */
+html body #world-inventory .bag-heading{border-bottom:2px solid #ddb15e59!important;box-shadow:0 2px 0 #0a0f1f80}
+html body #world-inventory #world-bag-summary :is(strong,span){background:var(--ui2-well)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:inset 0 3px 6px #0009!important;color:#fff!important;font-weight:900!important}
+html body #world-inventory #world-bag-summary strong{color:#ffe08f!important}
+/* Round buttons: close, rail toggle, Menu home, look, card close. */
+html body #world-inventory :is(#world-bag-close,.rm-railbtn,.gx-close,.sx-look){background:var(--ui2-gloss)!important;border:3px solid var(--ui2-ink)!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),inset 0 3px 0 #ffffff40,0 3px 0 var(--ui2-ink)!important;color:#fff!important;transition:transform .06s}
+html body #world-inventory :is(#world-bag-close,.rm-railbtn,.gx-close,.sx-look):active{transform:translateY(3px);box-shadow:inset 0 0 0 1.5px var(--ui2-gold),0 0 0 var(--ui2-ink)!important}
+/* The page rail: a sunken strip; the open page is a glossy slate key with a brass ring and a brass icon. */
+html body #world-inventory nav.bag-section-tabs{background:#0f1522!important;border-right:2.5px solid var(--ui2-ink)!important;box-shadow:inset -1.5px 0 0 #ddb15e40!important}
+html body #world-inventory nav.bag-section-tabs .rm-page{border-radius:12px!important;color:#8090ad!important;background:none!important;border:2.5px solid transparent!important;box-shadow:none!important}
+html body #world-inventory nav.bag-section-tabs .rm-page:is([aria-selected=true],[aria-pressed=true],[aria-current=page],.is-active,.active){background:var(--ui2-gloss)!important;border-color:var(--ui2-ink)!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),inset 0 3px 0 #ffffff33,0 3px 0 var(--ui2-ink)!important;color:var(--ui2-gold)!important}
+html body #world-inventory nav.bag-section-tabs .rm-page::before,html body #world-inventory nav.bag-section-tabs .rm-page::after{background:none!important;box-shadow:none!important}
+/* Subtabs (Items, Etc, Materials) and filter chips: dark wells; the open one rises in glossy slate with brass letters. */
+html body #world-inventory :is(.rm-subtab,.gx-chip){background:var(--ui2-well)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:inset 0 3px 6px #0008!important;color:#a9b5ca!important;font-weight:900!important;border-radius:12px!important}
+html body #world-inventory :is(.rm-subtab,.gx-chip):is([aria-selected=true],[aria-pressed=true],[aria-current=page],.is-active,.active,.on){background:var(--ui2-gloss)!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),inset 0 3px 0 #ffffff33,0 3px 0 var(--ui2-ink)!important;color:#ffe08f!important;text-shadow:0 1px 0 var(--ui2-ink)}
+html body #world-inventory .gx-chip i{color:#fff!important;font-style:normal}
+/* Panels: slate in an ink outline with a brass inner line. */
+html body #world-inventory :is(.gx-doll,.gx-card,.gx-keystat,.sx-card,.gx-worn,.cs-points,.cs-wheel-toggle){background:var(--ui2-panel)!important;border:2.5px solid var(--ui2-ink)!important;border-radius:16px!important;box-shadow:var(--ui2-line),inset 0 3px 0 #ffffff12,0 3px 0 #0a0f1fcc!important}
+/* Wells inside panels. */
+html body #world-inventory :is(.gx-attr,.sx-key,.sx-arow,.gx-base){background:var(--ui2-well)!important;border:2px solid var(--ui2-ink)!important;border-radius:12px!important;box-shadow:inset 0 3px 7px #0009!important}
+html body #world-inventory .gx-statrow,html body #world-inventory .sx-row{border-color:#ffffff14!important}
+html body #world-inventory .sx-aic{border:2px solid var(--ui2-ink)!important;box-shadow:inset 0 2px 0 #ffffff1f!important}
+html body #world-inventory .sx-amain{background:radial-gradient(circle at 40% 30%,#f8e2b0,#ddb15e 55%,#9c6e2c)!important;border:2px solid var(--ui2-ink)!important;color:#3d2508!important;font-weight:900!important}
+/* XP on the Stats card: the same purple bar as the HUD. */
+html body #world-inventory .sx-xptrack{height:10px!important;background:#1a1530!important;border:2.5px solid var(--ui2-ink)!important;border-radius:7px!important;box-shadow:0 2px 0 var(--ui2-ink)!important;overflow:hidden}
+html body #world-inventory .sx-xptrack>*{background:linear-gradient(180deg,#b9a6ff 0 38%,#7c5cff 38% 100%)!important;border-radius:0!important}
+/* Item frames: rarity colored ring, glossy top, ink outline; empty slots are sunken and dashed. */
+html body #world-inventory :is(button.gx-slot,button.gx-tile,.gx-itemicon){background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--rarity,#c9d2dc) 26%,#2a3650),#141c2c 78%)!important;border:3px solid var(--ui2-ink)!important;border-radius:14px!important;box-shadow:inset 0 0 0 2.5px var(--rarity,#c9d2dc),inset 0 0 0 4px #0a0f1f80,inset 0 5px 0 #ffffff1a,0 3px 0 var(--ui2-ink)!important}
+html body #world-inventory :is(button.gx-slot,button.gx-tile)[aria-pressed=true]{box-shadow:inset 0 0 0 2.5px var(--rarity,#c9d2dc),inset 0 0 0 4px #0a0f1f80,0 3px 0 var(--ui2-ink),0 0 0 3px var(--ui2-gold),0 0 14px #ddb15e99!important}
+html body #world-inventory button.gx-slot.is-empty{background:#0f1522!important;border:2.5px dashed #3c4a66!important;box-shadow:inset 0 3px 7px #0009!important}
+html body #world-inventory .gx-name{font-weight:900!important;color:#e6ebf3!important;text-shadow:0 1px 0 var(--ui2-ink)}
+html body #world-inventory .gx-pedestal{background:radial-gradient(ellipse at center,#0a0f1f99,transparent 70%)!important}
+/* Buttons: brass for the one main action, glossy slate for the rest, red for resets. */
+html body #world-inventory :is(.gx-btn,.gx-salvage,.cs-reset){border:3px solid var(--ui2-ink)!important;border-radius:14px!important;background:var(--ui2-gloss)!important;box-shadow:inset 0 3px 0 #ffffff40,inset 0 -4px 0 #00000038,0 4px 0 var(--ui2-ink)!important;color:#fff!important;font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.03em;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill;transition:transform .06s,box-shadow .06s}
+html body #world-inventory .gx-btn.is-primary{background:linear-gradient(180deg,#f8e2b0 0%,#e9b960 48%,#d2913e 52%,#a8681c 100%)!important;color:#fff!important;-webkit-text-stroke:3.5px #5a3410}
+html body #world-inventory .cs-reset{background:linear-gradient(180deg,#f0a090 0%,#d65a4a 48%,#b8402f 52%,#8a2a1e 100%)!important}
+html body #world-inventory :is(.gx-btn,.gx-salvage,.cs-reset):active:not(:disabled){transform:translateY(4px);box-shadow:inset 0 3px 0 #ffffff30,0 0 0 var(--ui2-ink)!important}
+html body #world-inventory :is(.gx-btn,.gx-salvage,.cs-reset):disabled{filter:saturate(.2) brightness(.8)}
+/* The item card. */
+html body #world-inventory .gx-sheet{background:linear-gradient(180deg,#26324a 0%,#172031 100%)!important;border:3px solid var(--ui2-ink)!important;border-radius:18px!important;box-shadow:inset 0 0 0 2px #ddb15e8c,0 5px 0 var(--ui2-ink),0 16px 40px #000b!important}
+html body #world-inventory .gx-sheetfoot{background:#141c2c!important;border-top:2px solid #ddb15e40!important}
+html body #world-inventory .gx-arrow{background:#26324a!important;border-color:var(--ui2-ink)!important}
+html body #world-inventory .gx-knob{background:linear-gradient(180deg,#5a6d8f,#26324a)!important;border:2px solid var(--ui2-ink)!important}
+html body #world-inventory :is(.gx-switch[aria-checked=true],.gx-switch[aria-pressed=true],.gx-switch.is-on) .gx-knob{background:linear-gradient(180deg,#e9b960,#9c6e2c)!important}
+/* Skills: the tree keeps its night sky; it sits in an ink frame with a brass line. */
+html body #world-inventory .cs-stage{border:3px solid var(--ui2-ink)!important;border-radius:16px!important;box-shadow:inset 0 0 0 1.5px #ddb15e73!important}
+/* The Menu tiles. */
+html body #world-inventory .mh button.mh-tile{background:var(--ui2-panel)!important;border:3px solid var(--ui2-ink)!important;border-radius:18px!important;box-shadow:inset 0 0 0 2px #ddb15e8c,inset 0 4px 0 #ffffff14,0 4px 0 var(--ui2-ink)!important;transition:transform .06s,box-shadow .06s}
+html body #world-inventory .mh button.mh-tile:active{transform:translateY(4px);box-shadow:inset 0 0 0 2px #ddb15e8c,0 0 0 var(--ui2-ink)!important}
+html body #world-inventory .mh button.mh-tile::before,html body #world-inventory .mh button.mh-tile::after{display:none!important}
+html body #world-inventory .mh-ic{background:var(--ui2-orb-bg)!important;border:3px solid var(--ui2-ink)!important;box-shadow:inset 0 0 0 2.5px var(--ui2-gold),inset 0 0 0 4.5px var(--ui2-ink),inset 0 4px 0 #ffffff2e,0 3px 0 var(--ui2-ink)!important;color:#fff!important}
+html body #world-inventory .mh-frame{border:3px solid var(--ui2-ink)!important;background:var(--ui2-orb-bg)!important;box-shadow:inset 0 0 0 3px var(--ui2-gold),inset 0 0 0 5px var(--ui2-ink),0 4px 0 var(--ui2-ink)!important}
+html body #world-inventory .mh-hint{background:var(--ui2-well)!important;border:2px solid var(--ui2-ink)!important;color:#ffe08f!important;font-weight:900!important}
+html body #world-inventory .mh-badge{background:radial-gradient(circle at 40% 35%,#ff9a8f,#ff3b30 55%,#c4140c)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:0 2px 0 var(--ui2-ink)!important;color:#fff!important;font-family:var(--ui2-display)!important;font-weight:400!important;-webkit-text-stroke:2.5px var(--ui2-ink);paint-order:stroke fill}
+/* Materials: soul and scrap rows as slate panels; counts in the display face; tags as small wells. */
+html body #world-inventory #world-materials-view{background:none!important}
+html body #world-inventory .mt-sec{font-weight:900!important;color:var(--ui2-gold)!important;text-shadow:0 1px 0 var(--ui2-ink)}
+html body #world-inventory article.mt-row{background:var(--ui2-panel)!important;border:2.5px solid var(--ui2-ink)!important;border-radius:14px!important;box-shadow:var(--ui2-line),inset 0 3px 0 #ffffff12,0 3px 0 #0a0f1fcc!important}
+html body #world-inventory article.mt-row.mt-hero{background:linear-gradient(180deg,#3a2c52 0%,#24193a 100%)!important;box-shadow:inset 0 0 0 1.5px #b45cff99,inset 0 3px 0 #ffffff14,0 3px 0 #0a0f1fcc!important}
+html body #world-inventory .mt-row strong,html body #world-inventory .mt-text>b{font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em;color:#fff!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+html body #world-inventory b.mt-count{font-family:var(--ui2-display)!important;font-weight:400!important;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)}
+html body #world-inventory .mt-row.is-zero b.mt-count{color:#8f9bb0!important}
+html body #world-inventory span.mt-tag{background:var(--ui2-well)!important;border:1.5px solid var(--ui2-ink)!important;color:#ffe08f!important;font-weight:900!important}
+html body #world-inventory .mt-desc,html body #world-inventory .mt-note{color:#c8d0de!important}
 
+/* UI v2: item card v2 (mockup claude.ai/artifact/UBR5hMsh3VJKFHX6geFcAw). A verdict band (Upgrade, Trade-off,
+   Downgrade) with Damage and Toughness chips, one This / Worn table with today's roll bars, and Salvage beside Equip. */
+html body #world-inventory .gx-verdict{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 10px;padding:9px 11px;border:3px solid var(--ui2-ink);border-radius:14px;box-shadow:inset 0 2px 0 #ffffff1f,0 3px 0 var(--ui2-ink)}
+html body #world-inventory .gx-verdict.is-up{background:linear-gradient(180deg,#2c5a3a,#173322)}
+html body #world-inventory .gx-verdict.is-mixed{background:linear-gradient(180deg,#5a4a22,#2e2512)}
+html body #world-inventory .gx-verdict.is-down{background:linear-gradient(180deg,#5c2a28,#311514)}
+html body #world-inventory .gx-verdict.is-same{background:linear-gradient(180deg,#34435f,#1c263b)}
+html body #world-inventory .gx-vtag{font:400 21px/1 var(--ui2-display);letter-spacing:.02em;color:#fff;-webkit-text-stroke:4px var(--ui2-ink);paint-order:stroke fill}
+html body #world-inventory .gx-verdict.is-up .gx-vtag{color:#c9ffcf}
+html body #world-inventory .gx-verdict.is-mixed .gx-vtag{color:#ffe7a8}
+html body #world-inventory .gx-verdict.is-down .gx-vtag{color:#ffc4b8}
+html body #world-inventory .gx-vchips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+html body #world-inventory .gx-vchip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:#0f1522cc;border:2px solid var(--ui2-ink);font:900 12px/1 var(--ui2-body);color:#d6dce7}
+html body #world-inventory .gx-vchip b{font:400 15px/1 var(--ui2-display);-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill;color:#d6dce7}
+html body #world-inventory .gx-vchip.is-up b{color:#7dff8a}
+html body #world-inventory .gx-vchip.is-down b{color:#ff8a7a}
+html body #world-inventory .gx-ct{display:grid;gap:5px;margin:4px 0 10px}
+html body #world-inventory .gx-ctrow{display:grid;grid-template-columns:minmax(0,1fr) 27% 27%;align-items:center;gap:0}
+html body #world-inventory .gx-ctrow.is-head{font:900 11px/1 var(--ui2-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ui2-gold);text-align:center}
+html body #world-inventory .gx-ctworn{display:inline-flex;align-items:center;justify-content:center;gap:5px}
+html body #world-inventory .gx-ctworn canvas,html body #world-inventory .gx-ctworn img{width:20px;height:20px}
+html body #world-inventory .gx-ctname{min-width:0;padding-right:8px}
+html body #world-inventory .gx-ctlabel{display:flex;align-items:center;gap:6px;font:800 13px/1.2 var(--ui2-body);color:#d6dce7}
+html body #world-inventory .gx-ctlabel .gx-ic{flex:none}
+html body #world-inventory .gx-ctrow.is-max .gx-ctlabel{color:#ff8a70}
+html body #world-inventory .gx-ctname .gx-roll{margin:5px 0 0 21px}
+html body #world-inventory .gx-ctv{text-align:center;white-space:nowrap;padding:7px 3px;background:var(--ui2-well);border-top:2px solid var(--ui2-ink);border-bottom:2px solid var(--ui2-ink);font:400 16px/1 var(--ui2-display);letter-spacing:.02em;color:#c9d2dc;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+html body #world-inventory .gx-ctrow .gx-ctv:nth-child(2){border-left:2px solid var(--ui2-ink);border-radius:10px 0 0 10px}
+html body #world-inventory .gx-ctrow .gx-ctv:nth-child(3){border-right:2px solid var(--ui2-ink);border-radius:0 10px 10px 0;box-shadow:inset 2px 0 0 var(--ui2-ink)}
+html body #world-inventory .gx-ctv.is-win{color:#fff;background:linear-gradient(180deg,#2a4a35,#183223)}
+html body #world-inventory .gx-ctv.is-win::after{content:" \25B2";font-size:10px;color:#7dff8a;-webkit-text-stroke:2px var(--ui2-ink)}
+html body #world-inventory .gx-ctv.is-lose{color:#8f9bb0}
+html body #world-inventory .gx-ctv.is-none{color:#5d6a82;-webkit-text-stroke:0}
+html body #world-inventory .gx-ctsub{margin:7px 0 1px;font:900 11px/1 var(--ui2-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ui2-gold);text-shadow:0 1px 0 var(--ui2-ink)}
+html body #world-inventory .gx-ctnone{margin:0;font:800 italic 13px/1.3 var(--ui2-body);color:#8f9bb0}
+html body #world-inventory .gx-sheetfoot .gx-btn.is-primary{flex:1.6}
+html body #world-inventory .gx-sheetfoot .gx-btn.is-salvage{flex:1.2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1.05}
+html body #world-inventory .gx-sheetfoot .gx-btn .gx-haul{font:900 10px/1.1 var(--ui2-body);letter-spacing:.02em;color:#d6dce7;-webkit-text-stroke:0;text-shadow:0 1px 0 var(--ui2-ink)}
+html body #world-inventory .gx-sheetfoot .gx-btn.is-primary .gx-haul{color:#5a3410;text-shadow:0 1px 0 #f8e2b080}
+html body #world-inventory .gx-sheetfoot .gx-btn.is-more{flex:none;padding-inline:12px}
+html body #world-inventory .gx-itemname .gx-uniquetag{font:900 10px/1.2 var(--ui2-body)!important;letter-spacing:.08em;-webkit-text-stroke:0;color:#3d2508!important;background:linear-gradient(180deg,#f8e2b0,#ddb15e)!important;border:1.5px solid var(--ui2-ink)}
