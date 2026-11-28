@@ -339688,6 +339688,463 @@ function frostvigilName(e, x, y, name) {
   e.fillText(name, x, y);
   e.restore();
 }
+var VSH = VENT_PAL;
+var vshEase = (x) => x * x * (3 - 2 * x);
+var vshClamp = (x) => Math.max(0, Math.min(1, x));
+var vshSeg = (t, a, b) => vshClamp((t - a) / (b - a));
+var vshMix = (a, b, u) => a + (b - a) * u;
+var VSH_BRACE = 0.75;
+var VSH_FLY = 0.62;
+var VSH_POOL = 1.9;
+var VSH_SPENT = 2.35;
+var VSH_END = 4.9;
+var VSH_BOMBS = [0.3, 0.46, 0.6, 0.74, 0.88].map((f, k) => ({ f, at: VSH_BRACE + k * 0.2 }));
+function vshBeat(t, low) {
+  const T121 = low ? 3 : 6, s = (t % T121 + T121) % T121 / T121 * 6 - 0.6;
+  const on = s >= 0 && s < VSH_END;
+  return {
+    s,
+    on,
+    brace: on && s < VSH_BRACE + 0.1 ? vshEase(vshSeg(s, 0, VSH_BRACE)) : 0,
+    erupt: on && s >= VSH_BRACE && s < VSH_SPENT ? 1 - vshSeg(s, VSH_SPENT - 0.3, VSH_SPENT) : 0,
+    spent: on ? vshEase(vshSeg(s, VSH_SPENT - 0.2, VSH_SPENT + 0.3)) * (1 - vshEase(vshSeg(s, VSH_END - 0.5, VSH_END))) : 0
+  };
+}
+function vshHeat(b, t) {
+  return vshClamp(0.5 + Math.sin(t * 2.4) * 0.12 + b.brace * 0.4 + b.erupt * 0.5 - b.spent * 0.45);
+}
+var VSH_TILT = -0.62;
+var VSH_LEN = 17;
+var VSH_K = 1.3;
+function vshTip(x, y) {
+  return [x + VSH_K * VSH_LEN * Math.sin(VSH_TILT), y - VSH_K * VSH_LEN * Math.cos(VSH_TILT)];
+}
+function vshCone(e, x, y, heat, spent, shake) {
+  const L = VSH_LEN, wAt = (yy) => 6.8 - (6.8 - 1.9) * (-yy / L);
+  e.save();
+  e.translate(x + shake, y);
+  e.rotate(VSH_TILT);
+  e.scale(VSH_K, VSH_K);
+  const body6 = () => {
+    e.beginPath();
+    e.moveTo(-6.8, 0);
+    e.quadraticCurveTo(-5.4, -L * 0.55, -1.9, -L);
+    e.lineTo(1.9, -L);
+    e.quadraticCurveTo(5.8, -L * 0.5, 6.8, 0);
+    e.ellipse(0, 0, 6.8, 2.6, 0, 0, Math.PI);
+    e.closePath();
+  };
+  body6();
+  e.fillStyle = VSH.rock;
+  e.fill();
+  e.save();
+  body6();
+  e.clip();
+  e.fillStyle = VSH.rockL;
+  e.fillRect(-8, -L - 1, 4.6, L + 4);
+  e.fillStyle = VSH.rockD;
+  e.fillRect(2.6, -L - 1, 6, L + 4);
+  for (const yy of [-3.2, -7.4, -11.2, -14.4]) {
+    const w = wAt(yy);
+    e.strokeStyle = VSH.rockDD;
+    e.lineWidth = 0.8;
+    e.beginPath();
+    e.moveTo(-w - 0.5, yy + 1.4);
+    e.quadraticCurveTo(0, yy + 2.6, w + 0.5, yy - 1.2);
+    e.stroke();
+    e.strokeStyle = VSH.rockLL;
+    e.lineWidth = 0.4;
+    e.beginPath();
+    e.moveTo(-w, yy + 0.6);
+    e.quadraticCurveTo(-w * 0.4, yy + 1.4, w * 0.1, yy + 1.1);
+    e.stroke();
+  }
+  for (const [x0, x1, x2] of [
+    [-0.6, -2.6, -1.4],
+    [1.2, 2.8, 3.9]
+  ]) {
+    e.strokeStyle = VSH.crust;
+    e.lineWidth = 1.8;
+    e.beginPath();
+    e.moveTo(x0, -L);
+    e.quadraticCurveTo(x1, -L * 0.5, x2, -0.5);
+    e.stroke();
+    e.globalAlpha = 0.3 + heat * 0.7;
+    e.strokeStyle = heat > 0.15 ? VSH.lava : VSH.crust;
+    e.lineWidth = 0.8;
+    e.stroke();
+    e.globalAlpha = 1;
+  }
+  e.restore();
+  body6();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 1.1;
+  e.lineJoin = "round";
+  e.stroke();
+  e.beginPath();
+  e.moveTo(-4.2, -8.6);
+  e.lineTo(-7.6, -10.4);
+  e.lineTo(-4.9, -11.6);
+  e.closePath();
+  e.fillStyle = VSH.claw;
+  e.fill();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 0.7;
+  e.stroke();
+  e.strokeStyle = VSH.clawL;
+  e.lineWidth = 0.4;
+  e.beginPath();
+  e.moveTo(-4.6, -9.6);
+  e.lineTo(-6.6, -10.6);
+  e.stroke();
+  e.beginPath();
+  e.ellipse(0, -L, 2.4, 1.2, 0, 0, TAU260);
+  e.fillStyle = spent > 0.5 ? VSH.crust : VSH.lavaD;
+  e.fill();
+  if (spent < 0.9) {
+    e.save();
+    e.globalAlpha = 1 - spent;
+    e.shadowColor = VSH.lava;
+    e.shadowBlur = 4 + heat * 6;
+    e.fillStyle = heat > 0.7 ? VSH.lavaL : VSH.lava;
+    e.beginPath();
+    e.ellipse(0, -L + 0.15, 1.7, 0.7, 0, 0, TAU260);
+    e.fill();
+    e.restore();
+  }
+  e.beginPath();
+  e.ellipse(0, -L, 2.4, 1.2, 0, 0, TAU260);
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 0.8;
+  e.stroke();
+  e.restore();
+}
+function vshPool(e, x, cy2, k, crust2, t, seed2) {
+  if (k <= 0) return;
+  const rx = 6.5 * k, ry = 3.4 * k, hot = 1 - crust2;
+  e.save();
+  e.beginPath();
+  e.ellipse(x, cy2, rx + 1.4, ry + 1.1, 0, 0, TAU260);
+  e.fillStyle = VSH.crust;
+  e.fill();
+  e.strokeStyle = EDGE5;
+  e.lineWidth = 0.7;
+  e.stroke();
+  e.beginPath();
+  e.ellipse(x, cy2 + 0.2, rx, ry, 0, 0, TAU260);
+  e.fillStyle = hot > 0.02 ? VSH.lavaD : VSH.crust;
+  e.fill();
+  if (hot > 0.02) {
+    e.globalAlpha = hot;
+    e.fillStyle = VSH.lava;
+    e.beginPath();
+    e.ellipse(x + 0.3, cy2 + 0.3, rx * 0.72, ry * 0.6, 0, 0, TAU260);
+    e.fill();
+    e.fillStyle = VSH.lavaL;
+    e.beginPath();
+    e.ellipse(x - rx * 0.15, cy2 - ry * 0.15, rx * 0.32, ry * 0.26, -0.3, 0, TAU260);
+    e.fill();
+    e.strokeStyle = VSH.lavaL;
+    e.lineWidth = 0.5;
+    const a0 = t * 1.1 + seed2;
+    e.beginPath();
+    e.ellipse(x, cy2, rx * 0.55, ry * 0.5, 0, a0, a0 + 1.7);
+    e.stroke();
+    e.globalAlpha = 1;
+  }
+  if (crust2 > 0) {
+    e.globalAlpha = Math.min(1, crust2 * 1.5) * (0.5 + 0.5 * (1 - crust2));
+    e.strokeStyle = VSH.lava;
+    e.lineWidth = 0.5;
+    e.beginPath();
+    e.moveTo(x - rx * 0.6, cy2 - 0.4);
+    e.lineTo(x - rx * 0.1, cy2 + 0.6);
+    e.lineTo(x + rx * 0.5, cy2 - 0.5);
+    e.moveTo(x - rx * 0.1, cy2 + 0.6);
+    e.lineTo(x, cy2 + ry * 0.8);
+    e.stroke();
+    e.globalAlpha = 1;
+  }
+  e.restore();
+}
+var VENTSHELL_BAR = {
+  shape: (e, o, t, i, a) => pill(e, o, t, i, a),
+  chunk: [VSH.lavaL, VSH.lava, VSH.lavaD],
+  under(e, o, t, i, a, l, n) {
+    const b = vshBeat(l, n < 0.5), heat = vshHeat(b, l), shake = b.brace > 0.2 ? Math.sin(l * 70) * 0.7 * b.brace : 0;
+    vshCone(e, o + 1, t + a / 2 + 1, heat, b.spent, shake);
+  },
+  track(e, o, t, i, a) {
+    pill(e, o - 2.5, t - 2.5, i + 5, a + 5);
+    e.fillStyle = vgrad(e, t - 2.5, a + 5, [VSH.rockL, VSH.rock, VSH.rockD]);
+    e.fill();
+    e.lineWidth = 1;
+    e.strokeStyle = EDGE5;
+    e.stroke();
+    const r = seeded2(83);
+    e.strokeStyle = VSH.rockDD;
+    e.lineWidth = 0.5;
+    e.beginPath();
+    for (let x = o + 8; x < o + i - 8; x += 14 + r() * 18) {
+      e.moveTo(x, t - 1.6);
+      e.lineTo(x + 5 + r() * 6, t - 1.4);
+      e.moveTo(x + 3, t + a + 1.5);
+      e.lineTo(x + 9 + r() * 5, t + a + 1.6);
+    }
+    e.stroke();
+    for (let x = o + 30; x < o + i - 10; x += 44 + r() * 30) {
+      e.strokeStyle = VSH.crust;
+      e.lineWidth = 1.4;
+      e.beginPath();
+      e.moveTo(x, t - 2.3);
+      e.lineTo(x + 1.2, t - 0.4);
+      e.stroke();
+      e.strokeStyle = VSH.lavaD;
+      e.lineWidth = 0.5;
+      e.stroke();
+    }
+    pill(e, o, t, i, a);
+    e.fillStyle = VSH.crust;
+    e.fill();
+    e.save();
+    e.clip();
+    e.fillStyle = "#3a2622";
+    e.fillRect(o, t, i, a * 0.3);
+    e.strokeStyle = "rgba(194,65,12,.35)";
+    e.lineWidth = 0.5;
+    e.beginPath();
+    for (let x = o + 6; x < o + i; x += 12 + r() * 16) {
+      e.moveTo(x, t + a * (0.3 + r() * 0.3));
+      e.lineTo(x + 2 + r() * 3, t + a * (0.5 + r() * 0.4));
+    }
+    e.stroke();
+    e.restore();
+  },
+  fill(e, o, t, i, a, l, n) {
+    const b = vshBeat(l, i / n < 0.5), heat = vshHeat(b, l);
+    e.fillStyle = VSH.shell;
+    e.fillRect(o, t, i, a);
+    e.fillStyle = VSH.shellL;
+    e.fillRect(o, t, i, a * 0.32);
+    e.fillStyle = VSH.shellD;
+    e.fillRect(o, t + a * 0.7, i, a * 0.3);
+    e.fillStyle = "rgba(255,214,180,.6)";
+    e.fillRect(o, t + 0.5, i, 0.5);
+    const r = seeded2(31);
+    let x = o + 11 + r() * 3;
+    while (x < o + i + 14) {
+      const pw = 15 + r() * 7, x0 = x - pw;
+      const g = e.createLinearGradient(x0, 0, x, 0);
+      g.addColorStop(0, "rgba(86,22,16,0)");
+      g.addColorStop(0.75, "rgba(86,22,16,0)");
+      g.addColorStop(1, "rgba(86,22,16,.55)");
+      e.fillStyle = g;
+      e.fillRect(Math.max(o, x0), t, Math.min(x, o + i) - Math.max(o, x0), a);
+      if (x < o + i - 1) {
+        e.strokeStyle = VSH.shellDD;
+        e.lineWidth = 1.6;
+        e.beginPath();
+        e.moveTo(x - 0.4, t);
+        e.quadraticCurveTo(x + 1.6, t + a * 0.5, x - 0.4, t + a);
+        e.stroke();
+        e.globalAlpha = 0.3 + heat * 0.6;
+        e.strokeStyle = heat > 0.8 ? VSH.lavaL : VSH.lava;
+        e.lineWidth = 0.7;
+        e.beginPath();
+        e.moveTo(x + 0.3, t + 0.8);
+        e.quadraticCurveTo(x + 2.1, t + a * 0.5, x + 0.3, t + a - 0.8);
+        e.stroke();
+        e.globalAlpha = 1;
+      }
+      dot17(e, x0 + pw * 0.42, t + a * 0.38, 0.85, VSH.shellD);
+      dot17(e, x0 + pw * 0.42 - 0.3, t + a * 0.3, 0.4, VSH.shellL);
+      if (pw > 18) dot17(e, x0 + pw * 0.7, t + a * 0.45, 0.6, VSH.shellD);
+      x += pw;
+    }
+  },
+  chunkMotion(e, o, t, i, a, l) {
+    for (let n = 0; n < 4; n++) {
+      const r = (l * 0.9 + n / 4) % 1;
+      e.globalAlpha = 1 - r;
+      dot17(e, o + i * (0.15 + n * 0.23), t + a - r * 5, 0.8, VSH.lavaL);
+    }
+    e.globalAlpha = 1;
+  },
+  edge(e, o, t, i, a) {
+    e.fillStyle = VSH.shellDD;
+    e.beginPath();
+    e.moveTo(o - 2, t);
+    e.lineTo(o + 0.6, t);
+    e.lineTo(o - 0.6, t + i * 0.4);
+    e.lineTo(o + 0.5, t + i * 0.7);
+    e.lineTo(o - 0.3, t + i);
+    e.lineTo(o - 2, t + i);
+    e.closePath();
+    e.fill();
+    e.strokeStyle = VSH.lava;
+    e.lineWidth = 0.6 + a * 0.6;
+    e.beginPath();
+    e.moveTo(o + 0.6, t);
+    e.lineTo(o - 0.6, t + i * 0.4);
+    e.lineTo(o + 0.5, t + i * 0.7);
+    e.lineTo(o - 0.3, t + i);
+    e.stroke();
+  },
+  over(e, o, t, i, a, l, n, r) {
+    const low = n < 0.5, b = vshBeat(l, low), heat = vshHeat(b, l), fx = o + i * n, cy2 = t + a / 2, [cx, cyTop] = vshTip(o + 1, t + a / 2 + 1);
+    for (let k = 0; k < 3; k++) {
+      const q2 = (l * 0.5 + k / 3) % 1, steam2 = b.spent > 0.4;
+      e.save();
+      e.globalAlpha = (1 - q2) * (steam2 ? 0.7 : 0.45 + b.brace * 0.3);
+      e.fillStyle = steam2 ? VSH.steam : k % 2 ? VSH.smoke : VSH.smokeL;
+      e.beginPath();
+      e.arc(cx + Math.sin(q2 * 4 + k) * 1.5 - q2 * 4, cyTop - 2 - q2 * 9, 1.3 + q2 * 2.4, 0, TAU260);
+      e.fill();
+      e.restore();
+    }
+    if (b.erupt > 0 && b.s < VSH_BOMBS[4].at + 0.15) {
+      const k = b.erupt * (0.7 + 0.3 * Math.sin(l * 30));
+      e.save();
+      e.shadowColor = VSH.lava;
+      e.shadowBlur = 6;
+      e.fillStyle = VSH.lava;
+      e.beginPath();
+      e.moveTo(cx - 1.8, cyTop);
+      e.quadraticCurveTo(cx - 2.6, cyTop - 5 * k, cx - 2.6, cyTop - 8 * k);
+      e.quadraticCurveTo(cx + 0.4, cyTop - 5 * k, cx + 1.8, cyTop);
+      e.closePath();
+      e.fill();
+      e.fillStyle = VSH.lavaL;
+      e.beginPath();
+      e.ellipse(cx - 0.8, cyTop - 2.5 * k, 0.7, 2.5 * k, -0.3, 0, TAU260);
+      e.fill();
+      e.restore();
+    }
+    for (const [j, { f, at: at10 }] of VSH_BOMBS.entries()) {
+      if (!b.on) break;
+      const tx = o + i * f, land = at10 + VSH_FLY;
+      if (b.s >= at10 - 0.25 && b.s < land) {
+        const u = vshSeg(b.s, at10 - 0.25, land);
+        e.save();
+        e.globalAlpha = Math.min(1, u * 4);
+        e.strokeStyle = "rgba(42,16,10,.65)";
+        e.lineWidth = 2.2;
+        e.beginPath();
+        e.ellipse(tx, cy2, 7.5, 4.5, 0, 0, TAU260);
+        e.stroke();
+        e.strokeStyle = VSH.lava;
+        e.lineWidth = 0.9;
+        e.stroke();
+        e.fillStyle = "rgba(255,122,30,.3)";
+        e.beginPath();
+        e.ellipse(tx, cy2, 7.5 * u, 4.5 * u, 0, 0, TAU260);
+        e.fill();
+        e.restore();
+      }
+      if (b.s >= land && b.s < land + VSH_POOL + 0.5) {
+        const p = b.s - land;
+        vshPool(
+          e,
+          tx,
+          cy2,
+          vshEase(vshSeg(p, 0, 0.15)) * (1 - vshSeg(p, VSH_POOL, VSH_POOL + 0.5)),
+          vshSeg(p, 0.9, VSH_POOL),
+          l,
+          j * 1.7
+        );
+      }
+      if (b.s >= at10 && b.s < land) {
+        const u = (b.s - at10) / VSH_FLY, x = vshMix(cx, tx, u), y = vshMix(cyTop - 2, cy2 - 1, u) - Math.sin(u * Math.PI) * 13;
+        for (let m = 1; m < 4; m++) {
+          const v = Math.max(0, u - m * 0.06);
+          e.globalAlpha = 0.8 - m * 0.2;
+          dot17(
+            e,
+            vshMix(cx, tx, v),
+            vshMix(cyTop - 2, cy2 - 1, v) - Math.sin(v * Math.PI) * 13,
+            1.2 - m * 0.2,
+            VSH.lavaL
+          );
+        }
+        e.globalAlpha = 1;
+        e.beginPath();
+        e.arc(x, y, 2.4, 0, TAU260);
+        e.fillStyle = VSH.lava;
+        e.fill();
+        e.fillStyle = VSH.crust;
+        e.beginPath();
+        e.arc(x + 0.7, y + 0.6, 1.1, 0, TAU260);
+        e.fill();
+        dot17(e, x - 0.8, y - 0.8, 0.6, VSH.lavaL);
+        e.beginPath();
+        e.arc(x, y, 2.4, 0, TAU260);
+        e.strokeStyle = EDGE5;
+        e.lineWidth = 0.7;
+        e.stroke();
+      }
+      if (b.s >= land && b.s < land + 0.35) {
+        const q2 = (b.s - land) / 0.35;
+        e.save();
+        e.globalAlpha = 1 - q2;
+        for (let m = 0; m < 6; m++) {
+          const ang = Math.PI + m / 5 * Math.PI;
+          dot17(
+            e,
+            tx + Math.cos(ang) * (3 + q2 * 8),
+            cy2 + Math.sin(ang) * (2 + q2 * 6),
+            1 - q2 * 0.5,
+            m % 2 ? VSH.lavaL : VSH.lava
+          );
+        }
+        e.restore();
+      }
+    }
+    if (low)
+      for (let k = 0; k < 4; k++) {
+        const q2 = (l * 0.6 + k / 4) % 1, x = o + 18 + (k * 0.31 + 0.15) % 1 * Math.max(0, fx - o - 22);
+        e.globalAlpha = (1 - q2) * 0.9;
+        dot17(e, x + Math.sin(q2 * 6 + k) * 1.5, t - 1 - q2 * 8, 0.7, k % 2 ? VSH.lavaL : VSH.lava);
+      }
+    e.globalAlpha = 1;
+    if (r > 0) {
+      for (let k = 0; k < 7; k++) {
+        const d = 1 - r, dx = (k - 3) * 2.4 * (0.4 + d), vy = -4 + d * d * 14 + k % 2 * 2;
+        e.globalAlpha = r;
+        e.fillStyle = k % 3 ? VSH.shellL : VSH.lavaL;
+        e.beginPath();
+        e.moveTo(fx + dx, cy2 + vy - 1);
+        e.lineTo(fx + dx + 0.9, cy2 + vy);
+        e.lineTo(fx + dx, cy2 + vy + 1);
+        e.lineTo(fx + dx - 0.9, cy2 + vy);
+        e.closePath();
+        e.fill();
+      }
+      e.globalAlpha = 1;
+    }
+  }
+};
+function drawVentshellBar(e, o, t, i, a) {
+  const { x, y, w } = o;
+  drawBar(e, { x: x + 18, y: y + NAME_GAP, w: w - 24, h: BAR_H }, i, VENTSHELL_BAR, a);
+  ventshellName(e, x + w / 2, y + 13, t.name);
+}
+function ventshellName(e, x, y, name) {
+  e.save();
+  e.textAlign = "center";
+  e.textBaseline = "alphabetic";
+  e.lineJoin = "round";
+  e.font = "900 13px Georgia,serif";
+  e.shadowColor = "#000000a0";
+  e.shadowBlur = 4;
+  e.shadowOffsetY = 1;
+  e.lineWidth = 3.4;
+  e.strokeStyle = "#2a1010";
+  e.strokeText(name, x, y);
+  e.shadowColor = "transparent";
+  e.fillStyle = vgrad(e, y - 10, 11, ["#ffe9b0", "#ffb050", "#e0541c"]);
+  e.fillText(name, x, y);
+  e.restore();
+}
 var LESSER_BARS = Object.freeze({
   rustmaw: Object.freeze({ draw: drawRustmawBar, side: 24 }),
   sporecrown: Object.freeze({ draw: drawSporecrownBar, side: 14 }),
@@ -339709,7 +340166,8 @@ var LESSER_BARS = Object.freeze({
   cairnwarden: Object.freeze({ draw: drawCairnwardenBar, side: 16 }),
   shardheart: Object.freeze({ draw: drawShardheartBar, side: 16 }),
   rimehorn: Object.freeze({ draw: drawRimehornBar, side: 16 }),
-  frostvigil: Object.freeze({ draw: drawFrostvigilBar, side: 16 })
+  frostvigil: Object.freeze({ draw: drawFrostvigilBar, side: 16 }),
+  ventshell: Object.freeze({ draw: drawVentshellBar, side: 16 })
 });
 function drawLesserBossBarV1(e, o, t, i, a) {
   let l = LESSER_BARS[t?.id];
