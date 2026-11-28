@@ -2692,3 +2692,47 @@ html body #world-inventory .hero-slots button.is-quiet{background:var(--ui2-well
 html body #world-inventory .hero-slots button.is-danger{background:linear-gradient(180deg,#ffb4a8 0%,#ff6a55 48%,#e2483a 52%,#b42a20 100%)!important;-webkit-text-stroke-color:#5a0d08}
 html body #world-inventory .hero-slots .hero-slot-worlds button small{font-family:var(--ui2-body)!important;font-weight:800;-webkit-text-stroke:0;color:#c8d0de!important}
 html body #world-inventory .hero-slots .hero-slot-worlds button.is-current{box-shadow:inset 0 0 0 2px var(--ui2-gold),0 3px 0 var(--ui2-ink)!important}
+
+/* ==========================================================================================
+   UI v2, step 6 (2026-11-28): the big moments (moments_v2.js) in slate and brass. Level up, a unique drop and a boss
+   kill share one banner: brass rays, a sparkle burst, a slate badge with a brass ring, a brass ribbon and a slate
+   plate. A unique tints its rays and glow with its rarity. No dark overlay: only a light brass glow at the edges.
+   The Bestiary's tier-up toast is drawn bigger, with the card art and a shine.
+   ========================================================================================== */
+.moment-v2{--moment-accent:var(--ui2-gold);position:fixed;inset:0;z-index:60;pointer-events:none;overflow:hidden}
+.moment-v2-flash{position:absolute;inset:0;box-shadow:inset 0 0 110px 26px color-mix(in srgb,var(--moment-accent) 70%,transparent);animation:mo2-flash 1.6s ease-out forwards}
+.moment-v2-stage{position:absolute;left:50%;top:30%;width:0;height:0;animation:mo2-stage var(--moment-ms,3200ms) ease-in forwards}
+.moment-v2-rays{position:absolute;left:-180px;top:-180px;width:360px;height:360px;border-radius:50%;background:repeating-conic-gradient(from 0deg,transparent 0deg 7deg,color-mix(in srgb,var(--moment-accent) 45%,transparent) 9deg 13deg,transparent 15deg 22deg);-webkit-mask:radial-gradient(circle,#000 18%,#0008 42%,transparent 70%);mask:radial-gradient(circle,#000 18%,#0008 42%,transparent 70%);animation:mo2-rays var(--moment-ms,3200ms) linear forwards,mo2-rays-in .5s ease-out both}
+.moment-v2-burst i{position:absolute;left:-4px;top:-6px;width:8px;height:12px;background:var(--ui2-gold-hi);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);filter:drop-shadow(0 0 4px var(--moment-accent));animation:mo2-spark 1.1s cubic-bezier(.2,.7,.3,1) both}
+.moment-v2-badge{position:absolute;left:-56px;top:-62px;width:112px;height:112px;box-sizing:border-box;border-radius:50%;display:grid;place-items:center;background:var(--ui2-orb-bg);border:3px solid var(--ui2-ink);box-shadow:inset 0 0 0 3.5px var(--ui2-gold),inset 0 0 0 5.5px var(--ui2-ink),inset 0 6px 0 #ffffff2e,0 4px 0 var(--ui2-ink),0 0 34px 6px color-mix(in srgb,var(--moment-accent) 60%,transparent);animation:mo2-pop .7s cubic-bezier(.17,1.6,.4,1) both}
+.moment-v2-badge strong{font:400 52px/1 var(--ui2-display);color:#fff;-webkit-text-stroke:6px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 3px 0 var(--ui2-ink);margin-top:-8px;font-variant-numeric:tabular-nums}
+.moment-v2-badge img{width:68px;height:68px;object-fit:contain;image-rendering:pixelated;margin-top:-6px;filter:drop-shadow(0 2px 0 var(--ui2-ink)) drop-shadow(0 0 8px color-mix(in srgb,var(--moment-accent) 70%,transparent))}
+.moment-v2-badge svg{width:64px;height:64px;margin-top:-8px;fill:var(--ui2-gold-hi);stroke:var(--ui2-ink);stroke-width:1.6px;paint-order:stroke fill;filter:drop-shadow(0 2px 0 var(--ui2-ink))}
+.moment-v2[data-kind=unique] .moment-v2-badge{box-shadow:inset 0 0 0 3.5px var(--moment-accent),inset 0 0 0 5.5px var(--ui2-ink),inset 0 6px 0 #ffffff2e,0 4px 0 var(--ui2-ink),0 0 40px 10px color-mix(in srgb,var(--moment-accent) 70%,transparent)}
+.moment-v2-ribbon{position:absolute;left:50%;top:30px;transform:translateX(-50%);white-space:nowrap;padding:5px 26px 7px;background:var(--ui2-brass-btn,linear-gradient(180deg,#f6deaa,#ddb15e 55%,#9c6e2c));clip-path:polygon(0 0,100% 0,calc(100% - 12px) 50%,100% 100%,0 100%,12px 50%);filter:drop-shadow(0 3px 0 var(--ui2-ink));font:400 19px/1 var(--ui2-display);letter-spacing:.06em;color:#fff;-webkit-text-stroke:4px var(--ui2-ink);paint-order:stroke fill;animation:mo2-ribbon .5s cubic-bezier(.2,1.4,.4,1) .15s both}
+.moment-v2-plate{position:absolute;left:50%;top:72px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px;max-width:min(88vw,420px);width:max-content;box-sizing:border-box;padding:7px 16px 8px;border-radius:14px;background:var(--ui2-panel,linear-gradient(180deg,#2a3650,#172031));border:2.5px solid var(--ui2-ink);box-shadow:inset 0 0 0 1.5px #ddb15e99,inset 0 2px 0 #ffffff1f,0 4px 0 var(--ui2-ink);animation:mo2-plate .45s ease-out .3s both}
+.moment-v2-title{font:400 24px/1.1 var(--ui2-display);letter-spacing:.02em;color:var(--ui2-cream);-webkit-text-stroke:5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink);text-align:center;text-wrap:balance}
+.moment-v2[data-kind=unique] .moment-v2-title{color:color-mix(in srgb,var(--moment-accent) 55%,#fff)}
+.moment-v2-sub{font:800 12.5px/1.3 var(--ui2-body);color:#dde2ec;text-align:center}
+.moment-v2[data-kind=boss] .moment-v2-title{font-size:28px}
+@keyframes mo2-flash{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
+@keyframes mo2-stage{0%,84%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-22px)}}
+@keyframes mo2-rays{to{transform:rotate(70deg)}}
+@keyframes mo2-rays-in{from{opacity:0;transform:scale(.4)}}
+@keyframes mo2-spark{0%{opacity:0;transform:translate(0,0) scale(.4)}15%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1)}}
+@keyframes mo2-pop{0%{opacity:0;transform:scale(.2) rotate(-12deg)}100%{opacity:1;transform:none}}
+@keyframes mo2-ribbon{from{opacity:0;transform:translateX(-50%) scaleX(.3)}}
+@keyframes mo2-plate{from{opacity:0;transform:translate(-50%,10px)}}
+@media(max-height:500px){.moment-v2-stage{top:34%;scale:.8}}
+@media(prefers-reduced-motion:reduce){.moment-v2 *{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+/* Bestiary tier up: a bigger card with the monster's art, the tier's color as its frame and a shine across it. */
+html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"]{overflow:hidden;border-radius:14px!important;padding:6px 14px 8px 6px!important;gap:10px!important;box-shadow:inset 0 0 0 2px var(--toast-accent),inset 0 2px 0 #ffffff1f,0 3px 0 #000a,0 0 16px color-mix(in srgb,var(--toast-accent) 55%,transparent)!important}
+html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-badge{position:relative;overflow:hidden;width:44px!important;height:44px!important;border-radius:10px;border-color:var(--ui2-ink);box-shadow:inset 0 0 0 2px var(--toast-accent),0 2px 0 var(--ui2-ink)}
+html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-badge img{width:40px!important;height:40px!important;border-radius:8px;object-fit:cover}
+html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-badge svg{width:24px!important;height:24px!important}
+html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-text{flex-direction:column!important;align-items:flex-start!important;gap:1px!important}
+html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-text strong{font-size:15px!important;color:color-mix(in srgb,var(--toast-accent) 45%,#fff)!important}
+html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-sub{font-size:11.5px!important;opacity:1!important}
+html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-text::before{content:"TIER UP";font:400 10px/1 var(--ui2-display);letter-spacing:.14em;color:var(--ui2-gold-hi);-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+html body .toast-lane-v1 .toast-v1[data-key^="bestiary/"] .toast-badge::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,#ffffff40 48%,transparent 60%);transform:translateX(-120%);animation:mo2-shine 1.2s ease-out .25s both;pointer-events:none}
+@keyframes mo2-shine{to{transform:translateX(120%)}}

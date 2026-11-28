@@ -115681,7 +115681,7 @@ var PLATE = {
 var overlaps = (a, b, p = 0) => a.x0 < b.x1 + p && a.x1 > b.x0 - p && a.y0 < b.y1 + p && a.y1 > b.y0 - p;
 var tileKey = (x, y) => (x + 32768) * 65536 + (y + 32768);
 function createForestStandsArtV2(env, prior) {
-  const doc = env.document, pieces = createStandPieces(doc), lanes3 = createStandLanes(doc), terraces = createTerracePainter(), volcanoes = createVolcanoPainter(), kits = /* @__PURE__ */ new Map(), plates2 = /* @__PURE__ */ new Map(), bands = /* @__PURE__ */ new WeakMap(), casters = /* @__PURE__ */ new WeakMap(), fronts = /* @__PURE__ */ new WeakMap();
+  const doc = env.document, pieces = createStandPieces(doc), lanes4 = createStandLanes(doc), terraces = createTerracePainter(), volcanoes = createVolcanoPainter(), kits = /* @__PURE__ */ new Map(), plates2 = /* @__PURE__ */ new Map(), bands = /* @__PURE__ */ new WeakMap(), casters = /* @__PURE__ */ new WeakMap(), fronts = /* @__PURE__ */ new WeakMap();
   let plateBytes = 0, models = /* @__PURE__ */ new WeakMap(), kitsAt = prior.kitGeneration?.() ?? 0;
   const stats3 = { platesBuilt: 0, trees: 0, faded: 0, replays: 0, lanePages: 0, terracePages: 0 };
   function kit2(code2, kind, h = 0) {
@@ -116604,7 +116604,7 @@ function createForestStandsArtV2(env, prior) {
     }
     stats3.lanePages++;
     const o = laneOptions(m, at10), k = paints ? paintedRoads(m, bounds3, at10) : null;
-    yield* lanes3.draw(c, bounds3, { ...o, kinds: ["T"] });
+    yield* lanes4.draw(c, bounds3, { ...o, kinds: ["T"] });
     if (k) {
       c.save();
       if (k.clip) c.clip(k.clip);
@@ -116615,7 +116615,7 @@ function createForestStandsArtV2(env, prior) {
         c.restore();
       }
     }
-    yield* lanes3.draw(c, bounds3, { ...o, kinds: ["P", "R"] });
+    yield* lanes4.draw(c, bounds3, { ...o, kinds: ["P", "R"] });
   }
   function roadOverlay(c, space, bounds3, at10) {
     const m = modelFor(space);
@@ -116627,7 +116627,7 @@ function createForestStandsArtV2(env, prior) {
         next = work.next();
       } while (!next.done);
     };
-    all(lanes3.draw(c, bounds3, { ...o, kinds: ["T"] }));
+    all(lanes4.draw(c, bounds3, { ...o, kinds: ["T"] }));
     if (k) {
       c.save();
       if (k.clip) c.clip(k.clip);
@@ -116637,7 +116637,7 @@ function createForestStandsArtV2(env, prior) {
         c.restore();
       }
     }
-    all(lanes3.draw(c, bounds3, { ...o, kinds: ["P", "R"] }));
+    all(lanes4.draw(c, bounds3, { ...o, kinds: ["P", "R"] }));
   }
   function groundDetail(space, x, y, occupied) {
     if (standsCell2(space, x, y)) return null;
@@ -116682,7 +116682,7 @@ function createForestStandsArtV2(env, prior) {
         plates: plates2.size,
         plateBytes,
         pieces: pieces.resources(),
-        lanes: lanes3.resources(),
+        lanes: lanes4.resources(),
         terraces: terraces.resources()
       }
     })
@@ -176430,7 +176430,7 @@ function projectWorldTerrainD9(state2, compiled, { x, y, width: width2 = 88, hei
 
 // src/host/combat_presentation_projection.js
 function projectCombatPresentation(state2, visibleIds) {
-  const ids4 = new Set(visibleIds), lanes3 = /* @__PURE__ */ new Map();
+  const ids4 = new Set(visibleIds), lanes4 = /* @__PURE__ */ new Map();
   const mastery = Object.values(state2.subweaponCombat.mastery ?? {});
   return {
     masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })),
@@ -176458,7 +176458,7 @@ function projectCombatPresentation(state2, visibleIds) {
         nextTick: e.expiresTick
       }))
     ].filter((e) => ids4.has(e.targetId) && e.expiresTick > state2.tick).map((e) => ({
-      lane: (lanes3.set(e.targetId, (lanes3.get(e.targetId) ?? -1) + 1), lanes3.get(e.targetId)),
+      lane: (lanes4.set(e.targetId, (lanes4.get(e.targetId) ?? -1) + 1), lanes4.get(e.targetId)),
       id: e.id,
       sourceId: e.sourceId,
       targetId: e.targetId,
@@ -243037,51 +243037,139 @@ function createSkillWheelV1({
   });
 }
 
-// src/client/level_up_celebration_v4.js
-var LEVEL_UP_CELEBRATION_V4 = Object.freeze({ durationMs: 3200, sparks: 22 });
-function createLevelUpCelebrationV4(doc) {
+// src/client/moments_v2.js
+var MOMENTS_V2 = Object.freeze({
+  ms: { level: 3200, unique: 3400, boss: 3600 },
+  queuedMs: 2400,
+  queueMax: 4,
+  sparks: 22
+});
+var lanes2 = /* @__PURE__ */ new WeakMap();
+var SVG2 = "http://www.w3.org/2000/svg";
+var GLYPHS = {
+  star: '<path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/>',
+  swords: '<g transform="rotate(45 12 12)"><path d="M10.6 15V4.6L12 2l1.4 2.6V15z"/><path d="M7.6 14.6h8.8v2H7.6z"/><path d="M11 16.6h2v3.6h-2z"/><circle cx="12" cy="21.3" r="1.4"/></g><g transform="rotate(-45 12 12)"><path d="M10.6 15V4.6L12 2l1.4 2.6V15z"/><path d="M7.6 14.6h8.8v2H7.6z"/><path d="M11 16.6h2v3.6h-2z"/><circle cx="12" cy="21.3" r="1.4"/></g>'
+};
+var titleCase2 = (text3) => String(text3).toLowerCase().replace(/(^|[\s'-])(\p{L})/gu, (_, lead, ch) => lead + ch.toUpperCase());
+function laneFor2(doc) {
+  let lane2 = lanes2.get(doc);
+  if (lane2) return lane2;
   let root6 = null, timer2 = null;
+  const queue = [];
   function clear2() {
     clearTimeout(timer2);
+    timer2 = null;
     root6?.remove();
     root6 = null;
   }
-  function play(level, detail = "") {
-    clear2();
-    root6 = doc.createElement("div");
-    root6.className = "level-up-v4";
+  function el3(tag2, className2, text3) {
+    const e = doc.createElement(tag2);
+    if (className2) e.className = className2;
+    if (text3 !== void 0) e.textContent = text3;
+    return e;
+  }
+  function build2(m, ms) {
+    root6 = el3("div", "moment-v2");
+    root6.dataset.kind = m.kind;
     root6.setAttribute("role", "status");
     root6.setAttribute("aria-live", "assertive");
-    const flash2 = doc.createElement("div");
-    flash2.className = "level-up-v4-flash";
-    const stage2 = doc.createElement("div");
-    stage2.className = "level-up-v4-stage";
-    const rays = doc.createElement("div");
-    rays.className = "level-up-v4-rays";
-    const burst8 = doc.createElement("div");
-    burst8.className = "level-up-v4-burst";
-    for (let i = 0; i < LEVEL_UP_CELEBRATION_V4.sparks; i++) {
-      const s = doc.createElement("i"), a = i / LEVEL_UP_CELEBRATION_V4.sparks * Math.PI * 2 + i % 3 * 0.17, d = 90 + i % 5 * 26;
+    root6.style.setProperty("--moment-ms", ms + "ms");
+    if (m.accent) root6.style.setProperty("--moment-accent", m.accent);
+    const stage2 = el3("div", "moment-v2-stage"), rays = el3("div", "moment-v2-rays"), burst8 = el3("div", "moment-v2-burst");
+    for (let i = 0; i < MOMENTS_V2.sparks; i++) {
+      const s = doc.createElement("i"), a = i / MOMENTS_V2.sparks * Math.PI * 2 + i % 3 * 0.17, d = 90 + i % 5 * 26;
       s.style.setProperty("--dx", Math.cos(a) * d + "px");
       s.style.setProperty("--dy", Math.sin(a) * d * 0.8 + "px");
       s.style.animationDelay = i % 4 * 40 + "ms";
       burst8.append(s);
     }
-    const emblem8 = doc.createElement("div");
-    emblem8.className = "level-up-v4-emblem";
-    const kicker = doc.createElement("small");
-    kicker.textContent = "LEVEL UP";
-    const number2 = doc.createElement("strong");
-    number2.textContent = String(level);
-    const sub = doc.createElement("span");
-    sub.textContent = detail;
-    emblem8.append(kicker, number2);
-    stage2.append(rays, burst8, emblem8, sub);
-    root6.append(flash2, stage2);
+    const badge2 = el3("div", "moment-v2-badge");
+    if (m.image) {
+      const img = doc.createElement("img");
+      img.src = m.image;
+      img.alt = "";
+      badge2.append(img);
+    } else if (m.number !== void 0) badge2.append(el3("strong", "", String(m.number)));
+    else {
+      const svg3 = doc.createElementNS(SVG2, "svg");
+      svg3.setAttribute("viewBox", "0 0 24 24");
+      svg3.setAttribute("aria-hidden", "true");
+      svg3.innerHTML = GLYPHS[m.glyph] ?? GLYPHS.star;
+      badge2.append(svg3);
+    }
+    const ribbon3 = el3("div", "moment-v2-ribbon", m.kicker), plate8 = el3("div", "moment-v2-plate");
+    if (m.title) plate8.append(el3("strong", "moment-v2-title", m.title));
+    if (m.sub) plate8.append(el3("span", "moment-v2-sub", m.sub));
+    stage2.append(rays, burst8, badge2, ribbon3);
+    if (m.title || m.sub) stage2.append(plate8);
+    root6.append(el3("div", "moment-v2-flash"), stage2);
     doc.body.append(root6);
-    timer2 = setTimeout(clear2, LEVEL_UP_CELEBRATION_V4.durationMs);
+    timer2 = setTimeout(next, ms);
   }
-  return Object.freeze({ play, destroy: clear2 });
+  function next() {
+    clear2();
+    const m = queue.shift();
+    if (m) build2(m, Math.min(MOMENTS_V2.ms[m.kind] ?? 3e3, queue.length ? MOMENTS_V2.queuedMs : Infinity));
+  }
+  function play(m) {
+    if (!doc?.body) return;
+    if (!root6) return build2(m, MOMENTS_V2.ms[m.kind] ?? 3e3);
+    queue.push(m);
+    if (queue.length > MOMENTS_V2.queueMax) queue.shift();
+  }
+  lane2 = {
+    play,
+    waiting: () => queue.length,
+    destroy() {
+      queue.length = 0;
+      clear2();
+      lanes2.delete(doc);
+    }
+  };
+  lanes2.set(doc, lane2);
+  return lane2;
+}
+function momentV2(doc, moment) {
+  return laneFor2(doc).play(moment);
+}
+function levelUpMomentV2(doc, level, detail = "") {
+  momentV2(doc, { kind: "level", kicker: "LEVEL UP", number: level, sub: detail });
+}
+function uniqueDropMomentV2(doc, { name, rarity = "", image = null, accent = null }) {
+  momentV2(doc, {
+    kind: "unique",
+    kicker: "UNIQUE!",
+    title: name,
+    sub: rarity ? `${rarity} \xB7 added to your bag` : "Added to your bag",
+    image,
+    accent
+  });
+}
+function slainBossOfV2(actor) {
+  if (actor?.boss) {
+    const def = actor.boss.bossDefinitionId, page = bossPageFor(def);
+    return { name: BOSS_PAGE_NAMES[page] ?? titleCase2(String(def ?? "Boss").replace(/_/g, " ")), tag: "Boss slain" };
+  }
+  const named2 = NAMED_ENDS_V1[actor?.elite?.namedEliteId];
+  if (named2 && LESSER_BOSSES_V1[named2.id]) return { name: titleCase2(named2.label), tag: "Lesser boss slain" };
+  return null;
+}
+function createBossSlainWatcherV2(doc) {
+  let alive = /* @__PURE__ */ new Map(), space = null;
+  return function refresh(model) {
+    if (!model?.entitiesById) return;
+    const here2 = `${model.context?.campaignId}/${model.space?.id ?? model.space?.label ?? ""}`;
+    const now3 = /* @__PURE__ */ new Map();
+    for (const [id2, a] of Object.entries(model.entitiesById)) {
+      const who = (a?.boss || a?.elite?.namedEliteId) && slainBossOfV2(a);
+      if (!who) continue;
+      if (a.alive) now3.set(id2, who);
+      else if (space === here2 && alive.has(id2))
+        momentV2(doc, { kind: "boss", kicker: "VICTORY", title: who.name, sub: who.tag, glyph: "swords" });
+    }
+    alive = now3;
+    space = here2;
+  };
 }
 
 // src/client/camp_journal_card_v1.js
@@ -286635,6 +286723,13 @@ function createInventoryPresentation({
           accent: tier2 ? RARITY_COLORS[tier2] : null,
           key: "item/" + added2.itemId
         });
+        if (uniqueOf(itemDefinition(added2)))
+          uniqueDropMomentV2(document2, {
+            name: displayName(itemDefinition(added2)),
+            rarity: RARITY_NAMES[tier2] ?? "",
+            image: itemIconUrl(added2, document2),
+            accent: tier2 ? RARITY_COLORS[tier2] : null
+          });
         toastUntil = time3 + 1800;
       }
     } else if (observed?.identity !== identity2) {
@@ -317456,7 +317551,7 @@ function needle4(c, x, y, a) {
   c.fill();
   c.restore();
 }
-function lanes2(c, x, y, u) {
+function lanes3(c, x, y, u) {
   if (u >= 1) return;
   c.save();
   c.globalAlpha = (1 - u) * 0.5;
@@ -317744,7 +317839,7 @@ function desertUniquesArtV1(c, { m, id: id2, a, f, foot: foot2, visible: visible
   if (b && see(b.x, b.y + lift)) {
     const x = b.x, y = b.y + lift;
     place4("spinegrove-burst/" + id2, x, () => {
-      if (groundPassV1()) lanes2(c, x, y - 2, b.age / 15);
+      if (groundPassV1()) lanes3(c, x, y - 2, b.age / 15);
       if (b.age < 24) standV1(c, y + 0.3, () => shards3(c, x, y, b.age / 24));
       for (let i = 0; i < 8; i++) {
         const an = i * TAU247 / 8, d = 14 + b.age * 9;
@@ -352565,7 +352660,14 @@ function mountPlayableClient({
   otherLands = null
 }) {
   const doc = environment.document, canvas = doc.getElementById("world-view"), status = doc.getElementById("world-status");
-  const levelUpCelebration = createLevelUpCelebrationV4(doc);
+  const levelUpCelebration = { play: (level, detail) => levelUpMomentV2(doc, level, detail) }, bossSlainWatcher = createBossSlainWatcherV2(doc);
+  if (new URL(environment.location.href).searchParams.get("previewMoments") === "1") {
+    if (doc.defaultView) doc.defaultView.previewMomentV2 = (moment) => momentV2(doc, moment);
+    environment.setTimeout(() => {
+      levelUpMomentV2(doc, "12", "+3 attribute points \xB7 +1 utility SP");
+      uniqueDropMomentV2(doc, { name: "Previewed Unique", rarity: "Legendary", accent: "#e67e22" });
+    }, 4e3);
+  }
   if (new URL(environment.location.href).searchParams.get("previewLevelUp") === "1")
     environment.setTimeout(() => {
       levelUpCelebration.play("5", "+3 attribute points \xB7 +1 utility SP");
@@ -353033,6 +353135,7 @@ function mountPlayableClient({
     skillBar.refresh(model, presentation.gameplayHudVisible && !presentation.defeated);
     primary?.refresh(model);
     const participant = model.playersById[model.localPlayerId], progress5 = participant.progression;
+    bossSlainWatcher(model);
     const levelNotice = doc.getElementById("world-level-up");
     const painted6 = performanceProbe ? performanceProbe.measure("rendererTotal", () => renderer.render(model, time3, input, authorityDeadline)) : renderer.render(model, time3, input, authorityDeadline);
     const displayProgress = painted6.xpDisplay ?? progress5;
