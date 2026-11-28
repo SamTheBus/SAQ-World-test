@@ -4869,258 +4869,173 @@ var LABELS = {
   brimstone_colossus: "BRIMSTONE COLOSSUS",
   arachnid_treant: "ARACHNID TREANT"
 };
+var HOMES = {
+  corrosive_abomination: "wetland",
+  void_overseer: "frostland",
+  chronos_arbitrator: "upland",
+  nexus_overseer: "tropical",
+  gilded_vault_keeper: "upland",
+  marcus: "grassland",
+  ashfang: "desert",
+  cinderhart: "woodland",
+  barrow_king: "grassland",
+  sun_pharaoh: "desert",
+  aegis_goliath: "upland",
+  brimstone_colossus: "volcanic",
+  arachnid_treant: "tropical"
+};
+var WARDENS = /* @__PURE__ */ new Set([
+  "cinderhart",
+  "barrow_king",
+  "sun_pharaoh",
+  "aegis_goliath",
+  "arachnid_treant",
+  "corrosive_abomination",
+  "void_overseer",
+  "brimstone_colossus"
+]);
 var title = (label2) => String(label2).toLowerCase().replace(/(^|[\s-])([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/ (The|Of) /g, (w) => w.toLowerCase());
-var BOSS_PAGE_IDS = freezeWire([...WORLD_BOSS_ROLES]);
-var BOSS_PAGE_NAMES = freezeWire(
-  Object.fromEntries(
-    [...BOSS_PAGE_IDS, "arachnid_treant"].map((id2) => [
-      id2,
-      title(RECOVERED_BOSSES[id2]?.label ?? BIOME_BOSSES_V1[id2]?.label ?? LABELS[id2] ?? id2.replace(/_/g, " "))
-    ])
-  )
-);
+var worldIds = [...WORLD_BOSS_ROLES, "arachnid_treant"].filter((id2, i, a) => a.indexOf(id2) === i);
+var BOSS_PAGES = freezeWire([
+  ...Object.entries(LESSER_BOSSES_V1).map(([id2, b]) => ({
+    id: id2,
+    name: title(b.name ?? id2),
+    land: b.biome,
+    kind: "lesser"
+  })),
+  ...worldIds.map((id2) => ({
+    id: id2,
+    name: title(RECOVERED_BOSSES[id2]?.label ?? BIOME_BOSSES_V1[id2]?.label ?? LABELS[id2] ?? id2.replace(/_/g, " ")),
+    land: HOMES[id2] ?? "everywhere",
+    kind: WARDENS.has(id2) ? "warden" : "boss"
+  }))
+]);
+var BOSS_PAGE_BY_ID = freezeWire(Object.fromEntries(BOSS_PAGES.map((b) => [b.id, b])));
+var BOSS_PAGE_IDS = freezeWire(BOSS_PAGES.map((b) => b.id));
+var BOSS_PAGE_NAMES = freezeWire(Object.fromEntries(BOSS_PAGES.map((b) => [b.id, b.name])));
 
 // src/shared/content/bestiary_v1.js
-var BESTIARY_VERSION = "bestiary-v1";
+var BESTIARY_VERSION = "bestiary-v2";
 var RARE_HEALTH_X100 = 300;
 var RARE_DAMAGE_X100 = 150;
-var RARE_CARD_STACK = freezeWire([3, 8]);
-var CARD_DROP = freezeWire({
-  ordinary: { per10000: 50, stack: [1, 1] },
-  elite: { per10000: 500, stack: [1, 3] },
-  boss: { per10000: 2e3, stack: [1, 1] }
-});
+var KILL_CREDIT = freezeWire({ ordinary: 1, elite: 3, rare: 10, boss: 1 });
 var TIERS = freezeWire(["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]);
-var TIER_COLORS = freezeWire(["#ffffff", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#e74c3c"]);
-var TIER_CARDS = freezeWire([1, 25, 100, 300, 600, 1e3]);
-var BOSS_TIER_CARDS = freezeWire([1, 5, 15, 35, 65, 100]);
-var TIER_SOULS = freezeWire([0, 10, 30, 80, 200, 500]);
-var TIER_GOLD = freezeWire([0, 5e4, 1e6, 1e7, 75e6, 3e8]);
-var BIG = [50, 75, 100, 125, 150, 200];
-var SMALL = [25, 35, 50, 60, 75, 100];
-var CRITDMG = [100, 150, 200, 250, 300, 400];
-var DMG = [null, null, 100, 200, 300, 500];
-var FIND = [null, null, 100, 200, 300, 400];
-var DOUBLE = [null, null, 200, 400, 600, 800];
-var TEN = [null, null, 200, 400, 600, 1e3];
-var LIFE = [null, null, 25, 50, 75, 100];
-var POTCD = [null, null, 200, 400, 600, 800];
-var RANGE = [null, null, 500, 1e3, 1500, 2e3];
-var BESTIARY_STATS = freezeWire({
-  atkPct: ["Attack", [...BIG], true],
-  defPct: ["Defense", [...BIG], true],
-  maxHpPct: ["Max health", [...BIG], true],
-  strPct: ["Strength", [...BIG], true],
-  dexPct: ["Dexterity", [...BIG], true],
-  intPct: ["Intelligence", [...BIG], true],
-  moveSpeedPct: ["Move speed", [...BIG], true],
-  attackSpeed: ["Attack speed", [...BIG], true],
-  critChance: ["Crit chance", [...SMALL], true],
-  block: ["Block chance", [...SMALL], true],
-  parry: ["Parry chance", [...SMALL], true],
-  cdr: ["Cooldown reduction", [...SMALL], true],
-  critDamage: ["Crit damage", [...CRITDMG], true],
-  fireDmg: ["Fire damage", [...DMG], true],
-  frostDmg: ["Frost damage", [...DMG], true],
-  lightningDmg: ["Lightning damage", [...DMG], true],
-  bleedDmg: ["Bleed damage", [...DMG], true],
-  poisonDmg: ["Poison damage", [...DMG], true],
-  shockDmg: ["Shock damage", [...DMG], true],
-  counterDmg: ["Counter damage", [...DMG], true],
-  eliteDmg: ["Elite and boss damage", [...DMG], true],
-  executeDmg: ["Execute", [...DMG], false],
-  rareDmg: ["Rare damage", [...DMG], false],
-  nightDmg: ["Night damage", [...DMG], false],
-  goldFind: ["Gold find", [...FIND], false],
-  goldFindX2: ["Gold find", [...DOUBLE], false],
-  xpFind: ["XP", [...FIND], false],
-  soulFind: ["Monster Soul find", [...FIND], false],
-  potionHeal: ["Potion healing", [...FIND], false],
-  cardFind: ["Card find", [...FIND], false],
-  itemFind: ["Item find", [...FIND], false],
-  itemQuality: ["Item quality", [...FIND], false],
-  thorns: ["Thorns", [...TEN], false],
-  statusResist: ["Status resist", [...TEN], false],
-  lifeKill: ["Life on kill", [...LIFE], true],
-  potionCooldown: ["Potion cooldown", [...POTCD], false],
-  pickupRange: ["Pickup range", [...RANGE], false]
-});
-var STAT_POOL = freezeWire({ goldFindX2: "goldFind" });
-var HUNTER_DAMAGE = freezeWire([0, 0, 0, 0, 1e3, 2e3]);
-var HUNTER_RARE = freezeWire([0, 0, 0, 0, 5e3, 1e4]);
-var BESTIARY_GROUPS = freezeWire([
-  { id: "woodland", name: "Woodland", set: "maxHpPct" },
-  { id: "grassland", name: "Grassland", set: "xpFind" },
-  { id: "desert", name: "Desert", set: "goldFind" },
-  { id: "frost", name: "Frost & Upland", set: "cdr" },
-  { id: "wetland", name: "Wetland", set: "potionHeal" },
-  { id: "volcanic", name: "Volcanic", set: "atkPct" },
-  { id: "ruins", name: "Ruins & Forts", set: "itemFind" },
-  { id: "wanderers", name: "Wanderers", set: "rareChance" },
-  { id: "roads", name: "Roads & Camps", set: "moveSpeedPct" }
+var TIER_COLORS = freezeWire(["#c9d2dc", "#4fd65a", "#3aa0ff", "#b45cff", "#ff9a1f", "#ff3b4e"]);
+var CREATURE_TIER_KILLS = freezeWire([10, 50, 200, 750, 2500, 1e4]);
+var BOSS_TIER_KILLS = freezeWire([1, 5, 15, 35, 65, 100]);
+var CREATURE_TIER_BONUS = freezeWire({ damage: 10 });
+var BOSS_TIER_BONUS = freezeWire({ maxHpPct: 20, goldFind: 40 });
+var BESTIARY_STAT_NAMES = freezeWire({ damage: "Damage", maxHpPct: "Max health", goldFind: "Gold" });
+function tierForKills(kills, ladder) {
+  let t = 0;
+  while (t < ladder.length && kills >= ladder[t]) t++;
+  return t;
+}
+var BESTIARY_LANDS = freezeWire([
+  { id: "woodland", name: "Woodland" },
+  { id: "grassland", name: "Grassland" },
+  { id: "desert", name: "Desert" },
+  { id: "wetland", name: "Wetland" },
+  { id: "upland", name: "Upland" },
+  { id: "tropical", name: "Tropical" },
+  { id: "frostland", name: "Snow" },
+  { id: "volcanic", name: "Volcanic" },
+  { id: "everywhere", name: "Everywhere" },
+  { id: "wanderers", name: "Wanderers" }
 ]);
 var BESTIARY_CARDS = freezeWire([
-  ["slime", "Green Slime", "woodland", "maxHpPct", "potionHeal"],
-  ["sprout", "Sprout", "woodland", "cdr", "xpFind"],
-  ["golem", "Stone Golem", "woodland", "defPct", "thorns"],
-  ["thorn_wyrm", "Thorn Wyrm", "woodland", "atkPct", "bleedDmg"],
-  ["snapjaw", "Snapjaw", "woodland", "critChance", "bleedDmg"],
-  ["dart_frog", "Dart Frog", "woodland", "attackSpeed", "poisonDmg"],
-  ["tusk_boar", "Tusk Boar", "grassland", "maxHpPct", "goldFind"],
-  ["field_scarecrow", "Field Scarecrow", "grassland", "critChance", "nightDmg"],
-  ["barrow_wight", "Barrow Wight", "grassland", "intPct", "soulFind"],
-  ["field_mantis", "Field Mantis", "grassland", "critDamage", "bleedDmg"],
-  ["meadow_bee", "Meadow Bee", "grassland", "attackSpeed", "poisonDmg"],
-  ["sand_scarab", "Sand Scarab", "desert", "defPct", "pickupRange"],
-  ["dune_scorpion", "Dune Scorpion", "desert", "critDamage", "poisonDmg"],
-  ["tomb_mummy", "Tomb Mummy", "desert", "maxHpPct", "lifeKill"],
-  ["antlion", "Antlion", "desert", "strPct", "executeDmg"],
-  ["cactling", "Cactling", "desert", "defPct", "thorns"],
-  ["dust_imp", "Dust Imp", "desert", "moveSpeedPct", "goldFind"],
-  ["wyrmling", "Frost Wyrmling", "frost", "atkPct", "frostDmg"],
-  ["gilded_scuttler", "Gilded Scuttler", "frost", "critChance", "itemFind"],
-  ["mimic_shield", "Mimic Shield", "frost", "block", "counterDmg"],
-  ["horn_beetle", "Horn Beetle", "frost", "defPct", "thorns"],
-  ["griffling", "Griffling", "frost", "attackSpeed", "lightningDmg"],
-  ["cairnling", "Cairnling", "frost", "strPct", "soulFind"],
-  ["shardling", "Shardling", "frost", "critDamage", "frostDmg"],
-  ["young_yeti", "Young Yeti", "frost", "maxHpPct", "eliteDmg"],
-  ["lantern_wisp", "Lantern Wisp", "frost", "intPct", "lifeKill"],
-  ["swamp_basilisk", "Swamp Basilisk", "wetland", "maxHpPct", "statusResist"],
-  ["toxic_fly", "Toxic Fly", "wetland", "moveSpeedPct", "poisonDmg"],
-  ["marsh_ghost", "Marsh Ghost", "wetland", "parry", "potionCooldown"],
-  ["corroded_golem", "Corroded Golem", "wetland", "defPct", "soulFind"],
-  ["bog_lily", "Bog Lily", "wetland", "intPct", "poisonDmg"],
-  ["bog_frog", "Bog Frog", "wetland", "moveSpeedPct", "potionHeal"],
-  ["leech", "Leech", "wetland", "maxHpPct", "lifeKill"],
-  ["magma_elemental", "Magma Elemental", "volcanic", "atkPct", "fireDmg"],
-  ["lava_serpent", "Lava Serpent", "volcanic", "critDamage", "executeDmg"],
-  ["hell_bat", "Hell Bat", "volcanic", "attackSpeed", "lifeKill"],
-  ["slag_slime", "Slag Slime", "volcanic", "maxHpPct", "fireDmg"],
-  ["cinder_crab", "Cinder Crab", "volcanic", "defPct", "fireDmg"],
-  ["forge_imp", "Forge Imp", "volcanic", "strPct", "counterDmg"],
-  ["ember_newt", "Ember Newt", "volcanic", "moveSpeedPct", "fireDmg"],
-  ["gargoyle", "Gargoyle Warden", "ruins", "strPct", "eliteDmg"],
-  ["rust_nibbler", "Rust Nibbler", "ruins", "critChance", "itemQuality"],
-  ["animated_armor", "Animated Armor", "ruins", "block", "counterDmg"],
-  ["cursed_blade", "Cursed Blade", "ruins", "critDamage", "bleedDmg"],
-  ["void_orb", "Void Orb", "wanderers", "atkPct", "rareDmg"],
-  ["void_crawler", "Void Crawler", "wanderers", "dexPct", "goldFind"],
-  ["void_spectre", "Void Spectre", "wanderers", "parry", "itemQuality"],
-  ["void_wraith", "Void Wraith", "wanderers", "critDamage", "lifeKill"],
-  ["rift_drifter", "Rift Drifter", "wanderers", "moveSpeedPct", "xpFind"],
-  ["clockwork_scarab", "Clockwork Scarab", "wanderers", "defPct", "shockDmg"],
-  ["star_weaver", "Star Weaver", "wanderers", "intPct", "lightningDmg"],
-  ["coin_elemental", "Coin Elemental", "wanderers", "maxHpPct", "goldFindX2"],
-  ["temporal_watcher", "Temporal Watcher", "wanderers", "cdr", "potionCooldown"],
-  ["clockwork_drone", "Clockwork Drone", "wanderers", "attackSpeed", "shockDmg"],
-  ["neon_spider", "Neon Spider", "wanderers", "critChance", "rareDmg"],
-  ["wireframe_orb", "Wireframe Orb", "wanderers", "maxHpPct", "cardFind"],
-  ["cyber_wraith", "Cyber Wraith", "wanderers", "critDamage", "eliteDmg"],
-  ["bandit_cutthroat", "Cutthroat", "roads", "dexPct", "executeDmg"],
-  ["bandit_archer", "Bandit Archer", "roads", "attackSpeed", "eliteDmg"],
-  ["bandit_brute", "Bandit Brute", "roads", "strPct", "lifeKill"],
-  ["bandit_captain", "Bandit Captain", "roads", "defPct", "itemFind"],
-  ["burrower", "Burrower", "roads", "parry", "pickupRange"]
+  ["slime", "Green Slime", "woodland"],
+  ["sprout", "Sprout", "woodland"],
+  ["golem", "Stone Golem", "woodland"],
+  ["thorn_wyrm", "Thorn Wyrm", "woodland"],
+  ["tusk_boar", "Tusk Boar", "grassland"],
+  ["field_scarecrow", "Field Scarecrow", "grassland"],
+  ["barrow_wight", "Barrow Wight", "grassland"],
+  ["field_mantis", "Field Mantis", "grassland"],
+  ["meadow_bee", "Meadow Bee", "grassland"],
+  ["sand_scarab", "Sand Scarab", "desert"],
+  ["dune_scorpion", "Dune Scorpion", "desert"],
+  ["tomb_mummy", "Tomb Mummy", "desert"],
+  ["antlion", "Antlion", "desert"],
+  ["cactling", "Cactling", "desert"],
+  ["dust_imp", "Dust Imp", "desert"],
+  ["swamp_basilisk", "Swamp Basilisk", "wetland"],
+  ["toxic_fly", "Toxic Fly", "wetland"],
+  ["marsh_ghost", "Marsh Ghost", "wetland"],
+  ["corroded_golem", "Corroded Golem", "wetland"],
+  ["bog_lily", "Bog Lily", "wetland"],
+  ["bog_frog", "Bog Frog", "wetland"],
+  ["leech", "Leech", "wetland"],
+  ["wyrmling", "Frost Wyrmling", "upland"],
+  ["gilded_scuttler", "Gilded Scuttler", "upland"],
+  ["mimic_shield", "Mimic Shield", "upland"],
+  ["horn_beetle", "Horn Beetle", "upland"],
+  ["griffling", "Griffling", "upland"],
+  ["cairnling", "Cairnling", "upland"],
+  ["snapjaw", "Snapjaw", "tropical"],
+  ["dart_frog", "Dart Frog", "tropical"],
+  ["shardling", "Shardling", "frostland"],
+  ["young_yeti", "Young Yeti", "frostland"],
+  ["lantern_wisp", "Lantern Wisp", "frostland"],
+  ["magma_elemental", "Magma Elemental", "volcanic"],
+  ["lava_serpent", "Lava Serpent", "volcanic"],
+  ["hell_bat", "Hell Bat", "volcanic"],
+  ["slag_slime", "Slag Slime", "volcanic"],
+  ["cinder_crab", "Cinder Crab", "volcanic"],
+  ["forge_imp", "Forge Imp", "volcanic"],
+  ["ember_newt", "Ember Newt", "volcanic"],
+  ["bandit_cutthroat", "Cutthroat", "everywhere"],
+  ["bandit_archer", "Bandit Archer", "everywhere"],
+  ["bandit_brute", "Bandit Brute", "everywhere"],
+  ["bandit_captain", "Bandit Captain", "everywhere"],
+  ["burrower", "Burrower", "everywhere"],
+  ["gargoyle", "Gargoyle Warden", "everywhere"],
+  ["rust_nibbler", "Rust Nibbler", "everywhere"],
+  ["animated_armor", "Animated Armor", "everywhere"],
+  ["cursed_blade", "Cursed Blade", "everywhere"],
+  ["void_orb", "Void Orb", "wanderers"],
+  ["void_crawler", "Void Crawler", "wanderers"],
+  ["void_spectre", "Void Spectre", "wanderers"],
+  ["void_wraith", "Void Wraith", "wanderers"],
+  ["rift_drifter", "Rift Drifter", "wanderers"],
+  ["clockwork_scarab", "Clockwork Scarab", "wanderers"],
+  ["star_weaver", "Star Weaver", "wanderers"],
+  ["coin_elemental", "Coin Elemental", "wanderers"],
+  ["temporal_watcher", "Temporal Watcher", "wanderers"],
+  ["clockwork_drone", "Clockwork Drone", "wanderers"],
+  ["neon_spider", "Neon Spider", "wanderers"],
+  ["wireframe_orb", "Wireframe Orb", "wanderers"],
+  ["cyber_wraith", "Cyber Wraith", "wanderers"]
 ]);
 var CARD_BY_FAMILY = freezeWire(
-  Object.fromEntries(
-    BESTIARY_CARDS.map((c) => [c[0], { family: c[0], name: c[1], group: c[2], line1: c[3], line2: c[4] }])
-  )
+  Object.fromEntries(BESTIARY_CARDS.map((c) => [c[0], { family: c[0], name: c[1], land: c[2] }]))
 );
-var SET_STEP = [100, 200, 300, 400, 500, 600];
-var SET_LADDER = freezeWire({
-  cdr: [50, 100, 150, 200, 250, 300],
-  rareChance: [200, 400, 600, 800, 1e3, 1200]
-});
-var setLadder = (stat) => SET_LADDER[stat] ?? SET_STEP;
-var BOSS_SET = freezeWire({ stats: ["atkPct", "defPct", "maxHpPct"], ladder: SET_STEP });
-var BESTIARY_CAPS = freezeWire({ potionCooldown: 5e3, statusResist: 5e3 });
 
 // src/shared/contracts/bestiary_album_v1.js
-var MYTHIC = TIER_CARDS.length - 1;
 var count = (v) => Number.isSafeInteger(v) && v > 0 ? v : 0;
 function emptyAlbum() {
-  return {
-    version: BESTIARY_VERSION,
-    cards: {},
-    tiers: {},
-    souls: 0,
-    spare: {},
-    bosses: {},
-    bossTiers: {},
-    bossNames: {}
-  };
+  return { version: BESTIARY_VERSION, kills: {}, bosses: {} };
 }
 function normalizeAlbum(raw) {
   const a = emptyAlbum();
   if (!raw || raw.version !== BESTIARY_VERSION) return a;
-  a.souls = count(raw.souls);
-  for (const [f3, n] of Object.entries(raw.cards ?? {}))
-    if (CARD_BY_FAMILY[f3] && count(n)) {
-      a.cards[f3] = n;
-      const t = raw.tiers?.[f3];
-      a.tiers[f3] = Number.isInteger(t) && t >= 0 && t <= MYTHIC && n >= TIER_CARDS[t] ? t : 0;
-      if (count(raw.spare?.[f3])) a.spare[f3] = raw.spare[f3];
-    }
-  for (const [id2, n] of Object.entries(raw.bosses ?? {}))
-    if (/^[a-z0-9_:-]{1,80}$/.test(id2) && count(n)) {
-      a.bosses[id2] = n;
-      const t = raw.bossTiers?.[id2];
-      a.bossTiers[id2] = Number.isInteger(t) && t >= 0 && t <= MYTHIC && n >= BOSS_TIER_CARDS[t] ? t : 0;
-      const nm = raw.bossNames?.[id2];
-      if (typeof nm === "string" && nm.length <= 60) a.bossNames[id2] = nm;
-    }
+  for (const [f3, n] of Object.entries(raw.kills ?? {})) if (CARD_BY_FAMILY[f3] && count(n)) a.kills[f3] = n;
+  for (const [id2, n] of Object.entries(raw.bosses ?? {})) if (BOSS_PAGE_BY_ID[id2] && count(n)) a.bosses[id2] = n;
   return a;
 }
 var sorted = (v) => v === null || typeof v !== "object" ? JSON.stringify(v) : Array.isArray(v) ? "[" + v.map(sorted).join(",") + "]" : "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + sorted(v[k])).join(",") + "}";
 var albumText = (a) => sorted(normalizeAlbum(a));
 var albumIsNormal = (a) => sorted(a) === albumText(a);
-function setTier(album, groupId) {
-  let low = MYTHIC;
-  for (const c of BESTIARY_CARDS)
-    if (c[2] === groupId) {
-      const t = album.tiers[c[0]];
-      if (!Number.isInteger(t)) return -1;
-      low = Math.min(low, t);
-    }
-  return low;
-}
-function bossSetTier(album, bossIds) {
-  if (!bossIds.length) return -1;
-  let low = MYTHIC;
-  for (const id2 of bossIds) {
-    const t = album.bossTiers[id2];
-    if (!Number.isInteger(t)) return -1;
-    low = Math.min(low, t);
-  }
-  return low;
-}
-function albumBonuses(album, { bossIds = [] } = {}) {
-  const stats = {}, hunter = {}, sets = {};
-  const add = (k, v) => {
-    if (v) {
-      k = STAT_POOL[k] ?? k;
-      stats[k] = (stats[k] ?? 0) + v;
-    }
-  };
-  for (const [f3, t] of Object.entries(album.tiers)) {
-    const c = CARD_BY_FAMILY[f3];
-    if (!c) continue;
-    add(c.line1, BESTIARY_STATS[c.line1][1][t] ?? 0);
-    add(c.line2, BESTIARY_STATS[c.line2][1][t] ?? 0);
-    if (HUNTER_DAMAGE[t] || HUNTER_RARE[t]) hunter[f3] = { damage: HUNTER_DAMAGE[t], rare: HUNTER_RARE[t] };
-  }
-  for (const g of BESTIARY_GROUPS) {
-    const t = setTier(album, g.id);
-    sets[g.id] = t;
-    if (t >= 0) add(g.set, setLadder(g.set)[t]);
-  }
-  const bt = bossSetTier(album, bossIds);
-  sets.bosses = bt;
-  if (bt >= 0) for (const k of BOSS_SET.stats) add(k, BOSS_SET.ladder[bt]);
-  for (const [k, cap3] of Object.entries(BESTIARY_CAPS)) if (stats[k] > cap3) stats[k] = cap3;
-  return { stats, hunter, sets };
+var creatureTier = (album, family2) => tierForKills(album.kills[family2] ?? 0, CREATURE_TIER_KILLS);
+var bossTier = (album, id2) => tierForKills(album.bosses[id2] ?? 0, BOSS_TIER_KILLS);
+function albumBonuses(album) {
+  let creatureTiers = 0, bossTiers = 0;
+  for (const f3 of Object.keys(album.kills)) creatureTiers += creatureTier(album, f3);
+  for (const id2 of Object.keys(album.bosses)) bossTiers += bossTier(album, id2);
+  const stats = {};
+  for (const [k, v] of Object.entries(CREATURE_TIER_BONUS)) if (creatureTiers) stats[k] = v * creatureTiers;
+  for (const [k, v] of Object.entries(BOSS_TIER_BONUS)) if (bossTiers) stats[k] = (stats[k] ?? 0) + v * bossTiers;
+  return { stats, creatureTiers, bossTiers };
 }
 
 // src/shared/content/encounter_composition_v1.js
@@ -5812,71 +5727,22 @@ function sporeActorRenewedV5(a, b, id2) {
   return false;
 }
 
-// src/shared/contracts/economy_amount.js
-function amount(value) {
-  requireContract(
-    typeof value === "string" && value.length <= 512 && /^(0|[1-9][0-9]*)(\.[0-9]*[1-9])?$/.test(value),
-    "Invalid economy amount"
-  );
-  return value;
-}
-var parts = (value) => {
-  const [whole, fraction = ""] = amount(value).split(".");
-  return [BigInt(whole + fraction), fraction.length];
-};
-function wire(n, scale2) {
-  requireContract(n >= 0n, "Insufficient economy amount");
-  let digits = n.toString().padStart(scale2 + 1, "0");
-  if (scale2) digits = digits.slice(0, -scale2) + "." + digits.slice(-scale2);
-  if (digits.includes(".")) digits = digits.replace(/0+$/, "").replace(/\.$/, "");
-  return amount(digits);
-}
-function aligned(a, b) {
-  const [x, s] = parts(a), [y, t] = parts(b), scale2 = Math.max(s, t);
-  return [x * 10n ** BigInt(scale2 - s), y * 10n ** BigInt(scale2 - t), scale2];
-}
-function addAmount(a, b) {
-  const [x, y, s] = aligned(a, b);
-  return wire(x + y, s);
-}
-function subtractAmount(a, b) {
-  const [x, y, s] = aligned(a, b);
-  return wire(x - y, s);
-}
-function compareAmount(a, b) {
-  const [x, y] = aligned(a, b);
-  return x < y ? -1 : x > y ? 1 : 0;
-}
-function multiplyAmount(a, b) {
-  const [x, s] = parts(a), [y, t] = parts(b);
-  return wire(x * y, s + t);
-}
-function powerAmount(a, n) {
-  safeInteger(n, 0, 100);
-  const [x, s] = parts(a);
-  return wire(x ** BigInt(n), s * n);
-}
-function wholeAmount(n) {
-  safeInteger(n);
-  return amount(String(n));
-}
-var rewardAmount = (value) => typeof value === "number" ? wholeAmount(value) : amount(value);
-
 // src/shared/contracts/bestiary_world_v1.js
-var BESTIARY_ROOT_V1 = "bestiary-world-v1";
-var GROUND = Object.freeze({ settleTicks: 30, pickupRadius: 34, lifetimeTicks: 18e3, maximum: 24, spread: 18 });
-var root = (s) => s.bestiary;
+var BESTIARY_ROOT_V1 = "bestiary-world-v2";
+var LEGACY_ROOT = "bestiary-world-v1";
+var LEGACY_BONUS = "bestiary-bonus-v1";
+var root = (s) => s.bestiary?.version === BESTIARY_ROOT_V1 ? s.bestiary : void 0;
 var playerAlbumV1 = (s, playerId) => root(s)?.albumsByPlayerId[playerId] ?? null;
 var familyOf = (s, id2) => ordinaryEnemyForProfile(s.entitiesById[id2]?.contentDefinitionId)?.family;
 var episodeOf = (s, groupId) => s.encounterEconomy?.groups[groupId]?.episode;
-var BESTIARY_BONUS_V1 = "bestiary-bonus-v1";
+var BESTIARY_BONUS_V1 = "bestiary-bonus-v2";
 function bestiaryBonusV1(album) {
-  const b = albumBonuses(album, { bossIds: BOSS_PAGE_IDS });
-  return { version: BESTIARY_BONUS_V1, stats: b.stats, hunter: b.hunter };
+  return { version: BESTIARY_BONUS_V1, stats: albumBonuses(album).stats };
 }
 var sortedText = (v) => v === null || typeof v !== "object" ? JSON.stringify(v) : "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + sortedText(v[k])).join(",") + "}";
 function validateBestiaryBonusV1(s, p, bonus) {
   const album = playerAlbumV1(s, p.playerId);
+  if (bonus?.version === LEGACY_BONUS && !album) return;
   if (!album) {
     requireContract(bonus === void 0, "Bestiary bonus without an album");
     return;
@@ -5896,9 +5762,10 @@ function rareActorProfileV1(s, actor, profile2) {
   };
 }
 function validateBestiaryRootV1(s) {
-  const r = root(s);
+  if (s.bestiary?.version === LEGACY_ROOT) return;
+  const r = s.bestiary;
   if (r === void 0) return;
-  closedRecord(r, ["version", "albumsByPlayerId", "raresByEntityId", "groundByPlayerId"]);
+  closedRecord(r, ["version", "albumsByPlayerId", "raresByEntityId"]);
   requireContract(r.version === BESTIARY_ROOT_V1, "Unsupported Bestiary root");
   for (const [pid, a] of Object.entries(r.albumsByPlayerId))
     requireContract(s.playersById[pid] && albumIsNormal(a), "Invalid Bestiary album");
@@ -5909,25 +5776,6 @@ function validateBestiaryRootV1(s) {
     closedRecord(x, ["groupId", "episode", "family"]);
     requireContract(typeof x.groupId === "string" && x.groupId.length <= 240 && CARD_BY_FAMILY[x.family], "Invalid rare");
     safeInteger(x.episode, 0);
-  }
-  for (const [pid, ground] of Object.entries(r.groundByPlayerId)) {
-    requireContract(s.playersById[pid] && Object.keys(ground).length <= GROUND.maximum, "Invalid ground cards");
-    for (const [id2, d] of Object.entries(ground)) {
-      requireContract(id2.length <= 240, "Ground card id");
-      closedRecord(d, ["family", "count", "spaceInstanceId", "tick"], ["world", "position", "boss"]);
-      requireContract(
-        (d.boss === void 0 ? CARD_BY_FAMILY[d.family] : d.boss === true && BOSS_PAGE_NAMES[d.family]) && typeof d.spaceInstanceId === "string" && d.spaceInstanceId.length <= 240,
-        "Ground card"
-      );
-      safeInteger(d.count, 1, 100);
-      safeInteger(d.tick, 0, s.tick);
-      requireContract(d.world === void 0 !== (d.position === void 0), "Ground card place");
-      if (d.world) validateWorldPosition(d.world);
-      else {
-        closedRecord(d.position, ["x", "y"]);
-        requireContract(Number.isFinite(d.position.x) && Number.isFinite(d.position.y), "Ground card position");
-      }
-    }
   }
 }
 
@@ -30180,6 +30028,56 @@ function validateProvisionProgress(a, b) {
     );
 }
 
+// src/shared/contracts/economy_amount.js
+function amount(value) {
+  requireContract(
+    typeof value === "string" && value.length <= 512 && /^(0|[1-9][0-9]*)(\.[0-9]*[1-9])?$/.test(value),
+    "Invalid economy amount"
+  );
+  return value;
+}
+var parts = (value) => {
+  const [whole, fraction = ""] = amount(value).split(".");
+  return [BigInt(whole + fraction), fraction.length];
+};
+function wire(n, scale2) {
+  requireContract(n >= 0n, "Insufficient economy amount");
+  let digits = n.toString().padStart(scale2 + 1, "0");
+  if (scale2) digits = digits.slice(0, -scale2) + "." + digits.slice(-scale2);
+  if (digits.includes(".")) digits = digits.replace(/0+$/, "").replace(/\.$/, "");
+  return amount(digits);
+}
+function aligned(a, b) {
+  const [x, s] = parts(a), [y, t] = parts(b), scale2 = Math.max(s, t);
+  return [x * 10n ** BigInt(scale2 - s), y * 10n ** BigInt(scale2 - t), scale2];
+}
+function addAmount(a, b) {
+  const [x, y, s] = aligned(a, b);
+  return wire(x + y, s);
+}
+function subtractAmount(a, b) {
+  const [x, y, s] = aligned(a, b);
+  return wire(x - y, s);
+}
+function compareAmount(a, b) {
+  const [x, y] = aligned(a, b);
+  return x < y ? -1 : x > y ? 1 : 0;
+}
+function multiplyAmount(a, b) {
+  const [x, s] = parts(a), [y, t] = parts(b);
+  return wire(x * y, s + t);
+}
+function powerAmount(a, n) {
+  safeInteger(n, 0, 100);
+  const [x, s] = parts(a);
+  return wire(x ** BigInt(n), s * n);
+}
+function wholeAmount(n) {
+  safeInteger(n);
+  return amount(String(n));
+}
+var rewardAmount = (value) => typeof value === "number" ? wholeAmount(value) : amount(value);
+
 // src/shared/content/quest_gear_v1.js
 var QUEST_GEAR_VERSION = "quest-gear-v1";
 var QUEST_GEAR_GROUPS = Object.freeze({
@@ -51244,14 +51142,6 @@ function validateCommand(command) {
       typeof command.payload.targetPlayerId === "string" && command.payload.targetPlayerId.length > 0 && command.payload.targetPlayerId.length <= 120 && typeof command.payload.holding === "boolean",
       "Invalid revive"
     );
-  } else if (command.kind === "service.bestiary") {
-    closedRecord(command.payload, ["family", "tier", "inventoryRevision"], ["boss"]);
-    requireContract(
-      (command.payload.boss === void 0 || command.payload.boss === true) && typeof command.payload.family === "string" && /^[a-z_]{1,40}$/.test(command.payload.family),
-      "Invalid Bestiary page"
-    );
-    safeInteger(command.payload.tier, 1, 5);
-    safeInteger(command.payload.inventoryRevision);
   } else if (command.kind === "service.modify" || command.kind === "service.material" || command.kind === "service.breakdown") {
     closedRecord(command.payload, [
       "npcId",
@@ -52270,7 +52160,7 @@ function validateTripHellV1(s, h) {
 
 // src/shared/contracts/trip_snacks_world_v1.js
 var TRIP_ROOT_V1 = "trip-snacks-world-v1";
-var GROUND2 = Object.freeze({ settleTicks: 30, pickupRadius: 30, lifetimeTicks: 18e3, maximum: 12, spread: 16 });
+var GROUND = Object.freeze({ settleTicks: 30, pickupRadius: 30, lifetimeTicks: 18e3, maximum: 12, spread: 16 });
 var TRIP_BAG_STACK_V1 = 99;
 var root2 = (s) => s.trips;
 function validateTripRootV1(s) {
@@ -52287,7 +52177,7 @@ function validateTripRootV1(s) {
     }
   }
   for (const [pid, ground] of Object.entries(r.groundByPlayerId)) {
-    requireContract(s.playersById[pid] && Object.keys(ground).length <= GROUND2.maximum, "Invalid ground snacks");
+    requireContract(s.playersById[pid] && Object.keys(ground).length <= GROUND.maximum, "Invalid ground snacks");
     for (const [id2, d] of Object.entries(ground)) {
       requireContract(id2.length <= 240, "Ground snack id");
       closedRecord(d, ["snack", "spaceInstanceId", "tick"], ["world", "position"]);
@@ -58520,7 +58410,6 @@ function validateActivityCommand(command) {
       "service.modify",
       "service.material",
       "service.breakdown",
-      "service.bestiary",
       "service.buy",
       "service.sell",
       "service.rest",
@@ -61948,7 +61837,6 @@ function seatComparable(s, kept, party2, room2) {
       r.startedTick = null;
     }
   only(c.bestiary?.albumsByPlayerId);
-  only(c.bestiary?.groundByPlayerId);
   only(c.trips?.bagsByPlayerId);
   only(c.trips?.groundByPlayerId);
   only(c.trips?.tripsByPlayerId);
