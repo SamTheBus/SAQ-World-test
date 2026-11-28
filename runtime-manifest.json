@@ -1,6 +1,6 @@
 {
-  "runtimeId": "feec95f1839bc07d",
-  "runtimeSha256": "feec95f1839bc07d22b56e7841edb7e30e1b9fee096ae2b774c1d5fb91a7aafc",
+  "runtimeId": "ce477e1c7c7f77a1",
+  "runtimeSha256": "ce477e1c7c7f77a11b404554aae8d1876b606b2d12e2b3ec24633f8617f1c185",
   "files": [
     {
       "path": ".nojekyll",
@@ -93,9 +93,29 @@
       "sha256": "f0f85c4edd2c3dc659db649e9fd0258951445d2fa0735eb43b44a1052ed3d2f5"
     },
     {
+      "path": "assets/fonts-v1/lilitaone-400-latin.woff2",
+      "bytes": 10672,
+      "sha256": "d2575d4fa3632580aafcbcdf6978b3b57e144b90cf5bd9c2c98194f28b869704"
+    },
+    {
+      "path": "assets/fonts-v1/nunito-var-latin.woff2",
+      "bytes": 27892,
+      "sha256": "8eccaf0c0e30f5f0a32c31d365cc4d234ed0b09439f03aa92d0d4d564be809ed"
+    },
+    {
       "path": "assets/fonts-v1/OFL-IMFell.txt",
       "bytes": 4452,
       "sha256": "2a3ca501fc4d5efcad9798531e3e06962b1e20c60e464f6cbd6c17630112c773"
+    },
+    {
+      "path": "assets/fonts-v1/OFL-LilitaOne.txt",
+      "bytes": 4392,
+      "sha256": "255d5debbb80eb2ea762644311f266a279e8778f00156655a516e2b7781a63e1"
+    },
+    {
+      "path": "assets/fonts-v1/OFL-Nunito.txt",
+      "bytes": 4385,
+      "sha256": "580df76c95a1ec5ab878ceb25bb3d85c6a076804e9c970c8c6972aea775fdf65"
     },
     {
       "path": "assets/fonts-v1/OFL.txt",
@@ -530,7 +550,7 @@
     {
       "path": "index.html",
       "bytes": 13989,
-      "sha256": "20cd7a66117d9378c8245939cfd1bc067a9729303b95771d58e0712909c306f7"
+      "sha256": "7b10d62dacb56279d32b9908f6eb6f484502efcfd4d7ceda51ec078965f63d5d"
     },
     {
       "path": "manifest.webmanifest",
@@ -558,9 +578,9 @@
       "sha256": "7db8c23d3d071f10af27f69428fb3f40deb5eeb8a332946192a66dc1e22e73e4"
     },
     {
-      "path": "src/chunks/playable_browser-5DZRBC76.js",
-      "bytes": 14183445,
-      "sha256": "c92be59423116a0fa7458fe88ef27b81f7d91562f07facbcda2904f820439ebc"
+      "path": "src/chunks/playable_browser-H4NUX2EP.js",
+      "bytes": 14186580,
+      "sha256": "eb91168f46d57a858935052c845544c1eb9d5774dbbb7795d32e5f4bc67c22fd"
     },
     {
       "path": "src/chunks/world_browser-AQ2NRYII.js",
@@ -580,7 +600,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2162,
-      "sha256": "51d4b7548c68780f644ac530884fc8f2de4eac5b796404280b1cdf9ccccdcf55"
+      "sha256": "199df3519f46e48e0037601a0d4256f9f5f2a930822f00863f95022c8e36ea7a"
     },
     {
       "path": "world-maker-worker.js",
@@ -589,8 +609,8 @@
     },
     {
       "path": "world.css",
-      "bytes": 283661,
-      "sha256": "57bfd570d30056f68d7a7ebfda6dcf5cecdeda71c5701d8c57892ad37849eb77"
+      "bytes": 300740,
+      "sha256": "b66b97a56ccc3b23ed5a3823cf0275a39592d1674150a07e846349e7ecc5f668"
     }
   ]
 }

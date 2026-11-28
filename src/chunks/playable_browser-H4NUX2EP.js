@@ -141150,10 +141150,10 @@ function dropGear(s, h, p, m) {
     inv.revision++;
   }
 }
-function hitHellImpV1(s, p, impId, requested) {
+function hitHellImpV1(s, p, impId, requested2) {
   const h = s.trips?.hell, I = h?.imps, m = I?.list[impId];
-  if (!m || !out(s, m) || !p || compareCombat(requested, 0) <= 0) return null;
-  const before = m.hp, actual = minCombat(m.hp, requested);
+  if (!m || !out(s, m) || !p || compareCombat(requested2, 0) <= 0) return null;
+  const before = m.hp, actual = minCombat(m.hp, requested2);
   m.hp = combatInteger(subtractCombat(m.hp, actual));
   m.scare ??= s.tick;
   m.lastHit = s.tick;
@@ -142171,13 +142171,13 @@ function dropGear2(s, h, n, p, at10) {
     inv.revision++;
   }
 }
-function hitNightmareV1(s, p, targetId, requested) {
+function hitNightmareV1(s, p, targetId, requested2) {
   const h = s.trips?.hell, n = h?.nightmare;
-  if (!n || !p || compareCombat(requested, 0) <= 0) return null;
+  if (!n || !p || compareCombat(requested2, 0) <= 0) return null;
   if (targetId === nightmareIdV1(s.campaign.campaignId, h.eatTick)) {
     if (!awake(s, n)) return null;
     const before2 = n.hp;
-    n.hp = combatInteger(subtractCombat(n.hp, minCombat(n.hp, requested)));
+    n.hp = combatInteger(subtractCombat(n.hp, minCombat(n.hp, requested2)));
     n.lastHit = s.tick;
     const defeated2 = compareCombat(n.hp, 0) === 0, xp = [];
     if (defeated2) {
@@ -142195,7 +142195,7 @@ function hitNightmareV1(s, p, targetId, requested) {
   const m = n.caps[targetId];
   if (!m || !capOut(s, n, m)) return null;
   const before = m.hp;
-  m.hp = combatInteger(subtractCombat(m.hp, minCombat(m.hp, requested)));
+  m.hp = combatInteger(subtractCombat(m.hp, minCombat(m.hp, requested2)));
   const defeated = compareCombat(m.hp, 0) === 0;
   if (defeated) {
     m.end = "dead";
@@ -148109,8 +148109,8 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
     campaignWorld,
     // The world a start plays on: the one a resumed campaign was made on, or for a new campaign the
     // stored world it asks for. null is today's map; a named world that isn't stored is an error.
-    async forStart({ resume = null, requested = null } = {}) {
-      const hash95 = resume ? await campaignWorld(resume.campaignId) : requested || null;
+    async forStart({ resume = null, requested: requested2 = null } = {}) {
+      const hash95 = resume ? await campaignWorld(resume.campaignId) : requested2 || null;
       if (!hash95) return null;
       const found = await describe(hash95);
       if (!found) throw new Error("Seeded world missing");
@@ -149105,11 +149105,11 @@ function createHeroCreatorV1({
       paint4();
     }
   }
-  function open3(requested) {
+  function open3(requested2) {
     const m = readModel(), p = local8(m);
     if (!p?.d8 || busy) return false;
     const hasClass = Boolean(heroClassOf(p.d8));
-    mode = !p.d8.look ? "create" : requested === "look" || hasClass ? "look" : "class";
+    mode = !p.d8.look ? "create" : requested2 === "look" || hasClass ? "look" : "class";
     look = { ...DEFAULT_LOOK, ...p.d8.look ?? {} };
     nameInput.value = look.name;
     deferClass = false;
@@ -149990,12 +149990,12 @@ function launchPodSporesV2(r, { allowDyingPod = null } = {}) {
       if (isSporeV5(r)) break;
     }
 }
-function damageSporePodV2(s, id2, n, requested) {
+function damageSporePodV2(s, id2, n, requested2) {
   const r = s.d9World?.worldEvents?.records[id2];
   requireContract(isSporeV2(r) && r.status === "active" && Number.isInteger(n) && n >= 0 && n < 3, "Spore pod is not active");
   const pod4 = r.pods[n];
-  requireContract(compareCombat(pod4.hp, 0) > 0 && compareCombat(requested, 0) > 0, "Spore pod cannot take that damage");
-  const actual = minCombat(pod4.hp, requested);
+  requireContract(compareCombat(pod4.hp, 0) > 0 && compareCombat(requested2, 0) > 0, "Spore pod cannot take that damage");
+  const actual = minCombat(pod4.hp, requested2);
   pod4.lastDamage = combatInteger(pod4.lastHitTick === s.tick ? addCombat(pod4.lastDamage ?? 0, actual) : actual);
   pod4.hp = combatInteger(subtractCombat(pod4.hp, actual));
   pod4.lastHitTick = s.tick;
@@ -162006,11 +162006,11 @@ function createMasteryEffects(s, { damage: damage2, eligible: eligible2, identit
 function settleTomeSustain(player, actor, combat, stats3) {
   if (!player.d8 || !actor.alive || compareCombat(stats3.maxBarrier, 0) <= 0) return false;
   const r = (id2) => finiteNodeRank(player.d8, id2), syphon = r("tome_arcane_syphon"), resilience = r("tome_resilience");
-  const restore = (requested, overflowHeal) => {
-    const gained = minCombat(requested, subtractCombat(stats3.maxBarrier, combat.barrier));
+  const restore = (requested2, overflowHeal) => {
+    const gained = minCombat(requested2, subtractCombat(stats3.maxBarrier, combat.barrier));
     combat.barrier = combatInteger(addCombat(combat.barrier, gained));
     if (overflowHeal)
-      actor.hp = combatInteger(minCombat(stats3.maxHp, addCombat(actor.hp, combatInteger(multiplyCombat(subtractCombat(requested, gained), 1, 2)))));
+      actor.hp = combatInteger(minCombat(stats3.maxHp, addCombat(actor.hp, combatInteger(multiplyCombat(subtractCombat(requested2, gained), 1, 2)))));
     if (compareCombat(combat.barrier, stats3.maxBarrier) === 0) combat.barrierRechargeRemainder = 0;
   };
   if (syphon) {
@@ -170028,15 +170028,15 @@ function createArchivedBossFightRuntime(state2, { pool: pool4, damage: damage2, 
         ))
           continue;
         const acidic = kind !== "slag";
-        let requested = rounded2(t.maxHp, acidic ? 15 : 1, acidic ? 1e3 : 100);
+        let requested2 = rounded2(t.maxHp, acidic ? 15 : 1, acidic ? 1e3 : 100);
         if (acidic) {
           if (compareCombat(t.hp, "1") <= 0) continue;
-          requested = combatInteger(minCombat(requested, subtractCombat(t.hp, "1")), "round");
+          requested2 = combatInteger(minCombat(requested2, subtractCombat(t.hp, "1")), "round");
         }
         damagePacket(
           a,
           t,
-          requested,
+          requested2,
           kind === "slag" ? "corrosive_slag_sludge" : kind === "bile" ? "corrosive_bile_pool" : "corrosive_acid",
           { sourceActionSequence: b.abilitySequence, nonLethal: acidic }
         );
@@ -174155,7 +174155,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
         })
       );
   }
-  function damage2(source3, target, requested = null, mechanic = "main", causationCommandId = null, attribution = null) {
+  function damage2(source3, target, requested2 = null, mechanic = "main", causationCommandId = null, attribution = null) {
     const askedMechanic = mechanic;
     if (isPodCombatTargetV4(target) && target.podResource.vault) {
       if (!canActivityApplyDamage(state2, manifest, source3, target) || source3.team !== "party") return;
@@ -174174,7 +174174,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       const p = playerFor(source3.entityId), combat = state2.subweaponCombat.actors[source3.entityId], roll10 = { rng: combat.rng }, packet = criticalDamagePacket(
         roll10,
         progression.resolvedStats(source3.entityId),
-        requested ?? source3.attackDamage,
+        requested2 ?? source3.attackDamage,
         mechanic,
         false,
         attribution?.periodic !== true && attribution?.trigger !== "periodic"
@@ -174235,7 +174235,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       const p = playerFor(source3.entityId), combat = state2.subweaponCombat.actors[source3.entityId], roll10 = { rng: combat.rng }, packet = criticalDamagePacket(
         roll10,
         progression.resolvedStats(source3.entityId),
-        requested ?? source3.attackDamage,
+        requested2 ?? source3.attackDamage,
         mechanic,
         false,
         attribution?.periodic !== true && attribution?.trigger !== "periodic"
@@ -174320,12 +174320,12 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       }
       return;
     }
-    if (!resolvedComponent && mechanic === "bash" && !attribution?.masteryArea && family.effects.bash(source3, target, requested, attribution?.trigger ?? "pressure"))
+    if (!resolvedComponent && mechanic === "bash" && !attribution?.masteryArea && family.effects.bash(source3, target, requested2, attribution?.trigger ?? "pressure"))
       return;
     if (!periodic && !attribution?.bossComponentImpact) {
       const component = bossCombat.towerTarget(source3, target, attribution);
       if (component) {
-        const first = damage2(source3, component, requested, mechanic, causationCommandId, {
+        const first = damage2(source3, component, requested2, mechanic, causationCommandId, {
           ...attribution,
           bossComponentImpact: true
         });
@@ -174361,7 +174361,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       progression.combatLevel(source3.team === "party" ? source3.entityId : target.entityId),
       fair ? fair.member : source3.team === "hostile" && attribution?.sourceLevel !== void 0 ? attribution.sourceLevel : progression.combatLevel(source3.team === "hostile" ? source3.entityId : target.entityId)
     ) : null;
-    let raw = requested ?? asCombatAmount(source3.attackDamage), critical = resolvedComponent ? attribution.inheritedCritical === true : false, defense = null, defenseStats = null, barrierAbsorption = null, pendingPlayerRng = null, pendingForcedTransient = null, eliteGuard = null, eliteAttack = null;
+    let raw = requested2 ?? asCombatAmount(source3.attackDamage), critical = resolvedComponent ? attribution.inheritedCritical === true : false, defense = null, defenseStats = null, barrierAbsorption = null, pendingPlayerRng = null, pendingForcedTransient = null, eliteGuard = null, eliteAttack = null;
     const sourceSubweaponSuppressed = source3.team === "party" && subweaponSuppressedD12_4I(state2, source3.entityId);
     if (!resolvedComponent && mechanic === "main") {
       const factor = family.effects.mainMultiplier(target);
@@ -244139,15 +244139,15 @@ body #world-inventory.rpg-menu[data-group=hero]:not([data-section=forge]) button
 /* The Player card: the hero in a brass frame, name and level, and what is inside. */
 #world-inventory .mh button.mh-hero{gap:6px;padding:18px 14px 16px;background:linear-gradient(180deg,#3a4856 0%,#253340 40%,#18222b 100%)}
 .mh-frame{position:relative;width:132px;height:132px;flex:none;box-sizing:border-box;border-radius:50%;border:3px solid #0000;background:radial-gradient(circle at 50% 34%,#55708a,#2a3d50 55%,#121b24) padding-box,linear-gradient(155deg,#fbe6ad,#a67828 45%,#f0cf85 75%,#8a6120) border-box;box-shadow:0 0 0 1px #06090d,0 4px 0 #06090d;overflow:hidden;display:grid;place-items:center}
-.mh-portrait{width:150px;height:147px;image-rendering:pixelated;flex:none;margin-top:10px}
+.mh-portrait{width:100%;height:100%;image-rendering:pixelated;flex:none}
 .mh-level{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%)}
 .mh-who{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;max-width:100%}
 .mh-kicker{font:800 10px/1 var(--rpg-ui,"Segoe UI",system-ui,sans-serif);letter-spacing:.22em;text-transform:uppercase;color:#e9c676}
 .mh-hero .mh-name{font-size:22px}
 .mh-hero small{font-size:13px;color:#c5d0d4}
 .mh-hint{margin-top:5px;padding:5px 11px;border-radius:99px;border:1px solid #c9a35a55;background:#0d131980;font:700 11px/1 var(--rpg-ui,"Segoe UI",system-ui,sans-serif);letter-spacing:.04em;color:#e3d3a8;white-space:nowrap}
-@media(max-height:500px) and (min-width:601px){.mh{padding:10px 14px}.mh-wrap{gap:10px;grid-template-columns:minmax(190px,240px) minmax(0,1fr)}.mh-grid{gap:9px}#world-inventory .mh button.mh-tile{padding:11px 8px 10px;gap:4px}.mh-ic{width:46px;height:46px}.mh-ic svg{width:24px;height:24px}.mh-name{font-size:15px}.mh-tile small{font-size:11px}#world-inventory .mh button.mh-hero{padding:12px 10px 10px}.mh-frame{width:104px;height:104px}.mh-portrait{width:120px;height:118px;margin-top:8px}.mh-hero .mh-name{font-size:19px}.mh-hint{margin-top:3px}}
-@media(max-width:600px){.mh{padding:14px}.mh-wrap{grid-template-columns:1fr;gap:12px}.mh-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#world-inventory .mh button.mh-tile{padding:16px 8px 14px}#world-inventory .mh button.mh-hero{flex-direction:row;justify-content:flex-start;gap:16px;padding:16px 18px;text-align:left}.mh-frame{width:104px;height:104px}.mh-portrait{width:120px;height:118px;margin-top:8px}.mh-who{align-items:flex-start}}
+@media(max-height:500px) and (min-width:601px){.mh{padding:10px 14px}.mh-wrap{gap:10px;grid-template-columns:minmax(190px,240px) minmax(0,1fr)}.mh-grid{gap:9px}#world-inventory .mh button.mh-tile{padding:11px 8px 10px;gap:4px}.mh-ic{width:46px;height:46px}.mh-ic svg{width:24px;height:24px}.mh-name{font-size:15px}.mh-tile small{font-size:11px}#world-inventory .mh button.mh-hero{padding:12px 10px 10px}.mh-frame{width:104px;height:104px}.mh-portrait{width:100%;height:100%}.mh-hero .mh-name{font-size:19px}.mh-hint{margin-top:3px}}
+@media(max-width:600px){.mh{padding:14px}.mh-wrap{grid-template-columns:1fr;gap:12px}.mh-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#world-inventory .mh button.mh-tile{padding:16px 8px 14px}#world-inventory .mh button.mh-hero{flex-direction:row;justify-content:flex-start;gap:16px;padding:16px 18px;text-align:left}.mh-frame{width:104px;height:104px}.mh-portrait{width:100%;height:100%}.mh-who{align-items:flex-start}}
 `;
 function createMenuHubV1({ document: doc, tiles: tiles9, portrait }) {
   if (!doc.getElementById("menu-hub-v1-css")) {
@@ -244176,7 +244176,7 @@ function createMenuHubV1({ document: doc, tiles: tiles9, portrait }) {
     if (t.hero) {
       const frame6 = el3("span", "mh-frame"), canvas = el3("canvas", "mh-portrait");
       canvas.width = 200;
-      canvas.height = 196;
+      canvas.height = 200;
       canvas.setAttribute("aria-hidden", "true");
       frame6.append(canvas);
       const who = el3("span", "mh-who"), title17 = el3("span", "mh-name", t.name);
@@ -248579,6 +248579,47 @@ function drawHeroPortrait(canvas, heroLook) {
   } catch {
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+function drawHeroPortraitRound(canvas, heroLook) {
+  const ctx = canvas.getContext?.("2d");
+  if (!ctx) return;
+  const W21 = canvas.width, H9 = canvas.height;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, W21, H9);
+  if (!heroLook) return;
+  const actor = { kind: "actor", team: "party", alive: true, position: { x: 0, y: 0 }, movedLastTick: false, heroLook }, draw = (c, s2, ox, oy) => {
+    c.imageSmoothingEnabled = false;
+    c.setTransform(s2, 0, 0, s2, ox, oy);
+    try {
+      drawWorldHero(c, actor, 1, 1e3, null, 100, false, null);
+    } catch {
+    }
+    c.setTransform(1, 0, 0, 1, 0, 0);
+  };
+  const m = canvas.ownerDocument?.createElement("canvas");
+  let top = -26, bottom = 2, reach2 = 14;
+  const mc = m?.getContext?.("2d");
+  if (mc) {
+    m.width = m.height = 240;
+    draw(mc, 4, 120, 200);
+    const d = mc.getImageData(0, 0, 240, 240).data;
+    let t = 240, b = -1, l = 240, r = -1;
+    for (let y = 0; y < 240; y++)
+      for (let x = 0; x < 240; x++)
+        if (d[(y * 240 + x) * 4 + 3] > 24) {
+          if (y < t) t = y;
+          if (y > b) b = y;
+          if (x < l) l = x;
+          if (x > r) r = x;
+        }
+    if (b >= 0) {
+      top = (t - 200) / 4;
+      bottom = (b + 1 - 200) / 4;
+      reach2 = Math.max(120 - l, r + 1 - 120) / 4;
+    }
+  }
+  const height = bottom - top, s = Math.min(H9 * 0.7 / height, W21 * 0.66 / reach2);
+  draw(ctx, s, Math.round(W21 / 2), Math.round(H9 / 2 - (top + bottom) / 2 * s));
 }
 var svg2 = (body6, size = 26) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true">${body6}</svg>`;
 var line25 = 'fill="none" stroke="#56636f" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"';
@@ -253206,7 +253247,7 @@ function createInventoryPresentation({
   }
   const hub = createMenuHubV1({
     document: document2,
-    portrait: drawHeroPortrait,
+    portrait: drawHeroPortraitRound,
     tiles: [
       {
         id: "player",
@@ -257627,6 +257668,7 @@ function createVitalsHudV4(doc) {
   progression?.prepend(xp);
   const vitals = doc.getElementById("world-hud-vitals"), levelText = doc.getElementById("world-level"), NS2 = "http://www.w3.org/2000/svg";
   let med = null, ring11 = null, medNum = null, medPar = null, lastLevel = null, lastRing = null, ringTimer = null;
+  let face5 = null, faceLook = null, faceKey = "";
   if (vitals && levelText) {
     med = doc.createElement("div");
     med.className = "vmed";
@@ -257640,8 +257682,30 @@ function createVitalsHudV4(doc) {
     medNum = doc.createElement("strong");
     medPar = doc.createElement("small");
     medPar.hidden = true;
-    med.append(svg3, lv, medNum, medPar);
+    face5 = doc.createElement("canvas");
+    face5.className = "vportrait";
+    face5.width = face5.height = 88;
+    med.append(svg3, face5, lv, medNum, medPar);
     vitals.append(med);
+  }
+  function portrait(heroLook) {
+    if (!face5 || !heroLook || heroLook === faceLook) return;
+    faceLook = heroLook;
+    const key4 = JSON.stringify(heroLook);
+    if (key4 === faceKey) return;
+    faceKey = key4;
+    const c = face5.getContext?.("2d");
+    if (!c) return;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.clearRect(0, 0, 88, 88);
+    c.imageSmoothingEnabled = false;
+    c.translate(45, 61);
+    c.scale(2.6, 2.6);
+    try {
+      drawBlockyHero(c, heroSpecForActor({ heroLook }), { t: 0.5, facing: 1, still: true });
+    } catch {
+    }
+    c.setTransform(1, 0, 0, 1, 0, 0);
   }
   const setRing = (v, instant) => {
     if (!ring11) return;
@@ -257765,6 +257829,7 @@ function createVitalsHudV4(doc) {
   return Object.freeze({
     update: update2,
     barrier: barrier2,
+    portrait,
     destroy() {
       view3.clearTimeout(wrapTimer);
       view3.clearTimeout(ringTimer);
@@ -257774,6 +257839,23 @@ function createVitalsHudV4(doc) {
       barrierBar?.remove();
     }
   });
+}
+
+// src/client/ui_fonts_v2.js
+var UI_FONTS_V2 = Object.freeze([
+  ["Lilita One", "lilitaone-400-latin.woff2", "400"],
+  ["Nunito", "nunito-var-latin.woff2", "800 900"]
+]);
+var requested = false;
+function loadUiFontsV2(doc = globalThis.document) {
+  if (requested || typeof FontFace !== "function" || !doc?.fonts) return;
+  requested = true;
+  for (const [family, file, weight2] of UI_FONTS_V2)
+    try {
+      new FontFace(family, `url('assets/fonts-v1/${file}') format('woff2')`, { weight: weight2, display: "swap" }).load().then((face5) => doc.fonts.add(face5)).catch(() => {
+      });
+    } catch {
+    }
 }
 
 // src/client/wilderness_event_clue_hud_v3_8.js
@@ -293212,57 +293294,63 @@ function createAtlasMapV2({
       x.arc(cx, cy2, r, 0, 7);
       x.stroke();
     };
-    ring11(R19 + 6, R19 + 13, "rgba(0,0,0,.22)", 5);
-    ring11(R19, R19 + 11.5, "#070b10", 3);
-    const g = x.createRadialGradient(cx - R19 * 0.35, cy2 - R19 * 0.7, R19 * 0.2, cx, cy2, R19 + 11);
-    g.addColorStop(0, "#6a7c88");
-    g.addColorStop(0.75, "#2b3b46");
-    g.addColorStop(1, "#17242e");
+    ring11(R19 + 6, R19 + 13, "rgba(0,0,0,.25)", 5);
+    ring11(R19 - 1, R19 + 12, "#0a0f1f", 3.5);
+    const g = x.createLinearGradient(0, cy2 - R19 - 10, 0, cy2 + R19 + 10);
+    g.addColorStop(0, "#f6deaa");
+    g.addColorStop(0.35, "#ddb15e");
+    g.addColorStop(1, "#9c6e2c");
     ring11(R19, R19 + 10, g);
-    line45(R19 + 10, "#0b1015", 2.2);
-    line45(R19 + 0.9, "#0b1015", 2);
-    line45(R19 + 2.6, "#d4b98a", 1.4);
-    x.strokeStyle = "rgba(255,255,255,.10)";
-    x.lineWidth = 1.2;
+    line45(R19 + 10.6, "#0a0f1f", 2.6);
+    line45(R19 + 0.6, "#0a0f1f", 2.6);
+    x.strokeStyle = "rgba(255,255,255,.55)";
+    x.lineWidth = 1.6;
     x.beginPath();
-    x.arc(cx, cy2, R19 + 8.4, Math.PI * 1.1, Math.PI * 1.9);
+    x.arc(cx, cy2, R19 + 7.6, Math.PI * 1.08, Math.PI * 1.92);
+    x.stroke();
+    x.strokeStyle = "rgba(120,64,0,.45)";
+    x.beginPath();
+    x.arc(cx, cy2, R19 + 3, Math.PI * 0.1, Math.PI * 0.9);
     x.stroke();
     for (let i = 0; i < 3; i++) {
       const a = i * Math.PI / 2;
-      x.strokeStyle = "#d4b98a";
-      x.lineWidth = 1.8;
+      x.strokeStyle = "#0a0f1f";
+      x.lineWidth = 2.2;
       x.beginPath();
-      x.moveTo(cx + Math.cos(a) * (R19 + 4.5), cy2 + Math.sin(a) * (R19 + 4.5));
-      x.lineTo(cx + Math.cos(a) * (R19 + 8), cy2 + Math.sin(a) * (R19 + 8));
+      x.moveTo(cx + Math.cos(a) * (R19 + 3.5), cy2 + Math.sin(a) * (R19 + 3.5));
+      x.lineTo(cx + Math.cos(a) * (R19 + 7.5), cy2 + Math.sin(a) * (R19 + 7.5));
       x.stroke();
     }
     x.save();
     x.translate(cx, cy2 - R19 - 6);
-    x.fillStyle = "#070b10";
+    x.fillStyle = "#0a0f1f";
     x.beginPath();
-    x.arc(0, 2.2, 9.6, 0, 7);
+    x.arc(0, 2.4, 11, 0, 7);
     x.fill();
-    x.fillStyle = "#0b1015";
     x.beginPath();
-    x.arc(0, 0, 9.6, 0, 7);
+    x.arc(0, 0, 11, 0, 7);
     x.fill();
-    const gg = x.createRadialGradient(-2, -3, 1, 0, 0, 9);
-    gg.addColorStop(0, "#6a7c88");
-    gg.addColorStop(1, "#1f2d38");
+    const gg = x.createRadialGradient(-2, -4, 1, 0, 0, 10);
+    gg.addColorStop(0, "#5a6d8f");
+    gg.addColorStop(1, "#182133");
     x.fillStyle = gg;
     x.beginPath();
-    x.arc(0, 0, 8, 0, 7);
+    x.arc(0, 0, 8.8, 0, 7);
     x.fill();
-    x.strokeStyle = "#d4b98a";
-    x.lineWidth = 1.1;
+    x.strokeStyle = "#ddb15e";
+    x.lineWidth = 1.6;
     x.beginPath();
-    x.arc(0, 0, 6.9, 0, 7);
+    x.arc(0, 0, 8, 0, 7);
     x.stroke();
-    x.font = "800 10px " + UI_FONT;
-    x.fillStyle = "#f0c862";
+    x.font = '400 12px "Lilita One", ' + UI_FONT;
     x.textAlign = "center";
     x.textBaseline = "middle";
-    x.fillText("N", 0, 0.5);
+    x.lineJoin = "round";
+    x.lineWidth = 3;
+    x.strokeStyle = "#0a0f1f";
+    x.strokeText("N", 0, 1);
+    x.fillStyle = "#ffffff";
+    x.fillText("N", 0, 1);
     x.restore();
     bezel = { key: key5, canvas: c };
     return c;
@@ -326885,7 +326973,7 @@ var IMPACT_LIGHT = Object.freeze({
   quake: ["#ff9d5c", 38, 500, 0.35],
   bash: ["#73bedc", 36, 300, 0.4]
 });
-var numberFont = (px7) => `800 ${px7}px "Baloo 2", system-ui, sans-serif`;
+var numberFont = (px7) => `400 ${px7}px "Lilita One", "Baloo 2", system-ui, sans-serif`;
 function numberStampV1(ctx, n, px7, scale, fill8) {
   const key4 = n.text + "|" + px7 + "|" + fill8;
   if (n.stampKey === key4) return n.stamp;
@@ -326933,6 +327021,7 @@ function freeNumberStampV1(n) {
 }
 var fontRequested = false;
 function loadNumberFont() {
+  loadUiFontsV2();
   if (fontRequested || typeof FontFace !== "function" || typeof document === "undefined" || !document.fonts) return;
   fontRequested = true;
   try {
@@ -352594,6 +352683,7 @@ function mountPlayableClient({
       renderer?.previewLevelUp?.(m.playersById[m.localPlayerId].entityId);
     }, 4e3);
   const playerHealthHudV3 = createPlayerHealthHudV3(doc), vitalsHud = createVitalsHudV4(doc);
+  loadUiFontsV2(doc);
   const woodlandClueHud = createWoodlandClueHudV3_8(doc), worldEventHud = createWorldEventHudV3(doc, (groupId) => {
     const exit = readModel().space.exits?.find((e) => e.eventAction?.groupId === groupId);
     if (exit?.available && !gameplayInputBlocked()) {
@@ -353127,6 +353217,7 @@ function mountPlayableClient({
       if (hpBar) hpBar.value = 100 * hpRatio;
       vitalsHud.update(hpData);
       vitalsHud.barrier(model.subweapon);
+      vitalsHud.portrait(hero.heroLook);
       setText(doc.getElementById("world-gold"), formatAmount(painted6.walletDisplay ?? model.inventory?.gold ?? "0"));
       const health = doc.getElementById("world-health");
       if (health)
@@ -364272,8 +364363,8 @@ async function startWorldClient(environment) {
     if (activity)
       try {
         builtWorlds = createBuiltWorldStoreV1({ indexedDB: saveIndexedDb, sha256 });
-        let requested = location.searchParams.get("builtWorld");
-        if (!launch.resume && !requested && partyWorld && !partyWorld.own) requested = partyWorld.hash;
+        let requested2 = location.searchParams.get("builtWorld");
+        if (!launch.resume && !requested2 && partyWorld && !partyWorld.own) requested2 = partyWorld.hash;
         refreshRecord = !coopGuest && !visiting ? readRefreshV1(deviceStorage, refreshKey) : null;
         if (refreshRecord) {
           if (launch.resume?.campaignId === refreshRecord.old.campaignId) {
@@ -364290,8 +364381,8 @@ async function startWorldClient(environment) {
             clearRefreshV1(deviceStorage, refreshKey);
             environment.location.reload();
             return null;
-          } else if (!launch.resume && !requested) {
-            requested = refreshRecord.newHash;
+          } else if (!launch.resume && !requested2) {
+            requested2 = refreshRecord.newHash;
             writeRefreshV1(deviceStorage, refreshKey, { ...refreshRecord, phase: "started" });
           }
         }
@@ -364300,12 +364391,12 @@ async function startWorldClient(environment) {
           movingHero = heroEntry?.hero && readHeroPassport(deviceStorage, channel2, heroId) ? { look: { ...heroEntry.hero.look, name: heroEntry.name || "Hero" }, cls: heroEntry.hero.cls } : null;
           launch = { source: "classic-retired", resume: null };
         }
-        if (!launch.resume && !requested && !FORGE_REVIEW_BUILD && proofCase === "A" && plannedOpening.assetId === "alpha") {
+        if (!launch.resume && !requested2 && !FORGE_REVIEW_BUILD && proofCase === "A" && plannedOpening.assetId === "alpha") {
           const made2 = await newWorldFlowV1({ environment, save: (text3) => builtWorlds.put(text3), moving: movingHero });
           startingHero = made2.moved ? null : made2.hero;
-          requested = made2.world?.hash ?? null;
+          requested2 = made2.world?.hash ?? null;
         }
-        builtWorld = await builtWorlds.forStart({ resume: launch.resume, requested });
+        builtWorld = await builtWorlds.forStart({ resume: launch.resume, requested: requested2 });
         if (builtWorld)
           plannedReview = await plannedOpening.open({
             hash: builtWorld.hash,

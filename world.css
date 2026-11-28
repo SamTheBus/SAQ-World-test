@@ -2210,3 +2210,123 @@ html body .cs-view>.cs-bubble .cs-learn{position:sticky;bottom:0;z-index:1;flex:
 .cs-toast.show span{animation:cs-toast 2.2s ease-out both}
 @keyframes cs-toast{0%{opacity:0;transform:translateY(-10px) scale(.9)}12%{opacity:1;transform:translateY(0) scale(1.06)}20%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
 @media(prefers-reduced-motion:reduce){.cs-toast.show span{animation-duration:1.6s}}
+
+/* ==========================================================================================
+   UI v2, step 1 (Sammy 2026-11-27, page UQkJsRKj...: "Oh I fucking love that"): the shared parts
+   and the HUD. One chunky display face (Lilita One) always outlined in ink, Nunito ExtraBold for
+   small text, slate frames with a brass inner line (Sammy 2026-11-27: the first royal + yellow read too yellow-blue), glossy buttons that press down. Positions
+   stay where the HUD layout put them; this block only changes how each piece looks. The two faces load from
+   assets/fonts-v1 in ui_fonts_v2.js (the theme checks keep font rules out of this file).
+   ========================================================================================== */
+:root{
+  --ui2-display:'Lilita One','Baloo 2',system-ui,sans-serif;
+  --ui2-body:'Nunito',system-ui,sans-serif;
+  --ui2-ink:#0a0f1f;
+  --ui2-royal-hi:#4b5d7c;--ui2-royal:#2c3a54;--ui2-royal-lo:#182133;--ui2-well:#0f1522;
+  --ui2-gold-hi:#f6deaa;--ui2-gold:#ddb15e;--ui2-gold-lo:#9c6e2c;
+  --ui2-cream:#fff6dc;
+  --ui2-r-common:#c9d2dc;--ui2-r-uncommon:#4fd65a;--ui2-r-rare:#3aa0ff;--ui2-r-epic:#b45cff;--ui2-r-legendary:#ff9a1f;--ui2-r-mythic:#ff3b4e;
+  --ui2-frame-bg:linear-gradient(180deg,var(--ui2-royal-hi) 0%,var(--ui2-royal) 22%,var(--ui2-royal-lo) 100%);
+  --ui2-frame-shadow:inset 0 0 0 2px var(--ui2-gold),inset 0 0 0 3.5px #0a0f1f8c,inset 0 5px 0 #ffffff26,0 4px 0 var(--ui2-ink);
+  --ui2-orb-bg:radial-gradient(circle at 50% 30%,#52648a 0,#2c3a54 52%,#182133 100%);
+}
+/* Shared parts for every later screen. */
+.ui2-ol{font-family:var(--ui2-display);font-weight:400;letter-spacing:.02em;color:#fff;-webkit-text-stroke:4px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)}
+.ui2-frame{background:var(--ui2-frame-bg);border:3px solid var(--ui2-ink);border-radius:16px;box-shadow:var(--ui2-frame-shadow)}
+.ui2-well{background:var(--ui2-well);border:3px solid var(--ui2-ink);border-radius:12px;box-shadow:inset 0 4px 10px #0009}
+.ui2-btn{--c-hi:#b8e6ff;--c:#56b4ff;--c-lo:#2f8fe8;--c-lo2:#1d68c2;--c-ink:#0a2f66;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;font:400 18px/1 var(--ui2-display);letter-spacing:.03em;color:#fff;-webkit-text-stroke:4px var(--c-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--c-ink);padding:10px 18px 12px;border-radius:14px;border:3px solid var(--ui2-ink);background:linear-gradient(180deg,var(--c-hi) 0%,var(--c) 48%,var(--c-lo) 52%,var(--c-lo2) 100%);box-shadow:inset 0 3px 0 #ffffff8c,inset 0 -5px 0 #00000038,0 5px 0 var(--ui2-ink);transition:transform .06s,box-shadow .06s;cursor:pointer}
+.ui2-btn:active:not(:disabled){transform:translateY(4px);box-shadow:inset 0 3px 0 #ffffff66,inset 0 -2px 0 #00000038,0 1px 0 var(--ui2-ink)}
+.ui2-btn.y{--c-hi:#fff3a6;--c:#ffcf3f;--c-lo:#f5a91c;--c-lo2:#e08a0a;--c-ink:#6b3600}
+.ui2-btn.g{--c-hi:#c8ff9a;--c:#6fe05a;--c-lo:#3fbf3f;--c-lo2:#2a962e;--c-ink:#0d4a12}
+.ui2-btn.r{--c-hi:#ffb4a8;--c:#ff6a55;--c-lo:#e2483a;--c-lo2:#b42a20;--c-ink:#5a0d08}
+.ui2-btn:disabled,.ui2-btn.off{--c-hi:#8f9bb0;--c:#6d7a91;--c-lo:#566179;--c-lo2:#444e63;--c-ink:#1a2030;cursor:default}
+.ui2-dot{display:grid;place-items:center;min-width:20px;height:20px;padding:0 4px;border-radius:11px;background:radial-gradient(circle at 40% 35%,#ff9a8f,#ff3b30 55%,#c4140c);border:2.5px solid var(--ui2-ink);box-shadow:0 2px 0 var(--ui2-ink);font:400 12px/1 var(--ui2-display);color:#fff}
+
+/* ---- Vitals: a royal frame, the hero's face in a gold-rimmed medal, a gold level coin, fat outlined bars ---- */
+html body #world-hud-vitals{background:var(--ui2-frame-bg)!important;border:3px solid var(--ui2-ink)!important;border-radius:16px!important;box-shadow:var(--ui2-frame-shadow)!important;overflow:visible}
+html body #world-hud-vitals.saq-critical-health-v3{background:linear-gradient(180deg,#e0566a 0%,#a8283f 30%,#5e1426 100%)!important}
+html body #world-hud-vitals .vmed{border-radius:50%;background:var(--ui2-orb-bg);border:3px solid var(--ui2-ink);box-shadow:inset 0 0 0 3px var(--ui2-gold),inset 0 0 0 5px var(--ui2-ink),0 4px 0 var(--ui2-ink);overflow:visible;box-sizing:border-box}
+html body #world-hud-vitals .vmed>svg,html body #world-hud-vitals .vmed>b{display:none}
+html body #world-hud-vitals .vmed .vportrait{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px);border-radius:50%;pointer-events:none}
+html body #world-hud-vitals .vmed>strong{position:absolute;left:-7px;bottom:-7px;top:auto;right:auto;width:26px;height:26px;margin:0;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 40% 30%,#f8e2b0,#ddb15e 50%,#b07a2e);border:2.5px solid var(--ui2-ink);box-shadow:0 2px 0 var(--ui2-ink);font:400 14px/1 var(--ui2-display)!important;color:#fff;-webkit-text-stroke:3px #5a3410;paint-order:stroke fill;text-shadow:none;z-index:2;transform:none}
+html body #world-hud-vitals .vmed>strong.long{font-size:11px!important;width:30px;height:30px}
+html body #world-hud-vitals .vmed>small{display:none!important}
+html body #world-hud-vitals .vbar-hp{border:2.5px solid var(--ui2-ink);border-radius:10px;background:#1a1530;box-shadow:0 2px 0 var(--ui2-ink);overflow:hidden}
+html body #world-hud-vitals .vbar-hp .vbar-fill{border-radius:0;background:linear-gradient(180deg,#ff8a8f 0 38%,#ff3b4a 38% 100%);box-shadow:inset 0 -3px 0 #0000003d}
+html body #world-hud-vitals .vbar-hp .vbar-trail{border-radius:0}
+html body #world-hud-vitals .vbar-hp .vbar-ticks{background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1.5px),#0a0f1f80 calc(25% - 1.5px) 25%)}
+html body #world-hud-vitals .vbar-hp .vbar-gloss{background:none}
+html body #world-health{font:400 12px/1 var(--ui2-display)!important;letter-spacing:.03em;color:#fff!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill;text-shadow:none!important;display:grid;place-items:center}
+/* XP as a purple bar under health; the gold count sits at its right end. */
+html body #world-hud-vitals::before,html body #world-hud-vitals::after{display:none!important}
+html body #world-hud-vitals .vital-bars,html body #world-progression{position:static!important}
+html body #world-hud-vitals .vbar-xp{display:block!important;position:absolute!important;grid-column:auto!important;grid-row:auto!important;inset:27px auto auto 54px!important;width:calc(100% - 54px - 64px)!important;height:10px;border:2.5px solid var(--ui2-ink);border-radius:7px;background:#1a1530;box-shadow:0 2px 0 var(--ui2-ink);overflow:hidden;box-sizing:border-box}
+html body #world-hud-vitals .vbar-xp .vbar-fill{border-radius:0;background:linear-gradient(180deg,#b9a6ff 0 38%,#7c5cff 38% 100%);box-shadow:none}
+html body #world-hud-vitals .vbar-xp .vbar-gloss{background:none}
+html body #world-xp{display:none!important}
+html body #world-hud-vitals #world-wallet{display:flex!important;position:absolute!important;grid-column:auto!important;grid-row:auto!important;inset:24px 10px auto auto!important;align-items:center;gap:3px;font:400 12px/1 var(--ui2-display)!important;color:#fff!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+html body #world-wallet svg{filter:drop-shadow(0 1px 0 var(--ui2-ink))}
+html body #world-points-badge{background:radial-gradient(circle at 40% 35%,#ff9a8f,#ff3b30 55%,#c4140c)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:0 2px 0 var(--ui2-ink)!important;color:#fff!important;font:400 12px/1 var(--ui2-display)!important;-webkit-text-stroke:2.5px var(--ui2-ink);paint-order:stroke fill;border-radius:12px!important}
+
+/* ---- Place name: just outlined lettering, no strip ---- */
+html body #world-hud-title,html body[data-hud-place] #world-hud-title{background:none!important;border:0!important;box-shadow:none!important}
+html body #world-hud-title::before,html body #world-hud-title::after{display:none!important}
+html body #space-label{font:400 16px/1.1 var(--ui2-display)!important;letter-spacing:.02em;color:var(--ui2-cream)!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)!important}
+
+/* ---- Quest card: dark glass with a gold line, outlined title, a green bar ---- */
+html body #quest-tracker{background:#10172ac7!important;border:2.5px solid var(--ui2-ink)!important;border-radius:12px!important;box-shadow:inset 0 0 0 1.5px #ddb15e99,0 3px 0 #00000080!important;backdrop-filter:none!important}
+html body #quest-tracker strong{font:400 14px/1.15 var(--ui2-display)!important;letter-spacing:.02em;color:#fff!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill;text-shadow:none!important}
+html body #quest-tracker .qx-tstep,html body #quest-tracker .qx-tdist,html body #quest-tracker .qx-tprog{font-family:var(--ui2-body)!important;font-weight:900!important;color:var(--ui2-cream)!important;text-shadow:0 1px 0 var(--ui2-ink)!important}
+
+/* ---- Interact button: a royal frame, a gold TAP coin ---- */
+html body #rpg-interaction-v2{background:var(--ui2-frame-bg)!important;border:3px solid var(--ui2-ink)!important;border-radius:18px!important;box-shadow:var(--ui2-frame-shadow)!important;transition:transform .06s}
+html body #rpg-interaction-v2:active{transform:translateY(3px)}
+html body #rpg-interaction-v2 kbd{background:radial-gradient(circle at 40% 30%,#f8e2b0,#ddb15e 55%,#b07a2e)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:0 2px 0 var(--ui2-ink)!important;border-radius:50%!important}
+html body #rpg-interaction-v2 kbd b,html body #rpg-interaction-v2 kbd i{font:400 13px/1 var(--ui2-display)!important;font-style:normal!important;color:#fff!important;-webkit-text-stroke:3px #5a3410;paint-order:stroke fill;text-shadow:none!important;letter-spacing:.02em}
+html body #rpg-interaction-v2 .interaction-icon{background:var(--ui2-well)!important;border:2.5px solid var(--ui2-ink)!important;border-radius:10px!important;box-shadow:inset 0 3px 6px #0008!important;color:var(--ui2-gold)!important}
+html body #rpg-interaction-v2 .interaction-copy small{font:900 10px/1 var(--ui2-body)!important;letter-spacing:.08em;color:#d9dfea!important;text-shadow:0 1px 0 var(--ui2-ink)!important}
+html body #rpg-interaction-v2 .interaction-copy strong{font:400 17px/1.1 var(--ui2-display)!important;letter-spacing:.02em;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)!important}
+
+/* ---- Potion: a glossy royal pill, the count in the display face ---- */
+html body #carried-rations.potion-button{background:linear-gradient(180deg,#5a6d8f 0%,#2c3a54 52%,#1c263b 100%)!important;border:3px solid var(--ui2-ink)!important;border-radius:999px!important;box-shadow:inset 0 0 0 2px var(--ui2-gold),inset 0 3px 0 #ffffff59,inset 0 -4px 0 #00000038,0 4px 0 var(--ui2-ink)!important;transition:transform .06s,box-shadow .06s}
+html body #carried-rations.potion-button:active{transform:translateY(3px);box-shadow:inset 0 0 0 2px var(--ui2-gold),inset 0 3px 0 #ffffff40,0 1px 0 var(--ui2-ink)!important}
+html body #carried-rations .potion-socket{background:var(--ui2-well)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:inset 0 3px 6px #0009!important}
+html body #carried-rations .potion-copy small{font:900 9.5px/1 var(--ui2-body)!important;letter-spacing:.1em;color:#dde2ec!important;text-shadow:0 1px 0 var(--ui2-ink)!important}
+html body #carried-rations .potion-copy strong,html body #carried-rations .potion-copy strong span{font-family:var(--ui2-display)!important;font-weight:400!important;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)!important}
+
+/* ---- Attack: the gold button, glowing ---- */
+html body #primary-attack{background:radial-gradient(circle at 50% 28%,#f8e2b0 0,#e9b960 34%,#d2913e 70%,#9f6420 100%)!important;border:3.5px solid var(--ui2-ink)!important;box-shadow:inset 0 0 0 3px #f6e6c4,inset 0 0 0 5.5px var(--ui2-ink),inset 0 -8px 0 #7a3c0059,0 5px 0 var(--ui2-ink),0 0 22px #e0a85073!important;color:#fff!important}
+html body #primary-attack strong{font:400 15px/1 var(--ui2-display)!important;letter-spacing:.03em;color:#fff!important;-webkit-text-stroke:3.5px #5a3410;paint-order:stroke fill;text-shadow:0 2px 0 #5a3410!important}
+html body #primary-attack strong{transform:translateY(-3px)}
+html body #primary-attack small{transform:translateY(-4px);font:900 9px/1 var(--ui2-body)!important;letter-spacing:.12em;color:#5a3410!important;text-shadow:0 1px 0 #f8e2b080!important}
+html body #primary-attack>svg{filter:drop-shadow(0 2px 0 #5a341066)}
+
+/* ---- Skills and the class move: royal orbs in gold rings; cooling shows a dark sweep and outlined seconds ---- */
+html body .skill-wheel-v1 .skill-slot,html body .shield-guard,html body .shadow-dash,html body .mage-blink{background:var(--ui2-orb-bg)!important;border:3px solid var(--ui2-ink)!important;box-shadow:inset 0 0 0 2.5px var(--ui2-gold),inset 0 0 0 4.5px var(--ui2-ink),inset 0 4px 0 #ffffff2e,0 4px 0 var(--ui2-ink)!important}
+html body .skill-wheel-v1 .skill-slot[data-state=ready]{box-shadow:inset 0 0 0 2.5px #f6e6c4,inset 0 0 0 4.5px var(--ui2-ink),inset 0 4px 0 #ffffff2e,0 4px 0 var(--ui2-ink),0 0 16px #e8c070bf!important}
+html body .skill-wheel-v1 .skill-slot[data-state=locked]{background:#0f1522b3!important;box-shadow:inset 0 0 0 2px #2c3a5466,0 3px 0 #0a0f1f99!important;border-color:#0a0f1fb3!important}
+html body .skill-wheel-v1 .skill-slot[data-state=locked] .skill-slot-icon{color:#7f95c4!important}
+html body .skill-wheel-v1 .skill-slot-sweep{background:#050a1eb8!important}
+html body .skill-wheel-v1 .skill-slot-time{font:400 18px/1 var(--ui2-display)!important;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:none!important}
+html body .shield-guard,html body .shadow-dash,html body .mage-blink{font-family:var(--ui2-body)!important;font-weight:900!important;color:#fff!important}
+
+/* ---- Minimap: zoom buttons, the clock, the place line ---- */
+html body .m2-mini .m2-zoom{background:linear-gradient(180deg,#5a6d8f,#2c3a54 55%,#1c263b)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),inset 0 2px 0 #ffffff59,0 2px 0 var(--ui2-ink)!important;color:#fff!important;font:400 16px/1 var(--ui2-display)!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+html body #world-time-clock{background:#10172ae0!important;border:2.5px solid var(--ui2-ink)!important;border-radius:10px!important;box-shadow:0 2px 0 #0008!important;font:400 12px/1.3 var(--ui2-display)!important;letter-spacing:.03em;color:var(--ui2-cream)!important;text-shadow:none!important}
+html body .m2-mini .m2-placeline{font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em;color:var(--ui2-cream)!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill;text-shadow:none!important}
+/* The Menu button (the summary of the old controls panel). */
+html body #local-world-controls:not([open])>summary{background:linear-gradient(180deg,#5a6d8f,#2c3a54 55%,#1c263b)!important;border:3px solid var(--ui2-ink)!important;border-radius:14px!important;box-shadow:inset 0 0 0 2px var(--ui2-gold),inset 0 3px 0 #ffffff59,0 4px 0 var(--ui2-ink)!important;transition:transform .06s}
+html body #local-world-controls:not([open])>summary:active{transform:translateY(3px)}
+/* Phones held upright show the zone status ("Safe"); it moves under the panel's right end, beside the place name. */
+@media(max-width:600px){
+ html body #world-hud-vitals #world-status{position:absolute!important;grid-column:auto!important;grid-row:auto!important;inset:calc(100% + 7px) 4px auto auto!important;max-width:80px;font:900 10px/1 var(--ui2-body)!important;color:#b4ff9e!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 1px 0 var(--ui2-ink)}
+ html body #world-hud-title{max-width:calc(100vw - 215px)!important}
+}
+/* ---- Toasts: navy glass pills in an ink outline, edged in their own color (rarity, quest, gold) ---- */
+html body .toast-lane-v1 .toast-v1{background:linear-gradient(180deg,#1e2840f2,#10172af2)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:inset 0 0 0 1.5px var(--toast-accent),inset 0 2px 0 #ffffff1f,0 3px 0 #000a!important}
+html body .toast-lane-v1 .toast-v1::before{display:none}
+html body .toast-lane-v1 .toast-v1 .toast-badge{border:2px solid var(--ui2-ink);box-shadow:0 1px 0 var(--ui2-ink)}
+html body .toast-lane-v1 .toast-v1 .toast-text strong{font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em;color:#fff!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill;text-shadow:none!important}
+html body .toast-lane-v1 .toast-v1 .toast-sub{font-family:var(--ui2-body)!important;font-weight:800!important;color:#dde2ec!important;opacity:1!important}
+html body .toast-lane-v1 .toast-v1 .toast-count{font-family:var(--ui2-display)!important;font-weight:400!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+
