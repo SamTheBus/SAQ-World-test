@@ -2525,3 +2525,170 @@ html body #settlement-services .tn-why{font-weight:800!important;color:#c8d0de}
 /* The notice board keeps its wood; only the type changes. */
 html body #quest-board :is(p,span,small,b,strong,div,button,h3,h4,li,em){font-family:var(--ui2-body)!important}
 html body #quest-board .qb-title :is(h2,h3,b,strong){font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em;font-variant:normal;-webkit-text-stroke:4px #2e1f15;paint-order:stroke fill;text-shadow:0 2px 0 #2e1f15}
+
+/* ==========================================================================================
+   UI v2, step 5 (2026-11-28): the map's frame and sheets, the Constellation's skill card, the hero select,
+   the hero creator, the death screen and Settings in slate and brass. Layouts stay. The world map itself
+   stays parchment (it is a drawn map); only the plaque, round tools, sheets and call-outs around it change.
+   ========================================================================================== */
+:root{--ui2-panel:linear-gradient(180deg,#2a3650 0%,#1d273b 60%,#172031 100%);--ui2-gloss:linear-gradient(180deg,#5a6d8f 0%,#34435f 50%,#26324a 52%,#1c263b 100%);--ui2-brass-btn:linear-gradient(180deg,#f6deaa 0%,#ddb15e 48%,#c4923f 52%,#9c6e2c 100%);--ui2-sheet-shadow:inset 0 0 0 2px #ddb15e8c,inset 0 0 0 4px #0a0f1f99,0 6px 0 var(--ui2-ink),0 18px 50px #000a}
+
+/* ---- World map: a slate plaque, glossy round tools, slate sheets with brass buttons ---- */
+html body .m2-atlas{border:3px solid var(--ui2-ink)!important;border-radius:18px!important;box-shadow:inset 0 0 0 2px #ddb15e8c,0 6px 0 var(--ui2-ink),0 18px 50px #000c!important}
+html body .m2-title{background:var(--ui2-frame-bg)!important;border:3px solid var(--ui2-ink)!important;border-radius:14px!important;box-shadow:var(--ui2-frame-shadow)!important;padding:6px 18px 8px!important}
+html body .m2-title strong{font:400 24px/1.1 var(--ui2-display)!important;letter-spacing:.02em;color:var(--ui2-cream)!important;-webkit-text-stroke:4px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)}
+html body .m2-title span{font:800 12px/1.3 var(--ui2-body)!important;font-style:normal!important;color:var(--ui2-gold)!important;letter-spacing:.06em}
+html body .m2-tools button{background:var(--ui2-gloss)!important;border:3px solid var(--ui2-ink)!important;color:#fff!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),inset 0 3px 0 #ffffff40,0 3px 0 var(--ui2-ink)!important;transition:transform .06s}
+html body .m2-tools button:active{transform:translateY(3px);box-shadow:inset 0 0 0 1.5px var(--ui2-gold),0 0 0 var(--ui2-ink)!important}
+html body .m2-tools button[aria-pressed=true]{background:var(--ui2-brass-btn)!important;color:#3d2508!important}
+html body .m2-tools .m2-close{background:var(--ui2-orb-bg)!important}
+html body .m2-sheet{background:linear-gradient(180deg,#222d44 0%,#161e30 100%)!important;border:3px solid var(--ui2-ink)!important;border-radius:18px!important;box-shadow:var(--ui2-sheet-shadow)!important;color:#e6ebf3!important}
+html body .m2-sheet :is(.m2-head h3,h4,.m2-boss strong,.m2-land strong){font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)}
+html body .m2-sheet :is(.m2-sub,.m2-status,.m2-note,.m2-land small,.m2-key div){font-family:var(--ui2-body)!important;font-weight:800!important;color:#c8d0de!important}
+html body .m2-sheet .m2-status b{color:#7fe08a!important}
+html body .m2-sheet .m2-boss small{font-family:var(--ui2-body)!important;font-weight:900!important;color:var(--ui2-gold)!important}
+html body .m2-sheet .m2-key span{color:#fff!important}
+html body .m2-sheet .m2-chip{background:var(--ui2-well)!important;border:2px solid var(--ui2-ink)!important;box-shadow:inset 0 3px 6px #0008!important;color:#e6ebf3!important;font-family:var(--ui2-body)!important;font-weight:800!important}
+html body .m2-sheet .m2-land{border-top:2px solid #ddb15e40!important}
+html body .m2-x{background:var(--ui2-gloss)!important;border:3px solid var(--ui2-ink)!important;color:#fff!important;line-height:26px!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),0 3px 0 var(--ui2-ink)!important}
+html body .m2-sheet :is(.m2-btns button,.m2-land button){border:3px solid var(--ui2-ink)!important;border-radius:14px!important;font:400 17px/1 var(--ui2-display)!important;letter-spacing:.03em;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;box-shadow:inset 0 3px 0 #ffffff59,inset 0 -4px 0 #00000038,0 4px 0 var(--ui2-ink)!important;transition:transform .06s}
+html body .m2-sheet :is(.m2-btns button,.m2-land button):active:not(:disabled){transform:translateY(3px);box-shadow:inset 0 3px 0 #ffffff40,0 1px 0 var(--ui2-ink)!important}
+html body .m2-sheet :is(.m2-gold,.m2-land button){background:var(--ui2-brass-btn)!important;-webkit-text-stroke-color:#5a3410}
+html body .m2-sheet .m2-plain{background:var(--ui2-gloss)!important}
+html body .m2-sheet :is(.m2-btns button,.m2-land button):disabled{background:linear-gradient(180deg,#8f9bb0,#6d7a91 50%,#566179 52%,#444e63)!important;-webkit-text-stroke-color:#1a2030;opacity:1!important}
+html body :is(.m2-toast,.m2-kneel){background:var(--ui2-frame-bg)!important;border:3px solid var(--ui2-ink)!important;box-shadow:var(--ui2-frame-shadow)!important;color:#fff!important;font-family:var(--ui2-body)!important;font-weight:800!important}
+html body .m2-kneel strong{font:400 18px/1.1 var(--ui2-display)!important;color:#fff!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+html body .m2-kneel i{border:2px solid var(--ui2-ink)!important;background:var(--ui2-well)!important;height:8px!important}
+html body .m2-kneel i b{background:linear-gradient(180deg,#f6deaa 0 38%,#ddb15e 38%)!important}
+html body .m2-notice{background:var(--ui2-frame-bg)!important;border:3px solid var(--ui2-ink)!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),0 3px 0 var(--ui2-ink)!important}
+html body .m2-notice small{font:900 11px var(--ui2-body)!important;font-style:normal!important;color:var(--ui2-gold)!important;letter-spacing:.05em}
+html body .m2-notice strong{font:400 18px var(--ui2-display)!important;color:#fff!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+html body .m2-notice[data-tone=rare]{box-shadow:inset 0 0 0 1.5px #bfe6ff,0 0 12px #d6ecfb59,0 3px 0 var(--ui2-ink)!important}
+html body .m2-mini .m2-placeline{font:400 18px var(--ui2-display)!important;letter-spacing:.02em;color:var(--ui2-cream)!important;-webkit-text-stroke:4px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)!important}
+
+/* ---- Constellation: the skill card is a slate sheet; the name is outlined; Learn is the brass button ---- */
+html body #world-inventory .cs-bubble{background:linear-gradient(180deg,#222d44 0%,#161e30 100%)!important;border:3px solid var(--ui2-ink)!important;border-top:3px solid var(--ui2-ink)!important;border-radius:18px!important;box-shadow:inset 0 4px 0 var(--tree,#ddb15e),inset 0 0 0 2px #ddb15e73,0 6px 0 var(--ui2-ink),0 18px 50px #000c!important}
+html body #world-inventory .cs-bubble::before{background:#1f2940!important}
+html body #world-inventory .cs-bubble-head strong{font:400 21px/1.1 var(--ui2-display)!important;letter-spacing:.02em;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)}
+html body #world-inventory .cs-bubble-head em{font-family:var(--ui2-display)!important;font-weight:400!important;font-size:15px!important;color:var(--ui2-gold-hi)!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+html body #world-inventory .cs-kind{background:var(--ui2-well)!important;border:2px solid var(--ui2-ink)!important;border-radius:8px!important;color:#c8d0de!important;font:900 9px/1 var(--ui2-body)!important}
+html body #world-inventory .cs-kind.active{color:var(--ui2-gold-hi)!important;box-shadow:inset 0 0 0 1.5px #ddb15e99!important}
+html body #world-inventory .cs-kind.trade{color:#ffd0d8!important;box-shadow:inset 0 0 0 1.5px #e8848c99!important}
+html body #world-inventory :is(.cs-meta,.cs-req,.cs-desc,.cs-note,.cs-why,.cs-rank-lines,.cs-aug,.cs-aug b,.cs-key){font-family:var(--ui2-body)!important}
+html body #world-inventory .cs-desc{font-weight:800!important;color:#e6ebf3!important}
+html body #world-inventory :is(.cs-rank-label,.cs-augh){font-family:var(--ui2-body)!important;font-weight:900!important;color:var(--ui2-gold)!important}
+html body #world-inventory .cs-ranks{background:var(--ui2-well)!important;border:2px solid var(--ui2-ink)!important;border-radius:12px!important;box-shadow:inset 0 3px 7px #0009!important}
+html body #world-inventory #world-progression-view .cs-close{background:var(--ui2-gloss)!important;border:3px solid var(--ui2-ink)!important;border-radius:50%!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),inset 0 3px 0 #ffffff40,0 3px 0 var(--ui2-ink)!important;color:#fff!important}
+html body #world-inventory #world-progression-view .cs-aug{background:var(--ui2-well)!important;border:2px solid var(--ui2-ink)!important;border-radius:12px!important;box-shadow:inset 0 3px 6px #0008!important}
+html body #world-inventory #world-progression-view .cs-aug[data-on="true"]{background:var(--ui2-gloss)!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),inset 0 3px 0 #ffffff26,0 3px 0 var(--ui2-ink)!important}
+html body #world-inventory #world-progression-view .cs-learn{min-height:48px!important;background:var(--ui2-brass-btn)!important;border:3px solid var(--ui2-ink)!important;border-radius:14px!important;font:400 19px/1 var(--ui2-display)!important;letter-spacing:.03em;color:#fff!important;-webkit-text-stroke:4px #5a3410;paint-order:stroke fill;text-shadow:0 2px 0 #5a3410;box-shadow:inset 0 3px 0 #ffffff8c,inset 0 -5px 0 #00000038,0 5px 0 var(--ui2-ink)!important;transition:transform .06s}
+html body #world-inventory #world-progression-view .cs-learn:active:not(:disabled){transform:translateY(4px);box-shadow:inset 0 3px 0 #ffffff66,0 1px 0 var(--ui2-ink)!important}
+html body #world-inventory #world-progression-view .cs-learn:disabled{background:linear-gradient(180deg,#8f9bb0,#6d7a91 50%,#566179 52%,#444e63)!important;-webkit-text-stroke-color:#1a2030;text-shadow:0 2px 0 #1a2030}
+html body #world-inventory .cs-view>.cs-bubble .cs-learn,html body .cs-bubble .cs-learn{box-shadow:inset 0 3px 0 #ffffff8c,inset 0 -5px 0 #00000038,0 5px 0 var(--ui2-ink),0 -10px 14px #1a2338!important}
+html body #world-inventory #world-progression-view .cs-reset{background:var(--ui2-gloss)!important;border:3px solid var(--ui2-ink)!important;border-radius:14px!important;color:#fff!important;font-family:var(--ui2-body)!important;font-weight:900!important;box-shadow:inset 0 3px 0 #ffffff33,0 3px 0 var(--ui2-ink)!important}
+html body #world-inventory #world-progression-view .cs-reset.danger{background:linear-gradient(180deg,#ffb4a8 0%,#ff6a55 48%,#e2483a 52%,#b42a20 100%)!important;text-shadow:0 1px 0 #5a0d08}
+html body #world-inventory .cs-rank{background:var(--ui2-well)!important;border:2px solid var(--ui2-ink)!important;font-family:var(--ui2-body)!important;font-weight:900!important;box-shadow:0 2px 0 var(--ui2-ink)}
+html body #world-inventory .cs-skill[data-state=maxed] .cs-rank{background:var(--tree)!important;color:#0c1219!important}
+
+/* ---- Hero select ("Who is playing?"): slate hero cards, brass ring on the last played, outlined names ---- */
+html body #hero-select-v1{background:radial-gradient(ellipse at 50% 30%,#1d2740f2,#0a0f1ff2)!important;font-family:var(--ui2-body)!important;color:#e6ebf3!important}
+html body #hero-select-v1 h2{font:400 34px/1.1 var(--ui2-display)!important;letter-spacing:.02em;color:var(--ui2-cream)!important;-webkit-text-stroke:6px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 3px 0 var(--ui2-ink)!important}
+html body #hero-select-v1 button{background:var(--ui2-panel)!important;border:3px solid var(--ui2-ink)!important;border-radius:18px!important;box-shadow:inset 0 0 0 1.5px #ddb15e59,inset 0 4px 0 #ffffff14,0 5px 0 var(--ui2-ink)!important;transition:transform .06s}
+html body #hero-select-v1 button.is-last{box-shadow:inset 0 0 0 2.5px var(--ui2-gold),inset 0 4px 0 #ffffff1a,0 5px 0 var(--ui2-ink),0 0 18px #ddb15e55!important}
+html body #hero-select-v1 button:active{transform:translateY(4px);box-shadow:inset 0 0 0 1.5px #ddb15e59,0 1px 0 var(--ui2-ink)!important}
+html body #hero-select-v1 canvas{border-radius:50%!important;width:66px!important;height:66px!important;background:var(--ui2-orb-bg)!important;border:3px solid var(--ui2-ink);box-shadow:inset 0 0 0 2.5px var(--ui2-gold),0 3px 0 var(--ui2-ink);box-sizing:border-box}
+html body #hero-select-v1 .hs-who strong{font:400 21px/1.15 var(--ui2-display)!important;letter-spacing:.02em;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)}
+html body #hero-select-v1 .hs-who span{font-weight:800;color:#e6ebf3!important}
+html body #hero-select-v1 .hs-who small{font-weight:800;color:#a9b5ca!important}
+html body #hero-select-v1 .hs-tag{background:radial-gradient(circle at 40% 30%,#f8e2b0,#ddb15e 55%,#9c6e2c)!important;border:2px solid var(--ui2-ink);color:#3d2508!important;font:900 10px/14px var(--ui2-body)!important;box-shadow:0 2px 0 var(--ui2-ink)}
+html body #hero-select-v1 button.hs-new{background:var(--ui2-well)!important;border:3px dashed #4b5d7c!important;box-shadow:inset 0 3px 8px #0009!important;font:400 19px/1 var(--ui2-display)!important;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill}
+
+/* ---- Hero creator: the slate sheet, wells for every pick, a brass ring on what is picked, a brass Begin ---- */
+html body .hero-creator-v1{background:radial-gradient(ellipse at 50% 30%,#1d2740e6,#0a0f1fee)!important}
+html body .hero-creator-v1 .hc-panel{background:linear-gradient(180deg,#222d44 0%,#161e30 100%)!important;border:3px solid var(--ui2-ink)!important;border-radius:20px!important;box-shadow:var(--ui2-sheet-shadow)!important;color:#e6ebf3!important}
+html body .hero-creator-v1 :is(.hc-panel,.hc-panel p,.hc-panel span,.hc-panel small,.hc-panel button,.hc-panel legend,.hc-name){font-family:var(--ui2-body)!important}
+html body .hero-creator-v1 .hc-head h2{font:400 28px/1.1 var(--ui2-display)!important;letter-spacing:.02em;color:var(--ui2-cream)!important;-webkit-text-stroke:5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 3px 0 var(--ui2-ink)}
+html body .hero-creator-v1 :is(.hc-intro,.hc-sub,.hc-class span,.hc-class small){font-weight:800!important;color:#c8d0de!important}
+html body .hero-creator-v1 .hc-field legend{font-weight:900!important;color:var(--ui2-gold)!important;text-shadow:0 1px 0 var(--ui2-ink)}
+html body .hero-creator-v1 .hc-pick{color:#fff!important}
+html body .hero-creator-v1 .hc-preview{background:#1c2539!important}
+html body .hero-creator-v1 .hc-stage{border:3px solid var(--ui2-ink);box-shadow:inset 0 0 0 1.5px #ddb15e59,inset 0 6px 14px #0008;box-sizing:border-box}
+html body .hero-creator-v1 :is(.hc-class,.hc-tile){background:var(--ui2-well)!important;border:2.5px solid var(--ui2-ink)!important;border-radius:14px!important;box-shadow:inset 0 3px 7px #0009!important;transition:transform .06s}
+html body .hero-creator-v1 :is(.hc-class,.hc-tile):active{transform:translateY(2px)}
+html body .hero-creator-v1 .hc-class strong{font:400 19px/1.1 var(--ui2-display)!important;letter-spacing:.02em;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill}
+html body .hero-creator-v1 .hc-class[aria-pressed=true]{background:var(--ui2-panel)!important;box-shadow:inset 0 0 0 2.5px var(--class,#ddb15e),inset 0 4px 0 #ffffff14,0 3px 0 var(--ui2-ink),0 0 16px color-mix(in srgb,var(--class,#ddb15e) 40%,transparent)!important}
+html body .hero-creator-v1 .hc-tile span{font-weight:800!important;color:#c8d0de!important}
+html body .hero-creator-v1 .hc-tile[aria-pressed=true]{background:var(--ui2-gloss)!important;box-shadow:inset 0 0 0 2px var(--ui2-gold),inset 0 3px 0 #ffffff26,0 3px 0 var(--ui2-ink)!important}
+html body .hero-creator-v1 .hc-tile[aria-pressed=true] span{color:#ffe08f!important}
+html body .hero-creator-v1 .hc-swatch{border:3px solid var(--ui2-ink)!important;box-shadow:inset 0 -5px 0 #0003,inset 0 3px 0 #ffffff40,0 2px 0 var(--ui2-ink)!important}
+html body .hero-creator-v1 .hc-swatch[aria-pressed=true]{outline:3px solid var(--ui2-gold)!important;outline-offset:2px}
+html body .hero-creator-v1 .hc-toggle{background:var(--ui2-well)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:inset 0 3px 6px #0008!important;color:#a9b5ca!important;font-weight:900!important}
+html body .hero-creator-v1 .hc-toggle[aria-pressed=true]{background:var(--ui2-gloss)!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),inset 0 3px 0 #ffffff33,0 3px 0 var(--ui2-ink)!important;color:#ffe08f!important}
+html body .hero-creator-v1 .hc-name{background:var(--ui2-well)!important;border:3px solid var(--ui2-ink)!important;border-radius:14px!important;box-shadow:inset 0 3px 7px #0009!important;color:#fff!important;font-weight:900!important;font-size:17px!important}
+html body .hero-creator-v1 .hc-foot{background:#141b2b!important;border-top:2px solid #ddb15e40!important}
+html body .hero-creator-v1 .hc-status{font-weight:900!important;color:var(--ui2-gold-hi)!important}
+html body .hero-creator-v1 :is(.hc-confirm,.hc-later){border:3px solid var(--ui2-ink)!important;border-radius:14px!important;font:400 19px/1 var(--ui2-display)!important;letter-spacing:.03em;color:#fff!important;paint-order:stroke fill;transition:transform .06s}
+html body .hero-creator-v1 .hc-confirm{background:var(--ui2-brass-btn)!important;-webkit-text-stroke:4px #5a3410;text-shadow:0 2px 0 #5a3410;box-shadow:inset 0 3px 0 #ffffff8c,inset 0 -5px 0 #00000038,0 5px 0 var(--ui2-ink)!important}
+html body .hero-creator-v1 .hc-later{background:var(--ui2-gloss)!important;-webkit-text-stroke:3.5px var(--ui2-ink);box-shadow:inset 0 3px 0 #ffffff40,0 4px 0 var(--ui2-ink)!important}
+html body .hero-creator-v1 :is(.hc-confirm,.hc-later):active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 var(--ui2-ink)!important}
+html body .hero-creator-v1 .hc-confirm:disabled{background:linear-gradient(180deg,#8f9bb0,#6d7a91 50%,#566179 52%,#444e63)!important;-webkit-text-stroke-color:#1a2030;text-shadow:0 2px 0 #1a2030}
+
+/* ---- Death screen: the Slain title moves to Lilita; the killer card is a slate sheet; Respawn is the brass button ---- */
+html body #world-death,html body #world-death :is(p,small,span,button,div){font-family:var(--ui2-body)!important}
+html body #world-death .ds-title{font-family:var(--ui2-display)!important;font-weight:400!important;letter-spacing:.02em!important}
+html body #world-death .dcard{background:linear-gradient(180deg,#222d44 0%,#161e30 100%)!important;border:3px solid var(--ui2-ink)!important;border-radius:18px!important;box-shadow:var(--ui2-sheet-shadow)!important}
+html body #world-death canvas.pt{box-shadow:0 0 0 3px var(--ui2-ink),0 0 0 6px var(--ring,#b8c0c6),0 0 0 9px var(--ui2-ink)!important}
+html body #world-death .killer small{font-weight:900!important;color:var(--ui2-gold)!important}
+html body #world-death .killer b{font:400 21px/1.2 var(--ui2-display)!important;letter-spacing:.02em;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)}
+html body #world-death .killer .mv{font-weight:800;color:#c8d0de!important}
+html body #world-death .dmg{font-family:var(--ui2-display)!important;font-weight:400!important}
+html body #world-death .go{height:52px!important;min-height:52px!important;border:3px solid var(--ui2-ink)!important;border-radius:14px!important;background:linear-gradient(180deg,#8f9bb0,#6d7a91 50%,#566179 52%,#444e63)!important;font:400 19px/1 var(--ui2-display)!important;letter-spacing:.03em!important;color:#fff!important;-webkit-text-stroke:3.5px #1a2030;paint-order:stroke fill;box-shadow:inset 0 3px 0 #ffffff40,0 5px 0 var(--ui2-ink)!important;overflow:hidden}
+html body #world-death .go .fill{background:var(--ui2-brass-btn)!important}
+html body #world-death .go.awake{background:var(--ui2-brass-btn)!important;-webkit-text-stroke-color:#5a3410;text-shadow:0 2px 0 #5a3410;box-shadow:inset 0 3px 0 #ffffff8c,inset 0 -5px 0 #00000038,0 5px 0 var(--ui2-ink),0 0 16px #ddb15e66!important}
+html body #world-death .go.awake:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ui2-ink)!important}
+html body #world-death .go kbd{font-family:var(--ui2-body)!important;font-weight:900;border:2px solid var(--ui2-ink)!important;background:var(--ui2-well)!important;color:#fff!important;-webkit-text-stroke:0}
+html body #world-death .leave{min-height:40px!important;border:3px solid var(--ui2-ink)!important;border-radius:12px!important;background:var(--ui2-gloss)!important;color:#e7c9f2!important;font-weight:900!important;box-shadow:inset 0 3px 0 #ffffff33,0 3px 0 var(--ui2-ink)!important}
+html body #world-death .rev{font-weight:900}
+html body #world-death .rev .bar{height:8px!important;border:2px solid var(--ui2-ink)!important;background:var(--ui2-well)!important}
+html body #world-death .rev .bar i{background:linear-gradient(180deg,#f6deaa 0 38%,#ddb15e 38%)!important}
+
+/* ---- Settings: slate panels with brass labels, brass toggles and sliders, glossy buttons ---- */
+html body #world-inventory .st{color:#e6ebf3!important}
+html body #world-inventory .st-sec{background:var(--ui2-panel)!important;border:2.5px solid var(--ui2-ink)!important;border-radius:16px!important;box-shadow:inset 0 0 0 1.5px #ddb15e73,inset 0 3px 0 #ffffff12,0 3px 0 #0a0f1fcc!important}
+html body #world-inventory .st-sec h3{font:900 11px/1.2 var(--ui2-body)!important;color:var(--ui2-gold)!important;text-shadow:0 1px 0 var(--ui2-ink)}
+html body #world-inventory .st-line{font-weight:800!important}
+html body #world-inventory :is(.st-line small,.st-data-row,.st-data-row.note){color:#a9b5ca!important;font-weight:700!important}
+html body #world-inventory .st-data-row b{color:#fff!important;font-weight:900!important}
+html body #world-inventory .st-val{font:400 14px var(--ui2-display)!important;color:#fff!important;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill}
+html body #world-inventory .st input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(180deg,#f6deaa 0 38%,#ddb15e 38%) 0/var(--v) 100% no-repeat,var(--ui2-well);box-shadow:0 0 0 2px var(--ui2-ink)}
+html body #world-inventory .st input[type=range]::-moz-range-track{height:10px;border-radius:6px;background:linear-gradient(180deg,#f6deaa 0 38%,#ddb15e 38%) 0/var(--v) 100% no-repeat,var(--ui2-well);box-shadow:0 0 0 2px var(--ui2-ink)}
+html body #world-inventory .st input[type=range]::-webkit-slider-thumb{width:22px;height:22px;margin-top:-6px;background:var(--ui2-gloss);border:3px solid var(--ui2-ink);box-shadow:inset 0 0 0 1.5px var(--ui2-gold),0 2px 0 var(--ui2-ink)}
+html body #world-inventory .st input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ui2-gloss);border:3px solid var(--ui2-ink);box-shadow:inset 0 0 0 1.5px var(--ui2-gold),0 2px 0 var(--ui2-ink)}
+html body #world-inventory .st button.st-tog{height:28px!important;min-height:28px!important;width:50px!important;flex-basis:50px!important;background:var(--ui2-well)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:inset 0 3px 6px #0009!important;box-sizing:border-box}
+html body #world-inventory .st button.st-tog::after{top:1.5px!important;left:2px!important;width:20px!important;height:20px!important;background:var(--ui2-gloss)!important;box-shadow:inset 0 0 0 1.5px #8090ad,0 2px 0 var(--ui2-ink)!important}
+html body #world-inventory .st button.st-tog[aria-checked=true]{background:linear-gradient(180deg,#9c6e2c,#6a4a1c)!important}
+html body #world-inventory .st button.st-tog[aria-checked=true]::after{left:24px!important;background:radial-gradient(circle at 40% 30%,#fff2c4,#ddb15e 55%,#9c6e2c)!important;box-shadow:inset 0 0 0 1.5px var(--ui2-ink),0 2px 0 var(--ui2-ink)!important}
+html body #world-inventory .st-seg{background:var(--ui2-well)!important;border:2.5px solid var(--ui2-ink);box-shadow:inset 0 3px 6px #0009!important}
+html body #world-inventory .st .st-seg button{font:900 11px var(--ui2-body)!important;color:#a9b5ca!important}
+html body #world-inventory .st .st-seg button[aria-pressed=true]{background:var(--ui2-gloss)!important;color:#ffe08f!important;box-shadow:inset 0 0 0 1.5px var(--ui2-gold),0 2px 0 var(--ui2-ink)!important}
+html body #world-inventory .st button.st-btn{border:3px solid var(--ui2-ink)!important;border-radius:12px!important;padding:7px 14px 8px!important;font:900 12px var(--ui2-body)!important;letter-spacing:.06em;background:var(--ui2-brass-btn)!important;color:#3d2508!important;box-shadow:inset 0 2px 0 #ffffff8c,0 3px 0 var(--ui2-ink)!important;transition:transform .06s}
+html body #world-inventory .st button.st-btn.ghost{background:var(--ui2-gloss)!important;color:#fff!important;box-shadow:inset 0 2px 0 #ffffff33,0 3px 0 var(--ui2-ink)!important}
+html body #world-inventory .st button.st-btn.danger{background:linear-gradient(180deg,#ffb4a8 0%,#ff6a55 48%,#e2483a 52%,#b42a20 100%)!important;color:#fff!important;text-shadow:0 1px 0 #5a0d08}
+html body #world-inventory .st button.st-btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 0 0 var(--ui2-ink)!important}
+html body #world-inventory .cs-wheel-panel{background:var(--ui2-panel)!important;border:2.5px solid var(--ui2-ink)!important;border-radius:16px!important;box-shadow:inset 0 0 0 1.5px #ddb15e73,inset 0 3px 0 #ffffff12,0 3px 0 #0a0f1fcc!important}
+/* ---- Heroes page: slate hero cards (brass ring on the one playing), round portraits, glossy buttons ---- */
+html body #world-inventory .hero-slot{background:var(--ui2-panel)!important;border:2.5px solid var(--ui2-ink)!important;border-radius:16px!important;box-shadow:inset 0 0 0 1.5px #ddb15e59,inset 0 3px 0 #ffffff12,0 3px 0 #0a0f1fcc!important}
+html body #world-inventory .hero-slot.is-active{box-shadow:inset 0 0 0 2.5px var(--ui2-gold),inset 0 3px 0 #ffffff1a,0 3px 0 var(--ui2-ink),0 0 16px #ddb15e44!important}
+html body #world-inventory .hero-slot.is-new{background:var(--ui2-well)!important;border:2.5px dashed #4b5d7c!important;box-shadow:inset 0 3px 8px #0009!important}
+html body #world-inventory :is(.hero-slot-portrait,.hero-slot-plus){border-radius:14px!important;background:var(--ui2-orb-bg)!important;border:2.5px solid var(--ui2-ink)!important;box-shadow:inset 0 0 0 2px #ddb15e99,0 2px 0 var(--ui2-ink)!important;box-sizing:border-box}
+html body #world-inventory .hero-slot-plus{color:#fff!important;font:400 32px/1 var(--ui2-display)!important;-webkit-text-stroke:4px var(--ui2-ink);paint-order:stroke fill}
+html body #world-inventory :is(.hero-slot-name,.hero-slots-coop strong,.hero-slots-party strong){font-family:var(--ui2-display)!important;font-weight:400!important;font-size:19px!important;letter-spacing:.02em;color:#fff!important;-webkit-text-stroke:3.5px var(--ui2-ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ui2-ink)}
+html body #world-inventory :is(.hero-slot-class,.hero-slot-world,.hero-slots-intro,.hero-slots-party p){font-weight:800!important;color:#c8d0de!important}
+html body #world-inventory :is(.hero-slot-badge,.hero-slot-tag){background:radial-gradient(circle at 40% 30%,#f8e2b0,#ddb15e 55%,#9c6e2c)!important;border:2px solid var(--ui2-ink)!important;color:#3d2508!important;font-weight:900!important;box-shadow:0 2px 0 var(--ui2-ink)}
+html body #world-inventory .hero-slots-party{background:var(--ui2-panel)!important;border:2.5px solid var(--ui2-ink)!important;border-radius:16px!important;box-shadow:inset 0 0 0 1.5px #ddb15e59!important}
+html body #world-inventory .hero-slots button{border:3px solid var(--ui2-ink)!important;border-radius:14px!important;background:var(--ui2-gloss)!important;color:#fff!important;font:400 16px/1 var(--ui2-display)!important;letter-spacing:.03em;-webkit-text-stroke:3px var(--ui2-ink);paint-order:stroke fill;box-shadow:inset 0 3px 0 #ffffff40,0 3px 0 var(--ui2-ink)!important;transition:transform .06s}
+html body #world-inventory .hero-slots button:active:not(:disabled){transform:translateY(3px);box-shadow:0 0 0 var(--ui2-ink)!important}
+html body #world-inventory .hero-slots button.is-quiet{background:var(--ui2-well)!important;color:#c8d0de!important;box-shadow:inset 0 3px 6px #0008!important}
+html body #world-inventory .hero-slots button.is-danger{background:linear-gradient(180deg,#ffb4a8 0%,#ff6a55 48%,#e2483a 52%,#b42a20 100%)!important;-webkit-text-stroke-color:#5a0d08}
+html body #world-inventory .hero-slots .hero-slot-worlds button small{font-family:var(--ui2-body)!important;font-weight:800;-webkit-text-stroke:0;color:#c8d0de!important}
+html body #world-inventory .hero-slots .hero-slot-worlds button.is-current{box-shadow:inset 0 0 0 2px var(--ui2-gold),0 3px 0 var(--ui2-ink)!important}

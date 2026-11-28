@@ -148902,7 +148902,7 @@ function createHeroCreatorV1({
   function paintStage(t) {
     draw(
       stage2,
-      specFor(heroClass() ?? (mode === "look" ? null : cls), previewGear()),
+      specFor(heroClass()?.id ?? (mode === "look" ? null : cls), previewGear()),
       (c, w, h) => {
         const s = Math.min(h / 56, w / 58);
         c.translate(w * 0.5 - (facing2 > 0 ? 3 : -3) * s, h - 22 - 20 * 0.8 * s);
