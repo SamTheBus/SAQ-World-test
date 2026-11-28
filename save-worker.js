@@ -64700,6 +64700,7 @@ var ENTRY_KEEP = 8e3;
 var COPY_KEEP = 16;
 var f64 = new Float64Array(1);
 var u322 = new Uint32Array(f64.buffer);
+var DIGEST_CHARS = 4 << 20;
 var getPath = (o, path) => path.reduce((x, k) => x && typeof x === "object" ? x[k] : void 0, o);
 var deepFreeze = (v) => {
   if (v && typeof v === "object" && !Object.isFrozen(v)) {

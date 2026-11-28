@@ -354172,6 +354172,30 @@ var SPLIT_KEYS = 24;
 var ROOTS_EVERY = 64;
 var f64 = new Float64Array(1);
 var u32 = new Uint32Array(f64.buffer);
+var DIGEST_MIN = 8;
+var DIGEST_KEEP = 4e4;
+var DIGEST_CHARS = 4 << 20;
+var digests = /* @__PURE__ */ new Map();
+var digestChars = 0;
+function digestOf(s) {
+  let d = digests.get(s);
+  if (d !== void 0) return d;
+  let a = 795577875, b = 461845907;
+  for (let i = 0; i < s.length; i++) {
+    const n = s.charCodeAt(i);
+    a = Math.imul(a ^ n, 16777619);
+    b = Math.imul(b ^ n, 1540483477);
+    b ^= b >>> 15;
+  }
+  if (digests.size >= DIGEST_KEEP || digestChars + s.length > DIGEST_CHARS) {
+    digests.clear();
+    digestChars = 0;
+  }
+  d = [a >>> 0, b >>> 0];
+  digests.set(s, d);
+  digestChars += s.length;
+  return d;
+}
 function hashWireV1(value2) {
   let a = 2166136261, b = 2538058380;
   const mix53 = (n) => {
@@ -354181,6 +354205,11 @@ function hashWireV1(value2) {
   };
   const str = (s) => {
     mix53(s.length + 20973);
+    if (s.length >= DIGEST_MIN) {
+      const d = digestOf(s);
+      mix53(d[0]);
+      return mix53(d[1]);
+    }
     for (let i = 0; i < s.length; i++) mix53(s.charCodeAt(i));
   };
   const walk = (v) => {
