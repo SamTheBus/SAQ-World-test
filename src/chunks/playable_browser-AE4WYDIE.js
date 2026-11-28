@@ -116139,7 +116139,9 @@ function createForestStandsArtV2(env, prior) {
       bg.fill(up2(o));
     }
     {
-      const [mc, g] = mk();
+      const g = bg;
+      g.save();
+      g.globalCompositeOperation = "source-atop";
       g.strokeStyle = P29.crack;
       g.lineWidth = 1.4;
       for (const t of ts) {
@@ -116175,14 +116177,7 @@ function createForestStandsArtV2(env, prior) {
           g.restore();
         }
       }
-      raw(g, () => {
-        g.globalCompositeOperation = "destination-in";
-        g.drawImage(body6, 0, 0);
-      });
-      g.globalCompositeOperation = "destination-out";
-      g.fill(up2(h));
-      raw(bg, () => bg.drawImage(mc, 0, 0));
-      giveScratch(mc);
+      g.restore();
     }
     const top = up2(h);
     bg.save();
@@ -116223,61 +116218,38 @@ function createForestStandsArtV2(env, prior) {
       if (!rows.has(t.y)) rows.set(t.y, []);
       rows.get(t.y).push(t);
     }
-    const [cov, cg] = mk(), slices = [];
+    const slices = [], front2 = [];
     let bytes = 0;
-    for (const r of [...rows.keys()].sort((a, b) => b - a)) {
-      const row2 = rows.get(r), rp = new Path2D();
-      for (const t of row2) rp.addPath(shape4(t));
-      const [mc, g] = mk();
+    const rowShape = (g, rp, from, to, width2) => {
       g.fillStyle = g.strokeStyle = "#fff";
-      g.lineWidth = 10;
+      g.lineWidth = width2;
       g.lineJoin = "round";
-      for (let o = 0; o <= h; o += 2) {
+      for (let o = from; o <= to; o += 2) {
         g.save();
         g.translate(0, -o);
         g.fill(rp);
         g.stroke(rp);
         g.restore();
       }
-      const [sl, sg] = mk();
-      raw(sg, () => {
-        sg.drawImage(mc, 0, 0);
-        sg.globalCompositeOperation = "destination-out";
-        sg.drawImage(cov, 0, 0);
-        sg.globalCompositeOperation = "source-in";
-        sg.drawImage(out5, 0, 0);
-      });
-      {
-        const [e, eg] = mk();
-        eg.fillStyle = eg.strokeStyle = "#fff";
-        eg.lineWidth = 5;
-        eg.lineJoin = "round";
-        for (let o = 2; o <= h - 2; o += 2) {
-          eg.save();
-          eg.translate(0, -o);
-          eg.fill(rp);
-          eg.stroke(rp);
-          eg.restore();
-        }
-        raw(cg, () => cg.drawImage(e, 0, 0));
-        giveScratch(e);
-      }
-      const xs = row2.map((t) => t.x), x0 = Math.max(X0, Math.min(...xs) * T108 - 26), x1 = Math.min(X0 + W21, (Math.max(...xs) + 1) * T108 + 26), y0 = Math.max(Y0, r * T108 - h - 14), y1 = Math.min(Y0 + Hh, (r + 1) * T108 + 16);
+    };
+    for (const r of [...rows.keys()].sort((a, b) => b - a)) {
+      const row2 = rows.get(r), rp = new Path2D();
+      for (const t of row2) rp.addPath(shape4(t));
+      const xs = row2.map((t) => t.x), x0 = Math.max(X0, Math.min(...xs) * T108 - 26), x1 = Math.min(X0 + W21, (Math.max(...xs) + 1) * T108 + 26), y0 = Math.max(Y0, r * T108 - h - 14), y1 = Math.min(Y0 + Hh, (r + 1) * T108 + 16), ox = Math.round((x0 - X0) * PS), oy = Math.round((y0 - Y0) * PS), rw = Math.max(1, Math.round((x1 - x0) * PS)), rh = Math.max(1, Math.round((y1 - y0) * PS)), box6 = { x0, y0, x1, y1 };
       const cr = doc.createElement("canvas");
-      cr.width = Math.max(1, Math.round((x1 - x0) * PS));
-      cr.height = Math.max(1, Math.round((y1 - y0) * PS));
+      cr.width = rw;
+      cr.height = rh;
       const cc = cr.getContext("2d");
-      cc.drawImage(
-        sl,
-        Math.round((x0 - X0) * PS),
-        Math.round((y0 - Y0) * PS),
-        cr.width,
-        cr.height,
-        0,
-        0,
-        cr.width,
-        cr.height
-      );
+      cc.setTransform(PS, 0, 0, PS, -X0 * PS - ox, -Y0 * PS - oy);
+      rowShape(cc, rp, 0, h, 10);
+      cc.setTransform(1, 0, 0, 1, 0, 0);
+      cc.globalCompositeOperation = "source-in";
+      cc.drawImage(out5, ox, oy, rw, rh, 0, 0, rw, rh);
+      cc.globalCompositeOperation = "destination-out";
+      cc.setTransform(PS, 0, 0, PS, -X0 * PS - ox, -Y0 * PS - oy);
+      for (const f of front2) if (overlaps(f.box, box6)) rowShape(cc, f.rp, 2, h - 2, 5);
+      cc.globalCompositeOperation = "source-over";
+      front2.push({ rp, box: box6 });
       cc.setTransform(PS, 0, 0, PS, -x0 * PS, -y0 * PS);
       smoothSpriteContext(cc);
       for (const t of row2) {
@@ -116294,12 +116266,9 @@ function createForestStandsArtV2(env, prior) {
           s.h * k
         );
       }
-      giveScratch(mc);
-      giveScratch(sl);
       slices.push({ row: r, y: (r + 1) * T108, x0, x1, y0, y1, img: cr });
       bytes += cr.width * cr.height * 4;
     }
-    giveScratch(cov);
     giveScratch(out5);
     return { slices, bytes, users: [] };
   }
